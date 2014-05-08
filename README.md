@@ -23,8 +23,9 @@ After cloning RevKit perform the following steps
 The RevKit base system contains basic data structures and several functions for
 reversible circuit design.  Further, many algorithms for optimization,
 simulation, and synthesis are implemented.  More advanced functionality can be
-added via addons.  Please take a look into the addons directory for further
-information.
+added via addons.  Please take a look into the
+[wiki](https://github.com/msoeken/revkit/wiki) and the addons directory for
+further information.
 
 ## About
 
