@@ -28,6 +28,6 @@ information.
 
 ## About
 
-This system is maintained by Mathias Soeken <msoeken@cs.uni-bremen.de>. Parts
+This system is maintained by Mathias Soeken (msoeken@cs.uni-bremen.de). Parts
 have been contributed by Stefan Frehse, Aaron Lye, Nils Przigoda, Laura Tague,
 and Robert Wille.
