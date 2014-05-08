@@ -13,10 +13,10 @@ The following software is required in order to build RevKit
 
 After cloning RevKit perform the following steps
 
-> mkdir build
-> cd build
-> cmake ..
-> make
+    mkdir build
+    cd build
+    cmake ..
+    make
 
 ## Addons
 
