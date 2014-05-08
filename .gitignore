@@ -1,0 +1,7 @@
+build
+*~
+ext/include
+ext/lib
+ext/circuits
+ext/functions
+addons/revkit-addon-*

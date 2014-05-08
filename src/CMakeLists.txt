@@ -1,0 +1,16 @@
+# Configuration
+add_definitions(-Werror -fPIC)
+add_ext_library("gmp;gmpxx")
+
+subdirlist(directories ".")
+foreach(dir ${directories})
+  file(GLOB_RECURSE files ${dir}/*.cpp)
+  file(GLOB_RECURSE addon_files ${CMAKE_SOURCE_DIR}/addons/revkit-addon-*/src/${dir}/*.cpp)
+  add_library(objlib_${dir} OBJECT ${files} ${addon_files})
+  add_library(revkit_${dir} SHARED $<TARGET_OBJECTS:objlib_${dir}>)
+  add_library(revkit_${dir}_static STATIC $<TARGET_OBJECTS:objlib_${dir}>)
+  target_link_libraries(revkit_${dir} ${Boost_LIBRARIES})
+  foreach(library ${ext_libraries})
+    target_link_libraries(revkit_${dir} ${library})
+  endforeach()
+endforeach()
