@@ -42,7 +42,12 @@ option(revkit_ENABLE_TESTS "build tests" on)
 # Addons
 add_subdirectory(addons)
 foreach (dir ${addon_directories})
-  include_directories(${dir})
+  string(REGEX REPLACE "revkit-" "" def ${dir})
+  string(REGEX REPLACE "-" "_" def ${def})
+  string(TOUPPER ${def} def)
+  message(${def})
+  add_definitions(-D${def})
+  include_directories(addons/${dir}/src)
 endforeach()
 
 # Libraries

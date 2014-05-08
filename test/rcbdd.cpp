@@ -1,8 +1,11 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE rcbdd
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/test/unit_test.hpp>
+
+#if ADDON_REVLIB
+
+#include <boost/assign/std/vector.hpp>
 
 #include <core/circuit.hpp>
 #include <core/rcbdd.hpp>
@@ -46,6 +49,12 @@ BOOST_AUTO_TEST_CASE(simple)
     rcbdd_synthesis( circ, cf, settings );
   });
 }
+
+#else
+
+BOOST_AUTO_TEST_CASE(simple) {}
+
+#endif
 
 // Local Variables:
 // c-basic-offset: 2
