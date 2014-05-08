@@ -4,8 +4,8 @@
 
 Add a new addon by cloning the respective git repository into this folder. Afwards perform the following steps in the `build' directory
 
-> cmake ..
-> make
+    cmake ..
+    make
 
 The directory name of the addon must start with *revkit-addon-*
 
