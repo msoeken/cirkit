@@ -28,9 +28,10 @@ BOOST_AUTO_TEST_CASE(simple)
 
     properties::ptr settings( new properties );
     settings->set( "verbose", true );
+    settings->set( "truth_table", true );
 
-    embed_pla( cf, master_test_suite().argv[1] );
-    rcbdd_synthesis( circ, cf, settings );
+    embed_pla( cf, master_test_suite().argv[1], settings );
+    //rcbdd_synthesis( circ, cf, settings );
     return;
   }
 

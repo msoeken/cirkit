@@ -18,8 +18,10 @@
 #include "embed_pla.hpp"
 #include "synthesis_utils_p.hpp"
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/irange.hpp>
 
 #include <gmpxx.h>
 
@@ -68,7 +70,7 @@ BDD create_bdd_from_outcube(const rcbdd& cf, const std::string& outcube)
     case '0':
     case '~':
     case '-':
-      cube &= !cf.y(i);
+      //cube &= !cf.y(i);
       break;
     }
   }
@@ -170,7 +172,8 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
                 properties::ptr statistics )
 {
   /* Settings */
-  bool verbose = get<bool>( settings, "verbose", false );
+  bool verbose     = get<bool>( settings, "verbose", false );
+  bool truth_table = get<bool>( settings, "truth_table", false ); /* prints the truth table (for debugging) */
 
   /* BDD manager? */
   cf.initialize_manager();
@@ -221,8 +224,6 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
   mpz_class maxmu = *boost::max_element(p.mu | map_values);
   unsigned req_vars = calculate_required_lines(p.n, p.m, maxmu);
 
-  //std::cout << req_vars << std::endl;
-
   cf.create_variables(req_vars);
 
   /* Now create the BDD */
@@ -247,24 +248,22 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
     BDD ocube = create_bdd_from_outcube(cf, outcube);
     mpz_class patterns(icube.CountMinterm(p.n));
 
-    /* TODO update func */
+    /* compute h */
+    BDD constants = cf.manager().bddOne();
+    for ( unsigned i = 0; i < req_vars - p.n; ++i ) { constants += cf.x( i ); }
+    BDD h = cf.remove_ys( func ).ExistAbstract(constants);
+
+    /* add new cubes */
     BDD fcube = cf.manager().bddOne();
     for (unsigned i = 0u; i < req_vars - p.n; i++)
     {
       fcube &= !cf.x(i);
     }
-    fcube &= icube & ocube;
+    fcube &= !h & icube & ocube;
 
     if (p.mu.find(outcube) == p.mu.end()) {
       p.mu[outcube] = 0u;
     }
-
-    /*std::cout << "Incube: " << incube << std::endl;
-    std::cout << "Outcube: " << outcube << std::endl;
-    std::cout << "Patterns: " << patterns << std::endl;
-    std::cout << "Number of don't cares: " << dont_cares.size() << std::endl;
-    std::cout << "Number of garbage: " << (req_vars - m) << std::endl;
-    std::cout << "mu[outcube]: " << mu[outcube] << std::endl;*/
 
     std::vector<BDD> dec_garbage = garbage;
     for (unsigned i = 0u; i < p.mu[outcube]; ++i)
@@ -285,20 +284,57 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
       }
     }
 
-    /* Update entry in mu */
-    p.mu[outcube] += patterns;
-    fcube &= !p.u;
-    p.u |= icube;
-
-    //fcube.PrintMinterm();
-
-    /* Update func */
     func |= fcube;
+    p.mu[outcube] += patterns;
+
+    /* Update existing cubes */
+    func &= !(h & icube) | ocube;
+  }
+
+  /* Assign zeros */
+  for ( unsigned i = 0; i < p.m; ++i )
+  {
+    BDD f0 = func.Cofactor( !cf.y( i ) );
+    BDD f1 = func.Cofactor(  cf.y( i ) );
+
+    func = ((f1 & !f0) & cf.y( i )) | ((f1 & f0) & !cf.y( i ));
   }
 
   if ( verbose )
   {
     func.PrintMinterm();
+    std::cout << "|f|:   " << func.CountMinterm( 2 * cf.num_vars() ) << std::endl;
+    std::cout << "|f_x|: " << cf.remove_ys( func ).CountMinterm( cf.num_vars() ) << std::endl;
+    std::cout << "|f_y|: " << cf.remove_xs( func ).CountMinterm( cf.num_vars() ) << std::endl;
+  }
+
+  if ( truth_table )
+  {
+    using boost::adaptors::transformed;
+
+    DdGen *gen;
+    int  *cube;
+    CUDD_VALUE_TYPE value;
+
+    unsigned vars = cf.num_vars();
+
+    std::cout << std::string( vars - p.n, 'c' )
+              << ' '
+              << std::string( p.n, 'x' )
+              << " | "
+              << std::string( p.m, 'y' )
+              << ' '
+              << std::string( vars - p.m, 'g' )
+              << std::endl;
+    std::cout << std::string( vars + 2u, '-' ) << '+' << std::string( vars + 2u, '-' ) << std::endl;
+
+    Cudd_ForeachCube( cf.manager().getManager(), func.getNode(), gen, cube, value )
+    {
+      std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" ).insert( vars - p.n, " " );
+      std::cout << " | ";
+      std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" ).insert( p.m, " " );
+      std::cout << std::endl;
+    }
   }
 
   cf.set_chi( func );
