@@ -34,5 +34,5 @@ have been contributed by Stefan Frehse, Aaron Lye, Nils Przigoda, Laura Tague,
 and Robert Wille.
 
 RevKit 2.0 is undergoing some heavy modifications and therefore many functions
-that are contained in [RevKit 1.3](https://www.revkit.org) are not available
+that are contained in [RevKit 1.3](http://www.revkit.org) are not available
 yet (e.g. quantum gates, GUI).
