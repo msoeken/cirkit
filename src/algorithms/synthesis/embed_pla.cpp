@@ -108,6 +108,35 @@ std::vector<BDD> _dec(const rcbdd& cf, const std::vector<BDD>& vars)
   return outputs;
 }
 
+void print_truth_table( const rcbdd& cf, const BDD& f, unsigned n, unsigned m )
+{
+  using boost::adaptors::transformed;
+
+  DdGen *gen;
+  int  *cube;
+  CUDD_VALUE_TYPE value;
+
+  unsigned vars = cf.num_vars();
+
+  std::cout << std::string( vars - n, 'c' )
+            << ' '
+            << std::string( n, 'x' )
+            << " | "
+            << std::string( m, 'y' )
+            << ' '
+            << std::string( vars - m, 'g' )
+            << std::endl;
+  std::cout << std::string( vars + 2u, '-' ) << '+' << std::string( vars + 2u, '-' ) << std::endl;
+
+  Cudd_ForeachCube( cf.manager().getManager(), f.getNode(), gen, cube, value )
+  {
+    std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" ).insert( vars - n, " " );
+    std::cout << " | ";
+    std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" ).insert( m, " " );
+    std::cout << std::endl;
+  }
+}
+
 class embed_pla_processor : public pla_processor
 {
 public:
@@ -310,31 +339,7 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
 
   if ( truth_table )
   {
-    using boost::adaptors::transformed;
-
-    DdGen *gen;
-    int  *cube;
-    CUDD_VALUE_TYPE value;
-
-    unsigned vars = cf.num_vars();
-
-    std::cout << std::string( vars - p.n, 'c' )
-              << ' '
-              << std::string( p.n, 'x' )
-              << " | "
-              << std::string( p.m, 'y' )
-              << ' '
-              << std::string( vars - p.m, 'g' )
-              << std::endl;
-    std::cout << std::string( vars + 2u, '-' ) << '+' << std::string( vars + 2u, '-' ) << std::endl;
-
-    Cudd_ForeachCube( cf.manager().getManager(), func.getNode(), gen, cube, value )
-    {
-      std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" ).insert( vars - p.n, " " );
-      std::cout << " | ";
-      std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" ).insert( p.m, " " );
-      std::cout << std::endl;
-    }
+    print_truth_table( cf, func, p.n, p.m );
   }
 
   cf.set_chi( func );
