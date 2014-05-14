@@ -25,8 +25,9 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/range/algorithm.hpp>
 #include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
 
 #include <core/io/read_pla_to_bdd.hpp>
 
@@ -65,18 +66,42 @@ std::ostream& operator<<( std::ostream& os, const cube_t& cube )
   return os;
 }
 
+boost::dynamic_bitset<> diff_cube( const cube_t& c1, const cube_t& c2 )
+{
+  return ((c1.second ^ c2.second) | ((c1.second & c1.first) ^ (c2.second & c2.first)));
+}
+
 /* Returns the distance of c1 and c2. If distance is 1 and bit_pos == -1, then bit_pos stores
  * the bit position in which they differ.
  */
 boost::dynamic_bitset<>::size_type distance( const cube_t& c1, const cube_t& c2, int& bit_pos )
 {
-  boost::dynamic_bitset<> diff = ((c1.second ^ c2.second) | ((c1.second & c1.first) ^ (c2.second & c2.first)));
+  boost::dynamic_bitset<> diff = diff_cube( c1, c2 );
   auto d = diff.count();
   if ( d == 1 && bit_pos == -1 )
   {
     bit_pos = diff.find_first();
   }
   return d;
+}
+
+/* This changes cube c1 at position with respect to the value of c2 at this position. */
+void change( cube_t& c1, const cube_t& c2, unsigned position )
+{
+  if ( c1.second[position] && c2.second[position] ) /* 0, 1 -> - */
+  {
+    c1.first.reset( position );
+    c1.second.reset( position );
+  }
+  else if ( !c1.second[position] ) /* -, X -> ~X */
+  {
+    c1.first.set( position, !c2.first[position] );
+    c1.second.set( position );
+  }
+  else if ( !c2.second[position] ) /* X, - -> ~X */
+  {
+    c1.first.flip( position );
+  }
 }
 
 class esop_manager
@@ -113,20 +138,7 @@ public:
     {
       unsigned distance_one_cubeid = std::distance( distances.begin(), it );
       cube_t c = cubes.at( distance_one_cubeid );
-      if ( c.second[bit_pos] && cube.second[bit_pos] ) /* 0, 1 -> - */
-      {
-        c.first.reset( bit_pos );
-        c.second.reset( bit_pos );
-      }
-      else if ( !c.second[bit_pos] ) /* -, X -> ~X */
-      {
-        c.first.set( bit_pos, !cube.first[bit_pos] );
-        c.second.set( bit_pos );
-      }
-      else if ( !cube.second[bit_pos] ) /* X, - -> ~X */
-      {
-        c.first.flip( bit_pos );
-      }
+      change( c, cube, bit_pos );
       remove_cube( distance_one_cubeid );
       add_cube( c );
       return;
@@ -157,6 +169,59 @@ public:
         if ( it->second > cubeid ) { it->second--; }
       }
     }
+  }
+
+  /* We know the distance when we call this function, so we do not want to recompute it */
+  void get_different_positions( const cube_t& c1, const cube_t& c2, unsigned distance, std::vector<unsigned>& positions )
+  {
+    boost::dynamic_bitset<> diff = diff_cube( c1, c2 );
+    unsigned pos;
+
+    for ( unsigned i = 0u; i < distance; ++i )
+    {
+      positions += ( pos = diff.find_first() );
+      diff.flip( pos );
+    }
+  }
+
+  bool optimize( unsigned distance )
+  {
+    using boost::adaptors::transformed;
+
+    assert( distance >= 2 && distance <= 4 );
+
+    std::vector<unsigned> positions;
+    for ( const auto& p : distance_lists.at( distance - 2u ) )
+    {
+      if ( verbose )
+      {
+        std::cout << "Try to optimize with cube " << p.first << " and " << p.second << std::endl;
+      }
+
+      /* store */
+      const cube_t& c1 = cubes.at( p.first );
+      const cube_t& c2 = cubes.at( p.second );
+
+      positions.clear();
+      get_different_positions( c1, c2, distance, positions );
+
+      do
+      {
+        if ( verbose )
+        {
+          std::cout << "Permutation: " << boost::join( positions | transformed( boost::lexical_cast<std::string, unsigned> ), ", " ) << std::endl;
+        }
+
+        cube_t c = c1;
+        for ( unsigned pos : positions )
+        {
+          change( c, c2, pos );
+          std::cout << c << std::endl;
+        }
+      } while ( boost::next_permutation( positions ) );
+    }
+
+    return false;
   }
 
   void print_statistics()
@@ -327,6 +392,8 @@ void generate_exact_psdkro( const std::string& filename, const generate_exact_ps
 
   read_pla_to_bdd( bdd, filename );
   generate_exact_psdkro( esop, bdd.cudd, bdd.outputs.front().second, settings );
+
+  esop.optimize( 2u );
 
   esop.print_statistics();
 }
