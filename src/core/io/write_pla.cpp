@@ -19,6 +19,7 @@
 
 #include <fstream>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -45,8 +46,22 @@ void write_pla( const binary_truth_table& pla, const std::string& filename )
 
     if ( first )
     {
-      os << ".i " << std::distance( it->first.first, it->first.second ) << std::endl;
-      os << ".o " << std::distance( it->second.first, it->second.second ) << std::endl;
+      unsigned num_inputs = std::distance( it->first.first, it->first.second );
+      unsigned num_outputs = std::distance( it->second.first, it->second.second );
+
+      os << ".i " << num_inputs << std::endl;
+      os << ".o " << num_outputs << std::endl;
+
+      if ( num_inputs == pla.inputs().size() )
+      {
+        os << ".ilb " << boost::join( pla.inputs(), " " ) << std::endl;
+      }
+
+      if ( num_outputs == pla.outputs().size() )
+      {
+        os << ".ob " << boost::join( pla.outputs(), " " ) << std::endl;
+      }
+
       first = false;
     }
 
