@@ -1,4 +1,4 @@
-# RevKit 2.0 (Base System)
+# RevKit 2.0 Base System (Beta)
 
 ## Requirements
 
@@ -32,3 +32,7 @@ further information.
 This system is maintained by Mathias Soeken (msoeken@cs.uni-bremen.de). Parts
 have been contributed by Stefan Frehse, Aaron Lye, Nils Przigoda, Laura Tague,
 and Robert Wille.
+
+RevKit 2.0 is undergoing some heavy modifications and therefore many functions
+that are contained in [RevKit 1.3](http://www.revkit.org) are not available
+yet (e.g. quantum gates, GUI).
