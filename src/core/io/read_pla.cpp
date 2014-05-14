@@ -30,7 +30,7 @@
 namespace revkit
 {
 
-  struct transform_to_constants
+  struct transform_pla_to_constants
   {
     constant operator()( const char& c ) const
     {
@@ -97,10 +97,10 @@ namespace revkit
     void on_cube( const std::string& in, const std::string& out )
     {
       std::vector<boost::optional<bool> > cube_in( in.size() );
-      boost::transform( in, cube_in.begin(), transform_to_constants() );
+      boost::transform( in, cube_in.begin(), transform_pla_to_constants() );
 
       std::vector<boost::optional<bool> > cube_out( out.size() );
-      boost::transform( out, cube_out.begin(), transform_to_constants() );
+      boost::transform( out, cube_out.begin(), transform_pla_to_constants() );
 
       bool match = false;
       for ( binary_truth_table::iterator spec_cube = spec.begin(); spec_cube != spec.end(); ++spec_cube )
