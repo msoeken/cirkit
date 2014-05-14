@@ -8,6 +8,7 @@ The following software is required in order to build RevKit
 * cmake (at least version 2.8.9)
 * g++ or clang++ (with C++11 support)
 * boost (at least version 1.48.0)
+* GNU MP, and its C++ interface GMP++
 
 ## Build RevKit
 
