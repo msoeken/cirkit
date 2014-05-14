@@ -36,6 +36,10 @@ extend_pla_settings::extend_pla_settings() : post_compact( true ) {}
 
 void extend_pla( binary_truth_table& base, binary_truth_table& extended, const extend_pla_settings& settings )
 {
+  // copy metadata
+  extended.set_inputs( base.inputs() );
+  extended.set_outputs( base.outputs() );
+
   // CUDD stuff
   Cudd mgr( 0, 0 );
   std::vector<BDD> vars( base.num_inputs() );
