@@ -41,9 +41,9 @@ namespace revkit
  ******************************************************************************/
 enum decomposition_type
 {
-  Shannon,
+  NegativeDavio,
   PositiveDavio,
-  NegativeDavio
+  Shannon
 };
 
 enum var_values_enum
@@ -354,10 +354,13 @@ private:
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
+#define DumpFF( cudd, f ) Cudd_DumpFactoredForm( cudd, 1, &f, 0, 0, stdout ); std::cout << std::endl;
 
-exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_t& exp_cache )
+exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_t& exp_cache, unsigned indentation )
 {
   exp_cost_t r;
+
+  std::cout << std::string( indentation * 2u, ' ' ); DumpFF( cudd, f )
 
   // terminal cases
   if ( f == Cudd_ReadLogicZero( cudd ) ) return std::make_pair( PositiveDavio, 0u );
@@ -378,11 +381,9 @@ exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_
 
   // recursively solve subproblems
   int n0, n1, n2, nmax;
-  n0 = count_cubes_in_exact_psdkro( cudd, f0, exp_cache ).second;
-  n1 = count_cubes_in_exact_psdkro( cudd, f1, exp_cache ).second;
-  n2 = count_cubes_in_exact_psdkro( cudd, f2, exp_cache ).second;
-
-  // TODO clean f2
+  n0 = count_cubes_in_exact_psdkro( cudd, f0, exp_cache, indentation + 1 ).second;
+  n1 = count_cubes_in_exact_psdkro( cudd, f1, exp_cache, indentation + 1 ).second;
+  n2 = count_cubes_in_exact_psdkro( cudd, f2, exp_cache, indentation + 1 ).second;
 
   // determine the mostly costly expansion
   nmax = n0 > n1 ? n0 : n1;
@@ -397,7 +398,8 @@ exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_
   return exp_cache[f] = r;
 }
 
-void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, char * var_values, const exp_cache_t& exp_cache, const generate_exact_psdkro_settings& settings )
+// TODO can we do something nicer with last_index
+void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, char * var_values, int last_index, const exp_cache_t& exp_cache, const generate_exact_psdkro_settings& settings )
 {
   // terminal cases
   if ( f == Cudd_ReadLogicZero( cudd ) ) return;
@@ -425,6 +427,14 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, ch
   // determine the top-most variable
   int index = Cudd_NodeReadIndex( f );
 
+  // clear intermediate variables that have not been used
+  for ( int i = last_index + 1; i < index; ++i )
+  {
+    var_values[i] = VariableAbsent;
+  }
+
+  std::cout << "Apply " << exp << " (" << exp_cache.find( f )->second.second << ", Index = " << index << ") for "; DumpFF( cudd, f );
+
   // get co-factors
   DdNode * f0 = Cudd_NotCond( Cudd_E( f ), Cudd_IsComplement( f ) );
   DdNode * f1 = Cudd_NotCond( Cudd_T( f ), Cudd_IsComplement( f ) );
@@ -434,23 +444,23 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, ch
   if ( exp == PositiveDavio )
   {
     var_values[index] = VariableAbsent;
-    generate_exact_psdkro( esop, cudd, f0, var_values, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f0, var_values, index, exp_cache, settings );
     var_values[index] = VariablePositive;
-    generate_exact_psdkro( esop, cudd, f2, var_values, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f2, var_values, index, exp_cache, settings );
   }
   else if ( exp == NegativeDavio )
   {
     var_values[index] = VariableAbsent;
-    generate_exact_psdkro( esop, cudd, f1, var_values, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f1, var_values, index, exp_cache, settings );
     var_values[index] = VariableNegative;
-    generate_exact_psdkro( esop, cudd, f2, var_values, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f2, var_values, index, exp_cache, settings );
   }
   else
   {
     var_values[index] = VariableNegative;
-    generate_exact_psdkro( esop, cudd, f0, var_values, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f0, var_values, index, exp_cache, settings );
     var_values[index] = VariablePositive;
-    generate_exact_psdkro( esop, cudd, f1, var_values, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f1, var_values, index, exp_cache, settings );
   }
 
   Cudd_RecursiveDeref( cudd, f2 );
@@ -467,11 +477,11 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, co
   }
 
   exp_cache_t exp_cache;
-  count_cubes_in_exact_psdkro( cudd, f, exp_cache );
+  count_cubes_in_exact_psdkro( cudd, f, exp_cache, 0u );
 
   char * var_values = new char[Cudd_ReadSize( cudd )];
   std::fill( var_values, var_values + Cudd_ReadSize( cudd ), VariableAbsent );
-  generate_exact_psdkro( esop, cudd, f, var_values, exp_cache, settings );
+  generate_exact_psdkro( esop, cudd, f, var_values, -1, exp_cache, settings );
 
   boost::for_each( exp_cache | map_keys, [&cudd]( DdNode* node ) { Cudd_RecursiveDeref( cudd, node ); } );
   delete var_values;
