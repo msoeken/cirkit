@@ -354,13 +354,9 @@ private:
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
-#define DumpFF( cudd, f ) Cudd_DumpFactoredForm( cudd, 1, &f, 0, 0, stdout ); std::cout << std::endl;
-
 exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_t& exp_cache, unsigned indentation )
 {
   exp_cost_t r;
-
-  std::cout << std::string( indentation * 2u, ' ' ); DumpFF( cudd, f )
 
   // terminal cases
   if ( f == Cudd_ReadLogicZero( cudd ) ) return std::make_pair( PositiveDavio, 0u );
@@ -408,6 +404,10 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, ch
     using boost::adaptors::indexed;
 
     unsigned n = Cudd_ReadSize( cudd );
+    for ( int i = last_index + 1; i < n; ++i )
+    {
+      var_values[i] = VariableAbsent;
+    }
     boost::dynamic_bitset<> lits( n, 0u ), care( n, 0u );
 
     auto range = boost::make_iterator_range( var_values, var_values + Cudd_ReadSize( cudd ) ) | indexed( 0u );
@@ -432,8 +432,6 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, ch
   {
     var_values[i] = VariableAbsent;
   }
-
-  std::cout << "Apply " << exp << " (" << exp_cache.find( f )->second.second << ", Index = " << index << ") for "; DumpFF( cudd, f );
 
   // get co-factors
   DdNode * f0 = Cudd_NotCond( Cudd_E( f ), Cudd_IsComplement( f ) );
@@ -469,12 +467,6 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, ch
 void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, const generate_exact_psdkro_settings& settings )
 {
   using boost::adaptors::map_keys;
-
-  if ( settings.verbose )
-  {
-    std::cout << "Generate PSDKRO for: " << std::endl;
-    Cudd_PrintMinterm( cudd, f );
-  }
 
   exp_cache_t exp_cache;
   count_cubes_in_exact_psdkro( cudd, f, exp_cache, 0u );
