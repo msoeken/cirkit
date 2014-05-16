@@ -158,13 +158,13 @@ public:
     cubes += cube;
   }
 
-  bool remove_from_distance_list( cube_pair_list_t& l, unsigned cubeid )
+  bool remove_from_distance_list( cube_pair_list_t& l, unsigned cubeid, bool remove_first = true )
   {
-    l.remove_if( [&cubeid]( const std::pair<unsigned, unsigned>& p ) { return p.first == cubeid || p.second == cubeid; } );
+    l.remove_if( [&cubeid, &remove_first]( const std::pair<unsigned, unsigned>& p ) { return ( remove_first && p.first == cubeid ) || p.second == cubeid; } );
     for ( auto it = l.begin(); it != l.end(); ++it )
     {
-      if ( it->first  > cubeid ) { it->first--;  }
-      if ( it->second > cubeid ) { it->second--; }
+      if ( remove_first && it->first  > cubeid ) { it->first--;  }
+      if (                 it->second > cubeid ) { it->second--; }
     }
   }
 
@@ -231,6 +231,9 @@ public:
         bit_pos = -1;
         for ( unsigned cubeid = 0u; cubeid < cubes.size(); ++cubeid )
         {
+          /* do not calculate distance to given cubes */
+          if ( cubeid == cubeid1 || cubeid == cubeid2 ) continue;
+
           const cube_t& ex_cube = cubes.at( cubeid );
           auto d = compute_distance( ex_cube, c, bit_pos );
           if ( d == 0u )
