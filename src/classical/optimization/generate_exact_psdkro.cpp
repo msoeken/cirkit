@@ -118,7 +118,6 @@ public:
 
   void add_cube( cube_t cube )
   {
-#if 0
     unsigned cubeid = 0u;
     std::vector<char> distances( cubes.size() );
     int bit_pos = -1;
@@ -155,7 +154,7 @@ public:
         distance_lists[distances[i] - 2u] += std::make_pair( i, cubes.size() );
       }
     }
-#endif
+
     cubes += cube;
   }
 
