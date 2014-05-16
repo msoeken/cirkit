@@ -1,6 +1,10 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE approximate_additional_lines
 
+#include <boost/test/unit_test.hpp>
+
+#if ADDON_REVLIB
+
 #include <initializer_list>
 #include <iomanip>
 #include <future>
@@ -17,7 +21,6 @@
 #include <boost/range/algorithm_ext.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/test/unit_test.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <core/functions/approximate_additional_lines.hpp>
@@ -92,3 +95,13 @@ BOOST_AUTO_TEST_CASE(simple)
   /* generate table */
   table.print();
 }
+
+#else
+
+BOOST_AUTO_TEST_CASE(simple) {}
+
+#endif
+
+// Local Variables:
+// c-basic-offset: 2
+// End:
