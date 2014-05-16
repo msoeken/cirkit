@@ -38,6 +38,8 @@ add_subdirectory(ext)
 option(revkit_ENABLE_PROGRAMS "build programs" on)
 option(revkit_ENABLE_TESTS "build tests" on)
 
+# Libraries (include)
+include_directories(src)
 
 # Addons
 add_subdirectory(addons)
@@ -45,13 +47,11 @@ foreach (dir ${addon_directories})
   string(REGEX REPLACE "revkit-" "" def ${dir})
   string(REGEX REPLACE "-" "_" def ${def})
   string(TOUPPER ${def} def)
-  message(${def})
   add_definitions(-D${def})
   include_directories(addons/${dir}/src)
 endforeach()
 
 # Libraries
-include_directories(src)
 add_subdirectory(src)
 
 # Programs
