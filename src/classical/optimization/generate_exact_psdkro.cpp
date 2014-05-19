@@ -17,6 +17,7 @@
 
 #include "generate_exact_psdkro.hpp"
 
+#include <iomanip>
 #include <list>
 
 #include <boost/algorithm/string/join.hpp>
@@ -35,6 +36,16 @@ using namespace boost::assign;
 
 namespace revkit
 {
+
+/******************************************************************************
+ * Utils                                                                      *
+ ******************************************************************************/
+void print_banner( const std::string& caption, unsigned width = 40u )
+{
+  std::cout << '+' << std::string( width - 2u, '-' ) << '+' << std::endl
+            << "| " << std::left << std::setw( width - 3u ) << caption << '|' << std::endl
+            << '+' << std::string( width - 2u, '-' ) << '+' << std::endl;
+}
 
 /******************************************************************************
  * Types                                                                      *
@@ -107,7 +118,8 @@ void change( cube_t& c1, const cube_t& c2, unsigned position )
 class esop_manager
 {
 public:
-  typedef std::list<std::pair<unsigned, unsigned> > cube_pair_list_t;
+  typedef std::pair<unsigned, unsigned> cube_pair_t;
+  typedef std::list<cube_pair_t> cube_pair_list_t;
 
   esop_manager( bool verbose = false, unsigned capacity = 1000u )
     : verbose( verbose ),
@@ -158,13 +170,15 @@ public:
     cubes += cube;
   }
 
-  bool remove_from_distance_list( cube_pair_list_t& l, unsigned cubeid, bool remove_first = true )
+  bool remove_from_distance_list( cube_pair_list_t& l, unsigned cubeid, bool remove_first = true, bool remove_second = true )
   {
-    l.remove_if( [&cubeid, &remove_first]( const std::pair<unsigned, unsigned>& p ) { return ( remove_first && p.first == cubeid ) || p.second == cubeid; } );
+    l.remove_if( [&cubeid, &remove_first, &remove_second]( const std::pair<unsigned, unsigned>& p ) {
+        return ( remove_first && p.first == cubeid ) || ( remove_second && p.second == cubeid );
+      } );
     for ( auto it = l.begin(); it != l.end(); ++it )
     {
-      if ( remove_first && it->first  > cubeid ) { it->first--;  }
-      if (                 it->second > cubeid ) { it->second--; }
+      if ( remove_first  && it->first  > cubeid ) { it->first--;  }
+      if ( remove_second && it->second > cubeid ) { it->second--; }
     }
   }
 
@@ -192,6 +206,14 @@ public:
     }
   }
 
+  std::string pair_list_to_string( const cube_pair_list_t& l )
+  {
+    using boost::adaptors::transformed;
+
+    return boost::join( l | transformed( []( const cube_pair_t& p ) {
+          return boost::str( boost::format( "(%d,%d)" ) % p.first % p.second ); } ), ", " );
+  }
+
   bool leads_to_improvement( unsigned cubeid1, unsigned cubeid2, unsigned distance )
   {
     using boost::adaptors::transformed;
@@ -214,19 +236,22 @@ public:
     {
       if ( verbose )
       {
-        std::cout << "Permutation: " << boost::join( positions | transformed( boost::lexical_cast<std::string, unsigned> ), ", " ) << std::endl;
+        std::cout << "  Permutation: " << boost::join( positions | transformed( boost::lexical_cast<std::string, unsigned> ), ", " ) << std::endl;
       }
 
       /* reset values */
       improvement = distance - 2;
       c = c1;
+      new_cubes.clear();
+      eliminate_candidates.clear();
+      merge_candidates.clear();
 
       /* follow exor link */
       for ( unsigned pos : positions )
       {
         change( c, c2, pos );
         new_cubes += c;
-        std::cout << c << std::endl;
+        std::cout << "    " << ( new_cubes.size() - 1u ) << ": " << c << std::endl;
 
         bit_pos = -1;
         for ( unsigned cubeid = 0u; cubeid < cubes.size(); ++cubeid )
@@ -247,12 +272,58 @@ public:
             improvement -= 1;
           }
         }
+      }
 
-        /* did we find a good permutation? */
-        if ( improvement < 0 )
+      /* did we find a good permutation? */
+      if ( improvement < 0 )
+      {
+        std::cout << "    Found improvement" << std::endl;
+        std::cout << "      Elimination candidates: " << pair_list_to_string( eliminate_candidates ) << std::endl;
+        std::cout << "      Merging     candidates: " << pair_list_to_string( merge_candidates ) << std::endl;
+
+        /* remove old pair */
+        remove_cube( cubeid1 );
+        remove_cube( cubeid2 );
+        remove_from_distance_list( eliminate_candidates, cubeid1, false, true  );
+        remove_from_distance_list( eliminate_candidates, cubeid2, false, true  );
+        remove_from_distance_list( merge_candidates, cubeid1, false, true  );
+        remove_from_distance_list( merge_candidates, cubeid2, false, true  );
+
+        /* remove from eliminated candidates */
+        while ( !eliminate_candidates.empty() )
         {
-          std::cout << "Found improvement" << std::endl;
+          auto p = eliminate_candidates.front();
+          remove_cube( p.second );
+          remove_from_distance_list( eliminate_candidates, p.second, false, true  );
+          remove_from_distance_list( eliminate_candidates, p.first,  true,  false );
+          remove_from_distance_list( merge_candidates, p.second, false, true  );
+          remove_from_distance_list( merge_candidates, p.first,  true,  false );
         }
+
+        /* merge with merged candidates */
+        while ( !merge_candidates.empty() )
+        {
+          auto p = merge_candidates.front();
+          cube_t old_cube = cubes.at( p.second );
+          cube_t new_cube = new_cubes.at( p.first );
+          bit_pos = -1;
+          assert( compute_distance( old_cube, new_cube, bit_pos ) == 1 );
+
+          change( old_cube, new_cube, bit_pos );
+          remove_cube( p.second );
+          add_cube( old_cube );
+
+          new_cubes.erase( new_cubes.begin() + p.first );
+          remove_from_distance_list( merge_candidates, p.second, false, true  );
+          remove_from_distance_list( merge_candidates, p.first,  true,  false );
+        }
+
+        for ( const auto& c : new_cubes )
+        {
+          add_cube( c );
+        }
+
+        return true;
       }
     } while ( boost::next_permutation( positions ) );
 
@@ -265,6 +336,11 @@ public:
 
     assert( distance >= 2 && distance <= 4 );
 
+    if ( verbose )
+    {
+      print_banner( boost::str( boost::format( "EXOR-LINK (d = %d)" ) % distance ) );
+    }
+
     std::vector<unsigned> positions;
     for ( const auto& p : distance_lists.at( distance - 2u ) )
     {
@@ -273,7 +349,10 @@ public:
         std::cout << "Try to optimize with cube " << p.first << " and " << p.second << std::endl;
       }
 
-      leads_to_improvement( p.first, p.second, distance );
+      if ( leads_to_improvement( p.first, p.second, distance ) )
+      {
+        break;
+      }
     }
 
     return false;
@@ -283,6 +362,8 @@ public:
   {
     using boost::adaptors::indexed;
     using boost::adaptors::transformed;
+
+    print_banner( "Statistics" );
 
     std::cout << "Number of cubes: " << cubes.size() << std::endl;
     std::cout << "Cubes:" << std::endl;
@@ -295,10 +376,7 @@ public:
     for ( unsigned i = 0u; i < 3u; ++i )
     {
       std::cout << boost::format( "%4d: " ) % (i + 2u);
-      std::cout << boost::join(
-                    distance_lists[i] | transformed( []( const std::pair<unsigned, unsigned>& p ) {
-                        return boost::str( boost::format( "(%d,%d)" ) % p.first % p.second ); } ), ", " )
-                << std::endl;
+      std::cout << pair_list_to_string( distance_lists[i] ) << std::endl;
     }
   }
 
@@ -496,6 +574,8 @@ void generate_exact_psdkro( const std::string& filename, const generate_exact_ps
 
   read_pla_to_bdd( bdd, filename );
   generate_exact_psdkro( esop, bdd.cudd, bdd.outputs.front().second, settings );
+
+  esop.print_statistics();
 
   esop.exorlink( 2u );
 
