@@ -225,8 +225,6 @@ public:
     cube_t c;                               /* used for current cube computation */
     int improvement;                        /* store the current possible improvement */
     std::vector<cube_t> new_cubes;          /* new cubes */
-    cube_pair_list_t eliminate_candidates;  /* possible eliminations due to distance-0 pairs (first index is from new_cubes) */
-    cube_pair_list_t merge_candidates;      /* possible merging due to distance-1 pairs (first index is from new_cubes) */
     int bit_pos;
 
     get_different_positions( c1, c2, distance, positions );
@@ -243,8 +241,6 @@ public:
       improvement = distance - 2;
       c = c1;
       new_cubes.clear();
-      eliminate_candidates.clear();
-      merge_candidates.clear();
 
       /* follow exor link */
       for ( unsigned pos : positions )
@@ -263,12 +259,10 @@ public:
           auto d = compute_distance( ex_cube, c, bit_pos );
           if ( d == 0u )
           {
-            eliminate_candidates += std::make_pair( new_cubes.size() - 1u, cubeid );
             improvement -= 2;
           }
           else if ( d == 1u )
           {
-            merge_candidates += std::make_pair( new_cubes.size() - 1u, cubeid );
             improvement -= 1;
           }
         }
@@ -278,46 +272,12 @@ public:
       if ( improvement < 0 )
       {
         std::cout << "    Found improvement" << std::endl;
-        std::cout << "      Elimination candidates: " << pair_list_to_string( eliminate_candidates ) << std::endl;
-        std::cout << "      Merging     candidates: " << pair_list_to_string( merge_candidates ) << std::endl;
 
         /* remove old pair */
         remove_cube( cubeid1 );
         remove_cube( cubeid2 );
-        remove_from_distance_list( eliminate_candidates, cubeid1, false, true  );
-        remove_from_distance_list( eliminate_candidates, cubeid2, false, true  );
-        remove_from_distance_list( merge_candidates, cubeid1, false, true  );
-        remove_from_distance_list( merge_candidates, cubeid2, false, true  );
 
-        /* remove from eliminated candidates */
-        while ( !eliminate_candidates.empty() )
-        {
-          auto p = eliminate_candidates.front();
-          remove_cube( p.second );
-          remove_from_distance_list( eliminate_candidates, p.second, false, true  );
-          remove_from_distance_list( eliminate_candidates, p.first,  true,  false );
-          remove_from_distance_list( merge_candidates, p.second, false, true  );
-          remove_from_distance_list( merge_candidates, p.first,  true,  false );
-        }
-
-        /* merge with merged candidates */
-        while ( !merge_candidates.empty() )
-        {
-          auto p = merge_candidates.front();
-          cube_t old_cube = cubes.at( p.second );
-          cube_t new_cube = new_cubes.at( p.first );
-          bit_pos = -1;
-          assert( compute_distance( old_cube, new_cube, bit_pos ) == 1 );
-
-          change( old_cube, new_cube, bit_pos );
-          remove_cube( p.second );
-          add_cube( old_cube );
-
-          new_cubes.erase( new_cubes.begin() + p.first );
-          remove_from_distance_list( merge_candidates, p.second, false, true  );
-          remove_from_distance_list( merge_candidates, p.first,  true,  false );
-        }
-
+        /* add new cubes */
         for ( const auto& c : new_cubes )
         {
           add_cube( c );
