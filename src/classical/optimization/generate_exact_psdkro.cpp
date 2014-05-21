@@ -121,8 +121,9 @@ public:
   typedef std::pair<unsigned, unsigned> cube_pair_t;
   typedef std::list<cube_pair_t> cube_pair_list_t;
 
-  esop_manager( bool verbose = false, unsigned capacity = 1000u )
-    : verbose( verbose ),
+  esop_manager( DdManager * cudd, bool verbose = false, unsigned capacity = 1000u )
+    : cudd( cudd ),
+      verbose( verbose ),
       distance_lists( 3u )
   {
     cubes.reserve( capacity );
@@ -216,18 +217,23 @@ public:
 
   bool leads_to_improvement( unsigned cubeid1, unsigned cubeid2, unsigned distance )
   {
+    assert( cubeid1 < cubeid2 );
+
     using boost::adaptors::transformed;
 
     const cube_t& c1 = cubes.at( cubeid1 ); /* easy access to c1 */
     const cube_t& c2 = cubes.at( cubeid2 ); /* easy access to c2 */
 
     std::vector<unsigned> positions;        /* positions of different cubes in c1 and c2 */
-    cube_t c;                               /* used for current cube computation */
+    cube_t a, b;                            /* used for current cube computation */
     int improvement;                        /* store the current possible improvement */
     std::vector<cube_t> new_cubes;          /* new cubes */
     int bit_pos;
 
     get_different_positions( c1, c2, distance, positions );
+
+    /* for now we only consider distance = 2 */
+    assert( distance == 2u );
 
     /* loop over all permutations of the positions vector */
     do
@@ -239,15 +245,22 @@ public:
 
       /* reset values */
       improvement = distance - 2;
-      c = c1;
+      a = c1;
+      b = c2;
       new_cubes.clear();
 
+      change( a, c2, positions.at( 0u ) );
+      change( b, c1, positions.at( 1u ) );
+
+      new_cubes += a,b;
+
       /* follow exor link */
-      for ( unsigned pos : positions )
+      for ( unsigned i = 0; i < distance; ++i )
       {
-        change( c, c2, pos );
-        new_cubes += c;
-        std::cout << "    " << ( new_cubes.size() - 1u ) << ": " << c << std::endl;
+        if ( verbose )
+        {
+          std::cout << "    " << i << ": " << new_cubes.at( i ) << std::endl;
+        }
 
         bit_pos = -1;
         for ( unsigned cubeid = 0u; cubeid < cubes.size(); ++cubeid )
@@ -256,7 +269,7 @@ public:
           if ( cubeid == cubeid1 || cubeid == cubeid2 ) continue;
 
           const cube_t& ex_cube = cubes.at( cubeid );
-          auto d = compute_distance( ex_cube, c, bit_pos );
+          auto d = compute_distance( ex_cube, new_cubes.at( i ), bit_pos );
           if ( d == 0u )
           {
             improvement -= 2;
@@ -271,11 +284,14 @@ public:
       /* did we find a good permutation? */
       if ( improvement < 0 )
       {
-        std::cout << "    Found improvement" << std::endl;
+        if ( verbose )
+        {
+          std::cout << "    Found improvement" << std::endl;
+        }
 
         /* remove old pair */
-        remove_cube( cubeid1 );
         remove_cube( cubeid2 );
+        remove_cube( cubeid1 );
 
         /* add new cubes */
         for ( const auto& c : new_cubes )
@@ -340,26 +356,33 @@ public:
     }
   }
 
-  DdNode * to_bdd( DdManager * cudd )
+  DdNode * to_bdd( const cube_t& cube )
+  {
+    DdNode * cubef = Cudd_ReadOne( cudd ), *tmp;
+    Cudd_Ref( cubef );
+
+    for ( unsigned i = 0u; i < cube.first.size(); ++i )
+    {
+      if ( cube.second[i] )
+      {
+        tmp = Cudd_bddAnd( cudd, cubef, cube.first[i] ? Cudd_bddIthVar( cudd, i ) : Cudd_Not( Cudd_bddIthVar( cudd, i ) ) );
+        Cudd_Ref( tmp );
+        Cudd_RecursiveDeref( cudd, cubef );
+        cubef = tmp;
+      }
+    }
+
+    return cubef;
+  }
+
+  DdNode * to_bdd( const std::vector<cube_t>& cube_list )
   {
     DdNode * f = Cudd_ReadLogicZero( cudd ), * tmp;
     Cudd_Ref( f );
 
-    for ( const auto& cube : cubes )
+    for ( const auto& cube : cube_list )
     {
-      DdNode * cubef = Cudd_ReadOne( cudd );
-      Cudd_Ref( cubef );
-
-      for ( unsigned i = 0u; i < cube.first.size(); ++i )
-      {
-        if ( cube.second[i] )
-        {
-          tmp = Cudd_bddAnd( cudd, cubef, cube.first[i] ? Cudd_bddIthVar( cudd, i ) : Cudd_Not( Cudd_bddIthVar( cudd, i ) ) );
-          Cudd_Ref( tmp );
-          Cudd_RecursiveDeref( cudd, cubef );
-          cubef = tmp;
-        }
-      }
+      DdNode * cubef = to_bdd( cube );
 
       tmp = Cudd_bddXor( cudd, f, cubef );
       Cudd_Ref( tmp );
@@ -371,9 +394,14 @@ public:
     return f;
   }
 
-  bool verify( DdManager * cudd, DdNode * f )
+  DdNode * to_bdd()
   {
-    DdNode * esopf = to_bdd( cudd );
+    return to_bdd( cubes );
+  }
+
+  bool verify( DdNode * f )
+  {
+    DdNode * esopf = to_bdd();
     DdNode * compare = Cudd_bddXnor( cudd, f, esopf );
     Cudd_Ref( compare );
     Cudd_RecursiveDeref( cudd, esopf );
@@ -386,6 +414,7 @@ public:
   }
 
 private:
+  DdManager * cudd;
   bool verbose;
   std::vector<cube_t> cubes;
   std::vector<cube_pair_list_t> distance_lists;
@@ -530,17 +559,27 @@ generate_exact_psdkro_settings::generate_exact_psdkro_settings()
 void generate_exact_psdkro( const std::string& filename, const generate_exact_psdkro_settings& settings )
 {
   BDDTable bdd;
-  esop_manager esop( settings.verbose );
-
   read_pla_to_bdd( bdd, filename );
+
+  esop_manager esop( bdd.cudd, settings.verbose );
+
   generate_exact_psdkro( esop, bdd.cudd, bdd.outputs.front().second, settings );
 
-  esop.print_statistics();
+  if ( settings.verbose )
+  {
+    esop.print_statistics();
+  }
 
-  esop.exorlink( 2u );
+  for ( unsigned i = 0u; i < 50u; ++i )
+  {
+    esop.exorlink( 2u );
+  }
 
-  esop.print_statistics();
-  std::cout << "Equal? " << esop.verify( bdd.cudd, bdd.outputs.front().second ) << std::endl;
+  if ( settings.verbose )
+  {
+    esop.print_statistics();
+  }
+  std::cout << "Equal? " << esop.verify( bdd.outputs.front().second ) << std::endl;
 }
 
 }
