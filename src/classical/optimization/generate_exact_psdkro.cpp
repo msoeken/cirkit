@@ -26,11 +26,14 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
 #include <core/io/read_pla_to_bdd.hpp>
+#include <core/utils/timer.hpp>
 
 using namespace boost::assign;
 
@@ -113,6 +116,18 @@ void change( cube_t& c1, const cube_t& c2, unsigned position )
   {
     c1.first.flip( position );
   }
+}
+
+/* Alternative implementation of change, but seems to be a tiny bit slower. */
+void change_alternative( cube_t& c1, const cube_t& c2, unsigned position )
+{
+  bool V1 = c1.first[position];
+  bool V2 = c2.first[position];
+  bool C1 = c1.second[position];
+  bool C2 = c2.second[position];
+
+  c1.first.set( !V1 && !V2 && (C1 ^ C2) );
+  c1.second.set( !C1 && !C2 && (V1 ^ V2) );
 }
 
 class esop_manager
@@ -580,6 +595,46 @@ void generate_exact_psdkro( const std::string& filename, const generate_exact_ps
     esop.print_statistics();
   }
   std::cout << "Equal? " << esop.verify( bdd.outputs.front().second ) << std::endl;
+}
+
+/******************************************************************************
+ * Tests                                                                      *
+ ******************************************************************************/
+
+void test_change_performance()
+{
+  unsigned n = 10u;
+  unsigned count = 1u << 21u;
+
+  boost::random::mt19937 gen;
+  boost::random::uniform_int_distribution<> dist( 0, (1u << n) - 1u );
+
+  std::vector<std::pair<cube_t, cube_t> > cubes( count );
+  boost::generate( cubes, [&n, &gen, &dist]() { return std::make_pair(
+                                                                      std::make_pair( boost::dynamic_bitset<>( n, dist( gen ) ), boost::dynamic_bitset<>( n, dist( gen ) ) ),
+                                                                      std::make_pair( boost::dynamic_bitset<>( n, dist( gen ) ), boost::dynamic_bitset<>( n, dist( gen ) ) ) ); } );
+
+  {
+    print_timer pt( std::cout );
+    timer<print_timer> t( pt );
+
+    for ( const auto& p : cubes )
+    {
+      cube_t c = p.first;
+      change( c, p.second, 5u );
+    }
+  }
+
+  {
+    print_timer pt( std::cout );
+    timer<print_timer> t( pt );
+
+    for ( const auto& p : cubes )
+    {
+      cube_t c = p.first;
+      change_alternative( c, p.second, 5u );
+    }
+  }
 }
 
 }

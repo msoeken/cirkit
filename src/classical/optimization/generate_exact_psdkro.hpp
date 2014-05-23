@@ -41,6 +41,8 @@ struct generate_exact_psdkro_settings
 
 void generate_exact_psdkro( const std::string& filename, const generate_exact_psdkro_settings& settings = generate_exact_psdkro_settings() );
 
+void test_change_performance();
+
 }
 
 #endif
