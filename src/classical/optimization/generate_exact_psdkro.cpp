@@ -152,7 +152,25 @@ public:
     link_groups[0u][1u][1u] += 2u,0u;
 
     link_groups[1u].resize( 6u );
-
+    boost::for_each( link_groups[1u], []( std::vector<std::vector<unsigned> >& v ) { v.resize( 3u ); } );
+    link_groups[1u][0u][0u] += 0u,0u,2u; // 1
+    link_groups[1u][0u][1u] += 2u,1u,1u; // 3
+    link_groups[1u][0u][2u] += 0u,2u,1u; // 7
+    link_groups[1u][1u][0u] += 0u,0u,2u; // 1
+    link_groups[1u][1u][1u] += 1u,2u,1u; // 6
+    link_groups[1u][1u][2u] += 2u,0u,1u; // 8
+    link_groups[1u][2u][0u] += 2u,1u,1u; // 3
+    link_groups[1u][2u][1u] += 0u,2u,0u; // 5
+    link_groups[1u][2u][2u] += 0u,1u,2u; // 9
+    link_groups[1u][3u][0u] += 1u,1u,2u; // 2
+    link_groups[1u][3u][1u] += 2u,0u,0u; // 4
+    link_groups[1u][3u][2u] += 1u,2u,0u; // 10
+    link_groups[1u][4u][0u] += 1u,1u,2u; // 2
+    link_groups[1u][4u][1u] += 0u,2u,0u; // 5
+    link_groups[1u][4u][2u] += 2u,1u,0u; // 11
+    link_groups[1u][5u][0u] += 2u,0u,0u; // 4
+    link_groups[1u][5u][1u] += 1u,2u,1u; // 6
+    link_groups[1u][5u][2u] += 1u,0u,2u; // 12
 
     link_groups[2u].resize( 24u );
   }
@@ -243,6 +261,29 @@ public:
           return boost::str( boost::format( "(%d,%d)" ) % p.first % p.second ); } ), ", " );
   }
 
+  void get_exorlink_group( const cube_t& c1, const cube_t& c2, cube_t * tmp_cubes, unsigned group, const std::vector<unsigned>& positions )
+  {
+    /* distance is positions.size() */
+    unsigned distance = positions.size();
+    for ( unsigned i = 0u; i < distance; ++i )
+    {
+      tmp_cubes[i] = c1;
+      for ( unsigned j = 0u; j < distance; ++j )
+      {
+        switch ( link_groups[distance - 2u][group][i][j] )
+        {
+        case 1u:
+          tmp_cubes[i].first.set( positions[j], c2.first[positions[j]] );
+          tmp_cubes[i].second.set( positions[j], c2.second[positions[j]] );
+          break;
+        case 2u:
+          change( tmp_cubes[i], c2, positions[j] );
+          break;
+        }
+      }
+    }
+  }
+
   bool leads_to_improvement( unsigned cubeid1, unsigned cubeid2, unsigned distance )
   {
     assert( cubeid1 < cubeid2 );
@@ -255,39 +296,32 @@ public:
     std::vector<unsigned> positions;        /* positions of different cubes in c1 and c2 */
     cube_t tmp_cubes[4];                    /* used for current cube computation */
     int improvement;                        /* store the current possible improvement */
-    std::vector<cube_t> new_cubes;          /* new cubes */
     int bit_pos;
 
     get_different_positions( c1, c2, distance, positions );
 
-    /* for now we only consider distance = 2 */
-    assert( distance == 2u );
+    /* for now we only consider distance <= 3 */
+    assert( distance <= 3u );
 
-    /* loop over all permutations of the positions vector */
-    do
+    /* loop over all grous */
+    for ( unsigned group = 0u; group < link_groups[distance - 2u].size(); ++group )
     {
       if ( verbose )
       {
-        std::cout << "  Permutation: " << boost::join( positions | transformed( boost::lexical_cast<std::string, unsigned> ), ", " ) << std::endl;
+        std::cout << "  Group: " << group << std::endl;
       }
 
       /* reset values */
       improvement = distance - 2;
-      tmp_cubes[0u] = c1;
-      tmp_cubes[1u] = c2;
-      new_cubes.clear();
 
-      change( tmp_cubes[0u], c2, positions.at( 0u ) );
-      change( tmp_cubes[1u], c1, positions.at( 1u ) );
-
-      new_cubes += tmp_cubes[0u],tmp_cubes[1u];
+      get_exorlink_group( c1, c2, tmp_cubes, group, positions );
 
       /* follow exor link */
       for ( unsigned i = 0; i < distance; ++i )
       {
         if ( verbose )
         {
-          std::cout << "    " << i << ": " << new_cubes.at( i ) << std::endl;
+          std::cout << "    " << i << ": " << tmp_cubes[i] << std::endl;
         }
 
         bit_pos = -1;
@@ -297,7 +331,7 @@ public:
           if ( cubeid == cubeid1 || cubeid == cubeid2 ) continue;
 
           const cube_t& ex_cube = cubes.at( cubeid );
-          auto d = compute_distance( ex_cube, new_cubes.at( i ), bit_pos );
+          auto d = compute_distance( ex_cube, tmp_cubes[i], bit_pos );
           if ( d == 0u )
           {
             improvement -= 2;
@@ -310,7 +344,7 @@ public:
       }
 
       /* did we find a good permutation? */
-      if ( improvement < 0 )
+      if ( ( distance == 2u && improvement < 0 ) || ( distance >= 3u && improvement <= 0 ) )
       {
         if ( verbose )
         {
@@ -322,14 +356,14 @@ public:
         remove_cube( cubeid1 );
 
         /* add new cubes */
-        for ( const auto& c : new_cubes )
+        for ( unsigned i = 0u; i < distance; ++i )
         {
-          add_cube( c );
+          add_cube( tmp_cubes[i] );
         }
 
         return true;
       }
-    } while ( boost::next_permutation( positions ) );
+    }
 
     return false;
   }
@@ -599,9 +633,10 @@ void generate_exact_psdkro( const std::string& filename, const generate_exact_ps
     esop.print_statistics();
   }
 
-  for ( unsigned i = 0u; i < 50u; ++i )
+  for ( unsigned i = 0u; i < 3u; ++i )
   {
     esop.exorlink( 2u );
+    esop.exorlink( 3u );
   }
 
   if ( settings.verbose )
