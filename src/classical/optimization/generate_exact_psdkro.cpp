@@ -139,9 +139,22 @@ public:
   esop_manager( DdManager * cudd, bool verbose = false, unsigned capacity = 1000u )
     : cudd( cudd ),
       verbose( verbose ),
-      distance_lists( 3u )
+      distance_lists( 3u ),
+      link_groups( 3u )
   {
     cubes.reserve( capacity );
+
+    link_groups[0u].resize( 2u );
+    boost::for_each( link_groups[0u], []( std::vector<std::vector<unsigned> >& v ) { v.resize( 2u ); } );
+    link_groups[0u][0u][0u] += 0u,2u;
+    link_groups[0u][0u][1u] += 2u,1u;
+    link_groups[0u][1u][0u] += 1u,2u;
+    link_groups[0u][1u][1u] += 2u,0u;
+
+    link_groups[1u].resize( 6u );
+
+
+    link_groups[2u].resize( 24u );
   }
 
   void add_cube( cube_t cube )
@@ -240,7 +253,7 @@ public:
     const cube_t& c2 = cubes.at( cubeid2 ); /* easy access to c2 */
 
     std::vector<unsigned> positions;        /* positions of different cubes in c1 and c2 */
-    cube_t a, b;                            /* used for current cube computation */
+    cube_t tmp_cubes[4];                    /* used for current cube computation */
     int improvement;                        /* store the current possible improvement */
     std::vector<cube_t> new_cubes;          /* new cubes */
     int bit_pos;
@@ -260,14 +273,14 @@ public:
 
       /* reset values */
       improvement = distance - 2;
-      a = c1;
-      b = c2;
+      tmp_cubes[0u] = c1;
+      tmp_cubes[1u] = c2;
       new_cubes.clear();
 
-      change( a, c2, positions.at( 0u ) );
-      change( b, c1, positions.at( 1u ) );
+      change( tmp_cubes[0u], c2, positions.at( 0u ) );
+      change( tmp_cubes[1u], c1, positions.at( 1u ) );
 
-      new_cubes += a,b;
+      new_cubes += tmp_cubes[0u],tmp_cubes[1u];
 
       /* follow exor link */
       for ( unsigned i = 0; i < distance; ++i )
@@ -433,6 +446,7 @@ private:
   bool verbose;
   std::vector<cube_t> cubes;
   std::vector<cube_pair_list_t> distance_lists;
+  std::vector<std::vector<std::vector<std::vector<unsigned> > > > link_groups; // distance -> group -> cube -> id
 };
 
 /******************************************************************************
