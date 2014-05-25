@@ -18,6 +18,8 @@
 #include "rcbdd_synthesis.hpp"
 #include "synthesis_utils_p.hpp"
 
+#include <fstream>
+
 #include <boost/range/algorithm_ext/push_back.hpp>
 
 namespace revkit
@@ -30,7 +32,7 @@ enum Direction {
 
 struct rcbdd_synthesis_manager
 {
-  rcbdd_synthesis_manager( const rcbdd& _cf, bool _verbose ) : cf( _cf ), verbose( _verbose )
+  rcbdd_synthesis_manager( const rcbdd& _cf, bool _verbose, const std::string& _name ) : cf( _cf ), verbose( _verbose ), name( _name )
   {
     f = _cf.chi();
   }
@@ -265,6 +267,82 @@ struct rcbdd_synthesis_manager
     }
   }
 
+  void create_toffoli_gates_with_exorcism(const BDD& gate, unsigned var, unsigned offset)
+  {
+    if (gate == cf.manager().bddZero()) return;
+
+    std::ofstream esopout;
+    esopout.open( boost::str( boost::format( "/tmp/%s_%d_%d.pla" ) % name % var % offset ) );
+    esopout << ".i " << cf.num_vars() << std::endl;
+    esopout << ".o " << 1 << std::endl;
+
+    int *cube;
+    CUDD_VALUE_TYPE value;
+    DdGen *gen;
+
+    Cudd_ForeachCube(gate.manager(), gate.getNode(), gen, cube, value)
+    {
+      char v;
+
+      for (unsigned i = 0u; i < cf.num_vars(); ++i) {
+        v = cube[3u * i + offset];
+        if (v != 2) {
+          esopout << ((v == 0) ? "0" : "1");
+        } else {
+          esopout << "-";
+        }
+      }
+
+      esopout << " 1" << std::endl;
+    }
+
+    esopout << ".e" << std::endl;
+    esopout.close();
+
+    /*
+    system("exorcism /tmp/test.esop");
+
+    // Get number of gates
+    total_toffoli_gates += boost::lexical_cast<unsigned long long>(execute_and_return_output("cat /tmp/test.esop | grep -v -e \"^[#\\.]\" | wc -l"));
+    total_control_lines += boost::lexical_cast<unsigned long long>(execute_and_return_output("cat /tmp/test.esop | grep -v -e \"^[#\\.]\" | awk '{print $1}' | tr '\\n' ' ' | sed -e \"s/[^01]//g\" | wc -c"));
+
+    // Get gates
+    using boost::format;
+    using boost::str;
+
+    std::ifstream is;
+    is.open("/tmp/test.esop");
+
+    std::string line;
+    while (std::getline(is, line)) {
+      boost::trim(line);
+      if (line.empty()) continue;
+
+      if (line[0] == '0' || line[0] == '1' || line[0] == '-') {
+        std::string negate, vars;
+        unsigned c = 0u;
+        for (unsigned i = 0u; i < mgr.num_vars(); ++i) {
+          if (line[i] == '0') {
+            negate += str(format("t1 x%d\n") % i);
+          }
+          if (line[i] == '0' || line[i] == '1') {
+            vars += str(format(" x%d") % i);
+            ++c;
+          }
+        }
+        std::string _gate = str(format("%st%d%s x%d\n%s") % negate % (c + 1u) % vars % _var % negate);
+        if (offset == 0u) {
+          real_l += _gate;
+        } else {
+          real_r = _gate + real_r;
+        }
+      }
+    }
+    is.close();
+    */
+}
+
+
   void default_synthesis()
   {
     for (unsigned var = 0; var < cf.num_vars(); ++var)
@@ -287,8 +365,8 @@ struct rcbdd_synthesis_manager
         right_f.PrintMinterm();
       }
 
-      //create_toffoli_gates_with_exorcism(left_f, 0u);
-      //create_toffoli_gates_with_exorcism(right_f, 1u);
+      create_toffoli_gates_with_exorcism(left_f, var, 0u);
+      create_toffoli_gates_with_exorcism(right_f, var, 1u);
     }
   }
   /*
@@ -431,6 +509,7 @@ struct rcbdd_synthesis_manager
 
   const rcbdd& cf;
   bool verbose;
+  std::string name;
   BDD f;
   BDD left_f, right_f;
   unsigned _var;
@@ -442,9 +521,10 @@ struct rcbdd_synthesis_manager
 bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  bool verbose = get<bool>( settings, "verbose", false );
+  bool verbose     = get<bool>(        settings, "verbose", false  );
+  std::string name = get<std::string>( settings, "name",    "test" );
 
-  rcbdd_synthesis_manager mgr( cf, verbose );
+  rcbdd_synthesis_manager mgr( cf, verbose, name );
   mgr.default_synthesis();
 
   return false;
