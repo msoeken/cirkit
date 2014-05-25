@@ -8,6 +8,11 @@
 
 #define COMPARE_WITH_EXORCISM 1
 
+void on_cube( const revkit::cube_t& cube )
+{
+  /* do nothing */
+}
+
 BOOST_AUTO_TEST_CASE(simple)
 {
   using boost::unit_test::framework::master_test_suite;
@@ -17,6 +22,7 @@ BOOST_AUTO_TEST_CASE(simple)
   settings->set( "verbose", false );
   settings->set( "runs", 1u );
   settings->set( "verify", true );
+  settings->set( "on_cube", cube_function_t( on_cube ) );
 
   properties::ptr statistics( new properties() );
 
@@ -39,6 +45,5 @@ BOOST_AUTO_TEST_CASE(simple)
 }
 
 // Local Variables:
-
 // c-basic-offset: 2
 // End:

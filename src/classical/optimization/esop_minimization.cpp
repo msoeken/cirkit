@@ -23,7 +23,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/list.hpp>
 #include <boost/assign/std/vector.hpp>
-#include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -70,7 +69,6 @@ enum var_values_enum
 
 typedef std::pair<unsigned, unsigned> exp_cost_t;
 typedef std::map<DdNode*, exp_cost_t> exp_cache_t;
-typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
 
 std::ostream& operator<<( std::ostream& os, const cube_t& cube )
 {
@@ -143,7 +141,7 @@ public:
       distance_lists( 3u ),
       link_groups( 3u )
   {
-    cubes.reserve( capacity );
+    _cubes.reserve( capacity );
 
     link_groups[0u].resize( 2u );
     boost::for_each( link_groups[0u], []( std::vector<std::vector<unsigned> >& v ) { v.resize( 2u ); } );
@@ -179,12 +177,12 @@ public:
   void add_cube( cube_t cube )
   {
     unsigned cubeid = 0u;
-    std::vector<char> distances( cubes.size() );
+    std::vector<char> distances( _cubes.size() );
     int bit_pos = -1;
 
-    for ( ; cubeid < cubes.size(); ++cubeid )
+    for ( ; cubeid < _cubes.size(); ++cubeid )
     {
-      const cube_t& c = cubes.at( cubeid );
+      const cube_t& c = _cubes.at( cubeid );
 
       /* distance-0 */
       if ( ( distances[cubeid] = compute_distance( c, cube, bit_pos ) ) == 0 )
@@ -199,7 +197,7 @@ public:
     if ( it != distances.end() )
     {
       unsigned distance_one_cubeid = std::distance( distances.begin(), it );
-      cube_t c = cubes.at( distance_one_cubeid );
+      cube_t c = _cubes.at( distance_one_cubeid );
       change( c, cube, bit_pos );
       remove_cube( distance_one_cubeid );
       add_cube( c );
@@ -211,11 +209,11 @@ public:
     {
       if ( distances[i] <= 4 )
       {
-        distance_lists[distances[i] - 2u] += std::make_pair( i, cubes.size() );
+        distance_lists[distances[i] - 2u] += std::make_pair( i, _cubes.size() );
       }
     }
 
-    cubes += cube;
+    _cubes += cube;
   }
 
   bool remove_from_distance_list( cube_pair_list_t& l, unsigned cubeid, bool remove_first = true, bool remove_second = true )
@@ -232,7 +230,7 @@ public:
 
   bool remove_cube( unsigned cubeid )
   {
-    cubes.erase( cubes.begin() + cubeid );
+    _cubes.erase( _cubes.begin() + cubeid );
 
     /* remove from distance lists */
     for ( unsigned i = 0u; i < 3u; ++i )
@@ -291,8 +289,8 @@ public:
 
     using boost::adaptors::transformed;
 
-    const cube_t& c1 = cubes.at( cubeid1 ); /* easy access to c1 */
-    const cube_t& c2 = cubes.at( cubeid2 ); /* easy access to c2 */
+    const cube_t& c1 = _cubes.at( cubeid1 ); /* easy access to c1 */
+    const cube_t& c2 = _cubes.at( cubeid2 ); /* easy access to c2 */
 
     std::vector<unsigned> positions;        /* positions of different cubes in c1 and c2 */
     cube_t tmp_cubes[4];                    /* used for current cube computation */
@@ -326,12 +324,12 @@ public:
         }
 
         bit_pos = -1;
-        for ( unsigned cubeid = 0u; cubeid < cubes.size(); ++cubeid )
+        for ( unsigned cubeid = 0u; cubeid < _cubes.size(); ++cubeid )
         {
           /* do not calculate distance to given cubes */
           if ( cubeid == cubeid1 || cubeid == cubeid2 ) continue;
 
-          const cube_t& ex_cube = cubes.at( cubeid );
+          const cube_t& ex_cube = _cubes.at( cubeid );
           auto d = compute_distance( ex_cube, tmp_cubes[i], bit_pos );
           if ( d == 0u )
           {
@@ -399,14 +397,19 @@ public:
 
   inline unsigned cube_count() const
   {
-    return cubes.size();
+    return _cubes.size();
   }
 
   inline unsigned literal_count() const
   {
     using boost::adaptors::transformed;
 
-    return boost::accumulate( cubes | transformed( []( const cube_t& c ) { return c.second.count(); } ), 0u );
+    return boost::accumulate( _cubes | transformed( []( const cube_t& c ) { return c.second.count(); } ), 0u );
+  }
+
+  inline const std::vector<cube_t>& cubes() const
+  {
+    return _cubes;
   }
 
   void print_statistics()
@@ -419,7 +422,7 @@ public:
     std::cout << "Number of cubes:    " << cube_count() << std::endl;
     std::cout << "Number of literals: " << literal_count() << std::endl;
     std::cout << "Cubes:" << std::endl;
-    auto range = cubes | indexed( 0u );
+    auto range = _cubes | indexed( 0u );
     for ( auto it = range.begin(); it != range.end(); ++it )
     {
       std::cout << boost::format( "%4d: " ) % it.index() << *it << std::endl;
@@ -472,7 +475,7 @@ public:
 
   DdNode * to_bdd()
   {
-    return to_bdd( cubes );
+    return to_bdd( _cubes );
   }
 
   bool verify( DdNode * f )
@@ -492,7 +495,7 @@ public:
 private:
   DdManager * cudd;
   bool verbose;
-  std::vector<cube_t> cubes;
+  std::vector<cube_t> _cubes;
   std::vector<cube_pair_list_t> distance_lists;
   std::vector<std::vector<std::vector<std::vector<unsigned> > > > link_groups; // distance -> group -> cube -> id
 };
@@ -619,9 +622,10 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
   using boost::adaptors::map_keys;
 
   /* Settings */
-  bool     verbose = get( settings, "verbose", true  );
-  unsigned runs    = get( settings, "runs",    1u    );
-  bool     verify  = get( settings, "verify",  false );
+  bool            verbose = get( settings, "verbose", true  );
+  unsigned        runs    = get( settings, "runs",    1u    );
+  bool            verify  = get( settings, "verify",  false );
+  cube_function_t on_cube = get( settings, "on_cube", cube_function_t() );
 
   esop_manager esop( cudd, verbose );
 
@@ -664,6 +668,12 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
     }
   }
 
+  /* pass cubes */
+  if ( on_cube )
+  {
+    boost::for_each( esop.cubes(), on_cube );
+  }
+
   if ( statistics )
   {
     statistics->set( "cube_count", esop.cube_count() );
@@ -694,7 +704,7 @@ void test_change_performance()
   unsigned count = 1u << 21u;
 
   boost::random::mt19937 gen;
-  boost::random::uniform_int_distribution<> dist( 0, (1u << n) - 1u );
+  boost::random::uniform_int_distribution<> dist( 0u, (1u << n) - 1u );
 
   std::vector<std::pair<cube_t, cube_t> > cubes( count );
   boost::generate( cubes, [&n, &gen, &dist]() { return std::make_pair(

@@ -27,7 +27,10 @@
 #ifndef ESOP_MINIMIZATION_HPP
 #define ESOP_MINIMIZATION_HPP
 
+#include <functional>
 #include <string>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include <cudd.h>
 
@@ -35,6 +38,9 @@
 
 namespace revkit
 {
+
+typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
+typedef std::function<void(const cube_t&)> cube_function_t;
 
 void esop_minimization( DdManager * cudd, DdNode * f,
                       properties::ptr settings = properties::ptr(),
