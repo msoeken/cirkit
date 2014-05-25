@@ -397,12 +397,12 @@ public:
     return false;
   }
 
-  inline unsigned number_of_cubes() const
+  inline unsigned cube_count() const
   {
     return cubes.size();
   }
 
-  inline unsigned number_of_literals() const
+  inline unsigned literal_count() const
   {
     using boost::adaptors::transformed;
 
@@ -416,8 +416,8 @@ public:
 
     print_banner( "Statistics" );
 
-    std::cout << "Number of cubes:    " << number_of_cubes() << std::endl;
-    std::cout << "Number of literals: " << number_of_literals() << std::endl;
+    std::cout << "Number of cubes:    " << cube_count() << std::endl;
+    std::cout << "Number of literals: " << literal_count() << std::endl;
     std::cout << "Cubes:" << std::endl;
     auto range = cubes | indexed( 0u );
     for ( auto it = range.begin(); it != range.end(); ++it )
@@ -619,37 +619,61 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
   using boost::adaptors::map_keys;
 
   /* Settings */
-  bool     verbose = get( settings, "verbose", true );
-  unsigned runs    = get( settings, "runs",    1u   );
+  bool     verbose = get( settings, "verbose", true  );
+  unsigned runs    = get( settings, "runs",    1u    );
+  bool     verify  = get( settings, "verify",  false );
 
   esop_manager esop( cudd, verbose );
 
-  exp_cache_t exp_cache;
-  count_cubes_in_exact_psdkro( cudd, f, exp_cache, 0u );
-
-  char * var_values = new char[Cudd_ReadSize( cudd )];
-  std::fill( var_values, var_values + Cudd_ReadSize( cudd ), VariableAbsent );
-  generate_exact_psdkro( esop, cudd, f, var_values, -1, exp_cache );
-
-  boost::for_each( exp_cache | map_keys, [&cudd]( DdNode* node ) { Cudd_RecursiveDeref( cudd, node ); } );
-  delete var_values;
-
-  if ( verbose )
+  /* block for timing */
   {
-    esop.print_statistics();
+    timer<properties_timer> t;
+
+    if ( statistics )
+    {
+      properties_timer rt( statistics );
+      t.start( rt );
+    }
+
+    /* get initial cover using exact PSDKRO optimization */
+    exp_cache_t exp_cache;
+    count_cubes_in_exact_psdkro( cudd, f, exp_cache, 0u );
+
+    char * var_values = new char[Cudd_ReadSize( cudd )];
+    std::fill( var_values, var_values + Cudd_ReadSize( cudd ), VariableAbsent );
+    generate_exact_psdkro( esop, cudd, f, var_values, -1, exp_cache );
+
+    boost::for_each( exp_cache | map_keys, [&cudd]( DdNode* node ) { Cudd_RecursiveDeref( cudd, node ); } );
+    delete var_values;
+
+    if ( verbose )
+    {
+      esop.print_statistics();
+    }
+
+    /* EXOR-LINK */
+    for ( unsigned i = 0u; i < runs; ++i )
+    {
+      esop.exorlink( 2u );
+      esop.exorlink( 3u );
+    }
+
+    if ( verbose )
+    {
+      esop.print_statistics();
+    }
   }
 
-  for ( unsigned i = 0u; i < runs; ++i )
+  if ( statistics )
   {
-    esop.exorlink( 2u );
-    esop.exorlink( 3u );
+    statistics->set( "cube_count", esop.cube_count() );
+    statistics->set( "literal_count", esop.literal_count() );
   }
 
-  if ( verbose )
+  if ( verify )
   {
-    esop.print_statistics();
+    assert( esop.verify( f ) );
   }
-  std::cout << "Equal? " << esop.verify( f ) << std::endl;
 }
 
 void esop_minimization( const std::string& filename, properties::ptr settings, properties::ptr statistics )
@@ -657,7 +681,7 @@ void esop_minimization( const std::string& filename, properties::ptr settings, p
   BDDTable bdd;
   read_pla_to_bdd( bdd, filename );
 
-  esop_minimization( bdd.cudd, bdd.outputs.front().second, settings );
+  esop_minimization( bdd.cudd, bdd.outputs.front().second, settings, statistics );
 }
 
 /******************************************************************************
