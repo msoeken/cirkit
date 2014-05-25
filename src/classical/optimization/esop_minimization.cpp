@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "generate_exact_psdkro.hpp"
+#include "esop_minimization.hpp"
 
 #include <iomanip>
 #include <list>
@@ -31,6 +31,7 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/range/numeric.hpp>
 
 #include <core/io/read_pla_to_bdd.hpp>
 #include <core/utils/timer.hpp>
@@ -396,6 +397,18 @@ public:
     return false;
   }
 
+  inline unsigned number_of_cubes() const
+  {
+    return cubes.size();
+  }
+
+  inline unsigned number_of_literals() const
+  {
+    using boost::adaptors::transformed;
+
+    return boost::accumulate( cubes | transformed( []( const cube_t& c ) { return c.second.count(); } ), 0u );
+  }
+
   void print_statistics()
   {
     using boost::adaptors::indexed;
@@ -403,7 +416,8 @@ public:
 
     print_banner( "Statistics" );
 
-    std::cout << "Number of cubes: " << cubes.size() << std::endl;
+    std::cout << "Number of cubes:    " << number_of_cubes() << std::endl;
+    std::cout << "Number of literals: " << number_of_literals() << std::endl;
     std::cout << "Cubes:" << std::endl;
     auto range = cubes | indexed( 0u );
     for ( auto it = range.begin(); it != range.end(); ++it )
@@ -527,7 +541,7 @@ exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_
 }
 
 // TODO can we do something nicer with last_index
-void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, char * var_values, int last_index, const exp_cache_t& exp_cache, const generate_exact_psdkro_settings& settings )
+void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, char * var_values, int last_index, const exp_cache_t& exp_cache )
 {
   // terminal cases
   if ( f == Cudd_ReadLogicZero( cudd ) ) return;
@@ -574,76 +588,76 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, ch
   if ( exp == PositiveDavio )
   {
     var_values[index] = VariableAbsent;
-    generate_exact_psdkro( esop, cudd, f0, var_values, index, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f0, var_values, index, exp_cache );
     var_values[index] = VariablePositive;
-    generate_exact_psdkro( esop, cudd, f2, var_values, index, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f2, var_values, index, exp_cache );
   }
   else if ( exp == NegativeDavio )
   {
     var_values[index] = VariableAbsent;
-    generate_exact_psdkro( esop, cudd, f1, var_values, index, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f1, var_values, index, exp_cache );
     var_values[index] = VariableNegative;
-    generate_exact_psdkro( esop, cudd, f2, var_values, index, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f2, var_values, index, exp_cache );
   }
   else
   {
     var_values[index] = VariableNegative;
-    generate_exact_psdkro( esop, cudd, f0, var_values, index, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f0, var_values, index, exp_cache );
     var_values[index] = VariablePositive;
-    generate_exact_psdkro( esop, cudd, f1, var_values, index, exp_cache, settings );
+    generate_exact_psdkro( esop, cudd, f1, var_values, index, exp_cache );
   }
 
   Cudd_RecursiveDeref( cudd, f2 );
-}
-
-void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, const generate_exact_psdkro_settings& settings )
-{
-  using boost::adaptors::map_keys;
-
-  exp_cache_t exp_cache;
-  count_cubes_in_exact_psdkro( cudd, f, exp_cache, 0u );
-
-  char * var_values = new char[Cudd_ReadSize( cudd )];
-  std::fill( var_values, var_values + Cudd_ReadSize( cudd ), VariableAbsent );
-  generate_exact_psdkro( esop, cudd, f, var_values, -1, exp_cache, settings );
-
-  boost::for_each( exp_cache | map_keys, [&cudd]( DdNode* node ) { Cudd_RecursiveDeref( cudd, node ); } );
-  delete var_values;
 }
 
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
 
-generate_exact_psdkro_settings::generate_exact_psdkro_settings()
-  : verbose( false )
-{}
-
-void generate_exact_psdkro( const std::string& filename, const generate_exact_psdkro_settings& settings )
+void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, properties::ptr statistics )
 {
-  BDDTable bdd;
-  read_pla_to_bdd( bdd, filename );
+  using boost::adaptors::map_keys;
 
-  esop_manager esop( bdd.cudd, settings.verbose );
+  /* Settings */
+  bool     verbose = get( settings, "verbose", true );
+  unsigned runs    = get( settings, "runs",    1u   );
 
-  generate_exact_psdkro( esop, bdd.cudd, bdd.outputs.front().second, settings );
+  esop_manager esop( cudd, verbose );
 
-  if ( settings.verbose )
+  exp_cache_t exp_cache;
+  count_cubes_in_exact_psdkro( cudd, f, exp_cache, 0u );
+
+  char * var_values = new char[Cudd_ReadSize( cudd )];
+  std::fill( var_values, var_values + Cudd_ReadSize( cudd ), VariableAbsent );
+  generate_exact_psdkro( esop, cudd, f, var_values, -1, exp_cache );
+
+  boost::for_each( exp_cache | map_keys, [&cudd]( DdNode* node ) { Cudd_RecursiveDeref( cudd, node ); } );
+  delete var_values;
+
+  if ( verbose )
   {
     esop.print_statistics();
   }
 
-  for ( unsigned i = 0u; i < 3u; ++i )
+  for ( unsigned i = 0u; i < runs; ++i )
   {
     esop.exorlink( 2u );
     esop.exorlink( 3u );
   }
 
-  if ( settings.verbose )
+  if ( verbose )
   {
     esop.print_statistics();
   }
-  std::cout << "Equal? " << esop.verify( bdd.outputs.front().second ) << std::endl;
+  std::cout << "Equal? " << esop.verify( f ) << std::endl;
+}
+
+void esop_minimization( const std::string& filename, properties::ptr settings, properties::ptr statistics )
+{
+  BDDTable bdd;
+  read_pla_to_bdd( bdd, filename );
+
+  esop_minimization( bdd.cudd, bdd.outputs.front().second, settings );
 }
 
 /******************************************************************************

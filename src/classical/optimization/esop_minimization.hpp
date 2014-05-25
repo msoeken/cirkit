@@ -16,7 +16,7 @@
  */
 
 /**
- * @file generate_exact_psdkro.hpp
+ * @file esop_minimization.hpp
  *
  * @brief Generation of exact PSDKRO expression from PLA
  *
@@ -24,22 +24,24 @@
  * @since  2.0
  */
 
-#ifndef GENERATE_EXACT_PSDKRO_HPP
-#define GENERATE_EXACT_PSDKRO_HPP
+#ifndef ESOP_MINIMIZATION_HPP
+#define ESOP_MINIMIZATION_HPP
 
 #include <string>
+
+#include <cudd.h>
+
+#include <core/properties.hpp>
 
 namespace revkit
 {
 
-struct generate_exact_psdkro_settings
-{
-  generate_exact_psdkro_settings();
-
-  bool verbose;
-};
-
-void generate_exact_psdkro( const std::string& filename, const generate_exact_psdkro_settings& settings = generate_exact_psdkro_settings() );
+void esop_minimization( DdManager * cudd, DdNode * f,
+                      properties::ptr settings = properties::ptr(),
+                      properties::ptr statistics = properties::ptr() );
+void esop_minimization( const std::string& filename,
+                      properties::ptr settings = properties::ptr(),
+                      properties::ptr statistics = properties::ptr() );
 
 void test_change_performance();
 
