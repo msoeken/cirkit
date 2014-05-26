@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(simple)
 
       //embed_pla( cf, path.relative_path().string() );
       properties::ptr settings( new properties );
-      settings->set( "truth_table", true );
+      settings->set( "write_pla", boost::str( boost::format( "/tmp/%s-embedded.pla" ) % name ) );
       embed_pla( cf, boost::str( boost::format( "/tmp/%s-extended.pla" ) % name ), settings );
     }
 

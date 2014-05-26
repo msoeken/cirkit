@@ -18,6 +18,8 @@
 #include "embed_pla.hpp"
 #include "synthesis_utils_p.hpp"
 
+#include <fstream>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
@@ -108,7 +110,7 @@ std::vector<BDD> _dec(const rcbdd& cf, const std::vector<BDD>& vars)
   return outputs;
 }
 
-void print_truth_table( const rcbdd& cf, const BDD& f, unsigned n, unsigned m )
+void print_truth_table( const rcbdd& cf, const BDD& f )
 {
   using boost::adaptors::transformed;
 
@@ -117,6 +119,8 @@ void print_truth_table( const rcbdd& cf, const BDD& f, unsigned n, unsigned m )
   CUDD_VALUE_TYPE value;
 
   unsigned vars = cf.num_vars();
+  unsigned n = cf.num_inputs();
+  unsigned m = cf.num_outputs();
 
   std::cout << std::string( vars - n, 'c' )
             << ' '
@@ -135,6 +139,38 @@ void print_truth_table( const rcbdd& cf, const BDD& f, unsigned n, unsigned m )
     std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" ).insert( m, " " );
     std::cout << std::endl;
   }
+}
+
+void write_pla_to_file( const rcbdd& cf, const BDD& f, const std::string& filename )
+{
+  using boost::adaptors::transformed;
+
+  DdGen *gen;
+  int  *cube;
+  CUDD_VALUE_TYPE value;
+
+  unsigned vars = cf.num_vars();
+  unsigned n = cf.num_inputs();
+  unsigned m = cf.num_outputs();
+
+  std::filebuf fb;
+  fb.open( filename.c_str(), std::ios::out );
+  std::ostream os( &fb );
+
+  os << ".i " << n << std::endl
+     << ".o " << m << std::endl
+     << ".ilb " << boost::join( cf.input_labels(), " " ) << std::endl
+     << ".ob " << boost::join( cf.output_labels(), " " ) << std::endl;
+
+  Cudd_ForeachCube( cf.manager().getManager(), f.getNode(), gen, cube, value )
+  {
+    os << boost::join( boost::irange( vars - n, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" )
+       << " "
+       << boost::join( boost::irange( 0u, m ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" )
+       << std::endl;
+  }
+
+  fb.close();
 }
 
 class embed_pla_processor : public pla_processor
@@ -211,8 +247,9 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
                 properties::ptr statistics )
 {
   /* Settings */
-  bool verbose     = get<bool>( settings, "verbose", false );
-  bool truth_table = get<bool>( settings, "truth_table", false ); /* prints the truth table (for debugging) */
+  bool        verbose     = get( settings, "verbose",     false         );
+  bool        truth_table = get( settings, "truth_table", false         ); /* prints the truth table (for debugging) */
+  std::string write_pla   = get( settings, "write_pla",   std::string() );
 
   /* BDD manager? */
   cf.initialize_manager();
@@ -291,6 +328,7 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
     BDD constants = cf.manager().bddOne();
     for ( unsigned i = 0; i < req_vars - p.n; ++i ) { constants += cf.x( i ); }
     BDD h = cf.remove_ys( func ).ExistAbstract(constants);
+    assert( !h & icube == icube );
 
     /* add new cubes */
     BDD fcube = cf.manager().bddOne();
@@ -350,7 +388,12 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
 
   if ( truth_table )
   {
-    print_truth_table( cf, func, p.n, p.m );
+    print_truth_table( cf, func );
+  }
+
+  if ( write_pla.size() )
+  {
+    write_pla_to_file( cf, func, write_pla );
   }
 
   cf.set_chi( func );
