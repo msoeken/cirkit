@@ -131,7 +131,7 @@ namespace revkit
 
     os << std::endl;
 
-    os << ".outputs ";
+    os << ".outputs";
     //karma::generate_delimited( outit, *( karma::no_delimit['"' << karma::string] << '"' ), ascii::space, _outputs );
 
     for ( const auto& _output : _outputs )
