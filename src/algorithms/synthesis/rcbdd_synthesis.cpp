@@ -18,6 +18,8 @@
 #include "rcbdd_synthesis.hpp"
 #include "synthesis_utils_p.hpp"
 
+#include <classical/optimization/esop_minimization.hpp>
+
 #include <fstream>
 
 #include <boost/range/algorithm_ext/push_back.hpp>
@@ -32,9 +34,16 @@ enum Direction {
 
 struct rcbdd_synthesis_manager
 {
-  rcbdd_synthesis_manager( const rcbdd& _cf, bool _verbose, const std::string& _name ) : cf( _cf ), verbose( _verbose ), name( _name )
+  rcbdd_synthesis_manager( const rcbdd& _cf, circuit& _circ, bool _verbose, const std::string& _name, bool _genesop )
+    : cf( _cf ),
+      circ( _circ ),
+      verbose( _verbose ),
+      name( _name ),
+      genesop( _genesop )
   {
     f = _cf.chi();
+
+    circ.set_lines( _cf.num_vars() );
   }
 
   void set_var(unsigned v)
@@ -271,33 +280,42 @@ struct rcbdd_synthesis_manager
   {
     if (gate == cf.manager().bddZero()) return;
 
-    std::ofstream esopout;
-    esopout.open( boost::str( boost::format( "/tmp/%s_%d_%d.pla" ) % name % var % offset ) );
-    esopout << ".i " << cf.num_vars() << std::endl;
-    esopout << ".o " << 1 << std::endl;
-
-    int *cube;
-    CUDD_VALUE_TYPE value;
-    DdGen *gen;
-
-    Cudd_ForeachCube(gate.manager(), gate.getNode(), gen, cube, value)
+    if ( genesop )
     {
-      char v;
+      std::ofstream esopout;
+      esopout.open( boost::str( boost::format( "/tmp/%s_%d_%d.pla" ) % name % var % offset ) );
+      esopout << ".i " << cf.num_vars() << std::endl;
+      esopout << ".o " << 1 << std::endl;
 
-      for (unsigned i = 0u; i < cf.num_vars(); ++i) {
-        v = cube[3u * i + offset];
-        if (v != 2) {
-          esopout << ((v == 0) ? "0" : "1");
-        } else {
-          esopout << "-";
+      int *cube;
+      CUDD_VALUE_TYPE value;
+      DdGen *gen;
+
+      Cudd_ForeachCube(gate.manager(), gate.getNode(), gen, cube, value)
+      {
+        char v;
+
+        for (unsigned i = 0u; i < cf.num_vars(); ++i)
+        {
+          v = cube[3u * i + offset];
+          if (v != 2)
+          {
+            esopout << ((v == 0) ? "0" : "1");
+          }
+          else
+          {
+            esopout << "-";
+          }
         }
+
+        esopout << " 1" << std::endl;
       }
 
-      esopout << " 1" << std::endl;
+      esopout << ".e" << std::endl;
+      esopout.close();
     }
 
-    esopout << ".e" << std::endl;
-    esopout.close();
+    esop_minimization( gate.manager(), gate.getNode() );
 
     /*
     system("exorcism /tmp/test.esop");
@@ -340,8 +358,7 @@ struct rcbdd_synthesis_manager
     }
     is.close();
     */
-}
-
+  }
 
   void default_synthesis()
   {
@@ -508,8 +525,12 @@ struct rcbdd_synthesis_manager
   */
 
   const rcbdd& cf;
+  circuit& circ;
+
   bool verbose;
   std::string name;
+  bool genesop;
+
   BDD f;
   BDD left_f, right_f;
   unsigned _var;
@@ -521,10 +542,11 @@ struct rcbdd_synthesis_manager
 bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  bool verbose     = get<bool>(        settings, "verbose", false  );
-  std::string name = get<std::string>( settings, "name",    "test" );
+  bool        verbose = get<bool>(        settings, "verbose", false  );
+  std::string name    = get<std::string>( settings, "name",    "test" );
+  bool        genesop = get<bool>(        settings, "genesop", false  );
 
-  rcbdd_synthesis_manager mgr( cf, verbose, name );
+  rcbdd_synthesis_manager mgr( cf, circ, verbose, name, genesop );
   mgr.default_synthesis();
 
   return false;
