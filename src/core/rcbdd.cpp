@@ -22,7 +22,10 @@
 namespace revkit
 {
 
-rcbdd::rcbdd() : _n( 0u )
+rcbdd::rcbdd() :
+  _num_inputs( 0u ),
+  _num_outputs( 0u ),
+  _n( 0u )
 {
 }
 
@@ -94,6 +97,26 @@ BDD rcbdd::chi() const
 void rcbdd::set_chi( BDD f )
 {
   _chi = f;
+}
+
+void rcbdd::set_num_inputs( unsigned n )
+{
+  _num_inputs = n;
+}
+
+void rcbdd::set_num_outputs( unsigned n )
+{
+  _num_outputs = n;
+}
+
+unsigned rcbdd::num_inputs() const
+{
+  return _num_inputs;
+}
+
+unsigned rcbdd::num_outputs() const
+{
+  return _num_outputs;
 }
 
 BDD rcbdd::cofactor( BDD f, unsigned var, bool input_polarity, bool output_polarity ) const

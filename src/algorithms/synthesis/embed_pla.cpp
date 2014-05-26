@@ -150,12 +150,12 @@ public:
 
   void on_num_inputs( unsigned num_inputs )
   {
-    n = num_inputs;
+    cf.set_num_inputs( n = num_inputs );
   }
 
   void on_num_outputs( unsigned num_outputs )
   {
-    m = num_outputs;
+    cf.set_num_outputs( m = num_outputs );
   }
 
   void on_cube( const std::string& in, const std::string& out )

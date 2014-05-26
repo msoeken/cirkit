@@ -56,6 +56,10 @@ namespace revkit
     const Cudd& manager() const;
     BDD chi() const;
     void set_chi( BDD f );
+    void set_num_inputs( unsigned n );
+    void set_num_outputs( unsigned n );
+    unsigned num_inputs() const;
+    unsigned num_outputs() const;
 
     BDD compose(const BDD& left, const BDD& right) const;
     BDD cofactor( BDD f, unsigned var, bool input_polarity, bool output_polarity ) const;
@@ -71,6 +75,8 @@ namespace revkit
     boost::optional<Cudd> _manager;
     BDD _chi;
 
+    unsigned _num_inputs;
+    unsigned _num_outputs;
     unsigned _n;
     std::vector<BDD> _xs;
     std::vector<BDD> _ys;
