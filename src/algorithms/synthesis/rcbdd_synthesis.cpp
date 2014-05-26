@@ -23,6 +23,7 @@
 
 #include <fstream>
 
+#include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
 namespace revkit
@@ -46,6 +47,14 @@ struct rcbdd_synthesis_manager
     f = _cf.chi();
 
     circ.set_lines( _cf.num_vars() );
+
+    std::vector<std::string> inputs( _cf.num_vars(), "0" );
+    boost::copy( cf.input_labels(), inputs.end() - _cf.num_inputs() );
+    circ.set_inputs( inputs );
+
+    std::vector<std::string> outputs( _cf.num_vars(), "-" );
+    boost::copy( cf.output_labels(), outputs.begin() );
+    circ.set_outputs( outputs );
 
     std::vector<constant> constants( _cf.num_vars(), constant() );
     std::fill( constants.begin(), constants.end() - _cf.num_inputs(), true );
