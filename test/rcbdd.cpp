@@ -38,6 +38,7 @@ BOOST_AUTO_TEST_CASE(simple)
     binary_truth_table pla, extended;
 
     std::cout << "Process: " << path.relative_path().string() << std::endl;
+    std::string name = path.stem().string();
 
     {
       print_timer pt( std::cout );
@@ -57,7 +58,7 @@ BOOST_AUTO_TEST_CASE(simple)
       extend_pla_settings settings;
       extend_pla( pla, extended, settings );
 
-      write_pla( extended, "/tmp/test.pla" );
+      write_pla( extended, boost::str( boost::format( "/tmp/%s-extended.pla" ) % name ) );
     }
 
     {
@@ -66,7 +67,9 @@ BOOST_AUTO_TEST_CASE(simple)
       std::cout << " - embed:  ";
 
       //embed_pla( cf, path.relative_path().string() );
-      embed_pla( cf, "/tmp/test.pla" );
+      properties::ptr settings( new properties );
+      settings->set( "truth_table", true );
+      embed_pla( cf, boost::str( boost::format( "/tmp/%s-extended.pla" ) % name ), settings );
     }
 
     {
@@ -76,12 +79,12 @@ BOOST_AUTO_TEST_CASE(simple)
 
       properties::ptr settings( new properties );
       settings->set( "verbose", false );
-      settings->set( "name", path.stem().string() );
+      settings->set( "name", name );
 
       rcbdd_synthesis( circ, cf, settings );
     }
 
-    write_realization( circ, boost::str( boost::format( "/tmp/%s.real" ) % path.stem().string() ) );
+    write_realization( circ, boost::str( boost::format( "/tmp/%s.real" ) % name ) );
   });
 }
 
