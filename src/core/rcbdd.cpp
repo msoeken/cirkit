@@ -18,6 +18,7 @@
 #include "rcbdd.hpp"
 
 #include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
 
 namespace revkit
 {
@@ -117,6 +118,28 @@ unsigned rcbdd::num_inputs() const
 unsigned rcbdd::num_outputs() const
 {
   return _num_outputs;
+}
+
+void rcbdd::set_input_labels( const std::vector<std::string>& labels )
+{
+  _input_labels.clear();
+  boost::push_back( _input_labels, labels );
+}
+
+void rcbdd::set_output_labels( const std::vector<std::string>& labels )
+{
+  _output_labels.clear();
+  boost::push_back( _output_labels, labels );
+}
+
+const std::vector<std::string> rcbdd::input_labels() const
+{
+  return _input_labels;
+}
+
+const std::vector<std::string> rcbdd::output_labels() const
+{
+  return _output_labels;
 }
 
 BDD rcbdd::cofactor( BDD f, unsigned var, bool input_polarity, bool output_polarity ) const

@@ -158,6 +158,16 @@ public:
     cf.set_num_outputs( m = num_outputs );
   }
 
+  void on_input_labels( const std::vector<std::string>& input_labels )
+  {
+    cf.set_input_labels( input_labels );
+  }
+
+  void on_output_labels( const std::vector<std::string>& output_labels )
+  {
+    cf.set_output_labels( output_labels );
+  }
+
   void on_cube( const std::string& in, const std::string& out )
   {
     if (!variables_generated)

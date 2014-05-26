@@ -60,6 +60,10 @@ namespace revkit
     void set_num_outputs( unsigned n );
     unsigned num_inputs() const;
     unsigned num_outputs() const;
+    void set_input_labels( const std::vector<std::string>& labels );
+    void set_output_labels( const std::vector<std::string>& labels );
+    const std::vector<std::string> input_labels() const;
+    const std::vector<std::string> output_labels() const;
 
     BDD compose(const BDD& left, const BDD& right) const;
     BDD cofactor( BDD f, unsigned var, bool input_polarity, bool output_polarity ) const;
@@ -77,6 +81,8 @@ namespace revkit
 
     unsigned _num_inputs;
     unsigned _num_outputs;
+    std::vector<std::string> _input_labels;
+    std::vector<std::string> _output_labels;
     unsigned _n;
     std::vector<BDD> _xs;
     std::vector<BDD> _ys;
