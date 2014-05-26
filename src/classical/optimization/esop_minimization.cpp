@@ -438,7 +438,6 @@ public:
   DdNode * to_bdd( const cube_t& cube )
   {
     DdNode * cubef = Cudd_ReadOne( cudd ), *tmp;
-    Cudd_Ref( cubef );
 
     for ( unsigned i = 0u; i < cube.first.size(); ++i )
     {
@@ -457,7 +456,6 @@ public:
   DdNode * to_bdd( const std::vector<cube_t>& cube_list )
   {
     DdNode * f = Cudd_ReadLogicZero( cudd ), * tmp;
-    Cudd_Ref( f );
 
     for ( const auto& cube : cube_list )
     {
@@ -538,6 +536,8 @@ exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_
   if      ( nmax == n0 ) r = std::make_pair( NegativeDavio, n1 + n2 );
   else if ( nmax == n1 ) r = std::make_pair( PositiveDavio, n0 + n2 );
   else                   r = std::make_pair( Shannon,       n0 + n1 );
+
+  Cudd_RecursiveDeref( cudd, f2 );
 
   // cache and return result
   return exp_cache[f] = r;
@@ -622,9 +622,9 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
   using boost::adaptors::map_keys;
 
   /* Settings */
-  bool            verbose = get( settings, "verbose", true  );
-  unsigned        runs    = get( settings, "runs",    1u    );
-  bool            verify  = get( settings, "verify",  false );
+  bool            verbose = get( settings, "verbose", false             );
+  unsigned        runs    = get( settings, "runs",    1u                );
+  bool            verify  = get( settings, "verify",  false             );
   cube_function_t on_cube = get( settings, "on_cube", cube_function_t() );
 
   esop_manager esop( cudd, verbose );
@@ -647,7 +647,6 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
     std::fill( var_values, var_values + Cudd_ReadSize( cudd ), VariableAbsent );
     generate_exact_psdkro( esop, cudd, f, var_values, -1, exp_cache );
 
-    boost::for_each( exp_cache | map_keys, [&cudd]( DdNode* node ) { Cudd_RecursiveDeref( cudd, node ); } );
     delete var_values;
 
     if ( verbose )
