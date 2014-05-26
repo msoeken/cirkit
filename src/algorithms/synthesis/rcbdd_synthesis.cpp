@@ -18,6 +18,7 @@
 #include "rcbdd_synthesis.hpp"
 #include "synthesis_utils_p.hpp"
 
+#include <core/functions/add_gates.hpp>
 #include <classical/optimization/esop_minimization.hpp>
 
 #include <fstream>
@@ -39,7 +40,8 @@ struct rcbdd_synthesis_manager
       circ( _circ ),
       verbose( _verbose ),
       name( _name ),
-      genesop( _genesop )
+      genesop( _genesop ),
+      insert_position( 0u )
   {
     f = _cf.chi();
 
@@ -276,6 +278,21 @@ struct rcbdd_synthesis_manager
     }
   }
 
+  void add_toffoli_gate( const cube_t& cube )
+  {
+    gate::control_container controls;
+    for ( unsigned i = 0u; i < cube.first.size(); ++i )
+    {
+      if ( cube.second[i] )
+      {
+        controls += make_var( i, cube.first[i] );
+      }
+    }
+
+    insert_toffoli( circ, insert_position, controls, _var );
+    insert_position++;
+  }
+
   void create_toffoli_gates_with_exorcism(const BDD& gate, unsigned var, unsigned offset)
   {
     if (gate == cf.manager().bddZero()) return;
@@ -315,7 +332,15 @@ struct rcbdd_synthesis_manager
       esopout.close();
     }
 
-    esop_minimization( gate.manager(), gate.getNode() );
+    properties::ptr settings( new properties() );
+    settings->set( "on_cube", cube_function_t( [this]( const cube_t& c ) { add_toffoli_gate( c ); } ) );
+    properties::ptr statistics( new properties() );
+    esop_minimization( gate.manager(), gate.getNode(), settings, statistics );
+
+    if ( offset == 1u )
+    {
+      insert_position -= statistics->get<unsigned>( "cube_count" );
+    }
 
     /*
     system("exorcism /tmp/test.esop");
@@ -534,6 +559,7 @@ struct rcbdd_synthesis_manager
   BDD f;
   BDD left_f, right_f;
   unsigned _var;
+  unsigned insert_position;
   BDD n, pp, np, p;
   BDD nx, ppx, npx, px;
   BDD ny,  ppy, npy, py;

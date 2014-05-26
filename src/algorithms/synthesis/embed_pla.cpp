@@ -317,6 +317,7 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
     p.mu[outcube] += patterns;
 
     /* Update existing cubes */
+    assert( (h & icube) == cf.manager().bddZero() );
     func &= !(h & icube) | ocube;
   }
 
