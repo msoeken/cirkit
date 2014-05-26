@@ -6,6 +6,7 @@
 #if ADDON_REVLIB
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/format.hpp>
 
 #include <core/circuit.hpp>
 #include <core/rcbdd.hpp>
@@ -13,6 +14,7 @@
 #include <core/functions/extend_pla.hpp>
 #include <core/io/read_pla.hpp>
 #include <core/io/write_pla.hpp>
+#include <core/io/write_realization.hpp>
 #include <core/utils/timer.hpp>
 #include <algorithms/synthesis/embed_pla.hpp>
 #include <algorithms/synthesis/rcbdd_synthesis.hpp>
@@ -23,22 +25,7 @@ using namespace boost::assign;
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-  using boost::unit_test::framework::master_test_suite;
   using namespace revkit;
-
-  if ( master_test_suite().argc == 2u )
-  {
-    circuit circ;
-    rcbdd cf;
-
-    properties::ptr settings( new properties );
-    settings->set( "verbose", true );
-    settings->set( "truth_table", true );
-
-    embed_pla( cf, master_test_suite().argv[1], settings );
-    //rcbdd_synthesis( circ, cf, settings );
-    return;
-  }
 
   std::vector<std::string> whitelist;
   whitelist += "sym6_63","con1_136","bw_116";
@@ -93,6 +80,8 @@ BOOST_AUTO_TEST_CASE(simple)
 
       rcbdd_synthesis( circ, cf, settings );
     }
+
+    write_realization( circ, boost::str( boost::format( "/tmp/%s.real" ) % path.stem().string() ) );
   });
 }
 

@@ -46,6 +46,14 @@ struct rcbdd_synthesis_manager
     f = _cf.chi();
 
     circ.set_lines( _cf.num_vars() );
+
+    std::vector<constant> constants( _cf.num_vars(), constant() );
+    std::fill( constants.begin(), constants.end() - _cf.num_inputs(), true );
+    circ.set_constants( constants );
+
+    std::vector<bool> garbage( _cf.num_vars(), true );
+    std::fill( garbage.begin(), garbage.begin() + _cf.num_outputs(), false );
+    circ.set_garbage( garbage );
   }
 
   void set_var(unsigned v)
@@ -278,14 +286,14 @@ struct rcbdd_synthesis_manager
     }
   }
 
-  void add_toffoli_gate( const cube_t& cube )
+  void add_toffoli_gate( const cube_t& cube, unsigned offset )
   {
     gate::control_container controls;
-    for ( unsigned i = 0u; i < cube.first.size(); ++i )
+    for ( unsigned i = 0u; i < cf.num_vars(); ++i )
     {
-      if ( cube.second[i] )
+      if ( cube.second[3u * i + offset] )
       {
-        controls += make_var( i, cube.first[i] );
+        controls += make_var( i, cube.first[3u * i + offset] );
       }
     }
 
@@ -333,7 +341,7 @@ struct rcbdd_synthesis_manager
     }
 
     properties::ptr settings( new properties() );
-    settings->set( "on_cube", cube_function_t( [this]( const cube_t& c ) { add_toffoli_gate( c ); } ) );
+    settings->set( "on_cube", cube_function_t( [this, &offset]( const cube_t& c ) { add_toffoli_gate( c, offset ); } ) );
     properties::ptr statistics( new properties() );
     esop_minimization( gate.manager(), gate.getNode(), settings, statistics );
 
