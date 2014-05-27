@@ -2,9 +2,12 @@
 #define BOOST_TEST_MODULE aigmeta
 
 #include <boost/format.hpp>
+#include <boost/graph/one_bit_color_map.hpp>
+#include <boost/graph/stoer_wagner_min_cut.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <classical/io/read_aigmeta.hpp>
+#include <classical/utils/aig_to_graph.hpp>
 
 extern "C" {
 #include <aiger.h>
@@ -21,7 +24,17 @@ BOOST_AUTO_TEST_CASE(simple)
   aiger * aig;
   aig = aiger_init();
   aiger_open_and_read_from_file( aig, boost::str( boost::format( "%s.aig" ) % master_test_suite().argv[1] ).c_str() );
+
+  aig_graph graph;
+  aig_to_graph( aig, graph );
+
+  BOOST_AUTO( parities, boost::make_one_bit_color_map( num_vertices( graph ), get( boost::vertex_index, graph ) ) );
+  int w = boost::stoer_wagner_min_cut( graph, get( boost::edge_weight, graph ), boost::parity_map( parities ) );
+
+  std::cout << "Min-cut is " << w << std::endl;
+
   aiger_reset( aig );
+
 
   std::cout << meta << std::endl;
 
