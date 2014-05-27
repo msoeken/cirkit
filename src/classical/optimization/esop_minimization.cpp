@@ -138,78 +138,9 @@ public:
   esop_manager( DdManager * cudd, bool verbose = false, unsigned capacity = 1000u )
     : cudd( cudd ),
       verbose( verbose ),
-      distance_lists( 3u ),
-      link_groups( 3u )
+      distance_lists( 3u )
   {
     _cubes.reserve( capacity );
-
-    /**
-     * (2 0) (1 2)
-     * (0 2) (2 1)
-     */
-    link_groups[0u].resize( 2u );
-    boost::for_each( link_groups[0u], []( std::vector<std::vector<unsigned> >& v ) { v.resize( 2u ); } );
-    link_groups[0u][0u][0u] += 0u,2u;
-    link_groups[0u][0u][1u] += 2u,1u;
-    link_groups[0u][1u][0u] += 1u,2u;
-    link_groups[0u][1u][1u] += 2u,0u;
-
-    /**
-     * (2 0 0) (1 2 0) (1 1 2)
-     * (2 0 0) (1 0 2) (1 2 1)
-     * (0 2 0) (2 1 0) (1 1 2)
-     * (0 2 0) (0 1 2) (2 1 1)
-     * (0 0 2) (2 0 1) (1 2 1)
-     * (0 0 2) (0 2 1) (2 1 1)
-     */
-    link_groups[1u].resize( 6u );
-    boost::for_each( link_groups[1u], []( std::vector<std::vector<unsigned> >& v ) { v.resize( 3u ); } );
-    link_groups[1u][0u][0u] += 0u,0u,2u; // 1
-    link_groups[1u][0u][1u] += 2u,1u,1u; // 3
-    link_groups[1u][0u][2u] += 0u,2u,1u; // 7
-    link_groups[1u][1u][0u] += 0u,0u,2u; // 1
-    link_groups[1u][1u][1u] += 1u,2u,1u; // 6
-    link_groups[1u][1u][2u] += 2u,0u,1u; // 8
-    link_groups[1u][2u][0u] += 2u,1u,1u; // 3
-    link_groups[1u][2u][1u] += 0u,2u,0u; // 5
-    link_groups[1u][2u][2u] += 0u,1u,2u; // 9
-    link_groups[1u][3u][0u] += 1u,1u,2u; // 2
-    link_groups[1u][3u][1u] += 2u,0u,0u; // 4
-    link_groups[1u][3u][2u] += 1u,2u,0u; // 10
-    link_groups[1u][4u][0u] += 1u,1u,2u; // 2
-    link_groups[1u][4u][1u] += 0u,2u,0u; // 5
-    link_groups[1u][4u][2u] += 2u,1u,0u; // 11
-    link_groups[1u][5u][0u] += 2u,0u,0u; // 4
-    link_groups[1u][5u][1u] += 1u,2u,1u; // 6
-    link_groups[1u][5u][2u] += 1u,0u,2u; // 12
-
-    /**
-     * (2 0 0 0) (1 2 0 0) (1 1 2 0) (1 1 1 2)
-     * (2 0 0 0) (1 2 0 0) (1 1 0 2) (1 1 2 1)
-     * (2 0 0 0) (1 0 2 0) (1 2 1 0) (1 1 1 2)
-     * (2 0 0 0) (1 0 2 0) (1 0 1 2) (1 2 1 1)
-     * (2 0 0 0) (1 0 0 2) (1 2 0 1) (1 1 2 1)
-     * (2 0 0 0) (1 0 0 2) (1 0 2 1) (1 2 1 1)
-     * (0 2 0 0) (2 1 0 0) (1 1 2 0) (1 1 1 2)
-     * (0 2 0 0) (2 1 0 0) (1 1 0 2) (1 1 2 1)
-     * (0 2 0 0) (0 1 2 0) (2 1 1 0) (1 1 1 2)
-     * (0 2 0 0) (0 1 2 0) (0 1 1 2) (2 1 1 1)
-     * (0 2 0 0) (0 1 0 2) (2 1 0 1) (1 1 2 1)
-     * (0 2 0 0) (0 1 0 2) (0 1 2 1) (2 1 1 1)
-     * (0 0 2 0) (2 0 1 0) (1 2 1 0) (1 1 1 2)
-     * (0 0 2 0) (2 0 1 0) (1 0 1 2) (1 2 1 1)
-     * (0 0 2 0) (0 2 1 0) (2 1 1 0) (1 1 1 2)
-     * (0 0 2 0) (0 2 1 0) (0 1 1 2) (2 1 1 1)
-     * (0 0 2 0) (0 0 1 2) (2 0 1 1) (1 2 1 1)
-     * (0 0 2 0) (0 0 1 2) (0 2 1 1) (2 1 1 1)
-     * (0 0 0 2) (2 0 0 1) (1 2 0 1) (1 1 2 1)
-     * (0 0 0 2) (2 0 0 1) (1 0 2 1) (1 2 1 1)
-     * (0 0 0 2) (0 2 0 1) (2 1 0 1) (1 1 2 1)
-     * (0 0 0 2) (0 2 0 1) (0 1 2 1) (2 1 1 1)
-     * (0 0 0 2) (0 0 2 1) (2 0 1 1) (1 2 1 1)
-     * (0 0 0 2) (0 0 2 1) (0 2 1 1) (2 1 1 1)
-     */
-    link_groups[2u].resize( 24u );
   }
 
   void add_cube( cube_t cube )
@@ -307,7 +238,7 @@ public:
       tmp_cubes[i] = c1;
       for ( unsigned j = 0u; j < distance; ++j )
       {
-        switch ( link_groups[distance - 2u][group][i][j] )
+        switch ( cube_groups[cube_group_offsets[distance - 2u] + group * distance * distance + i * distance + j] )
         {
         case 1u:
           tmp_cubes[i].first.set( positions[j], c2.first[positions[j]] );
@@ -337,11 +268,8 @@ public:
 
     get_different_positions( c1, c2, distance, positions );
 
-    /* for now we only consider distance <= 3 */
-    assert( distance <= 3u );
-
     /* loop over all grous */
-    for ( unsigned group = 0u; group < link_groups[distance - 2u].size(); ++group )
+    for ( unsigned group = 0u; group < cube_group_count[distance - 2u]; ++group )
     {
       if ( verbose )
       {
@@ -426,7 +354,7 @@ public:
 
       if ( leads_to_improvement( p.first, p.second, distance ) )
       {
-        break;
+        return true;
       }
     }
 
@@ -533,8 +461,88 @@ private:
   bool verbose;
   std::vector<cube_t> _cubes;
   std::vector<cube_pair_list_t> distance_lists;
-  std::vector<std::vector<std::vector<std::vector<unsigned> > > > link_groups; // distance -> group -> cube -> id
+
+  static unsigned cube_groups[];
+  static unsigned cube_group_count[];
+  static unsigned cube_group_offsets[];
 };
+
+/**
+ * (2 0) (1 2)
+ * (0 2) (2 1)
+ */
+
+/**
+ * (2 0 0) (1 2 0) (1 1 2)
+ * (2 0 0) (1 0 2) (1 2 1)
+ * (0 2 0) (2 1 0) (1 1 2)
+ * (0 2 0) (0 1 2) (2 1 1)
+ * (0 0 2) (2 0 1) (1 2 1)
+ * (0 0 2) (0 2 1) (2 1 1)
+ */
+
+/**
+ * (2 0 0 0) (1 2 0 0) (1 1 2 0) (1 1 1 2)
+ * (2 0 0 0) (1 2 0 0) (1 1 0 2) (1 1 2 1)
+ * (2 0 0 0) (1 0 2 0) (1 2 1 0) (1 1 1 2)
+ * (2 0 0 0) (1 0 2 0) (1 0 1 2) (1 2 1 1)
+ * (2 0 0 0) (1 0 0 2) (1 2 0 1) (1 1 2 1)
+ * (2 0 0 0) (1 0 0 2) (1 0 2 1) (1 2 1 1)
+ * (0 2 0 0) (2 1 0 0) (1 1 2 0) (1 1 1 2)
+ * (0 2 0 0) (2 1 0 0) (1 1 0 2) (1 1 2 1)
+ * (0 2 0 0) (0 1 2 0) (2 1 1 0) (1 1 1 2)
+ * (0 2 0 0) (0 1 2 0) (0 1 1 2) (2 1 1 1)
+ * (0 2 0 0) (0 1 0 2) (2 1 0 1) (1 1 2 1)
+ * (0 2 0 0) (0 1 0 2) (0 1 2 1) (2 1 1 1)
+ * (0 0 2 0) (2 0 1 0) (1 2 1 0) (1 1 1 2)
+ * (0 0 2 0) (2 0 1 0) (1 0 1 2) (1 2 1 1)
+ * (0 0 2 0) (0 2 1 0) (2 1 1 0) (1 1 1 2)
+ * (0 0 2 0) (0 2 1 0) (0 1 1 2) (2 1 1 1)
+ * (0 0 2 0) (0 0 1 2) (2 0 1 1) (1 2 1 1)
+ * (0 0 2 0) (0 0 1 2) (0 2 1 1) (2 1 1 1)
+ * (0 0 0 2) (2 0 0 1) (1 2 0 1) (1 1 2 1)
+ * (0 0 0 2) (2 0 0 1) (1 0 2 1) (1 2 1 1)
+ * (0 0 0 2) (0 2 0 1) (2 1 0 1) (1 1 2 1)
+ * (0 0 0 2) (0 2 0 1) (0 1 2 1) (2 1 1 1)
+ * (0 0 0 2) (0 0 2 1) (2 0 1 1) (1 2 1 1)
+ * (0 0 0 2) (0 0 2 1) (0 2 1 1) (2 1 1 1)
+ */
+unsigned esop_manager::cube_groups[] = { 2, 0, 1, 2,
+                                         0, 2, 2, 1,
+                                         2, 0, 0, 1, 2, 0, 1, 1, 2,
+                                         2, 0, 0, 1, 0, 2, 1, 2, 1,
+                                         0, 2, 0, 2, 1, 0, 1, 1, 2,
+                                         0, 2, 0, 0, 1, 2, 2, 1, 1,
+                                         0, 0, 2, 2, 0, 1, 1, 2, 1,
+                                         0, 0, 2, 0, 2, 1, 2, 1, 1,
+                                         2, 0, 0, 0, 1, 2, 0, 0, 1, 1, 2, 0, 1, 1, 1, 2,
+                                         2, 0, 0, 0, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 2, 1,
+                                         2, 0, 0, 0, 1, 0, 2, 0, 1, 2, 1, 0, 1, 1, 1, 2,
+                                         2, 0, 0, 0, 1, 0, 2, 0, 1, 0, 1, 2, 1, 2, 1, 1,
+                                         2, 0, 0, 0, 1, 0, 0, 2, 1, 2, 0, 1, 1, 1, 2, 1,
+                                         2, 0, 0, 0, 1, 0, 0, 2, 1, 0, 2, 1, 1, 2, 1, 1,
+                                         0, 2, 0, 0, 2, 1, 0, 0, 1, 1, 2, 0, 1, 1, 1, 2,
+                                         0, 2, 0, 0, 2, 1, 0, 0, 1, 1, 0, 2, 1, 1, 2, 1,
+                                         0, 2, 0, 0, 0, 1, 2, 0, 2, 1, 1, 0, 1, 1, 1, 2,
+                                         0, 2, 0, 0, 0, 1, 2, 0, 0, 1, 1, 2, 2, 1, 1, 1,
+                                         0, 2, 0, 0, 0, 1, 0, 2, 2, 1, 0, 1, 1, 1, 2, 1,
+                                         0, 2, 0, 0, 0, 1, 0, 2, 0, 1, 2, 1, 2, 1, 1, 1,
+                                         0, 0, 2, 0, 2, 0, 1, 0, 1, 2, 1, 0, 1, 1, 1, 2,
+                                         0, 0, 2, 0, 2, 0, 1, 0, 1, 0, 1, 2, 1, 2, 1, 1,
+                                         0, 0, 2, 0, 0, 2, 1, 0, 2, 1, 1, 0, 1, 1, 1, 2,
+                                         0, 0, 2, 0, 0, 2, 1, 0, 0, 1, 1, 2, 2, 1, 1, 1,
+                                         0, 0, 2, 0, 0, 0, 1, 2, 2, 0, 1, 1, 1, 2, 1, 1,
+                                         0, 0, 2, 0, 0, 0, 1, 2, 0, 2, 1, 1, 2, 1, 1, 1,
+                                         0, 0, 0, 2, 2, 0, 0, 1, 1, 2, 0, 1, 1, 1, 2, 1,
+                                         0, 0, 0, 2, 2, 0, 0, 1, 1, 0, 2, 1, 1, 2, 1, 1,
+                                         0, 0, 0, 2, 0, 2, 0, 1, 2, 1, 0, 1, 1, 1, 2, 1,
+                                         0, 0, 0, 2, 0, 2, 0, 1, 0, 1, 2, 1, 2, 1, 1, 1,
+                                         0, 0, 0, 2, 0, 0, 2, 1, 2, 0, 1, 1, 1, 2, 1, 1,
+                                         0, 0, 0, 2, 0, 0, 2, 1, 0, 2, 1, 1, 2, 1, 1, 1 };
+
+unsigned esop_manager::cube_group_count[] = { 2u, 6u, 24u };
+
+unsigned esop_manager::cube_group_offsets[] = { 0u, 8u, 62u };
 
 /******************************************************************************
  * Private functions                                                          *
@@ -695,8 +703,29 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
     /* EXOR-LINK */
     for ( unsigned i = 0u; i < runs; ++i )
     {
-      esop.exorlink( 2u );
-      esop.exorlink( 3u );
+      unsigned old_count, cur_count = esop.cube_count();
+
+      do {
+        old_count = cur_count;
+
+        do {
+          old_count = cur_count;
+
+          esop.exorlink( 2u );
+          esop.exorlink( 3u );
+          esop.exorlink( 4u );
+
+          cur_count = esop.cube_count();
+        } while ( cur_count < old_count );
+
+        /* last gasp */
+        for ( unsigned j = 0u; j < 10u; ++j )
+        {
+          esop.exorlink( 4u );
+        }
+
+        cur_count = esop.cube_count();
+      } while ( cur_count < old_count );
     }
 
     if ( verbose )

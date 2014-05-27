@@ -6,7 +6,7 @@
 
 #include <classical/optimization/esop_minimization.hpp>
 
-#define COMPARE_WITH_EXORCISM 1
+#define COMPARE_WITH_EXORCISM 0
 
 void on_cube( const revkit::cube_t& cube )
 {
@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(simple)
   using namespace revkit;
 
   properties::ptr settings( new properties() );
-  settings->set( "verbose", false );
+  settings->set( "verbose", true );
   settings->set( "runs", 1u );
   settings->set( "verify", true );
   settings->set( "on_cube", cube_function_t( on_cube ) );

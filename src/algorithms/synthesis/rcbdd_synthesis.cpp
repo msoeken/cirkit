@@ -351,6 +351,7 @@ struct rcbdd_synthesis_manager
 
     properties::ptr settings( new properties() );
     settings->set( "on_cube", cube_function_t( [this, &offset]( const cube_t& c ) { add_toffoli_gate( c, offset ); } ) );
+    settings->set( "verify", true );
     properties::ptr statistics( new properties() );
     esop_minimization( gate.manager(), gate.getNode(), settings, statistics );
 
