@@ -33,3 +33,21 @@ externalProject_add(puma
   LOG_BUILD 1
   LOG_INSTALL 1)
 add_ext_library("libpuma.so")
+
+set(aiger_SRC ${CMAKE_BINARY_DIR}/ext/aiger-prefix/src/aiger)
+set(aiger_HEADERS ${aiger_SRC}/aiger.h)
+set(aiger_LIBS ${aiger_SRC}/libaiger.so.1.0.1)
+
+externalProject_add(aiger
+  DOWNLOAD_DIR .
+  URL "http://www.informatik.uni-bremen.de/revkit/files/aiger-1.9.4.tar.gz"
+  CONFIGURE_COMMAND sed -i -e "s/CFLAGS=\"/CFLAGS=\"-fPIC /g" configure COMMAND ./configure
+  BUILD_COMMAND make COMMAND gcc -shared -Wl,-soname,libaiger.so.1 -o libaiger.so.1.0.1 aiger.o -lc
+  BUILD_IN_SOURCE 1
+  INSTALL_COMMAND cp ${aiger_HEADERS} ${ext_INCLUDE} COMMAND cp ${aiger_LIBS} ${ext_LIB} COMMAND ldconfig -n ${ext_LIB} COMMAND ln -s ${ext_LIB}/libaiger.so.1.0.1 ${ext_LIB}/libaiger.so
+  LOG_DOWNLOAD 1
+  LOG_BUILD 1
+  LOG_INSTALL 1
+)
+add_ext_library("libaiger.so")
+
