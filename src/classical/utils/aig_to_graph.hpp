@@ -42,11 +42,18 @@ namespace boost
 namespace revkit
 {
 
-  typedef boost::property<boost::edge_weight_t, unsigned, boost::property<boost::edge_polarity_t, bool> > edge_properties_t;
+  typedef boost::property<boost::edge_weight_t, double, boost::property<boost::edge_polarity_t, bool> > edge_properties_t;
   typedef boost::property<boost::vertex_name_t, unsigned> vertex_properties_t;
   typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, vertex_properties_t, edge_properties_t> aig_graph;
 
-  void aig_to_graph( const aiger * aig, aig_graph& graph );
+  struct aig_to_graph_settings
+  {
+    aig_to_graph_settings();
+
+    std::string dotname;
+  };
+
+  void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_settings& settings = aig_to_graph_settings() );
 
 }
 
