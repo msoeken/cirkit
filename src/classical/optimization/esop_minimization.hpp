@@ -18,7 +18,7 @@
 /**
  * @file esop_minimization.hpp
  *
- * @brief Generation of exact PSDKRO expression from PLA
+ * @brief ESOP minimization
  *
  * @author Mathias Soeken
  * @since  2.0
@@ -42,12 +42,34 @@ namespace revkit
 typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
 typedef std::function<void(const cube_t&)> cube_function_t;
 
+/**
+ * @brief ESOP minimization
+ *
+ * This convenience function takes the BDD node that contains
+ * the function to be optimized directly.
+ *
+ * @author Mathias Soeken
+ */
 void esop_minimization( DdManager * cudd, DdNode * f,
-                      properties::ptr settings = properties::ptr(),
-                      properties::ptr statistics = properties::ptr() );
+                        properties::ptr settings = properties::ptr(),
+                        properties::ptr statistics = properties::ptr() );
+
+/**
+ * @brief ESOP minimization
+ *
+ * This optimization algorithm is an implementation of the paper
+ * [A. Mishchenko and M. Perkowski, Reed Muller Workshop 5 (2001)].
+ * The paper has also been implemented in the tool EXORCISM-4 by the
+ * same authors.
+ *
+ * In comparison to EXORCISM-4 this algorithm does not support functions
+ * with mulitple outputs.
+ *
+ * @author Mathias Soeken
+ */
 void esop_minimization( const std::string& filename,
-                      properties::ptr settings = properties::ptr(),
-                      properties::ptr statistics = properties::ptr() );
+                        properties::ptr settings = properties::ptr(),
+                        properties::ptr statistics = properties::ptr() );
 
 void test_change_performance();
 
