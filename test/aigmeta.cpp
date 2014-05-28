@@ -1,14 +1,15 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE aigmeta
 
+#include <list>
+
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <boost/graph/boykov_kolmogorov_max_flow.hpp>
-#include <boost/range/iterator_range.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <classical/io/read_aigmeta.hpp>
 #include <classical/utils/aig_to_graph.hpp>
+#include <classical/utils/find_mincut.hpp>
 
 extern "C" {
 #include <aiger.h>
@@ -41,23 +42,9 @@ BOOST_AUTO_TEST_CASE(simple)
   settings.dotname = "/tmp/test.dot";
   aig_to_graph( aig, graph, settings );
 
-  double flow = boykov_kolmogorov_max_flow( graph, 0, 1 );
-  std::cout << "Total flow: " << flow << std::endl;
-
-  auto capacity = boost::get( boost::edge_capacity, graph );
-  auto name     = boost::get( boost::vertex_name,   graph );
-  auto color    = boost::get( boost::vertex_color,  graph );
-
-  for ( const auto& e : boost::make_iterator_range( edges( graph ) ) )
-  {
-    if ( capacity[e] > 0 )
-    {
-      if ( color[source(e, graph)] != color[target(e, graph)] )
-      {
-        std::cout << "Cut between " << name[source(e, graph)] << " and " << name[target(e, graph)] << std::endl;
-      }
-    }
-  }
+  std::list<unsigned> cut;
+  find_mincut( graph, cut );
+  std::cout << "Found cut of size: " << cut.size() << std::endl;
 
   std::cout << "AIG #inputs:  " << aig->num_inputs << std::endl
             << "AIG #outputs: " << aig->num_outputs << std::endl;

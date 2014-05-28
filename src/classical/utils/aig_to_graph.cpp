@@ -81,7 +81,7 @@ void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_setti
     aiger_and * node = aig->ands + i;
 
     vertex_t vertex = add_vertex( graph );
-    indexmap[vertex] = aiger_strip( node->lhs );
+    indexmap[vertex] = node->lhs;
     id_to_vertex[aiger_strip( node->lhs )] = vertex;
   }
 
