@@ -55,8 +55,6 @@ namespace revkit
 
   struct aig_to_graph_settings
   {
-    aig_to_graph_settings();
-
     std::string dotname;
   };
 

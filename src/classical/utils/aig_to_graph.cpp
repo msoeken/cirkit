@@ -54,8 +54,6 @@ void add_edge_with_rev( vertex_t v, vertex_t w, aig_graph& graph, double weight,
  * Public functions                                                           *
  ******************************************************************************/
 
-aig_to_graph_settings::aig_to_graph_settings() {}
-
 void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_settings& settings )
 {
   std::map<unsigned, vertex_t> id_to_vertex;
@@ -84,7 +82,7 @@ void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_setti
 
     vertex_t vertex = add_vertex( graph );
     indexmap[vertex] = aiger_strip( node->lhs );
-    id_to_vertex.insert( std::make_pair( aiger_strip( node->lhs ), vertex ) );
+    id_to_vertex[aiger_strip( node->lhs )] = vertex;
   }
 
   /* Connect AND nodes */
