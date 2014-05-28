@@ -5,6 +5,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/optional.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <classical/io/read_aigmeta.hpp>
@@ -24,13 +25,14 @@ BOOST_AUTO_TEST_CASE(simple)
   boost::filesystem::path filename( master_test_suite().argv[1] );
   boost::filesystem::path jsonname( boost::str( boost::format( "%s/%s.json" ) % filename.parent_path().string() % filename.stem().string() ) );
 
+  boost::optional<aigmeta> meta;
   if ( exists( jsonname ) )
   {
-    aigmeta meta;
-    read_aigmeta( meta, jsonname.string() );
+    meta = aigmeta();
+    read_aigmeta( *meta, jsonname.string() );
 
     std::cout << "Meta-data available:" << std::endl
-              << meta << std::endl;
+              << *meta << std::endl;
   }
 
   aiger * aig;
@@ -45,6 +47,25 @@ BOOST_AUTO_TEST_CASE(simple)
   std::list<unsigned> cut;
   find_mincut( graph, cut );
   std::cout << "Found cut of size: " << cut.size() << std::endl;
+
+  if ( meta )
+  {
+    for ( unsigned lit : cut )
+    {
+      std::cout << lit << ":";
+      for ( const auto& bundle : meta->bundles )
+      {
+        for ( auto it = bundle.literals.begin(); it != bundle.literals.end(); ++it )
+        {
+          if ( *it == lit )
+          {
+            std::cout << " " << bundle.name << "[" << std::distance( bundle.literals.begin(), it ) << "]";
+          }
+        }
+      }
+      std::cout << std::endl;
+    }
+  }
 
   std::cout << "AIG #inputs:  " << aig->num_inputs << std::endl
             << "AIG #outputs: " << aig->num_outputs << std::endl;
