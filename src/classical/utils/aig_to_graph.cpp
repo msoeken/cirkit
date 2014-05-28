@@ -31,6 +31,25 @@ namespace revkit
  * Private functions                                                          *
  ******************************************************************************/
 
+typedef boost::graph_traits<aig_graph>::vertex_descriptor vertex_t;
+typedef boost::graph_traits<aig_graph>::edge_descriptor edge_t;
+
+void add_edge_with_rev( vertex_t v, vertex_t w, aig_graph& graph, double weight, bool polarity )
+{
+  auto polaritymap = get( boost::edge_polarity, graph );
+  auto capacitymap = get( boost::edge_capacity, graph );
+  auto reversemap  = get( boost::edge_reverse,  graph );
+
+  edge_t edge  = add_edge( v, w, graph ).first;
+  edge_t redge = add_edge( w, v, graph ).first;
+
+  polaritymap[edge] = polaritymap[redge] = polarity;
+  capacitymap[edge] = weight;
+  capacitymap[redge] = 0.0;
+  reversemap[edge] = redge;
+  reversemap[redge] = edge;
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -39,30 +58,26 @@ aig_to_graph_settings::aig_to_graph_settings() {}
 
 void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_settings& settings )
 {
-  typedef boost::graph_traits<aig_graph>::vertex_descriptor vertex_t;
-  typedef boost::graph_traits<aig_graph>::edge_descriptor edge_t;
-
   std::map<unsigned, vertex_t> id_to_vertex;
-  boost::property_map<aig_graph, boost::vertex_name_t>::type indexmap = get( boost::vertex_name, graph );
-  boost::property_map<aig_graph, boost::edge_polarity_t>::type polaritymap = get( boost::edge_polarity, graph );
-  boost::property_map<aig_graph, boost::edge_weight_t>::type weightmap = get( boost::edge_weight, graph );
+  vertex_t source, target;
 
-  vertex_t source = add_vertex( graph );
-  indexmap[source] = 0u;
-  vertex_t target = add_vertex( graph );
-  indexmap[target] = 1u;
+  auto indexmap    = get( boost::vertex_name,   graph );
+  auto capacitymap = get( boost::edge_capacity, graph );
 
+  indexmap[source = add_vertex( graph )] = 0u;
+  indexmap[target = add_vertex( graph )] = 1u;
+
+  /* Add inputs to graph */
   for ( unsigned i = 0u; i < aig->num_inputs; ++i )
   {
     vertex_t vertex = add_vertex( graph );
     indexmap[vertex] = aig->inputs[i].lit;
     id_to_vertex[aig->inputs[i].lit] = vertex;
 
-    edge_t edge = add_edge( source, vertex, graph ).first;
-    polaritymap[edge] = true;
-    weightmap[edge] = std::numeric_limits<double>::infinity();
+    add_edge_with_rev( source, vertex, graph, std::numeric_limits<double>::infinity(), true );
   }
 
+  /* Add vertex for each AND node */
   for ( unsigned i = 0u; i < aig->num_ands; ++i )
   {
     aiger_and * node = aig->ands + i;
@@ -72,23 +87,19 @@ void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_setti
     id_to_vertex.insert( std::make_pair( aiger_strip( node->lhs ), vertex ) );
   }
 
+  /* Connect AND nodes */
   for ( unsigned i = 0u; i < aig->num_ands; ++i )
   {
     aiger_and * node = aig->ands + i;
 
-    edge_t edge0 = add_edge( id_to_vertex[aiger_strip( node->rhs0 )], id_to_vertex[aiger_strip( node->lhs )], graph ).first;
-    polaritymap[edge0] = !( node->rhs0 & 1 );
-    weightmap[edge0] = 1.0;
-    edge_t edge1 = add_edge( id_to_vertex[aiger_strip( node->rhs1 )], id_to_vertex[aiger_strip( node->lhs )], graph ).first;
-    polaritymap[edge1] = !( node->rhs0 & 1 );
-    weightmap[edge1] = 1.0;
+    add_edge_with_rev( id_to_vertex[aiger_strip( node->rhs0 )], id_to_vertex[aiger_strip( node->lhs )], graph, 1.0, !( node->rhs0 & 1 ) );
+    add_edge_with_rev( id_to_vertex[aiger_strip( node->rhs1 )], id_to_vertex[aiger_strip( node->lhs )], graph, 1.0, !( node->rhs1 & 1 ) );
   }
 
+  /* Connect outputs to target */
   for ( unsigned i = 0u; i < aig->num_outputs; ++i )
   {
-    edge_t edge = add_edge( id_to_vertex[aiger_strip( aig->outputs[i].lit )], target, graph ).first;
-    polaritymap[edge] = !( aig->outputs[i].lit & 1 );
-    weightmap[edge] = std::numeric_limits<double>::infinity();
+    add_edge_with_rev( id_to_vertex[aiger_strip( aig->outputs[i].lit )], target, graph, std::numeric_limits<double>::infinity(), !( aig->outputs[i].lit & 1 ) );
   }
 
   if ( !settings.dotname.empty() )
@@ -96,7 +107,7 @@ void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_setti
     std::filebuf fb;
     fb.open( settings.dotname.c_str(), std::ios::out );
     std::ostream os( &fb );
-    boost::write_graphviz( os, graph, boost::make_label_writer( indexmap ), boost::make_label_writer( weightmap ) );
+    boost::write_graphviz( os, graph, boost::make_label_writer( indexmap ), boost::make_label_writer( capacitymap ) );
     fb.close();
   }
 }

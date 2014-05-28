@@ -3,8 +3,8 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <boost/graph/one_bit_color_map.hpp>
-#include <boost/graph/stoer_wagner_min_cut.hpp>
+#include <boost/graph/boykov_kolmogorov_max_flow.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <classical/io/read_aigmeta.hpp>
@@ -41,30 +41,23 @@ BOOST_AUTO_TEST_CASE(simple)
   settings.dotname = "/tmp/test.dot";
   aig_to_graph( aig, graph, settings );
 
-  BOOST_AUTO( parities, boost::make_one_bit_color_map( num_vertices( graph ), get( boost::vertex_index, graph ) ) );
-  int w = boost::stoer_wagner_min_cut( graph, get( boost::edge_weight, graph ), boost::parity_map( parities ) );
+  double flow = boykov_kolmogorov_max_flow( graph, 0, 1 );
+  std::cout << "Total flow: " << flow << std::endl;
 
-  std::cout << "Set A:";
-  for ( unsigned i = 0u; i < num_vertices( graph ); ++i )
+  auto capacity = boost::get( boost::edge_capacity, graph );
+  auto name     = boost::get( boost::vertex_name,   graph );
+  auto color    = boost::get( boost::vertex_color,  graph );
+
+  for ( const auto& e : boost::make_iterator_range( edges( graph ) ) )
   {
-    if ( get( parities, i ) )
+    if ( capacity[e] > 0 )
     {
-      std::cout << " " << get( boost::vertex_name, graph )[i];
+      if ( color[source(e, graph)] != color[target(e, graph)] )
+      {
+        std::cout << "Cut between " << name[source(e, graph)] << " and " << name[target(e, graph)] << std::endl;
+      }
     }
   }
-  std::cout << std::endl;
-
-  std::cout << "Set B:";
-  for ( unsigned i = 0u; i < num_vertices( graph ); ++i )
-  {
-    if ( !get( parities, i ) )
-    {
-      std::cout << " " << get( boost::vertex_name, graph )[i];
-    }
-  }
-  std::cout << std::endl;
-
-  std::cout << "Min-cut is " << w << std::endl;
 
   std::cout << "AIG #inputs:  " << aig->num_inputs << std::endl
             << "AIG #outputs: " << aig->num_outputs << std::endl;
