@@ -1,4 +1,6 @@
 set(local_addon_directories "")
+set(local_addon_include_directories "")
+set(local_addon_link_directories "")
 
 subdirlist(directories ".")
 foreach(dir ${directories})
@@ -12,3 +14,5 @@ foreach(dir ${directories})
 endforeach()
 
 set(addon_directories ${local_addon_directories} PARENT_SCOPE)
+set(addon_include_directories ${local_addon_include_directories} PARENT_SCOPE)
+set(addon_link_directories ${local_addon_link_directories} PARENT_SCOPE)

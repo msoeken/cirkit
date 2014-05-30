@@ -37,6 +37,7 @@ add_subdirectory(ext)
 # Options
 option(revkit_ENABLE_PROGRAMS "build programs" on)
 option(revkit_ENABLE_TESTS "build tests" on)
+option(revkit_LINK_PROGRAMS_TO_STATIC "links programs to static libraries" off)
 
 # Libraries (include)
 include_directories(src)
@@ -49,6 +50,12 @@ foreach (dir ${addon_directories})
   string(TOUPPER ${def} def)
   add_definitions(-D${def})
   include_directories(addons/${dir}/src)
+endforeach()
+foreach (dir ${addon_include_directories})
+  include_directories(${dir})
+endforeach()
+foreach (dir ${addon_link_directories})
+  link_directories(${dir})
 endforeach()
 
 # Libraries
