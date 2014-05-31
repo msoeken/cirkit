@@ -27,31 +27,16 @@
 #ifndef AIG_TO_GRAPH_HPP
 #define AIG_TO_GRAPH_HPP
 
+#include <classical/aig.hpp>
+
 #include <boost/graph/adjacency_list.hpp>
 
 extern "C" {
 #include <aiger.h>
 }
 
-namespace boost
-{
-  enum edge_polarity_t { edge_polarity };
-  BOOST_INSTALL_PROPERTY(edge, polarity);
-}
-
 namespace revkit
 {
-
-  typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS> traits_t;
-  typedef boost::property<boost::vertex_name_t, unsigned,
-          boost::property<boost::vertex_color_t, boost::default_color_type,
-          boost::property<boost::vertex_distance_t, long,
-          boost::property<boost::vertex_predecessor_t, traits_t::edge_descriptor> > > > vertex_properties_t;
-  typedef boost::property<boost::edge_capacity_t, double,
-          boost::property<boost::edge_residual_capacity_t, double,
-          boost::property<boost::edge_reverse_t, traits_t::edge_descriptor,
-          boost::property<boost::edge_polarity_t, bool> > > > edge_properties_t;
-  typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, vertex_properties_t, edge_properties_t> aig_graph;
 
   struct aig_to_graph_settings
   {
