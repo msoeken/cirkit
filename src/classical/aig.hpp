@@ -27,6 +27,7 @@
 #ifndef AIG_HPP
 #define AIG_HPP
 
+#include <iostream>
 #include <map>
 #include <vector>
 
@@ -68,6 +69,8 @@ namespace revkit
   aig_node aig_create_pi( aig_graph& aig, const std::string& name );
   void aig_create_po( aig_graph& aig, const aig_node& node, const std::string& name, bool polarity = true );
   aig_node aig_create_and( aig_graph& aig, aig_node left, aig_node right, bool polarity_left = true, bool polarity_right = true );
+
+  void write_dot( std::ostream& os, const aig_graph& aig );
 
 }
 

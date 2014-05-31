@@ -16,16 +16,16 @@
  */
 
 /**
- * @file aig_to_graph.hpp
+ * @file aiger_to_aig.hpp
  *
- * @brief Create graph from AIG
+ * @brief Creates aig_graph from aiger struct
  *
  * @author Mathias Soeken
  * @since  2.0
  */
 
-#ifndef AIG_TO_GRAPH_HPP
-#define AIG_TO_GRAPH_HPP
+#ifndef AIGER_TO_AIG_HPP
+#define AIGER_TO_AIG_HPP
 
 #include <classical/aig.hpp>
 
@@ -38,12 +38,12 @@ extern "C" {
 namespace revkit
 {
 
-  struct aig_to_graph_settings
+  struct aiger_to_aig_settings
   {
     std::string dotname;
   };
 
-  void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_settings& settings = aig_to_graph_settings() );
+  void aiger_to_aig( const aiger * aig, aig_graph& graph, const aiger_to_aig_settings& settings = aiger_to_aig_settings() );
 
 }
 

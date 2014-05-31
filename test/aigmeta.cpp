@@ -9,7 +9,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <classical/io/read_aigmeta.hpp>
-#include <classical/utils/aig_to_graph.hpp>
+#include <classical/utils/aiger_to_aig.hpp>
 #include <classical/utils/find_mincut.hpp>
 
 extern "C" {
@@ -40,9 +40,9 @@ BOOST_AUTO_TEST_CASE(simple)
   aiger_open_and_read_from_file( aig, filename.string().c_str() );
 
   aig_graph graph;
-  aig_to_graph_settings settings;
+  aiger_to_aig_settings settings;
   settings.dotname = "/tmp/test.dot";
-  aig_to_graph( aig, graph, settings );
+  aiger_to_aig( aig, graph, settings );
 
   std::list<unsigned> cut;
   find_mincut( graph, cut );

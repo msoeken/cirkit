@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "aig_to_graph.hpp"
+#include "aiger_to_aig.hpp"
 
 #include <climits>
 #include <fstream>
@@ -31,17 +31,14 @@ namespace revkit
  * Private functions                                                          *
  ******************************************************************************/
 
-typedef boost::graph_traits<aig_graph>::vertex_descriptor vertex_t;
-typedef boost::graph_traits<aig_graph>::edge_descriptor edge_t;
-
-void add_edge_with_rev( vertex_t v, vertex_t w, aig_graph& graph, double weight, bool polarity )
+void add_edge_with_rev( aig_node v, aig_node w, aig_graph& graph, double weight, bool polarity )
 {
   auto polaritymap = get( boost::edge_polarity, graph );
   auto capacitymap = get( boost::edge_capacity, graph );
   auto reversemap  = get( boost::edge_reverse,  graph );
 
-  edge_t edge  = add_edge( v, w, graph ).first;
-  edge_t redge = add_edge( w, v, graph ).first;
+  aig_edge edge  = add_edge( v, w, graph ).first;
+  aig_edge redge = add_edge( w, v, graph ).first;
 
   polaritymap[edge] = polaritymap[redge] = polarity;
   capacitymap[edge] = weight;
@@ -54,10 +51,10 @@ void add_edge_with_rev( vertex_t v, vertex_t w, aig_graph& graph, double weight,
  * Public functions                                                           *
  ******************************************************************************/
 
-void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_settings& settings )
+void aiger_to_aig( const aiger * aig, aig_graph& graph, const aiger_to_aig_settings& settings )
 {
-  std::map<unsigned, vertex_t> id_to_vertex;
-  vertex_t source, target;
+  std::map<unsigned, aig_node> id_to_vertex;
+  aig_node source, target;
 
   auto indexmap    = get( boost::vertex_name,   graph );
   auto capacitymap = get( boost::edge_capacity, graph );
@@ -68,7 +65,7 @@ void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_setti
   /* Add inputs to graph */
   for ( unsigned i = 0u; i < aig->num_inputs; ++i )
   {
-    vertex_t vertex = add_vertex( graph );
+    aig_node vertex = add_vertex( graph );
     indexmap[vertex] = aig->inputs[i].lit;
     id_to_vertex[aig->inputs[i].lit] = vertex;
 
@@ -80,7 +77,7 @@ void aig_to_graph( const aiger * aig, aig_graph& graph, const aig_to_graph_setti
   {
     aiger_and * node = aig->ands + i;
 
-    vertex_t vertex = add_vertex( graph );
+    aig_node vertex = add_vertex( graph );
     indexmap[vertex] = node->lhs;
     id_to_vertex[aiger_strip( node->lhs )] = vertex;
   }

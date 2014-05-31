@@ -29,7 +29,7 @@
 
 #include <list>
 
-#include <classical/utils/aig_to_graph.hpp>
+#include <classical/aig.hpp>
 
 namespace revkit
 {

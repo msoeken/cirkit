@@ -18,11 +18,16 @@
 #include "aig.hpp"
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/graph/graphviz.hpp>
 
 namespace revkit
 {
 
 using namespace boost::assign;
+
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
 
 void aig_initialize( aig_graph& aig )
 {
@@ -47,6 +52,7 @@ void aig_create_po( aig_graph& aig, const aig_node& node, const std::string& nam
 
 aig_node aig_create_and( aig_graph& aig, aig_node left, aig_node right, bool polarity_left, bool polarity_right )
 {
+  /* sort left and right child */
   if ( left > right )
   {
     aig_node tmp = left;
@@ -60,6 +66,7 @@ aig_node aig_create_and( aig_graph& aig, aig_node left, aig_node right, bool pol
 
   auto& info = boost::get_property( aig, boost::graph_name );
 
+  /* structural hashing */
   auto key = std::make_tuple( left, right, polarity_left, polarity_right );
   auto it = info.strash.find( key );
   if ( it != info.strash.end() )
@@ -67,14 +74,23 @@ aig_node aig_create_and( aig_graph& aig, aig_node left, aig_node right, bool pol
     return it->second;
   }
 
-  aig_node vertex = add_vertex( aig );
+  /* create node and connect to children */
+  aig_node node = add_vertex( aig );
+  boost::get( boost::vertex_name, aig )[node] = 2u * num_vertices( aig );
 
-  aig_edge le = add_edge( vertex, left, aig ).first;
+  aig_edge le = add_edge( node, left, aig ).first;
   boost::get( boost::edge_polarity, aig )[le] = polarity_left;
-  aig_edge re = add_edge( vertex, right, aig ).first;
+  aig_edge re = add_edge( node, right, aig ).first;
   boost::get( boost::edge_polarity, aig )[re] = polarity_right;
 
-  return info.strash[key] = vertex;
+  return info.strash[key] = node;
+}
+
+void write_dot( std::ostream& os, const aig_graph& aig )
+{
+  auto indexmap = get( boost::vertex_name, aig );
+
+  boost::write_graphviz( os, aig, boost::make_label_writer( indexmap ) );
 }
 
 }
