@@ -57,7 +57,7 @@ struct rcbdd_synthesis_manager
     circ.set_outputs( outputs );
 
     std::vector<constant> constants( _cf.num_vars(), constant() );
-    std::fill( constants.begin(), constants.end() - _cf.num_inputs(), true );
+    std::fill( constants.begin(), constants.end() - _cf.num_inputs(), false );
     circ.set_constants( constants );
 
     std::vector<bool> garbage( _cf.num_vars(), true );
@@ -174,7 +174,17 @@ struct rcbdd_synthesis_manager
     boost::push_back(variables, cf.ys());
 
     // Pick an arbitrary cube from pp
-    BDD cube = pp.PickOneMinterm(variables);
+    BDD cube;
+
+    if ( pp != cf.manager().bddZero() )
+    {
+      cube = pp.PickOneMinterm(variables);
+    }
+    else
+    {
+      cube = ( !cf.remove_xs( f ) & !cf.remove_ys( f ) & cf.x( _var) & !cf.y( _var ) ).PickOneMinterm( variables );
+      f |= cube;
+    }
     char change = ChangeLeft;
 
     BDD lf = cf.manager().bddZero();
@@ -289,7 +299,7 @@ struct rcbdd_synthesis_manager
 
   void resolve_k_cycles()
   {
-    while (cf.cofactor(f, _var, true, false) != cf.manager().bddZero())
+    while (cf.cofactor(f, _var, true, false) != cf.manager().bddZero() || cf.cofactor(f, _var, false, true) != cf.manager().bddZero())
     {
       cycle_step();
     }
@@ -412,12 +422,12 @@ struct rcbdd_synthesis_manager
         std::cout << "Adjust variable " << var << std::endl;
       }
       set_var(var);
-      only_left_gate_shortcut();
-      resolve_one_cycles();
-      resolve_two_cycles();
+      //only_left_gate_shortcut();
+      //resolve_one_cycles();
+      //resolve_two_cycles();
       resolve_k_cycles();
 
-      if (verbose)
+      if ( verbose )
       {
         std::cout << "Target: " << _var << std::endl << " - left control function:" << std::endl;
         left_f.PrintMinterm();
