@@ -34,14 +34,16 @@ int main( int argc, char ** argv )
 
   std::string filename;
   std::string embedded_pla;
+  bool        truth_table = false;
   bool        verbose = false;
 
   program_options opts;
   opts.add_write_realization_option();
   opts.add_options()
-    ( "filename",     value<std::string>( &filename ),                        "PLA filename" )
-    ( "embedded_pla", value<std::string>( &embedded_pla ),                    "Filename of the embedded PLA file (default is empty)" )
-    ( "verbose",      value<bool>       ( &verbose )->default_value( false ), "Verbose" )
+    ( "filename",     value<std::string>( &filename ),                            "PLA filename" )
+    ( "embedded_pla", value<std::string>( &embedded_pla ),                        "Filename of the embedded PLA file (default is empty)" )
+    ( "truth_table",  value<bool>       ( &truth_table )->default_value( false ), "Prints truth table of embedded PLA (with constants and garbage)" )
+    ( "verbose",      value<bool>       ( &verbose )->default_value( false ),     "Verbose" )
     ;
   opts.parse( argc, argv );
 
@@ -62,6 +64,7 @@ int main( int argc, char ** argv )
   write_pla( extended, "/tmp/extended.pla" );
 
   properties::ptr ep_settings( new properties );
+  ep_settings->set( "truth_table", truth_table );
   ep_settings->set( "write_pla", embedded_pla );
   embed_pla( cf, "/tmp/extended.pla", ep_settings );
 
