@@ -229,12 +229,10 @@ public:
     // preperation of truth table columns
     if ( adjusted_lines.empty() )
     {
-      std::cout << "basic first step for pos = " << pos << std::endl;
       basic_first_step( pos );
     }
     else
     {
-      std::cout << "next step for pos = " << pos << std::endl;
       next_step( pos );
     }
 
