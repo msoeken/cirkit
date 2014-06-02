@@ -36,12 +36,9 @@ enum Direction {
 
 struct rcbdd_synthesis_manager
 {
-  rcbdd_synthesis_manager( const rcbdd& _cf, circuit& _circ, bool _verbose, const std::string& _name, bool _genesop )
+  rcbdd_synthesis_manager( const rcbdd& _cf, circuit& _circ )
     : cf( _cf ),
       circ( _circ ),
-      verbose( _verbose ),
-      name( _name ),
-      genesop( _genesop ),
       insert_position( 0u )
   {
     f = _cf.chi();
@@ -417,14 +414,14 @@ struct rcbdd_synthesis_manager
   {
     for (unsigned var = 0; var < cf.num_vars(); ++var)
     {
-      if ( verbose )
+      if ( verbose || progress )
       {
-        std::cout << "Adjust variable " << var << std::endl;
+        std::cout << "Adjust variable " << var << " / " << cf.num_vars() << std::endl;
       }
       set_var(var);
-      //only_left_gate_shortcut();
-      //resolve_one_cycles();
-      //resolve_two_cycles();
+      only_left_gate_shortcut();
+      resolve_one_cycles();
+      resolve_two_cycles();
       resolve_k_cycles();
 
       if ( verbose )
@@ -581,6 +578,7 @@ struct rcbdd_synthesis_manager
   circuit& circ;
 
   bool verbose;
+  bool progress;
   std::string name;
   bool genesop;
 
@@ -596,11 +594,16 @@ struct rcbdd_synthesis_manager
 bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  bool        verbose = get<bool>(        settings, "verbose", false  );
-  std::string name    = get<std::string>( settings, "name",    "test" );
-  bool        genesop = get<bool>(        settings, "genesop", false  );
+  bool        verbose  = get<bool>(        settings, "verbose",  false  );
+  bool        progress = get<bool>(        settings, "progress", false  );
+  std::string name     = get<std::string>( settings, "name",     "test" );
+  bool        genesop  = get<bool>(        settings, "genesop",  false  );
 
-  rcbdd_synthesis_manager mgr( cf, circ, verbose, name, genesop );
+  rcbdd_synthesis_manager mgr( cf, circ );
+  mgr.verbose  = verbose;
+  mgr.progress = progress;
+  mgr.name     = name;
+  mgr.genesop  = genesop;
   mgr.default_synthesis();
 
   return false;
