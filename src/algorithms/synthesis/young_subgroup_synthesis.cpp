@@ -34,6 +34,8 @@
 #include <core/io/write_pla.hpp>
 #include <core/utils/timer.hpp>
 
+#include <cuddObj.hh>
+
 using namespace boost::assign;
 
 namespace revkit
@@ -44,7 +46,16 @@ typedef std::vector<std::vector<int> > truth_table_column_t;
 class young_subgroup_synthesis_manager
 {
 public:
-  void add_gate_for_cube( circuit& circ, unsigned target, const std::string& str )
+  young_subgroup_synthesis_manager( circuit& circ ) : circ( circ )
+  {
+    /* initialize BDD variables */
+    for ( unsigned i = 0u; i < circ.lines(); ++i )
+    {
+      cudd.bddVar();
+    }
+  }
+
+  void add_gate_for_cube( circuit& gatecirc, unsigned target, const std::string& str )
   {
     gate::control_container controls;
 
@@ -55,10 +66,10 @@ public:
       controls += make_var( c, str[i] == '1' );
     }
 
-    append_toffoli( circ, controls, target );
+    append_toffoli( gatecirc, controls, target );
   }
 
-  void synthesis_gate( circuit& circ, binary_truth_table const& spec, unsigned target, unsigned& start )
+  void synthesis_gate( binary_truth_table const& spec, unsigned target, unsigned& start )
   {
     write_pla( spec, "v.pla" );
     system((char *)"exorcism -q 3 v.pla >temp.dat 2>temp.dat");
@@ -134,14 +145,34 @@ public:
     return i;
   }
 
-  void add_gates( circuit& circ,
-                  const truth_table_column_t& vf_in, const truth_table_column_t& vf_out,
+  void add_gates( const truth_table_column_t& vf_in, const truth_table_column_t& vf_out,
                   const truth_table_column_t& vb_in, const truth_table_column_t& vb_out,
                   unsigned pos,
                   unsigned& start)
   {
     unsigned bw = vf_in[0].size(), back;
     binary_truth_table spec_front, spec_back;
+    BDD bdd_front = cudd.bddZero(), bdd_back = cudd.bddZero();
+
+    for ( unsigned i = 0u; i < vf_in.size(); ++i )
+    {
+      if ( vf_in[i][pos] == 0u )
+      {
+        if ( vf_out[i][pos] == 1 )
+        {
+          BDD cube = cudd.bddOne();
+
+          for ( unsigned j = 0; j < bw; ++j )
+          {
+            if ( j == pos ) continue;
+            cube &= vf_in[i][j] == 1 ? cudd.bddVar( j ) : !cudd.bddVar( j );
+          }
+
+          bdd_front |= cube;
+        }
+      }
+    }
+
     for (unsigned i = 0; i < vf_in.size(); ++i) {
       binary_truth_table::cube_type in_cube, out_cube;
       if (vf_in[i][pos] == 0) {
@@ -167,23 +198,24 @@ public:
     if ( verbose )
     {
       std::cout << "SPEC for front:" << std::endl << spec_front << std::endl;
+      std::cout << "BDD for front:" << std::endl;
+      bdd_front.PrintMinterm();
     }
-    synthesis_gate(circ, spec_front, pos, start);
+    synthesis_gate(spec_front, pos, start);
     //  std::cout << " Circuit:" << std::endl << circ << std::endl;
     back = start;
 
     if ( verbose )
     {
-      std::cout << "SPEC for front:" << std::endl << spec_front << std::endl;
+      std::cout << "SPEC for back:" << std::endl << spec_front << std::endl;
     }
-    synthesis_gate(circ, spec_back, pos, back);
+    synthesis_gate(spec_back, pos, back);
     //  std::cout << " Circuit:" << std::endl << circ << std::endl;
     //specs.insert(specs.begin() + pos, spec_front);
     //specs.insert(specs.begin() + pos + 1, spec_back);
   }
 
-  void add_gates( circuit& circ,
-                  const truth_table_column_t& vf, const truth_table_column_t& vb,
+  void add_gates( const truth_table_column_t& vf, const truth_table_column_t& vb,
                   unsigned pos, unsigned& start )
   {
     binary_truth_table spec;
@@ -205,7 +237,7 @@ public:
     {
       std::cout << "SPEC for middle:" << std::endl << spec << std::endl;
     }
-    synthesis_gate(circ, spec, pos, start);
+    synthesis_gate( spec, pos, start);
     //  std::cout << " Circuit:" << std::endl << circ << std::endl;
   }
 
@@ -251,6 +283,8 @@ public:
     }
   }
 
+  Cudd cudd;
+  circuit& circ;
   bool verbose;
 };
 
@@ -284,7 +318,7 @@ public:
     // copy metadata
     copy_metadata(spec, circ);
 
-    young_subgroup_synthesis_manager mgr;
+    young_subgroup_synthesis_manager mgr( circ );
     mgr.verbose = verbose;
 
     // Step 1
@@ -297,11 +331,11 @@ public:
       if (i < spec.num_inputs() - 1) {
         //  print_vec(v_front, v_back);
         mgr.build_shape(v_front, v_back, i);
-        mgr.add_gates(circ, v_f_in, v_front, v_b_in, v_back, i, start);
+        mgr.add_gates(v_f_in, v_front, v_b_in, v_back, i, start);
         mgr.next_step(v_f_in, v_front, v_b_in, v_back, i + 1);
 
       } else {
-        mgr.add_gates(circ, v_f_in, v_b_in, i, start);
+        mgr.add_gates(v_f_in, v_b_in, i, start);
         //  print_vec(v_f_in, v_b_in);
       }
       i++;
