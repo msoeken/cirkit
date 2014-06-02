@@ -29,23 +29,27 @@ namespace revkit
 
   boost::dynamic_bitset<>& core_gate_simulation::operator()( const gate& g, boost::dynamic_bitset<>& input ) const
   {
-    // TODO negative controls
     if ( is_toffoli( g ) )
     {
       boost::dynamic_bitset<> c_mask( input.size() );
+      boost::dynamic_bitset<> input_copy = input;
       for ( const auto& v : g.controls() )
       {
-        assert( v.polarity() );
+        if ( !v.polarity() )
+        {
+          input_copy.flip( v.line() );
+        }
         c_mask.set( v.line() );
       }
 
-      if ( c_mask.none() || ( ( input & c_mask ) == c_mask ) )
+      if ( c_mask.none() || ( ( input_copy & c_mask ) == c_mask ) )
       {
         input.flip( g.targets().front() );
       }
 
       return input;
     }
+    // TODO negative controls
     else if ( is_fredkin( g ) )
     {
       boost::dynamic_bitset<> c_mask( input.size() );
