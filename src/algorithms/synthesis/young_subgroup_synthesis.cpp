@@ -23,6 +23,9 @@
 #include <vector>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/range/irange.hpp>
 
 #include <core/circuit.hpp>
 #include <core/truth_table.hpp>
@@ -48,7 +51,7 @@ typedef std::vector<std::vector<int> > truth_table_column_t;
 class young_subgroup_synthesis_manager
 {
 public:
-  young_subgroup_synthesis_manager( circuit& circ ) : circ( circ )
+  young_subgroup_synthesis_manager( circuit& circ, const binary_truth_table& spec ) : circ( circ ), spec( spec ), start( 0u )
   {
     /* initialize BDD variables */
     for ( unsigned i = 0u; i < circ.lines(); ++i )
@@ -86,9 +89,7 @@ public:
     }
   }
 
-  void basic_first_step( const binary_truth_table& spec,
-                         truth_table_column_t& v_f_in, truth_table_column_t& v_f_out,
-                         truth_table_column_t& v_b_in, truth_table_column_t& v_b_out)
+  void basic_first_step( unsigned pos )
   {
     unsigned bw = spec.num_inputs();
     for (binary_truth_table::const_iterator it = spec.begin(); it != spec.end(); ++it)
@@ -101,12 +102,12 @@ public:
         in_cube.push_back(**(c + i));
         out_cube.push_back(**(ci + i));
       }
-      v_f_in += in_cube;
-      v_b_in += out_cube;
-      out_cube[0] = -1;
-      in_cube[0] = -1;
-      v_f_out += in_cube;
-      v_b_out += out_cube;
+      vf_in += in_cube;
+      vb_in += out_cube;
+      out_cube[pos] = -1;
+      in_cube[pos] = -1;
+      vf_out += in_cube;
+      vb_out += out_cube;
     }
   }
 
@@ -145,9 +146,7 @@ public:
     return bdd;
   }
 
-  void add_gates( const truth_table_column_t& vf_in, const truth_table_column_t& vf_out,
-                  const truth_table_column_t& vb_in, const truth_table_column_t& vb_out,
-                  unsigned pos,
+  void add_gates( unsigned pos,
                   unsigned& start)
   {
     BDD bdd_front = get_control_function( vf_in, vf_out, pos );
@@ -169,10 +168,9 @@ public:
     synthesis_gate(bdd_back, pos, back);
   }
 
-  void add_gates( const truth_table_column_t& vf, const truth_table_column_t& vb,
-                  unsigned pos, unsigned& start )
+  void add_last_gate( unsigned pos, unsigned& start )
   {
-    BDD bdd = get_control_function( vf, vb, pos );
+    BDD bdd = get_control_function( vf_in, vb_in, pos );
 
     if ( verbose )
     {
@@ -182,63 +180,96 @@ public:
     synthesis_gate( bdd, pos, start);
   }
 
-  void next_step( truth_table_column_t& v_f_in, truth_table_column_t& v_f_out,
-                  truth_table_column_t& v_b_in, truth_table_column_t& v_b_out,
-                  unsigned pos)
+  void next_step( unsigned pos)
   {
-    v_f_in = v_f_out;
-    v_b_in = v_b_out;
-    for (unsigned i = 0; i < v_f_in.size(); ++i) {
-      v_f_out[i][pos] = -1;
-      v_b_out[i][pos] = -1;
+    vf_in = vf_out;
+    vb_in = vb_out;
+    for (unsigned i = 0; i < vf_in.size(); ++i) {
+      vf_out[i][pos] = -1;
+      vb_out[i][pos] = -1;
 
     }
   }
 
-  void build_shape( truth_table_column_t& v_front, truth_table_column_t& v_back, unsigned pos )
+  void build_shape( unsigned pos )
   {
     unsigned j = 0u, nb_cubes = 0u;
-    while (j < v_front.size()) {
+    while (j < vf_out.size())
+    {
       unsigned k = j;
-      while (k < v_front.size() && v_front[k][pos] != -1)
+      while (k < vf_out.size() && vf_out[k][pos] != -1)
+      {
         k++;
-      //  std::cout << "k=" << k  << "j=" << j<< std::endl;
-      if (k < v_front.size()) {
-        //    std::cout << "index1= "<<v_back.size()<< std::endl;
-        std::vector<int> v = v_front[k];
-        v_front[k][pos] = 0;
-        unsigned index = find(v_front, v);
-        v_front[index][pos] = 1;
-        v = v_back[index];
-        v_back[index][pos] = 1;
-        index = find(v_back, v);
-        v_back[index][pos] = 0;
+      }
+
+      if (k < vf_out.size())
+      {
+        std::vector<int> v = vf_out[k];
+        vf_out[k][pos] = 0;
+        unsigned index = find(vf_out, v);
+        vf_out[index][pos] = 1;
+        v = vb_out[index];
+        vb_out[index][pos] = 1;
+        index = find(vb_out, v);
+        vb_out[index][pos] = 0;
         j = index;
         nb_cubes++;
-        //    std::cout << "index3= "<< index<<"  pos="<<pos << std::endl;
-
-      } else {
-        //    std::cout << "else===" << std::endl;
+      }
+      else
+      {
         break;
       }
     }
   }
 
+  void add_gates_for_line( unsigned pos )
+  {
+    assert( boost::find( adjusted_lines, pos ) == adjusted_lines.end() );
+
+    // preperation of truth table columns
+    if ( adjusted_lines.empty() )
+    {
+      std::cout << "basic first step for pos = " << pos << std::endl;
+      basic_first_step( pos );
+    }
+    else
+    {
+      std::cout << "next step for pos = " << pos << std::endl;
+      next_step( pos );
+    }
+
+    // add gates
+    if ( adjusted_lines.size() + 1u < circ.lines() ) /* not the last gate? */
+    {
+      build_shape( pos );
+      add_gates( pos, start );
+    }
+    else
+    {
+      add_last_gate( pos, start );
+    }
+
+    adjusted_lines += pos;
+  }
+
   Cudd cudd;
   circuit& circ;
+  const binary_truth_table& spec;
+  std::vector<unsigned> adjusted_lines;
+  unsigned start;
   bool verbose;
+
+  truth_table_column_t vf_in, vf_out, vb_in, vb_out;
 };
 
 
   bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics)
   {
     /* Settings */
-    bool verbose = get( settings, "verbose", false );
+    bool                  verbose  = get( settings, "verbose",  false                   );
+    std::vector<unsigned> ordering = get( settings, "ordering", std::vector<unsigned>() );
 
-    unsigned bw = spec.num_inputs(), i = 0u;
-
-    std::vector<std::vector<int> > v_front, v_back, v_f_in, v_b_in;
-    timer < properties_timer > t;
+    timer<properties_timer> t;
 
     if (statistics) {
       properties_timer rt(statistics);
@@ -254,32 +285,24 @@ public:
       return false;
     }
 
-    circ.set_lines(bw);
+    circ.set_lines(spec.num_inputs());
 
     // copy metadata
     copy_metadata(spec, circ);
 
-    young_subgroup_synthesis_manager mgr( circ );
+    // manager
+    young_subgroup_synthesis_manager mgr( circ, spec );
     mgr.verbose = verbose;
 
-    // Step 1
-    mgr.basic_first_step(spec, v_f_in, v_front, v_b_in, v_back);
+    // variable ordering
+    if ( ordering.empty() )
+    {
+      boost::push_back( ordering, boost::irange( 0u, spec.num_inputs() ) );
+    }
 
-    // Step 2
-    unsigned start = 0u;
-    while (i < spec.num_inputs()) {
-      //std::cout << "i=" << i << std::endl;
-      if (i < spec.num_inputs() - 1) {
-        //  print_vec(v_front, v_back);
-        mgr.build_shape(v_front, v_back, i);
-        mgr.add_gates(v_f_in, v_front, v_b_in, v_back, i, start);
-        mgr.next_step(v_f_in, v_front, v_b_in, v_back, i + 1);
-
-      } else {
-        mgr.add_gates(v_f_in, v_b_in, i, start);
-        //  print_vec(v_f_in, v_b_in);
-      }
-      i++;
+    for ( auto i : ordering )
+    {
+      mgr.add_gates_for_line( i );
     }
 
     return true;

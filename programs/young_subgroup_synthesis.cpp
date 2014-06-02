@@ -27,20 +27,28 @@
 #include <algorithms/simulation/simple_simulation.hpp>
 #include <algorithms/synthesis/young_subgroup_synthesis.hpp>
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/range/adaptors.hpp>
+
 using namespace revkit;
 
 int main( int argc, char ** argv )
 {
   using boost::program_options::value;
 
-  bool print_circuit     = false;
-  bool print_truth_table = false;
-  bool verbose           = false;
+  std::string ordering;
+  bool        print_circuit     = false;
+  bool        print_truth_table = false;
+  bool        verbose           = false;
 
   program_options opts;
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
+    ( "ordering",          value<std::string>( &ordering ),                           "Complete variable ordering (space separated)" )
     ( "print_circuit",     value<bool>( &print_circuit )->default_value( false ),     "Prints the circuit" )
     ( "print_truth_table", value<bool>( &print_truth_table )->default_value( false ), "Prints the truth table of the circuit" )
     ( "verbose",           value<bool>( &verbose )->default_value( false ),           "Be verbose" )
@@ -60,6 +68,18 @@ int main( int argc, char ** argv )
   circuit circ;
   properties::ptr settings( new properties );
   settings->set( "verbose", verbose );
+
+  if ( !ordering.empty() )
+  {
+    using boost::adaptors::transformed;
+
+    std::vector<std::string> vsordering;
+    boost::split( vsordering, ordering, boost::is_any_of( " " ) );
+    std::vector<unsigned> vuordering;
+    boost::push_back( vuordering, vsordering | transformed( []( const std::string& s ) { return boost::lexical_cast<unsigned>( s ); } ) );
+    settings->set( "ordering", vuordering );
+  }
+
   young_subgroup_synthesis( circ, spec, settings );
 
   if ( print_circuit )
