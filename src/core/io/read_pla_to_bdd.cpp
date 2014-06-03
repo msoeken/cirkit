@@ -25,7 +25,6 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/irange.hpp>
-#include <boost/range/join.hpp>
 
 #include "pla_parser.hpp"
 
@@ -207,7 +206,17 @@ namespace revkit
     }
 
     // Variables
-    auto labels = inputs_first ? boost::join( pla.input_labels, pla.output_labels ) : boost::join( pla.output_labels, pla.input_labels );
+    std::vector<std::string> labels;
+    if ( inputs_first )
+    {
+      boost::push_back( labels, pla.input_labels );
+      boost::push_back( labels, pla.output_labels );
+    }
+    else
+    {
+      boost::push_back( labels, pla.output_labels );
+      boost::push_back( labels, pla.input_labels );
+    }	
 
     // Inputs
     boost::transform( labels,

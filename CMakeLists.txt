@@ -1,6 +1,6 @@
 project("RevKit" CXX)
 cmake_minimum_required(VERSION 2.8.9)
-add_definitions(-std=c++11 -g)
+add_definitions(-std=c++11 -g -DBOOST_RESULT_OF_USE_DECLTYPE)
 
 include(CTest)
 
