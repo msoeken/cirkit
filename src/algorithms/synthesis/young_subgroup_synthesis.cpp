@@ -89,7 +89,7 @@ public:
     }
   }
 
-  void basic_first_step( unsigned pos )
+  void basic_first_step()
   {
     unsigned bw = spec.num_inputs();
     for (binary_truth_table::const_iterator it = spec.begin(); it != spec.end(); ++it)
@@ -111,19 +111,17 @@ public:
     }
   }
 
-  int find(const truth_table_column_t& vect, const truth_table_column_t::value_type& v)
+  int find( const truth_table_column_t& vect, const truth_table_column_t::value_type& v )
   {
     unsigned i = 0u;
-    while (i < vect.size() && !(std::equal(vect[i].begin(), vect[i].end(), v.begin())))
+    while ( i < vect.size() && !boost::equal( vect[i], v ) )
     {
       i++;
     }
     return i;
   }
 
-  BDD get_control_function( const truth_table_column_t& in,
-                            const truth_table_column_t& out,
-                            unsigned pos )
+  BDD get_control_function( const truth_table_column_t& in, const truth_table_column_t& out )
   {
     BDD bdd = cudd.bddZero();
 
@@ -146,11 +144,10 @@ public:
     return bdd;
   }
 
-  void add_gates( unsigned pos,
-                  unsigned& start)
+  void add_gates( unsigned& start )
   {
-    BDD bdd_front = get_control_function( vf_in, vf_out, pos );
-    BDD bdd_back  = get_control_function( vb_in, vb_out, pos );
+    BDD bdd_front = get_control_function( vf_in, vf_out );
+    BDD bdd_back  = get_control_function( vb_in, vb_out );
 
     if ( verbose )
     {
@@ -168,9 +165,9 @@ public:
     synthesis_gate(bdd_back, pos, back);
   }
 
-  void add_last_gate( unsigned pos, unsigned& start )
+  void add_last_gate( unsigned& start )
   {
-    BDD bdd = get_control_function( vf_in, vb_in, pos );
+    BDD bdd = get_control_function( vf_in, vb_in );
 
     if ( verbose )
     {
@@ -180,7 +177,7 @@ public:
     synthesis_gate( bdd, pos, start);
   }
 
-  void next_step( unsigned pos)
+  void next_step()
   {
     vf_in = vf_out;
     vb_in = vb_out;
@@ -191,7 +188,7 @@ public:
     }
   }
 
-  void build_shape( unsigned pos )
+  void build_shape()
   {
     unsigned j = 0u, nb_cubes = 0u;
     while (j < vf_out.size())
@@ -222,29 +219,30 @@ public:
     }
   }
 
-  void add_gates_for_line( unsigned pos )
+  void add_gates_for_line( unsigned line )
   {
-    assert( boost::find( adjusted_lines, pos ) == adjusted_lines.end() );
+    assert( boost::find( adjusted_lines, line ) == adjusted_lines.end() );
+    pos = line;
 
     // preperation of truth table columns
     if ( adjusted_lines.empty() )
     {
-      basic_first_step( pos );
+      basic_first_step();
     }
     else
     {
-      next_step( pos );
+      next_step();
     }
 
     // add gates
     if ( adjusted_lines.size() + 1u < circ.lines() ) /* not the last gate? */
     {
-      build_shape( pos );
-      add_gates( pos, start );
+      build_shape();
+      add_gates( start );
     }
     else
     {
-      add_last_gate( pos, start );
+      add_last_gate( start );
     }
 
     adjusted_lines += pos;
@@ -254,66 +252,66 @@ public:
   circuit& circ;
   const binary_truth_table& spec;
   std::vector<unsigned> adjusted_lines;
-  unsigned start;
+  unsigned pos, start;
   bool verbose;
 
   truth_table_column_t vf_in, vf_out, vb_in, vb_out;
 };
 
 
-  bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics)
-  {
-    /* Settings */
-    bool                  verbose  = get( settings, "verbose",  false                   );
-    std::vector<unsigned> ordering = get( settings, "ordering", std::vector<unsigned>() );
+bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics)
+{
+  /* Settings */
+  bool                  verbose  = get( settings, "verbose",  false                   );
+  std::vector<unsigned> ordering = get( settings, "ordering", std::vector<unsigned>() );
 
-    timer<properties_timer> t;
+  timer<properties_timer> t;
 
-    if (statistics) {
-      properties_timer rt(statistics);
-      t.start(rt);
-    }
-
-    // circuit has to be empty
-    clear_circuit(circ);
-
-    // truth table has to be fully specified
-    if (!fully_specified(spec)) {
-      set_error_message(statistics, "truth table `spec` is not fully specified.");
-      return false;
-    }
-
-    circ.set_lines(spec.num_inputs());
-
-    // copy metadata
-    copy_metadata(spec, circ);
-
-    // manager
-    young_subgroup_synthesis_manager mgr( circ, spec );
-    mgr.verbose = verbose;
-
-    // variable ordering
-    if ( ordering.empty() )
-    {
-      boost::push_back( ordering, boost::irange( 0u, spec.num_inputs() ) );
-    }
-
-    for ( auto i : ordering )
-    {
-      mgr.add_gates_for_line( i );
-    }
-
-    return true;
+  if (statistics) {
+    properties_timer rt(statistics);
+    t.start(rt);
   }
 
-  truth_table_synthesis_func young_subgroup_synthesis_func(properties::ptr settings, properties::ptr statistics)
-  {
-    truth_table_synthesis_func f = [&settings, &statistics]( circuit& circ, const binary_truth_table& spec ) {
-      return young_subgroup_synthesis( circ, spec, settings, statistics );
-    };
-    f.init( settings, statistics );
-    return f;
+  // circuit has to be empty
+  clear_circuit(circ);
+
+  // truth table has to be fully specified
+  if (!fully_specified(spec)) {
+    set_error_message(statistics, "truth table `spec` is not fully specified.");
+    return false;
   }
+
+  circ.set_lines(spec.num_inputs());
+
+  // copy metadata
+  copy_metadata(spec, circ);
+
+  // manager
+  young_subgroup_synthesis_manager mgr( circ, spec );
+  mgr.verbose = verbose;
+
+  // variable ordering
+  if ( ordering.empty() )
+  {
+    boost::push_back( ordering, boost::irange( 0u, spec.num_inputs() ) );
+  }
+
+  for ( auto i : ordering )
+  {
+    mgr.add_gates_for_line( i );
+  }
+
+  return true;
+}
+
+truth_table_synthesis_func young_subgroup_synthesis_func(properties::ptr settings, properties::ptr statistics)
+{
+  truth_table_synthesis_func f = [&settings, &statistics]( circuit& circ, const binary_truth_table& spec ) {
+    return young_subgroup_synthesis( circ, spec, settings, statistics );
+  };
+  f.init( settings, statistics );
+  return f;
+}
 
 }
 
