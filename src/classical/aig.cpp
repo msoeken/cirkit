@@ -17,13 +17,95 @@
 
 #include "aig.hpp"
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
+#include <boost/format.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/range/adaptors.hpp>
 
 namespace revkit
 {
 
 using namespace boost::assign;
+
+/******************************************************************************
+ * Types                                                                      *
+ ******************************************************************************/
+
+typedef std::map<std::string, std::string> properties_map_t;
+
+/******************************************************************************
+ * Private functions                                                          *
+ ******************************************************************************/
+
+std::string make_string( const properties_map_t& properties )
+{
+  using boost::adaptors::transformed;
+
+  return boost::join( properties | transformed( []( const std::pair<std::string, std::string>& p ) { return boost::str( boost::format( "%s=%s" ) % p.first % p.second ); } ), "," );
+}
+
+struct aig_dot_writer
+{
+  aig_dot_writer( const aig_graph& aig ) : aig( aig ) {}
+
+  /* vertex properties */
+  void operator()( std::ostream& os, const aig_node& v )
+  {
+    properties_map_t properties;
+    const auto& graph_info = boost::get_property( aig, boost::graph_name );
+    const auto& namemap = boost::get( boost::vertex_name, aig );
+
+    if ( out_degree( v, aig ) == 0u )
+    {
+      properties["shape"] = "box";
+    }
+
+    auto itName = graph_info.node_names.find( v );
+    if ( itName != graph_info.node_names.end() )
+    {
+      properties["label"] = boost::str( boost::format( "\"%s (%d)\"" ) % itName->second % namemap[v] );
+    }
+    else
+    {
+      properties["label"] = boost::str( boost::format( "\"%s\"" ) % namemap[v] );
+    }
+
+    os << "[" << make_string( properties ) << "]";
+  }
+
+  /* edge properties */
+  void operator()( std::ostream& os, const aig_edge& e )
+  {
+    const auto& polaritymap = boost::get( boost::edge_polarity, aig );
+
+    if ( !polaritymap[e] )
+    {
+      os << "[style=dashed]";
+    }
+  }
+
+  /* graph properties */
+  void operator()( std::ostream& os )
+  {
+    const auto& graph_info = boost::get_property( aig, boost::graph_name );
+
+    unsigned index = 0u;
+    for ( const auto& o : graph_info.outputs )
+    {
+      os << "o" << index << "[label=\"" << o.second << "\",shape=box];" << std::endl;
+      os << "o" << index << " -> " << o.first.first << " ";
+      if ( !o.first.second )
+      {
+        os << "[style=dashed]";
+      }
+      os << ";" << std::endl;
+    }
+  }
+
+private:
+  const aig_graph& aig;
+};
 
 /******************************************************************************
  * Public functions                                                           *
@@ -44,7 +126,7 @@ aig_function aig_get_constant( aig_graph& aig, bool value )
 aig_function aig_create_pi( aig_graph& aig, const std::string& name )
 {
   aig_node node = add_vertex( aig );
-  boost::get( boost::vertex_name, aig )[node] = 2u * num_vertices( aig );
+  boost::get( boost::vertex_name, aig )[node] = 2u * ( num_vertices( aig ) - 1u );
 
   boost::get_property( aig, boost::graph_name ).inputs += node;
   boost::get_property( aig, boost::graph_name ).node_names[node] = name;
@@ -79,7 +161,7 @@ aig_function aig_create_and( aig_graph& aig, aig_function left, aig_function rig
 
   /* create node and connect to children */
   aig_node node = add_vertex( aig );
-  boost::get( boost::vertex_name, aig )[node] = 2u * num_vertices( aig );
+  boost::get( boost::vertex_name, aig )[node] = 2u * ( num_vertices( aig ) - 1u );
 
   aig_edge le = add_edge( node, left.first, aig ).first;
   boost::get( boost::edge_polarity, aig )[le] = left.second;
@@ -93,7 +175,8 @@ void write_dot( std::ostream& os, const aig_graph& aig )
 {
   auto indexmap = get( boost::vertex_name, aig );
 
-  boost::write_graphviz( os, aig, boost::make_label_writer( indexmap ) );
+  aig_dot_writer writer( aig );
+  boost::write_graphviz( os, aig, writer, writer, writer );
 }
 
 }
