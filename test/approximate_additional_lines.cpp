@@ -6,7 +6,6 @@
 #if ADDON_REVLIB
 
 #include <initializer_list>
-#include <iomanip>
 #include <future>
 #include <fstream>
 #include <vector>
@@ -14,14 +13,8 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <boost/fusion/include/boost_tuple.hpp>
 #include <boost/optional.hpp>
-#include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
-#include <boost/range/algorithm_ext.hpp>
-#include <boost/range/irange.hpp>
-#include <boost/spirit/include/karma.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include <core/functions/approximate_additional_lines.hpp>
 #include <core/utils/foreach_function.hpp>
