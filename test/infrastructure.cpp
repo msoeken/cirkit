@@ -3,7 +3,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "benchmark_table.hpp"
+#include <core/utils/benchmark_table.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)
 {
@@ -14,7 +14,6 @@ BOOST_AUTO_TEST_CASE(simple)
   table.add( std::string( "d2" ),     2u, 1.01 );
 
   table.print();
-  //table.print();
 }
 
 // Local Variables:

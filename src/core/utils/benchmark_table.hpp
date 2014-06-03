@@ -15,6 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file benchmark_table.hpp
+ *
+ * @brief Data-structures for producing benchmark tables
+ *
+ * @author Mathias Soeken
+ * @since  2.0
+ */
+
 #ifndef BENCHMARK_TABLE_HPP
 #define BENCHMARK_TABLE_HPP
 
@@ -130,7 +139,7 @@ public:
   template<typename T>
   void add_length( const T& value )
   {
-    unsigned l = print_cell<T>( value, length_t() ).size();
+    unsigned l = print_cell( value ).size();
     if ( l > lengths[length_i] )
     {
       lengths[length_i] = l;

@@ -18,10 +18,10 @@
 #include <boost/range/algorithm.hpp>
 
 #include <core/functions/approximate_additional_lines.hpp>
+#include <core/utils/benchmark_table.hpp>
 #include <core/utils/foreach_function.hpp>
 
 #include "caching.h"
-#include "benchmark_table.hpp"
 
 unsigned call_extern( const std::string& filename, unsigned num_inputs, const std::string& program )
 {
