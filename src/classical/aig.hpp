@@ -42,13 +42,14 @@ namespace boost
 namespace revkit
 {
   typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS> traits_t;
+  typedef std::pair<traits_t::vertex_descriptor, bool> aig_function; /* the second type is for the polarity */
 
   struct aig_graph_info
   {
     std::map<traits_t::vertex_descriptor, std::string> node_names;
-    std::vector<std::tuple<traits_t::vertex_descriptor, bool, std::string> > outputs;
+    std::vector<std::pair<aig_function, std::string> > outputs;
     std::vector<traits_t::vertex_descriptor> inputs;
-    std::map<std::tuple<traits_t::vertex_descriptor, traits_t::vertex_descriptor, bool, bool>, traits_t::vertex_descriptor> strash;
+    std::map<std::pair<aig_function, aig_function>, aig_function> strash;
   };
 
   typedef boost::property<boost::vertex_name_t, unsigned,
@@ -66,9 +67,10 @@ namespace revkit
   typedef boost::graph_traits<aig_graph>::edge_descriptor aig_edge;
 
   void aig_initialize( aig_graph& aig );
-  aig_node aig_create_pi( aig_graph& aig, const std::string& name );
-  void aig_create_po( aig_graph& aig, const aig_node& node, const std::string& name, bool polarity = true );
-  aig_node aig_create_and( aig_graph& aig, aig_node left, aig_node right, bool polarity_left = true, bool polarity_right = true );
+  aig_function aig_get_constant( aig_graph& aig, bool value );
+  aig_function aig_create_pi( aig_graph& aig, const std::string& name );
+  void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name );
+  aig_function aig_create_and( aig_graph& aig, aig_function left, aig_function right );
 
   void write_dot( std::ostream& os, const aig_graph& aig );
 

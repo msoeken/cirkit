@@ -36,38 +36,41 @@ void aig_initialize( aig_graph& aig )
   boost::get( boost::vertex_name, aig )[node] = 0u;
 }
 
-aig_node aig_create_pi( aig_graph& aig, const std::string& name )
+aig_function aig_get_constant( aig_graph& aig, bool value )
+{
+  return std::make_pair( 0u, value );
+}
+
+aig_function aig_create_pi( aig_graph& aig, const std::string& name )
 {
   aig_node node = add_vertex( aig );
   boost::get( boost::vertex_name, aig )[node] = 2u * num_vertices( aig );
 
   boost::get_property( aig, boost::graph_name ).inputs += node;
   boost::get_property( aig, boost::graph_name ).node_names[node] = name;
+
+  return std::make_pair( node, true );
 }
 
-void aig_create_po( aig_graph& aig, const aig_node& node, const std::string& name, bool polarity )
+void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name )
 {
-  boost::get_property( aig, boost::graph_name ).outputs += std::make_tuple( node, polarity, name );
+  boost::get_property( aig, boost::graph_name ).outputs += std::make_pair( f, name );
 }
 
-aig_node aig_create_and( aig_graph& aig, aig_node left, aig_node right, bool polarity_left, bool polarity_right )
+aig_function aig_create_and( aig_graph& aig, aig_function left, aig_function right )
 {
   /* sort left and right child */
-  if ( left > right )
+  if ( left.first > right.first )
   {
-    aig_node tmp = left;
+    aig_function tmp = left;
     left = right;
     right = tmp;
-
-    bool btmp = polarity_left;
-    polarity_left = polarity_right;
-    polarity_right = tmp;
   }
 
   auto& info = boost::get_property( aig, boost::graph_name );
 
   /* structural hashing */
-  auto key = std::make_tuple( left, right, polarity_left, polarity_right );
+  auto key = std::make_pair( left, right );
   auto it = info.strash.find( key );
   if ( it != info.strash.end() )
   {
@@ -78,12 +81,12 @@ aig_node aig_create_and( aig_graph& aig, aig_node left, aig_node right, bool pol
   aig_node node = add_vertex( aig );
   boost::get( boost::vertex_name, aig )[node] = 2u * num_vertices( aig );
 
-  aig_edge le = add_edge( node, left, aig ).first;
-  boost::get( boost::edge_polarity, aig )[le] = polarity_left;
-  aig_edge re = add_edge( node, right, aig ).first;
-  boost::get( boost::edge_polarity, aig )[re] = polarity_right;
+  aig_edge le = add_edge( node, left.first, aig ).first;
+  boost::get( boost::edge_polarity, aig )[le] = left.second;
+  aig_edge re = add_edge( node, right.first, aig ).first;
+  boost::get( boost::edge_polarity, aig )[re] = right.second;
 
-  return info.strash[key] = node;
+  return info.strash[key] = std::make_pair( node, true );
 }
 
 void write_dot( std::ostream& os, const aig_graph& aig )
