@@ -70,9 +70,13 @@ namespace revkit
   aig_function aig_get_constant( aig_graph& aig, bool value );
   aig_function aig_create_pi( aig_graph& aig, const std::string& name );
   void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name );
-  aig_function aig_create_and( aig_graph& aig, aig_function left, aig_function right );
+  aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig_function& right );
+  aig_function aig_create_or( aig_graph& aig, const aig_function& left, const aig_function& right );
+  aig_function aig_create_ite( aig_graph& aig, const aig_function& cond, const aig_function& t, const aig_function& e );
 
   void write_dot( std::ostream& os, const aig_graph& aig );
+
+  aig_function operator!( const aig_function& f );
 
 }
 

@@ -100,6 +100,7 @@ struct aig_dot_writer
         os << "[style=dashed]";
       }
       os << ";" << std::endl;
+      ++index;
     }
   }
 
@@ -139,20 +140,13 @@ void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& na
   boost::get_property( aig, boost::graph_name ).outputs += std::make_pair( f, name );
 }
 
-aig_function aig_create_and( aig_graph& aig, aig_function left, aig_function right )
+aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig_function& right )
 {
-  /* sort left and right child */
-  if ( left.first > right.first )
-  {
-    aig_function tmp = left;
-    left = right;
-    right = tmp;
-  }
-
   auto& info = boost::get_property( aig, boost::graph_name );
 
   /* structural hashing */
-  auto key = std::make_pair( left, right );
+  bool in_order = left.first < right.first;
+  auto key = std::make_pair( in_order ? left : right, in_order ? right : left );
   auto it = info.strash.find( key );
   if ( it != info.strash.end() )
   {
@@ -171,6 +165,16 @@ aig_function aig_create_and( aig_graph& aig, aig_function left, aig_function rig
   return info.strash[key] = std::make_pair( node, true );
 }
 
+aig_function aig_create_or( aig_graph& aig, const aig_function& left, const aig_function& right )
+{
+  return !aig_create_and( aig, !left, !right );
+}
+
+aig_function aig_create_ite( aig_graph& aig, const aig_function& cond, const aig_function& t, const aig_function& e )
+{
+  return aig_create_or( aig, aig_create_and( aig, cond, t ), aig_create_and( aig, !cond, e ) );
+}
+
 void write_dot( std::ostream& os, const aig_graph& aig )
 {
   auto indexmap = get( boost::vertex_name, aig );
@@ -178,6 +182,12 @@ void write_dot( std::ostream& os, const aig_graph& aig )
   aig_dot_writer writer( aig );
   boost::write_graphviz( os, aig, writer, writer, writer );
 }
+
+aig_function operator!( const aig_function& f )
+{
+  return std::make_pair( f.first, !f.second );
+}
+
 
 }
 
