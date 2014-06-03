@@ -20,12 +20,74 @@
 
 #include <iomanip>
 
+#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/tuple/tuple.hpp>
 
+/* this is to format a cell */
+typedef boost::optional<unsigned> length_t;
+
+template<typename T>
+std::string print_cell( const T& value, const length_t& length = length_t() )
+{
+  assert( 0 );
+}
+
+template<>
+std::string print_cell<>( const std::string& value, const length_t& length )
+{
+  if ( length )
+  {
+    return boost::str( boost::format( "%-" + boost::lexical_cast<std::string>( *length ) + "s" ) % value );
+  }
+  else
+  {
+    return value;
+  }
+}
+
+template<>
+std::string print_cell<>( const int& value, const length_t& length )
+{
+  if ( length )
+  {
+    return boost::str( boost::format( "%" + boost::lexical_cast<std::string>( *length ) + "d" ) % value );
+  }
+  else
+  {
+    return boost::lexical_cast<std::string>( value );
+  }
+}
+
+template<>
+std::string print_cell<>( const unsigned& value, const length_t& length )
+{
+  if ( length )
+  {
+    return boost::str( boost::format( "%" + boost::lexical_cast<std::string>( *length ) + "d" ) % value );
+  }
+  else
+  {
+    return boost::lexical_cast<std::string>( value );
+  }
+}
+
+template<>
+std::string print_cell<>( const double& value, const length_t& length )
+{
+  if ( length )
+  {
+    return boost::str( boost::format( "%" + boost::lexical_cast<std::string>( *length ) + ".2f" ) % value );
+  }
+  else
+  {
+    return boost::str( boost::format( "%.2f" ) % value );
+  }
+}
 
 /* this is to display one row of the result set */
 template<class TypleT, int N, typename... Arguments> struct print_row_t;
@@ -33,7 +95,7 @@ template<class TupleT, int N, class T, typename... Arguments> struct print_row_t
 {
   static void print( const TupleT& t, const std::vector<unsigned>& column_lengths )
   {
-    std::cout << "| " << std::setw( column_lengths[N] ) << boost::get<N>( t ) << " ";
+    std::cout << "| " << print_cell( boost::get<N>( t ), column_lengths[N] ) << " ";
     print_row_t<TupleT, N + 1, Arguments...>::print( t, column_lengths );
   }
 };
@@ -41,7 +103,7 @@ template<class TupleT, int N, class T> struct print_row_t<TupleT, N, T>
 {
   static void print( const TupleT& t, const std::vector<unsigned>& column_lengths )
   {
-    std::cout << "| " << std::setw( column_lengths[N] ) << boost::get<N>( t ) << " |" << std::endl;
+    std::cout << "| " << print_cell( boost::get<N>( t ), column_lengths[N] ) << " |" << std::endl;
   }
 };
 
@@ -68,7 +130,7 @@ public:
   template<typename T>
   void add_length( const T& value )
   {
-    unsigned l = boost::lexical_cast<std::string>( value ).size();
+    unsigned l = print_cell<T>( value, length_t() ).size();
     if ( l > lengths[length_i] )
     {
       lengths[length_i] = l;
@@ -101,6 +163,7 @@ public:
   {
     for ( unsigned n : boost::irange( 0u, (unsigned)_column_names.size() ) )
     {
+      std::cout.setf( std::ios::left );
       std::cout << "| " << std::setw( lengths[n] ) << _column_names[n] << " ";
     }
     std::cout << "|" << std::endl;

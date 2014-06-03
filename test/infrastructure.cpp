@@ -9,9 +9,9 @@ BOOST_AUTO_TEST_CASE(simple)
 {
   benchmark_table<std::string, unsigned, double> table( { "Name", "Gates", "Time" } );
 
-  table.add( std::string( "hwb4" ),  10, 4.50 );
-  table.add( std::string( "sqrt2" ), 18, 9.20 );
-  table.add( std::string( "d2" ),     2, 1.01 );
+  table.add( std::string( "hwb4" ),  10u, 4.50 );
+  table.add( std::string( "sqrt2" ), 18u, 9.20 );
+  table.add( std::string( "d2" ),     2u, 1.01 );
 
   table.print();
   //table.print();
