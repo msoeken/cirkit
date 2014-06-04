@@ -53,9 +53,13 @@ inline void read_box_def( aigmeta& meta, const ptree& pt )
   box.id = pt.get<unsigned>( "output_bundle_id" );
   box.oper_type = pt.get<std::string>( "oper_type" );
 
-  for ( const auto& port_def : pt.get_child( "port_def" ) )
+  auto children = pt.get_child_optional( "port_def" );
+  if ( children )
   {
-    read_port_def( box, port_def.second );
+    for ( const auto& port_def : *children )
+    {
+      read_port_def( box, port_def.second );
+    }
   }
 
   meta.boxes += box;
