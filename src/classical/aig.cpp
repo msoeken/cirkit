@@ -170,9 +170,19 @@ aig_function aig_create_or( aig_graph& aig, const aig_function& left, const aig_
   return !aig_create_and( aig, !left, !right );
 }
 
+aig_function aig_create_xor( aig_graph& aig, const aig_function& left, const aig_function& right )
+{
+  return aig_create_or( aig, aig_create_and( aig, !left, right), aig_create_and( aig, left, !right ) );
+}
+
 aig_function aig_create_ite( aig_graph& aig, const aig_function& cond, const aig_function& t, const aig_function& e )
 {
   return aig_create_or( aig, aig_create_and( aig, cond, t ), aig_create_and( aig, !cond, e ) );
+}
+
+aig_function aig_create_maj( aig_graph& aig, const aig_function& a, const aig_function& b, const aig_function& c )
+{
+  return aig_create_or( aig, aig_create_or( aig, aig_create_and( aig, a, b ), aig_create_and( aig, a, c ) ), aig_create_and( aig, b, c ) );
 }
 
 void write_dot( std::ostream& os, const aig_graph& aig )

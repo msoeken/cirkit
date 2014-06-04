@@ -72,7 +72,9 @@ namespace revkit
   void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name );
   aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig_function& right );
   aig_function aig_create_or( aig_graph& aig, const aig_function& left, const aig_function& right );
+  aig_function aig_create_xor( aig_graph& aig, const aig_function& left, const aig_function& right );
   aig_function aig_create_ite( aig_graph& aig, const aig_function& cond, const aig_function& t, const aig_function& e );
+  aig_function aig_create_maj( aig_graph& aig, const aig_function& a, const aig_function& b, const aig_function& c );
 
   void write_dot( std::ostream& os, const aig_graph& aig );
 
