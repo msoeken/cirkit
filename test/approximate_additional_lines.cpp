@@ -49,10 +49,11 @@ BOOST_AUTO_TEST_CASE(simple)
   enable_caching( "tcad_embedding" );
 
   /* run algorithms */
-  std::vector<std::string> blacklist, whitelist;
+  std::vector<std::string> blacklist, whitelist, date11_list;
   blacklist += "misex3c_181","5xp1_90","bw_116","sao2_199","f2_158","cps_140";
   whitelist += "xor5_195";
-  foreach_function_with_blacklist( blacklist, [&table]( const boost::filesystem::path& path ) {
+  date11_list += "apex2_101","apex5_104","cordic_138","cps_140","e64_149","ex5p_154","pdc_191","seq_201","spla_202","xor5_195";
+  foreach_function_with_whitelist( date11_list, [&table]( const boost::filesystem::path& path ) {
     std::string function = path.stem().string();
 
     /* output */
@@ -75,12 +76,12 @@ BOOST_AUTO_TEST_CASE(simple)
     /* exact after extending */     // unfortunately CUDD is not thread-safe, hence this work around
     boost::optional<unsigned> exact = compute_and_cache<unsigned>([&filename, &num_inputs]() {
       return call_extern( filename, num_inputs, "extend_truth_table" );
-    }, std::chrono::seconds(5), "tcad_embedding", function + "-exact", true );
+    }, std::chrono::seconds(1500), "tcad_embedding", function + "-exact", true );
 
     /* exact with characteristic BDD */
     boost::optional<unsigned> exact_bdd = compute_and_cache<unsigned>([&filename, &num_inputs]() {
       return call_extern( filename, num_inputs, "characteristic_bdd" );
-    }, std::chrono::seconds(10), "tcad_embedding", function + "-exact-bdd", true );
+    }, std::chrono::seconds(1500), "tcad_embedding", function + "-exact-bdd", true );
 
     /* add to results */
     table.add( function, num_inputs, num_outputs, num_inputs + num_outputs, heuristic, exact, exact_bdd );
