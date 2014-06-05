@@ -114,6 +114,8 @@ private:
 
 void aig_initialize( aig_graph& aig )
 {
+  assert( num_vertices( aig ) == 0u );
+
   /* create constant node */
   aig_node node = add_vertex( aig );
   boost::get( boost::vertex_name, aig )[node] = 0u;
@@ -156,6 +158,7 @@ aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig
   /* create node and connect to children */
   aig_node node = add_vertex( aig );
   boost::get( boost::vertex_name, aig )[node] = 2u * ( num_vertices( aig ) - 1u );
+  assert( 2u * node == 2u * ( num_vertices( aig ) - 1u ) );
 
   aig_edge le = add_edge( node, left.first, aig ).first;
   boost::get( boost::edge_polarity, aig )[le] = left.second;
