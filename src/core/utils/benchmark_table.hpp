@@ -98,6 +98,13 @@ std::string print_cell<>( const double& value, const length_t& length )
   }
 }
 
+template<>
+std::string print_cell<>( const boost::optional<unsigned>& value, const length_t& length )
+{
+  std::string timeout = "T/O";
+  return value ? print_cell( *value, length ) : print_cell( timeout );
+}
+
 /* this is to display one row of the result set */
 template<class TypleT, int N, typename... Arguments> struct print_row_t;
 template<class TupleT, int N, class T, typename... Arguments> struct print_row_t<TupleT, N, T, Arguments...>
