@@ -134,7 +134,7 @@ aig_function aig_create_pi( aig_graph& aig, const std::string& name )
   boost::get_property( aig, boost::graph_name ).inputs += node;
   boost::get_property( aig, boost::graph_name ).node_names[node] = name;
 
-  return std::make_pair( node, true );
+  return std::make_pair( node, false );
 }
 
 void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name )
@@ -190,10 +190,15 @@ aig_function aig_create_maj( aig_graph& aig, const aig_function& a, const aig_fu
 
 void write_dot( std::ostream& os, const aig_graph& aig )
 {
-  auto indexmap = get( boost::vertex_name, aig );
-
   aig_dot_writer writer( aig );
   boost::write_graphviz( os, aig, writer, writer, writer );
+}
+
+unsigned aig_to_literal( const aig_graph& aig, const aig_function& f )
+{
+  const auto& indexmap = get( boost::vertex_name, aig );
+
+  return indexmap[f.first] + ( f.second ? 1u : 0u );
 }
 
 aig_function operator!( const aig_function& f )

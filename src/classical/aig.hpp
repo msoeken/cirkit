@@ -78,6 +78,7 @@ namespace revkit
 
   void write_dot( std::ostream& os, const aig_graph& aig );
 
+  unsigned aig_to_literal( const aig_graph& aig, const aig_function& f );
   aig_function operator!( const aig_function& f );
 
 }
