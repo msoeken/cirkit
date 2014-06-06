@@ -63,6 +63,8 @@ struct aigmeta
 };
 
 void read_aigmeta( aigmeta& meta, const std::string& filename );
+void write_aigmeta( const aigmeta& meta, const std::string& filename );
+
 std::ostream& operator<<( std::ostream& os, const aigmeta& meta );
 
 }

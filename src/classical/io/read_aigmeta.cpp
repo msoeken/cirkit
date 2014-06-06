@@ -101,6 +101,19 @@ void read_aigmeta( aigmeta& meta, const std::string& filename )
   }
 }
 
+void write_aigmeta( const aigmeta& meta, const std::string& filename )
+{
+  std::filebuf fb;
+  fb.open( filename.c_str(), std::ios::out );
+  std::ostream os( &fb );
+
+  os << "{" << std::endl;
+  os << "    \"dut\" : \"" << meta.dut << "\"," << std::endl;
+  os << "}" << std::endl;
+
+  fb.close();
+}
+
 std::ostream& operator<<( std::ostream& os, const aigmeta& meta )
 {
   os << "DUT:      " << meta.dut << std::endl
