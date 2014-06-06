@@ -19,6 +19,7 @@
 
 #include <iostream>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -103,13 +104,33 @@ void read_aigmeta( aigmeta& meta, const std::string& filename )
 
 void write_aigmeta( const aigmeta& meta, const std::string& filename )
 {
+  using boost::adaptors::transformed;
+
   std::filebuf fb;
   fb.open( filename.c_str(), std::ios::out );
   std::ostream os( &fb );
 
   os << "{" << std::endl;
-  os << "    \"dut\" : \"" << meta.dut << "\"," << std::endl;
-  os << "}" << std::endl;
+  os << "    \"dut\": \"" << meta.dut << "\"," << std::endl;
+  os << "    \"bundle_def\": [" << std::endl;
+
+  bool first = true;
+  for ( const auto& bundle : meta.bundles )
+  {
+    if ( !first )
+    {
+      os << "," << std::endl;
+    }
+    first = false;
+    os << "        {" << std::endl
+       << "            \"name\": \"" << bundle.name << "\"," << std::endl
+       << "            \"bundle_id\": " << bundle.id << "," << std::endl
+       << "            \"litx\": [ " << boost::join( bundle.literals | transformed( boost::lexical_cast<std::string, unsigned> ), ", " ) << " ]" << std::endl
+       << "        }";
+  }
+  os << std::endl
+     << "    ]" << std::endl
+     << "}" << std::endl;
 
   fb.close();
 }
