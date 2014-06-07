@@ -112,9 +112,32 @@ void write_aigmeta( const aigmeta& meta, const std::string& filename )
 
   os << "{" << std::endl;
   os << "    \"dut\": \"" << meta.dut << "\"," << std::endl;
-  os << "    \"bundle_def\": [" << std::endl;
+
+  /* boxes */
+  os << "    \"box_def\": [" << std::endl;
 
   bool first = true;
+  for ( const auto& box : meta.boxes )
+  {
+    if ( !first )
+    {
+      os << "," << std::endl;
+    }
+    first = false;
+    os << "        {" << std::endl
+       << "            \"output_bundle_id\": " << box.id << "," << std::endl
+       << "            \"oper_type\": \"" << box.oper_type << "\"," << std::endl
+       << "            \"port_def\": []" << std::endl
+       << "        }";
+  }
+
+  os << std::endl
+     << "    ]," << std::endl;
+
+  /* bundles */
+  os << "    \"bundle_def\": [" << std::endl;
+
+  first = true;
   for ( const auto& bundle : meta.bundles )
   {
     if ( !first )
