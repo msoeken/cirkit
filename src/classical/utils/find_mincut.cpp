@@ -24,23 +24,98 @@
 namespace revkit
 {
 
-void find_mincut( aig_graph& graph, std::list<unsigned>& cut )
+/******************************************************************************
+ * Private functions                                                          *
+ ******************************************************************************/
+
+void add_reverse_edge( aig_graph& aig, const aig_edge& edge, double capacity = 1.0 )
+{
+  auto capacitymap   = get( boost::edge_capacity,   aig );
+  auto reversemap    = get( boost::edge_reverse,    aig );
+
+  auto redge = add_edge( boost::target( edge, aig ), boost::source( edge, aig ), aig ).first;
+
+  capacitymap[edge] = capacity;
+  capacitymap[redge] = 0.0;
+  reversemap[edge] = redge;
+  reversemap[redge] = edge;
+}
+
+aig_edge add_reverse_edge( aig_graph& aig, const aig_node& from, const aig_node& to, double capacity = std::numeric_limits<double>::infinity() )
+{
+  auto capacitymap   = get( boost::edge_capacity,   aig );
+  auto reversemap    = get( boost::edge_reverse,    aig );
+
+  auto edge = add_edge( from, to, aig ).first;
+  auto redge = add_edge( to, from, aig ).first;
+
+  capacitymap[edge] = capacity;
+  capacitymap[redge] = 0.0;
+  reversemap[edge] = redge;
+  reversemap[redge] = edge;
+
+  return edge;
+}
+
+void prepare_graph( aig_graph& aig, aig_node& source, aig_node& target )
+{
+  const auto& graph_info = boost::get_property( aig, boost::graph_name );
+  auto complementmap = get( boost::edge_complement, aig );
+  auto capacitymap   = get( boost::edge_capacity,   aig );
+  auto reversemap    = get( boost::edge_reverse,    aig );
+
+  /* reverse edges */
+  for ( const auto& edge : boost::make_iterator_range( edges( aig ) ) )
+  {
+    add_reverse_edge( aig, edge );
+  }
+
+  /* source and target */
+  source = add_vertex( aig );
+  target = add_vertex( aig );
+
+  for ( const auto& input : graph_info.inputs )
+  {
+    add_reverse_edge( aig, input, target );
+  }
+
+  for ( const auto& output : graph_info.outputs )
+  {
+    auto output_node = add_vertex( aig );
+    auto edge = add_reverse_edge( aig, output_node, output.first.first, 1.0 );
+    complementmap[edge] = output.first.second;
+
+    add_reverse_edge( aig, source, output_node );
+  }
+
+  /* constant */
+  add_reverse_edge( aig, graph_info.constant, target );
+}
+
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
+
+void find_mincut( aig_graph& aig, std::list<aig_function>& cut )
 {
   using namespace boost::assign;
+  aig_node source, target;
 
-  boykov_kolmogorov_max_flow( graph, 0, 1 );
+  prepare_graph( aig, source, target );
 
-  auto capacity = boost::get( boost::edge_capacity, graph );
-  auto name     = boost::get( boost::vertex_name,   graph );
-  auto color    = boost::get( boost::vertex_color,  graph );
+  boykov_kolmogorov_max_flow( aig, source, target );
 
-  for ( const auto& e : boost::make_iterator_range( edges( graph ) ) )
+  auto capacity   = boost::get( boost::edge_capacity,   aig );
+  auto complement = boost::get( boost::edge_complement, aig );
+  auto color      = boost::get( boost::vertex_color,    aig );
+
+  for ( const auto& e : boost::make_iterator_range( edges( aig ) ) )
   {
     if ( capacity[e] > 0 )
     {
-      if ( color[source(e, graph)] != color[target(e, graph)] )
+      if ( color[boost::source(e, aig)] != color[boost::target(e, aig)] )
       {
-        cut += name[source(e, graph)];
+        cut += std::make_pair( boost::target(e, aig), complement[e] );
       }
     }
   }

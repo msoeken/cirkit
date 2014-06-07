@@ -44,28 +44,9 @@ BOOST_AUTO_TEST_CASE(simple)
   settings.dotname = "/tmp/test.dot";
   aiger_to_aig( aig, graph, settings );
 
-  std::list<unsigned> cut;
+  std::list<aig_function> cut;
   find_mincut( graph, cut );
   std::cout << "Found cut of size: " << cut.size() << std::endl;
-
-  if ( meta )
-  {
-    for ( unsigned lit : cut )
-    {
-      std::cout << lit << ":";
-      for ( const auto& bundle : meta->bundles )
-      {
-        for ( auto it = bundle.literals.begin(); it != bundle.literals.end(); ++it )
-        {
-          if ( *it == lit )
-          {
-            std::cout << " " << bundle.name << "[" << std::distance( bundle.literals.begin(), it ) << "]";
-          }
-        }
-      }
-      std::cout << std::endl;
-    }
-  }
 
   std::cout << "AIG #inputs:  " << aig->num_inputs << std::endl
             << "AIG #outputs: " << aig->num_outputs << std::endl;
