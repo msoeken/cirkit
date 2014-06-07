@@ -46,9 +46,10 @@ namespace revkit
 
   struct aig_graph_info
   {
-    std::map<traits_t::vertex_descriptor, std::string> node_names;
-    std::vector<std::pair<aig_function, std::string> > outputs;
-    std::vector<traits_t::vertex_descriptor> inputs;
+    traits_t::vertex_descriptor                                   constant;
+    std::map<traits_t::vertex_descriptor, std::string>            node_names;
+    std::vector<std::pair<aig_function, std::string> >            outputs;
+    std::vector<traits_t::vertex_descriptor>                      inputs;
     std::map<std::pair<aig_function, aig_function>, aig_function> strash;
   };
 
@@ -67,7 +68,8 @@ namespace revkit
   typedef boost::graph_traits<aig_graph>::edge_descriptor aig_edge;
 
   void aig_initialize( aig_graph& aig );
-  aig_function aig_get_constant( aig_graph& aig, bool value );
+  aig_function aig_get_constant( const aig_graph& aig, bool value );
+  //bool aig_is_constant_used( const aig_graph& aig );
   aig_function aig_create_pi( aig_graph& aig, const std::string& name );
   void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name );
   aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig_function& right );
@@ -76,7 +78,8 @@ namespace revkit
   aig_function aig_create_ite( aig_graph& aig, const aig_function& cond, const aig_function& t, const aig_function& e );
   aig_function aig_create_maj( aig_graph& aig, const aig_function& a, const aig_function& b, const aig_function& c );
 
-  void write_dot( std::ostream& os, const aig_graph& aig );
+  void write_dot( const aig_graph& aig, std::ostream& os );
+  void write_dot( const aig_graph& aig, const std::string& filename );
 
   unsigned aig_to_literal( const aig_graph& aig, const aig_function& f );
   aig_function operator!( const aig_function& f );

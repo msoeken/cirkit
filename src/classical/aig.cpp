@@ -17,6 +17,8 @@
 
 #include "aig.hpp"
 
+#include <fstream>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
@@ -116,15 +118,26 @@ void aig_initialize( aig_graph& aig )
 {
   assert( num_vertices( aig ) == 0u );
 
+  auto& info = boost::get_property( aig, boost::graph_name );
+
   /* create constant node */
-  aig_node node = add_vertex( aig );
-  boost::get( boost::vertex_name, aig )[node] = 0u;
+  info.constant = add_vertex( aig );
+  boost::get( boost::vertex_name, aig )[info.constant] = 0u;
 }
 
-aig_function aig_get_constant( aig_graph& aig, bool value )
+aig_function aig_get_constant( const aig_graph& aig, bool value )
 {
-  return std::make_pair( 0u, value );
+  auto& info = boost::get_property( aig, boost::graph_name );
+
+  return std::make_pair( info.constant, value );
 }
+
+// bool aig_is_constant_used( const aig_graph& aig )
+// {
+//   auto& info = boost::get_property( aig, boost::graph_name );
+
+//   return boost::in_degree( info.constant, aig );
+// }
 
 aig_function aig_create_pi( aig_graph& aig, const std::string& name )
 {
@@ -188,10 +201,19 @@ aig_function aig_create_maj( aig_graph& aig, const aig_function& a, const aig_fu
   return aig_create_or( aig, aig_create_or( aig, aig_create_and( aig, a, b ), aig_create_and( aig, a, c ) ), aig_create_and( aig, b, c ) );
 }
 
-void write_dot( std::ostream& os, const aig_graph& aig )
+void write_dot( const aig_graph& aig, std::ostream& os )
 {
   aig_dot_writer writer( aig );
   boost::write_graphviz( os, aig, writer, writer, writer );
+}
+
+void write_dot( const aig_graph& aig, const std::string& filename )
+{
+  std::filebuf fb;
+  fb.open( filename.c_str(), std::ios::out );
+  std::ostream os( &fb );
+  write_dot( aig, os );
+  fb.close();
 }
 
 unsigned aig_to_literal( const aig_graph& aig, const aig_function& f )
