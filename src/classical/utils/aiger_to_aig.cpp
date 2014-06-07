@@ -31,16 +31,16 @@ namespace revkit
  * Private functions                                                          *
  ******************************************************************************/
 
-void add_edge_with_rev( aig_node v, aig_node w, aig_graph& graph, double weight, bool polarity )
+void add_edge_with_rev( aig_node v, aig_node w, aig_graph& graph, double weight, bool complement )
 {
-  auto polaritymap = get( boost::edge_polarity, graph );
+  auto complementmap = get( boost::edge_complement, graph );
   auto capacitymap = get( boost::edge_capacity, graph );
   auto reversemap  = get( boost::edge_reverse,  graph );
 
   aig_edge edge  = add_edge( v, w, graph ).first;
   aig_edge redge = add_edge( w, v, graph ).first;
 
-  polaritymap[edge] = polaritymap[redge] = polarity;
+  complementmap[edge] = complementmap[redge] = complement;
   capacitymap[edge] = weight;
   capacitymap[redge] = 0.0;
   reversemap[edge] = redge;
@@ -69,7 +69,13 @@ void aiger_to_aig( const aiger * aig, aig_graph& graph, const aiger_to_aig_setti
     indexmap[vertex] = aig->inputs[i].lit;
     id_to_vertex[aig->inputs[i].lit] = vertex;
 
-    add_edge_with_rev( source, vertex, graph, std::numeric_limits<double>::infinity(), true );
+    std::cout << "Add input: " << aig->inputs[i].lit << std::endl;
+    if ( aig->inputs[i].name )
+    {
+      std::cout << "Has name: " << aig->inputs[i].name << std::endl;
+    }
+
+    add_edge_with_rev( source, vertex, graph, std::numeric_limits<double>::infinity(), false );
   }
 
   /* Add vertex for each AND node */
@@ -87,14 +93,14 @@ void aiger_to_aig( const aiger * aig, aig_graph& graph, const aiger_to_aig_setti
   {
     aiger_and * node = aig->ands + i;
 
-    add_edge_with_rev( id_to_vertex[aiger_strip( node->rhs0 )], id_to_vertex[aiger_strip( node->lhs )], graph, 1.0, !( node->rhs0 & 1 ) );
-    add_edge_with_rev( id_to_vertex[aiger_strip( node->rhs1 )], id_to_vertex[aiger_strip( node->lhs )], graph, 1.0, !( node->rhs1 & 1 ) );
+    add_edge_with_rev( id_to_vertex[aiger_strip( node->rhs0 )], id_to_vertex[aiger_strip( node->lhs )], graph, 1.0, node->rhs0 & 1 );
+    add_edge_with_rev( id_to_vertex[aiger_strip( node->rhs1 )], id_to_vertex[aiger_strip( node->lhs )], graph, 1.0, node->rhs1 & 1 );
   }
 
   /* Connect outputs to target */
   for ( unsigned i = 0u; i < aig->num_outputs; ++i )
   {
-    add_edge_with_rev( id_to_vertex[aiger_strip( aig->outputs[i].lit )], target, graph, std::numeric_limits<double>::infinity(), !( aig->outputs[i].lit & 1 ) );
+    add_edge_with_rev( id_to_vertex[aiger_strip( aig->outputs[i].lit )], target, graph, std::numeric_limits<double>::infinity(), aig->outputs[i].lit & 1 );
   }
 
   if ( !settings.dotname.empty() )

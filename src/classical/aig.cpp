@@ -77,9 +77,9 @@ struct aig_dot_writer
   /* edge properties */
   void operator()( std::ostream& os, const aig_edge& e )
   {
-    const auto& polaritymap = boost::get( boost::edge_polarity, aig );
+    const auto& complementmap = boost::get( boost::edge_complement, aig );
 
-    if ( !polaritymap[e] )
+    if ( complementmap[e] )
     {
       os << "[style=dashed]";
     }
@@ -95,7 +95,7 @@ struct aig_dot_writer
     {
       os << "o" << index << "[label=\"" << o.second << "\",shape=box];" << std::endl;
       os << "o" << index << " -> " << o.first.first << " ";
-      if ( !o.first.second )
+      if ( o.first.second )
       {
         os << "[style=dashed]";
       }
@@ -161,11 +161,11 @@ aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig
   assert( 2u * node == 2u * ( num_vertices( aig ) - 1u ) );
 
   aig_edge le = add_edge( node, left.first, aig ).first;
-  boost::get( boost::edge_polarity, aig )[le] = left.second;
+  boost::get( boost::edge_complement, aig )[le] = left.second;
   aig_edge re = add_edge( node, right.first, aig ).first;
-  boost::get( boost::edge_polarity, aig )[re] = right.second;
+  boost::get( boost::edge_complement, aig )[re] = right.second;
 
-  return info.strash[key] = std::make_pair( node, true );
+  return info.strash[key] = std::make_pair( node, false );
 }
 
 aig_function aig_create_or( aig_graph& aig, const aig_function& left, const aig_function& right )

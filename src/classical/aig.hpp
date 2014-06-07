@@ -35,14 +35,14 @@
 
 namespace boost
 {
-  enum edge_polarity_t { edge_polarity };
-  BOOST_INSTALL_PROPERTY(edge, polarity);
+  enum edge_complement_t { edge_complement };
+  BOOST_INSTALL_PROPERTY(edge, complement);
 }
 
 namespace revkit
 {
   typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS> traits_t;
-  typedef std::pair<traits_t::vertex_descriptor, bool> aig_function; /* the second type is for the polarity */
+  typedef std::pair<traits_t::vertex_descriptor, bool> aig_function; /* the second type is for the complement */
 
   struct aig_graph_info
   {
@@ -59,7 +59,7 @@ namespace revkit
   typedef boost::property<boost::edge_capacity_t, double,
           boost::property<boost::edge_residual_capacity_t, double,
           boost::property<boost::edge_reverse_t, traits_t::edge_descriptor,
-          boost::property<boost::edge_polarity_t, bool> > > > edge_properties_t;
+          boost::property<boost::edge_complement_t, bool> > > > edge_properties_t;
   typedef boost::property<boost::graph_name_t, aig_graph_info> graph_properties_t;
   typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, vertex_properties_t, edge_properties_t, graph_properties_t> aig_graph;
 
