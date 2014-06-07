@@ -44,10 +44,6 @@ BOOST_AUTO_TEST_CASE(simple)
   settings.dotname = "/tmp/test.dot";
   aiger_to_aig( aig, graph, settings );
 
-  std::list<aig_function> cut;
-  find_mincut( graph, cut );
-  std::cout << "Found cut of size: " << cut.size() << std::endl;
-
   std::cout << "AIG #inputs:  " << aig->num_inputs << std::endl
             << "AIG #outputs: " << aig->num_outputs << std::endl;
 

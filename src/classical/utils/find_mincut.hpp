@@ -34,7 +34,7 @@
 namespace revkit
 {
 
-  void find_mincut( aig_graph& aig, std::list<aig_function>& cut );
+  void find_mincut( aig_graph& aig, unsigned count, std::list<std::list<aig_function>>& cuts );
 
 }
 

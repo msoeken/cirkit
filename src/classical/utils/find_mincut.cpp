@@ -21,6 +21,8 @@
 #include <boost/graph/boykov_kolmogorov_max_flow.hpp>
 #include <boost/range/iterator_range.hpp>
 
+using namespace boost::assign;
+
 namespace revkit
 {
 
@@ -57,7 +59,7 @@ aig_edge add_reverse_edge( aig_graph& aig, const aig_node& from, const aig_node&
   return edge;
 }
 
-void prepare_graph( aig_graph& aig, aig_node& source, aig_node& target )
+void prepare_graph( aig_graph& aig, aig_node& source, aig_node& target, std::list<aig_edge>& original_edges )
 {
   const auto& graph_info = boost::get_property( aig, boost::graph_name );
   auto complementmap = get( boost::edge_complement, aig );
@@ -68,6 +70,7 @@ void prepare_graph( aig_graph& aig, aig_node& source, aig_node& target )
   for ( const auto& edge : boost::make_iterator_range( edges( aig ) ) )
   {
     add_reverse_edge( aig, edge );
+    original_edges += edge;
   }
 
   /* source and target */
@@ -84,6 +87,7 @@ void prepare_graph( aig_graph& aig, aig_node& source, aig_node& target )
     auto output_node = add_vertex( aig );
     auto edge = add_reverse_edge( aig, output_node, output.first.first, 1.0 );
     complementmap[edge] = output.first.second;
+    original_edges += edge;
 
     add_reverse_edge( aig, source, output_node );
   }
@@ -96,28 +100,47 @@ void prepare_graph( aig_graph& aig, aig_node& source, aig_node& target )
  * Public functions                                                           *
  ******************************************************************************/
 
-void find_mincut( aig_graph& aig, std::list<aig_function>& cut )
+void find_mincut( aig_graph& aig, unsigned count, std::list<std::list<aig_function>>& cuts )
 {
-  using namespace boost::assign;
   aig_node source, target;
+  std::list<aig_edge> original_edges;
+  std::list<aig_edge> cut_edges;
 
-  prepare_graph( aig, source, target );
+  prepare_graph( aig, source, target, original_edges );
 
-  boykov_kolmogorov_max_flow( aig, source, target );
-
-  auto capacity   = boost::get( boost::edge_capacity,   aig );
-  auto complement = boost::get( boost::edge_complement, aig );
-  auto color      = boost::get( boost::vertex_color,    aig );
-
-  for ( const auto& e : boost::make_iterator_range( edges( aig ) ) )
+  for ( unsigned i = 0u; i < count; ++i )
   {
-    if ( capacity[e] > 0 )
+    boykov_kolmogorov_max_flow( aig, source, target );
+
+    auto capacity   = boost::get( boost::edge_capacity,   aig );
+    auto complement = boost::get( boost::edge_complement, aig );
+    auto color      = boost::get( boost::vertex_color,    aig );
+
+    std::list<aig_function> cut;
+
+    for ( const auto& e : boost::make_iterator_range( edges( aig ) ) )
     {
-      if ( color[boost::source(e, aig)] != color[boost::target(e, aig)] )
+      if ( capacity[e] > 0 )
       {
-        cut += std::make_pair( boost::target(e, aig), complement[e] );
+        if ( color[boost::source(e, aig)] != color[boost::target(e, aig)] )
+        {
+          cut += std::make_pair( boost::target(e, aig), complement[e] );
+          cut_edges += e;
+        }
       }
     }
+
+    for ( const auto& e : original_edges )
+    {
+      capacity[e] = 1.0;
+    }
+
+    for ( const auto& e : cut_edges )
+    {
+      capacity[e] = std::numeric_limits<double>::infinity();
+    }
+
+    cuts += cut;
   }
 }
 
