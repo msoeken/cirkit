@@ -47,6 +47,7 @@ namespace revkit
   struct aig_graph_info
   {
     traits_t::vertex_descriptor                                   constant;
+    bool                                                          constant_used = false;
     std::map<traits_t::vertex_descriptor, std::string>            node_names;
     std::vector<std::pair<aig_function, std::string> >            outputs;
     std::vector<traits_t::vertex_descriptor>                      inputs;
@@ -68,8 +69,8 @@ namespace revkit
   typedef boost::graph_traits<aig_graph>::edge_descriptor aig_edge;
 
   void aig_initialize( aig_graph& aig );
-  aig_function aig_get_constant( const aig_graph& aig, bool value );
-  //bool aig_is_constant_used( const aig_graph& aig );
+  aig_function aig_get_constant( aig_graph& aig, bool value );
+  bool aig_is_constant_used( const aig_graph& aig );
   aig_function aig_create_pi( aig_graph& aig, const std::string& name );
   void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name );
   aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig_function& right );

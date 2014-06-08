@@ -22,6 +22,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
+#include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/range/adaptors.hpp>
 
@@ -110,6 +111,23 @@ private:
   const aig_graph& aig;
 };
 
+struct remove_constant_if_unused
+{
+  remove_constant_if_unused() {}
+  remove_constant_if_unused( const aig_graph& aig ) : aig( &aig ) {}
+
+  template <typename Vertex>
+  bool operator()( const Vertex& v ) const
+  {
+    const auto& graph_info = boost::get_property( *aig, boost::graph_name );
+
+    return ( v != graph_info.constant ) || graph_info.constant_used;
+  }
+
+private:
+  aig_graph const* aig = nullptr;
+};
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -125,19 +143,20 @@ void aig_initialize( aig_graph& aig )
   boost::get( boost::vertex_name, aig )[info.constant] = 0u;
 }
 
-aig_function aig_get_constant( const aig_graph& aig, bool value )
+aig_function aig_get_constant( aig_graph& aig, bool value )
 {
   auto& info = boost::get_property( aig, boost::graph_name );
 
+  info.constant_used = true;
   return std::make_pair( info.constant, value );
 }
 
-// bool aig_is_constant_used( const aig_graph& aig )
-// {
-//   auto& info = boost::get_property( aig, boost::graph_name );
+bool aig_is_constant_used( const aig_graph& aig )
+{
+  auto& info = boost::get_property( aig, boost::graph_name );
 
-//   return boost::in_degree( info.constant, aig );
-// }
+  return info.constant_used;
+}
 
 aig_function aig_create_pi( aig_graph& aig, const std::string& name )
 {
@@ -203,8 +222,10 @@ aig_function aig_create_maj( aig_graph& aig, const aig_function& a, const aig_fu
 
 void write_dot( const aig_graph& aig, std::ostream& os )
 {
+  boost::filtered_graph<aig_graph, boost::keep_all, remove_constant_if_unused> fg( aig, boost::keep_all(), remove_constant_if_unused( aig ) );
+
   aig_dot_writer writer( aig );
-  boost::write_graphviz( os, aig, writer, writer, writer );
+  boost::write_graphviz( os, fg, writer, writer, writer );
 }
 
 void write_dot( const aig_graph& aig, const std::string& filename )
