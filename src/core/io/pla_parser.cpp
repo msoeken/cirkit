@@ -31,7 +31,7 @@
 namespace revkit
 {
 
-bool pla_parser( std::istream& in, pla_processor& reader )
+bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_cube )
 {
   std::string line;
 
@@ -62,14 +62,14 @@ bool pla_parser( std::istream& in, pla_processor& reader )
     {
       std::vector<std::string> input_labels;
       std::string rem = line.substr( 5 );
-      boost::split( input_labels, rem, boost::is_space() );
+      boost::split( input_labels, rem, boost::is_space(), boost::token_compress_on );
       reader.on_input_labels( input_labels );
     }
     else if ( boost::starts_with( line, ".ob " ) )
     {
       std::vector<std::string> output_labels;
       std::string rem = line.substr( 4 );
-      boost::split( output_labels, rem, boost::is_space() );
+      boost::split( output_labels, rem, boost::is_space(), boost::token_compress_on );
       reader.on_output_labels( output_labels );
     }
     else if ( line == ".e" )
@@ -85,19 +85,24 @@ bool pla_parser( std::istream& in, pla_processor& reader )
       assert( line.size() && ( line[0] == '0' || line[0] == '1' || line[0] == '-' ) );
 
       std::vector<std::string> inout;
-      boost::split( inout, line, boost::is_space() );
+      boost::split( inout, line, boost::is_space(), boost::token_compress_on );
       assert( inout.size() == 2 );
       reader.on_cube( inout[0], inout[1] );
+
+      if ( skip_after_first_cube )
+      {
+        break;
+      }
     }
   }
 }
 
-bool pla_parser( const std::string& filename, pla_processor& reader )
+bool pla_parser( const std::string& filename, pla_processor& reader, bool skip_after_first_cube )
 {
   std::ifstream is;
   is.open(filename.c_str());
 
-  return pla_parser( is, reader );
+  return pla_parser( is, reader, skip_after_first_cube );
 }
 
 }

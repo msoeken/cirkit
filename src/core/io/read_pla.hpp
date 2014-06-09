@@ -40,15 +40,6 @@ namespace revkit
   struct read_pla_settings
   {
     /**
-     * @brief Standard constructor
-     *
-     * Initializes default values
-     *
-     * @since  1.0
-     */
-    read_pla_settings();
-
-    /**
      * @brief If true, the truth table is extended after parsing
      *
      * If this variable is set to true, then 1) all cubes
@@ -63,7 +54,12 @@ namespace revkit
      *
      * @since  1.0
      */
-    bool extend;
+    bool extend = true;
+
+    /**
+     * @since  2.0
+     */
+    bool skip_after_first_cube = false;
   };
 
   binary_truth_table::cube_type combine_pla_cube( const binary_truth_table::cube_type& c1, const binary_truth_table::cube_type& c2 );

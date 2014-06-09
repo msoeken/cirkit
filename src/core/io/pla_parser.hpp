@@ -33,10 +33,10 @@
 
 namespace revkit
 {
-    class pla_processor;
+  class pla_processor;
 
-    bool pla_parser( std::istream& in, pla_processor& reader );
-    bool pla_parser( const std::string& filename, pla_processor& reader );
+  bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_cube = false );
+  bool pla_parser( const std::string& filename, pla_processor& reader, bool skip_after_first_cube = false );
 }
 
 #endif

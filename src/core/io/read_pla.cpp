@@ -53,11 +53,6 @@ namespace revkit
     }
   };
 
-  read_pla_settings::read_pla_settings()
-    : extend( true )
-  {
-  }
-
   // A function to combine an input and an output cube
   //   @assumes that c1 and c2 have the same size
   binary_truth_table::cube_type combine_pla_cube( const binary_truth_table::cube_type& c1, const binary_truth_table::cube_type& c2 )
@@ -130,7 +125,7 @@ namespace revkit
   bool read_pla( binary_truth_table& spec, std::istream& in, const read_pla_settings& settings, std::string* error )
   {
     read_pla_processor p( spec );
-    pla_parser( in, p );
+    pla_parser( in, p, settings.skip_after_first_cube );
 
     if ( settings.extend )
     {
