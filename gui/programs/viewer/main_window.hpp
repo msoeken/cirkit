@@ -36,6 +36,9 @@ private:
   void setupMenuBar();
   void setupToolBar();
 
+private Q_SLOTS:
+  void open();
+
 private:
   class Private;
   Private * const d;

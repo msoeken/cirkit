@@ -17,14 +17,22 @@
 
 #include "main_window.hpp"
 
+#include <memory>
+
 #include <QtCore/QSize>
 #include <QtGui/QIcon>
 #include <QtWidgets/QAction>
+#include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QToolBar>
 
 #include <src/circuit_view.hpp>
+
+#include <core/circuit.hpp>
+#include <core/io/read_realization.hpp>
+
+using namespace revkit;
 
 class MainWindow::Private
 {
@@ -36,6 +44,8 @@ public:
   QAction * mAboutAction;
 
   CircuitView * mCircuitView;
+
+  std::shared_ptr<circuit> mCircuit;
 };
 
 MainWindow::MainWindow() : QMainWindow(), d( new Private() )
@@ -56,6 +66,17 @@ MainWindow::MainWindow() : QMainWindow(), d( new Private() )
 CircuitView * MainWindow::circuitView() const
 {
   return d->mCircuitView;
+}
+
+void MainWindow::open()
+{
+  QString filename = QFileDialog::getOpenFileName( this, "Open Circuit", "", "RevLib circuit (*.real)" );
+  if ( !filename.isEmpty() )
+  {
+    d->mCircuit.reset( new circuit );
+    read_realization( *d->mCircuit, filename.toStdString() );
+    d->mCircuitView->load( *d->mCircuit );
+  }
 }
 
 void MainWindow::setupActions()
@@ -80,6 +101,7 @@ void MainWindow::setupActions()
   d->mAboutAction = new QAction( QIcon::fromTheme( "help-about" ), "&About", this );
   d->mAboutAction->setStatusTip( "Displays information about the RevKit Viewer" );
 
+  connect( d->mOpenAction, SIGNAL( triggered() ), SLOT( open() ) );
   connect( d->mExitAction, SIGNAL( triggered() ), SLOT( close() ) );
 }
 
