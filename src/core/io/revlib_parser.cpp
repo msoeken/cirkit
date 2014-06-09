@@ -145,7 +145,7 @@ namespace revkit
   }
 
 
-  bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string& base_directory, std::string* error )
+  bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string& base_directory, bool read_gates, std::string* error )
   {
     std::string line;
 
@@ -450,6 +450,11 @@ namespace revkit
         }
 
         reader.on_begin();
+
+        if ( !read_gates )
+        {
+          return true;
+        }
       }
       else if ( command == ".end" )
       {

@@ -97,6 +97,14 @@ namespace revkit
   };
 
   /**
+   * @since  2.0
+   */
+  struct read_realization_settings
+  {
+    bool read_gates = false;
+  };
+
+  /**
    * @brief Read a circuit realization into a circuit from stream
    *
    * This method uses revlib_parser(std::istream&, revlib_processor&, std::string*)
@@ -112,7 +120,7 @@ namespace revkit
    *
    * @since  1.0
    */
-  bool read_realization( circuit& circ, std::istream& in, std::string* error = 0 );
+  bool read_realization( circuit& circ, std::istream& in, const read_realization_settings& settings = read_realization_settings(), std::string* error = 0 );
 
   /**
    * @brief Read a circuit realization into a circuit from filename
@@ -131,20 +139,6 @@ namespace revkit
    * read_realization( circ, "circuit.real" );
    * @endcode
    *
-   * Sometimes it is useful to provide the caller with error information
-   * in case the call failed. To obtain an error message a pointer to
-   * a \b std::string is given as third parameter to the function. The function
-   * returns \b false if it fails.
-   *
-   * @code
-   * circuit circ;
-   * std::string error;
-   *
-   * if ( !read_realization( circ, "circuit.real", &error ) ) {
-   *   std::cerr << "An error occured: " << error << std::endl;
-   * }
-   * @endcode
-   *
    * @param circ     circuit to be constructed
    * @param filename filename of the realization
    * @param error    A pointer to a string. In case the parsing fails,
@@ -153,7 +147,7 @@ namespace revkit
    *
    * @since  1.0
    */
-  bool read_realization( circuit& circ, const std::string& filename, std::string* error = 0 );
+  bool read_realization( circuit& circ, const std::string& filename, const read_realization_settings& settings = read_realization_settings(), std::string* error = 0 );
 }
 
 #endif /* READ_REALIZATION_HPP */

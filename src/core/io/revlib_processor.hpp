@@ -79,7 +79,7 @@ namespace revkit
     virtual ~revlib_processor();
 
   private:
-    friend bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string&, std::string* error );
+    friend bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string&, bool read_gates, std::string* error );
 
   protected:
     /**

@@ -53,6 +53,7 @@ namespace revkit
    * @param base_directory A base directory to look for included files.
    *                       This is usually the directory of the loaded file-name.
    *                       This member was introduced in RevKit version 1.1
+   * @param read_gates Decides whether gates should be parsed. Useful when only meta-data is required.
    * @param error A pointer to a string. In case the parsing fails,
    *              and \p error is not null, a error message is stored
    *
@@ -60,7 +61,7 @@ namespace revkit
    *
    * @since  1.1
    */
-  bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string& base_directory = std::string( "." ), std::string* error = 0 );
+  bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string& base_directory = std::string( "." ), bool read_gates = true, std::string* error = 0 );
 
 }
 

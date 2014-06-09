@@ -188,14 +188,14 @@ namespace revkit
     d->circs.pop();
   }
 
-  bool read_realization( circuit& circ, std::istream& in, std::string* error )
+  bool read_realization( circuit& circ, std::istream& in, const read_realization_settings& settings, std::string* error )
   {
     circuit_processor processor( circ );
 
-    return revlib_parser( in, processor, ".", error );
+    return revlib_parser( in, processor, ".", settings.read_gates, error );
   }
 
-  bool read_realization( circuit& circ, const std::string& filename, std::string* error )
+  bool read_realization( circuit& circ, const std::string& filename, const read_realization_settings& settings, std::string* error )
   {
     std::ifstream is;
     is.open( filename.c_str(), std::ifstream::in );
