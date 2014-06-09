@@ -6,6 +6,7 @@ add_definitions(-std=c++11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
+find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Boost REQUIRED)
 
@@ -18,5 +19,5 @@ set(revkit_viewer_SRCS
     programs/viewer/main.cpp)
 
 add_executable(revkit_viewer ${revkit_viewer_SRCS})
-target_link_libraries(revkit_viewer Qt5::Widgets revkit_core)
+target_link_libraries(revkit_viewer Qt5::Gui Qt5::Widgets revkit_core)
 

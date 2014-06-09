@@ -32,7 +32,13 @@ public:
   CircuitView * circuitView() const;
 
 private:
-  CircuitView * mCircuitView;
+  void setupActions();
+  void setupMenuBar();
+  void setupToolBar();
+
+private:
+  class Private;
+  Private * const d;
 };
 
 #endif
