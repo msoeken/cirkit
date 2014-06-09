@@ -79,7 +79,7 @@ public:
 
     properties::ptr settings( new properties() );
     settings->set( "on_cube", cube_function_t( [this, &gatecirc, &target]( const cube_t& c ) { add_gate_for_cube( gatecirc, target, c ); } ) );
-    settings->set( "verify", true );
+    settings->set( "verify", false );
     esop_minimization( control_function.manager(), control_function.getNode(), settings );
 
     if ( gatecirc.num_gates() )
