@@ -404,6 +404,7 @@ public:
   DdNode * to_bdd( const cube_t& cube )
   {
     DdNode * cubef = Cudd_ReadOne( cudd ), *tmp;
+    Cudd_Ref( cubef );
 
     for ( unsigned i = 0u; i < cube.first.size(); ++i )
     {
@@ -422,6 +423,7 @@ public:
   DdNode * to_bdd( const std::vector<cube_t>& cube_list )
   {
     DdNode * f = Cudd_ReadLogicZero( cudd ), * tmp;
+    Cudd_Ref( f );
 
     for ( const auto& cube : cube_list )
     {
