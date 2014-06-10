@@ -15,20 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QtWidgets/QApplication>
+#ifndef TRUTH_TABLE_WIDGET_HPP
+#define TRUTH_TABLE_WIDGET_HPP
 
-#include "main_window.hpp"
+#include <QtWidgets/QTableWidget>
 
-int main( int argc, char ** argv )
+#include <core/truth_table.hpp>
+
+class TruthTableWidget : public QTableWidget
 {
-  QApplication app( argc, argv );
+  Q_OBJECT
 
-  MainWindow window;
-  window.openFromFilename( "../../ext/circuits/3_17_13.real" );
-  window.show();
+public:
+  explicit TruthTableWidget( const revkit::binary_truth_table& spec, QWidget * parent = nullptr );
+};
 
-  return app.exec();
-}
+#endif
 
 // Local Variables:
 // c-basic-offset: 2

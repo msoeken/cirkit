@@ -22,15 +22,21 @@
 #include <QtCore/QSize>
 #include <QtGui/QIcon>
 #include <QtWidgets/QAction>
+#include <QtWidgets/QDialog>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QToolBar>
+#include <QtWidgets/QVBoxLayout>
 
 #include <src/circuit_view.hpp>
+#include <src/truth_table_widget.hpp>
 
 #include <core/circuit.hpp>
+#include <core/functions/circuit_to_truth_table.hpp>
 #include <core/io/read_realization.hpp>
+
+#include <algorithms/simulation/simple_simulation.hpp>
 
 using namespace revkit;
 
@@ -73,10 +79,32 @@ void MainWindow::open()
   QString filename = QFileDialog::getOpenFileName( this, "Open Circuit", "", "RevLib circuit (*.real)" );
   if ( !filename.isEmpty() )
   {
-    d->mCircuit.reset( new circuit );
-    read_realization( *d->mCircuit, filename.toStdString() );
-    d->mCircuitView->load( *d->mCircuit );
+    openFromFilename( filename );
   }
+}
+
+void MainWindow::openFromFilename( const QString& filename )
+{
+  d->mCircuit.reset( new circuit );
+  read_realization( *d->mCircuit, filename.toStdString() );
+  d->mCircuitView->load( *d->mCircuit );
+}
+
+void MainWindow::showTruthTable()
+{
+  QDialog * dialog = new QDialog( this, Qt::Dialog );
+  dialog->setWindowTitle( "Truth Table" );
+
+  binary_truth_table spec;
+  circuit_to_truth_table( *d->mCircuit, spec, simple_simulation_func() );
+
+  TruthTableWidget * table = new TruthTableWidget( spec, dialog );
+
+  dialog->setLayout( new QVBoxLayout() );
+  dialog->layout()->setMargin( 0u );
+  dialog->layout()->addWidget( table );
+
+  dialog->exec();
 }
 
 void MainWindow::setupActions()
@@ -103,6 +131,8 @@ void MainWindow::setupActions()
 
   connect( d->mOpenAction, SIGNAL( triggered() ), SLOT( open() ) );
   connect( d->mExitAction, SIGNAL( triggered() ), SLOT( close() ) );
+
+  connect( d->mSpecAction, SIGNAL( triggered() ), SLOT( showTruthTable() ) );
 }
 
 void MainWindow::setupMenuBar()

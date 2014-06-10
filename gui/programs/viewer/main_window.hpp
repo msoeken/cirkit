@@ -36,8 +36,12 @@ private:
   void setupMenuBar();
   void setupToolBar();
 
+public:
+  void openFromFilename( const QString& filename );
+
 private Q_SLOTS:
   void open();
+  void showTruthTable();
 
 private:
   class Private;
