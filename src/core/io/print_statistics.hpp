@@ -93,6 +93,9 @@ namespace revkit
   void print_statistics( std::ostream& os, const circuit& circ, double runtime = -1.0,
                          const print_statistics_settings& settings = print_statistics_settings() );
 
+  void print_statistics( const std::string& filename, const circuit& circ, double runtime = -1.0,
+                         const print_statistics_settings& settings = print_statistics_settings() );
+
   /**
    * @brief Print statistics about a circuit to standard output
    *

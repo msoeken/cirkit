@@ -19,6 +19,7 @@
 #include "synthesis_utils_p.hpp"
 
 #include <core/functions/add_gates.hpp>
+#include <core/utils/timer.hpp>
 #include <classical/optimization/esop_minimization.hpp>
 
 #include <fstream>
@@ -599,6 +600,14 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   std::string name     = get<std::string>( settings, "name",     "test" );
   bool        genesop  = get<bool>(        settings, "genesop",  false  );
 
+  /* Timing */
+  timer<properties_timer> t;
+
+  if (statistics) {
+    properties_timer rt(statistics);
+    t.start(rt);
+  }
+
   rcbdd_synthesis_manager mgr( cf, circ );
   mgr.verbose  = verbose;
   mgr.progress = progress;
@@ -606,7 +615,7 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   mgr.genesop  = genesop;
   mgr.default_synthesis();
 
-  return false;
+  return true;
 }
 
 }

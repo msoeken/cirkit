@@ -17,6 +17,8 @@
 
 #include "print_statistics.hpp"
 
+#include <fstream>
+
 #include <boost/format.hpp>
 
 #include "../utils/costs.hpp"
@@ -43,6 +45,15 @@ namespace revkit
     fmt.exceptions( boost::io::all_error_bits ^ ( boost::io::too_many_args_bit | boost::io::too_few_args_bit ) );
 
     os << fmt % runtime_string % circ.num_gates() % circ.lines() % costs( circ, costs_by_gate_func( transistor_costs() ) );
+  }
+
+  void print_statistics( const std::string& filename, const circuit& circ, double runtime, const print_statistics_settings& settings )
+  {
+    std::filebuf fb;
+    fb.open( filename.c_str(), std::ios::out );
+    std::ostream os( &fb );
+    print_statistics( os, circ, runtime, settings );
+    fb.close();
   }
 
   void print_statistics( const circuit& circ, double runtime, const print_statistics_settings& settings )

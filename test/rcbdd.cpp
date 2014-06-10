@@ -13,6 +13,7 @@
 #include <core/truth_table.hpp>
 #include <core/functions/extend_pla.hpp>
 #include <core/functions/circuit_to_truth_table.hpp>
+#include <core/io/print_statistics.hpp>
 #include <core/io/read_pla.hpp>
 #include <core/io/write_pla.hpp>
 #include <core/io/write_realization.hpp>
@@ -84,7 +85,10 @@ BOOST_AUTO_TEST_CASE(simple)
       settings->set( "progress", true );
       settings->set( "name", name );
 
-      rcbdd_synthesis( circ, cf, settings );
+      properties::ptr statistics( new properties );
+
+      rcbdd_synthesis( circ, cf, settings, statistics );
+      print_statistics( boost::str( boost::format( "logs/rcbdd/%s.log" ) % name ), circ, statistics->get<double>( "runtime" ) );
     }
 
     write_realization( circ, boost::str( boost::format( "logs/rcbdd/%s.real" ) % name ) );
