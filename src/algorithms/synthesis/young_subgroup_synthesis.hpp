@@ -40,7 +40,7 @@ namespace revkit
 
 bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr());
 
-truth_table_synthesis_func young_subgroup_synthesis(properties::ptr settings = properties::ptr(new properties()), properties::ptr statistics = properties::ptr(new properties()));
+truth_table_synthesis_func young_subgroup_synthesis_func(properties::ptr settings = properties::ptr(new properties()), properties::ptr statistics = properties::ptr(new properties()));
 
 }
 
