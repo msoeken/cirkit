@@ -98,7 +98,7 @@ namespace revkit
   {
     specification_processor processor( spec );
 
-    return revlib_parser( in, processor, ".", error );
+    return revlib_parser( in, processor, ".", true, error );
   }
 
   bool read_specification( binary_truth_table& spec, const std::string& filename, std::string* error )
