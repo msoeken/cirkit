@@ -30,10 +30,8 @@ BOOST_AUTO_TEST_CASE(simple)
   using namespace revkit;
 
   std::vector<std::string> whitelist;
-  //whitelist += "sym6_63","con1_136";//,"bw_116";
-  whitelist += "sym6_63","urf2_73","con1_136","hwb9_65","urf1_72","urf5_76","sym9_71","urf3_75","rd84_70","sym10_207","urf4_89";
-  //whitelist += "sym6_63";
-  //whitelist += "sym6_63","urf2_73","con1_136","hwb9_65","urf1_72","urf5_76","sym9_71","urf3_75","rd84_70","sym10_207","urf4_89","adr4_93","cycle_10_2_61","clip_124","dc2_143","misex1_178","co14_135","urf6_77","dk27_146","t481_208","5xp1_90","C7552_119","apla_107","bw_116";
+  //whitelist += "sym6_63","urf2_73","con1_136","hwb9_65","urf1_72","urf5_76","sym9_71","urf3_75","rd84_70","sym10_207","urf4_89";
+  whitelist += "sym6_63","urf2_73","con1_136","hwb9_65","urf1_72","urf5_76","sym9_71","urf3_75","rd84_70","sym10_207","urf4_89","adr4_93","cycle_10_2_61","clip_124","dc2_143","misex1_178","co14_135","urf6_77","dk27_146","t481_208","5xp1_90","C7552_119","apla_107","bw_116";
   // extra alu1_94
   foreach_function_with_whitelist( whitelist, []( const boost::filesystem::path& path ) {
     circuit circ;
@@ -62,7 +60,7 @@ BOOST_AUTO_TEST_CASE(simple)
       extend_pla_settings settings;
       extend_pla( pla, extended, settings );
 
-      write_pla( extended, boost::str( boost::format( "/tmp/%s-extended.pla" ) % name ) );
+      write_pla( extended, boost::str( boost::format( "logs/rcbdd/%s-extended.pla" ) % name ) );
     }
 
     {
@@ -72,8 +70,8 @@ BOOST_AUTO_TEST_CASE(simple)
 
       //embed_pla( cf, path.relative_path().string() );
       properties::ptr settings( new properties );
-      settings->set( "write_pla", boost::str( boost::format( "/tmp/%s-embedded.pla" ) % name ) );
-      embed_pla( cf, boost::str( boost::format( "/tmp/%s-extended.pla" ) % name ), settings );
+      settings->set( "write_pla", boost::str( boost::format( "logs/rcbdd/%s-embedded.pla" ) % name ) );
+      embed_pla( cf, boost::str( boost::format( "logs/rcbdd/%s-extended.pla" ) % name ), settings );
     }
 
     {
@@ -89,7 +87,7 @@ BOOST_AUTO_TEST_CASE(simple)
       rcbdd_synthesis( circ, cf, settings );
     }
 
-    write_realization( circ, boost::str( boost::format( "/tmp/%s.real" ) % name ) );
+    write_realization( circ, boost::str( boost::format( "logs/rcbdd/%s.real" ) % name ) );
 
     {
       print_timer pt( std::cout );
@@ -99,6 +97,7 @@ BOOST_AUTO_TEST_CASE(simple)
       circuit_to_truth_table( circ, spec, simple_simulation_func() );
     }
 
+    if ( false )
     {
       circuit ys_circ;
 
@@ -108,7 +107,7 @@ BOOST_AUTO_TEST_CASE(simple)
 
       young_subgroup_synthesis( ys_circ, spec );
 
-      write_realization( ys_circ, boost::str( boost::format( "/tmp/%s-ys.real" ) % name ) );
+      write_realization( ys_circ, boost::str( boost::format( "logs/rcbdd/%s-ys.real" ) % name ) );
     }
   });
 }
