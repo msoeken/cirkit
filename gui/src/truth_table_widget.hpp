@@ -20,14 +20,17 @@
 
 #include <QtWidgets/QTableWidget>
 
-#include <core/truth_table.hpp>
+#include <core/circuit.hpp>
 
 class TruthTableWidget : public QTableWidget
 {
   Q_OBJECT
 
 public:
-  explicit TruthTableWidget( const revkit::binary_truth_table& spec, QWidget * parent = nullptr );
+  explicit TruthTableWidget( const revkit::circuit& circ, QWidget * parent = nullptr );
+
+private:
+  void addItem( unsigned row, unsigned column, bool value, bool enabled );
 };
 
 #endif

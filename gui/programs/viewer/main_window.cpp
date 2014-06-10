@@ -33,10 +33,7 @@
 #include <src/truth_table_widget.hpp>
 
 #include <core/circuit.hpp>
-#include <core/functions/circuit_to_truth_table.hpp>
 #include <core/io/read_realization.hpp>
-
-#include <algorithms/simulation/simple_simulation.hpp>
 
 using namespace revkit;
 
@@ -95,10 +92,7 @@ void MainWindow::showTruthTable()
   QDialog * dialog = new QDialog( this, Qt::Dialog );
   dialog->setWindowTitle( "Truth Table" );
 
-  binary_truth_table spec;
-  circuit_to_truth_table( *d->mCircuit, spec, simple_simulation_func() );
-
-  TruthTableWidget * table = new TruthTableWidget( spec, dialog );
+  TruthTableWidget * table = new TruthTableWidget( *d->mCircuit, dialog );
 
   dialog->setLayout( new QVBoxLayout() );
   dialog->layout()->setMargin( 0u );

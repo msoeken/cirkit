@@ -20,11 +20,19 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/irange.hpp>
 
+#include <core/truth_table.hpp>
+#include <core/functions/circuit_to_truth_table.hpp>
+
+#include <algorithms/simulation/simple_simulation.hpp>
+
 using namespace revkit;
 
-TruthTableWidget::TruthTableWidget( const binary_truth_table& spec, QWidget * parent )
-  : QTableWidget( (1u << spec.num_inputs() ), 2u * spec.num_inputs(), parent )
+TruthTableWidget::TruthTableWidget( const circuit& circ, QWidget * parent )
+  : QTableWidget( (1u << circ.lines() ), 2u * circ.lines(), parent )
 {
+  binary_truth_table spec;
+  circuit_to_truth_table( circ, spec, simple_simulation_func() );
+
   QStringList hlabels, vlabels;
 
   boost::for_each( spec.inputs(), [&hlabels]( const std::string& i ) { hlabels.append( QString::fromStdString( i ) ); } );
@@ -48,19 +56,30 @@ TruthTableWidget::TruthTableWidget( const binary_truth_table& spec, QWidget * pa
     unsigned col = 0u;
     for ( const auto& in : boost::make_iterator_range( line.first ) )
     {
-      QTableWidgetItem * item = new QTableWidgetItem( *in ? "1" : "0" );
-      setItem( row, col++, item );
+      addItem( row, col, *in, !circ.constants()[col] || *circ.constants()[col] == *in );
+      col++;
     }
     for ( const auto& out : boost::make_iterator_range( line.second ) )
     {
-      QTableWidgetItem * item = new QTableWidgetItem( *out ? "1" : "0" );
-      setItem( row, col++, item );
+      addItem( row, col++, *out, !circ.garbage()[col - circ.lines()] );
     }
 
     ++row;
   }
 
   resizeColumnsToContents();
+}
+
+void TruthTableWidget::addItem( unsigned row, unsigned column, bool value, bool enabled )
+{
+  QTableWidgetItem * item = new QTableWidgetItem( value ? "1" : "0" );
+  int flags = Qt::ItemIsSelectable;
+  if ( enabled )
+  {
+    flags |= Qt::ItemIsEnabled;
+  }
+  item->setFlags( (Qt::ItemFlag)flags );
+  setItem( row, column, item );
 }
 
 #include "src/truth_table_widget.moc"
