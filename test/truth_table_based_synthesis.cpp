@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(simple)
   benchmark_table<std::string, unsigned, unsigned, unsigned, unsigned>
   table( { "Benchmark", "n", "TBS", "RMS", "YSG" } );
 
-  std::vector<std::string> whitelist = { "3_17_6","4_49_7","4gt10_22","4gt11_23","4gt12_24","4gt13_25","4mod5_8","decod24_10","ham3_28","ham7_29","hwb7_15" };
+  std::vector<std::string> whitelist = { "3_17_6","4_49_7","4gt10_22","4gt11_23","4gt12_24","4gt13_25","4mod5_8","decod24_10","ham3_28","ham7_29","hwb7_15","hwb8_64","hwb9_65","mod5d1_16","mod5d2_16","rd32_19","rd73_69","sym9_71" };
   foreach_function_with_whitelist( whitelist, [&table]( const boost::filesystem::path& path ) {
     std::string benchmark = path.stem().string();
 
