@@ -17,6 +17,8 @@
 
 #include "circuit_view.hpp"
 
+#include <QtGui/QPainter>
+#include <QtGui/QPixmap>
 #include <QtWidgets/QGraphicsItem>
 #include <QtWidgets/QGraphicsScene>
 
@@ -116,6 +118,15 @@ void CircuitView::load( const circuit& circ )
     scene()->addItem( gateItem );
     ++index;
   }
+}
+
+void CircuitView::saveImage( const QString& filename ) const
+{
+  QPixmap pixmap( scene()->width(), scene()->height() );
+  QPainter painter( &pixmap );
+  scene()->render( &painter );
+  pixmap.save( filename );
+  painter.end();
 }
 
 QGraphicsTextItem * CircuitView::addLineLabel( int x, int y, QString text, unsigned align, bool color )

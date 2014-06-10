@@ -33,6 +33,7 @@ public:
   explicit CircuitView( QWidget * parent = nullptr );
 
   void load( const revkit::circuit& circ );
+  void saveImage( const QString& filename ) const;
 
 private:
   QGraphicsTextItem * addLineLabel( int x, int y, QString text, unsigned align, bool color );

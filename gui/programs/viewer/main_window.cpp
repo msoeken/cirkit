@@ -87,6 +87,15 @@ void MainWindow::openFromFilename( const QString& filename )
   d->mCircuitView->load( *d->mCircuit );
 }
 
+void MainWindow::saveImage()
+{
+  QString filename = QFileDialog::getSaveFileName( this, "Save as Image", "", "PNG image (*.png);;JPG image (*.jpg)" );
+  if ( !filename.isEmpty() )
+  {
+    d->mCircuitView->saveImage( filename );
+  }
+}
+
 void MainWindow::showTruthTable()
 {
   QDialog * dialog = new QDialog( this, Qt::Dialog );
@@ -124,6 +133,7 @@ void MainWindow::setupActions()
   d->mAboutAction->setStatusTip( "Displays information about the RevKit Viewer" );
 
   connect( d->mOpenAction, SIGNAL( triggered() ), SLOT( open() ) );
+  connect( d->mImageAction, SIGNAL( triggered() ), SLOT( saveImage() ) );
   connect( d->mExitAction, SIGNAL( triggered() ), SLOT( close() ) );
 
   connect( d->mSpecAction, SIGNAL( triggered() ), SLOT( showTruthTable() ) );
