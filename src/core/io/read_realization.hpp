@@ -101,7 +101,7 @@ namespace revkit
    */
   struct read_realization_settings
   {
-    bool read_gates = false;
+    bool read_gates = true;
   };
 
   /**

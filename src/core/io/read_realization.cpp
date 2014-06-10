@@ -211,7 +211,7 @@ namespace revkit
 
     boost::filesystem::path pfilename( filename );
     circuit_processor processor( circ );
-    return revlib_parser( is, processor, pfilename.parent_path().string(), error );
+    return revlib_parser( is, processor, pfilename.parent_path().string(), settings.read_gates, error );
   }
 
 }
