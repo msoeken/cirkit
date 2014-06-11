@@ -27,6 +27,8 @@
 #include <algorithms/simulation/simple_simulation.hpp>
 #include <algorithms/synthesis/young_subgroup_synthesis.hpp>
 
+#include <classical/optimization/esop_minimization.hpp>
+
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
@@ -68,6 +70,7 @@ int main( int argc, char ** argv )
   circuit circ;
   properties::ptr settings( new properties );
   settings->set( "verbose", verbose );
+  settings->set( "esopmin", dd_based_esop_minimization_func() );
 
   if ( !ordering.empty() )
   {
