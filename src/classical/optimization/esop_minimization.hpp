@@ -35,12 +35,10 @@
 #include <cudd.h>
 
 #include <core/properties.hpp>
+#include <classical/optimization/optimization.hpp>
 
 namespace revkit
 {
-
-typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-typedef std::function<void(const cube_t&)> cube_function_t;
 
 /**
  * @brief ESOP minimization
@@ -70,6 +68,12 @@ void esop_minimization( DdManager * cudd, DdNode * f,
 void esop_minimization( const std::string& filename,
                         properties::ptr settings = properties::ptr(),
                         properties::ptr statistics = properties::ptr() );
+
+dd_based_esop_optimization_func dd_based_esop_minimization_func( properties::ptr settings = properties::ptr( new properties() ),
+                                                                 properties::ptr statistics = properties::ptr( new properties() ) );
+
+pla_based_esop_optimization_func pla_based_esop_minimization_func( properties::ptr settings = properties::ptr( new properties() ),
+                                                                   properties::ptr statistics = properties::ptr( new properties() ) );
 
 void test_change_performance();
 

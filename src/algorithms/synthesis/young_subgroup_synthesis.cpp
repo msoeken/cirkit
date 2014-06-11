@@ -37,7 +37,7 @@
 #include <core/io/write_pla.hpp>
 #include <core/utils/timer.hpp>
 
-#include <classical/optimization/esop_minimization.hpp>
+#include <classical/optimization/optimization.hpp>
 
 #include <cuddObj.hh>
 
@@ -77,10 +77,9 @@ public:
   {
     circuit gatecirc( circ.lines() );
 
-    properties::ptr settings( new properties() );
-    settings->set( "on_cube", cube_function_t( [this, &gatecirc, &target]( const cube_t& c ) { add_gate_for_cube( gatecirc, target, c ); } ) );
-    settings->set( "verify", false );
-    esop_minimization( control_function.manager(), control_function.getNode(), settings );
+    esopmin.settings()->set( "on_cube", cube_function_t( [this, &gatecirc, &target]( const cube_t& c ) { add_gate_for_cube( gatecirc, target, c ); } ) );
+    esopmin.settings()->set( "verify", false );
+    esopmin( control_function.manager(), control_function.getNode() );
 
     if ( gatecirc.num_gates() )
     {
@@ -254,6 +253,7 @@ public:
   std::vector<unsigned> adjusted_lines;
   unsigned pos, start;
   bool verbose;
+  dd_based_esop_optimization_func esopmin;
 
   truth_table_column_t vf_in, vf_out, vb_in, vb_out;
 };
@@ -262,8 +262,9 @@ public:
 bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics)
 {
   /* Settings */
-  bool                  verbose  = get( settings, "verbose",  false                   );
-  std::vector<unsigned> ordering = get( settings, "ordering", std::vector<unsigned>() );
+  bool                            verbose  = get( settings, "verbose",  false                             );
+  std::vector<unsigned>           ordering = get( settings, "ordering", std::vector<unsigned>()           );
+  dd_based_esop_optimization_func esopmin  = get( settings, "esopmin",  dd_based_esop_optimization_func() );
 
   timer<properties_timer> t;
 
@@ -289,6 +290,7 @@ bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, pro
   // manager
   young_subgroup_synthesis_manager mgr( circ, spec );
   mgr.verbose = verbose;
+  mgr.esopmin = esopmin;
 
   // variable ordering
   if ( ordering.empty() )

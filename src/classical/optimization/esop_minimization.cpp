@@ -762,6 +762,25 @@ void esop_minimization( const std::string& filename, properties::ptr settings, p
   esop_minimization( bdd.cudd, bdd.outputs.front().second, settings, statistics );
 }
 
+dd_based_esop_optimization_func dd_based_esop_minimization_func(properties::ptr settings, properties::ptr statistics)
+{
+  dd_based_esop_optimization_func f = [&settings, &statistics]( DdManager * cudd, DdNode * f ) {
+    return esop_minimization( cudd, f, settings, statistics );
+  };
+  f.init( settings, statistics );
+  return f;
+}
+
+pla_based_esop_optimization_func pla_based_esop_minimization_func(properties::ptr settings, properties::ptr statistics)
+{
+  pla_based_esop_optimization_func f = [&settings, &statistics]( const std::string& filename ) {
+    return esop_minimization( filename, settings, statistics );
+  };
+  f.init( settings, statistics );
+  return f;
+}
+
+
 /******************************************************************************
  * Tests                                                                      *
  ******************************************************************************/
