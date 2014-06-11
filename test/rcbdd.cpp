@@ -23,6 +23,7 @@
 #include <algorithms/synthesis/embed_pla.hpp>
 #include <algorithms/synthesis/rcbdd_synthesis.hpp>
 #include <algorithms/synthesis/young_subgroup_synthesis.hpp>
+#include <classical/optimization/exorcism_minimization.hpp>
 
 using namespace boost::assign;
 
@@ -84,6 +85,7 @@ BOOST_AUTO_TEST_CASE(simple)
       settings->set( "verbose", false );
       settings->set( "progress", true );
       settings->set( "name", name );
+      settings->set( "esopmin", dd_based_exorcism_minimization_func() );
 
       properties::ptr statistics( new properties );
 
