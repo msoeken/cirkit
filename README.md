@@ -1,4 +1,4 @@
-# RevKit 2.0 Base System (Beta)
+# RevKit 2.0 Base System
 
 ## Requirements
 
