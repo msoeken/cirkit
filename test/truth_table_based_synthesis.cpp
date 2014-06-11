@@ -20,6 +20,8 @@
 #include <algorithms/synthesis/transformation_based_synthesis.hpp>
 #include <algorithms/synthesis/young_subgroup_synthesis.hpp>
 
+#include <classical/optimization/esop_minimization.hpp>
+
 BOOST_AUTO_TEST_CASE(simple)
 {
   using namespace revkit;
@@ -51,8 +53,10 @@ BOOST_AUTO_TEST_CASE(simple)
     transformation_based_synthesis( circ_tbs, spec, properties::ptr(), tbs_statistics );
     properties::ptr rms_statistics( new properties );
     reed_muller_synthesis( circ_rms, spec, properties::ptr(), rms_statistics );
+    properties::ptr ysg_settings( new properties );
+    ysg_settings->set( "esopmin", dd_based_esop_minimization_func() );
     properties::ptr ysg_statistics( new properties );
-    young_subgroup_synthesis( circ_ysg, spec, properties::ptr(), ysg_statistics );
+    young_subgroup_synthesis( circ_ysg, spec, ysg_settings, ysg_statistics );
 
     write_realization( circ_ysg, boost::str( boost::format( "/tmp/%s.real" ) % benchmark ) );
 
