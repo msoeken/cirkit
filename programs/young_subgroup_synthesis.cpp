@@ -28,6 +28,7 @@
 #include <algorithms/synthesis/young_subgroup_synthesis.hpp>
 
 #include <classical/optimization/esop_minimization.hpp>
+#include <classical/optimization/exorcism_minimization.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -44,6 +45,7 @@ int main( int argc, char ** argv )
   std::string ordering;
   bool        print_circuit     = false;
   bool        print_truth_table = false;
+  unsigned    esop_minimizer    = 0u;
   bool        verbose           = false;
 
   program_options opts;
@@ -53,6 +55,7 @@ int main( int argc, char ** argv )
     ( "ordering",          value<std::string>( &ordering ),                           "Complete variable ordering (space separated)" )
     ( "print_circuit",     value<bool>( &print_circuit )->default_value( false ),     "Prints the circuit" )
     ( "print_truth_table", value<bool>( &print_truth_table )->default_value( false ), "Prints the truth table of the circuit" )
+    ( "esop_minimizer",    value<unsigned>( &esop_minimizer )->default_value( 0u ),   "ESOP minizer (0: built-in, 1: exorcism)" )
     ( "verbose",           value<bool>( &verbose )->default_value( false ),           "Be verbose" )
     ;
 
@@ -70,7 +73,10 @@ int main( int argc, char ** argv )
   circuit circ;
   properties::ptr settings( new properties );
   settings->set( "verbose", verbose );
-  settings->set( "esopmin", dd_based_esop_minimization_func() );
+
+  properties::ptr esopmin_settings( new properties );
+  esopmin_settings->set( "verbose", verbose );
+  settings->set( "esopmin", esop_minimizer ? dd_based_exorcism_minimization_func( esopmin_settings ) : dd_based_esop_minimization_func( esopmin_settings ) );
 
   if ( !ordering.empty() )
   {
