@@ -75,6 +75,11 @@ public:
 
   void synthesis_gate( BDD control_function, unsigned target, unsigned& start )
   {
+    if ( control_function == cudd.bddZero() )
+    {
+      return;
+    }
+
     circuit gatecirc( circ.lines() );
 
     esopmin.settings()->set( "on_cube", cube_function_t( [this, &gatecirc, &target]( const cube_t& c ) { add_gate_for_cube( gatecirc, target, c ); } ) );
