@@ -148,7 +148,7 @@ void write_aigmeta( const aigmeta& meta, const std::string& filename )
     os << "        {" << std::endl
        << "            \"name\": \"" << bundle.name << "\"," << std::endl
        << "            \"bundle_id\": " << bundle.id << "," << std::endl
-       << "            \"litx\": [ " << boost::join( bundle.literals | transformed( boost::lexical_cast<std::string, unsigned> ), ", " ) << " ]" << std::endl
+       << "            \"litx\": [ " << boost::join( bundle.literals | transformed( []( unsigned l ) { return boost::lexical_cast<std::string>( l ); } ), ", " ) << " ]" << std::endl
        << "        }";
   }
   os << std::endl
