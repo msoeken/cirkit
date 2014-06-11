@@ -21,14 +21,15 @@
 #include <algorithms/synthesis/young_subgroup_synthesis.hpp>
 
 #include <classical/optimization/esop_minimization.hpp>
+#include <classical/optimization/exorcism_minimization.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)
 {
   using namespace revkit;
 
   /* store results */
-  benchmark_table<std::string, unsigned, unsigned, double, unsigned, double, unsigned, double>
-    table( { "Benchmark", "n", "TBS", "t", "RMS", "t", "YSG", "t" } );
+  benchmark_table<std::string, unsigned, unsigned, double, unsigned, double, unsigned, double, unsigned, double>
+    table( { "Benchmark", "n", "TBS", "t", "RMS", "t", "YSG", "t", "YSG2", "t" } );
 
   std::vector<std::string> whitelist = { "3_17_6","4_49_7","4gt10_22","4gt11_23","4gt12_24","4gt13_25","4mod5_8","decod24_10","ham3_28","ham7_29","hwb7_15","hwb8_64","hwb9_65","mod5d1_16","mod5d2_16","rd32_19","rd73_69","sym9_71" };
   foreach_function_with_whitelist( whitelist, [&table]( const boost::filesystem::path& path ) {
@@ -48,19 +49,25 @@ BOOST_AUTO_TEST_CASE(simple)
     embed_truth_table( spec, pla );
 
     /* synthesis */
-    circuit circ_tbs, circ_rms, circ_ysg;
+    circuit circ_tbs, circ_rms, circ_ysg, circ_ysg2;
+
     properties::ptr tbs_statistics( new properties );
     transformation_based_synthesis( circ_tbs, spec, properties::ptr(), tbs_statistics );
+
     properties::ptr rms_statistics( new properties );
     reed_muller_synthesis( circ_rms, spec, properties::ptr(), rms_statistics );
+
     properties::ptr ysg_settings( new properties );
     ysg_settings->set( "esopmin", dd_based_esop_minimization_func() );
     properties::ptr ysg_statistics( new properties );
     young_subgroup_synthesis( circ_ysg, spec, ysg_settings, ysg_statistics );
 
-    write_realization( circ_ysg, boost::str( boost::format( "/tmp/%s.real" ) % benchmark ) );
+    properties::ptr ysg2_settings( new properties );
+    ysg2_settings->set( "esopmin", dd_based_exorcism_minimization_func() );
+    properties::ptr ysg2_statistics( new properties );
+    young_subgroup_synthesis( circ_ysg2, spec, ysg2_settings, ysg2_statistics );
 
-    table.add( benchmark, spec.num_inputs(), circ_tbs.num_gates(), tbs_statistics->get<double>( "runtime" ), circ_rms.num_gates(), rms_statistics->get<double>( "runtime" ), circ_ysg.num_gates(), ysg_statistics->get<double>( "runtime" ) );
+    table.add( benchmark, spec.num_inputs(), circ_tbs.num_gates(), tbs_statistics->get<double>( "runtime" ), circ_rms.num_gates(), rms_statistics->get<double>( "runtime" ), circ_ysg.num_gates(), ysg_statistics->get<double>( "runtime" ), circ_ysg2.num_gates(), ysg2_statistics->get<double>( "runtime" ) );
   });
 
   /* generate table */
