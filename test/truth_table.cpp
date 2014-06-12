@@ -5,6 +5,7 @@
 #include <boost/test/output_test_stream.hpp>
 
 #include <core/truth_table.hpp>
+#include <core/utils/truth_table_helpers.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)
 {
@@ -24,4 +25,12 @@ BOOST_AUTO_TEST_CASE(simple)
 
   BOOST_CHECK( !output.is_empty( false ) );
   BOOST_CHECK( output.is_equal( "00 00\n01 01\n10 11\n11 10\n" ) );
+
+  bitset_vector_t tt_vec;
+  truth_table_to_bitset_vector( spec, tt_vec );
+  BOOST_CHECK( tt_vec.size() == 4u );
+  BOOST_CHECK( tt_vec[0u] == boost::dynamic_bitset<>( 2u, 0u ) );
+  BOOST_CHECK( tt_vec[1u] == boost::dynamic_bitset<>( 2u, 1u ) );
+  BOOST_CHECK( tt_vec[2u] == boost::dynamic_bitset<>( 2u, 3u ) );
+  BOOST_CHECK( tt_vec[3u] == boost::dynamic_bitset<>( 2u, 2u ) );
 }
