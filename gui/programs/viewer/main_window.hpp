@@ -42,6 +42,7 @@ public:
 private Q_SLOTS:
   void open();
   void saveImage();
+  void saveLatex();
   void showTruthTable();
 
 private:

@@ -17,6 +17,7 @@
 
 #include "main_window.hpp"
 
+#include <fstream>
 #include <memory>
 
 #include <QtCore/QSize>
@@ -33,6 +34,7 @@
 #include <src/truth_table_widget.hpp>
 
 #include <core/circuit.hpp>
+#include <core/io/create_image.hpp>
 #include <core/io/read_realization.hpp>
 
 using namespace revkit;
@@ -96,6 +98,20 @@ void MainWindow::saveImage()
   }
 }
 
+void MainWindow::saveLatex()
+{
+  QString filename = QFileDialog::getSaveFileName( this, "Save as LaTeX", "", "LaTeX file (*.tex)" );
+  if ( !filename.isEmpty() )
+  {
+    std::filebuf fb;
+    fb.open( filename.toLatin1(), std::ios::out );
+    std::ostream os( &fb );
+    create_tikz_settings settings;
+    create_image( os, *d->mCircuit, settings );
+    fb.close();
+  }
+}
+
 void MainWindow::showTruthTable()
 {
   QDialog * dialog = new QDialog( this, Qt::Dialog );
@@ -134,6 +150,7 @@ void MainWindow::setupActions()
 
   connect( d->mOpenAction, SIGNAL( triggered() ), SLOT( open() ) );
   connect( d->mImageAction, SIGNAL( triggered() ), SLOT( saveImage() ) );
+  connect( d->mLatexAction, SIGNAL( triggered() ), SLOT( saveLatex() ) );
   connect( d->mExitAction, SIGNAL( triggered() ), SLOT( close() ) );
 
   connect( d->mSpecAction, SIGNAL( triggered() ), SLOT( showTruthTable() ) );
