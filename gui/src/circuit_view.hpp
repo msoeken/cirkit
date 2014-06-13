@@ -18,6 +18,8 @@
 #ifndef CIRCUIT_VIEW_HPP
 #define CIRCUIT_VIEW_HPP
 
+#include <memory>
+
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QWidget>
 
@@ -32,11 +34,22 @@ class CircuitView : public QGraphicsView
 public:
   explicit CircuitView( QWidget * parent = nullptr );
 
-  void load( const revkit::circuit& circ );
+  void load( const std::shared_ptr<revkit::circuit>& circ );
   void saveImage( const QString& filename ) const;
 
 private:
+  void setupActions();
+  void setupContextMenu();
+
   QGraphicsTextItem * addLineLabel( int x, int y, QString text, unsigned align, bool color );
+
+private Q_SLOTS:
+  void copyLatexToClipboard();
+  void showContextMenu( const QPoint& pos );
+
+private:
+  class Private;
+  Private * const d;
 };
 
 #endif

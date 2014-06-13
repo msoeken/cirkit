@@ -17,10 +17,17 @@
 
 #include "circuit_view.hpp"
 
+#include <memory>
+
+#include <QtGui/QClipboard>
+#include <QtGui/QIcon>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
 #include <QtWidgets/QGraphicsItem>
 #include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QMenu>
 
 #include <boost/foreach.hpp>
 #include <boost/range/algorithm.hpp>
@@ -28,13 +35,15 @@
 
 #include <core/target_tags.hpp>
 #include <core/functions/find_lines.hpp>
+#include <core/io/create_image.hpp>
 
 using namespace revkit;
 
 class CircuitLineItem : public QGraphicsItemGroup
 {
 public:
-  CircuitLineItem( unsigned index, unsigned width, QGraphicsItem * parent = nullptr ) : QGraphicsItemGroup( parent )
+  CircuitLineItem( unsigned index, unsigned width, QGraphicsItem * parent = nullptr )
+    : QGraphicsItemGroup( parent )
   {
     setToolTip( boost::str( boost::format( "<b><font color=\"#606060\">Line:</font></b> %d" ) % index ).c_str() );
 
@@ -51,7 +60,8 @@ public:
 class GateItem : public QGraphicsItemGroup
 {
 public:
-  GateItem( const gate& g, unsigned index, const circuit& circ, QGraphicsItem * parent = nullptr ) : QGraphicsItemGroup( parent )
+  GateItem( const gate& g, unsigned index, const circuit& circ, QGraphicsItem * parent = nullptr )
+    : QGraphicsItemGroup( parent )
   {
     std::vector<unsigned> lines;
     find_non_empty_lines( g, std::back_inserter( lines ) );
@@ -89,31 +99,48 @@ public:
   }
 };
 
-CircuitView::CircuitView( QWidget * parent ) : QGraphicsView( parent )
+class CircuitView::Private
+{
+public:
+  Private() {}
+
+  QAction * mLatexToClipboardAction;
+
+  std::shared_ptr<circuit> mCircuit;
+};
+
+CircuitView::CircuitView( QWidget * parent )
+  : QGraphicsView( parent ),
+    d( new Private() )
 {
   setScene( new QGraphicsScene( this ) );
   scene()->setBackgroundBrush( Qt::white );
+
+  setupActions();
+  setupContextMenu();
 }
 
-void CircuitView::load( const circuit& circ )
+void CircuitView::load( const std::shared_ptr<circuit>& circ )
 {
+  d->mCircuit = circ;
+
   boost::for_each( scene()->items(), [this]( QGraphicsItem* item ) { scene()->removeItem( item ); } );
 
-  unsigned width = 30u * circ.num_gates();
+  unsigned width = 30u * circ->num_gates();
 
-  for ( unsigned i : boost::irange( 0u, circ.lines() ) )
+  for ( unsigned i : boost::irange( 0u, circ->lines() ) )
   {
-    auto line = new CircuitLineItem( i, circ.num_gates() );
+    auto line = new CircuitLineItem( i, circ->num_gates() );
     scene()->addItem( line );
 
-    addLineLabel( 0u, i * 30u, circ.inputs()[i].c_str(), Qt::AlignRight, circ.constants()[i] );
-    addLineLabel( width, i * 30u, circ.outputs()[i].c_str(), Qt::AlignLeft, circ.garbage()[i] );
+    addLineLabel( 0u, i * 30u, circ->inputs()[i].c_str(), Qt::AlignRight, circ->constants()[i] );
+    addLineLabel( width, i * 30u, circ->outputs()[i].c_str(), Qt::AlignLeft, circ->garbage()[i] );
   }
 
   unsigned index = 0u;
-  for ( const gate& g : circ )
+  for ( const gate& g : *circ )
   {
-    auto gateItem = new GateItem( g, index, circ );
+    auto gateItem = new GateItem( g, index, *circ );
     gateItem->setPos( index * 30u + 15u, 0u );
     scene()->addItem( gateItem );
     ++index;
@@ -127,6 +154,36 @@ void CircuitView::saveImage( const QString& filename ) const
   scene()->render( &painter );
   pixmap.save( filename );
   painter.end();
+}
+
+void CircuitView::setupActions()
+{
+  d->mLatexToClipboardAction = new QAction( QIcon::fromTheme( "text-x-tex" ), "&LaTeX to Clipboard", this );
+  connect( d->mLatexToClipboardAction, SIGNAL( triggered() ), SLOT( copyLatexToClipboard() ) );
+}
+
+void CircuitView::setupContextMenu()
+{
+  setContextMenuPolicy( Qt::CustomContextMenu );
+  connect( this, SIGNAL( customContextMenuRequested(const QPoint&) ), SLOT( showContextMenu(const QPoint&) ) );
+}
+
+void CircuitView::showContextMenu( const QPoint& pos )
+{
+  QMenu * menu = new QMenu( this );
+  menu->addAction( d->mLatexToClipboardAction );
+  menu->popup( mapToGlobal( pos ) );
+}
+
+void CircuitView::copyLatexToClipboard()
+{
+  if ( d->mCircuit )
+  {
+    std::stringstream sstream;
+    create_tikz_settings settings;
+    create_image( sstream, *d->mCircuit, settings );
+    QApplication::clipboard()->setText( QString::fromStdString( sstream.str() ) );
+  }
 }
 
 QGraphicsTextItem * CircuitView::addLineLabel( int x, int y, QString text, unsigned align, bool color )

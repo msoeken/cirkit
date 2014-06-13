@@ -86,7 +86,7 @@ void MainWindow::openFromFilename( const QString& filename )
 {
   d->mCircuit.reset( new circuit );
   read_realization( *d->mCircuit, filename.toStdString() );
-  d->mCircuitView->load( *d->mCircuit );
+  d->mCircuitView->load( d->mCircuit );
 }
 
 void MainWindow::saveImage()
