@@ -44,7 +44,7 @@
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/clear_circuit.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 namespace internal

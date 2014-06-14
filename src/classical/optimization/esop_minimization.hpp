@@ -37,7 +37,7 @@
 #include <core/properties.hpp>
 #include <classical/optimization/optimization.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 /**

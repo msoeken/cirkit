@@ -11,7 +11,7 @@ The following software is required in order to build CirKit
 * GNU MP, and its C++ interface GMP++
 * Qt5 (only for the GUI)
 
-## Build RevKit
+## Build CirKit
 
 After cloning CirKit perform the following steps
 

@@ -37,7 +37,7 @@
 /**
  * @brief Main namespace
  */
-namespace revkit
+namespace cirkit
 {
 
   /**

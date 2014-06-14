@@ -27,7 +27,7 @@
 #ifndef FLATTEN_CIRCUIT_HPP
 #define FLATTEN_CIRCUIT_HPP
 
-namespace revkit
+namespace cirkit
 {
 
   class circuit;

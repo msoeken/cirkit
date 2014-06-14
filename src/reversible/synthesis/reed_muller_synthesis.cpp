@@ -42,7 +42,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   typedef std::vector<boost::dynamic_bitset<> > spectra_t;

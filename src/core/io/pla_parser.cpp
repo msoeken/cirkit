@@ -28,7 +28,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_cube )

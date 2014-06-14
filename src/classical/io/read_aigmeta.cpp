@@ -27,7 +27,7 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 using namespace boost::assign;

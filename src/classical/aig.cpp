@@ -26,7 +26,7 @@
 #include <boost/graph/graphviz.hpp>
 #include <boost/range/adaptors.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 using namespace boost::assign;

@@ -35,7 +35,7 @@
 
 #include <reversible/optimization/optimization.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

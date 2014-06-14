@@ -28,7 +28,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
   bool transposition_to_circuit( circuit& circ, const boost::dynamic_bitset<>& inputs, const boost::dynamic_bitset<>& outputs )
   {

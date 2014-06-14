@@ -31,7 +31,7 @@
 
 #include <classical/aig.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   void find_mincut( aig_graph& aig, unsigned count, std::list<std::list<aig_function>>& cuts );

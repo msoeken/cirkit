@@ -23,7 +23,7 @@
 
 #include "../utils/costs.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   print_statistics_settings::print_statistics_settings()

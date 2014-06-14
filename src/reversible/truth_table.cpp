@@ -19,7 +19,7 @@
 
 #include <boost/range/iterator_range.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   std::ostream& operator<<( std::ostream& os, const binary_truth_table& spec )

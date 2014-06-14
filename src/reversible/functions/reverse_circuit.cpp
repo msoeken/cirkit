@@ -21,7 +21,7 @@
 
 #include "copy_circuit.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   void reverse_circuit( const circuit& src, circuit& dest )

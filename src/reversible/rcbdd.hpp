@@ -32,7 +32,7 @@
 
 #include <cuddObj.hh>
 
-namespace revkit
+namespace cirkit
 {
 
   using namespace boost::assign;

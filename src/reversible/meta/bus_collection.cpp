@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace revkit
+namespace cirkit
 {
 
   class bus_collection::priv

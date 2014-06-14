@@ -29,7 +29,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace revkit
+namespace cirkit
 {
   class circuit;
 

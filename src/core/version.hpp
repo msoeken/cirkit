@@ -24,7 +24,7 @@
  * @since  1.1
  */
 
-namespace revkit
+namespace cirkit
 {
 
   /**

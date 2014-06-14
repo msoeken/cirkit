@@ -34,7 +34,7 @@
 
 #include <reversible/synthesis/synthesis.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   // NOTE define naming conventions for public enumerations

@@ -29,7 +29,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
 extend_pla_settings::extend_pla_settings() : post_compact( true ) {}

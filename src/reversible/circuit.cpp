@@ -27,7 +27,7 @@
 
 #include "functions/copy_circuit.hpp"
 
-namespace revkit
+namespace cirkit
 {
   using boost::adaptors::indirected;
   using boost::adaptors::transformed;

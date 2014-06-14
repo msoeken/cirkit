@@ -17,7 +17,7 @@
 
 #include "fully_specified.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   bool fully_specified( const binary_truth_table& tt, bool is_reversible )

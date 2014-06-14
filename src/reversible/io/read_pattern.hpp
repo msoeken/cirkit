@@ -29,7 +29,7 @@
 
 #include <string>
 
-namespace revkit
+namespace cirkit
 {
 
   class pattern;

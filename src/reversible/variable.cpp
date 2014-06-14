@@ -19,7 +19,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   variable::variable( unsigned v ) : v( v ) {}

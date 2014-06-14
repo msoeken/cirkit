@@ -29,7 +29,7 @@
 
 #include <iostream>
 
-namespace revkit
+namespace cirkit
 {
 
   class circuit;

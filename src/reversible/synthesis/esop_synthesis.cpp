@@ -35,7 +35,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   typedef std::vector<std::pair<binary_truth_table::cube_type, binary_truth_table::cube_type> > cubes_type;

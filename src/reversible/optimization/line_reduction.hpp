@@ -35,7 +35,7 @@
 #include <reversible/optimization/optimization.hpp>
 #include <reversible/synthesis/synthesis.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   class circuit;

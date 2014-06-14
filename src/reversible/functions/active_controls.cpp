@@ -19,7 +19,7 @@
 
 #include <boost/range/algorithm.hpp>
 
-namespace revkit
+namespace cirkit
 {
   class active_controls::priv
   {

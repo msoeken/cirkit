@@ -23,7 +23,7 @@
 
 #include "dd_synthesis_p.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   bool bdd_synthesis( circuit& circ, const std::string& filename,

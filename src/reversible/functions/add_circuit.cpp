@@ -20,7 +20,7 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/insert.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   void append_circuit( circuit& circ, const circuit& src, const gate::control_container& controls )

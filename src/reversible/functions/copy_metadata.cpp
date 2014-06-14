@@ -17,7 +17,7 @@
 
 #include "copy_metadata.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   copy_metadata_settings::copy_metadata_settings()

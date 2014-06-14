@@ -21,7 +21,7 @@
 
 #include "../io/io_utils_p.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   template<typename Iterator>

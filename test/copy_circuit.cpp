@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(simple)
   using boost::test_tools::output_test_stream;
 
   using namespace boost::assign;
-  using namespace revkit;
+  using namespace cirkit;
 
   circuit circ( 6u ), copy, smaller_copy;
 

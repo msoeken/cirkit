@@ -36,7 +36,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   bool read_pattern( pattern& p, const std::string& filename, std::string* error )

@@ -17,7 +17,7 @@
 
 #include "version.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   const char* revkit_version()

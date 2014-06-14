@@ -24,7 +24,7 @@
 
 #include <boost/range/algorithm.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   void flatten_circuit( const circuit& base, circuit& circ, bool keep_meta_data )

@@ -22,7 +22,7 @@
 #include <boost/format.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 void write_aiger( const aig_graph& aig, std::ostream& os )

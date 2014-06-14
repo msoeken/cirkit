@@ -52,7 +52,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 #ifndef __WIN32
   template<typename Func>

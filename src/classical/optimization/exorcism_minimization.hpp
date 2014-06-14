@@ -36,7 +36,7 @@
 
 #include <core/properties.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 /**

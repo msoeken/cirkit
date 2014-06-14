@@ -44,7 +44,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
 typedef std::vector<std::vector<int> > truth_table_column_t;

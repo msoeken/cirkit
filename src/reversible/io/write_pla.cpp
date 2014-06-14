@@ -24,7 +24,7 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 void write_pla( const binary_truth_table& pla, const std::string& filename )

@@ -38,7 +38,7 @@
 
 #include <core/properties.hpp>
 
-namespace revkit {
+namespace cirkit {
 
   /**
    * @brief Functor for the timer class which prints the run-time to an output stream

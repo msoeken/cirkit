@@ -36,7 +36,7 @@
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/adaptors.hpp>
 
-using namespace revkit;
+using namespace cirkit;
 
 int main( int argc, char ** argv )
 {

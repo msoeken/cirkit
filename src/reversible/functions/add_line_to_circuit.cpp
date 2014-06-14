@@ -23,7 +23,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   unsigned add_line_to_circuit( circuit& circ, const std::string& input, const std::string& output, const constant& c, bool g )

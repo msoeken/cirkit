@@ -21,7 +21,7 @@
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/io/print_circuit.hpp>
 
-using namespace revkit;
+using namespace cirkit;
 
 int main( int argc, char ** argv )
 {

@@ -35,7 +35,7 @@
 
 #include <reversible/synthesis/synthesis.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

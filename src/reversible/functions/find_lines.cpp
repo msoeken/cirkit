@@ -17,7 +17,7 @@
 
 #include "find_lines.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   void find_empty_lines( const gate& src, unsigned line_size, std::set<unsigned>& lines )

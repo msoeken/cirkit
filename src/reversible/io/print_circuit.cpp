@@ -28,7 +28,7 @@
 #include "../circuit.hpp"
 #include "../target_tags.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   print_circuit_settings::print_circuit_settings( std::ostream& os )

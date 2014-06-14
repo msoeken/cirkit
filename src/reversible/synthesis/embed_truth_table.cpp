@@ -32,7 +32,7 @@ using namespace boost::assign;
 
 // NOTE use unsigned long long instead of unsigned
 // now this approach works only for embedding with 32 extra lines
-namespace revkit
+namespace cirkit
 {
 
   unsigned additional_garbage( const binary_truth_table& base, std::vector<unsigned>& values )

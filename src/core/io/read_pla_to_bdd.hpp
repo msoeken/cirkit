@@ -35,7 +35,7 @@
 
 #include <cudd.h>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

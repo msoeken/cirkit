@@ -24,7 +24,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   ////////////////////////////// class target_line_adder

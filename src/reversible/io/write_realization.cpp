@@ -33,7 +33,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   struct constant_to_char

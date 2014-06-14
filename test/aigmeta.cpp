@@ -19,7 +19,7 @@ extern "C" {
 BOOST_AUTO_TEST_CASE(simple)
 {
   using boost::unit_test::framework::master_test_suite;
-  using namespace revkit;
+  using namespace cirkit;
 
   assert( master_test_suite().argc == 2u );
   boost::filesystem::path filename( master_test_suite().argv[1] );

@@ -21,7 +21,7 @@
 
 #include <reversible/functions/copy_circuit.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   bool expand_circuit( const circuit& base, circuit& circ, unsigned num_lines, const std::vector<unsigned>& filter )

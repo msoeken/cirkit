@@ -30,7 +30,7 @@
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

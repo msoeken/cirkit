@@ -30,7 +30,7 @@
 #include <iostream>
 #include <string>
 
-namespace revkit
+namespace cirkit
 {
 
   struct variable

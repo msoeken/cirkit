@@ -9,7 +9,7 @@
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-  using namespace revkit;
+  using namespace cirkit;
 
   circuit circ;
   properties::ptr settings( new properties );

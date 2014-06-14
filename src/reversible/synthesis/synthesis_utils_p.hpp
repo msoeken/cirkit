@@ -21,7 +21,7 @@
 
 #include <gmpxx.h>
 
-namespace revkit
+namespace cirkit
 {
 
   unsigned hamming_distance( unsigned a, unsigned b );

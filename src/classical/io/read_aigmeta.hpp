@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-namespace revkit
+namespace cirkit
 {
 
 struct aigmeta_port

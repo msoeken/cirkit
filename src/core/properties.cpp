@@ -17,7 +17,7 @@
 
 #include "properties.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   properties::properties()

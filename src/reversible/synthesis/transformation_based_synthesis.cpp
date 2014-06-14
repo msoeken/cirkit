@@ -27,7 +27,7 @@
 
 #include "synthesis_utils_p.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   void read_output_values( const binary_truth_table& spec, std::vector<unsigned>& output_values )

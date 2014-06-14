@@ -10,7 +10,7 @@
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-  using namespace revkit;
+  using namespace cirkit;
   using namespace boost::assign;
 
   circuit circ( 3u );

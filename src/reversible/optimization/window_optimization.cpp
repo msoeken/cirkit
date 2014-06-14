@@ -28,7 +28,7 @@
 #include <reversible/simulation/simple_simulation.hpp>
 #include <reversible/synthesis/transformation_based_synthesis.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   shift_window_selection::shift_window_selection()

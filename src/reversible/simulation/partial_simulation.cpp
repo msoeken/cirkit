@@ -24,7 +24,7 @@
 
 #include <reversible/simulation/simple_simulation.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   bool partial_simulation( boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input, properties::ptr settings, properties::ptr statistics )

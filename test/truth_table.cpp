@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_CASE(simple)
 {
   using boost::test_tools::output_test_stream;
 
-  using namespace revkit;
+  using namespace cirkit;
 
   binary_truth_table spec;
 

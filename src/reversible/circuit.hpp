@@ -40,7 +40,7 @@
 #include <reversible/gate.hpp>
 #include <reversible/meta/bus_collection.hpp>
 
-namespace revkit
+namespace cirkit
 {
   /**
    * @brief Type for determine whether line is constant or not

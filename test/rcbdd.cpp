@@ -29,7 +29,7 @@ using namespace boost::assign;
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-  using namespace revkit;
+  using namespace cirkit;
 
   std::vector<std::string> whitelist;
   //whitelist += "sym6_63","urf2_73","con1_136","hwb9_65","urf1_72","urf5_76","sym9_71","urf3_75","rd84_70","sym10_207","urf4_89";

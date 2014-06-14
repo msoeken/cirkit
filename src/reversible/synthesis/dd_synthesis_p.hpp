@@ -23,7 +23,7 @@
 
 #include <cudd.h>
 
-namespace revkit
+namespace cirkit
 {
 
   class circuit;

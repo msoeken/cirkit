@@ -39,8 +39,8 @@ unsigned call_extern( const std::string& filename, unsigned num_inputs, const st
 BOOST_AUTO_TEST_CASE(simple)
 {
   using namespace boost::assign;
-  using namespace revkit;
-  using namespace revkit::test;
+  using namespace cirkit;
+  using namespace cirkit::test;
 
   /* store results */
   benchmark_table<std::string, unsigned, unsigned, unsigned, unsigned, boost::optional<unsigned>, boost::optional<unsigned> >

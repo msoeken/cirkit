@@ -27,7 +27,7 @@
 #include <core/io/pla_parser.hpp>
 #include <reversible/functions/extend_truth_table.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   struct transform_pla_to_constants

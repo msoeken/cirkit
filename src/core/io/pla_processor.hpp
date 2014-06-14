@@ -30,7 +30,7 @@
 #include <iosfwd>
 #include <vector>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

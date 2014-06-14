@@ -32,7 +32,7 @@
 #include <reversible/functions/copy_metadata.hpp>
 #include <reversible/utils/costs.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   template<typename Iterator, typename OutputIterator>

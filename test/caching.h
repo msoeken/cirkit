@@ -5,7 +5,7 @@
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
 
-namespace revkit {
+namespace cirkit {
 namespace test {
 
 template<typename Res, typename _Fn, typename _Rep, typename _Period>

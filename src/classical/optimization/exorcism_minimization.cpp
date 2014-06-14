@@ -28,7 +28,7 @@
 
 #include <core/io/pla_parser.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 /******************************************************************************

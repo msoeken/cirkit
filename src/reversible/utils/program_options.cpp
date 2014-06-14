@@ -19,7 +19,7 @@
 
 #include "costs.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   class program_options::priv

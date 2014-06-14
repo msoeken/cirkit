@@ -32,7 +32,7 @@
 
 #include <classical/aig.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 void write_aiger( const aig_graph& aig, std::ostream& os );

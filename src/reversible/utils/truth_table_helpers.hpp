@@ -33,7 +33,7 @@
 
 #include <reversible/truth_table.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 typedef std::vector<boost::dynamic_bitset<> > bitset_vector_t;

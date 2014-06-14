@@ -22,7 +22,7 @@
 
 #include "revlib_parser.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   ////////////////////////////// class specification_processor

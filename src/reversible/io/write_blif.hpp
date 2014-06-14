@@ -33,7 +33,7 @@
 
 #include <boost/optional.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   class circuit;

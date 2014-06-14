@@ -29,7 +29,7 @@
 
 #include <reversible/gate.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

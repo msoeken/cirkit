@@ -33,7 +33,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <reversible/synthesis/synthesis.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

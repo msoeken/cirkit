@@ -23,7 +23,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   template<typename Iterator>

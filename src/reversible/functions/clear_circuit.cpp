@@ -17,7 +17,7 @@
 
 #include "clear_circuit.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   void clear_circuit( circuit& circ )

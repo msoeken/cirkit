@@ -22,7 +22,7 @@
 #include <reversible/functions/extend_pla.hpp>
 #include <reversible/io/read_pla.hpp>
 
-using namespace revkit;
+using namespace cirkit;
 
 int main( int argc, char ** argv )
 {

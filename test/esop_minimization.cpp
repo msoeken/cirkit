@@ -8,7 +8,7 @@
 
 #define COMPARE_WITH_EXORCISM 0
 
-void on_cube( const revkit::cube_t& cube )
+void on_cube( const cirkit::cube_t& cube )
 {
   /* do nothing */
 }
@@ -16,7 +16,7 @@ void on_cube( const revkit::cube_t& cube )
 BOOST_AUTO_TEST_CASE(simple)
 {
   using boost::unit_test::framework::master_test_suite;
-  using namespace revkit;
+  using namespace cirkit;
 
   properties::ptr settings( new properties() );
   settings->set( "verbose", true );

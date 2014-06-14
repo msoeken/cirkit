@@ -29,7 +29,7 @@
 #ifndef EXTEND_PLA_HPP
 #define EXTEND_PLA_HPP
 
-namespace revkit
+namespace cirkit
 {
 
   /**

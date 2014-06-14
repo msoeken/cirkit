@@ -21,7 +21,7 @@
 
 #include <core/properties.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   void bitset_to_vector( binary_truth_table::cube_type& vec, const boost::dynamic_bitset<> number )

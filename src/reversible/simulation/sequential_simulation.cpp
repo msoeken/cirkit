@@ -34,7 +34,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   // If needed somewhere else, put to utilities of simulation

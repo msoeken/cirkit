@@ -43,7 +43,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   bool transposition_based_synthesis( circuit& circ, const binary_truth_table& spec,

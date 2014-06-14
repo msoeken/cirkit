@@ -37,7 +37,7 @@
 #include <reversible/circuit.hpp>
 #include <reversible/io/revlib_parser.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

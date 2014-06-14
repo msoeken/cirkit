@@ -36,7 +36,7 @@
 
 #include <core/functor.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;

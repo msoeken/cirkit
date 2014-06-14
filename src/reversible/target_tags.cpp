@@ -17,7 +17,7 @@
 
 #include "target_tags.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   bool same_type( const gate& g1, const gate& g2 )

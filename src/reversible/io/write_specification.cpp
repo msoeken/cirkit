@@ -32,7 +32,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   struct tristate_to_char

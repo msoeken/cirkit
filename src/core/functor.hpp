@@ -31,7 +31,7 @@
 
 #include <core/properties.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**
@@ -117,7 +117,7 @@ namespace revkit
      *
      * @return A smart pointer to the settings
      */
-    const revkit::properties::ptr& settings() const
+    const properties::ptr& settings() const
     {
       return _settings;
     }
@@ -129,7 +129,7 @@ namespace revkit
      *
      * @return A smart pointer to the statistics
      */
-    const revkit::properties::ptr& statistics() const
+    const properties::ptr& statistics() const
     {
       return _statistics;
     }

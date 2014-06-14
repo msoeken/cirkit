@@ -22,7 +22,7 @@
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/write_realization.hpp>
 
-using namespace revkit;
+using namespace cirkit;
 
 int main( int argc, char ** argv )
 {

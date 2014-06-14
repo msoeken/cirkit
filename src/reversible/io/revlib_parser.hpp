@@ -30,7 +30,7 @@
 #include <iosfwd>
 #include <string>
 
-namespace revkit
+namespace cirkit
 {
 
   class revlib_processor;

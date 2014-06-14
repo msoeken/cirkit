@@ -34,7 +34,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   const std::string& add_wire( std::vector<std::string>& wires )

@@ -32,7 +32,7 @@
 
 #include <reversible/circuit.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

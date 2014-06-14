@@ -39,7 +39,7 @@ namespace boost
   BOOST_INSTALL_PROPERTY(edge, complement);
 }
 
-namespace revkit
+namespace cirkit
 {
   typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS> traits_t;
   typedef std::pair<traits_t::vertex_descriptor, bool> aig_function; /* the second type is for the complement */

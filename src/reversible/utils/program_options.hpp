@@ -31,7 +31,7 @@
 
 #include <reversible/utils/costs.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

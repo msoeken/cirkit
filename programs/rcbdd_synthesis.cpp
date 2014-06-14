@@ -26,7 +26,7 @@
 #include <reversible/synthesis/embed_pla.hpp>
 #include <reversible/synthesis/rcbdd_synthesis.hpp>
 
-using namespace revkit;
+using namespace cirkit;
 
 int main( int argc, char ** argv )
 {

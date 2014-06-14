@@ -24,7 +24,7 @@
 #include <reversible/gate.hpp>
 #include <reversible/target_tags.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   boost::dynamic_bitset<>& core_gate_simulation::operator()( const gate& g, boost::dynamic_bitset<>& input ) const

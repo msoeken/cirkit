@@ -29,7 +29,7 @@
 
 #include <core/io/pla_parser.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 BDD create_bdd_from_incube(const rcbdd& cf, const std::string& incube, unsigned offset = 0u, std::vector<BDD>* dont_cares = 0)

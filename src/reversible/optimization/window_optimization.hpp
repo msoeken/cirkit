@@ -39,7 +39,7 @@
 #include <reversible/simulation/simulation.hpp>
 #include <reversible/synthesis/synthesis.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   typedef boost::tuple<circuit, std::vector<unsigned> > circuit_filter_pair;

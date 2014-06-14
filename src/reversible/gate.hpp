@@ -36,7 +36,7 @@
 
 #include <boost/any.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

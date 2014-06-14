@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-namespace revkit
+namespace cirkit
 {
 
   ////////////////////////////// class revlib_processor

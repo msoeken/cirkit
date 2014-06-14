@@ -42,7 +42,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   struct transform_to_garbage

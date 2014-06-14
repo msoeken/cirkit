@@ -28,7 +28,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
   //// class: create_image_settings ////

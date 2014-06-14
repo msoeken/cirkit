@@ -25,7 +25,7 @@
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-  using namespace revkit;
+  using namespace cirkit;
 
   /* store results */
   benchmark_table<std::string, unsigned, unsigned, double, unsigned, double, unsigned, double, unsigned, double>

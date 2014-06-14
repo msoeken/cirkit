@@ -17,7 +17,7 @@
 #include <gmpxx.h>
 
 using namespace boost::assign;
-using namespace revkit;
+using namespace cirkit;
 
 mpz_class pow2(unsigned n)
 {

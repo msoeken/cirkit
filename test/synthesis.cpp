@@ -18,7 +18,7 @@
 #include <reversible/synthesis/transformation_based_synthesis.hpp>
 #include <reversible/synthesis/transposition_based_synthesis.hpp>
 
-using namespace revkit;
+using namespace cirkit;
 
 void add_entries_from_permutation( binary_truth_table& spec, const std::vector<unsigned>& permutation )
 {

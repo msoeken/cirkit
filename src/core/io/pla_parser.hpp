@@ -31,7 +31,7 @@
 
 #include <core/io/pla_processor.hpp>
 
-namespace revkit
+namespace cirkit
 {
   class pla_processor;
 

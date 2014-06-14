@@ -32,7 +32,7 @@
 
 #include <iostream>
 
-namespace revkit
+namespace cirkit
 {
 
 /**

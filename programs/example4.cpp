@@ -21,7 +21,7 @@
 #include <reversible/functions/add_gates.hpp>
 
 using namespace boost::assign;
-using namespace revkit;
+using namespace cirkit;
 
 int main( int argc, char ** argv )
 {

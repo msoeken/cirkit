@@ -19,7 +19,7 @@
 
 #include "../circuit.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   typedef boost::graph_traits<hierarchy_graph>::vertex_descriptor hierarchy_vertex;

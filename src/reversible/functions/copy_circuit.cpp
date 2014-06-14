@@ -27,7 +27,7 @@
 #include "add_circuit.hpp"
 #include "copy_metadata.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   void copy_circuit( const circuit& src, circuit& dest )

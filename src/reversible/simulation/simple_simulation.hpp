@@ -34,7 +34,7 @@
 
 #include <reversible/simulation/simulation.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   class gate;

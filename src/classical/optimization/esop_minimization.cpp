@@ -37,7 +37,7 @@
 
 using namespace boost::assign;
 
-namespace revkit
+namespace cirkit
 {
 
 /******************************************************************************

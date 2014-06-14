@@ -33,7 +33,7 @@
 #include <reversible/rcbdd.hpp>
 #include <reversible/synthesis/synthesis.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

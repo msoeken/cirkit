@@ -19,7 +19,7 @@
 
 #include <boost/range/iterator_range.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 void truth_table_to_bitset_vector( const binary_truth_table& spec, bitset_vector_t& vec )

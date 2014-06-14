@@ -38,7 +38,7 @@
 #include <reversible/truth_table.hpp>
 #include <reversible/simulation/simulation.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   /**

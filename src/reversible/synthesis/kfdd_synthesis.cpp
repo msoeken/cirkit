@@ -21,7 +21,7 @@
 
 #include "dd_synthesis_p.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   bool kfdd_synthesis( circuit& circ, const std::string& filename, properties::ptr settings, properties::ptr statistics )

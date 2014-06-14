@@ -24,7 +24,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graphviz.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
 /******************************************************************************

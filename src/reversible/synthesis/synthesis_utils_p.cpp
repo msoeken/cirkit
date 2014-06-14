@@ -17,7 +17,7 @@
 
 #include "synthesis_utils_p.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   unsigned hamming_distance( unsigned a, unsigned b )

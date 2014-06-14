@@ -22,7 +22,7 @@
 
 #include "transformation_based_synthesis.hpp"
 
-namespace revkit
+namespace cirkit
 {
 
   bool swop( circuit& circ, const binary_truth_table& spec,

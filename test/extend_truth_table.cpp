@@ -16,7 +16,7 @@
 BOOST_AUTO_TEST_CASE(simple)
 {
   using boost::unit_test::framework::master_test_suite;
-  using namespace revkit;
+  using namespace cirkit;
 
   if ( master_test_suite().argc != 2u ) return;
 

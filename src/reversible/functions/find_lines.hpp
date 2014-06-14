@@ -35,7 +35,7 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 
-namespace revkit
+namespace cirkit
 {
 
   class gate;

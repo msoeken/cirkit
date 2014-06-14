@@ -32,7 +32,7 @@
 #include <cuddObj.hh>
 #include <gmpxx.h>
 
-namespace revkit
+namespace cirkit
 {
 
 unsigned parse_number_from_pla_command(const std::string& line)

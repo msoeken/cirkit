@@ -35,7 +35,7 @@ extern "C" {
 #include <aiger.h>
 }
 
-namespace revkit
+namespace cirkit
 {
 
   struct aiger_to_aig_settings
