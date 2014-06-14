@@ -16,35 +16,33 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file write_pla.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief Write PLA truth table to file
  *
  * @author Mathias Soeken
  * @since  2.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef WRITE_PLA_HPP
+#define WRITE_PLA_HPP
 
 #include <string>
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/function.hpp>
-
-#include <cudd.h>
-
-#include <core/functor.hpp>
+#include <reversible/truth_table.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
-
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Writes PLA truth table to file
+   *
+   * @param pla PLA given as truth table (can contain don't cares)
+   * @param filename PLA filename
+   *
+   * @version 2.0
+   */
+  void write_pla( const binary_truth_table& pla, const std::string& filename );
 
 }
 

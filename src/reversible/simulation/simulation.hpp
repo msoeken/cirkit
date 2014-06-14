@@ -16,39 +16,38 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file simulation.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief General Simulation type definitions
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  1.0
  */
-
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
-
-#include <string>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/function.hpp>
 
-#include <cudd.h>
-
 #include <core/functor.hpp>
+#include <reversible/circuit.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
+  /**
+   * @brief Simulation functor
+   *
+   * @since  1.0
+   */
+  typedef functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)> simulation_func;
 
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Multi step simulation functor
+   *
+   * @since  1.2
+   */
+  typedef functor<bool(std::vector<boost::dynamic_bitset<> >&, const circuit&, const std::vector<boost::dynamic_bitset<> >& )> multi_step_simulation_func;
 
 }
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2

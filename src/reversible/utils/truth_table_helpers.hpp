@@ -16,35 +16,35 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file truth_table_helpers.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief Some useful functions for dealing with truth tables
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  1.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef TRUTH_TABLE_HELPERS_HPP
+#define TRUTH_TABLE_HELPERS_HPP
 
-#include <string>
+#include <vector>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/function.hpp>
 
-#include <cudd.h>
-
-#include <core/functor.hpp>
+#include <reversible/truth_table.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
+typedef std::vector<boost::dynamic_bitset<> > bitset_vector_t;
 
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+/**
+ * Transforms a truth table into a vector of bitsets
+ *
+ * @param spec A fully specified truth table for a total reversible function
+ * @param vec  An empty vector
+ */
+void truth_table_to_bitset_vector( const binary_truth_table& spec, bitset_vector_t& vec );
 
 }
 

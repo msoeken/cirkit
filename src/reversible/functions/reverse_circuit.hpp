@@ -16,39 +16,52 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file reverse_circuit.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief Reverse a circuit
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  1.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef REVERSE_CIRCUIT_HPP
+#define REVERSE_CIRCUIT_HPP
 
-#include <string>
-
-#include <boost/dynamic_bitset.hpp>
-#include <boost/function.hpp>
-
-#include <cudd.h>
-
-#include <core/functor.hpp>
+#include <reversible/circuit.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
+  /**
+   * @brief Reverse a circuit
+   *
+   * This function reverses a circuit \p src and writes
+   * the result to a new circuit \p dest.
+   *
+   * You can use reverse_circuit(circuit&) if the circuit
+   * should be reversed in-place.
+   *
+   * @param src  Source circuit
+   * @param dest Destination circuit
+   *
+   * @since  1.0
+   */
+  void reverse_circuit( const circuit& src, circuit& dest );
 
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Reverse a circuit in-place
+   *
+   * This function reverses a circuit \p circ in-place.
+   *
+   * @param circ Circuit to be reversed
+   *
+   * @since  1.0
+   */
+  void reverse_circuit( circuit& circ );
 
 }
 
-#endif
+#endif /* REVERSE_CIRCUIT_HPP */
 
 // Local Variables:
 // c-basic-offset: 2

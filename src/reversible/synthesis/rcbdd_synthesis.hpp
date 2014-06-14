@@ -16,39 +16,38 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file rcbdd_synthesis.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief Synthesis based on RCBDDs
  *
  * @author Mathias Soeken
+ * @author Laura Tague
  * @since  2.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef RCBDD_SYNTHESIS_HPP
+#define RCBDD_SYNTHESIS_HPP
 
 #include <string>
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/function.hpp>
-
-#include <cudd.h>
-
-#include <core/functor.hpp>
+#include <reversible/rcbdd.hpp>
+#include <reversible/synthesis/synthesis.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
-
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Embedding of an irreversible specification
+   *
+   * @since  2.0
+   */
+  bool rcbdd_synthesis( circuit& circ, const rcbdd& cf,
+                        properties::ptr settings = properties::ptr(),
+                        properties::ptr statistics = properties::ptr() );
 
 }
 
-#endif
+#endif /* RCBDD_SYNTHESIS_HPP */
 
 // Local Variables:
 // c-basic-offset: 2

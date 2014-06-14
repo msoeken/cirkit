@@ -16,39 +16,46 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file circuit_to_truth_table.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief Generates a truth table from a circuit
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  1.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
-
-#include <string>
+#ifndef CIRCUIT_TO_TRUTH_TABLE_HPP
+#define CIRCUIT_TO_TRUTH_TABLE_HPP
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/function.hpp>
 
-#include <cudd.h>
-
 #include <core/functor.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/truth_table.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
-
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Generates a truth table from a circuit
+   *
+   * This function takes a circuit, simulates it with a custom simulation function
+   * and creates the specification. Further, the meta is copied.
+   *
+   * @param circ Circuit to be simulated
+   * @param spec Empty truth table to be constructed
+   * @param simulation Simulation function object
+   *
+   * @return true on success, false otherwise
+   *
+   * @since  1.0
+   */
+  bool circuit_to_truth_table( const circuit& circ, binary_truth_table& spec, const functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)>& simulation );
 
 }
 
-#endif
+#endif /* CIRCUIT_TO_TRUTH_TABLE_HPP */
 
 // Local Variables:
 // c-basic-offset: 2

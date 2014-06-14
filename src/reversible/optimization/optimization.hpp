@@ -18,37 +18,33 @@
 /**
  * @file optimization.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief General Optimization type definitions
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  1.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef OPTIMIZATION_HPP
+#define OPTIMIZATION_HPP
 
-#include <string>
-
-#include <boost/dynamic_bitset.hpp>
 #include <boost/function.hpp>
 
-#include <cudd.h>
-
 #include <core/functor.hpp>
+#include <reversible/circuit.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
-
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Optimization functor
+   *
+   * @since 1.0
+   */
+  typedef functor<bool(circuit&, const circuit&)> optimization_func;
 
 }
 
-#endif
+#endif /* OPTIMIZATION_HPP */
 
 // Local Variables:
 // c-basic-offset: 2

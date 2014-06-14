@@ -16,35 +16,32 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file young_subgroup_synthesis.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief Young subgroup synthesis
  *
+ * @author Nabila Abdessaied
  * @author Mathias Soeken
+ *
  * @since  2.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef YOUNG_SUBGROUP_SYNTHESIS
+#define YOUNG_SUBGROUP_SYNTHESIS
 
-#include <string>
+#include <core/properties.hpp>
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/function.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/truth_table.hpp>
 
-#include <cudd.h>
-
-#include <core/functor.hpp>
+#include <reversible/synthesis/synthesis.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
+bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr());
 
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+truth_table_synthesis_func young_subgroup_synthesis_func(properties::ptr settings = properties::ptr(new properties()), properties::ptr statistics = properties::ptr(new properties()));
 
 }
 

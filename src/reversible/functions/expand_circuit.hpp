@@ -16,39 +16,46 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file expand_circuit.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief Expand a circuit on the base of a sub circuit
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  1.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef EXPAND_CIRCUIT_HPP
+#define EXPAND_CIRCUIT_HPP
 
-#include <string>
+#include <vector>
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/function.hpp>
-
-#include <cudd.h>
-
-#include <core/functor.hpp>
+#include <reversible/circuit.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
-
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Expands a circuit
+   *
+   * This function expands the circuit \p base, such that
+   * it will have \p num_lines and maps each line \em i
+   * in the circuit \p base to the line \em filter[i] in the
+   * circuit \p circ.
+   *
+   * @param base Base circuit
+   * @param circ Newly created circuit, extended from \p base. Needs to be empty.
+   * @param num_lines New number of lines
+   * @param filter Mapping for calculating the new line indices.
+   *
+   * @return true on success, false otherwise
+   *
+   * @since  1.0
+   */
+  bool expand_circuit( const circuit& base, circuit& circ, unsigned num_lines, const std::vector<unsigned>& filter );
 
 }
 
-#endif
+#endif /* EXPAND_CIRCUIT_HPP */
 
 // Local Variables:
 // c-basic-offset: 2

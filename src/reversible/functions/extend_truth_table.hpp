@@ -16,39 +16,36 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file extend_truth_table.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief Removes the Don't Care Values of a binary truth table
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  1.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef EXTEND_TRUTH_TABLE_HPP
+#define EXTEND_TRUTH_TABLE_HPP
 
-#include <string>
-
-#include <boost/dynamic_bitset.hpp>
-#include <boost/function.hpp>
-
-#include <cudd.h>
-
-#include <core/functor.hpp>
+#include <reversible/truth_table.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
-
-
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Removes the Don't Care Values of a binary truth table
+   *
+   * This methods fills the incomplete cubes of a truth table.
+   *
+   * @param spec Truth table
+   *
+   * @since  1.0
+   */
+  void extend_truth_table( binary_truth_table& spec );
 
 }
 
-#endif
+#endif /* EXTEND_TRUTH_TABLE_HPP */
 
 // Local Variables:
 // c-basic-offset: 2

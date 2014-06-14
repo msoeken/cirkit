@@ -16,39 +16,59 @@
  */
 
 /**
- * @file optimization.hpp
+ * @file synthesis.hpp
  *
- * @brief General classical optimization type definitions
+ * @brief General Synthesis type definitions
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  1.0
  */
 
-#ifndef CLASSICAL_OPTIMIZATION_HPP
-#define CLASSICAL_OPTIMIZATION_HPP
+#ifndef SYNTHESIS_HPP
+#define SYNTHESIS_HPP
 
 #include <string>
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/function.hpp>
 
-#include <cudd.h>
-
 #include <core/functor.hpp>
+
+#include <reversible/circuit.hpp>
+#include <reversible/truth_table.hpp>
 
 namespace revkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
+  /**
+   * @brief Functor for synthesis based on a truth table
+   *
+   * @since  1.0
+   */
+  typedef functor<bool(circuit&, const binary_truth_table&)> truth_table_synthesis_func;
 
+  /**
+   * @brief Functor for synthesis based on a file-name (PLA or BLIF)
+   *
+   * @since  1.0
+   */
+  typedef functor<bool(circuit&, const std::string&)> pla_blif_synthesis_func;
 
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  /**
+   * @brief Functor for embedding a binary truth table in place
+   *
+   * @since  1.0
+   */
+  typedef functor<bool(binary_truth_table&, const binary_truth_table&)> embedding_func;
 
+  /**
+   * @brief Functor for decomposing a reversible circuit into a quantum circuit
+   *
+   * @since  1.0
+   */
+  typedef functor<bool(circuit&, const circuit&)> decomposition_func;
 }
 
-#endif
+#endif /* SYNTHESIS_HPP */
 
 // Local Variables:
 // c-basic-offset: 2
