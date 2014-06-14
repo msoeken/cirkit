@@ -17,10 +17,10 @@
 
 #include <iostream>
 
-#include <core/circuit.hpp>
-#include <core/functions/reverse_circuit.hpp>
-#include <core/io/read_realization.hpp>
-#include <core/io/write_realization.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/functions/reverse_circuit.hpp>
+#include <reversible/io/read_realization.hpp>
+#include <reversible/io/write_realization.hpp>
 
 using namespace revkit;
 

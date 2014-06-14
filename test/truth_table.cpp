@@ -4,8 +4,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/output_test_stream.hpp>
 
-#include <core/truth_table.hpp>
-#include <core/utils/truth_table_helpers.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/utils/truth_table_helpers.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)
 {

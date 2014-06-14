@@ -17,15 +17,15 @@
 
 #include <iostream>
 
-#include <core/truth_table.hpp>
-#include <core/functions/circuit_to_truth_table.hpp>
-#include <core/io/print_circuit.hpp>
-#include <core/io/read_specification.hpp>
-#include <core/io/write_realization.hpp>
-#include <core/utils/program_options.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/functions/circuit_to_truth_table.hpp>
+#include <reversible/io/print_circuit.hpp>
+#include <reversible/io/read_specification.hpp>
+#include <reversible/io/write_realization.hpp>
+#include <reversible/utils/program_options.hpp>
 
-#include <algorithms/simulation/simple_simulation.hpp>
-#include <algorithms/synthesis/young_subgroup_synthesis.hpp>
+#include <reversible/simulation/simple_simulation.hpp>
+#include <reversible/synthesis/young_subgroup_synthesis.hpp>
 
 #include <classical/optimization/esop_minimization.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>

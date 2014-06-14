@@ -4,9 +4,9 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <core/circuit.hpp>
-#include <core/target_tags.hpp>
-#include <core/functions/add_gates.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/target_tags.hpp>
+#include <reversible/functions/add_gates.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)
 {

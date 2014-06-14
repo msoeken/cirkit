@@ -10,13 +10,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/output_test_stream.hpp>
 
-#include <core/circuit.hpp>
-#include <core/truth_table.hpp>
-#include <core/functions/circuit_to_truth_table.hpp>
-#include <algorithms/simulation/simple_simulation.hpp>
-#include <algorithms/synthesis/reed_muller_synthesis.hpp>
-#include <algorithms/synthesis/transformation_based_synthesis.hpp>
-#include <algorithms/synthesis/transposition_based_synthesis.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/functions/circuit_to_truth_table.hpp>
+#include <reversible/simulation/simple_simulation.hpp>
+#include <reversible/synthesis/reed_muller_synthesis.hpp>
+#include <reversible/synthesis/transformation_based_synthesis.hpp>
+#include <reversible/synthesis/transposition_based_synthesis.hpp>
 
 using namespace revkit;
 

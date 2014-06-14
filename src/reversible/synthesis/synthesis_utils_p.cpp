@@ -39,6 +39,21 @@ namespace revkit
     return mpz_class("1" + std::string(n, '0'), 2);
   }
 
+  unsigned calculate_required_lines(unsigned n, unsigned m, mpz_class maxmu)
+  {
+    unsigned exp = 0u;
+
+    while (pow2(exp) < maxmu) {
+      ++exp;
+  #ifdef DEBUG
+      std::cout << "exp: " << exp << std::endl;
+  #endif
+    }
+  #ifdef DEBUG
+    std::cout << "n: " << n << "; m: " << m << std::endl;
+  #endif
+    return n > m + exp ? n : m + exp;
+  }
 
 }
 

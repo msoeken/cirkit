@@ -17,9 +17,9 @@
 
 #include <iostream>
 
-#include <core/circuit.hpp>
-#include <core/functions/add_gates.hpp>
-#include <core/io/print_circuit.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/functions/add_gates.hpp>
+#include <reversible/io/print_circuit.hpp>
 
 using namespace revkit;
 

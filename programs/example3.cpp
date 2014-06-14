@@ -18,9 +18,9 @@
 #include <iostream>
 #include <iterator>   // for std::distance
 
-#include <core/circuit.hpp>
-#include <core/gate.hpp>
-#include <core/io/read_realization.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/gate.hpp>
+#include <reversible/io/read_realization.hpp>
 
 using namespace revkit;
 

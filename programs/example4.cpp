@@ -17,8 +17,8 @@
 
 #include <boost/assign/std/vector.hpp>
 
-#include <core/circuit.hpp>
-#include <core/functions/add_gates.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/functions/add_gates.hpp>
 
 using namespace boost::assign;
 using namespace revkit;

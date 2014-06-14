@@ -9,16 +9,16 @@
 
 #include <boost/format.hpp>
 
-#include <core/truth_table.hpp>
-#include <core/io/read_pla.hpp>
-#include <core/io/write_realization.hpp>
 #include <core/utils/benchmark_table.hpp>
-#include <core/utils/foreach_function.hpp>
 
-#include <algorithms/synthesis/embed_truth_table.hpp>
-#include <algorithms/synthesis/reed_muller_synthesis.hpp>
-#include <algorithms/synthesis/transformation_based_synthesis.hpp>
-#include <algorithms/synthesis/young_subgroup_synthesis.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/io/read_pla.hpp>
+#include <reversible/io/write_realization.hpp>
+#include <reversible/utils/foreach_function.hpp>
+#include <reversible/synthesis/embed_truth_table.hpp>
+#include <reversible/synthesis/reed_muller_synthesis.hpp>
+#include <reversible/synthesis/transformation_based_synthesis.hpp>
+#include <reversible/synthesis/young_subgroup_synthesis.hpp>
 
 #include <classical/optimization/esop_minimization.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>

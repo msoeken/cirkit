@@ -17,9 +17,9 @@
 #include <boost/optional.hpp>
 #include <boost/range/algorithm.hpp>
 
-#include <core/functions/approximate_additional_lines.hpp>
 #include <core/utils/benchmark_table.hpp>
-#include <core/utils/foreach_function.hpp>
+#include <reversible/functions/approximate_additional_lines.hpp>
+#include <reversible/utils/foreach_function.hpp>
 
 #include "caching.h"
 
@@ -52,7 +52,8 @@ BOOST_AUTO_TEST_CASE(simple)
   std::vector<std::string> blacklist, whitelist, date11_list;
   blacklist += "misex3c_181","5xp1_90","bw_116","sao2_199","f2_158","cps_140";
   whitelist += "xor5_195";
-  date11_list += "apex2_101","apex5_104","cordic_138","cps_140","e64_149","ex5p_154","pdc_191","seq_201","spla_202","xor5_195";
+  //date11_list += "apex2_101","apex5_104","cordic_138","cps_140","e64_149","ex5p_154","pdc_191","seq_201","spla_202","xor5_195";
+  date11_list += "spla_202";
   foreach_function_with_whitelist( date11_list, [&table]( const boost::filesystem::path& path ) {
     std::string function = path.stem().string();
 

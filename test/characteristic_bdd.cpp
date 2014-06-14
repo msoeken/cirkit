@@ -11,7 +11,7 @@
 
 #include <core/io/read_pla_to_bdd.hpp>
 
-#include <algorithms/synthesis/dd_synthesis_p.hpp>
+#include <reversible/synthesis/dd_synthesis_p.hpp>
 
 #include <cuddInt.h>
 #include <gmpxx.h>

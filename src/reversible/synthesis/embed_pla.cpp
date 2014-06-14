@@ -80,17 +80,6 @@ BDD create_bdd_from_outcube(const rcbdd& cf, const std::string& outcube)
   return cube;
 }
 
-unsigned calculate_required_lines(unsigned n, unsigned m, mpz_class maxmu)
-{
-  unsigned exp = 0u;
-
-  while (pow2(exp) < maxmu) {
-    ++exp;
-  }
-
-  return n > m + exp ? n : m + exp;
-}
-
 std::vector<BDD> _dec(const rcbdd& cf, const std::vector<BDD>& vars)
 {
   std::vector<BDD> outputs;

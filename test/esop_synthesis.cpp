@@ -3,9 +3,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <core/circuit.hpp>
-#include <core/io/print_circuit.hpp>
-#include <algorithms/synthesis/esop_synthesis.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/io/print_circuit.hpp>
+#include <reversible/synthesis/esop_synthesis.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)
 {

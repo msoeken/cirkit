@@ -27,6 +27,8 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <reversible/synthesis/synthesis_utils_p.hpp>
+
 #include <cuddObj.hh>
 #include <gmpxx.h>
 
@@ -63,27 +65,6 @@ BDD create_bdd_from_incube(Cudd& mgr, const std::string& incube, const std::vect
   }
 
   return cube;
-}
-
-mpz_class pow2(unsigned n)
-{
-  return mpz_class("1" + std::string(n, '0'), 2);
-}
-
-unsigned calculate_required_lines(unsigned n, unsigned m, mpz_class maxmu)
-{
-  unsigned exp = 0u;
-
-  while (pow2(exp) < maxmu) {
-    ++exp;
-#ifdef DEBUG
-    std::cout << "exp: " << exp << std::endl;
-#endif
-  }
-#ifdef DEBUG
-  std::cout << "n: " << n << "; m: " << m << std::endl;
-#endif
-  return n > m + exp ? n : m + exp;
 }
 
 unsigned approximate_additional_lines( const std::string& filename, properties::ptr statistics )

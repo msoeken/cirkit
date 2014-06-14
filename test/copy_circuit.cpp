@@ -5,10 +5,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/output_test_stream.hpp>
 
-#include <core/circuit.hpp>
-#include <core/functions/add_gates.hpp>
-#include <core/functions/copy_circuit.hpp>
-#include <core/io/print_circuit.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/functions/add_gates.hpp>
+#include <reversible/functions/copy_circuit.hpp>
+#include <reversible/io/print_circuit.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)
 {

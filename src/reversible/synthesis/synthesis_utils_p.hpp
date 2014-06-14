@@ -26,6 +26,7 @@ namespace revkit
 
   unsigned hamming_distance( unsigned a, unsigned b );
   mpz_class pow2(unsigned n);
+  unsigned calculate_required_lines(unsigned n, unsigned m, mpz_class maxmu);
 
 }
 

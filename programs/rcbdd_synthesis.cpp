@@ -15,16 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <core/circuit.hpp>
-#include <core/rcbdd.hpp>
-#include <core/truth_table.hpp>
-#include <core/functions/extend_pla.hpp>
-#include <core/io/read_pla.hpp>
-#include <core/io/write_pla.hpp>
-#include <core/io/write_realization.hpp>
-#include <core/utils/program_options.hpp>
-#include <algorithms/synthesis/embed_pla.hpp>
-#include <algorithms/synthesis/rcbdd_synthesis.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/rcbdd.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/functions/extend_pla.hpp>
+#include <reversible/io/read_pla.hpp>
+#include <reversible/io/write_pla.hpp>
+#include <reversible/io/write_realization.hpp>
+#include <reversible/utils/program_options.hpp>
+#include <reversible/synthesis/embed_pla.hpp>
+#include <reversible/synthesis/rcbdd_synthesis.hpp>
 
 using namespace revkit;
 

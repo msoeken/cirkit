@@ -17,10 +17,10 @@
 
 #include <iostream>
 
-#include <core/truth_table.hpp>
-#include <core/functions/extend_pla.hpp>
-#include <core/io/read_pla.hpp>
 #include <core/io/read_pla_to_bdd.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/functions/extend_pla.hpp>
+#include <reversible/io/read_pla.hpp>
 
 using namespace revkit;
 

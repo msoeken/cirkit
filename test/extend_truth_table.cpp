@@ -5,12 +5,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <core/truth_table.hpp>
-#include <core/functions/approximate_additional_lines.hpp>
-#include <core/functions/extend_pla.hpp>
-#include <core/io/read_pla.hpp>
 #include <core/io/read_pla_to_bdd.hpp>
-#include <core/io/write_pla.hpp>
+
+#include <reversible/truth_table.hpp>
+#include <reversible/functions/approximate_additional_lines.hpp>
+#include <reversible/functions/extend_pla.hpp>
+#include <reversible/io/read_pla.hpp>
+#include <reversible/io/write_pla.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)
 {
