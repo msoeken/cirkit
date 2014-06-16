@@ -239,9 +239,13 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
   bool        verbose     = get( settings, "verbose",     false         );
   bool        truth_table = get( settings, "truth_table", false         ); /* prints the truth table (for debugging) */
   std::string write_pla   = get( settings, "write_pla",   std::string() );
+  bool        const_value = get( settings, "const_value", false         ); /* value that is used for constant embedding */
 
   /* BDD manager? */
   cf.initialize_manager();
+
+  /* Constant value */
+  cf.set_constant_value( const_value );
 
   /* Parser */
   embed_pla_processor p( cf );
@@ -323,7 +327,7 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
     BDD fcube = cf.manager().bddOne();
     for (unsigned i = 0u; i < req_vars - p.n; i++)
     {
-      fcube &= !cf.x(i);
+      fcube &= ( const_value ? cf.x(i) : !cf.x(i) );
     }
     fcube &= !h & icube & ocube;
 

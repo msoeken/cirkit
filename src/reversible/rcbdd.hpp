@@ -40,8 +40,6 @@ namespace cirkit
   class rcbdd
   {
   public:
-    rcbdd();
-
     void initialize_manager();
     void create_variables( unsigned n );
     BDD x( unsigned i ) const;
@@ -56,6 +54,8 @@ namespace cirkit
     const Cudd& manager() const;
     BDD chi() const;
     void set_chi( BDD f );
+    void set_constant_value( bool v );
+    bool constant_value() const;
     void set_num_inputs( unsigned n );
     void set_num_outputs( unsigned n );
     unsigned num_inputs() const;
@@ -79,11 +79,12 @@ namespace cirkit
     boost::optional<Cudd> _manager;
     BDD _chi;
 
-    unsigned _num_inputs;
-    unsigned _num_outputs;
+    bool _constant_value = false;
+    unsigned _num_inputs = 0u;
+    unsigned _num_outputs = 0u;
     std::vector<std::string> _input_labels;
     std::vector<std::string> _output_labels;
-    unsigned _n;
+    unsigned _n = 0u;
     std::vector<BDD> _xs;
     std::vector<BDD> _ys;
     std::vector<BDD> _zs;

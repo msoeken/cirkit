@@ -23,13 +23,6 @@
 namespace cirkit
 {
 
-rcbdd::rcbdd() :
-  _num_inputs( 0u ),
-  _num_outputs( 0u ),
-  _n( 0u )
-{
-}
-
 void rcbdd::initialize_manager()
 {
   if ( !_manager )
@@ -98,6 +91,16 @@ BDD rcbdd::chi() const
 void rcbdd::set_chi( BDD f )
 {
   _chi = f;
+}
+
+void rcbdd::set_constant_value( bool v )
+{
+  _constant_value = v;
+}
+
+bool rcbdd::constant_value() const
+{
+  return _constant_value;
 }
 
 void rcbdd::set_num_inputs( unsigned n )
