@@ -56,11 +56,30 @@ public:
     }
 
     cube_t cube = std::make_pair( values, care );
-    on_cube_f( cube );
+
+    if ( on_cube_f )
+    {
+      on_cube_f( cube );
+    }
+
+    ++_cube_count;
+    _literal_count += care.count();
+  }
+
+  unsigned cube_count() const
+  {
+    return _cube_count;
+  }
+
+  unsigned literal_count() const
+  {
+    return _literal_count;
   }
 
 private:
   const cube_function_t& on_cube_f;
+  unsigned _cube_count = 0u;
+  unsigned _literal_count = 0u;
 };
 
 /******************************************************************************
@@ -109,10 +128,13 @@ void exorcism_minimization( const std::string& filename, properties::ptr setting
   std::string esopname = boost::str( boost::format( "%s/%s.esop" ) % path.parent_path().string() % path.stem().string() );
 
   /* Parse */
-  if ( on_cube )
+  exorcism_processor p( on_cube );
+  pla_parser( esopname, p );
+
+  if ( statistics )
   {
-    exorcism_processor p( on_cube );
-    pla_parser( esopname, p );
+    statistics->set( "cube_count", p.cube_count() );
+    statistics->set( "literal_count", p.literal_count() );
   }
 }
 
