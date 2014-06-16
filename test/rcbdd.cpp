@@ -18,6 +18,7 @@
 #include <reversible/io/read_pla.hpp>
 #include <reversible/io/write_pla.hpp>
 #include <reversible/io/write_realization.hpp>
+#include <reversible/io/write_specification.hpp>
 #include <reversible/utils/foreach_function.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
 #include <reversible/synthesis/embed_pla.hpp>
@@ -33,8 +34,7 @@ BOOST_AUTO_TEST_CASE(simple)
 
   std::vector<std::string> whitelist;
   //whitelist += "sym6_63","urf2_73","con1_136","hwb9_65","urf1_72","urf5_76","sym9_71","urf3_75","rd84_70","sym10_207","urf4_89";
-  //whitelist += "sym6_63","urf2_73","con1_136","hwb9_65","urf1_72","urf5_76","sym9_71","urf3_75","rd84_70","sym10_207","urf4_89","adr4_93","cycle_10_2_61","clip_124","dc2_143","misex1_178","co14_135","urf6_77","dk27_146","t481_208","5xp1_90","C7552_119","apla_107","bw_116";
-  whitelist += "C7552_119";
+  whitelist += "sym6_63","urf2_73","con1_136","hwb9_65","urf1_72","urf5_76","sym9_71","urf3_75","rd84_70","sym10_207","urf4_89","adr4_93","cycle_10_2_61","clip_124","dc2_143","misex1_178","co14_135","urf6_77","dk27_146","t481_208","5xp1_90","C7552_119","apla_107","bw_116";
   // extra alu1_94
   foreach_function_with_whitelist( whitelist, []( const boost::filesystem::path& path ) {
     circuit circ;
@@ -74,6 +74,7 @@ BOOST_AUTO_TEST_CASE(simple)
       //embed_pla( cf, path.relative_path().string() );
       properties::ptr settings( new properties );
       settings->set( "write_pla", boost::str( boost::format( "logs/rcbdd/%s-embedded.pla" ) % name ) );
+      settings->set( "const_value", false );
       embed_pla( cf, boost::str( boost::format( "logs/rcbdd/%s-extended.pla" ) % name ), settings );
     }
 
@@ -83,7 +84,7 @@ BOOST_AUTO_TEST_CASE(simple)
       std::cout << " - synth:  ";
 
       properties::ptr settings( new properties );
-      settings->set( "verbose", true );
+      settings->set( "verbose", false );
       settings->set( "progress", true );
       settings->set( "name", name );
       settings->set( "esopmin", dd_based_exorcism_minimization_func() );
@@ -102,6 +103,7 @@ BOOST_AUTO_TEST_CASE(simple)
       std::cout << " - simul:  ";
 
       circuit_to_truth_table( circ, spec, simple_simulation_func() );
+      write_specification( spec, boost::str( boost::format( "logs/rcbdd/%s.spec" ) % name ) );
     }
 
     if ( false )

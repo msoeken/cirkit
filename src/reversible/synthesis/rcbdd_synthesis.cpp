@@ -46,7 +46,7 @@ struct rcbdd_synthesis_manager
 
     circ.set_lines( _cf.num_vars() );
 
-    std::vector<std::string> inputs( _cf.num_vars(), "0" );
+    std::vector<std::string> inputs( _cf.num_vars(), _cf.constant_value() ? "1" : "0" );
     boost::copy( cf.input_labels(), inputs.end() - _cf.num_inputs() );
     circ.set_inputs( inputs );
 
@@ -55,7 +55,7 @@ struct rcbdd_synthesis_manager
     circ.set_outputs( outputs );
 
     std::vector<constant> constants( _cf.num_vars(), constant() );
-    std::fill( constants.begin(), constants.end() - _cf.num_inputs(), false );
+    std::fill( constants.begin(), constants.end() - _cf.num_inputs(), _cf.constant_value() );
     circ.set_constants( constants );
 
     std::vector<bool> garbage( _cf.num_vars(), true );
@@ -299,10 +299,21 @@ struct rcbdd_synthesis_manager
   {
     while (cf.cofactor(f, _var, true, false) != cf.manager().bddZero() || cf.cofactor(f, _var, false, true) != cf.manager().bddZero())
     {
-      std::cout << "#N: " << cf.cofactor( f, _var, false, false ).CountMinterm( 2u * cf.num_vars() ) << " "
-                << "#P': " << cf.cofactor( f, _var, true, false ).CountMinterm( 2u * cf.num_vars() ) << " "
-                << "#N': " << cf.cofactor( f, _var, false, true ).CountMinterm( 2u * cf.num_vars() ) << " "
-                << "#P: " << cf.cofactor( f, _var, true, true ).CountMinterm( 2u * cf.num_vars() ) << std::endl;
+      compute_cofactors();
+
+      /* special case #P' is 0 and #N' is not zero, then swap */
+      if ( pp == cf.manager().bddZero() && np != cf.manager().bddZero() )
+      {
+        apply_gates( cf.manager().bddOne(), cf.manager().bddOne() );
+      }
+
+      if ( verbose )
+      {
+        std::cout << "#N: " << cf.cofactor( f, _var, false, false ).CountMinterm( 2u * cf.num_vars() ) << " "
+                  << "#P': " << cf.cofactor( f, _var, true, false ).CountMinterm( 2u * cf.num_vars() ) << " "
+                  << "#N': " << cf.cofactor( f, _var, false, true ).CountMinterm( 2u * cf.num_vars() ) << " "
+                  << "#P: " << cf.cofactor( f, _var, true, true ).CountMinterm( 2u * cf.num_vars() ) << std::endl;
+      }
 
       cycle_step();
     }
