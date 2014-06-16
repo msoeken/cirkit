@@ -1,4 +1,4 @@
-/* RevKit: A Toolkit for Reversible Circuit Design (www.revkit.org)
+/* CirKit: A circuit toolkit
  * Copyright (C) 2009-2011  The RevKit Developers <revkit@informatik.uni-bremen.de>
  *
  * This program is free software: you can redistribute it and/or modify
