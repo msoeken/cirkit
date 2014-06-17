@@ -33,22 +33,13 @@
 #include <boost/range/numeric.hpp>
 
 #include <core/io/read_pla_to_bdd.hpp>
+#include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 
 using namespace boost::assign;
 
 namespace cirkit
 {
-
-/******************************************************************************
- * Utils                                                                      *
- ******************************************************************************/
-void print_banner( const std::string& caption, unsigned width = 40u )
-{
-  std::cout << '+' << std::string( width - 2u, '-' ) << '+' << std::endl
-            << "| " << std::left << std::setw( width - 3u ) << caption << '|' << std::endl
-            << '+' << std::string( width - 2u, '-' ) << '+' << std::endl;
-}
 
 /******************************************************************************
  * Types                                                                      *
