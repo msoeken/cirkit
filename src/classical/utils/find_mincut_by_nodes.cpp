@@ -109,6 +109,13 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph( mc_graph_t& graph, const ai
     add_edges( node_map[input].second, target, std::numeric_limits<double>::infinity(), graph );
   }
 
+  /* Connect target (and maybe source) with constant */
+  add_edges( node_map[graph_info.constant].second, target, std::numeric_limits<double>::infinity(), graph );
+  if ( !graph_info.constant_used )
+  {
+    add_edges( source, node_map[graph_info.constant].first, std::numeric_limits<double>::infinity(), graph );
+  }
+
   return std::make_pair( source, target );
 }
 
