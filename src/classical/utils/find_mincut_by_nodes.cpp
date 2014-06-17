@@ -18,7 +18,9 @@
 #include "find_mincut_by_nodes.hpp"
 
 #include <boost/assign/std/list.hpp>
+#include <boost/assign/std/vector.hpp>
 #include <boost/graph/boykov_kolmogorov_max_flow.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
 using namespace boost::assign;
@@ -64,7 +66,7 @@ std::pair<mc_edge_t, mc_edge_t> add_edges( const mc_node_t& s, const mc_node_t& 
   return std::make_pair( edge, redge );
 }
 
-std::pair<mc_node_t, mc_node_t> create_mincut_graph( mc_graph_t& graph, const aig_graph& aig )
+std::pair<mc_node_t, mc_node_t> create_mincut_graph( mc_graph_t& graph, const aig_graph& aig, const std::vector<aig_node>& blocked_nodes )
 {
   const auto& graph_info = boost::get_property( aig, boost::graph_name );
   auto namemap = get( boost::edge_name, graph );
@@ -82,7 +84,8 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph( mc_graph_t& graph, const ai
     mc_node_t s = boost::add_vertex( graph );
     mc_node_t t = boost::add_vertex( graph );
 
-    mc_edge_t e = add_edges( s, t, 1.0, graph ).first;
+    bool is_blocked = boost::find( blocked_nodes, node ) != blocked_nodes.end();
+    mc_edge_t e = add_edges( s, t, is_blocked ? std::numeric_limits<double>::infinity() : 1.0, graph ).first;
     namemap[e] = node;
 
     node_map[node] = std::make_pair( s, t );
@@ -125,32 +128,37 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph( mc_graph_t& graph, const ai
 
 void find_mincut_by_nodes( const aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts )
 {
-  mc_graph_t graph;
-  mc_node_t source, target;
+  std::vector<aig_node> blocked_nodes;
 
-  boost::tie( source, target ) = create_mincut_graph( graph, aig );
-
-  boykov_kolmogorov_max_flow( graph, source, target );
-
-  auto capacity = boost::get( boost::edge_capacity, graph );
-  auto color    = boost::get( boost::vertex_color,  graph );
-  auto name     = boost::get( boost::edge_name,     graph );
-
-
-  std::list<aig_node> cut;
-
-  for ( const auto& e : boost::make_iterator_range( edges( graph ) ) )
+  for ( unsigned i = 0u; i < count; ++i )
   {
-    if ( capacity[e] > 0 )
+    mc_graph_t graph;
+    mc_node_t source, target;
+
+    boost::tie( source, target ) = create_mincut_graph( graph, aig, blocked_nodes );
+
+    boykov_kolmogorov_max_flow( graph, source, target );
+
+    auto capacity = boost::get( boost::edge_capacity, graph );
+    auto color    = boost::get( boost::vertex_color,  graph );
+    auto name     = boost::get( boost::edge_name,     graph );
+
+    std::list<aig_node> cut;
+
+    for ( const auto& e : boost::make_iterator_range( edges( graph ) ) )
     {
-      if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
+      if ( capacity[e] > 0 )
       {
-        cut += name[e];
+        if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
+        {
+          cut += name[e];
+          blocked_nodes += name[e];
+        }
       }
     }
-  }
 
-  cuts += cut;
+    cuts += cut;
+  }
 }
 
 }

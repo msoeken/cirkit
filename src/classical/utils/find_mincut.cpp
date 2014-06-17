@@ -102,6 +102,11 @@ void prepare_graph( aig_graph& aig, aig_node& source, aig_node& target, std::lis
 
 void find_mincut( aig_graph& aig, unsigned count, std::list<std::list<aig_function>>& cuts )
 {
+  if ( count == 0u )
+  {
+    return;
+  }
+
   aig_node source, target;
   std::list<aig_edge> original_edges;
   std::list<aig_edge> cut_edges;
