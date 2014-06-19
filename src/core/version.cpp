@@ -20,7 +20,7 @@
 namespace cirkit
 {
 
-  const char* revkit_version()
+  const char* cirkit_version()
   {
     static const char* version = "2.0";
     return version;

@@ -67,7 +67,7 @@ namespace cirkit
 
   write_realization_settings::write_realization_settings()
     : version( "2.0" ),
-      header( boost::str( boost::format( "This file has been generated using RevKit %s (www.revkit.org)" ) % revkit_version() ) )
+      header( boost::str( boost::format( "This file has been generated using RevKit %s (www.revkit.org)" ) % cirkit_version() ) )
   {
   }
 

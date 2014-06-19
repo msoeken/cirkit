@@ -18,7 +18,7 @@
 /**
  * @file version.hpp
  *
- * @brief Returns RevKit version
+ * @brief Returns CirKit version
  *
  * @author Mathias Soeken
  * @since  1.1
@@ -28,15 +28,15 @@ namespace cirkit
 {
 
   /**
-   * @brief Returns RevKit version
+   * @brief Returns CirKit version
    *
-   * Returns the current RevKit version
+   * Returns the current CirKit version
    *
    * @return Version string
    *
    * @since  1.1
    */
-  const char* revkit_version();
+  const char* cirkit_version();
 
 }
 
