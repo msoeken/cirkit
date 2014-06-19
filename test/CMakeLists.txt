@@ -8,7 +8,7 @@ function(add_unit_test name)
   target_link_libraries(test_${name} ${Boost_LIBRARIES} libcudd_cudd.so libcudd_dddmp.so libcudd_epd.so libcudd_mtr.so libcudd_nanotrav.so libcudd_obj.so libcudd_st.so libcudd_util.so libpuma.so)
   subdirlist(directories "../src/")
   foreach(dir ${directories})
-    target_link_libraries(test_${name} revkit_${dir})
+    target_link_libraries(test_${name} cirkit_${dir})
   endforeach()
 endfunction(add_unit_test)
 

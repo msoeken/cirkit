@@ -20,5 +20,5 @@ set(revkit_viewer_SRCS
     programs/viewer/main.cpp)
 
 add_executable(revkit_viewer ${revkit_viewer_SRCS})
-target_link_libraries(revkit_viewer Qt5::Gui Qt5::Widgets revkit_core revkit_algorithms revkit_classical)
+target_link_libraries(revkit_viewer Qt5::Gui Qt5::Widgets cirkit_core cirkit_reversible cirkit_classical)
 

@@ -1,4 +1,4 @@
-project("RevKit" CXX)
+project("CirKit" CXX)
 cmake_minimum_required(VERSION 2.8.9)
 add_definitions(-std=c++11 -g -DBOOST_RESULT_OF_USE_DECLTYPE)
 
@@ -35,9 +35,9 @@ link_directories(${CMAKE_SOURCE_DIR}/ext/lib)
 add_subdirectory(ext)
 
 # Options
-option(revkit_ENABLE_PROGRAMS "build programs" on)
-option(revkit_ENABLE_TESTS "build tests" on)
-option(revkit_LINK_PROGRAMS_TO_STATIC "links programs to static libraries" off)
+option(cirkit_ENABLE_PROGRAMS "build programs" on)
+option(cirkit_ENABLE_TESTS "build tests" on)
+option(cirkit_LINK_PROGRAMS_TO_STATIC "links programs to static libraries" off)
 
 # Libraries (include)
 include_directories(src)
@@ -45,7 +45,7 @@ include_directories(src)
 # Addons
 add_subdirectory(addons)
 foreach (dir ${addon_directories})
-  string(REGEX REPLACE "revkit-" "" def ${dir})
+  string(REGEX REPLACE "cirkit-" "" def ${dir})
   string(REGEX REPLACE "-" "_" def ${def})
   string(TOUPPER ${def} def)
   add_definitions(-D${def})
@@ -62,12 +62,12 @@ endforeach()
 add_subdirectory(src)
 
 # Programs
-if(revkit_ENABLE_PROGRAMS)
+if(cirkit_ENABLE_PROGRAMS)
   add_subdirectory(programs)
 endif()
 
 # Tests
-if(revkit_ENABLE_TESTS)
+if(cirkit_ENABLE_TESTS)
   enable_testing()
   add_subdirectory(test)
 endif()

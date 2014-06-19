@@ -151,6 +151,8 @@ void find_mincut_by_nodes( const aig_graph& aig, unsigned count, std::list<std::
       {
         if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
         {
+          std::cout << e << std::endl;
+
           cut += name[e];
           blocked_nodes += name[e];
         }
