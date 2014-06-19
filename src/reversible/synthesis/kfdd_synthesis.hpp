@@ -1,5 +1,5 @@
 /* RevKit: A Toolkit for Reversible Circuit Design (www.revkit.org)
- * Copyright (C) 2009-2013  The RevKit Developers <revkit@informatik.uni-bremen.de>
+ * Copyright (C) 2009-2014  The RevKit Developers <revkit@informatik.uni-bremen.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 /**
  * @file kfdd_synthesis.hpp
  *
- * @brief KFDD Based Synthesis
+ * @brief KFDD interface for DD-based synthesis
  *
  * @author Mathias Soeken
  * @since  1.0

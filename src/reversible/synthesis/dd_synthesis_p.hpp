@@ -1,5 +1,5 @@
 /* RevKit: A Toolkit for Reversible Circuit Design (www.revkit.org)
- * Copyright (C) 2009-2013  The RevKit Developers <revkit@informatik.uni-bremen.de>
+ * Copyright (C) 2009-2014  The RevKit Developers <revkit@informatik.uni-bremen.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @cond */
+/**
+ * @file dd_synthesis_p.hpp
+ *
+ * @brief DD Based Synthesis
+ *
+ * @author Mathias Soeken
+ * @author Robert Wille
+ * @since  1.0
+ */
+
 #ifndef DD_SYNTHESIS_P_HPP
 #define DD_SYNTHESIS_P_HPP
 
@@ -105,7 +114,6 @@ namespace internal
 }
 
 #endif /* DD_SYNTHESIS_P_HPP */
-/** @endcond */
 
 // Local Variables:
 // c-basic-offset: 2
