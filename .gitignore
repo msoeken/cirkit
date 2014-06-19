@@ -4,3 +4,5 @@ ext/include
 ext/lib
 ext/circuits
 ext/functions
+ext/bin
+tmp
