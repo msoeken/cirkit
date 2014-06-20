@@ -23,7 +23,7 @@
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QWidget>
 
-#include <core/circuit.hpp>
+#include <reversible/circuit.hpp>
 
 class QGraphicsTextItem;
 
@@ -34,7 +34,7 @@ class CircuitView : public QGraphicsView
 public:
   explicit CircuitView( QWidget * parent = nullptr );
 
-  void load( const std::shared_ptr<revkit::circuit>& circ );
+  void load( const std::shared_ptr<cirkit::circuit>& circ );
   void saveImage( const QString& filename ) const;
 
 private:

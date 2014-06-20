@@ -33,11 +33,11 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/irange.hpp>
 
-#include <core/target_tags.hpp>
-#include <core/functions/find_lines.hpp>
-#include <core/io/create_image.hpp>
+#include <reversible/target_tags.hpp>
+#include <reversible/functions/find_lines.hpp>
+#include <reversible/io/create_image.hpp>
 
-using namespace revkit;
+using namespace cirkit;
 
 class CircuitLineItem : public QGraphicsItemGroup
 {

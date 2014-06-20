@@ -20,12 +20,11 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/irange.hpp>
 
-#include <core/truth_table.hpp>
-#include <core/functions/circuit_to_truth_table.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/functions/circuit_to_truth_table.hpp>
+#include <reversible/simulation/simple_simulation.hpp>
 
-#include <algorithms/simulation/simple_simulation.hpp>
-
-using namespace revkit;
+using namespace cirkit;
 
 TruthTableWidget::TruthTableWidget( const circuit& circ, QWidget * parent )
   : QTableWidget( (1u << circ.lines() ), 2u * circ.lines(), parent )

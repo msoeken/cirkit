@@ -33,11 +33,11 @@
 #include <src/circuit_view.hpp>
 #include <src/truth_table_widget.hpp>
 
-#include <core/circuit.hpp>
-#include <core/io/create_image.hpp>
-#include <core/io/read_realization.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/io/create_image.hpp>
+#include <reversible/io/read_realization.hpp>
 
-using namespace revkit;
+using namespace cirkit;
 
 class MainWindow::Private
 {
