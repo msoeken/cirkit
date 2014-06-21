@@ -20,6 +20,7 @@
 #include <boost/assign/std/list.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/graph/boykov_kolmogorov_max_flow.hpp>
+#include <boost/graph/filtered_graph.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
@@ -66,7 +67,7 @@ std::pair<mc_edge_t, mc_edge_t> add_edges( const mc_node_t& s, const mc_node_t& 
   return std::make_pair( edge, redge );
 }
 
-std::pair<mc_node_t, mc_node_t> create_mincut_graph( mc_graph_t& graph, const aig_graph& aig, const std::vector<aig_node>& blocked_nodes )
+std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_blocking( mc_graph_t& graph, const aig_graph& aig, const std::vector<aig_node>& blocked_nodes )
 {
   const auto& graph_info = boost::get_property( aig, boost::graph_name );
   auto namemap = get( boost::edge_name, graph );
@@ -122,11 +123,36 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph( mc_graph_t& graph, const ai
   return std::make_pair( source, target );
 }
 
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
+template<typename Graph>
+struct has_color
+{
+  has_color() {}
+  has_color( const Graph& graph, unsigned color ) : graph( graph ), color( color ) {}
 
-void find_mincut_by_nodes( const aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts )
+  bool operator()( const aig_node& n ) const
+  {
+    return boost::get( boost::vertex_color, graph )[n] == color;
+  }
+
+  bool operator()( const aig_edge& e ) const
+  {
+    const auto& map = boost::get( boost::vertex_color, graph );
+    return ( map[boost::source( e, graph )] == color ) &&
+           ( map[boost::target( e, graph )] == color );
+  }
+
+private:
+  const Graph& graph;
+  unsigned color;
+};
+
+std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_splitting( mc_graph_t& graph, const aig_graph& aig, unsigned color )
+{
+  has_color<aig_graph> filter( aig, color );
+  boost::filtered_graph<aig_graph, has_color<aig_graph>, has_color<aig_graph>> fg( aig, filter, filter );
+}
+
+void find_mincut_by_nodes_with_blocking( const aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts )
 {
   std::vector<aig_node> blocked_nodes;
 
@@ -135,7 +161,7 @@ void find_mincut_by_nodes( const aig_graph& aig, unsigned count, std::list<std::
     mc_graph_t graph;
     mc_node_t source, target;
 
-    boost::tie( source, target ) = create_mincut_graph( graph, aig, blocked_nodes );
+    boost::tie( source, target ) = create_mincut_graph_with_blocking( graph, aig, blocked_nodes );
 
     boykov_kolmogorov_max_flow( graph, source, target );
 
@@ -162,6 +188,76 @@ void find_mincut_by_nodes( const aig_graph& aig, unsigned count, std::list<std::
     cuts += cut;
   }
 }
+
+void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts )
+{
+  /* color nodes */
+  unsigned max_color = 0u;
+  auto aig_color = boost::get( boost::vertex_color, aig );
+  for ( const auto& v : boost::make_iterator_range( vertices( aig ) ) )
+  {
+    aig_color[v] = max_color;
+  }
+
+  /* find cuts */
+  for ( unsigned i = 0u; i < count; ++i )
+  {
+    mc_graph_t graph;
+    mc_node_t source, target;
+
+    boost::tie( source, target ) = create_mincut_graph_with_splitting( graph, aig, i );
+
+    boykov_kolmogorov_max_flow( graph, source, target );
+
+    auto capacity = boost::get( boost::edge_capacity, graph );
+    auto color    = boost::get( boost::vertex_color,  graph );
+    auto name     = boost::get( boost::edge_name,     graph );
+
+    std::list<aig_node> cut;
+
+    max_color++;
+
+    for ( const auto& e : boost::make_iterator_range( edges( graph ) ) )
+    {
+      if ( capacity[e] > 0 )
+      {
+        if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
+        {
+          std::cout << e << std::endl;
+
+          cut += name[e];
+        }
+      }
+
+      /* TODO update colors */
+    }
+
+    cuts += cut;
+  }
+}
+
+
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
+
+void find_mincut_by_nodes( aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts, const find_mincut_by_nodes_settings& settings )
+{
+  if ( settings.mode == splitting )
+  {
+    find_mincut_by_nodes_with_splitting( aig, count, cuts );
+  }
+  else if ( settings.mode == blocking )
+  {
+    find_mincut_by_nodes_with_blocking( aig, count, cuts );
+  }
+  else
+  {
+    /* mode not found */
+    assert( 0 );
+  }
+}
+
 
 }
 
