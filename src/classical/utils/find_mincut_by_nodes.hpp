@@ -38,7 +38,8 @@ namespace cirkit
 
   struct find_mincut_by_nodes_settings
   {
-    find_mincut_by_nodes_mode mode = splitting;
+    bool                      verbose = false;
+    find_mincut_by_nodes_mode mode    = splitting;
   };
 
   /**

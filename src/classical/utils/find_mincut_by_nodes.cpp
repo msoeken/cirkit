@@ -17,15 +17,19 @@
 
 #include "find_mincut_by_nodes.hpp"
 
+#include <fstream>
 #include <list>
 
 #include <boost/assign/std/list.hpp>
 #include <boost/assign/std/vector.hpp>
+#include <boost/format.hpp>
 #include <boost/graph/boykov_kolmogorov_max_flow.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/graphviz.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <boost/optional.hpp>
 
 using namespace boost::assign;
 
@@ -44,7 +48,7 @@ typedef boost::property<boost::vertex_color_t, boost::default_color_type,
 typedef boost::property<boost::edge_capacity_t, double,
         boost::property<boost::edge_residual_capacity_t, double,
         boost::property<boost::edge_reverse_t, mc_traits_t::edge_descriptor,
-        boost::property<boost::edge_name_t, aig_node>>>> mc_edge_properties_t;
+        boost::property<boost::edge_name_t, boost::optional<aig_node>>>>> mc_edge_properties_t;
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, mc_vertex_properties_t, mc_edge_properties_t> mc_graph_t;
 
 typedef boost::graph_traits<mc_graph_t>::vertex_descriptor mc_node_t;
@@ -218,6 +222,8 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_splitting( mc_graph_t& 
   /* Source and target */
   for ( const auto& vertex : boost::make_iterator_range( boost::vertices( graph ) ) )
   {
+    if ( vertex == source || vertex == target ) continue;
+
     if ( in_degree( vertex, graph ) == 0 )
     {
       add_edge( source, vertex, std::numeric_limits<double>::infinity(), graph );
@@ -230,15 +236,30 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_splitting( mc_graph_t& 
 
   add_reverse_edges( graph );
 
+  /* write graph to dot */
+  if ( true )
+  {
+    std::filebuf fb;
+    fb.open( boost::str( boost::format( "/tmp/graph-splitted-%d" ) % color ).c_str(), std::ios::out );
+    std::ostream os( &fb );
+    write_graphviz( os, graph );
+    fb.close();
+  }
+
   return std::make_pair( source, target );
 }
 
-void find_mincut_by_nodes_with_blocking( const aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts )
+void find_mincut_by_nodes_with_blocking( const aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts, const find_mincut_by_nodes_settings& settings )
 {
   std::vector<aig_node> blocked_nodes;
 
   for ( unsigned i = 0u; i < count; ++i )
   {
+    if ( settings.verbose )
+    {
+      std::cout << "[I] find min cut " << i << std::endl;
+    }
+
     mc_graph_t graph;
     mc_node_t source, target;
 
@@ -258,8 +279,18 @@ void find_mincut_by_nodes_with_blocking( const aig_graph& aig, unsigned count, s
       {
         if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
         {
-          cut += name[e];
-          blocked_nodes += name[e];
+          if ( name[e] )
+          {
+            cut += *name[e];
+            blocked_nodes += *name[e];
+          }
+          else
+          {
+            if ( settings.verbose )
+            {
+              std::cout << "[W] no node assigned to " << e << std::endl;
+            }
+          }
         }
       }
     }
@@ -268,7 +299,7 @@ void find_mincut_by_nodes_with_blocking( const aig_graph& aig, unsigned count, s
   }
 }
 
-void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts )
+void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts, const find_mincut_by_nodes_settings& settings )
 {
   /* color nodes */
   unsigned max_color = 0u;
@@ -281,6 +312,11 @@ void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::l
   /* find cuts */
   for ( unsigned i = 0u; i < count; ++i )
   {
+    if ( settings.verbose )
+    {
+      std::cout << "[I] find min cut " << i << std::endl;
+    }
+
     mc_graph_t graph;
     mc_node_t source, target;
 
@@ -301,7 +337,17 @@ void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::l
       {
         if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
         {
-          cut += name[e];
+          if ( name[e] )
+          {
+            cut += *name[e];
+          }
+          else
+          {
+            if ( settings.verbose )
+            {
+              std::cout << "[W] no node assigned to " << e << std::endl;
+            }
+          }
         }
       }
     }
@@ -310,8 +356,12 @@ void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::l
     {
       if ( vname[v] )
       {
-        assert( color[v] == boost::white_color || color[v] == boost::black_color );
-        aig_color[*vname[v]] = max_color + 1u + ( color[v] == boost::white_color ? 0u : 1u );
+        /* node is not in the cut */
+        if ( boost::find( cut, *vname[v] ) == cut.end() )
+        {
+          //assert( color[v] == boost::white_color || color[v] == boost::black_color );
+          aig_color[*vname[v]] = max_color + 1u + ( color[v] == boost::white_color ? 0u : 1u );
+        }
       }
       else
       {
@@ -333,11 +383,11 @@ void find_mincut_by_nodes( aig_graph& aig, unsigned count, std::list<std::list<a
 {
   if ( settings.mode == splitting )
   {
-    find_mincut_by_nodes_with_splitting( aig, count, cuts );
+    find_mincut_by_nodes_with_splitting( aig, count, cuts, settings );
   }
   else if ( settings.mode == blocking )
   {
-    find_mincut_by_nodes_with_blocking( aig, count, cuts );
+    find_mincut_by_nodes_with_blocking( aig, count, cuts, settings );
   }
   else
   {
