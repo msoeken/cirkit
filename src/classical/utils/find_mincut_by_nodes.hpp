@@ -34,12 +34,21 @@
 namespace cirkit
 {
 
+  enum find_mincut_by_nodes_mode { splitting, blocking };
+
+  struct find_mincut_by_nodes_settings
+  {
+    bool                      verbose = false;
+    find_mincut_by_nodes_mode mode    = splitting;
+  };
+
   /**
    * @param aig    AIG graph (will not be changed, instead a copy is created)
    * @param count  Number of cuts that should be determined
    * @param cuts   List of cuts, where a cut is a list of AIG nodes
    */
-  void find_mincut_by_nodes( const aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts );
+  void find_mincut_by_nodes( aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts,
+                             const find_mincut_by_nodes_settings& settings = find_mincut_by_nodes_settings() );
 
 }
 

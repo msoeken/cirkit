@@ -37,6 +37,9 @@
 #include <boost/range/irange.hpp>
 #include <boost/tuple/tuple.hpp>
 
+namespace cirkit
+{
+
 /* this is to format a cell */
 typedef boost::optional<unsigned> length_t;
 
@@ -196,6 +199,8 @@ private:
   std::vector<unsigned> lengths;
   unsigned length_i;
 };
+
+}
 
 #endif
 

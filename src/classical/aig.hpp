@@ -55,7 +55,7 @@ namespace cirkit
   };
 
   typedef boost::property<boost::vertex_name_t, unsigned,
-          boost::property<boost::vertex_color_t, boost::default_color_type,
+          boost::property<boost::vertex_color_t, unsigned,
           boost::property<boost::vertex_distance_t, long,
           boost::property<boost::vertex_predecessor_t, traits_t::edge_descriptor> > > > vertex_properties_t;
   typedef boost::property<boost::edge_capacity_t, double,
