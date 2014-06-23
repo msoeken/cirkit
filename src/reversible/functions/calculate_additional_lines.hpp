@@ -16,16 +16,16 @@
  */
 
 /**
- * @file approximate_additional_lines.hpp
+ * @file calculate_additional_lines.hpp
  *
- * @brief Approximates the number of additional lines
+ * @brief Calculates the minimal number of additional lines using BDDs
  *
  * @author Mathias Soeken
  * @since  2.0
  */
 
-#ifndef APPROXIMATE_ADDITIONAL_LINES_HPP
-#define APPROXIMATE_ADDITIONAL_LINES_HPP
+#ifndef CALCULATE_ADDITIONAL_LINES_HPP
+#define CALCULATE_ADDITIONAL_LINES_HPP
 
 #include <string>
 
@@ -34,18 +34,15 @@
 namespace cirkit
 {
 
-  /**
-   * @brief Approximates the number of additional lines
-   *
-   * @param filename Filename to a PLA representation
-   * @param statistics If statistics are set the original number of inputs and outputs of the
-   *                   function are stored in the fields "num_inputs" and "num_outputs"
-   *
-   * @return Number of additional lines that are sufficient for embedding
-   *
-   * @version 2.0
-   */
-  unsigned approximate_additional_lines( const std::string& filename, properties::ptr statistics = properties::ptr() );
+struct calculate_additional_lines_settings
+{
+  bool verbose = false;
+  std::string dotfile;
+};
+
+unsigned calculate_additional_lines( const std::string& filename,
+                                     const calculate_additional_lines_settings& settings = calculate_additional_lines_settings(),
+                                     properties::ptr statistics = properties::ptr() );
 
 }
 
