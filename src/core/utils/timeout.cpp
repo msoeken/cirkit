@@ -21,6 +21,10 @@
 #include <cstdlib>
 #include <thread>
 
+#ifndef _GLIBCXX_USE_NANOSLEEP
+#define _GLIBCXX_USE_NANOSLEEP 1
+#endif
+
 namespace cirkit
 {
 
