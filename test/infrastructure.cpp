@@ -5,6 +5,8 @@
 
 #include <core/utils/benchmark_table.hpp>
 
+using namespace cirkit;
+
 BOOST_AUTO_TEST_CASE(simple)
 {
   benchmark_table<std::string, unsigned, double> table( { "Name", "Gates", "Time" } );
