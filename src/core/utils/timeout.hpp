@@ -24,8 +24,8 @@
  * @since  2.0
  */
 
-#ifndef TIMER_HPP
-#define TIMER_HPP
+#ifndef TIMEOUT_HPP
+#define TIMEOUT_HPP
 
 namespace cirkit {
 
