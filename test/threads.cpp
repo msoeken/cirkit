@@ -1,20 +1,19 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE threads
 
-#include <chrono>
-#include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <thread>
 
 #include <boost/test/unit_test.hpp>
 
+#include <core/utils/timeout.hpp>
+
+using namespace cirkit;
+
 BOOST_AUTO_TEST_CASE(simple)
 {
-  std::thread t1([]() {
-      std::this_thread::sleep_for( std::chrono::seconds( 5u ) );
-      std::cout << "Exit." << std::endl;
-      exit( EXIT_FAILURE );
-    });
+  std::thread t1( []() { timeout_after( 5u ); } );
 
   for ( unsigned i = 0u; i < (1u << 27u); ++i )
   {
