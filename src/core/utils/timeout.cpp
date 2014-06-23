@@ -17,13 +17,13 @@
 
 #include "timeout.hpp"
 
-#include <chrono>
-#include <cstdlib>
-#include <thread>
-
 #ifndef _GLIBCXX_USE_NANOSLEEP
 #define _GLIBCXX_USE_NANOSLEEP 1
 #endif
+
+#include <chrono>
+#include <cstdlib>
+#include <thread>
 
 namespace cirkit
 {
