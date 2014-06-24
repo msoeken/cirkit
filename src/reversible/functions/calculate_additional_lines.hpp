@@ -34,14 +34,8 @@
 namespace cirkit
 {
 
-struct calculate_additional_lines_settings
-{
-  bool verbose = false;
-  std::string dotfile;
-};
-
 unsigned calculate_additional_lines( const std::string& filename,
-                                     const calculate_additional_lines_settings& settings = calculate_additional_lines_settings(),
+                                     properties::ptr settings = properties::ptr(),
                                      properties::ptr statistics = properties::ptr() );
 
 }

@@ -27,6 +27,7 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <core/utils/timer.hpp>
 #include <reversible/synthesis/synthesis_utils_p.hpp>
 
 #include <cuddObj.hh>
@@ -67,8 +68,17 @@ BDD create_bdd_from_incube(Cudd& mgr, const std::string& incube, const std::vect
   return cube;
 }
 
-unsigned approximate_additional_lines( const std::string& filename, properties::ptr statistics )
+unsigned approximate_additional_lines( const std::string& filename, properties::ptr settings, properties::ptr statistics )
 {
+  /* Timer */
+  timer<properties_timer> t;
+
+  if ( statistics )
+  {
+    properties_timer rt( statistics );
+    t.start( rt );
+  }
+
   /* Number of inputs and outputs */
   unsigned n = 0u;
   unsigned m = 0u;

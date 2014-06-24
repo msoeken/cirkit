@@ -23,6 +23,7 @@
 #include <boost/range/numeric.hpp>
 
 #include <core/io/read_pla_to_bdd.hpp>
+#include <core/utils/timer.hpp>
 
 #include <reversible/synthesis/dd_synthesis_p.hpp>
 #include <reversible/synthesis/synthesis_utils_p.hpp>
@@ -35,13 +36,13 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-void count_output_pattern_recurse( const BDDTable& bdd, DdNode* node, const std::string& pattern, unsigned depth, std::vector<mpz_class>& counts, const calculate_additional_lines_settings& settings )
+void count_output_pattern_recurse( const BDDTable& bdd, DdNode* node, const std::string& pattern, unsigned depth, std::vector<mpz_class>& counts, bool verbose )
 {
   if ( Cudd_IsConstant( node ) ) { return; }
 
   if ( depth == *bdd.num_real_outputs )
   {
-    if ( settings.verbose )
+    if ( verbose )
     {
       std::cout << pattern << " has " << Cudd_CountMinterm( bdd.cudd, node, bdd.inputs.size() - *bdd.num_real_outputs ) << std::endl;
     }
@@ -52,13 +53,26 @@ void count_output_pattern_recurse( const BDDTable& bdd, DdNode* node, const std:
     DdNode *t = cuddT( node ), *e = cuddE( node );
     //count_output_pattern_recurse( bdd, Cudd_IsComplement( t ) ? Cudd_Not( t ) : t, depth + 1u, counts );
     //count_output_pattern_recurse( bdd, Cudd_IsComplement( e ) ? Cudd_Not( e ) : e, depth + 1u, counts );
-    count_output_pattern_recurse( bdd, Cudd_Regular( t ), pattern + "1", depth + 1u, counts, settings );
-    count_output_pattern_recurse( bdd, Cudd_Regular( e ), pattern + "0", depth + 1u, counts, settings );
+    count_output_pattern_recurse( bdd, Cudd_Regular( t ), pattern + "1", depth + 1u, counts, verbose );
+    count_output_pattern_recurse( bdd, Cudd_Regular( e ), pattern + "0", depth + 1u, counts, verbose );
   }
 }
 
-unsigned calculate_additional_lines( const std::string& filename, const calculate_additional_lines_settings& settings, properties::ptr statistics )
+unsigned calculate_additional_lines( const std::string& filename, properties::ptr settings, properties::ptr statistics )
 {
+  /* Settings */
+  bool        verbose = get( settings, "verbose", false         );
+  std::string dotname = get( settings, "dotname", std::string() );
+
+  /* Timer */
+  timer<properties_timer> t;
+
+  if ( statistics )
+  {
+    properties_timer rt( statistics );
+    t.start( rt );
+  }
+
   BDDTable bdd;
   read_pla_to_characteristic_bdd( bdd, filename, false );
 
@@ -67,9 +81,9 @@ unsigned calculate_additional_lines( const std::string& filename, const calculat
   DdNode *add = Cudd_BddToAdd( bdd.cudd, bdd.outputs.at( 0 ).second );
   Cudd_Ref( add );
 
-  if ( !settings.dotfile.empty() )
+  if ( !dotname.empty() )
   {
-    FILE * fp = fopen( settings.dotfile.c_str(), "w" );
+    FILE * fp = fopen( dotname.c_str(), "w" );
     char ** inames = new char*[bdd.inputs.size()];
     boost::transform( bdd.inputs, inames, []( const std::pair<std::string, DdNode*>& p ) { return const_cast<char*>( p.first.c_str() ); } );
     char* onames[] = { const_cast<char*>( "f" ) };
@@ -77,17 +91,17 @@ unsigned calculate_additional_lines( const std::string& filename, const calculat
     fclose( fp );
   }
 
-  count_output_pattern_recurse( bdd, add, "", 0u, counts, settings );
+  count_output_pattern_recurse( bdd, add, "", 0u, counts, verbose );
 
   unsigned n = bdd.inputs.size() - *bdd.num_real_outputs;
   unsigned m = *bdd.num_real_outputs;
-  if ( settings.verbose )
+  if ( verbose )
   {
     std::cout << "total: " << boost::accumulate( counts, mpz_class( 0u ), []( mpz_class d1, mpz_class d2 ) { return d1 + d2; } ) << std::endl;
     std::cout << "pow2(n): " << pow2(n) << std::endl;
   }
   counts += pow2( n ) - boost::accumulate( counts, mpz_class( 0u ), []( mpz_class d1, mpz_class d2 ) { return d1 + d2; } );
-  if ( settings.verbose )
+  if ( verbose )
   {
     std::cout << "max: " << *boost::max_element( counts ) << std::endl;
   }

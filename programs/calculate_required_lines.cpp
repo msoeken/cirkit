@@ -57,7 +57,10 @@ int main( int argc, char ** argv )
     return 1;
   }
 
+  /* settings and statistics */
   unsigned additional = 0u;
+  properties::ptr settings( new properties );
+  settings->set( "verbose", verbose );
   properties::ptr statistics( new properties );
 
   /* timeout */
@@ -70,19 +73,17 @@ int main( int argc, char ** argv )
   if ( mode == 0u )
   {
     binary_truth_table pla, extended;
-    read_pla_settings settings;
-    settings.extend = false;
-    read_pla( pla, filename, settings );
+    read_pla_settings rp_settings;
+    rp_settings.extend = false;
+    read_pla( pla, filename, rp_settings );
     extend_pla( pla, extended );
 
     write_pla( extended, "/tmp/test.pla" );
 
-    additional = approximate_additional_lines( "/tmp/test.pla", statistics );
+    additional = approximate_additional_lines( "/tmp/test.pla", settings, statistics );
   }
   else if ( mode == 1u )
   {
-    calculate_additional_lines_settings settings;
-    settings.verbose = verbose;
     additional = calculate_additional_lines( filename, settings, statistics );
   }
 

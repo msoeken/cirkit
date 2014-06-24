@@ -45,7 +45,9 @@ namespace cirkit
    *
    * @version 2.0
    */
-  unsigned approximate_additional_lines( const std::string& filename, properties::ptr statistics = properties::ptr() );
+  unsigned approximate_additional_lines( const std::string& filename,
+                                         properties::ptr settings = properties::ptr(),
+                                         properties::ptr statistics = properties::ptr() );
 
 }
 
