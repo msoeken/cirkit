@@ -6,8 +6,3 @@ ext/circuits
 ext/functions
 ext/bin
 tmp
-.cproject
-.project
-CMakeCache.txt
-CMakeFiles/
-addons/cirkit-addon-optikit/
