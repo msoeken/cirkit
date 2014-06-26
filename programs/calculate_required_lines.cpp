@@ -39,13 +39,15 @@ int main( int argc, char ** argv )
   std::string filename;
   unsigned    mode    = 0u;
   unsigned    timeout = 5000u;
+  std::string tmpname = "/tmp/test.pla";
   bool        verbose = false;
 
   program_options opts;
   opts.add_options()
     ( "filename", value<std::string>( &filename ),                           "PLA filename" )
-    ( "mode",     value<unsigned>   ( &mode     )->default_value( mode    ), "Mode (0: extend, 1: BDD)" )
+    ( "mode",     value<unsigned>   ( &mode     )->default_value( mode    ), "Mode (0: extend, 1: BDD, 2: approximate)" )
     ( "timeout",  value<unsigned>   ( &timeout  )->default_value( timeout ), "Timeout in seconds" )
+    ( "tmpname",  value<std::string>( &tmpname  )->default_value( tmpname ), "Temporary filename for extended PLA" )
     ( "verbose",  value<bool>       ( &verbose  )->default_value( verbose ), "Be verbose" )
     ;
 
@@ -78,13 +80,17 @@ int main( int argc, char ** argv )
     read_pla( pla, filename, rp_settings );
     extend_pla( pla, extended );
 
-    write_pla( extended, "/tmp/test.pla" );
+    write_pla( extended, tmpname );
 
-    additional = approximate_additional_lines( "/tmp/test.pla", settings, statistics );
+    additional = approximate_additional_lines( tmpname, settings, statistics );
   }
   else if ( mode == 1u )
   {
     additional = calculate_additional_lines( filename, settings, statistics );
+  }
+  else if ( mode == 2u )
+  {
+    additional = approximate_additional_lines( filename, settings, statistics );
   }
 
   std::cout << "Inputs:     " << statistics->get<unsigned>( "num_inputs" ) << std::endl
