@@ -32,8 +32,6 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-extend_pla_settings::extend_pla_settings() : post_compact( true ) {}
-
 void extend_pla( binary_truth_table& base, binary_truth_table& extended, const extend_pla_settings& settings )
 {
   // copy metadata
@@ -93,13 +91,15 @@ void extend_pla( binary_truth_table& base, binary_truth_table& extended, const e
     binary_truth_table::cube_type base_in( base_cube->first.first, base_cube->first.second );
     binary_truth_table::cube_type base_out( base_cube->second.first, base_cube->second.second );
 
-#ifdef DEBUG
-    std::cout << "Processing:" << std::endl;
-    std::for_each( base_cube->first.first, base_cube->first.second, []( const boost::optional<bool>& b ) { std::cout << (b ? (*b ? "1" : "0") : "-"); } );
-    std::cout << " ";
-    std::for_each( base_cube->second.first, base_cube->second.second, []( const boost::optional<bool>& b ) { std::cout << (b ? (*b ? "1" : "0") : "-"); } );
-    std::cout << std::endl;
-#endif
+    if ( settings.verbose )
+    {
+      std::cout << "[I] Processing:" << std::endl;
+      std::cout << "[I] ";
+      std::for_each( base_cube->first.first, base_cube->first.second, []( const boost::optional<bool>& b ) { std::cout << (b ? (*b ? "1" : "0") : "-"); } );
+      std::cout << " ";
+      std::for_each( base_cube->second.first, base_cube->second.second, []( const boost::optional<bool>& b ) { std::cout << (b ? (*b ? "1" : "0") : "-"); } );
+      std::cout << std::endl;
+    }
 
     BDD bicube = bddFromCube( base_cube->first );
     base.remove_entry( base_cube );
@@ -112,13 +112,15 @@ void extend_pla( binary_truth_table& base, binary_truth_table& extended, const e
 
       if ( ( bicube & bocube ).CountMinterm( base.num_inputs() ) > 0.0 )
       {
-#ifdef DEBUG
-        std::cout << "intersection detected with" << std::endl;
-        std::for_each( extended_cube->first.first, extended_cube->first.second, []( const boost::optional<bool>& b ) { std::cout << (b ? (*b ? "1" : "0") : "-"); } );
-        std::cout << " ";
-        std::for_each( extended_cube->second.first, extended_cube->second.second, []( const boost::optional<bool>& b ) { std::cout << (b ? (*b ? "1" : "0") : "-"); } );
-        std::cout << std::endl;
-#endif
+        if ( settings.verbose )
+        {
+          std::cout << "[I] Intersection detected with" << std::endl;
+          std::cout << "[I] ";
+          std::for_each( extended_cube->first.first, extended_cube->first.second, []( const boost::optional<bool>& b ) { std::cout << (b ? (*b ? "1" : "0") : "-"); } );
+          std::cout << " ";
+          std::for_each( extended_cube->second.first, extended_cube->second.second, []( const boost::optional<bool>& b ) { std::cout << (b ? (*b ? "1" : "0") : "-"); } );
+          std::cout << std::endl;
+        }
         binary_truth_table::cube_type extended_in( extended_cube->first.first, extended_cube->first.second );
         binary_truth_table::cube_type extended_out( extended_cube->second.first, extended_cube->second.second );
 
@@ -170,18 +172,20 @@ void extend_pla( binary_truth_table& base, binary_truth_table& extended, const e
     // Copy the base_cube if no match has been found
     if ( !found_match )
     {
-#ifdef DEBUG
-      std::cout << "add directly!" << std::endl;
-#endif
+      if ( settings.verbose )
+      {
+        std::cout << "[I] Add directly!" << std::endl;
+      }
       extended.add_entry( base_in, base_out );
     }
 
-#ifdef DEBUG
-    std::cout << "Base:" << std::endl;
-    std::cout << base << std::endl;
-    std::cout << "Extended:" << std::endl;
-    std::cout << extended << std::endl << std::endl;
-#endif
+    if ( settings.verbose )
+    {
+      std::cout << "[I] base:" << std::endl;
+      std::cout << base << std::endl;
+      std::cout << "[I] extended:" << std::endl;
+      std::cout << extended << std::endl << std::endl;
+    }
   }
 
   /* Compact */

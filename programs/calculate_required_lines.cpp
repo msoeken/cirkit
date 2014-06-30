@@ -37,18 +37,22 @@ int main( int argc, char ** argv )
   using boost::program_options::value;
 
   std::string filename;
-  unsigned    mode    = 0u;
-  unsigned    timeout = 5000u;
-  std::string tmpname = "/tmp/test.pla";
-  bool        verbose = false;
+  unsigned    mode         = 0u;
+  bool        post_compact = true;
+  unsigned    timeout      = 5000u;
+  std::string tmpname      = "/tmp/test.pla";
+  std::string dotname;
+  bool        verbose      = false;
 
   program_options opts;
   opts.add_options()
-    ( "filename", value<std::string>( &filename ),                           "PLA filename" )
-    ( "mode",     value<unsigned>   ( &mode     )->default_value( mode    ), "Mode (0: extend, 1: BDD, 2: approximate)" )
-    ( "timeout",  value<unsigned>   ( &timeout  )->default_value( timeout ), "Timeout in seconds" )
-    ( "tmpname",  value<std::string>( &tmpname  )->default_value( tmpname ), "Temporary filename for extended PLA" )
-    ( "verbose",  value<bool>       ( &verbose  )->default_value( verbose ), "Be verbose" )
+    ( "filename",     value<std::string>( &filename     ),                                "PLA filename" )
+    ( "mode",         value<unsigned>   ( &mode         )->default_value( mode         ), "Mode (0: extend, 1: BDD, 2: approximate)" )
+    ( "post_compact", value<bool>       ( &post_compact )->default_value( post_compact ), "Compress PLA after extending (only for mode = 0)" )
+    ( "timeout",      value<unsigned>   ( &timeout      )->default_value( timeout      ), "Timeout in seconds" )
+    ( "tmpname",      value<std::string>( &tmpname      )->default_value( tmpname      ), "Temporary filename for extended PLA" )
+    ( "dotname",      value<std::string>( &dotname      ),                                "If non-empty and mode = 1, the BDD is dumped to that file" )
+    ( "verbose",      value<bool>       ( &verbose      )->default_value( verbose      ), "Be verbose" )
     ;
 
   opts.parse( argc, argv );
@@ -78,7 +82,10 @@ int main( int argc, char ** argv )
     read_pla_settings rp_settings;
     rp_settings.extend = false;
     read_pla( pla, filename, rp_settings );
-    extend_pla( pla, extended );
+    extend_pla_settings ep_settings;
+    ep_settings.post_compact = post_compact;
+    ep_settings.verbose = verbose;
+    extend_pla( pla, extended, ep_settings );
 
     write_pla( extended, tmpname );
 
@@ -86,6 +93,7 @@ int main( int argc, char ** argv )
   }
   else if ( mode == 1u )
   {
+    settings->set( "dotname", dotname );
     additional = calculate_additional_lines( filename, settings, statistics );
   }
   else if ( mode == 2u )

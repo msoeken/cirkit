@@ -78,7 +78,7 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
 
   std::vector<mpz_class> counts;
 
-  DdNode *add = Cudd_BddToAdd( bdd.cudd, bdd.outputs.at( 0 ).second );
+  DdNode *add = Cudd_BddToAdd( bdd.cudd, bdd.outputs.at( 0u ).second );
   Cudd_Ref( add );
 
   if ( !dotname.empty() )
@@ -87,7 +87,7 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
     char ** inames = new char*[bdd.inputs.size()];
     boost::transform( bdd.inputs, inames, []( const std::pair<std::string, DdNode*>& p ) { return const_cast<char*>( p.first.c_str() ); } );
     char* onames[] = { const_cast<char*>( "f" ) };
-    Cudd_DumpDot( bdd.cudd, 1, &add, inames, onames, fp );
+    Cudd_DumpDot( bdd.cudd, 1, &bdd.outputs.at( 0u ).second, inames, onames, fp );
     fclose( fp );
   }
 

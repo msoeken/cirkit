@@ -40,13 +40,6 @@ namespace cirkit
   struct extend_pla_settings
   {
     /**
-     * @brief Default constructor
-     *
-     * @since  2.0
-     */
-    extend_pla_settings();
-
-    /**
      * @brief Compact extended PLA after creation
      *
      * If this settings is set to true (which is default)
@@ -57,7 +50,14 @@ namespace cirkit
      *
      * @since  2.0
      */
-    bool post_compact;
+    bool post_compact = true;
+
+    /**
+     * @brief Be verbose
+     *
+     * @since  2.0
+     */
+    bool verbose = false;
   };
 
   /**
