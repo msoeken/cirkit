@@ -27,14 +27,17 @@
 #ifndef FIND_MINCUT_HPP
 #define FIND_MINCUT_HPP
 
-#include <list>
-
-#include <classical/aig.hpp>
+#include <core/properties.hpp>
+#include <classical/mincut/mincut.hpp>
 
 namespace cirkit
 {
 
-  void find_mincut( aig_graph& aig, unsigned count, std::list<std::list<aig_function>>& cuts );
+  bool find_mincut( std::list<std::list<aig_function>>& cuts, aig_graph& aig, unsigned count,
+                    properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() );
+
+  mincut_by_edge_func find_mincut_func( properties::ptr settings = properties::ptr( new properties ),
+                                        properties::ptr statistics = properties::ptr( new properties ) );
 
 }
 

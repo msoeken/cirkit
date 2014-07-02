@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "find_mincut_by_nodes.hpp"
+#include "find_mincut_splitting.hpp"
 
 #include <fstream>
 #include <list>
@@ -59,22 +59,6 @@ typedef boost::graph_traits<mc_graph_t>::edge_descriptor mc_edge_t;
  * Private functions                                                          *
  ******************************************************************************/
 
-std::pair<mc_edge_t, mc_edge_t> add_edges( const mc_node_t& s, const mc_node_t& t, double capacity, mc_graph_t& graph )
-{
-  auto capacitymap = get( boost::edge_capacity, graph );
-  auto reversemap  = get( boost::edge_reverse,  graph );
-
-  auto edge  = boost::add_edge( s, t, graph ).first;
-  auto redge = boost::add_edge( t, s, graph ).first;
-
-  capacitymap[edge] = capacity;
-  capacitymap[redge] = 0.0;
-  reversemap[edge] = redge;
-  reversemap[redge] = edge;
-
-  return std::make_pair( edge, redge );
-}
-
 mc_edge_t add_edge( const mc_node_t& s, const mc_node_t& t, double capacity, mc_graph_t& graph )
 {
   auto capacitymap = get( boost::edge_capacity, graph );
@@ -100,62 +84,6 @@ void add_reverse_edges( mc_graph_t& graph )
     reversemap[edge] = redge;
     reversemap[redge] = edge;
   }
-}
-
-std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_blocking( mc_graph_t& graph, const aig_graph& aig, const std::vector<aig_node>& blocked_nodes )
-{
-  const auto& graph_info = boost::get_property( aig, boost::graph_name );
-  auto namemap = get( boost::edge_name, graph );
-
-  /* A map to store AIG node to MC graph node */
-  std::map<aig_node, std::pair<mc_node_t, mc_node_t>> node_map;
-
-  /* Source and target */
-  mc_node_t source = boost::add_vertex( graph );
-  mc_node_t target = boost::add_vertex( graph );
-
-  /* Copy nodes */
-  for ( const aig_node& node : boost::make_iterator_range( boost::vertices( aig ) ) )
-  {
-    mc_node_t s = boost::add_vertex( graph );
-    mc_node_t t = boost::add_vertex( graph );
-
-    bool is_blocked = boost::find( blocked_nodes, node ) != blocked_nodes.end();
-    mc_edge_t e = add_edges( s, t, is_blocked ? std::numeric_limits<double>::infinity() : 1.0, graph ).first;
-    namemap[e] = node;
-
-    node_map[node] = std::make_pair( s, t );
-  }
-
-  /* Copy edges */
-  for ( const aig_edge& edge : boost::make_iterator_range( boost::edges( aig ) ) )
-  {
-    const mc_node_t& s = node_map[boost::source( edge, aig )].second;
-    const mc_node_t& t = node_map[boost::target( edge, aig )].first;
-
-    add_edges( s, t, std::numeric_limits<double>::infinity(), graph );
-  }
-
-  /* Connect source with outputs */
-  for ( const auto& output : graph_info.outputs )
-  {
-    add_edges( source, node_map[output.first.first].first, std::numeric_limits<double>::infinity(), graph );
-  }
-
-  /* Connect target with inputs */
-  for ( const auto& input : graph_info.inputs )
-  {
-    add_edges( node_map[input].second, target, std::numeric_limits<double>::infinity(), graph );
-  }
-
-  /* Connect target (and maybe source) with constant */
-  add_edges( node_map[graph_info.constant].second, target, std::numeric_limits<double>::infinity(), graph );
-  if ( !graph_info.constant_used )
-  {
-    add_edges( source, node_map[graph_info.constant].first, std::numeric_limits<double>::infinity(), graph );
-  }
-
-  return std::make_pair( source, target );
 }
 
 template<typename Graph>
@@ -236,71 +164,28 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_splitting( mc_graph_t& 
 
   add_reverse_edges( graph );
 
-  /* write graph to dot */
-  if ( true )
-  {
-    std::filebuf fb;
-    fb.open( boost::str( boost::format( "/tmp/graph-splitted-%d" ) % color ).c_str(), std::ios::out );
-    std::ostream os( &fb );
-    write_graphviz( os, graph );
-    fb.close();
-  }
-
   return std::make_pair( source, target );
 }
 
-void find_mincut_by_nodes_with_blocking( const aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts, const find_mincut_by_nodes_settings& settings )
+void find_mincut_splitting_dump_dot( const mc_graph_t& graph, const std::string& filename )
 {
-  std::vector<aig_node> blocked_nodes;
-
-  for ( unsigned i = 0u; i < count; ++i )
-  {
-    if ( settings.verbose )
-    {
-      std::cout << "[I] find min cut " << i << std::endl;
-    }
-
-    mc_graph_t graph;
-    mc_node_t source, target;
-
-    boost::tie( source, target ) = create_mincut_graph_with_blocking( graph, aig, blocked_nodes );
-
-    boykov_kolmogorov_max_flow( graph, source, target );
-
-    auto capacity = boost::get( boost::edge_capacity, graph );
-    auto color    = boost::get( boost::vertex_color,  graph );
-    auto name     = boost::get( boost::edge_name,     graph );
-
-    std::list<aig_node> cut;
-
-    for ( const auto& e : boost::make_iterator_range( edges( graph ) ) )
-    {
-      if ( capacity[e] > 0 )
-      {
-        if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
-        {
-          if ( name[e] )
-          {
-            cut += *name[e];
-            blocked_nodes += *name[e];
-          }
-          else
-          {
-            if ( settings.verbose )
-            {
-              std::cout << "[W] no node assigned to " << e << std::endl;
-            }
-          }
-        }
-      }
-    }
-
-    cuts += cut;
-  }
+  std::filebuf fb;
+  fb.open( filename.c_str(), std::ios::out );
+  std::ostream os( &fb );
+  write_graphviz( os, graph );
+  fb.close();
 }
 
-void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts, const find_mincut_by_nodes_settings& settings )
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
+
+bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig, unsigned count, properties::ptr settings, properties::ptr statistics )
 {
+  /* settings */
+  bool        verbose = get( settings, "verbose", false         );
+  std::string dotname = get( settings, "dotname", std::string() );
+
   /* color nodes */
   unsigned max_color = 0u;
   auto aig_color = boost::get( boost::vertex_color, aig );
@@ -312,7 +197,7 @@ void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::l
   /* find cuts */
   for ( unsigned i = 0u; i < count; ++i )
   {
-    if ( settings.verbose )
+    if ( verbose )
     {
       std::cout << "[I] find min cut " << i << std::endl;
     }
@@ -343,7 +228,7 @@ void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::l
           }
           else
           {
-            if ( settings.verbose )
+            if ( verbose )
             {
               std::cout << "[W] no node assigned to " << e << std::endl;
             }
@@ -372,30 +257,18 @@ void find_mincut_by_nodes_with_splitting( aig_graph& aig, unsigned count, std::l
     cuts += cut;
     max_color += 2u;
   }
+
+  return true;
 }
 
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
-void find_mincut_by_nodes( aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts, const find_mincut_by_nodes_settings& settings )
+mincut_by_node_func find_mincut_splitting_func( properties::ptr settings, properties::ptr statistics )
 {
-  if ( settings.mode == splitting )
-  {
-    find_mincut_by_nodes_with_splitting( aig, count, cuts, settings );
-  }
-  else if ( settings.mode == blocking )
-  {
-    find_mincut_by_nodes_with_blocking( aig, count, cuts, settings );
-  }
-  else
-  {
-    /* mode not found */
-    assert( 0 );
-  }
+  mincut_by_node_func f = [&settings, &statistics]( std::list<std::list<aig_node>>& cuts, aig_graph& aig, unsigned count ) {
+    return find_mincut_splitting( cuts, aig, count, settings, statistics );
+  };
+  f.init( settings, statistics );
+  return f;
 }
-
 
 }
 

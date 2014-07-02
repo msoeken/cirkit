@@ -10,7 +10,6 @@
 
 #include <classical/io/read_aigmeta.hpp>
 #include <classical/utils/aiger_to_aig.hpp>
-#include <classical/utils/find_mincut.hpp>
 
 extern "C" {
 #include <aiger.h>

@@ -16,39 +16,28 @@
  */
 
 /**
- * @file find_mincut_by_nodes.hpp
+ * @file mincut.hpp
  *
- * @brief Find Min-Cut in AIG graph based on nodes
+ * @brief Min-Cut algorithms in AIGs
  *
  * @author Mathias Soeken
  * @since  2.0
  */
 
-#ifndef FIND_MINCUT_BY_NODES_HPP
-#define FIND_MINCUT_BY_NODES_HPP
+#ifndef MINCUT_HPP
+#define MINCUT_HPP
 
 #include <list>
+
+#include <core/functor.hpp>
 
 #include <classical/aig.hpp>
 
 namespace cirkit
 {
 
-  enum find_mincut_by_nodes_mode { splitting, blocking };
-
-  struct find_mincut_by_nodes_settings
-  {
-    bool                      verbose = false;
-    find_mincut_by_nodes_mode mode    = splitting;
-  };
-
-  /**
-   * @param aig    AIG graph (will not be changed, instead a copy is created)
-   * @param count  Number of cuts that should be determined
-   * @param cuts   List of cuts, where a cut is a list of AIG nodes
-   */
-  void find_mincut_by_nodes( aig_graph& aig, unsigned count, std::list<std::list<aig_node>>& cuts,
-                             const find_mincut_by_nodes_settings& settings = find_mincut_by_nodes_settings() );
+  typedef functor<bool(std::list<std::list<aig_function>>&, aig_graph&, unsigned count)> mincut_by_edge_func;
+  typedef functor<bool(std::list<std::list<aig_node>>&, aig_graph&, unsigned count)> mincut_by_node_func;
 
 }
 

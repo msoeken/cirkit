@@ -100,11 +100,11 @@ void prepare_graph( aig_graph& aig, aig_node& source, aig_node& target, std::lis
  * Public functions                                                           *
  ******************************************************************************/
 
-void find_mincut( aig_graph& aig, unsigned count, std::list<std::list<aig_function>>& cuts )
+bool find_mincut( std::list<std::list<aig_function>>& cuts, aig_graph& aig, unsigned count, properties::ptr settings, properties::ptr statistics )
 {
   if ( count == 0u )
   {
-    return;
+    return true;
   }
 
   aig_node source, target;
@@ -147,6 +147,17 @@ void find_mincut( aig_graph& aig, unsigned count, std::list<std::list<aig_functi
 
     cuts += cut;
   }
+
+  return true;
+}
+
+mincut_by_edge_func find_mincut_func( properties::ptr settings, properties::ptr statistics )
+{
+  mincut_by_edge_func f = [&settings, &statistics]( std::list<std::list<aig_function>>& cuts, aig_graph& aig, unsigned count ) {
+    return find_mincut( cuts, aig, count, settings, statistics );
+  };
+  f.init( settings, statistics );
+  return f;
 }
 
 }
