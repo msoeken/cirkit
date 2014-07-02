@@ -193,7 +193,7 @@ namespace cirkit
     return true;
   }
 
-  bool read_pla_to_characteristic_bdd( BDDTable& bdd, const std::string& filename, bool inputs_first )
+  bool read_pla_to_characteristic_bdd( BDDTable& bdd, const std::string& filename, bool inputs_first, bool with_output_zero_patterns )
   {
     using boost::adaptors::map_values;
     using boost::irange;
@@ -339,6 +339,33 @@ namespace cirkit
       Cudd_RecursiveDeref( bdd.cudd, lhs );
       Cudd_RecursiveDeref( bdd.cudd, rhs );
       f = tmp;
+    }
+
+    if ( with_output_zero_patterns )
+    {
+      // Input patterns of f
+      DdNode *h = Cudd_bddExistAbstract( bdd.cudd, f, ys );
+      Cudd_Ref( h );
+
+      DdNode *yzero = Cudd_ReadOne( bdd.cudd );
+      for ( const auto& node : ynodes )
+      {
+        tmp = Cudd_bddAnd( bdd.cudd, yzero, Cudd_Not( node.second ) );
+        Cudd_Ref( tmp );
+        Cudd_RecursiveDeref( bdd.cudd, yzero );
+        yzero = tmp;
+      }
+
+      tmp = Cudd_bddAnd( bdd.cudd, yzero, h );
+      Cudd_Ref( tmp );
+      Cudd_RecursiveDeref( bdd.cudd, yzero );
+      Cudd_RecursiveDeref( bdd.cudd, h );
+
+      tmp2 = Cudd_bddOr( bdd.cudd, f, tmp );
+      Cudd_Ref( tmp2 );
+      Cudd_RecursiveDeref( bdd.cudd, f );
+      Cudd_RecursiveDeref( bdd.cudd, tmp );
+      f = tmp2;
     }
 
     bdd.outputs += std::make_pair( "f", f );

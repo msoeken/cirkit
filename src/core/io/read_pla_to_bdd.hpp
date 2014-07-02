@@ -96,10 +96,11 @@ namespace cirkit
    * @param bdd Table to store the BDD nodes
    * @param filename PLA filename
    * @param inputs_first Variable ordering, either inputs before outputs or the other way around
+   * @param with_output_zero_patterns Determines whether the 0...0 output pattern should explicitly be considered
    *
    * @since  2.0
    */
-  bool read_pla_to_characteristic_bdd( BDDTable& bdd, const std::string& filename, bool inputs_first = true );
+  bool read_pla_to_characteristic_bdd( BDDTable& bdd, const std::string& filename, bool inputs_first = true, bool with_output_zero_patterns = false );
 
 }
 
