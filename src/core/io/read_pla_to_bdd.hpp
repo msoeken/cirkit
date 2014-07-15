@@ -54,6 +54,13 @@ namespace cirkit
     BDDTable();
 
     /**
+     * @brief Use existing manager
+     *
+     * @since  2.0
+     */
+    BDDTable( DdManager * manager );
+
+    /**
      * @brief Deconstructor
      *
      * @since  1.3
@@ -81,6 +88,17 @@ namespace cirkit
      * @brief The internal CUDD manager object
      */
     DdManager* cudd;
+
+  private:
+    bool external_manager = false;
+  };
+
+  /**
+   * @since  2.0
+   */
+  struct read_pla_to_bdd_settings
+  {
+    std::function<DdNode*(DdManager*, unsigned)> input_generation_func = []( DdManager* manager, unsigned pos ) { return Cudd_bddNewVar( manager ); };
   };
 
   /**
@@ -88,7 +106,7 @@ namespace cirkit
    *
    * @since  1.3
    */
-  bool read_pla_to_bdd( BDDTable& bdd, const std::string& filename );
+  bool read_pla_to_bdd( BDDTable& bdd, const std::string& filename, const read_pla_to_bdd_settings& settings = read_pla_to_bdd_settings() );
 
   /**
    * @brief Reads a characteristic BDD from a PLA file

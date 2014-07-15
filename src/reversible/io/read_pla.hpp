@@ -81,6 +81,14 @@ namespace cirkit
    */
   bool read_pla( binary_truth_table& spec, const std::string& filename, const read_pla_settings& settings = read_pla_settings(), std::string* error = 0 );
 
+  /**
+   * @brief Reads only the size of the PLA, i.e. inputs and outputs without
+   *        parsing the whole file.
+   *
+   * @since  2.0
+   */
+  std::pair<unsigned, unsigned> read_pla_size( const std::string& filename );
+
 }
 
 #endif /* READ_PLA_HPP */

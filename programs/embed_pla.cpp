@@ -23,6 +23,7 @@
 #include <reversible/io/write_pla.hpp>
 #include <reversible/utils/program_options.hpp>
 #include <reversible/synthesis/embed_pla.hpp>
+#include <reversible/synthesis/embed_pla_bennett.hpp>
 
 #include <boost/format.hpp>
 
@@ -33,14 +34,16 @@ int main( int argc, char ** argv )
   using boost::program_options::value;
 
   std::string filename;
+  unsigned    mode = 0u;
   std::string planame;
 
   program_options opts;
   opts.add_options()
-    ( "filename", value<std::string>( &filename ), "PLA filename" )
-    ( "planame",  value<std::string>( &planame ),  "Filename of the embedded PLA file (default is empty)" )
-    ( "truth_table,t",                             "Prints truth table of embedded PLA (with constants and garbage)" )
-    ( "verbose,v",                                 "Be verbose" )
+    ( "filename", value<std::string>( &filename ),                      "PLA filename" )
+    ( "mode",     value<unsigned>   ( &mode     )->default_value( 0u ), "0: Exact cube-based embedding\n1: Heuristic BDD-based embedding" )
+    ( "planame",  value<std::string>( &planame  ),                      "Filename of the embedded PLA file (default is empty)" )
+    ( "truth_table,t",                                                  "Prints truth table of embedded PLA (with constants and garbage)" )
+    ( "verbose,v",                                                      "Be verbose" )
     ;
   opts.parse( argc, argv );
 
@@ -50,15 +53,18 @@ int main( int argc, char ** argv )
     return 1;
   }
 
-  binary_truth_table pla, extended;
+  /* extend for exact embedding */
+  if ( mode == 0u )
+  {
+    binary_truth_table pla, extended;
+    read_pla_settings rp_settings;
+    rp_settings.extend = false;
+    read_pla( pla, filename, rp_settings );
+    extend_pla( pla, extended );
+    write_pla( extended, "/tmp/extended.pla" );
+  }
+
   rcbdd cf;
-
-  read_pla_settings rp_settings;
-  rp_settings.extend = false;
-  read_pla( pla, filename, rp_settings );
-  extend_pla( pla, extended );
-  write_pla( extended, "/tmp/extended.pla" );
-
   properties::ptr settings( new properties );
   properties::ptr statistics( new properties );
   settings->set( "truth_table", opts.is_set( "truth_table" ) );
@@ -67,9 +73,15 @@ int main( int argc, char ** argv )
   {
       settings->set( "write_pla", planame );
   }
-  embed_pla( cf, "/tmp/extended.pla", settings, statistics );
+  pla_embedding_func embedding = ( mode == 0u ) ? embed_pla_func( settings, statistics ) : embed_pla_bennett_func( settings, statistics );
+  embedding( cf, mode == 0u ? "/tmp/extended.pla" : filename );
 
   std::cout << boost::format( "Runtime: %.2f" ) % statistics->get<double>( "runtime" ) << std::endl;
+
+  if ( mode == 1u )
+  {
+    std::cout << boost::format( "Runtime (read): %.2f" ) % statistics->get<double>( "runtime_read" ) << std::endl;
+  }
 
   return 0;
 }

@@ -129,7 +129,7 @@ namespace cirkit
     return true;
   }
 
-  bool read_pla_to_bdd( BDDTable& bdd, const std::string& filename )
+  bool read_pla_to_bdd( BDDTable& bdd, const std::string& filename, const read_pla_to_bdd_settings& settings )
   {
     using boost::adaptors::map_values;
 
@@ -144,7 +144,9 @@ namespace cirkit
     boost::transform( pla.input_labels,
                       std::back_inserter( bdd.inputs ),
                       []( const std::string& label ) { return std::make_pair( label, (DdNode*)0 ); } );
-    boost::generate( bdd.inputs | map_values, [&bdd]() { return Cudd_bddNewVar( bdd.cudd ); } );
+    //boost::generate( bdd.inputs | map_values, [&bdd]() { return Cudd_bddNewVar( bdd.cudd ); } );
+    unsigned pos = 0u;
+    boost::generate( bdd.inputs | map_values, [&settings, &bdd, &pos]() { return settings.input_generation_func( bdd.cudd, pos++ ); } );
 
     // Outputs
     boost::transform( pla.output_labels,
@@ -216,7 +218,7 @@ namespace cirkit
     {
       boost::push_back( labels, pla.output_labels );
       boost::push_back( labels, pla.input_labels );
-    }	
+    }
 
     // Inputs
     boost::transform( labels,
@@ -382,12 +384,21 @@ namespace cirkit
     cudd = Cudd_Init( 0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0 );
   }
 
+  BDDTable::BDDTable( DdManager * manager )
+    : external_manager( true )
+  {
+    cudd = manager;
+  }
+
   BDDTable::~BDDTable()
   {
-    using boost::adaptors::map_values;
+    if ( !external_manager )
+    {
+      using boost::adaptors::map_values;
 
-    boost::for_each( outputs | map_values, [this]( DdNode* node ) { Cudd_RecursiveDeref( this->cudd, node ); } );
-    Cudd_Quit( cudd );
+      boost::for_each( outputs | map_values, [this]( DdNode* node ) { Cudd_RecursiveDeref( this->cudd, node ); } );
+      Cudd_Quit( cudd );
+    }
   }
 
 }

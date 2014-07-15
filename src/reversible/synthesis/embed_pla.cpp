@@ -100,69 +100,6 @@ std::vector<BDD> _dec(const rcbdd& cf, const std::vector<BDD>& vars)
   return outputs;
 }
 
-void print_truth_table( const rcbdd& cf, const BDD& f )
-{
-  using boost::adaptors::transformed;
-
-  DdGen *gen;
-  int  *cube;
-  CUDD_VALUE_TYPE value;
-
-  unsigned vars = cf.num_vars();
-  unsigned n = cf.num_inputs();
-  unsigned m = cf.num_outputs();
-
-  std::cout << std::string( vars - n, 'c' )
-            << ' '
-            << std::string( n, 'x' )
-            << " | "
-            << std::string( m, 'y' )
-            << ' '
-            << std::string( vars - m, 'g' )
-            << std::endl;
-  std::cout << std::string( vars + 2u, '-' ) << '+' << std::string( vars + 2u, '-' ) << std::endl;
-
-  Cudd_ForeachCube( cf.manager().getManager(), f.getNode(), gen, cube, value )
-  {
-    std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" ).insert( vars - n, " " );
-    std::cout << " | ";
-    std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" ).insert( m, " " );
-    std::cout << std::endl;
-  }
-}
-
-void write_pla_to_file( const rcbdd& cf, const BDD& f, const std::string& filename )
-{
-  using boost::adaptors::transformed;
-
-  DdGen *gen;
-  int  *cube;
-  CUDD_VALUE_TYPE value;
-
-  unsigned vars = cf.num_vars();
-  unsigned n = cf.num_inputs();
-  unsigned m = cf.num_outputs();
-
-  std::filebuf fb;
-  fb.open( filename.c_str(), std::ios::out );
-  std::ostream os( &fb );
-
-  os << ".i " << n << std::endl
-     << ".o " << m << std::endl
-     << ".ilb " << boost::join( cf.input_labels(), " " ) << std::endl
-     << ".ob " << boost::join( cf.output_labels(), " " ) << std::endl;
-
-  Cudd_ForeachCube( cf.manager().getManager(), f.getNode(), gen, cube, value )
-  {
-    os << boost::join( boost::irange( vars - n, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" )
-       << " "
-       << boost::join( boost::irange( 0u, m ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" )
-       << std::endl;
-  }
-
-  fb.close();
-}
-
 class embed_pla_processor : public pla_processor
 {
 public:
@@ -388,22 +325,30 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
     std::cout << "|f_y|: " << cf.remove_xs( func ).CountMinterm( cf.num_vars() ) << std::endl;
   }
 
+  cf.set_chi( func );
+
   if ( truth_table )
   {
-    print_truth_table( cf, func );
+    cf.print_truth_table();
   }
 
   if ( write_pla.size() )
   {
-    write_pla_to_file( cf, func, write_pla );
+    cf.write_pla( write_pla );
   }
 
-  cf.set_chi( func );
-
-  return false;
+  return true;
 
 }
 
+pla_embedding_func embed_pla_func( properties::ptr settings, properties::ptr statistics )
+{
+  pla_embedding_func f = [&settings, &statistics]( rcbdd& cf, const std::string& filename ) {
+    return embed_pla( cf, filename, settings, statistics );
+  };
+  f.init( settings, statistics );
+  return f;
+}
 
 }
 

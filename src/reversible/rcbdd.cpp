@@ -17,8 +17,13 @@
 
 #include "rcbdd.hpp"
 
+#include <fstream>
+
+#include <boost/algorithm/string/join.hpp>
+#include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/range/irange.hpp>
 
 namespace cirkit
 {
@@ -225,6 +230,69 @@ BDD rcbdd::create_from_gate(unsigned target, const BDD& controlf) const
 
   return func;
 }
+
+void rcbdd::print_truth_table()
+{
+  using boost::adaptors::transformed;
+
+  DdGen *gen;
+  int  *cube;
+  CUDD_VALUE_TYPE value;
+
+  unsigned vars = num_vars();
+  unsigned n = num_inputs();
+  unsigned m = num_outputs();
+  std::cout << std::string( vars - n, 'c' )
+            << ' '
+            << std::string( n, 'x' )
+            << " | "
+            << std::string( m, 'y' )
+            << ' '
+            << std::string( vars - m, 'g' )
+            << std::endl;
+  std::cout << std::string( vars + 2u, '-' ) << '+' << std::string( vars + 2u, '-' ) << std::endl;
+
+  Cudd_ForeachCube( manager().getManager(), _chi.getNode(), gen, cube, value )
+  {
+    std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" ).insert( vars - n, " " );
+    std::cout << " | ";
+    std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" ).insert( m, " " );
+    std::cout << std::endl;
+  }
+}
+
+void rcbdd::write_pla( const std::string& filename )
+{
+  using boost::adaptors::transformed;
+
+  DdGen *gen;
+  int  *cube;
+  CUDD_VALUE_TYPE value;
+
+  unsigned vars = num_vars();
+  unsigned n = num_inputs();
+  unsigned m = num_outputs();
+
+  std::filebuf fb;
+  fb.open( filename.c_str(), std::ios::out );
+  std::ostream os( &fb );
+
+  os << ".i " << n << std::endl
+     << ".o " << m << std::endl
+     << ".ilb " << boost::join( input_labels(), " " ) << std::endl
+     << ".ob " << boost::join( output_labels(), " " ) << std::endl;
+
+  Cudd_ForeachCube( manager().getManager(), _chi.getNode(), gen, cube, value )
+  {
+    os << boost::join( boost::irange( vars - n, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" )
+       << " "
+       << boost::join( boost::irange( 0u, m ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" )
+       << std::endl;
+  }
+
+  fb.close();
+}
+
 
 }
 

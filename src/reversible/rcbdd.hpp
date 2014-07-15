@@ -75,6 +75,9 @@ namespace cirkit
 
     BDD create_from_gate(unsigned target, const BDD& controlf) const;
 
+    void print_truth_table();
+    void write_pla( const std::string& filename );
+
   private:
     boost::optional<Cudd> _manager;
     BDD _chi;

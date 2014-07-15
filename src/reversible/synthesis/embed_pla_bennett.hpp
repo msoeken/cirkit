@@ -16,16 +16,16 @@
  */
 
 /**
- * @file embed_pla.hpp
+ * @file embed_pla_bennett.hpp
  *
- * @brief Embedding of an irreversible specification given as PLA
+ * @brief Embedding of an irreversible specification given as PLA using Bennett Embedding
  *
  * @author Mathias Soeken
  * @since  2.0
  */
 
-#ifndef EMBED_PLA_HPP
-#define EMBED_PLA_HPP
+#ifndef EMBED_PLA_BENNETT_HPP
+#define EMBED_PLA_BENNETT_HPP
 
 #include <string>
 
@@ -35,21 +35,16 @@
 namespace cirkit
 {
 
-  /**
-   * @brief Embedding of an irreversible specification
-   *
-   * @since  2.0
-   */
-  bool embed_pla( rcbdd& cf, const std::string& filename,
-                  properties::ptr settings = properties::ptr(),
-                  properties::ptr statistics = properties::ptr() );
+  bool embed_pla_bennett( rcbdd& cf, const std::string& filename,
+                          properties::ptr settings = properties::ptr(),
+                          properties::ptr statistics = properties::ptr() );
 
 
-  pla_embedding_func embed_pla_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
+  pla_embedding_func embed_pla_bennett_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
 
 }
 
-#endif /* EMBED_PLA_HPP */
+#endif /* EMBED_PLA_BENNETT_HPP */
 
 // Local Variables:
 // c-basic-offset: 2

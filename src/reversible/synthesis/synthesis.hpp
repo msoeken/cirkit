@@ -34,6 +34,7 @@
 #include <core/functor.hpp>
 
 #include <reversible/circuit.hpp>
+#include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
 
 namespace cirkit
@@ -59,6 +60,13 @@ namespace cirkit
    * @since  1.0
    */
   typedef functor<bool(binary_truth_table&, const binary_truth_table&)> embedding_func;
+
+  /**
+   * @brief Functor for embedding a PLA to a RCBDD
+   *
+   * @since  2.0
+   */
+  typedef functor<bool(rcbdd&, const std::string&)> pla_embedding_func;
 
   /**
    * @brief Functor for decomposing a reversible circuit into a quantum circuit

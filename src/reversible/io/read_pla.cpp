@@ -122,6 +122,23 @@ namespace cirkit
     binary_truth_table& spec;
   };
 
+  class read_pla_size_processor : public pla_processor
+  {
+  public:
+    void on_num_inputs( unsigned num_inputs )
+    {
+      n = num_inputs;
+    }
+
+    void on_num_outputs( unsigned num_outputs )
+    {
+      m = num_outputs;
+    }
+
+    unsigned n, m;
+  };
+
+
   bool read_pla( binary_truth_table& spec, std::istream& in, const read_pla_settings& settings, std::string* error )
   {
     read_pla_processor p( spec );
@@ -150,6 +167,13 @@ namespace cirkit
     }
 
     return read_pla( spec, is, settings, error );
+  }
+
+  std::pair<unsigned, unsigned> read_pla_size( const std::string& filename )
+  {
+    read_pla_size_processor p;
+    pla_parser( filename, p, true );
+    return std::make_pair( p.n, p.m );
   }
 
 }
