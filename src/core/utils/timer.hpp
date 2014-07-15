@@ -197,7 +197,7 @@ namespace cirkit {
      *
      * @since  1.0
      */
-    properties_timer( properties::ptr _statistics ) : statistics( _statistics ) {}
+    properties_timer( properties::ptr _statistics, const std::string& key = "runtime" ) : statistics( _statistics ), key( key ) {}
 
     /**
      * @brief Saves the run-time to the \b runtime field of the statistics variable
@@ -210,13 +210,14 @@ namespace cirkit {
     {
       if ( statistics )
       {
-        statistics->set( "runtime", r );
+        statistics->set( key, r );
       }
       return r;
     }
 
   private:
     properties::ptr statistics;
+    std::string key = "runtime";
   };
 
   /**
