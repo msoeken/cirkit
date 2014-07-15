@@ -94,7 +94,16 @@ struct has_color
 
   bool operator()( const aig_node& n ) const
   {
-    return boost::get( boost::vertex_color, graph )[n] == color;
+    const auto& graph_info = boost::get_property( graph, boost::graph_name );
+
+    if ( n == graph_info.constant && !graph_info.constant_used )
+    {
+      return false;
+    }
+    else
+    {
+      return boost::get( boost::vertex_color, graph )[n] == color;
+    }
   }
 
   bool operator()( const aig_edge& e ) const
@@ -167,12 +176,54 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_splitting( mc_graph_t& 
   return std::make_pair( source, target );
 }
 
+struct find_mincut_splitting_dump_dot_writer
+{
+  find_mincut_splitting_dump_dot_writer( const mc_graph_t& graph ) : graph( graph ) {}
+
+  void operator()( std::ostream& os, const mc_node_t& node )
+  {
+    auto name = get( boost::vertex_name, graph );
+
+    if ( node == 0 )
+    {
+      os << "[label=\"s\",shape=box]";
+    }
+    else if ( node == 1 )
+    {
+      os << "[label=\"t\",shape=box]";
+    }
+    else
+    {
+      assert( name[node] );
+      os << "[label=\"" << ( 2u * *name[node] ) << "\"]";
+    }
+  }
+
+  void operator()( std::ostream& os, const mc_edge_t& edge )
+  {
+    auto capacity = get( boost::edge_capacity, graph );
+
+    if ( capacity[edge] == 0u )
+    {
+      os << "[color=red,style=dotted]";
+    }
+    else
+    {
+      os << "[label=\"" << capacity[edge] << "\"]";
+    }
+  }
+
+private:
+  const mc_graph_t& graph;
+};
+
 void find_mincut_splitting_dump_dot( const mc_graph_t& graph, const std::string& filename )
 {
   std::filebuf fb;
   fb.open( filename.c_str(), std::ios::out );
   std::ostream os( &fb );
-  write_graphviz( os, graph );
+  find_mincut_splitting_dump_dot_writer writer( graph );
+  write_graphviz( os, graph, writer, writer );
   fb.close();
 }
 
@@ -206,6 +257,15 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
     mc_node_t source, target;
 
     boost::tie( source, target ) = create_mincut_graph_with_splitting( graph, aig, i );
+    if ( !dotname.empty() )
+    {
+      std::string filename = boost::str( boost::format( dotname ) % i );
+      if ( verbose )
+      {
+        std::cout << "[I] write cut graph to " << filename << std::endl;
+      }
+      find_mincut_splitting_dump_dot( graph, filename );
+    }
 
     boykov_kolmogorov_max_flow( graph, source, target );
 
