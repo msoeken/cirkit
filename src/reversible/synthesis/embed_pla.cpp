@@ -28,6 +28,7 @@
 #include <gmpxx.h>
 
 #include <core/io/pla_parser.hpp>
+#include <core/utils/timer.hpp>
 
 namespace cirkit
 {
@@ -240,6 +241,14 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
   bool        truth_table = get( settings, "truth_table", false         ); /* prints the truth table (for debugging) */
   std::string write_pla   = get( settings, "write_pla",   std::string() );
   bool        const_value = get( settings, "const_value", false         ); /* value that is used for constant embedding */
+
+  /* Timing */
+  timer<properties_timer> t;
+
+  if (statistics) {
+    properties_timer rt(statistics);
+    t.start(rt);
+  }
 
   /* BDD manager? */
   cf.initialize_manager();
