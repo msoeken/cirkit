@@ -43,7 +43,7 @@ int main( int argc, char ** argv )
     ( "filename",     value<std::string>( &filename ),                            "PLA filename" )
     ( "embedded_pla", value<std::string>( &embedded_pla ),                        "Filename of the embedded PLA file (default is empty)" )
     ( "truth_table",  value<bool>       ( &truth_table )->default_value( false ), "Prints truth table of embedded PLA (with constants and garbage)" )
-    ( "verbose",      value<bool>       ( &verbose )->default_value( false ),     "Verbose" )
+    ( "verbose",      value<bool>       ( &verbose )->default_value( false ),     "Be verbose" )
     ;
   opts.parse( argc, argv );
 
