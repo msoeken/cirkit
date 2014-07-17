@@ -37,6 +37,8 @@ add_subdirectory(ext)
 # Options
 option(cirkit_ENABLE_PROGRAMS "build programs" on)
 option(cirkit_ENABLE_TESTS "build tests" on)
+option(cirkit_BUILD_SHARED "build shared libraries" on)
+option(cirkit_BUILD_STATIC "build static libraries" on)
 option(cirkit_LINK_PROGRAMS_TO_STATIC "links programs to static libraries" off)
 
 # Libraries (include)
