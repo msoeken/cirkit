@@ -15,6 +15,12 @@ function(add_program filename)
       target_link_libraries(${name} cirkit_${dir})
     endif()
   endforeach()
+  # Link static libraries twice
+  if (cirkit_LINK_PROGRAMS_TO_STATIC)
+    foreach(dir ${directories})
+      target_link_libraries(${name} cirkit_${dir}_static)
+    endforeach()
+  endif()
 endfunction(add_program)
 
 # Find all test source files and build unit tests from them
