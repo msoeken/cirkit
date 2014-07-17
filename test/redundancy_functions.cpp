@@ -40,7 +40,7 @@ void two_level_redundancy_function( unsigned p, unsigned q, double& runtime )
 
   rcbdd cf;
   cf.initialize_manager();
-  cf.create_variables( n + 1u );
+  cf.create_variables( n + 1u, false );
   cf.set_num_inputs( n );
   cf.set_num_outputs( 1u );
 
@@ -73,8 +73,7 @@ BOOST_AUTO_TEST_CASE(simple)
 {
   using namespace cirkit;
 
-  //std::vector<std::pair<unsigned, unsigned>> numbers{ {5u, 5u}, {6u, 6u}, {7u, 7u}, {9u, 9u}, {10u, 10u} };
-  std::vector<std::pair<unsigned, unsigned>> numbers{ {5u, 5u}, {6u, 6u}, {7u, 7u} };
+  std::vector<std::pair<unsigned, unsigned>> numbers{ {5u, 5u}, {6u, 6u}, {7u, 7u}, {8u, 8u}, {9u, 9u}, {10u, 10u} };
 
   benchmark_table<unsigned, unsigned, unsigned, unsigned, double> table( { "p", "q", "n", "m", "Run-time" } );
   unsigned p, q;
