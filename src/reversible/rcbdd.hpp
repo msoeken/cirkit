@@ -41,7 +41,7 @@ namespace cirkit
   {
   public:
     void initialize_manager();
-    void create_variables( unsigned n );
+    void create_variables( unsigned n, bool create_zs = true );
     BDD x( unsigned i ) const;
     BDD y( unsigned i ) const;
     BDD z( unsigned i ) const;

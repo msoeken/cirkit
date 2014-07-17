@@ -36,13 +36,16 @@ void rcbdd::initialize_manager()
   }
 }
 
-void rcbdd::create_variables( unsigned n )
+void rcbdd::create_variables( unsigned n, bool create_zs )
 {
   for (unsigned i = _n; i < n; ++i)
   {
     _xs += _manager->bddVar();
     _ys += _manager->bddVar();
-    _zs += _manager->bddVar();
+    if ( create_zs )
+    {
+      _zs += _manager->bddVar();
+    }
   }
 
   _n = n;
