@@ -15,6 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <thread>
+
+#include <core/utils/timeout.hpp>
+
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -36,14 +40,16 @@ int main( int argc, char ** argv )
   std::string filename;
   unsigned    mode = 0u;
   std::string planame;
+  unsigned    timeout      = 5000u;
 
   program_options opts;
   opts.add_options()
-    ( "filename", value<std::string>( &filename ),                      "PLA filename" )
-    ( "mode",     value<unsigned>   ( &mode     )->default_value( 0u ), "0: Exact cube-based embedding\n1: Heuristic BDD-based embedding" )
-    ( "planame",  value<std::string>( &planame  ),                      "Filename of the embedded PLA file (default is empty)" )
-    ( "truth_table,t",                                                  "Prints truth table of embedded PLA (with constants and garbage)" )
-    ( "verbose,v",                                                      "Be verbose" )
+    ( "filename", value<std::string>( &filename ),                           "PLA filename" )
+    ( "mode",     value<unsigned>   ( &mode     )->default_value( 0u ),      "0: Exact cube-based embedding\n1: Heuristic BDD-based embedding" )
+    ( "planame",  value<std::string>( &planame  ),                           "Filename of the embedded PLA file (default is empty)" )
+    ( "timeout",  value<unsigned>   ( &timeout  )->default_value( timeout ), "Timeout in seconds" )
+    ( "truth_table,t",                                                       "Prints truth table of embedded PLA (with constants and garbage)" )
+    ( "verbose,v",                                                           "Be verbose" )
     ;
   opts.parse( argc, argv );
 
@@ -52,6 +58,9 @@ int main( int argc, char ** argv )
     std::cout << opts << std::endl;
     return 1;
   }
+
+  /* timeout */
+  std::thread t1( [&timeout]() { timeout_after( timeout ); } );
 
   /* extend for exact embedding */
   if ( mode == 0u )

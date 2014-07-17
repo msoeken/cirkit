@@ -42,7 +42,6 @@ int main( int argc, char ** argv )
   unsigned    timeout      = 5000u;
   std::string tmpname      = "/tmp/test.pla";
   std::string dotname;
-  bool        verbose      = false;
 
   program_options opts;
   opts.add_options()
@@ -52,7 +51,7 @@ int main( int argc, char ** argv )
     ( "timeout",      value<unsigned>   ( &timeout      )->default_value( timeout      ), "Timeout in seconds" )
     ( "tmpname",      value<std::string>( &tmpname      )->default_value( tmpname      ), "Temporary filename for extended PLA" )
     ( "dotname",      value<std::string>( &dotname      ),                                "If non-empty and mode = 1, the BDD is dumped to that file" )
-    ( "verbose",      value<bool>       ( &verbose      )->default_value( verbose      ), "Be verbose" )
+    ( "verbose,v",                                                                        "Be verbose" )
     ;
 
   opts.parse( argc, argv );
@@ -66,7 +65,7 @@ int main( int argc, char ** argv )
   /* settings and statistics */
   unsigned additional = 0u;
   properties::ptr settings( new properties );
-  settings->set( "verbose", verbose );
+  settings->set( "verbose", opts.is_set( "verbose" ) );
   properties::ptr statistics( new properties );
 
   /* timeout */
@@ -84,7 +83,7 @@ int main( int argc, char ** argv )
     read_pla( pla, filename, rp_settings );
     extend_pla_settings ep_settings;
     ep_settings.post_compact = post_compact;
-    ep_settings.verbose = verbose;
+    ep_settings.verbose = opts.is_set( "verbose" );
     extend_pla( pla, extended, ep_settings );
 
     write_pla( extended, tmpname );
