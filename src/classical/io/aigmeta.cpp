@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "read_aigmeta.hpp"
+#include "aigmeta.hpp"
 
 #include <iostream>
 
@@ -165,6 +165,20 @@ std::ostream& operator<<( std::ostream& os, const aigmeta& meta )
      << "#Bundles: " << meta.bundles.size() << std::endl;
 
   return os;
+}
+
+void foreach_bundle_with_literal( const aigmeta& meta, unsigned literal, bool exact, const std::function<void(const aigmeta_bundle& bundle, unsigned pos)>& f )
+{
+  for ( const auto& bundle : meta.bundles )
+  {
+    for ( auto it = bundle.literals.begin(); it != bundle.literals.end(); ++it )
+    {
+      if ( *it == literal || ( !exact && *it == literal + 1u ) )
+      {
+        f( bundle, std::distance( bundle.literals.begin(), it ) );
+      }
+    }
+  }
 }
 
 }

@@ -8,7 +8,7 @@
 #include <boost/optional.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <classical/io/read_aigmeta.hpp>
+#include <classical/io/aigmeta.hpp>
 #include <classical/utils/aiger_to_aig.hpp>
 
 extern "C" {

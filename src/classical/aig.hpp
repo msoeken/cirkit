@@ -83,6 +83,7 @@ namespace cirkit
   void write_dot( const aig_graph& aig, const std::string& filename );
 
   unsigned aig_to_literal( const aig_graph& aig, const aig_function& f );
+  unsigned aig_to_literal( const aig_graph& aig, const aig_node& node );
   aig_function operator!( const aig_function& f );
 
 }

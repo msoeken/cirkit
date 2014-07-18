@@ -16,17 +16,18 @@
  */
 
 /**
- * @file read_aigmeta.hpp
+ * @file aigmeta.hpp
  *
- * @brief Read AIG metadata files
+ * @brief AIG metadata files
  *
  * @author Mathias Soeken
  * @since  2.0
  */
 
-#ifndef READ_AIGMETA_HPP
-#define READ_AIGMETA_HPP
+#ifndef AIGMETA_HPP
+#define AIGMETA_HPP
 
+#include <functional>
 #include <iostream>
 #include <list>
 #include <string>
@@ -64,6 +65,8 @@ struct aigmeta
 
 void read_aigmeta( aigmeta& meta, const std::string& filename );
 void write_aigmeta( const aigmeta& meta, const std::string& filename );
+
+void foreach_bundle_with_literal( const aigmeta& meta, unsigned literal, bool exact, const std::function<void(const aigmeta_bundle& bundle, unsigned pos)>& f );
 
 std::ostream& operator<<( std::ostream& os, const aigmeta& meta );
 

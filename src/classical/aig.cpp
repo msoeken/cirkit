@@ -244,6 +244,11 @@ unsigned aig_to_literal( const aig_graph& aig, const aig_function& f )
   return indexmap[f.first] + ( f.second ? 1u : 0u );
 }
 
+unsigned aig_to_literal( const aig_graph& aig, const aig_node& node )
+{
+  return boost::get( boost::vertex_name, aig )[node];
+}
+
 aig_function operator!( const aig_function& f )
 {
   return std::make_pair( f.first, !f.second );
