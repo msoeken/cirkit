@@ -167,7 +167,7 @@ std::ostream& operator<<( std::ostream& os, const aigmeta& meta )
   return os;
 }
 
-void foreach_bundle_with_literal( const aigmeta& meta, unsigned literal, bool exact, const std::function<void(const aigmeta_bundle& bundle, unsigned pos)>& f )
+void foreach_bundle_with_literal( const aigmeta& meta, unsigned literal, bool exact, const std::function<void(const aigmeta_bundle&, unsigned, unsigned)>& f )
 {
   for ( const auto& bundle : meta.bundles )
   {
@@ -175,7 +175,7 @@ void foreach_bundle_with_literal( const aigmeta& meta, unsigned literal, bool ex
     {
       if ( *it == literal || ( !exact && *it == literal + 1u ) )
       {
-        f( bundle, std::distance( bundle.literals.begin(), it ) );
+        f( bundle, *it, std::distance( bundle.literals.begin(), it ) );
       }
     }
   }

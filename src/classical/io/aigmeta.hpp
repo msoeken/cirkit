@@ -66,7 +66,17 @@ struct aigmeta
 void read_aigmeta( aigmeta& meta, const std::string& filename );
 void write_aigmeta( const aigmeta& meta, const std::string& filename );
 
-void foreach_bundle_with_literal( const aigmeta& meta, unsigned literal, bool exact, const std::function<void(const aigmeta_bundle& bundle, unsigned pos)>& f );
+/**
+ * @brief Iterates through bundles that contain literal
+ *
+ * @param meta    AIG meta-data
+ * @param literal Literal to look for
+ * @param exact   If false, then also literal + 1 is a valid match
+ * @param f       Functor (first param is found bundle,
+ *                second param is the literal that was found,
+ *                and third param is the position of that literal in the bundle)
+ */
+void foreach_bundle_with_literal( const aigmeta& meta, unsigned literal, bool exact, const std::function<void(const aigmeta_bundle&, unsigned, unsigned)>& f );
 
 std::ostream& operator<<( std::ostream& os, const aigmeta& meta );
 
