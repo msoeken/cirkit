@@ -33,7 +33,7 @@ namespace cirkit
         has_costs( false ),
         parsed( false )
     {}
-  
+
     std::string in_realization;
     std::string in_specification;
     std::string out_realization;
@@ -63,7 +63,7 @@ namespace cirkit
   {
     init();
   }
-  
+
   program_options::~program_options()
   {
     delete d;
@@ -171,7 +171,7 @@ namespace cirkit
 
   void program_options::init()
   {
-    add_options()( "help", "produce help message" );
+    add_options()( "help,h", "produce help message" );
   }
 
   const boost::program_options::variables_map& program_options::variables_map() const
