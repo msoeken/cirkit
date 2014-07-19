@@ -29,7 +29,6 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/optional.hpp>
 
 using namespace boost::assign;
 
@@ -37,34 +36,16 @@ namespace cirkit
 {
 
 /******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::bidirectionalS> mc_traits_t;
-typedef boost::property<boost::vertex_color_t, boost::default_color_type,
-        boost::property<boost::vertex_distance_t, long,
-        boost::property<boost::vertex_predecessor_t, mc_traits_t::edge_descriptor,
-        boost::property<boost::vertex_name_t, boost::optional<aig_node>>>>> mc_vertex_properties_t;
-typedef boost::property<boost::edge_capacity_t, double,
-        boost::property<boost::edge_residual_capacity_t, double,
-        boost::property<boost::edge_reverse_t, mc_traits_t::edge_descriptor,
-        boost::property<boost::edge_name_t, boost::optional<aig_node>>>>> mc_edge_properties_t;
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, mc_vertex_properties_t, mc_edge_properties_t> mc_graph_t;
-
-typedef boost::graph_traits<mc_graph_t>::vertex_descriptor mc_node_t;
-typedef boost::graph_traits<mc_graph_t>::edge_descriptor mc_edge_t;
-
-
-/******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
 
-mc_edge_t add_edge( const mc_node_t& s, const mc_node_t& t, double capacity, mc_graph_t& graph )
+mc_edge_t add_edge( const mc_vertex_t& s, const mc_vertex_t& t, double capacity, mc_graph_t& graph )
 {
   auto capacitymap = get( boost::edge_capacity, graph );
+  auto edgeinfomap = get( boost::edge_name,     graph );
   auto edge = boost::add_edge( s, t, graph ).first;
 
-  capacitymap[edge] = capacity;
+  edgeinfomap[edge].original_capacity = capacitymap[edge] = capacity;
 
   return edge;
 }
@@ -73,6 +54,7 @@ void add_reverse_edges( mc_graph_t& graph )
 {
   auto capacitymap = get( boost::edge_capacity, graph );
   auto reversemap  = get( boost::edge_reverse,  graph );
+  auto edgeinfomap = get( boost::edge_name,     graph );
 
   std::list<mc_edge_t> store_edges;
   boost::push_back( store_edges, boost::make_iterator_range( edges( graph ) ) );
@@ -80,7 +62,7 @@ void add_reverse_edges( mc_graph_t& graph )
   for ( const auto& edge : store_edges )
   {
     auto redge = boost::add_edge( boost::target( edge, graph ), boost::source( edge, graph ), graph ).first;
-    capacitymap[redge] = 0.0;
+    edgeinfomap[edge].original_capacity = capacitymap[redge] = 0.0;
     reversemap[edge] = redge;
     reversemap[redge] = edge;
   }
@@ -118,7 +100,7 @@ private:
   unsigned color;
 };
 
-std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_splitting( mc_graph_t& graph, const aig_graph& aig, unsigned color )
+std::pair<mc_vertex_t, mc_vertex_t> create_mincut_graph_with_splitting( mc_graph_t& graph, const aig_graph& aig, unsigned color )
 {
   has_color<aig_graph> filter( aig, color );
   boost::filtered_graph<aig_graph, has_color<aig_graph>, has_color<aig_graph>> fg( aig, filter, filter );
@@ -127,22 +109,22 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_splitting( mc_graph_t& 
   auto vnamemap = get( boost::vertex_name, graph );
 
   /* A map to store AIG node to MC graph node */
-  std::map<aig_node, std::pair<mc_node_t, mc_node_t>> node_map;
+  std::map<aig_node, std::pair<mc_vertex_t, mc_vertex_t>> node_map;
 
   /* Source and target */
-  mc_node_t source = boost::add_vertex( graph );
-  mc_node_t target = boost::add_vertex( graph );
+  mc_vertex_t source = boost::add_vertex( graph );
+  mc_vertex_t target = boost::add_vertex( graph );
 
   /* Copy nodes */
   for ( const aig_node& node : boost::make_iterator_range( boost::vertices( fg ) ) )
   {
-    mc_node_t s = boost::add_vertex( graph );
-    mc_node_t t = boost::add_vertex( graph );
+    mc_vertex_t s = boost::add_vertex( graph );
+    mc_vertex_t t = boost::add_vertex( graph );
     vnamemap[s] = node;
     vnamemap[t] = node;
 
     mc_edge_t e = add_edge( s, t, 1.0, graph );
-    namemap[e] = node;
+    namemap[e].original_node = node;
 
     node_map[node] = std::make_pair( s, t );
   }
@@ -150,8 +132,8 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_splitting( mc_graph_t& 
   /* Copy edges */
   for ( const aig_edge& edge : boost::make_iterator_range( boost::edges( fg ) ) )
   {
-    const mc_node_t& s = node_map[boost::source( edge, aig )].second;
-    const mc_node_t& t = node_map[boost::target( edge, aig )].first;
+    const mc_vertex_t& s = node_map[boost::source( edge, aig )].second;
+    const mc_vertex_t& t = node_map[boost::target( edge, aig )].first;
 
     add_edge( s, t, std::numeric_limits<double>::infinity(), graph );
   }
@@ -180,7 +162,7 @@ struct find_mincut_splitting_dump_dot_writer
 {
   find_mincut_splitting_dump_dot_writer( const mc_graph_t& graph ) : graph( graph ) {}
 
-  void operator()( std::ostream& os, const mc_node_t& node )
+  void operator()( std::ostream& os, const mc_vertex_t& node )
   {
     auto name = get( boost::vertex_name, graph );
 
@@ -254,7 +236,7 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
     }
 
     mc_graph_t graph;
-    mc_node_t source, target;
+    mc_vertex_t source, target;
 
     boost::tie( source, target ) = create_mincut_graph_with_splitting( graph, aig, i );
     if ( !dotname.empty() )
@@ -282,9 +264,9 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
       {
         if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
         {
-          if ( name[e] )
+          if ( name[e].original_node )
           {
-            cut += *name[e];
+            cut += *( name[e].original_node );
           }
           else
           {

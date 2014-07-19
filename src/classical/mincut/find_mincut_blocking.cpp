@@ -33,29 +33,10 @@ namespace cirkit
 {
 
 /******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::bidirectionalS> mc_traits_t;
-typedef boost::property<boost::vertex_color_t, boost::default_color_type,
-        boost::property<boost::vertex_distance_t, long,
-        boost::property<boost::vertex_predecessor_t, mc_traits_t::edge_descriptor,
-        boost::property<boost::vertex_name_t, boost::optional<aig_node>>>>> mc_vertex_properties_t;
-typedef boost::property<boost::edge_capacity_t, double,
-        boost::property<boost::edge_residual_capacity_t, double,
-        boost::property<boost::edge_reverse_t, mc_traits_t::edge_descriptor,
-        boost::property<boost::edge_name_t, boost::optional<aig_node>>>>> mc_edge_properties_t;
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, mc_vertex_properties_t, mc_edge_properties_t> mc_graph_t;
-
-typedef boost::graph_traits<mc_graph_t>::vertex_descriptor mc_node_t;
-typedef boost::graph_traits<mc_graph_t>::edge_descriptor mc_edge_t;
-
-
-/******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
 
-std::pair<mc_edge_t, mc_edge_t> add_edges( const mc_node_t& s, const mc_node_t& t, double capacity, mc_graph_t& graph )
+std::pair<mc_edge_t, mc_edge_t> add_edges( const mc_vertex_t& s, const mc_vertex_t& t, double capacity, mc_graph_t& graph )
 {
   auto capacitymap = get( boost::edge_capacity, graph );
   auto reversemap  = get( boost::edge_reverse,  graph );
@@ -71,27 +52,27 @@ std::pair<mc_edge_t, mc_edge_t> add_edges( const mc_node_t& s, const mc_node_t& 
   return std::make_pair( edge, redge );
 }
 
-std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_blocking( mc_graph_t& graph, const aig_graph& aig, const std::vector<aig_node>& blocked_nodes )
+std::pair<mc_vertex_t, mc_vertex_t> create_mincut_graph_with_blocking( mc_graph_t& graph, const aig_graph& aig, const std::vector<aig_node>& blocked_nodes )
 {
   const auto& graph_info = boost::get_property( aig, boost::graph_name );
   auto namemap = get( boost::edge_name, graph );
 
   /* A map to store AIG node to MC graph node */
-  std::map<aig_node, std::pair<mc_node_t, mc_node_t>> node_map;
+  std::map<aig_node, std::pair<mc_vertex_t, mc_vertex_t>> node_map;
 
   /* Source and target */
-  mc_node_t source = boost::add_vertex( graph );
-  mc_node_t target = boost::add_vertex( graph );
+  mc_vertex_t source = boost::add_vertex( graph );
+  mc_vertex_t target = boost::add_vertex( graph );
 
   /* Copy nodes */
   for ( const aig_node& node : boost::make_iterator_range( boost::vertices( aig ) ) )
   {
-    mc_node_t s = boost::add_vertex( graph );
-    mc_node_t t = boost::add_vertex( graph );
+    mc_vertex_t s = boost::add_vertex( graph );
+    mc_vertex_t t = boost::add_vertex( graph );
 
     bool is_blocked = boost::find( blocked_nodes, node ) != blocked_nodes.end();
     mc_edge_t e = add_edges( s, t, is_blocked ? std::numeric_limits<double>::infinity() : 1.0, graph ).first;
-    namemap[e] = node;
+    namemap[e].original_node = node;
 
     node_map[node] = std::make_pair( s, t );
   }
@@ -99,8 +80,8 @@ std::pair<mc_node_t, mc_node_t> create_mincut_graph_with_blocking( mc_graph_t& g
   /* Copy edges */
   for ( const aig_edge& edge : boost::make_iterator_range( boost::edges( aig ) ) )
   {
-    const mc_node_t& s = node_map[boost::source( edge, aig )].second;
-    const mc_node_t& t = node_map[boost::target( edge, aig )].first;
+    const mc_vertex_t& s = node_map[boost::source( edge, aig )].second;
+    const mc_vertex_t& t = node_map[boost::target( edge, aig )].first;
 
     add_edges( s, t, std::numeric_limits<double>::infinity(), graph );
   }
@@ -146,7 +127,7 @@ bool find_mincut_blocking( std::list<std::list<aig_node>>& cuts, aig_graph& aig,
     }
 
     mc_graph_t graph;
-    mc_node_t source, target;
+    mc_vertex_t source, target;
 
     boost::tie( source, target ) = create_mincut_graph_with_blocking( graph, aig, blocked_nodes );
 
@@ -164,10 +145,10 @@ bool find_mincut_blocking( std::list<std::list<aig_node>>& cuts, aig_graph& aig,
       {
         if ( color[boost::source(e, graph)] != color[boost::target(e, graph)] )
         {
-          if ( name[e] )
+          if ( name[e].original_node )
           {
-            cut += *name[e];
-            blocked_nodes += *name[e];
+            cut += *( name[e].original_node );
+            blocked_nodes += *( name[e].original_node );
           }
           else
           {

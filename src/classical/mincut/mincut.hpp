@@ -29,12 +29,43 @@
 
 #include <list>
 
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/optional.hpp>
+
 #include <core/functor.hpp>
 
 #include <classical/aig.hpp>
 
 namespace cirkit
 {
+
+  /******************************************************************************
+   * Types                                                                      *
+   ******************************************************************************/
+
+  struct mc_edge_info_t
+  {
+    boost::optional<aig_node> original_node;
+    double                    original_capacity;
+  };
+
+  typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::bidirectionalS> mc_traits_t;
+  typedef boost::property<boost::vertex_color_t, boost::default_color_type,
+          boost::property<boost::vertex_distance_t, long,
+          boost::property<boost::vertex_predecessor_t, mc_traits_t::edge_descriptor,
+          boost::property<boost::vertex_name_t, boost::optional<aig_node>>>>> mc_vertex_properties_t;
+  typedef boost::property<boost::edge_capacity_t, double,
+          boost::property<boost::edge_residual_capacity_t, double,
+          boost::property<boost::edge_reverse_t, mc_traits_t::edge_descriptor,
+          boost::property<boost::edge_name_t, mc_edge_info_t>>>> mc_edge_properties_t;
+  typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, mc_vertex_properties_t, mc_edge_properties_t> mc_graph_t;
+
+  typedef boost::graph_traits<mc_graph_t>::vertex_descriptor mc_vertex_t;
+  typedef boost::graph_traits<mc_graph_t>::edge_descriptor mc_edge_t;
+
+  /******************************************************************************
+   * Functors                                                                   *
+   ******************************************************************************/
 
   typedef functor<bool(std::list<std::list<aig_function>>&, aig_graph&, unsigned count)> mincut_by_edge_func;
   typedef functor<bool(std::list<std::list<aig_node>>&, aig_graph&, unsigned count)> mincut_by_node_func;
