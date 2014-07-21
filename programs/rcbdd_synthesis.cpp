@@ -19,6 +19,9 @@
 
 #include <core/utils/timeout.hpp>
 
+#include <classical/optimization/esop_minimization.hpp>
+#include <classical/optimization/exorcism_minimization.hpp>
+
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -38,16 +41,18 @@ int main( int argc, char ** argv )
 
   std::string filename;
   std::string embedded_pla;
-  unsigned    timeout;
+  unsigned    timeout        = 5000u;
+  unsigned    esop_minimizer = 0u;
 
   program_options opts;
   opts.add_write_realization_option();
   opts.add_options()
-    ( "filename",     value<std::string>( &filename ),                            "PLA filename" )
-    ( "embedded_pla", value<std::string>( &embedded_pla ),                        "Filename of the embedded PLA file (default is empty)" )
-    ( "truth_table,t",                                                            "Prints truth table of embedded PLA (with constants and garbage)" )
-    ( "timeout",      value<unsigned>   ( &timeout  )->default_value( timeout ),  "Timeout in seconds" )
-    ( "verbose,v",                                                                "Be verbose" )
+    ( "filename",       value<std::string>( &filename ),                            "PLA filename" )
+    ( "embedded_pla",   value<std::string>( &embedded_pla ),                        "Filename of the embedded PLA file (default is empty)" )
+    ( "truth_table,t",                                                              "Prints truth table of embedded PLA (with constants and garbage)" )
+    ( "timeout",        value<unsigned>   ( &timeout  )->default_value( timeout ),  "Timeout in seconds" )
+    ( "esop_minimizer", value<unsigned>   ( &esop_minimizer )->default_value( 0u ), "ESOP minizer (0: built-in, 1: exorcism)" )
+    ( "verbose,v",                                                                  "Be verbose" )
     ;
   opts.parse( argc, argv );
 
@@ -59,6 +64,8 @@ int main( int argc, char ** argv )
 
   /* timeout */
   std::thread t1( [&timeout]() { timeout_after( timeout ); } );
+
+  return 0;
 
   binary_truth_table pla, extended;
   rcbdd cf;
@@ -77,6 +84,9 @@ int main( int argc, char ** argv )
 
   properties::ptr rs_settings( new properties );
   rs_settings->set( "verbose", opts.is_set( "verbose" ) );
+  properties::ptr esopmin_settings( new properties );
+  esopmin_settings->set( "verbose", opts.is_set( "verbose" ) );
+  rs_settings->set( "esopmin", esop_minimizer ? dd_based_exorcism_minimization_func( esopmin_settings ) : dd_based_esop_minimization_func( esopmin_settings ) );
   rcbdd_synthesis( circ, cf, rs_settings );
 
   if ( opts.is_write_realization_filename_set() )
