@@ -15,6 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <thread>
+
+#include <core/utils/timeout.hpp>
+
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -34,16 +38,16 @@ int main( int argc, char ** argv )
 
   std::string filename;
   std::string embedded_pla;
-  bool        truth_table = false;
-  bool        verbose = false;
+  unsigned    timeout;
 
   program_options opts;
   opts.add_write_realization_option();
   opts.add_options()
     ( "filename",     value<std::string>( &filename ),                            "PLA filename" )
     ( "embedded_pla", value<std::string>( &embedded_pla ),                        "Filename of the embedded PLA file (default is empty)" )
-    ( "truth_table",  value<bool>       ( &truth_table )->default_value( false ), "Prints truth table of embedded PLA (with constants and garbage)" )
-    ( "verbose",      value<bool>       ( &verbose )->default_value( false ),     "Be verbose" )
+    ( "truth_table,t",                                                            "Prints truth table of embedded PLA (with constants and garbage)" )
+    ( "timeout",      value<unsigned>   ( &timeout  )->default_value( timeout ),  "Timeout in seconds" )
+    ( "verbose,v",                                                                "Be verbose" )
     ;
   opts.parse( argc, argv );
 
@@ -52,6 +56,9 @@ int main( int argc, char ** argv )
     std::cout << opts << std::endl;
     return 1;
   }
+
+  /* timeout */
+  std::thread t1( [&timeout]() { timeout_after( timeout ); } );
 
   binary_truth_table pla, extended;
   rcbdd cf;
@@ -64,12 +71,12 @@ int main( int argc, char ** argv )
   write_pla( extended, "/tmp/extended.pla" );
 
   properties::ptr ep_settings( new properties );
-  ep_settings->set( "truth_table", truth_table );
+  ep_settings->set( "truth_table", opts.is_set( "truth_table" ) );
   ep_settings->set( "write_pla", embedded_pla );
   embed_pla( cf, "/tmp/extended.pla", ep_settings );
 
   properties::ptr rs_settings( new properties );
-  rs_settings->set( "verbose", verbose );
+  rs_settings->set( "verbose", opts.is_set( "verbose" ) );
   rcbdd_synthesis( circ, cf, rs_settings );
 
   if ( opts.is_write_realization_filename_set() )
