@@ -65,8 +65,6 @@ int main( int argc, char ** argv )
   /* timeout */
   //std::thread t1( [&timeout]() { timeout_after( timeout ); } );
 
-  return 0;
-
   binary_truth_table pla, extended;
   rcbdd cf;
   circuit circ;
