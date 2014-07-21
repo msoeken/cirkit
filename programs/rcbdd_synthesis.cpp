@@ -27,6 +27,7 @@
 #include <reversible/truth_table.hpp>
 #include <reversible/functions/extend_pla.hpp>
 #include <reversible/io/read_pla.hpp>
+#include <reversible/io/print_statistics.hpp>
 #include <reversible/io/write_pla.hpp>
 #include <reversible/io/write_realization.hpp>
 #include <reversible/utils/program_options.hpp>
@@ -81,16 +82,19 @@ int main( int argc, char ** argv )
   embed_pla( cf, "/tmp/extended.pla", ep_settings );
 
   properties::ptr rs_settings( new properties );
+  properties::ptr rs_statistics( new properties );
   rs_settings->set( "verbose", opts.is_set( "verbose" ) );
   properties::ptr esopmin_settings( new properties );
   esopmin_settings->set( "verbose", opts.is_set( "verbose" ) );
   rs_settings->set( "esopmin", esop_minimizer ? dd_based_exorcism_minimization_func( esopmin_settings ) : dd_based_esop_minimization_func( esopmin_settings ) );
-  rcbdd_synthesis( circ, cf, rs_settings );
+  rcbdd_synthesis( circ, cf, rs_settings, rs_statistics );
 
   if ( opts.is_write_realization_filename_set() )
   {
     write_realization( circ, opts.write_realization_filename() );
   }
+
+  print_statistics( circ, rs_statistics->get<double>( "runtime" ) );
 
   return 0;
 }
