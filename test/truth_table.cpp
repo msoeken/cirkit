@@ -33,4 +33,9 @@ BOOST_AUTO_TEST_CASE(simple)
   BOOST_CHECK( tt_vec[1u] == boost::dynamic_bitset<>( 2u, 1u ) );
   BOOST_CHECK( tt_vec[2u] == boost::dynamic_bitset<>( 2u, 3u ) );
   BOOST_CHECK( tt_vec[3u] == boost::dynamic_bitset<>( 2u, 2u ) );
+
+  for ( unsigned i = 0u; i < 4u; ++i )
+  {
+    std::cout << boost::dynamic_bitset<>( 2u, i ) << " <-> " << tt_vec[i] << std::endl;
+  }
 }
