@@ -20,6 +20,7 @@
 #include <reversible/truth_table.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>
 #include <reversible/io/print_circuit.hpp>
+#include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_realization.hpp>
 #include <reversible/utils/program_options.hpp>
@@ -72,6 +73,7 @@ int main( int argc, char ** argv )
 
   circuit circ;
   properties::ptr settings( new properties );
+  properties::ptr statistics( new properties );
   settings->set( "verbose", verbose );
 
   properties::ptr esopmin_settings( new properties );
@@ -89,7 +91,7 @@ int main( int argc, char ** argv )
     settings->set( "ordering", vuordering );
   }
 
-  young_subgroup_synthesis( circ, spec, settings );
+  young_subgroup_synthesis( circ, spec, settings, statistics );
 
   if ( print_circuit )
   {
@@ -107,6 +109,8 @@ int main( int argc, char ** argv )
   {
     write_realization( circ, opts.write_realization_filename() );
   }
+
+  print_statistics( circ, statistics->get<double>( "runtime" ) );
 
   return 0;
 }
