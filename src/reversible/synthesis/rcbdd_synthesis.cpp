@@ -373,13 +373,16 @@ struct rcbdd_synthesis_manager
       esopout.close();
     }
 
-    esopmin.settings()->set( "on_cube", cube_function_t( [this, &offset]( const cube_t& c ) { add_toffoli_gate( c, offset ); } ) );
-    esopmin.settings()->set( "verify", false );
-    esopmin( gate.manager(), gate.getNode() );
-
-    if ( offset == 1u )
+    if ( create_gates )
     {
-      insert_position -= esopmin.statistics()->get<unsigned>( "cube_count" );
+      esopmin.settings()->set( "on_cube", cube_function_t( [this, &offset]( const cube_t& c ) { add_toffoli_gate( c, offset ); } ) );
+      esopmin.settings()->set( "verify", false );
+      esopmin( gate.manager(), gate.getNode() );
+
+      if ( offset == 1u )
+      {
+        insert_position -= esopmin.statistics()->get<unsigned>( "cube_count" );
+      }
     }
 
     /*
@@ -597,6 +600,7 @@ struct rcbdd_synthesis_manager
   std::string name;
   bool genesop;
   dd_based_esop_optimization_func esopmin;
+  bool create_gates;
 
   BDD f;
   BDD left_f, right_f;
@@ -610,11 +614,12 @@ struct rcbdd_synthesis_manager
 bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  bool                            verbose  = get( settings, "verbose",  false                             );
-  bool                            progress = get( settings, "progress", false                             );
-  std::string                     name     = get( settings, "name",     std::string( "test" )             );
-  bool                            genesop  = get( settings, "genesop",  false                             );
-  dd_based_esop_optimization_func esopmin  = get( settings, "esopmin",  dd_based_esop_optimization_func() );
+  bool                            verbose      = get( settings, "verbose",      false                             );
+  bool                            progress     = get( settings, "progress",     false                             );
+  std::string                     name         = get( settings, "name",         std::string( "test" )             );
+  bool                            genesop      = get( settings, "genesop",      false                             );
+  dd_based_esop_optimization_func esopmin      = get( settings, "esopmin",      dd_based_esop_optimization_func() );
+  bool                            create_gates = get( settings, "create_gates", true                              );
 
   /* Timing */
   timer<properties_timer> t;
@@ -625,11 +630,12 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   }
 
   rcbdd_synthesis_manager mgr( cf, circ );
-  mgr.verbose  = verbose;
-  mgr.progress = progress;
-  mgr.name     = name;
-  mgr.genesop  = genesop;
-  mgr.esopmin  = esopmin;
+  mgr.verbose      = verbose;
+  mgr.progress     = progress;
+  mgr.name         = name;
+  mgr.genesop      = genesop;
+  mgr.esopmin      = esopmin;
+  mgr.create_gates = create_gates;
   mgr.default_synthesis();
 
   return true;

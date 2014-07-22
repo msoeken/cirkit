@@ -755,8 +755,8 @@ void esop_minimization( const std::string& filename, properties::ptr settings, p
 
 dd_based_esop_optimization_func dd_based_esop_minimization_func(properties::ptr settings, properties::ptr statistics)
 {
-  dd_based_esop_optimization_func f = [&settings, &statistics]( DdManager * cudd, DdNode * f ) {
-    return esop_minimization( cudd, f, settings, statistics );
+  dd_based_esop_optimization_func f = [&settings, &statistics]( DdManager * cudd, DdNode * node ) {
+    return esop_minimization( cudd, node, settings, statistics );
   };
   f.init( settings, statistics );
   return f;
