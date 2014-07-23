@@ -383,6 +383,9 @@ struct rcbdd_synthesis_manager
       {
         insert_position -= esopmin.statistics()->get<unsigned>( "cube_count" );
       }
+
+      total_toffoli_gates += esopmin.statistics()->get<unsigned>( "cube_count" );
+      total_control_lines += esopmin.statistics()->get<unsigned>( "literal_count" );
     }
 
     /*
@@ -454,7 +457,7 @@ struct rcbdd_synthesis_manager
       create_toffoli_gates_with_exorcism(right_f, var, 1u);
     }
   }
-  /*
+
   void heuristic_swap() //Get chi
   {
     std::vector<unsigned> list_lines;
@@ -475,10 +478,16 @@ struct rcbdd_synthesis_manager
         BDD oldchi = f; //make a copy of chi
         unsigned old_control_lines = total_control_lines;
         unsigned old_toffoli_gates = total_toffoli_gates;
-        std::cout << " - total_toffoli_gates" << total_toffoli_gates << std::endl;
+        if ( verbose )
+        {
+          std::cout << "[I] - total_toffoli_gates" << total_toffoli_gates << std::endl;
+        }
         set_var(list_lines[i]);
 
-        std::cout << "set_var(var): " << _var << std::endl;
+        if ( verbose )
+        {
+          std::cout << "[I] set_var(var): " << _var << std::endl;
+        }
         only_left_gate_shortcut();
         resolve_one_cycles();
         resolve_two_cycles();
@@ -488,12 +497,12 @@ struct rcbdd_synthesis_manager
         {
           std::cout << "Target: " << _var << std::endl << " - left control function:" << std::endl;
           left_f.PrintMinterm();
-          std::cout << " - right control function:" << std::endl;
+          std::cout << "[I] - right control function:" << std::endl;
           right_f.PrintMinterm();
         }
 
-        create_toffoli_gates_with_exorcism(left_f, 0u);
-        create_toffoli_gates_with_exorcism(right_f, 1u);
+        create_toffoli_gates_with_exorcism(left_f, list_lines[i], 0u);
+        create_toffoli_gates_with_exorcism(right_f, list_lines[i], 1u);
 
 
         // Determine cost and save in new_cost
@@ -501,9 +510,9 @@ struct rcbdd_synthesis_manager
 
         if ( verbose )
         {
-          std::cout << "h1: Lines:    " << mgr.num_vars() << std::endl;
-          std::cout << "h1: Gates:    " << new_cost << std::endl;
-          std::cout << "Controls:     " << total_control_lines << std::endl;
+          std::cout << "[I] h1: Lines:    " << cf.num_vars() << std::endl;
+          std::cout << "[I] h1: Gates:    " << new_cost << std::endl;
+          std::cout << "[I] Controls:     " << total_control_lines << std::endl;
         }
 
         if (new_cost < min_cost)
@@ -512,7 +521,7 @@ struct rcbdd_synthesis_manager
           min_cost = new_cost;
           if ( verbose )
           {
-            std::cout << "--------------  Min cost:  " << min_cost << "   -------------- "  << std::endl;
+            std::cout << "[I] Min cost: " << min_cost << std::endl;
           }
         }
 
@@ -528,14 +537,14 @@ struct rcbdd_synthesis_manager
       resolve_two_cycles();
       resolve_k_cycles();
 
-      create_toffoli_gates_with_exorcism(left_f, 0u);
-      create_toffoli_gates_with_exorcism(right_f, 1u);
+      create_toffoli_gates_with_exorcism(left_f, best_line, 0u);
+      create_toffoli_gates_with_exorcism(right_f, best_line, 1u);
 
       list_lines.erase(std::remove(list_lines.begin(),list_lines.end(),best_line));
 
       if ( verbose )
       {
-        std::cout << "--------------  Best Lines:  " << best_line << "   -------------- "  << std::endl;
+        std::cout << "[I] Best Line: " << best_line << std::endl;
       }
     }
   }
@@ -567,7 +576,7 @@ struct rcbdd_synthesis_manager
           min_cost = new_cost;
           if ( verbose )
           {
-            std::cout << "--------------  Min cost:  " << min_cost << "   -------------- "  << std::endl;
+            std::cout << "[I] Min cost: " << min_cost << std::endl;
           }
         }
       }
@@ -579,18 +588,17 @@ struct rcbdd_synthesis_manager
       resolve_two_cycles();
       resolve_k_cycles();
 
-      create_toffoli_gates_with_exorcism(left_f, 0u);
-      create_toffoli_gates_with_exorcism(right_f, 1u);
+      create_toffoli_gates_with_exorcism(left_f, best_line, 0u);
+      create_toffoli_gates_with_exorcism(right_f, best_line, 1u);
 
       list_lines.erase(std::remove(list_lines.begin(),list_lines.end(),best_line));
 
       if ( verbose )
       {
-        std::cout << "--------------  Best Lines:  " << best_line << "   -------------- "  << std::endl;
+        std::cout << "[I] Best Line: " << best_line << std::endl;
       }
     }
   }
-  */
 
   const rcbdd& cf;
   circuit& circ;
@@ -609,6 +617,7 @@ struct rcbdd_synthesis_manager
   BDD n, pp, np, p;
   BDD nx, ppx, npx, px;
   BDD ny,  ppy, npy, py;
+  unsigned total_control_lines = 0u, total_toffoli_gates = 0u;
 };
 
 bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, properties::ptr statistics )
@@ -620,6 +629,8 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   bool                            genesop      = get( settings, "genesop",      false                             );
   dd_based_esop_optimization_func esopmin      = get( settings, "esopmin",      dd_based_esop_optimization_func() );
   bool                            create_gates = get( settings, "create_gates", true                              );
+  /* 0: default, 1: swap, 2: hamming */
+  unsigned                        mode         = get( settings, "mode",         0u                                );
 
   /* Timing */
   timer<properties_timer> t;
@@ -636,7 +647,17 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   mgr.genesop      = genesop;
   mgr.esopmin      = esopmin;
   mgr.create_gates = create_gates;
-  mgr.default_synthesis();
+  switch ( mode )
+  {
+  case 1u:
+    mgr.heuristic_swap();
+    break;
+  case 2u:
+    mgr.heuristic_hamming();
+    break;
+  default:
+    mgr.default_synthesis();
+  };
 
   return true;
 }

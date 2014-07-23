@@ -41,6 +41,7 @@ int main( int argc, char ** argv )
   using boost::program_options::value;
 
   std::string filename;
+  unsigned    mode           = 0u;
   std::string embedded_pla;
   unsigned    timeout        = 5000u;
   unsigned    esop_minimizer = 0u;
@@ -49,6 +50,7 @@ int main( int argc, char ** argv )
   opts.add_write_realization_option();
   opts.add_options()
     ( "filename",       value<std::string>( &filename ),                            "PLA filename" )
+    ( "mode",           value<unsigned>   ( &mode )->default_value( mode ),         "Mode (0: default, 1: swap, 2: hamming)" )
     ( "embedded_pla",   value<std::string>( &embedded_pla ),                        "Filename of the embedded PLA file (default is empty)" )
     ( "truth_table,t",                                                              "Prints truth table of embedded PLA (with constants and garbage)" )
     ( "timeout",        value<unsigned>   ( &timeout  )->default_value( timeout ),  "Timeout in seconds" )
@@ -84,6 +86,7 @@ int main( int argc, char ** argv )
   properties::ptr rs_settings( new properties );
   properties::ptr rs_statistics( new properties );
   rs_settings->set( "verbose", opts.is_set( "verbose" ) );
+  rs_settings->set( "mode", mode );
   properties::ptr esopmin_settings( new properties );
   esopmin_settings->set( "verbose", opts.is_set( "verbose" ) );
   rs_settings->set( "esopmin", esop_minimizer ? dd_based_exorcism_minimization_func( esopmin_settings ) : dd_based_esop_minimization_func( esopmin_settings ) );
