@@ -53,6 +53,7 @@ void create_and_synthesize( unsigned n, double& runtime, std::function<void(BDD&
   circuit circ;
   properties::ptr settings( new properties );
   settings->set( "create_gates", false );
+  //settings->set( "verbose", true );
   rcbdd_synthesis( circ, cf, settings );
 }
 
@@ -93,7 +94,7 @@ void synthesize_invert_or_rotate( unsigned n, double& runtime )
       {
         if ( i % 2 == 0u )
         {
-          chi &= cf.y(i).Xnor( cf.x((i + 2) % 2u * n) );
+          chi &= cf.y(i).Xnor( cf.x((i + 2) % (2u * n)) );
         }
         else
         {
@@ -138,13 +139,13 @@ BOOST_AUTO_TEST_CASE(simple)
 
     benchmark_table<unsigned, double> table( {"n", "Run-time"} );
 
+    std::cout << "Experiment: " << name << std::endl;
     for ( unsigned i : boost::irange( from, to ) )
     {
       func( i, runtime );
       table.add( i, runtime );
+      std::cout << "[I] " << i << ": " << runtime << std::endl;
     }
-
-    std::cout << "Experiment: " << name << std::endl;
     table.print();
   }
 }
