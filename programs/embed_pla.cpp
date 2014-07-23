@@ -60,7 +60,7 @@ int main( int argc, char ** argv )
   }
 
   /* timeout */
-  std::thread t1( [&timeout]() { timeout_after( timeout ); } );
+  //std::thread t1( [&timeout]() { timeout_after( timeout ); } );
 
   /* extend for exact embedding */
   if ( mode == 0u )
