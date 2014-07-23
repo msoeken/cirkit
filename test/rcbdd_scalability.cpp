@@ -69,20 +69,47 @@ void synthesize_identity( unsigned n, double& runtime )
 void synthesize_inverter( unsigned n, double& runtime )
 {
   create_and_synthesize( n, runtime, [&n]( BDD& chi, const rcbdd& cf ) {
-      for (unsigned i = 0u; i < n; ++i)
+      for ( unsigned i = 0u; i < n; ++i )
       {
         chi &= cf.x(i) ^ cf.y(i);
       }
     });
 }
 
-void synthesize_bitwise_and( unsigned n, double& runtime )
+void synthesize_rotate( unsigned n, unsigned k, double& runtime )
+{
+  create_and_synthesize( n, runtime, [&n, &k]( BDD& chi, const rcbdd& cf ) {
+      for ( unsigned i = 0u; i < n; ++i )
+      {
+        chi &= cf.y(i).Xnor( cf.x((i + k) % n));
+      }
+    });
+}
+
+void synthesize_invert_or_rotate( unsigned n, double& runtime )
 {
   create_and_synthesize( 2u * n, runtime, [&n]( BDD& chi, const rcbdd& cf ) {
-      for (unsigned i = 0u; i < n; ++i)
+      for ( unsigned i = 0u; i < 2u * n; ++i )
       {
-        chi &= cf.x(i).Xnor( cf.y(i) );
-        chi &= cf.y(n + i).Xnor( cf.x(i) & cf.x(n + i) );
+        if ( i % 2 == 0u )
+        {
+          chi &= cf.y(i).Xnor( cf.x((i + 2) % 2u * n) );
+        }
+        else
+        {
+          chi &= cf.y(i) ^ cf.x(i);
+        }
+      }
+    });
+}
+
+void synthesize_bitwise_xor( unsigned n, double& runtime )
+{
+  create_and_synthesize( 2u * n, runtime, [&n]( BDD& chi, const rcbdd& cf ) {
+      for ( unsigned i = 0u; i < n; ++i )
+      {
+        chi &= cf.y(i).Xnor( cf.x(i) );
+        chi &= cf.y(n + i).Xnor( cf.x(i) ^ cf.x(n + i) );
       }
     });
 }
@@ -94,9 +121,13 @@ BOOST_AUTO_TEST_CASE(simple)
   typedef std::function<void(unsigned, double&)> exp_func_t;
   typedef std::tuple<unsigned, unsigned, std::string, exp_func_t> exp_tuple_t;
   std::vector<exp_tuple_t> experiments =
-    { std::make_tuple( 0u, 20u, std::string( "identity" ),    exp_func_t( synthesize_identity    ) ),
-      std::make_tuple( 0u, 20u, std::string( "invert" ),      exp_func_t( synthesize_inverter    ) ),
-      std::make_tuple( 0u,  2u, std::string( "bitwise-and" ), exp_func_t( synthesize_bitwise_and ) ) };
+    { std::make_tuple( 1u, 150u, std::string( "identity" ),         exp_func_t( synthesize_identity         ) ),
+      std::make_tuple( 1u, 150u, std::string( "invert" ),           exp_func_t( synthesize_inverter         ) ),
+      std::make_tuple( 1u,  30u, std::string( "invert-or-rotate" ), exp_func_t( synthesize_invert_or_rotate ) ),
+      std::make_tuple( 1u,  30u, std::string( "rotate k=3" ),       exp_func_t( []( unsigned n, double& runtime ) { return synthesize_rotate( n, 3u, runtime ); } ) ),
+      std::make_tuple( 1u,  30u, std::string( "rotate k=5" ),       exp_func_t( []( unsigned n, double& runtime ) { return synthesize_rotate( n, 5u, runtime ); } ) ),
+      std::make_tuple( 1u,  25u, std::string( "rotate k=7" ),       exp_func_t( []( unsigned n, double& runtime ) { return synthesize_rotate( n, 7u, runtime ); } ) ),
+      std::make_tuple( 1u,  15u, std::string( "bitwise-xor" ),      exp_func_t( synthesize_bitwise_xor      ) ) };
 
   for ( const auto& exp : experiments )
   {
@@ -105,7 +136,7 @@ BOOST_AUTO_TEST_CASE(simple)
     const std::string& name = std::get<2>( exp );
     const exp_func_t&  func = std::get<3>( exp );
 
-    benchmark_table<unsigned, double> table( {"n", "Run-time" } );
+    benchmark_table<unsigned, double> table( {"n", "Run-time"} );
 
     for ( unsigned i : boost::irange( from, to ) )
     {
