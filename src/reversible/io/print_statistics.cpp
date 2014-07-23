@@ -26,12 +26,6 @@
 namespace cirkit
 {
 
-  print_statistics_settings::print_statistics_settings()
-    : main_template( "%1$sGates:            %2$d\nLines:            %3$d\nTransistor Costs: %4$d\n" ),
-      runtime_template( "Runtime:          %.2f\n" )
-  {
-  }
-
   void print_statistics( std::ostream& os, const circuit& circ, double runtime, const print_statistics_settings& settings )
   {
     std::string runtime_string;
@@ -44,7 +38,12 @@ namespace cirkit
     boost::format fmt( settings.main_template );
     fmt.exceptions( boost::io::all_error_bits ^ ( boost::io::too_many_args_bit | boost::io::too_few_args_bit ) );
 
-    os << fmt % runtime_string % circ.num_gates() % circ.lines() % costs( circ, costs_by_gate_func( transistor_costs() ) );
+    os << fmt
+      % runtime_string
+      % circ.num_gates()
+      % circ.lines()
+      % costs( circ, costs_by_gate_func( transistor_costs() ) )
+      % costs( circ, costs_by_gate_func( sk2013_quantum_costs() ) );
   }
 
   void print_statistics( const std::string& filename, const circuit& circ, double runtime, const print_statistics_settings& settings )

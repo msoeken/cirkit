@@ -40,25 +40,18 @@ namespace cirkit
   struct print_statistics_settings
   {
     /**
-     * @brief Default constructor
-     *
-     * Initializes default values
-     *
-     * @since  1.0
-     */
-    print_statistics_settings();
-
-    /**
      * @brief Main Template for statistics output
      *
      * Use
      *  - \b \%1$s as placeholder for the run-time string (specified by \p runtime_template),
      *  - \b \%2$d as placeholder for number of gates,
      *  - \b \%3$d as placeholder for number of lines.
+     *  - \b \%4$d as placeholder for number of transistor costs.
+     *  - \b \%5$d as placeholder for number of SK2013 quantum costs.
      *
      * @since  1.0
      */
-    std::string main_template;
+    std::string main_template = "%1$sGates:            %2$d\nLines:            %3$d\nTransistor Costs: %4$d\nSK2013 QCosts:    %5$d\n";
 
     /**
      * @brief Run-time Template for statistics output
@@ -73,7 +66,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    std::string runtime_template;
+    std::string runtime_template = "Runtime:          %.2f\n";
   };
 
   /**

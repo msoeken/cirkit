@@ -146,6 +146,18 @@ namespace cirkit
   };
 
   /**
+   * @brief Quantum costs from SK:2013
+   *
+   * Reference: Marek Szyprowski and Pawel Kerntopf, Low quantum
+   * cost realization of generalized peres and toffoli gates with
+   * multiple-control signals, IEEE Nano 2013, 802--807.
+   */
+  struct sk2013_quantum_costs
+  {
+    cost_t operator()( const gate& g, unsigned lines ) const;
+  };
+
+  /**
    * @brief Calculates the costs of a circuit by a given cost function
    *
    * With this function the costs for a circuit can be calculated.

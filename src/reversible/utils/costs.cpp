@@ -17,7 +17,7 @@
 
 #include "costs.hpp"
 
-#include <boost/tuple/tuple.hpp>
+#include <boost/range/algorithm.hpp>
 
 #include "../target_tags.hpp"
 #include "../functions/flatten_circuit.hpp"
@@ -38,6 +38,14 @@ namespace cirkit
   cost_t transistor_costs::operator()( const gate& g, unsigned lines ) const
   {
     return 8ull * g.controls().size();
+  }
+
+  cost_t sk2013_quantum_costs::operator()( const gate& g, unsigned lines ) const
+  {
+    unsigned ac = g.controls().size();
+    unsigned nc = boost::count_if( g.controls(), []( const variable& v ) { return !v.polarity(); } );
+
+    return 2ull * nc + 2ull * ac * ac - 2ull * ac + 1ull;
   }
 
   struct costs_visitor : public boost::static_visitor<cost_t>
