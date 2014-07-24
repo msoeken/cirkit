@@ -334,7 +334,7 @@ struct rcbdd_synthesis_manager
     insert_position++;
   }
 
-  void create_toffoli_gates_with_exorcism(const BDD& gate, unsigned var, unsigned offset)
+  void create_toffoli_gates_with_exorcism(const BDD& gate, unsigned var, unsigned offset, bool add_gates_to_circuit = true)
   {
     if (gate == cf.manager().bddZero()) return;
 
@@ -375,11 +375,18 @@ struct rcbdd_synthesis_manager
 
     if ( create_gates )
     {
-      esopmin.settings()->set( "on_cube", cube_function_t( [this, &offset]( const cube_t& c ) { add_toffoli_gate( c, offset ); } ) );
+      if ( add_gates_to_circuit )
+      {
+        esopmin.settings()->set( "on_cube", cube_function_t( [this, &offset]( const cube_t& c ) { add_toffoli_gate( c, offset ); } ) );
+      }
+      else
+      {
+        esopmin.settings()->set( "on_cube", cube_function_t( [this, &offset]( const cube_t& c ) {} ) );
+      }
       esopmin.settings()->set( "verify", false );
       esopmin( gate.manager(), gate.getNode() );
 
-      if ( offset == 1u )
+      if ( add_gates_to_circuit && offset == 1u )
       {
         insert_position -= esopmin.statistics()->get<unsigned>( "cube_count" );
       }
@@ -501,8 +508,8 @@ struct rcbdd_synthesis_manager
           right_f.PrintMinterm();
         }
 
-        create_toffoli_gates_with_exorcism(left_f, list_lines[i], 0u);
-        create_toffoli_gates_with_exorcism(right_f, list_lines[i], 1u);
+        create_toffoli_gates_with_exorcism( left_f, list_lines[i], 0u, false );
+        create_toffoli_gates_with_exorcism( right_f, list_lines[i], 1u, false );
 
 
         // Determine cost and save in new_cost
