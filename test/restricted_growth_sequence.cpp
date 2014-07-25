@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(simple)
 {
   using namespace cirkit;
 
-  benchmark_table<unsigned, unsigned, unsigned, double> table( { "p", "n", "m", "Run-time" } );
+  benchmark_table<unsigned, unsigned, unsigned, double> table( { "p", "n", "m", "Run-time" }, true );
   unsigned p, q;
   double runtime;
 
