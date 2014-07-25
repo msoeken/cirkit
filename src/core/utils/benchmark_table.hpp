@@ -139,7 +139,7 @@ class benchmark_table
 public:
   typedef boost::tuple<Arguments...> benchmark;
 
-  benchmark_table( std::initializer_list<std::string> column_names )
+  benchmark_table( std::initializer_list<std::string> column_names, bool verbose = false ) : verbose( verbose )
   {
     using boost::adaptors::transformed;
     boost::push_back( _column_names, column_names );
@@ -176,6 +176,11 @@ public:
     results.push_back(boost::make_tuple(std::forward<Args>(args)...));
     length_i = 0u;
     compute_lengths( args... );
+
+    if ( verbose )
+    {
+      print_row<benchmark, Arguments...>( results.back(), lengths );
+    }
   }
 
   void print() const
@@ -194,6 +199,7 @@ public:
   }
 
 private:
+  bool verbose = false;
   std::vector<std::string> _column_names;
   std::vector<benchmark> results;
   std::vector<unsigned> lengths;

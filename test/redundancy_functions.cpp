@@ -73,9 +73,9 @@ BOOST_AUTO_TEST_CASE(simple)
 {
   using namespace cirkit;
 
-  std::vector<std::pair<unsigned, unsigned>> numbers{ {5u, 5u}, {6u, 6u}, {7u, 7u}, {8u, 8u}, {9u, 9u}, {10u, 10u} };
+  std::vector<std::pair<unsigned, unsigned>> numbers{ {5u, 5u}, {6u, 6u}, {7u, 7u}, {8u, 8u}, {9u, 9u}, {10u, 10u}, {11u, 10u}, {10u, 11u}, {11u, 11u} };
 
-  benchmark_table<unsigned, unsigned, unsigned, unsigned, double> table( { "p", "q", "n", "m", "Run-time" } );
+  benchmark_table<unsigned, unsigned, unsigned, unsigned, double> table( { "p", "q", "n", "m", "Run-time" }, true );
   unsigned p, q;
   double runtime;
 
