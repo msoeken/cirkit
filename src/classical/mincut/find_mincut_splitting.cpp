@@ -24,8 +24,9 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/boykov_kolmogorov_max_flow.hpp>
-#include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/property_map/property_map.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -39,13 +40,23 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-mc_edge_t add_edge( const mc_vertex_t& s, const mc_vertex_t& t, double capacity, mc_graph_t& graph )
+mc_edge_t add_edge( const mc_vertex_t& s, const mc_vertex_t& t, double capacity, mc_graph_t& graph, bool create_reverse_edge = false )
 {
   auto capacitymap = get( boost::edge_capacity, graph );
   auto edgeinfomap = get( boost::edge_name,     graph );
+  auto reversemap  = get( boost::edge_reverse,  graph );
+
   auto edge = boost::add_edge( s, t, graph ).first;
 
   edgeinfomap[edge].original_capacity = capacitymap[edge] = capacity;
+
+  if ( create_reverse_edge )
+  {
+    auto redge = boost::add_edge( t, s, graph ).first;
+    edgeinfomap[redge].original_capacity = capacitymap[redge] = 0.0;
+    reversemap[edge] = redge;
+    reversemap[redge] = edge;
+  }
 
   return edge;
 }
@@ -62,49 +73,14 @@ void add_reverse_edges( mc_graph_t& graph )
   for ( const auto& edge : store_edges )
   {
     auto redge = boost::add_edge( boost::target( edge, graph ), boost::source( edge, graph ), graph ).first;
-    edgeinfomap[edge].original_capacity = capacitymap[redge] = 0.0;
+    edgeinfomap[redge].original_capacity = capacitymap[redge] = 0.0;
     reversemap[edge] = redge;
     reversemap[redge] = edge;
   }
 }
 
-template<typename Graph>
-struct has_color
+std::pair<mc_vertex_t, mc_vertex_t> create_mincut_graph_with_splitting( mc_graph_t& graph, const aig_graph& aig )
 {
-  has_color() {}
-  has_color( const Graph& graph, unsigned color ) : graph( graph ), color( color ) {}
-
-  bool operator()( const aig_node& n ) const
-  {
-    const auto& graph_info = boost::get_property( graph, boost::graph_name );
-
-    if ( n == graph_info.constant && !graph_info.constant_used )
-    {
-      return false;
-    }
-    else
-    {
-      return boost::get( boost::vertex_color, graph )[n] == color;
-    }
-  }
-
-  bool operator()( const aig_edge& e ) const
-  {
-    const auto& map = boost::get( boost::vertex_color, graph );
-    return ( map[boost::source( e, graph )] == color ) &&
-           ( map[boost::target( e, graph )] == color );
-  }
-
-private:
-  const Graph& graph;
-  unsigned color;
-};
-
-std::pair<mc_vertex_t, mc_vertex_t> create_mincut_graph_with_splitting( mc_graph_t& graph, const aig_graph& aig, unsigned color )
-{
-  has_color<aig_graph> filter( aig, color );
-  boost::filtered_graph<aig_graph, has_color<aig_graph>, has_color<aig_graph>> fg( aig, filter, filter );
-
   auto namemap  = get( boost::edge_name, graph   );
   auto vnamemap = get( boost::vertex_name, graph );
 
@@ -115,13 +91,16 @@ std::pair<mc_vertex_t, mc_vertex_t> create_mincut_graph_with_splitting( mc_graph
   mc_vertex_t source = boost::add_vertex( graph );
   mc_vertex_t target = boost::add_vertex( graph );
 
+  vnamemap[source].type = mc_source;
+  vnamemap[target].type = mc_target;
+
   /* Copy nodes */
-  for ( const aig_node& node : boost::make_iterator_range( boost::vertices( fg ) ) )
+  for ( const aig_node& node : boost::make_iterator_range( boost::vertices( aig ) ) )
   {
     mc_vertex_t s = boost::add_vertex( graph );
     mc_vertex_t t = boost::add_vertex( graph );
-    vnamemap[s] = node;
-    vnamemap[t] = node;
+    vnamemap[s].original_node = node;
+    vnamemap[t].original_node = node;
 
     mc_edge_t e = add_edge( s, t, 1.0, graph );
     namemap[e].original_node = node;
@@ -130,7 +109,7 @@ std::pair<mc_vertex_t, mc_vertex_t> create_mincut_graph_with_splitting( mc_graph
   }
 
   /* Copy edges */
-  for ( const aig_edge& edge : boost::make_iterator_range( boost::edges( fg ) ) )
+  for ( const aig_edge& edge : boost::make_iterator_range( boost::edges( aig ) ) )
   {
     const mc_vertex_t& s = node_map[boost::source( edge, aig )].second;
     const mc_vertex_t& t = node_map[boost::target( edge, aig )].first;
@@ -164,20 +143,20 @@ struct find_mincut_splitting_dump_dot_writer
 
   void operator()( std::ostream& os, const mc_vertex_t& node )
   {
-    auto name = get( boost::vertex_name, graph );
+    auto info = get( boost::vertex_name, graph )[node];
 
-    if ( node == 0 )
+    if ( info.type == mc_source )
     {
-      os << "[label=\"s\",shape=box]";
+      os << boost::format( "[label=\"s (%d)\",shape=box]" ) % node;
     }
-    else if ( node == 1 )
+    else if ( info.type == mc_target )
     {
-      os << "[label=\"t\",shape=box]";
+      os << boost::format( "[label=\"t (%d)\",shape=box]" ) % node;
     }
     else
     {
-      assert( name[node] );
-      os << "[label=\"" << ( 2u * *name[node] ) << "\"]";
+      assert( info.original_node );
+      os << "[label=\"" << ( 2u * *info.original_node ) << "\"]";
     }
   }
 
@@ -209,6 +188,34 @@ void find_mincut_splitting_dump_dot( const mc_graph_t& graph, const std::string&
   fb.close();
 }
 
+class has_one_weight_edges_visitor : public boost::default_dfs_visitor
+{
+public:
+  has_one_weight_edges_visitor( bool& found ) : found( found )
+  {
+    found = false;
+  }
+
+  template<typename Edge>
+  void examine_edge( Edge e, const mc_graph_t& graph )
+  {
+    if ( get( boost::edge_capacity, graph )[e] == 1.0 )
+    {
+      found = true;
+    }
+  }
+
+  bool& found;
+};
+
+bool has_one_weight_edges( const mc_graph_t& graph, const mc_vertex_t& source )
+{
+  bool found;
+  std::map<mc_vertex_t, boost::default_color_type> colors;
+  boost::depth_first_visit( graph, source, has_one_weight_edges_visitor( found ), boost::make_assoc_property_map( colors ) );
+  return found;
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -219,26 +226,26 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
   bool        verbose = get( settings, "verbose", false         );
   std::string dotname = get( settings, "dotname", std::string() );
 
-  /* color nodes */
-  unsigned max_color = 0u;
-  auto aig_color = boost::get( boost::vertex_color, aig );
-  for ( const auto& v : boost::make_iterator_range( vertices( aig ) ) )
-  {
-    aig_color[v] = max_color;
-  }
+  /* this keeps track of next source and target nodes */
+  std::deque<std::pair<mc_vertex_t, mc_vertex_t>> sts;
+
+  /* construct initial graph */
+  mc_graph_t graph;
+  mc_vertex_t source, target;
+
+  std::tie( source, target ) = create_mincut_graph_with_splitting( graph, aig );
+  sts.push_back({source, target});
 
   /* find cuts */
   for ( unsigned i = 0u; i < count; ++i )
   {
+    assert( !sts.empty() );
+
     if ( verbose )
     {
       std::cout << "[I] find min cut " << i << std::endl;
     }
 
-    mc_graph_t graph;
-    mc_vertex_t source, target;
-
-    boost::tie( source, target ) = create_mincut_graph_with_splitting( graph, aig, i );
     if ( !dotname.empty() )
     {
       std::string filename = boost::str( boost::format( dotname ) % i );
@@ -249,6 +256,13 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
       find_mincut_splitting_dump_dot( graph, filename );
     }
 
+    std::tie( source, target ) = sts.front();
+    sts.pop_front();
+
+    if ( verbose )
+    {
+      std::cout << boost::format( "[I] perform max-flow computation with s = %d and t = %d" ) % source % target << std::endl;
+    }
     boykov_kolmogorov_max_flow( graph, source, target );
 
     auto capacity = boost::get( boost::edge_capacity, graph );
@@ -257,6 +271,13 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
     auto vname    = boost::get( boost::vertex_name,   graph );
 
     std::list<aig_node> cut;
+
+    mc_vertex_t new_target = boost::add_vertex( graph );
+    mc_vertex_t new_source = boost::add_vertex( graph );
+    vname[new_target].type = mc_target;
+    vname[new_source].type = mc_source;
+
+    std::list<std::pair<mc_vertex_t, mc_vertex_t>> st_vertices;
 
     for ( const auto& e : boost::make_iterator_range( edges( graph ) ) )
     {
@@ -275,29 +296,35 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
               std::cout << "[W] no node assigned to " << e << std::endl;
             }
           }
+
+          /* New source and target */
+          st_vertices += std::make_pair( boost::source( e, graph ), boost::target( e, graph ) );
         }
       }
+
+      capacity[e] = name[e].original_capacity;
     }
 
-    for ( const auto& v : boost::make_iterator_range( vertices( graph ) ) )
+    for ( const auto& p : st_vertices )
     {
-      if ( vname[v] )
-      {
-        /* node is not in the cut */
-        if ( boost::find( cut, *vname[v] ) == cut.end() )
-        {
-          //assert( color[v] == boost::white_color || color[v] == boost::black_color );
-          aig_color[*vname[v]] = max_color + 1u + ( color[v] == boost::white_color ? 0u : 1u );
-        }
-      }
-      else
-      {
-        assert( v == source || v == target );
-      }
+      mc_vertex_t s, t;
+      std::tie( s, t ) = p;
+      add_edge( s, new_target, std::numeric_limits<double>::infinity(), graph, true );
+      add_edge( new_source, t, std::numeric_limits<double>::infinity(), graph, true );
+      remove_edge( s, t, graph );
+      remove_edge( t, s, graph );
+    }
+
+    if ( has_one_weight_edges( graph, source ) )
+    {
+      sts.push_back({source, new_target});
+    }
+    if ( has_one_weight_edges( graph, new_source ) )
+    {
+      sts.push_back({new_source, target});
     }
 
     cuts += cut;
-    max_color += 2u;
   }
 
   return true;

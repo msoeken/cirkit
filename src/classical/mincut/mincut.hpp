@@ -43,6 +43,14 @@ namespace cirkit
    * Types                                                                      *
    ******************************************************************************/
 
+  enum mc_vertex_type_t { mc_node, mc_source, mc_target };
+
+  struct mc_vertex_info_t
+  {
+    mc_vertex_type_t          type = mc_node;
+    boost::optional<aig_node> original_node;
+  };
+
   struct mc_edge_info_t
   {
     boost::optional<aig_node> original_node;
@@ -53,7 +61,7 @@ namespace cirkit
   typedef boost::property<boost::vertex_color_t, boost::default_color_type,
           boost::property<boost::vertex_distance_t, long,
           boost::property<boost::vertex_predecessor_t, mc_traits_t::edge_descriptor,
-          boost::property<boost::vertex_name_t, boost::optional<aig_node>>>>> mc_vertex_properties_t;
+          boost::property<boost::vertex_name_t, mc_vertex_info_t>>>> mc_vertex_properties_t;
   typedef boost::property<boost::edge_capacity_t, double,
           boost::property<boost::edge_residual_capacity_t, double,
           boost::property<boost::edge_reverse_t, mc_traits_t::edge_descriptor,
