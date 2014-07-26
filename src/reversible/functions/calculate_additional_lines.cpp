@@ -74,7 +74,7 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
   }
 
   BDDTable bdd;
-  read_pla_to_characteristic_bdd( bdd, filename, false, true );
+  read_pla_to_characteristic_bdd( bdd, filename, false, false );
 
   std::vector<mpz_class> counts;
 
