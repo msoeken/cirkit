@@ -83,6 +83,7 @@ std::pair<mc_vertex_t, mc_vertex_t> create_mincut_graph_with_splitting( mc_graph
 {
   auto namemap  = get( boost::edge_name, graph   );
   auto vnamemap = get( boost::vertex_name, graph );
+  const auto& graph_info = boost::get_property( aig, boost::graph_name );
 
   /* A map to store AIG node to MC graph node */
   std::map<aig_node, std::pair<mc_vertex_t, mc_vertex_t>> node_map;
@@ -97,6 +98,8 @@ std::pair<mc_vertex_t, mc_vertex_t> create_mincut_graph_with_splitting( mc_graph
   /* Copy nodes */
   for ( const aig_node& node : boost::make_iterator_range( boost::vertices( aig ) ) )
   {
+    if ( node == graph_info.constant && !aig_is_constant_used( aig ) ) continue;
+
     mc_vertex_t s = boost::add_vertex( graph );
     mc_vertex_t t = boost::add_vertex( graph );
     vnamemap[s].original_node = node;
@@ -208,11 +211,26 @@ public:
   bool& found;
 };
 
-bool has_one_weight_edges( const mc_graph_t& graph, const mc_vertex_t& source )
+bool has_one_weight_edges( const mc_graph_t& graph, const mc_vertex_t& source, bool verbose )
 {
+  if ( verbose )
+  {
+    std::cout << boost::format( "[I] determine reachable nodes from %d" ) % source << std::endl;
+  }
+
   bool found;
   std::map<mc_vertex_t, boost::default_color_type> colors;
   boost::depth_first_visit( graph, source, has_one_weight_edges_visitor( found ), boost::make_assoc_property_map( colors ) );
+
+  if ( verbose )
+  {
+    std::cout << "[I] color map:" << std::endl;
+    for ( const auto& p : colors )
+    {
+      std::cout << p.first << ": " << p.second << std::endl;
+    }
+  }
+
   return found;
 }
 
@@ -287,6 +305,10 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
         {
           if ( name[e].original_node )
           {
+            if ( verbose )
+            {
+              std::cout << boost::format( "[I] add node %d to cut" ) % *( name[e].original_node ) << std::endl;
+            }
             cut += *( name[e].original_node );
           }
           else
@@ -315,11 +337,11 @@ bool find_mincut_splitting( std::list<std::list<aig_node>>& cuts, aig_graph& aig
       remove_edge( t, s, graph );
     }
 
-    if ( has_one_weight_edges( graph, source ) )
+    if ( has_one_weight_edges( graph, source, verbose ) )
     {
       sts.push_back({source, new_target});
     }
-    if ( has_one_weight_edges( graph, new_source ) )
+    if ( has_one_weight_edges( graph, new_source, verbose ) )
     {
       sts.push_back({new_source, target});
     }
