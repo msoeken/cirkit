@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if ADDON_FORMAL
+
 #include "exact_synthesis.hpp"
 
 #include <cmath>
@@ -30,6 +32,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <core/utils/timer.hpp>
+#include <core/utils/z3_utils.hpp>
 
 #include <reversible/functions/fully_specified.hpp>
 #include <reversible/functions/add_gates.hpp>
@@ -40,29 +43,6 @@
 namespace cirkit
 {
   using namespace boost::assign;
-
-  z3::expr operator<<(z3::expr const & a, z3::expr const & b) {
-    check_context(a, b);
-    assert(a.is_bv() && b.is_bv());
-    Z3_ast r = Z3_mk_bvshl(a.ctx(), a, b);
-    a.check_error();
-    return z3::expr(a.ctx(), r);
-  }
-
-  z3::expr ite(z3::expr const & a, z3::expr const & b, z3::expr const & c) {
-    check_context(a, b);
-    check_context(b, c);
-    assert(a.is_bool());
-    Z3_ast r = Z3_mk_ite(a.ctx(), a, b, c);
-    a.check_error();
-    return z3::expr(a.ctx(), r);
-  }
-
-  boost::dynamic_bitset<> to_bitset( const z3::expr& a ) {
-    std::stringstream s;
-    s << a;
-    return boost::dynamic_bitset<>( s.str().substr( 2u ) );
-  }
 
   bool synthesis_for_fixed_length( circuit& circ, const binary_truth_table& spec, unsigned k )
   {
@@ -191,6 +171,8 @@ namespace cirkit
   }
 
 }
+
+#endif
 
 // Local Variables:
 // c-basic-offset: 2

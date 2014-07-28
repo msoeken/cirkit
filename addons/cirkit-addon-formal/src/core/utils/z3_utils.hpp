@@ -15,48 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+/**
+ * @file exact_synthesis.hpp
+ *
+ * @brief Exact Synthesis of Reversible Networks
+ */
 
-#if ADDON_FORMAL
+#ifndef Z3_UTILS_HPP
+#define Z3_UTILS_HPP
 
-#include <reversible/truth_table.hpp>
-#include <reversible/io/print_circuit.hpp>
-#include <reversible/io/read_specification.hpp>
-#include <reversible/utils/program_options.hpp>
-#include <reversible/synthesis/exact_synthesis.hpp>
+#include <boost/dynamic_bitset.hpp>
 
-using namespace cirkit;
+#include <z3++.h>
 
-int main( int argc, char ** argv )
+namespace cirkit
 {
-  program_options opts;
-  opts.add_read_specification_option();
 
-  opts.parse( argc, argv );
+z3::expr operator<<(z3::expr const & a, z3::expr const & b);
+z3::expr ite(z3::expr const & a, z3::expr const & b, z3::expr const & c);
+boost::dynamic_bitset<> to_bitset( const z3::expr& a );
 
-  if ( !opts.good() )
-  {
-    std::cout << opts << std::endl;
-    return 1;
-  }
-
-  binary_truth_table spec;
-  read_specification( spec, opts.read_specification_filename() );
-
-  circuit circ;
-  exact_synthesis( circ, spec );
-
-  std::cout << circ << std::endl;
-
-  return 0;
-}
-
-#else
-
-int main( int argc, char ** argv )
-{
-  std::cout << "[E] Addon `formal' is not installed." << std::endl;
-  return 1;
 }
 
 #endif

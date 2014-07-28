@@ -21,6 +21,8 @@
  * @brief Exact Synthesis of Reversible Networks
  */
 
+#if ADDON_FORMAL
+
 #ifndef EXACT_SYNTHESIS_HPP
 #define EXACT_SYNTHESIS_HPP
 
@@ -109,6 +111,8 @@ namespace cirkit
 }
 
 #endif /* EXACT_SYNTHESIS_HPP */
+
+#endif
 
 // Local Variables:
 // c-basic-offset: 2
