@@ -1,5 +1,5 @@
 /* RevKit: A Toolkit for Reversible Circuit Design (www.revkit.org)
- * Copyright (C) 2009-2014  The RevKit Developers <revkit@informatik.uni-bremen.de>
+ * Copyright (C) 2009-2011  The RevKit Developers <revkit@informatik.uni-bremen.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <reversible/circuit.hpp>
-#include <reversible/io/create_image.hpp>
+#include <iostream>
+
+#if ADDON_FORMAL
+
+#include <reversible/truth_table.hpp>
 #include <reversible/io/print_circuit.hpp>
-#include <reversible/io/print_statistics.hpp>
-#include <reversible/io/read_realization.hpp>
-#include <reversible/utils/program_options.hpp>
+#include <reversible/io/read_specification.hpp>
+#include <reversible/utils/reversible_program_options.hpp>
+#include <reversible/synthesis/exact_synthesis.hpp>
 
 using namespace cirkit;
 
 int main( int argc, char ** argv )
 {
-  program_options opts;
-  opts.add_read_realization_option();
-  opts.add_options()
-    ( "circuit,c",    "Prints the circuit" )
-    ( "statistics,s", "Prints circuit statistics " )
-    ( "image,i",      "Creates circuit image in LaTeX" )
-    ;
+  reversible_program_options opts;
+  opts.add_read_specification_option();
 
   opts.parse( argc, argv );
 
@@ -42,29 +40,27 @@ int main( int argc, char ** argv )
     return 1;
   }
 
+  binary_truth_table spec;
+  read_specification( spec, opts.read_specification_filename() );
+
   circuit circ;
-  read_realization( circ, opts.read_realization_filename() );
+  exact_synthesis( circ, spec );
 
-  if ( opts.is_set( "circuit" ) )
-  {
-    std::cout << circ << std::endl;
-  }
-
-  if ( opts.is_set( "statistics" ) )
-  {
-    print_statistics( circ );
-  }
-
-  if ( opts.is_set( "image" ) )
-  {
-    create_tikz_settings settings;
-    create_image( std::cout, circ, settings );
-  }
+  std::cout << circ << std::endl;
 
   return 0;
 }
 
+#else
+
+int main( int argc, char ** argv )
+{
+  std::cout << "[E] Addon `formal' is not installed." << std::endl;
+  return 1;
+}
+
+#endif
+
 // Local Variables:
 // c-basic-offset: 2
 // End:
-

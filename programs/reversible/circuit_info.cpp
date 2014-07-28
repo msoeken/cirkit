@@ -16,40 +16,50 @@
  */
 
 #include <reversible/circuit.hpp>
-#include <reversible/truth_table.hpp>
-#include <reversible/functions/circuit_to_truth_table.hpp>
+#include <reversible/io/create_image.hpp>
+#include <reversible/io/print_circuit.hpp>
+#include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_realization.hpp>
-#include <reversible/io/write_specification.hpp>
-#include <reversible/simulation/simple_simulation.hpp>
-#include <reversible/utils/program_options.hpp>
+#include <reversible/utils/reversible_program_options.hpp>
 
 using namespace cirkit;
 
 int main( int argc, char ** argv )
 {
-  using boost::program_options::value;
-
-  std::string specname;
-
-  program_options opts;
+  reversible_program_options opts;
   opts.add_read_realization_option();
   opts.add_options()
-    ( "specname", value<std::string>( &specname ), "SPEC filename" )
+    ( "circuit,c",    "Prints the circuit" )
+    ( "statistics,s", "Prints circuit statistics " )
+    ( "image,i",      "Creates circuit image in LaTeX" )
     ;
+
   opts.parse( argc, argv );
 
-  if ( !opts.good() || !opts.is_set( "specname" ) )
+  if ( !opts.good() )
   {
     std::cout << opts << std::endl;
     return 1;
   }
 
   circuit circ;
-  binary_truth_table spec;
-
   read_realization( circ, opts.read_realization_filename() );
-  circuit_to_truth_table( circ, spec, simple_simulation_func() );
-  write_specification( spec, specname );
+
+  if ( opts.is_set( "circuit" ) )
+  {
+    std::cout << circ << std::endl;
+  }
+
+  if ( opts.is_set( "statistics" ) )
+  {
+    print_statistics( circ );
+  }
+
+  if ( opts.is_set( "image" ) )
+  {
+    create_tikz_settings settings;
+    create_image( std::cout, circ, settings );
+  }
 
   return 0;
 }

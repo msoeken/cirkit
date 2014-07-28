@@ -16,7 +16,7 @@
  */
 
 /**
- * @file program_options.hpp
+ * @file reversible_program_options.hpp
  *
  * @brief Easier access to program options
  *
@@ -24,10 +24,10 @@
  * @since  1.0
  */
 
-#ifndef PROGRAM_OPTIONS_HPP
-#define PROGRAM_OPTIONS_HPP
+#ifndef REVERSIBLE_PROGRAM_OPTIONS_HPP
+#define REVERSIBLE_PROGRAM_OPTIONS_HPP
 
-#include <boost/program_options.hpp>
+#include <core/utils/program_options.hpp>
 
 #include <reversible/utils/costs.hpp>
 
@@ -44,37 +44,8 @@ namespace cirkit
    *
    * @note It can be useful to check the <a href="http://www.boost.org/doc/libs/1_41_0/doc/html/program_options.html">Boost.Program_Options</a>
    *       documentation for further information.
-   *
-   * @section sec_example_program_options
-   *
-   * This could be used for a synthesis algorithm to read a specification
-   * and write the result to a realization.
-   *
-   * @code
-   * #include <reversible/utils/program_options.hpp>
-   *
-   * ...
-   *
-   * revkit::program_options opts;     // Automatically adds a --help option for displaying help
-   * opts.add_read_specification_option();  // Adds a --filename ... option for reading specification
-   * opts.add_write_realization_option();   // Adds a --realname ... option for writing realization
-   * opts.parse( argc, argv );              // Parses the command line
-   *
-   * if ( !opts.good() ) {                  // good means that it was not asked for --help and --filename is set
-   *   std::cout << opts << std::endl;      // print usage
-   *   return 1;
-   * }
-   *
-   * revkit::reversible_truth_table spec;
-   * revkit::circuit circ;
-   *
-   * revkit::read_specification( spec, opts.read_specification_filename() );
-   * some_synthesis_approach( spec, circ );  
-   *
-   * revkit::write_realization( circ, opts.write_realization_filename() );
-   * @endcode
    */
-  class program_options : public boost::program_options::options_description
+  class reversible_program_options : public program_options
   {
   public:
     /**
@@ -87,7 +58,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    explicit program_options( unsigned line_length = m_default_line_length );
+    explicit reversible_program_options( unsigned line_length = m_default_line_length );
 
     /**
      * @brief Constructor with setting a caption for usage output
@@ -100,12 +71,12 @@ namespace cirkit
      *
      * @since  1.0
      */
-    explicit program_options( const std::string& caption, unsigned line_length = m_default_line_length );
+    explicit reversible_program_options( const std::string& caption, unsigned line_length = m_default_line_length );
 
     /**
      * @brief Default deconstructor
      */
-    virtual ~program_options();
+    virtual ~reversible_program_options();
 
     /**
      * @brief Is help needed? Are all properties set properly?
@@ -122,33 +93,6 @@ namespace cirkit
     bool good() const;
 
     /**
-     * @brief Parses the command line
-     *
-     * @param argc C argc argument of the main function
-     * @param argv C argv argument of the main function
-     *
-     * @since  1.0
-     */
-    void parse( int argc, char ** argv );
-
-    /**
-     * @brief Checks whether a parameter was set or not
-     *
-     * This method calls Boost's variable_map::count method
-     * and checks if the parameter was set at least once.
-     *
-     * This class should be simple in general so there is no
-     * distinction between one or more options of the same name.
-     *
-     * @param option Name of the option
-     *
-     * @return true when \p option was set, false otherwise.
-     *
-     * @since  1.0
-     */
-    bool is_set( const std::string& option ) const;
-
-    /**
      * @brief Adds an option for an input as RevLib realization
      *
      * This method adds an option called --filename which takes
@@ -161,7 +105,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    program_options& add_read_realization_option();
+    reversible_program_options& add_read_realization_option();
 
     /**
      * @brief Adds an option for an input as RevLib specification
@@ -176,7 +120,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    program_options& add_read_specification_option();
+    reversible_program_options& add_read_specification_option();
 
     /**
      * @brief Adds an option for an output as RevLib realization
@@ -191,7 +135,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    program_options& add_write_realization_option();
+    reversible_program_options& add_write_realization_option();
 
     /**
      * @brief Adds an option for selecting a cost function
@@ -205,7 +149,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    program_options& add_costs_option();
+    reversible_program_options& add_costs_option();
 
     /**
      * @brief Returns the RevLib realization input if it was set
@@ -271,21 +215,14 @@ namespace cirkit
      */
     cost_function costs() const;
 
-    // needed for python exposing
-    /** @cond */
-    const boost::program_options::variables_map& variables_map() const;
-    /** @endcond */
-
   private:
-    void init();
-
     class priv;
     priv* const d;
   };
 
 }
 
-#endif /* PROGRAM_OPTIONS_HPP */
+#endif
 
 // Local Variables:
 // c-basic-offset: 2

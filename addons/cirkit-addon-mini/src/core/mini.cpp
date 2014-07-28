@@ -24,7 +24,7 @@ namespace cirkit
 
 void mini()
 {
-  std::cout << "This comes from the RevKit mini algorithm!" << std::endl;
+  std::cout << "This comes from the CirKit mini algorithm!" << std::endl;
 }
 
 }

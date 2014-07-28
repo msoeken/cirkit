@@ -23,7 +23,7 @@
 #include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_realization.hpp>
-#include <reversible/utils/program_options.hpp>
+#include <reversible/utils/reversible_program_options.hpp>
 
 #include <reversible/simulation/simple_simulation.hpp>
 #include <reversible/synthesis/young_subgroup_synthesis.hpp>
@@ -49,7 +49,7 @@ int main( int argc, char ** argv )
   unsigned    esop_minimizer    = 0u;
   bool        verbose           = false;
 
-  program_options opts;
+  reversible_program_options opts;
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()

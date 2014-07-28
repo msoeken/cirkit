@@ -17,9 +17,10 @@
 
 #include <iostream>
 
+#include <core/utils/program_options.hpp>
+
 #include <reversible/truth_table.hpp>
 #include <reversible/io/write_pla.hpp>
-#include <reversible/utils/program_options.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>

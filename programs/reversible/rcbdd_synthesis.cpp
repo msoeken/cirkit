@@ -30,7 +30,7 @@
 #include <reversible/io/print_statistics.hpp>
 #include <reversible/io/write_pla.hpp>
 #include <reversible/io/write_realization.hpp>
-#include <reversible/utils/program_options.hpp>
+#include <reversible/utils/reversible_program_options.hpp>
 #include <reversible/synthesis/embed_pla.hpp>
 #include <reversible/synthesis/rcbdd_synthesis.hpp>
 
@@ -46,7 +46,7 @@ int main( int argc, char ** argv )
   unsigned    timeout        = 5000u;
   unsigned    esop_minimizer = 0u;
 
-  program_options opts;
+  reversible_program_options opts;
   opts.add_write_realization_option();
   opts.add_options()
     ( "filename",       value<std::string>( &filename ),                            "PLA filename" )

@@ -1,5 +1,5 @@
 /* RevKit: A Toolkit for Reversible Circuit Design (www.revkit.org)
- * Copyright (C) 2009-2011  The RevKit Developers <revkit@informatik.uni-bremen.de>
+ * Copyright (C) 2009-2014  The RevKit Developers <revkit@informatik.uni-bremen.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,52 +15,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-
-#if ADDON_FORMAL
-
-#include <reversible/truth_table.hpp>
-#include <reversible/io/print_circuit.hpp>
-#include <reversible/io/read_specification.hpp>
-#include <reversible/utils/program_options.hpp>
-#include <reversible/synthesis/exact_synthesis.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/functions/negative_controls_to_positive.hpp>
+#include <reversible/io/read_realization.hpp>
+#include <reversible/io/write_realization.hpp>
+#include <reversible/utils/reversible_program_options.hpp>
 
 using namespace cirkit;
 
 int main( int argc, char ** argv )
 {
-  program_options opts;
-  opts.add_read_specification_option();
-
+  reversible_program_options opts;
+  opts.add_read_realization_option();
+  opts.add_write_realization_option();
   opts.parse( argc, argv );
 
-  if ( !opts.good() )
+  if ( !opts.good() || !opts.is_write_realization_filename_set() )
   {
     std::cout << opts << std::endl;
     return 1;
   }
 
-  binary_truth_table spec;
-  read_specification( spec, opts.read_specification_filename() );
-
-  circuit circ;
-  exact_synthesis( circ, spec );
-
-  std::cout << circ << std::endl;
+  circuit src, dest;
+  read_realization( src, opts.read_realization_filename() );
+  negative_controls_to_positive( src, dest );
+  write_realization( dest, opts.write_realization_filename() );
 
   return 0;
 }
 
-#else
-
-int main( int argc, char ** argv )
-{
-  std::cout << "[E] Addon `formal' is not installed." << std::endl;
-  return 1;
-}
-
-#endif
-
 // Local Variables:
 // c-basic-offset: 2
 // End:
+

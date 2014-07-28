@@ -26,6 +26,14 @@ macro(subdirlist result curdir)
   set(${result} ${dirlist})
 endmacro()
 
+macro(srcdirlist result curdir)
+  if("${cirkit_PACKAGES}" STREQUAL "")
+    subdirlist(${result} ${curdir})
+  else()
+    set(${result} ${cirkit_PACKAGES})
+  endif()
+endmacro()
+
 # Dependencies
 set( MAIN_Boost_LIBRARIES unit_test_framework regex filesystem graph program_options system )
 find_package(Boost REQUIRED COMPONENTS ${MAIN_Boost_LIBRARIES} )
@@ -40,6 +48,7 @@ option(cirkit_ENABLE_TESTS "build tests" on)
 option(cirkit_BUILD_SHARED "build shared libraries" on)
 option(cirkit_BUILD_STATIC "build static libraries" on)
 option(cirkit_LINK_PROGRAMS_TO_STATIC "links programs to static libraries" off)
+set(cirkit_PACKAGES "" CACHE STRING "if non-empty, then only the packages in the semicolon-separated lists are build")
 
 # Libraries (include)
 include_directories(src)

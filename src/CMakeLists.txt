@@ -2,7 +2,7 @@
 add_definitions(-Werror -fPIC)
 add_ext_library("gmp;gmpxx")
 
-subdirlist(directories ".")
+srcdirlist(directories ".")
 foreach(dir ${directories})
   file(GLOB_RECURSE files ${dir}/*.cpp)
   foreach(adir ${addon_directories})

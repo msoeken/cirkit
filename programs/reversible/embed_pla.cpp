@@ -17,6 +17,7 @@
 
 #include <thread>
 
+#include <core/utils/program_options.hpp>
 #include <core/utils/timeout.hpp>
 
 #include <reversible/circuit.hpp>
@@ -25,7 +26,6 @@
 #include <reversible/functions/extend_pla.hpp>
 #include <reversible/io/read_pla.hpp>
 #include <reversible/io/write_pla.hpp>
-#include <reversible/utils/program_options.hpp>
 #include <reversible/synthesis/embed_pla.hpp>
 #include <reversible/synthesis/embed_pla_bennett.hpp>
 

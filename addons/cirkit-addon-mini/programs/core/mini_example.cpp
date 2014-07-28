@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <reversible/mini.hpp>
+#include <core/mini.hpp>
 
 int main(int argc, char ** argv)
 {

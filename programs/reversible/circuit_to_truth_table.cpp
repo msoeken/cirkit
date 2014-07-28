@@ -16,10 +16,12 @@
  */
 
 #include <reversible/circuit.hpp>
-#include <reversible/functions/negative_controls_to_positive.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/functions/circuit_to_truth_table.hpp>
 #include <reversible/io/read_realization.hpp>
-#include <reversible/io/write_realization.hpp>
-#include <reversible/utils/program_options.hpp>
+#include <reversible/io/write_specification.hpp>
+#include <reversible/simulation/simple_simulation.hpp>
+#include <reversible/utils/reversible_program_options.hpp>
 
 using namespace cirkit;
 
@@ -27,21 +29,27 @@ int main( int argc, char ** argv )
 {
   using boost::program_options::value;
 
-  program_options opts;
+  std::string specname;
+
+  reversible_program_options opts;
   opts.add_read_realization_option();
-  opts.add_write_realization_option();
+  opts.add_options()
+    ( "specname", value<std::string>( &specname ), "SPEC filename" )
+    ;
   opts.parse( argc, argv );
 
-  if ( !opts.good() || !opts.is_write_realization_filename_set() )
+  if ( !opts.good() || !opts.is_set( "specname" ) )
   {
     std::cout << opts << std::endl;
     return 1;
   }
 
-  circuit src, dest;
-  read_realization( src, opts.read_realization_filename() );
-  negative_controls_to_positive( src, dest );
-  write_realization( dest, opts.write_realization_filename() );
+  circuit circ;
+  binary_truth_table spec;
+
+  read_realization( circ, opts.read_realization_filename() );
+  circuit_to_truth_table( circ, spec, simple_simulation_func() );
+  write_specification( spec, specname );
 
   return 0;
 }
