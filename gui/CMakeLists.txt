@@ -16,7 +16,7 @@ link_directories( ../build/src )
 set(revkit_viewer_SRCS
     src/circuit_view.cpp
     src/truth_table_widget.cpp
-    programs/viewer/main_window.cpp
+    programs/viewer/viewer_window.cpp
     programs/viewer/main.cpp)
 
 add_executable(revkit_viewer ${revkit_viewer_SRCS})

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "main_window.hpp"
+#include "viewer_window.hpp"
 
 #include <fstream>
 #include <memory>
@@ -39,7 +39,7 @@
 
 using namespace cirkit;
 
-class MainWindow::Private
+class ViewerWindow::Private
 {
 public:
   Private() {}
@@ -53,7 +53,7 @@ public:
   std::shared_ptr<circuit> mCircuit;
 };
 
-MainWindow::MainWindow() : QMainWindow(), d( new Private() )
+ViewerWindow::ViewerWindow() : QMainWindow(), d( new Private() )
 {
   setWindowTitle( "RevKit Viewer" );
 
@@ -68,12 +68,12 @@ MainWindow::MainWindow() : QMainWindow(), d( new Private() )
   resize( 600, 300 );
 }
 
-CircuitView * MainWindow::circuitView() const
+CircuitView * ViewerWindow::circuitView() const
 {
   return d->mCircuitView;
 }
 
-void MainWindow::open()
+void ViewerWindow::open()
 {
   QString filename = QFileDialog::getOpenFileName( this, "Open Circuit", "", "RevLib circuit (*.real)" );
   if ( !filename.isEmpty() )
@@ -82,14 +82,14 @@ void MainWindow::open()
   }
 }
 
-void MainWindow::openFromFilename( const QString& filename )
+void ViewerWindow::openFromFilename( const QString& filename )
 {
   d->mCircuit.reset( new circuit );
   read_realization( *d->mCircuit, filename.toStdString() );
   d->mCircuitView->load( d->mCircuit );
 }
 
-void MainWindow::saveImage()
+void ViewerWindow::saveImage()
 {
   QString filename = QFileDialog::getSaveFileName( this, "Save as Image", "", "PNG image (*.png);;JPG image (*.jpg)" );
   if ( !filename.isEmpty() )
@@ -98,7 +98,7 @@ void MainWindow::saveImage()
   }
 }
 
-void MainWindow::saveLatex()
+void ViewerWindow::saveLatex()
 {
   QString filename = QFileDialog::getSaveFileName( this, "Save as LaTeX", "", "LaTeX file (*.tex)" );
   if ( !filename.isEmpty() )
@@ -112,7 +112,7 @@ void MainWindow::saveLatex()
   }
 }
 
-void MainWindow::showTruthTable()
+void ViewerWindow::showTruthTable()
 {
   QDialog * dialog = new QDialog( this, Qt::Dialog );
   dialog->setWindowTitle( "Truth Table" );
@@ -126,7 +126,7 @@ void MainWindow::showTruthTable()
   dialog->exec();
 }
 
-void MainWindow::setupActions()
+void ViewerWindow::setupActions()
 {
   d->mOpenAction = new QAction( QIcon::fromTheme( "document-open" ), "&Open...", this );
   d->mOpenAction->setStatusTip( "Opens a circuit realization in RevLib format" );
@@ -156,7 +156,7 @@ void MainWindow::setupActions()
   connect( d->mSpecAction, SIGNAL( triggered() ), SLOT( showTruthTable() ) );
 }
 
-void MainWindow::setupMenuBar()
+void ViewerWindow::setupMenuBar()
 {
   QMenu * file = menuBar()->addMenu( "&File" );
   file->addAction( d->mOpenAction );
@@ -175,7 +175,7 @@ void MainWindow::setupMenuBar()
   help->addAction( d->mAboutAction );
 }
 
-void MainWindow::setupToolBar()
+void ViewerWindow::setupToolBar()
 {
   QToolBar * toolbar = addToolBar( "Main" );
   toolbar->setIconSize( QSize( 32, 32 ) );
@@ -187,7 +187,7 @@ void MainWindow::setupToolBar()
   toolbar->addAction( d->mPartialAction );
 }
 
-#include "programs/viewer/main_window.moc"
+#include "programs/viewer/viewer_window.moc"
 
 // Local Variables:
 // c-basic-offset: 2

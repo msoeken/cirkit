@@ -22,12 +22,12 @@
 
 class CircuitView;
 
-class MainWindow : public QMainWindow
+class ViewerWindow : public QMainWindow
 {
   Q_OBJECT
 
 public:
-  MainWindow();
+  ViewerWindow();
 
   CircuitView * circuitView() const;
 

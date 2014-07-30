@@ -17,13 +17,13 @@
 
 #include <QtWidgets/QApplication>
 
-#include "main_window.hpp"
+#include "viewer_window.hpp"
 
 int main( int argc, char ** argv )
 {
   QApplication app( argc, argv );
 
-  MainWindow window;
+  ViewerWindow window;
   window.openFromFilename( "../../ext/circuits/3_17_13.real" );
   window.show();
 
