@@ -8,7 +8,7 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS regex filesystem graph program_options system)
 
 include_directories( ../src )
 link_directories( ../build/src )
@@ -20,5 +20,19 @@ set(revkit_viewer_SRCS
     programs/viewer/main.cpp)
 
 add_executable(revkit_viewer ${revkit_viewer_SRCS})
-target_link_libraries(revkit_viewer Qt5::Gui Qt5::Widgets cirkit_core cirkit_reversible cirkit_classical)
+target_link_libraries(revkit_viewer Qt5::Gui Qt5::Widgets cirkit_core_static cirkit_reversible_static cirkit_classical_static ${Boost_LIBRARIES})
 
+set(revkit_gui_FORMS programs/gui/main_widget.ui)
+qt5_wrap_ui(revkit_gui_FORMS_HEADERS ${revkit_gui_FORMS})
+
+set(revkit_gui_SRCS
+    programs/gui/core/button_bar.cpp
+    programs/gui/core/flow_container.cpp
+    programs/gui/core/flow_item_tree_widget.cpp
+    programs/gui/core/main_widget.cpp
+    programs/gui/core/messages_widget.cpp
+    programs/gui/main_window.cpp
+    programs/gui/main.cpp)
+
+add_executable(revkit_gui ${revkit_gui_SRCS} ${revkit_gui_FORMS_HEADERS})
+target_link_libraries(revkit_gui Qt5::Gui Qt5::Widgets cirkit_core_static cirkit_reversible_static cirkit_classical_static ${Boost_LIBRARIES})
