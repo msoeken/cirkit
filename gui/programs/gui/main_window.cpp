@@ -24,7 +24,9 @@ MainWindow::MainWindow( QWidget * parent ) : QMainWindow( parent )
   setupTools();
   setupActions();
   setupToolBars();
-};
+
+  widget->ui.tabWidget->slotNew();
+}
 
 void MainWindow::setupWidgets()
 {

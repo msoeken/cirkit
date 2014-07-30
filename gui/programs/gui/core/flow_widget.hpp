@@ -17,35 +17,25 @@
 
 #pragma once
 
-#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QGraphicsView>
 
-class FlowContainer : public QTabWidget
+class FlowWidget : public QGraphicsView
 {
   Q_OBJECT
 
 public:
-  FlowContainer( QWidget * parent = nullptr );
+  FlowWidget( QWidget * parent = nullptr );
 
 private:
-  void setupActions();
-  void updateActions();
+  void setupMenu();
 
-public Q_SLOTS:
-  void slotNew();
-  void slotOpen();
-  void slotSave();
-  void slotSaveAs();
-  void slotRun();
-  void slotClose( int index );
-  void slotFilenameChanged();
-  void slotModifiedChanged();
+private Q_SLOTS:
+  void slotContextMenu( QPoint pos );
 
-public:
-  QAction * newAction;
-  QAction * openAction;
-  QAction * saveAction;
-  QAction * saveAsAction;
-  QAction * runAction;
+protected:
+  void dragEnterEvent( QDragEnterEvent * event );
+  void dragMoveEvent( QDragMoveEvent * event );
+  void dropEvent( QDropEvent * event );
 };
 
 // Local Variables:

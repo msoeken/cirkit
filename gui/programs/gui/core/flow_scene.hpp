@@ -17,35 +17,39 @@
 
 #pragma once
 
-#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QGraphicsScene>
 
-class FlowContainer : public QTabWidget
+#include <boost/optional.hpp>
+
+class FlowScenePortConnecter : public QObject
 {
   Q_OBJECT
 
 public:
-  FlowContainer( QWidget * parent = nullptr );
+  FlowScenePortConnecter( QObject * parent = nullptr );
+};
 
-private:
-  void setupActions();
-  void updateActions();
-
-public Q_SLOTS:
-  void slotNew();
-  void slotOpen();
-  void slotSave();
-  void slotSaveAs();
-  void slotRun();
-  void slotClose( int index );
-  void slotFilenameChanged();
-  void slotModifiedChanged();
+class FlowSceneGraph : public QObject
+{
+  Q_OBJECT
 
 public:
-  QAction * newAction;
-  QAction * openAction;
-  QAction * saveAction;
-  QAction * saveAsAction;
-  QAction * runAction;
+  FlowSceneGraph( QObject * parent = nullptr );
+};
+
+class FlowScene : public QGraphicsScene
+{
+  Q_OBJECT
+
+public:
+  FlowScene( QObject * parent = nullptr );
+
+private:
+  boost::optional<QString> filename;
+  bool modified = false;
+
+  FlowSceneGraph * graph;
+  FlowScenePortConnecter * connecter;
 };
 
 // Local Variables:

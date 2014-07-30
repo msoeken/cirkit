@@ -15,38 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "flow_scene.hpp"
 
-#include <QtWidgets/QTabWidget>
+#include <QtGui/QPen>
 
-class FlowContainer : public QTabWidget
+FlowScenePortConnecter::FlowScenePortConnecter( QObject *parent ) : QObject( parent )
 {
-  Q_OBJECT
+  parent->installEventFilter( this );
 
-public:
-  FlowContainer( QWidget * parent = nullptr );
+  // TODO
+}
 
-private:
-  void setupActions();
-  void updateActions();
+FlowSceneGraph::FlowSceneGraph( QObject *parent ) : QObject( parent )
+{
+  // TODO
+}
 
-public Q_SLOTS:
-  void slotNew();
-  void slotOpen();
-  void slotSave();
-  void slotSaveAs();
-  void slotRun();
-  void slotClose( int index );
-  void slotFilenameChanged();
-  void slotModifiedChanged();
+FlowScene::FlowScene( QObject * parent ) : QGraphicsScene( parent )
+{
+  addRect( 0, 0, 1, 1, QPen( Qt::white ) );
 
-public:
-  QAction * newAction;
-  QAction * openAction;
-  QAction * saveAction;
-  QAction * saveAsAction;
-  QAction * runAction;
-};
+  graph = new FlowSceneGraph( this );
+  connecter = new FlowScenePortConnecter( this );
+
+  // TODO
+}
+
+#include "programs/gui/core/flow_scene.moc"
 
 // Local Variables:
 // c-basic-offset: 2

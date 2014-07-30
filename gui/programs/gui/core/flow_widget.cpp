@@ -15,39 +15,49 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "flow_widget.hpp"
+#include "flow_scene.hpp"
 
-#include <QtWidgets/QTabWidget>
-
-class FlowContainer : public QTabWidget
+FlowWidget::FlowWidget( QWidget * parent ) : QGraphicsView( parent )
 {
-  Q_OBJECT
+  setAcceptDrops( true );
+  setScene( new FlowScene( this ) );
+  setRenderHints( QPainter::Antialiasing | QPainter::SmoothPixmapTransform );
+  setAlignment( Qt::AlignLeft | Qt::AlignTop );
 
-public:
-  FlowContainer( QWidget * parent = nullptr );
+  // TODO
 
-private:
-  void setupActions();
-  void updateActions();
+  setupMenu();
+}
 
-public Q_SLOTS:
-  void slotNew();
-  void slotOpen();
-  void slotSave();
-  void slotSaveAs();
-  void slotRun();
-  void slotClose( int index );
-  void slotFilenameChanged();
-  void slotModifiedChanged();
+void FlowWidget::setupMenu()
+{
+  setContextMenuPolicy( Qt::CustomContextMenu );
+  // TODO
+  connect( this, SIGNAL( customContextMenuRequested( QPoint ) ), this, SLOT(slotContextMenu( QPoint ) ) );
+}
 
-public:
-  QAction * newAction;
-  QAction * openAction;
-  QAction * saveAction;
-  QAction * saveAsAction;
-  QAction * runAction;
-};
+void FlowWidget::slotContextMenu( QPoint pos )
+{
+  // TODO
+}
+
+void FlowWidget::dragEnterEvent( QDragEnterEvent * event )
+{
+  // TODO
+}
+
+void FlowWidget::dragMoveEvent( QDragMoveEvent * event )
+{
+  // TODO
+}
+
+void FlowWidget::dropEvent( QDropEvent * event )
+{
+  // TODO
+}
 
 // Local Variables:
 // c-basic-offset: 2
 // End:
+

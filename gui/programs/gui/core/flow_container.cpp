@@ -19,6 +19,8 @@
 
 #include <QtWidgets/QAction>
 
+#include <programs/gui/core/flow_widget.hpp>
+
 FlowContainer::FlowContainer( QWidget * parent ) : QTabWidget( parent )
 {
   setDocumentMode( true );
@@ -52,6 +54,8 @@ void FlowContainer::updateActions()
 
 void FlowContainer::slotNew()
 {
+  FlowWidget * widget = new FlowWidget( this );
+  setCurrentIndex( addTab( widget, QIcon::fromTheme( "text-rdf+xml" ), "New Graph" ) );
   // TODO
 }
 

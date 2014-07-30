@@ -29,6 +29,8 @@ set(revkit_gui_SRCS
     programs/gui/core/button_bar.cpp
     programs/gui/core/flow_container.cpp
     programs/gui/core/flow_item_tree_widget.cpp
+    programs/gui/core/flow_scene.cpp
+    programs/gui/core/flow_widget.cpp
     programs/gui/core/main_widget.cpp
     programs/gui/core/messages_widget.cpp
     programs/gui/main_window.cpp
