@@ -5,6 +5,7 @@
 
 #if ADDON_EXPERIMENTAL
 
+#include <iostream>
 #include <classical/utils/truth_table_utils.hpp>
 
 BOOST_AUTO_TEST_CASE(simple)

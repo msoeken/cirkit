@@ -44,7 +44,7 @@ externalProject_add(aiger
   CONFIGURE_COMMAND sed -i -e "s/CFLAGS=\"/CFLAGS=\"-fPIC /g" configure COMMAND ./configure
   BUILD_COMMAND make COMMAND gcc -shared -Wl,-soname,libaiger.so.1 -o libaiger.so.1.0.1 aiger.o -lc
   BUILD_IN_SOURCE 1
-  INSTALL_COMMAND cp ${aiger_HEADERS} ${ext_INCLUDE} COMMAND cp ${aiger_LIBS} ${ext_LIB} COMMAND ldconfig -n ${ext_LIB} COMMAND ln -s ${ext_LIB}/libaiger.so.1.0.1 ${ext_LIB}/libaiger.so
+  INSTALL_COMMAND cp ${aiger_HEADERS} ${ext_INCLUDE} COMMAND cp ${aiger_LIBS} ${ext_LIB} COMMAND ldconfig -n ${ext_LIB} COMMAND ln -fs ${ext_LIB}/libaiger.so.1.0.1 ${ext_LIB}/libaiger.so
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1
