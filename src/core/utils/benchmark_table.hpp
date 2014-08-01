@@ -27,6 +27,7 @@
 #ifndef BENCHMARK_TABLE_HPP
 #define BENCHMARK_TABLE_HPP
 
+#include <iostream>
 #include <iomanip>
 
 #include <boost/format.hpp>
