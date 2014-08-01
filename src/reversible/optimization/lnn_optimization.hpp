@@ -64,4 +64,6 @@ optimization_func lnn_optimization_func( properties::ptr settings = properties::
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:

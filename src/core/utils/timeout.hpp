@@ -37,4 +37,6 @@ void timeout_after( unsigned seconds );
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:

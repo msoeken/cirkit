@@ -71,4 +71,6 @@ pla_based_esop_optimization_func pla_based_exorcism_minimization_func( propertie
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:

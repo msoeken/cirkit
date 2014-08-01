@@ -109,4 +109,6 @@ bool pla_parser( const std::string& filename, pla_processor& reader, bool skip_a
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:

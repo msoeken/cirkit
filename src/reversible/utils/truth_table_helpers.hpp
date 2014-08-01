@@ -52,4 +52,6 @@ void truth_table_to_bitset_vector( const binary_truth_table& spec, bitset_vector
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:
