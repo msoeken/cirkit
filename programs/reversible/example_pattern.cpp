@@ -31,8 +31,14 @@ int main( int argc, char ** argv )
   boost::dynamic_bitset<> p2( 4u, 5u );  // 1010
 
   pattern_to_circuit( circ, p1, p2 );
- 
+
   std::cout << circ << std::endl;
 
   return 0;
 }
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:

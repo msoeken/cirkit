@@ -124,3 +124,9 @@ BOOST_AUTO_TEST_CASE(simple)
   os << lines << std::endl;
   fb.close();
 }
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:

@@ -37,3 +37,9 @@ int main( int argc, char ** argv )
   controls += 0,1,2,3;
   append_toffoli( circ, controls, 4 );
 }
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:

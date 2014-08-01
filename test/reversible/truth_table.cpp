@@ -56,3 +56,9 @@ BOOST_AUTO_TEST_CASE(simple)
     std::cout << boost::dynamic_bitset<>( 2u, i ) << " <-> " << tt_vec[i] << std::endl;
   }
 }
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:

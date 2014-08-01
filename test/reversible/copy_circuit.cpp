@@ -63,3 +63,9 @@ BOOST_AUTO_TEST_CASE(simple)
   BOOST_CHECK( !output.is_empty( false ) );
   BOOST_CHECK( output.is_equal( "**O\n*O-\nO--\n" ) );
 }
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:
