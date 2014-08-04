@@ -15,6 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file io_utils_p.hpp
+ *
+ * @brief I/O helper functions
+ *
+ * @author Mathias Soeken
+ * @since  1.0
+ */
+
 /** @cond */
 #ifndef IO_UTILS_P_HPP
 #define IO_UTILS_P_HPP

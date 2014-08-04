@@ -15,6 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file synthesis_utils_p.hpp
+ *
+ * @brief Synthesis helper functions
+ *
+ * @author Mathias Soeken
+ * @since  1.0
+ */
+
 /** @cond */
 #ifndef SYNTHESIS_UTILS_P_HPP
 #define SYNTHESIS_UTILS_P_HPP
