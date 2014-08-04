@@ -1,4 +1,4 @@
-/* RevKit (www.rekit.org)
+/* RevKit (www.revkit.org)
  * Copyright (C) 2009-2014  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
