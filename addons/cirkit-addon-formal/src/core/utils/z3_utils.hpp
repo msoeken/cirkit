@@ -19,6 +19,10 @@
  * @file z3_utils.hpp
  *
  * @brief Helper functions to extend the Z3 C++ API.
+ *
+ * @author  Mathias Soeken
+ * @author  Heinz Riener
+ * @version 2.0
  */
 
 #ifndef Z3_UTILS_HPP

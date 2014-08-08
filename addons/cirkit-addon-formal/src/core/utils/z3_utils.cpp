@@ -15,12 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file z3_utils.cpp
- *
- * @brief Helper functions to extend the Z3 C++ API.
- */
-
 #include "z3_utils.hpp"
 
 namespace cirkit
