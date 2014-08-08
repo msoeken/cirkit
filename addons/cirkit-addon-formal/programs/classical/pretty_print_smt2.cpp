@@ -31,6 +31,12 @@ void check_error( const z3::context& ctx )
   }
 }
 
+enum pp_style
+{
+  Z3        /* use Z3 specific commands */
+, SMTLIB2   /* use only standard SMT-LIB2 */
+}; // pp_style
+
 /*
  * SMT-LIB2 pretty printer based on
  * http://z3.codeplex.com/SourceControl/latest#examples/tptp/tptp5.cpp
@@ -39,7 +45,7 @@ void check_error( const z3::context& ctx )
 class pp_smt2
 {
 public:
-  pp_smt2( z3::context& ctx );
+  pp_smt2( z3::context& ctx, const pp_style style = SMTLIB2 );
 
   void collect_decls( const z3::expr& e );
   void collect_sort( const z3::sort& s );
@@ -55,14 +61,16 @@ private:
   void display_func_decl( std::ostream& os, const z3::func_decl& f ) const;
 
   z3::context& ctx;
+  const pp_style style;
   std::vector< z3::expr > todo;
   std::vector< z3::sort > sorts;
   std::vector< z3::func_decl > funs;
   std::set< unsigned > seen_ids;
 }; // pp_smt2
 
-pp_smt2::pp_smt2( z3::context& ctx )
-  : ctx(ctx) {}
+pp_smt2::pp_smt2( z3::context& ctx, const pp_style style )
+  : ctx(ctx)
+  , style(style) {}
 
 void pp_smt2::collect_decls( const z3::expr& e )
 {
@@ -169,7 +177,14 @@ void pp_smt2::display_func_decl( std::ostream& os, const z3::func_decl& f ) cons
   const std::string name = f.name().str();
   if ( f.is_const() )
   {
-    os << "(declare-const " << name << ' ';
+    if ( style == Z3 )
+    {
+      os << "(declare-const " << name << ' ';
+    }
+    else
+    {
+      os << "(declare-fun " << name << " () ";
+    }
     z3::sort srt( f.range() );
     display_sort( os, srt );
     os << ")" << std::endl;
@@ -210,7 +225,7 @@ void pp_smt2::display_func_decl( std::ostream& os, const z3::func_decl& f ) cons
 }
 
 
-void display_smt2( std::ostream& os, const std::string& filename, const bool simplify = false )
+void display_smt2( std::ostream& os, const std::string& filename, const pp_style style, const bool simplify = false )
 {
   z3::context ctx;
 
@@ -222,7 +237,7 @@ void display_smt2( std::ostream& os, const std::string& filename, const bool sim
     formula = formula.simplify();
   }
 
-  pp_smt2 pp( ctx );
+  pp_smt2 pp( ctx, style );
   pp.collect_decls( formula );
   pp.display_sort_decls( os );
   pp.display_func_decls( os );
@@ -256,6 +271,7 @@ int main( int argc, char ** argv )
     ( "filename",   value<std::string>( &filename ),   "SMT-LIB2 file" )
     ( "simplify,s",                                    "Simplify instance" )
     ( "no-rewrite,n",                                  "Disable instance rewriting" )
+    ( "allow-z3,z",                                    "Allow non-standard Z3 commands" )
     ;
   opts.parse( argc, argv );
 
@@ -270,7 +286,17 @@ int main( int argc, char ** argv )
     z3::set_param("pp.max_depth", 1000000);
   }
 
-  display_smt2( std::cout, filename, opts.is_set( "simplify" ) );
+  pp_style style;
+  if ( opts.is_set( "allow-z3" ) )
+  {
+    style = Z3;
+  }
+  else
+  {
+    style = SMTLIB2;
+  }
+
+  display_smt2( std::cout, filename, style, opts.is_set( "simplify" ) );
 
   return 0;
 }
