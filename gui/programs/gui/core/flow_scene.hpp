@@ -27,6 +27,9 @@ class FlowScenePortConnecter : public QObject
 
 public:
   FlowScenePortConnecter( QObject * parent = nullptr );
+
+Q_SIGNALS:
+  void edgeCreated(PortItem*, PortItem*);
 };
 
 class FlowSceneGraph : public QObject
