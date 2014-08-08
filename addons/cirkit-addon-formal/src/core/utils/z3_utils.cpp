@@ -16,9 +16,9 @@
  */
 
 /**
- * @file exact_synthesis.hpp
+ * @file z3_utils.cpp
  *
- * @brief Exact Synthesis of Reversible Networks
+ * @brief Helper functions to extend the Z3 C++ API.
  */
 
 #include "z3_utils.hpp"
@@ -26,23 +26,21 @@
 namespace cirkit
 {
 
-z3::expr operator<<( z3::expr const & a, z3::expr const & b )
+z3::expr operator<<( const z3::expr& a, const z3::expr& b )
 {
   check_context( a, b );
   assert( a.is_bv() && b.is_bv() );
   Z3_ast r = Z3_mk_bvshl( a.ctx(), a, b );
-  a.check_error();
-  return z3::expr( a.ctx(), r );
+  return z3::to_expr( a.ctx(), r );
 }
 
-z3::expr ite( z3::expr const & a, z3::expr const & b, z3::expr const & c )
+z3::expr ite( const z3::expr& a, const z3::expr& b, const z3::expr& c )
 {
   check_context( a, b );
   check_context( b, c );
   assert(a.is_bool());
   Z3_ast r = Z3_mk_ite( a.ctx(), a, b, c );
-  a.check_error();
-  return z3::expr( a.ctx(), r );
+  return z3::to_expr( a.ctx(), r );
 }
 
 boost::dynamic_bitset<> to_bitset( const z3::expr& a )
@@ -56,4 +54,6 @@ boost::dynamic_bitset<> to_bitset( const z3::expr& a )
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:
