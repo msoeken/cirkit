@@ -16,23 +16,23 @@
  */
 
 /**
- * @file exact_synthesis.hpp
+ * @file z3_utils.hpp
  *
- * @brief Exact Synthesis of Reversible Networks
+ * @brief Helper functions to extend the Z3 C++ API.
  */
 
 #ifndef Z3_UTILS_HPP
 #define Z3_UTILS_HPP
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <z3++.h>
+
+#include <boost/dynamic_bitset.hpp>
 
 namespace cirkit
 {
 
-z3::expr operator<<(z3::expr const & a, z3::expr const & b);
-z3::expr ite(z3::expr const & a, z3::expr const & b, z3::expr const & c);
+z3::expr operator<<(const z3::expr& a, const z3::expr& b);
+z3::expr ite(const z3::expr& a, const z3::expr& b, const z3::expr& c);
 boost::dynamic_bitset<> to_bitset( const z3::expr& a );
 
 }
@@ -41,4 +41,6 @@ boost::dynamic_bitset<> to_bitset( const z3::expr& a );
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:

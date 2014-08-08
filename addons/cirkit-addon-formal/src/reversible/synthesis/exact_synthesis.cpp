@@ -83,7 +83,7 @@ namespace cirkit
       {
         z3::expr hit = ctx.bool_const( str( format( "hit-%d-%d" ) % i % j ).c_str() );
         solver.add( hit == ((gate_values[i][j] & control) == control));
-        solver.add( gate_values[i + 1][j] == (gate_values[i][j] ^ (ite(hit, one, zero) << target)));
+        solver.add( gate_values[i + 1][j] == (gate_values[i][j] ^ (cirkit::ite(hit, one, zero) << target)));
       }
     }
 
