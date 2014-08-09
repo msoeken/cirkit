@@ -34,9 +34,6 @@ namespace cirkit
     bool has_in_specification = false;
     bool has_out_realization = false;
     bool has_costs = false;
-
-    boost::program_options::variables_map vm;
-    boost::program_options::positional_options_description pod;
   };
 
   reversible_program_options::reversible_program_options( unsigned line_length )
@@ -58,7 +55,7 @@ namespace cirkit
 
   bool reversible_program_options::good() const
   {
-    return ( program_options::good() && ( !d->has_in_realization || d->vm.count( "filename" ) ) && ( !d->has_in_specification || d->vm.count( "filename" ) ) );
+    return ( program_options::good() && ( !d->has_in_realization || is_set( "filename" ) ) && ( !d->has_in_specification || is_set( "filename" ) ) );
   }
 
   reversible_program_options& reversible_program_options::add_read_realization_option()
@@ -135,7 +132,7 @@ namespace cirkit
       return false;
     }
 
-    return d->vm.count( "realname" );
+    return is_set( "realname" );
   }
 }
 
