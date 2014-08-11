@@ -28,15 +28,6 @@ z3::expr operator<<( const z3::expr& a, const z3::expr& b )
   return z3::to_expr( a.ctx(), r );
 }
 
-z3::expr ite( const z3::expr& a, const z3::expr& b, const z3::expr& c )
-{
-  check_context( a, b );
-  check_context( b, c );
-  assert(a.is_bool());
-  Z3_ast r = Z3_mk_ite( a.ctx(), a, b, c );
-  return z3::to_expr( a.ctx(), r );
-}
-
 boost::dynamic_bitset<> to_bitset( const z3::expr& a )
 {
   std::stringstream s;

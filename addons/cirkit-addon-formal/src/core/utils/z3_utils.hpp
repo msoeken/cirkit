@@ -36,7 +36,6 @@ namespace cirkit
 {
 
 z3::expr operator<<(const z3::expr& a, const z3::expr& b);
-z3::expr ite(const z3::expr& a, const z3::expr& b, const z3::expr& c);
 boost::dynamic_bitset<> to_bitset( const z3::expr& a );
 
 }

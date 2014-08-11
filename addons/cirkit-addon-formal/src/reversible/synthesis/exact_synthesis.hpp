@@ -19,6 +19,11 @@
  * @file exact_synthesis.hpp
  *
  * @brief Exact Synthesis of Reversible Networks
+ *
+ * @author Mathias Soeken
+ * @author Oliver Keszöcze
+ * @author Stefan Frehse
+ * @since  2.0
  */
 
 #if ADDON_FORMAL
