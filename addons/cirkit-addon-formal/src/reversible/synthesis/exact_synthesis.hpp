@@ -53,22 +53,6 @@ namespace cirkit
    *     <td class="indexkey">Default Value</td>
    *   </tr>
    *   <tr>
-   *     <td rowspan="2" class="indexvalue">solver</td>
-   *     <td class="indexvalue">std::string</td>
-   *     <td class="indexvalue">"MiniSAT"</td>
-   *   </tr>
-   *   <tr>
-   *     <td colspan="2" class="indexvalue">The solver to be used in the approach.</td>
-   *   </tr>
-   *   <tr>
-   *     <td rowspan="2" class="indexvalue">spec_incremental</td>
-   *     <td class="indexvalue">bool</td>
-   *     <td class="indexvalue">true</td>
-   *   </tr>
-   *   <tr>
-   *     <td colspan="2" class="indexvalue">Specifies, whether the incremental encoding should be used.</td>
-   *   </tr>
-   *   <tr>
    *     <td rowspan="2" class="indexvalue">max_depth</td>
    *     <td class="indexvalue">unsigned</td>
    *     <td class="indexvalue">20u</td>
