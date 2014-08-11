@@ -134,6 +134,12 @@ namespace cirkit
     priv* const d;
   };
 
+  template<class T>
+  boost::program_options::typed_value<T>* value_with_default( T* v )
+  {
+    return boost::program_options::value( v )->default_value( *v );
+  }
+
 }
 
 #endif /* PROGRAM_OPTIONS_HPP */
