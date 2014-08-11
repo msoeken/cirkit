@@ -87,4 +87,6 @@ void foreach_function_with_max_variables( unsigned num_variables, _Fn&& __fn )
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:
