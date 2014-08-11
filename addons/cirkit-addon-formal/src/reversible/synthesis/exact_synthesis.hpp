@@ -23,7 +23,7 @@
  * @author Mathias Soeken
  * @author Oliver Keszöcze
  * @author Stefan Frehse
- * @since  2.0
+ * @since  1.0
  */
 
 #if ADDON_FORMAL
