@@ -26,16 +26,7 @@
 #include <reversible/utils/reversible_program_options.hpp>
 
 #include <reversible/simulation/simple_simulation.hpp>
-#include <reversible/synthesis/young_subgroup_synthesis.hpp>
-
-#include <classical/optimization/esop_minimization.hpp>
-#include <classical/optimization/exorcism_minimization.hpp>
-
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/adaptors.hpp>
+#include <reversible/synthesis/transformation_based_synthesis.hpp>
 
 using namespace cirkit;
 
@@ -43,18 +34,16 @@ int main( int argc, char ** argv )
 {
   using boost::program_options::value;
 
-  std::string ordering;
-  unsigned    esop_minimizer    = 0u;
+  bool bidirectional = true;
 
   reversible_program_options opts;
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
-    ( "ordering",            value<std::string>( &ordering ),                         "Complete variable ordering (space separated)" )
-    ( "print_circuit,c",                                                              "Prints the circuit" )
-    ( "print_truth_table,t",                                                          "Prints the truth table of the circuit" )
-    ( "esop_minimizer",      value<unsigned>( &esop_minimizer )->default_value( 0u ), "ESOP minizer (0: built-in, 1: exorcism)" )
-    ( "verbose,v",                                                                    "Be verbose" )
+    ( "bidirectional",       value<bool>( &bidirectional )->default_value( bidirectional ), "Bidirectional synthesis" )
+    ( "print_circuit,c",                                                                    "Prints the circuit" )
+    ( "print_truth_table,t",                                                                "Prints the truth table of the circuit" )
+    ( "verbose,v",                                                                          "Be verbose" )
     ;
 
   opts.parse( argc, argv );
@@ -71,24 +60,10 @@ int main( int argc, char ** argv )
   circuit circ;
   properties::ptr settings( new properties );
   properties::ptr statistics( new properties );
-  settings->set( "verbose", opts.is_set( "verbose" ) );
+  settings->set( "bidirectional", bidirectional );
+  settings->set( "verbose",       opts.is_set( "verbose" ) );
 
-  properties::ptr esopmin_settings( new properties );
-  esopmin_settings->set( "verbose", opts.is_set( "verbose" ) );
-  settings->set( "esopmin", esop_minimizer ? dd_based_exorcism_minimization_func( esopmin_settings ) : dd_based_esop_minimization_func( esopmin_settings ) );
-
-  if ( !ordering.empty() )
-  {
-    using boost::adaptors::transformed;
-
-    std::vector<std::string> vsordering;
-    boost::split( vsordering, ordering, boost::is_any_of( " " ) );
-    std::vector<unsigned> vuordering;
-    boost::push_back( vuordering, vsordering | transformed( []( const std::string& s ) { return boost::lexical_cast<unsigned>( s ); } ) );
-    settings->set( "ordering", vuordering );
-  }
-
-  young_subgroup_synthesis( circ, spec, settings, statistics );
+  transformation_based_synthesis( circ, spec, settings, statistics );
 
   if ( opts.is_set( "print_circuit" ) )
   {
