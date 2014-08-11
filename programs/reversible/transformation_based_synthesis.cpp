@@ -40,10 +40,10 @@ int main( int argc, char ** argv )
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
-    ( "bidirectional",       value<bool>( &bidirectional )->default_value( bidirectional ), "Bidirectional synthesis" )
-    ( "print_circuit,c",                                                                    "Prints the circuit" )
-    ( "print_truth_table,t",                                                                "Prints the truth table of the circuit" )
-    ( "verbose,v",                                                                          "Be verbose" )
+    ( "bidirectional",       value_with_default( &bidirectional ), "Bidirectional synthesis" )
+    ( "print_circuit,c",                                           "Prints the circuit" )
+    ( "print_truth_table,t",                                       "Prints the truth table of the circuit" )
+    ( "verbose,v",                                                 "Be verbose" )
     ;
 
   opts.parse( argc, argv );

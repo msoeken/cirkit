@@ -39,10 +39,10 @@ int main( int argc, char ** argv )
   reversible_program_options opts;
   opts.add_write_realization_option();
   opts.add_options()
-    ( "filename",           value<std::string>( &filename ),                 "PLA filename" )
-    ( "complemented_edges", value_with_default<bool>( &complemented_edges ), "Use complemented edges" )
-    ( "print_circuit,c",                                                     "Prints the circuit" )
-    ( "verbose,v",                                                           "Be verbose" )
+    ( "filename",           value( &filename ),                        "PLA filename" )
+    ( "complemented_edges", value_with_default( &complemented_edges ), "Use complemented edges" )
+    ( "print_circuit,c",                                               "Prints the circuit" )
+    ( "verbose,v",                                                     "Be verbose" )
     ;
 
   opts.parse( argc, argv );

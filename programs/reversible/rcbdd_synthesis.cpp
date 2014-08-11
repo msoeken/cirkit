@@ -49,13 +49,13 @@ int main( int argc, char ** argv )
   reversible_program_options opts;
   opts.add_write_realization_option();
   opts.add_options()
-    ( "filename",       value<std::string>( &filename ),                            "PLA filename" )
-    ( "mode",           value<unsigned>   ( &mode )->default_value( mode ),         "Mode (0: default, 1: swap, 2: hamming)" )
-    ( "embedded_pla",   value<std::string>( &embedded_pla ),                        "Filename of the embedded PLA file (default is empty)" )
-    ( "truth_table,t",                                                              "Prints truth table of embedded PLA (with constants and garbage)" )
-    ( "timeout",        value<unsigned>   ( &timeout  )->default_value( timeout ),  "Timeout in seconds" )
-    ( "esop_minimizer", value<unsigned>   ( &esop_minimizer )->default_value( 0u ), "ESOP minizer (0: built-in, 1: exorcism)" )
-    ( "verbose,v",                                                                  "Be verbose" )
+    ( "filename",       value( &filename ),                    "PLA filename" )
+    ( "mode",           value_with_default( &mode ),           "Mode (0: default, 1: swap, 2: hamming)" )
+    ( "embedded_pla",   value( &embedded_pla ),                "Filename of the embedded PLA file (default is empty)" )
+    ( "truth_table,t",                                         "Prints truth table of embedded PLA (with constants and garbage)" )
+    //    ( "timeout",        value_with_default( &timeout ),        "Timeout in seconds" )
+    ( "esop_minimizer", value_with_default( &esop_minimizer ), "ESOP minizer (0: built-in, 1: exorcism)" )
+    ( "verbose,v",                                             "Be verbose" )
     ;
   opts.parse( argc, argv );
 

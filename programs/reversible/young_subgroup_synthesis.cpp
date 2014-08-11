@@ -50,11 +50,11 @@ int main( int argc, char ** argv )
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
-    ( "ordering",            value<std::string>( &ordering ),                         "Complete variable ordering (space separated)" )
-    ( "print_circuit,c",                                                              "Prints the circuit" )
-    ( "print_truth_table,t",                                                          "Prints the truth table of the circuit" )
-    ( "esop_minimizer",      value<unsigned>( &esop_minimizer )->default_value( 0u ), "ESOP minizer (0: built-in, 1: exorcism)" )
-    ( "verbose,v",                                                                    "Be verbose" )
+    ( "ordering",            value( &ordering ),                    "Complete variable ordering (space separated)" )
+    ( "print_circuit,c",                                            "Prints the circuit" )
+    ( "print_truth_table,t",                                        "Prints the truth table of the circuit" )
+    ( "esop_minimizer",      value_with_default( &esop_minimizer ), "ESOP minizer (0: built-in, 1: exorcism)" )
+    ( "verbose,v",                                                  "Be verbose" )
     ;
 
   opts.parse( argc, argv );

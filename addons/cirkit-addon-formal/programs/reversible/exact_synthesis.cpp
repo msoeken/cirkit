@@ -45,12 +45,12 @@ int main( int argc, char ** argv )
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
-    ( "max_depth",           value_with_default<unsigned>( &max_depth ), "Maximum search depth" )
-    ( "print_circuit,c",                                                 "Prints the circuit" )
-    ( "print_truth_table,t",                                             "Prints the truth table of the circuit" )
-    ( "negative,n",                                                      "Allow negative control lines" )
-    ( "multiple,m",                                                      "Allow multiple target lines" )
-    ( "verbose,v",                                                       "Be verbose" )
+    ( "max_depth",           value_with_default( &max_depth ), "Maximum search depth" )
+    ( "print_circuit,c",                                       "Prints the circuit" )
+    ( "print_truth_table,t",                                   "Prints the truth table of the circuit" )
+    ( "negative,n",                                            "Allow negative control lines" )
+    ( "multiple,m",                                            "Allow multiple target lines" )
+    ( "verbose,v",                                             "Be verbose" )
     ;
 
   opts.parse( argc, argv );
