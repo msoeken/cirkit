@@ -44,20 +44,17 @@ int main( int argc, char ** argv )
   using boost::program_options::value;
 
   std::string ordering;
-  bool        print_circuit     = false;
-  bool        print_truth_table = false;
   unsigned    esop_minimizer    = 0u;
-  bool        verbose           = false;
 
   reversible_program_options opts;
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
-    ( "ordering",          value<std::string>( &ordering ),                           "Complete variable ordering (space separated)" )
-    ( "print_circuit",     value<bool>( &print_circuit )->default_value( false ),     "Prints the circuit" )
-    ( "print_truth_table", value<bool>( &print_truth_table )->default_value( false ), "Prints the truth table of the circuit" )
-    ( "esop_minimizer",    value<unsigned>( &esop_minimizer )->default_value( 0u ),   "ESOP minizer (0: built-in, 1: exorcism)" )
-    ( "verbose",           value<bool>( &verbose )->default_value( false ),           "Be verbose" )
+    ( "ordering",            value( &ordering ),                    "Complete variable ordering (space separated)" )
+    ( "print_circuit,c",                                            "Prints the circuit" )
+    ( "print_truth_table,t",                                        "Prints the truth table of the circuit" )
+    ( "esop_minimizer",      value_with_default( &esop_minimizer ), "ESOP minizer (0: built-in, 1: exorcism)" )
+    ( "verbose,v",                                                  "Be verbose" )
     ;
 
   opts.parse( argc, argv );
@@ -74,10 +71,10 @@ int main( int argc, char ** argv )
   circuit circ;
   properties::ptr settings( new properties );
   properties::ptr statistics( new properties );
-  settings->set( "verbose", verbose );
+  settings->set( "verbose", opts.is_set( "verbose" ) );
 
   properties::ptr esopmin_settings( new properties );
-  esopmin_settings->set( "verbose", verbose );
+  esopmin_settings->set( "verbose", opts.is_set( "verbose" ) );
   settings->set( "esopmin", esop_minimizer ? dd_based_exorcism_minimization_func( esopmin_settings ) : dd_based_esop_minimization_func( esopmin_settings ) );
 
   if ( !ordering.empty() )
@@ -93,12 +90,12 @@ int main( int argc, char ** argv )
 
   young_subgroup_synthesis( circ, spec, settings, statistics );
 
-  if ( print_circuit )
+  if ( opts.is_set( "print_circuit" ) )
   {
     std::cout << circ << std::endl;
   }
 
-  if ( print_truth_table )
+  if ( opts.is_set( "print_truth_table" ) )
   {
     binary_truth_table spec2;
     circuit_to_truth_table( circ, spec2, simple_simulation_func() );

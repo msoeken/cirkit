@@ -15,15 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @author Mathias Soeken
- * @author Oliver Keszöcze
- * @since  2.0
- */
-
 #include <iostream>
-
-#if ADDON_FORMAL
 
 #include <reversible/truth_table.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>
@@ -31,59 +23,47 @@
 #include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_realization.hpp>
-#include <reversible/simulation/simple_simulation.hpp>
-#include <reversible/synthesis/exact_synthesis.hpp>
 #include <reversible/utils/reversible_program_options.hpp>
+
+#include <reversible/synthesis/bdd_synthesis.hpp>
 
 using namespace cirkit;
 
 int main( int argc, char ** argv )
 {
-  unsigned max_depth = 20u;
+  using boost::program_options::value;
+
+  std::string filename;
+  bool complemented_edges = true;
 
   reversible_program_options opts;
-  opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
-    ( "max_depth",           value_with_default( &max_depth ), "Maximum search depth" )
-    ( "print_circuit,c",                                       "Prints the circuit" )
-    ( "print_truth_table,t",                                   "Prints the truth table of the circuit" )
-    ( "negative,n",                                            "Allow negative control lines" )
-    ( "multiple,m",                                            "Allow multiple target lines" )
-    ( "verbose,v",                                             "Be verbose" )
+    ( "filename",           value( &filename ),                        "PLA filename" )
+    ( "complemented_edges", value_with_default( &complemented_edges ), "Use complemented edges" )
+    ( "print_circuit,c",                                               "Prints the circuit" )
+    ( "verbose,v",                                                     "Be verbose" )
     ;
 
   opts.parse( argc, argv );
 
-  if ( !opts.good() )
+  if ( !opts.good() || !opts.is_set( "filename" ) )
   {
     std::cout << opts << std::endl;
     return 1;
   }
 
-  binary_truth_table spec;
-  read_specification( spec, opts.read_specification_filename() );
-
   circuit circ;
   properties::ptr settings( new properties );
-  settings->set( "max_depth", max_depth );
-  settings->set( "negative", opts.is_set( "negative" ) );
-  settings->set( "multiple", opts.is_set( "multiple" ) );
-  settings->set( "verbose", opts.is_set( "verbose" ) );
   properties::ptr statistics( new properties );
+  settings->set( "complemented_edges", complemented_edges );
+  settings->set( "verbose",            opts.is_set( "verbose" ) );
 
-  exact_synthesis( circ, spec, settings, statistics );
+  bdd_synthesis( circ, filename, settings, statistics );
 
   if ( opts.is_set( "print_circuit" ) )
   {
     std::cout << circ << std::endl;
-  }
-
-  if ( opts.is_set( "print_truth_table" ) )
-  {
-    binary_truth_table spec2;
-    circuit_to_truth_table( circ, spec2, simple_simulation_func() );
-    std::cout << spec2 << std::endl;
   }
 
   if ( opts.is_write_realization_filename_set() )
@@ -95,16 +75,6 @@ int main( int argc, char ** argv )
 
   return 0;
 }
-
-#else
-
-int main( int argc, char ** argv )
-{
-  std::cout << "[E] Addon `formal' is not installed." << std::endl;
-  return 1;
-}
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2

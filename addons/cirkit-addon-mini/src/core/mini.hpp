@@ -1,5 +1,5 @@
-/* RevKit: A Toolkit for Reversible Circuit Design (www.revkit.org)
- * Copyright (C) 2009-2014  The RevKit Developers <revkit@informatik.uni-bremen.de>
+/* RevKit (www.revkit.org)
+ * Copyright (C) 2009-2014  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,3 +31,9 @@ namespace cirkit
 }
 
 #endif
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:

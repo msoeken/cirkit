@@ -1,5 +1,5 @@
-/* RevKit: A Toolkit for Reversible Circuit Design (www.revkit.org)
- * Copyright (C) 2009-2011  The RevKit Developers <revkit@informatik.uni-bremen.de>
+/* RevKit (www.revkit.org)
+ * Copyright (C) 2009-2014  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,11 @@
  * @file exact_synthesis.hpp
  *
  * @brief Exact Synthesis of Reversible Networks
+ *
+ * @author Mathias Soeken
+ * @author Oliver Keszöcze
+ * @author Stefan Frehse
+ * @since  1.0
  */
 
 #if ADDON_FORMAL
@@ -46,22 +51,6 @@ namespace cirkit
    *     <td class="indexkey">Setting</td>
    *     <td class="indexkey">Type</td>
    *     <td class="indexkey">Default Value</td>
-   *   </tr>
-   *   <tr>
-   *     <td rowspan="2" class="indexvalue">solver</td>
-   *     <td class="indexvalue">std::string</td>
-   *     <td class="indexvalue">"MiniSAT"</td>
-   *   </tr>
-   *   <tr>
-   *     <td colspan="2" class="indexvalue">The solver to be used in the approach.</td>
-   *   </tr>
-   *   <tr>
-   *     <td rowspan="2" class="indexvalue">spec_incremental</td>
-   *     <td class="indexvalue">bool</td>
-   *     <td class="indexvalue">true</td>
-   *   </tr>
-   *   <tr>
-   *     <td colspan="2" class="indexvalue">Specifies, whether the incremental encoding should be used.</td>
    *   </tr>
    *   <tr>
    *     <td rowspan="2" class="indexvalue">max_depth</td>
@@ -116,4 +105,6 @@ namespace cirkit
 
 // Local Variables:
 // c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
 // End:
