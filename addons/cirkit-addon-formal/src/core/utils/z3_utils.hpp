@@ -1,5 +1,5 @@
-/* RevKit: A Toolkit for Reversible Circuit Design (www.revkit.org)
- * Copyright (C) 2009-2011  The RevKit Developers <revkit@informatik.uni-bremen.de>
+/* RevKit (www.revkit.org)
+ * Copyright (C) 2009-2014  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,11 @@
 namespace cirkit
 {
 
+void check_error( const z3::context& ctx );
 z3::expr operator<<(const z3::expr& a, const z3::expr& b);
-z3::expr ite(const z3::expr& a, const z3::expr& b, const z3::expr& c);
 boost::dynamic_bitset<> to_bitset( const z3::expr& a );
+const bool expr_to_bool( const z3::expr& e );
+const std::string expr_to_bin( const z3::expr &e );
 
 }
 
