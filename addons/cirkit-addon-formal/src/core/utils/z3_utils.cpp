@@ -17,8 +17,25 @@
 
 #include "z3_utils.hpp"
 
+#include <iostream>
+
 namespace cirkit
 {
+
+/*
+ * Based on
+ *   http://z3.codeplex.com/SourceControl/latest#examples/tptp/tptp5.cpp
+ *   (branch: unstable)
+ */
+void check_error( const z3::context& ctx )
+{
+  const Z3_error_code e = Z3_get_error_code( ctx );
+  if ( e != Z3_OK )
+  {
+    std::cerr << Z3_get_error_msg_ex( ctx, e ) << std::endl;
+    exit(1);
+  }
+}
 
 z3::expr operator<<( const z3::expr& a, const z3::expr& b )
 {
@@ -33,6 +50,26 @@ boost::dynamic_bitset<> to_bitset( const z3::expr& a )
   std::stringstream s;
   s << a;
   return boost::dynamic_bitset<>( s.str().substr( 2u ) );
+}
+
+const bool expr_to_bool( const z3::expr& e )
+{
+  assert( e.decl().decl_kind() == Z3_OP_TRUE ||
+          e.decl().decl_kind() == Z3_OP_FALSE );
+  std::ostringstream ss; ss << e;
+  assert( ss.str() == "true" || ss.str() == "false" );
+  return ( ss.str() == "true" );
+}
+
+const std::string expr_to_bin( const z3::expr &e )
+{
+  assert( e.decl().decl_kind() == Z3_OP_BNUM );
+  std::ostringstream ss; ss << e;
+  std::string val = ss.str();
+  assert( val[0] == '#' && val[1] == 'b' );
+  val = val.substr(2, val.size()-2);
+  assert( val.size() == e.decl().range().bv_size() );
+  return val;
 }
 
 }
