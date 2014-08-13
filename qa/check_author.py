@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+import fnmatch
+import os
+from termcolor import colored
+
+count = 0; total = 0
+for top in ["src"]:
+    for root, dirnames, filenames in os.walk( top ):
+        for filename in fnmatch.filter( filenames, "*.hpp" ):
+            name = os.path.join( root, filename )
+            lines = [line for line in open( name, "r" ).readlines() if line.find( "@author" ) >= 0]
+
+            if len( lines ) == 0:
+                print( "{0} File {1} does not contain an author.".format( colored( '[E]', 'red', attrs = ['bold'] ), colored( name, 'green' ) ) )
+                count += 1
+            total += 1
+
+print( "{0} {1} from {2} files do not contain an author.".format( colored( '[I]', 'white', attrs = ['bold'] ), count, total ) )
