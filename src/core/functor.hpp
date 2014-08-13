@@ -79,26 +79,6 @@ namespace cirkit
     /**
      * @brief Initializes the settings and statistics fields.
      *
-     * This method is usually called by the functor creation function
-     * to assign the settings and statistics data, e.g. in swop_func:
-     *
-     * @code
-     * typedef functor<bool(circuit&, const binary_truth_table&)> truth_table_synthesis_func;
-     *
-     * ...
-     *
-     * truth_table_synthesis_func swop_func( properties::ptr settings, properties::ptr statistics )
-     * {
-     *   truth_table_synthesis_func f = boost::bind( swop, _1, settings, statistics );
-     *   f.init( settings, statistics );
-     *   return f;
-     * }
-     * @endcode
-     * In this example, the settings and statistics objects are given as parameters to the swop function
-     * in the boost::bind expression, so that they are available when calling the algorithm. Further
-     * they are passed to the functor explicitly via init() to make them available using the functor,
-     * e.g. in other algorithms.
-     *
      * @param settings Settings properties
      * @param statistics Statistics properties
      *
