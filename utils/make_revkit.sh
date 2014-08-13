@@ -28,6 +28,15 @@ do
     mv revkit-$VERSION/addons/cirkit-addon-$d revkit-$VERSION/addons/revkit-addon-$d
 done
 
+echo -e "\e[1;37m[I]\e[0m Deleting \e[0;32m.gitignore\e[0m file"
+
+rm -Rf revkit-$VERSION/.gitignore
+
+echo -e "\e[1;37m[I]\e[0m Deleting \e[0;32mutils\e[0m and \e[0;32mqa\e[0m directory"
+
+rm -Rf revkit-$VERSION/utils
+rm -Rf revkit-$VERSION/qa
+
 echo -e "\e[1;37m[I]\e[0m Deleting GUI"
 
 rm -Rf revkit-$VERSION/gui/programs/gui
