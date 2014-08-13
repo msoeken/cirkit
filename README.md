@@ -27,3 +27,7 @@ To build the GUI perform the following steps from the base directory
     cd build
     cmake ..
     make
+
+## Build CirKit Addons
+
+The easiest way to enable addons is by typing `ccmake ..' in the build directory
