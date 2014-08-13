@@ -28,9 +28,9 @@
 #ifndef Z3_UTILS_HPP
 #define Z3_UTILS_HPP
 
-#include <z3++.h>
-
 #include <boost/dynamic_bitset.hpp>
+
+#include <z3++.h>
 
 namespace cirkit
 {
