@@ -20,8 +20,8 @@
  *
  * @brief Linear nearest Neighbor
  *
- * @author Aaron Lye
- * @since  2.0
+ * @author  Aaron Lye
+ * @version 2.0
  */
 
 #ifndef LNN_OPTIMIZATION_HPP
@@ -31,7 +31,6 @@
 
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>
-
 #include <reversible/optimization/optimization.hpp>
 
 namespace cirkit
@@ -42,7 +41,6 @@ namespace cirkit
  *
  * Algorith implements a linear nearest neighbor approach
  *
- * @since 2.0
  */
 bool lnn_optimization( circuit& circ, const circuit& base, properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() );
 
@@ -54,7 +52,6 @@ bool lnn_optimization( circuit& circ, const circuit& base, properties::ptr setti
  *
  * @return A functor which complies with the optimization_func interface
  *
- * @since 2.0
  */
 optimization_func lnn_optimization_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
 
