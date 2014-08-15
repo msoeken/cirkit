@@ -95,6 +95,8 @@ bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_
       }
     }
   }
+
+  return true;
 }
 
 bool pla_parser( const std::string& filename, pla_processor& reader, bool skip_after_first_cube )

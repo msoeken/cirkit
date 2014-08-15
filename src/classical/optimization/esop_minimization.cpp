@@ -176,7 +176,7 @@ public:
     _cubes += cube;
   }
 
-  bool remove_from_distance_list( cube_pair_list_t& l, unsigned cubeid, bool remove_first = true, bool remove_second = true )
+  void remove_from_distance_list( cube_pair_list_t& l, unsigned cubeid, bool remove_first = true, bool remove_second = true )
   {
     l.remove_if( [&cubeid, &remove_first, &remove_second]( const std::pair<unsigned, unsigned>& p ) {
         return ( remove_first && p.first == cubeid ) || ( remove_second && p.second == cubeid );
@@ -188,7 +188,7 @@ public:
     }
   }
 
-  bool remove_cube( unsigned cubeid )
+  void remove_cube( unsigned cubeid )
   {
     _cubes.erase( _cubes.begin() + cubeid );
 
