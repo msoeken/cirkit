@@ -145,7 +145,7 @@ namespace cirkit
 
   void create_tikz_settings::draw_line( std::ostream& os, float x1, float x2, float y ) const
   {
-    os << boost::format( "\\draw[line width=%f] (%f,%f) -- (%f,%f);" ) % line_width % x1 % y % x2 % y << std::endl;
+    os << boost::format( "\\draw[line width=%.2f] (%.2f,%.2f) -- (%.2f,%.2f);" ) % line_width % x1 % y % x2 % y << std::endl;
   }
 
   void create_tikz_settings::draw_input( std::ostream& os, float x, float y, const std::string& text, bool is_constant ) const
@@ -155,7 +155,7 @@ namespace cirkit
     {
       input = "$" + input + "$";
     }
-    os << boost::format( "\\draw (%f,%f) node [left] {%s%s};" ) % ( x - 0.1 ) % y % ( is_constant ? "\\color{red}" : "" ) % input << std::endl;
+    os << boost::format( "\\draw (%.2f,%.2f) node [left] {%s%s};" ) % ( x - 0.1 ) % y % ( is_constant ? "\\color{red}" : "" ) % input << std::endl;
   }
 
   void create_tikz_settings::draw_output( std::ostream& os, float x, float y, const std::string& text, bool is_garbage ) const
@@ -165,12 +165,12 @@ namespace cirkit
     {
       output = "$" + output + "$";
     }
-    os << boost::format( "\\draw (%f,%f) node [right] {%s};" ) % ( x + 0.1 ) % y % output << std::endl;
+    os << boost::format( "\\draw (%.2f,%.2f) node [right] {%s};" ) % ( x + 0.1 ) % y % output << std::endl;
   }
 
   void create_tikz_settings::draw_control( std::ostream& os, float x, float y, bool polarity ) const
   {
-    os << boost::format( "\\draw[fill%s] (%f,%f) circle (%f);" ) % ( polarity ? "" : "=white" ) % x % y % control_radius << std::endl;
+    os << boost::format( "\\draw[fill%s] (%.2f,%.2f) circle (%.2f);" ) % ( polarity ? "" : "=white" ) % x % y % control_radius << std::endl;
   }
 
   void create_tikz_settings::draw_targets( std::ostream& os, float x, const std::vector<float>& ys, const boost::any& target_tag ) const
@@ -197,7 +197,7 @@ namespace cirkit
 
   void create_tikz_settings::draw_gate_line( std::ostream& os, float x, float y1, float y2 ) const
   {
-    os << boost::format( "\\draw[line width=%f] (%f,%f) -- (%f,%f);" ) % line_width % x % y1 % x % y2 << std::endl;
+    os << boost::format( "\\draw[line width=%.2f] (%.2f,%.2f) -- (%.2f,%.2f);" ) % line_width % x % y1 % x % y2 << std::endl;
   }
 
   void create_tikz_settings::draw_end( std::ostream& os ) const
