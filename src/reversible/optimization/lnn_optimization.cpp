@@ -28,7 +28,7 @@
 #include <reversible/functions/add_gates.hpp>
 
 #include <stack>
-#include <limits.h>
+#include <climits>
 
 #define COUT_NUM_SWAPS
 
