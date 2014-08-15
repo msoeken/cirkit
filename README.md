@@ -31,3 +31,8 @@ To build the GUI perform the following steps from the base directory
 ## Build CirKit Addons
 
 The easiest way to enable addons is by typing `ccmake ..' in the build directory
+
+## Executing CirKit Programs
+
+Executables can be found in the directory `build/programs'. Form the build
+directory call e.g. `programs/circuit_info'
