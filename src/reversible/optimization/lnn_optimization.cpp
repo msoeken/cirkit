@@ -30,8 +30,6 @@
 #include <stack>
 #include <climits>
 
-#define COUT_NUM_SWAPS
-
 namespace cirkit
 {
 
@@ -43,7 +41,6 @@ namespace cirkit
     LNN_OPTIMIZATION_NAIVE,
     LNN_OPTIMIZATION_LOCAL_REORDER,
     LNN_OPTIMIZATION_GLOBAL_REORDER,
-    //LNN_OPTIMIZATION_ALTERNATING_GLOBAL_REORDER
   };
 
   /**
@@ -605,52 +602,57 @@ unsigned apply_global_reordering_scheme( circuit& circ, const circuit& base) {
 
   /**
    * @brief Applies the linear nearest neighbor optimization to a quantum circuit. Different modes are possible.
-      The global and local reordering scheme have been introduced in ...
-   *
+      The global and local reordering scheme have been introduced in [\ref SWD10].
+   *  reordering mode:
+   *  1: naive, 2: local reordering, 3: global reordering
    *
    */
   bool lnn_optimization( circuit& circ, const circuit& base, properties::ptr settings, properties::ptr statistics )
   {
-    unsigned selection_input = get<unsigned>(settings, "reordering", 0u);
+    /* settings */
+    bool verbose = get(settings, "verbose", false);
+    /*  1: naive, 2: local reordering, 3: global reordering */
+    unsigned reordering_mode = get<unsigned>(settings, "reordering_mode", 0u);
+    
     // Run-time measuring
     timer<properties_timer> t;
 
-    if ( statistics )
-    {
+    if ( statistics ){
         properties_timer rt( statistics );
         t.start( rt );
     }
 
     unsigned number_of_swaps;
-    switch(selection_input) {
+    switch(reordering_mode) {
     case LNN_OPTIMIZATION_NONE:
       copy_circuit(base,circ);
       number_of_swaps = NNC(base)*2;
       break;
     case LNN_OPTIMIZATION_NAIVE:
       if(NNC(base) == 0)
-  copy_circuit(base,circ);
+	copy_circuit(base,circ);
       else
-  number_of_swaps = apply_naive_scheme(circ,base);
+	number_of_swaps = apply_naive_scheme(circ,base);
       break;
     case LNN_OPTIMIZATION_LOCAL_REORDER:
       if(NNC(base) == 0)
-  copy_circuit(base,circ);
+	copy_circuit(base,circ);
       else
-  number_of_swaps = apply_local_reordering_scheme(circ, base);
+	number_of_swaps = apply_local_reordering_scheme(circ, base);
       break;
     case LNN_OPTIMIZATION_GLOBAL_REORDER:
       number_of_swaps = apply_global_reordering_scheme(circ, base);
       break;
 
     default:
-      //std::cout << "invalid mode." << std::endl;
+      if(verbose)
+	std::cout << "invalid mode." << std::endl;
       return false;
     }
 
-    #ifdef COUT_NUM_SWAPS
-    std::cout << number_of_swaps << std::endl;
-    #endif
+    if(verbose)
+      std::cout << "SWAP gates: " << number_of_swaps << std::endl;
+    
     return true;
 }
 
@@ -662,78 +664,6 @@ optimization_func lnn_optimization_func( properties::ptr settings, properties::p
     f.init( settings, statistics );
     return f;
 }
-
-
-//alternative approach
-  unsigned inner_alternating_global_reordering( circuit& circ) {
-    // resort: set the line with the highest NNC impact in the middle. if the selected line is allready the middle line, select the second highest, and so on. alternating position infront and behind the middle line
-
-    auto impact = calculate_impact(circ);
-    std::sort(impact.begin(), impact.end());
-    unsigned retNNC; //return Value
-    unsigned allocation[circ.lines()];
-
-    bool oddnumlines = circ.lines()%2;
-    if(!oddnumlines){
-      //case 1: circ.lines()/2
-      for(unsigned i = 0, pos = circ.lines()/2; i<circ.lines(); ++i) {
-  i%2 ? pos-=i :pos+=i;
-  allocation[pos] = impact[i].second;
-      }
-      circuit newcirc;
-      copy_metadata(circ,newcirc);
-      for( const auto& cg : circ)
-  newcirc.append_gate() = transform_gate(cg, allocation);
-
-      //case 2: circ.lines()/2 -1
-      unsigned allocation2[circ.lines()];
-      for(unsigned i = 0, pos = circ.lines()/2 -1 ; i<circ.lines(); ++i) {
-  i%2 ? pos+=i :pos-=i;
-  allocation2[pos] = impact[i].second;
-      }
-      circuit newcirc2;
-      copy_metadata(circ,newcirc2);
-      for( const auto& cg : circ)
-  newcirc2.append_gate() = transform_gate(cg, allocation2);
-
-      unsigned NNC1 = NNC(newcirc);
-      unsigned NNC2 = NNC(newcirc2);
-
-      if(NNC2 < NNC1){
-  circ = newcirc2;
-  retNNC = NNC2;
-  for(int i = 0; i<circ.lines(); i++)
-    allocation[i] = allocation2[i];
-      }
-      else{
-  circ = newcirc;
-  retNNC = NNC1;
-      }
-
-    }else{
-      for(unsigned i = 0, pos = circ.lines()/2; i<circ.lines(); ++i) {
-  i%2 ? pos-=i :pos+=i;
-  allocation[pos] = impact[i].second;
-      }
-
-      circuit newcirc;
-      copy_metadata(circ,newcirc);
-      for( const auto& cg : circ)
-  newcirc.append_gate() = transform_gate(cg, allocation);
-      circ = newcirc;
-      retNNC = NNC(circ);
-    }
-
-    permute_outputs_and_garbage_lines(circ, allocation, circ.lines());
-    permute_inputs_and_constant_inputs(circ, allocation, circ.lines());
-
-    return retNNC;
-}
-unsigned apply_alternating_global_reordering_scheme(circuit& circ, const circuit& base){
-  copy_circuit(base,circ);
-  return inner_alternating_global_reordering(circ);
-}
-
 }
 
 // Local Variables:
