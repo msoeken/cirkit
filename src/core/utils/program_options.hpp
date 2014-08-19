@@ -29,8 +29,6 @@
 
 #include <boost/program_options.hpp>
 
-#include <reversible/utils/costs.hpp>
-
 namespace cirkit
 {
 
