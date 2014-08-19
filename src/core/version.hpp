@@ -24,6 +24,9 @@
  * @since  1.1
  */
 
+#ifndef VERSION_HPP
+#define VERSION_HPP
+
 namespace cirkit
 {
 
@@ -39,6 +42,8 @@ namespace cirkit
   const char* cirkit_version();
 
 }
+
+#endif /* VERSION_HPP */
 
 // Local Variables:
 // c-basic-offset: 2
