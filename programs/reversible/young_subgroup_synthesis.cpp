@@ -17,6 +17,8 @@
 
 #include <iostream>
 
+#include <core/utils/string_utils.hpp>
+
 #include <reversible/truth_table.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>
 #include <reversible/io/print_circuit.hpp>
@@ -30,12 +32,6 @@
 
 #include <classical/optimization/esop_minimization.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
-
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/adaptors.hpp>
 
 using namespace cirkit;
 
@@ -79,12 +75,8 @@ int main( int argc, char ** argv )
 
   if ( !ordering.empty() )
   {
-    using boost::adaptors::transformed;
-
-    std::vector<std::string> vsordering;
-    boost::split( vsordering, ordering, boost::is_any_of( " " ) );
     std::vector<unsigned> vuordering;
-    boost::push_back( vuordering, vsordering | transformed( []( const std::string& s ) { return boost::lexical_cast<unsigned>( s ); } ) );
+    parse_string_list( vuordering, ordering );
     settings->set( "ordering", vuordering );
   }
 
