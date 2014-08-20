@@ -140,6 +140,9 @@ namespace cirkit
       return false;
     }
 
+    // Check ordering
+    assert( settings.ordering.empty() || settings.ordering.size() == *pla.num_inputs );
+
     // Inputs
     boost::transform( pla.input_labels,
                       std::back_inserter( bdd.inputs ),
@@ -169,7 +172,7 @@ namespace cirkit
       {
         if ( in[i] == '-' ) continue;
 
-        var = bdd.inputs[i].second;
+        var = settings.ordering.empty() ? bdd.inputs[i].second : bdd.inputs[settings.ordering[i]].second;
         Cudd_Ref( var );
         if ( in[i] == '0' ) var = Cudd_Not( var );
         tmp = Cudd_bddAnd( bdd.cudd, prod, var );

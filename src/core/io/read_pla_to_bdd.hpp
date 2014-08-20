@@ -99,6 +99,7 @@ namespace cirkit
   struct read_pla_to_bdd_settings
   {
     std::function<DdNode*(DdManager*, unsigned)> input_generation_func = []( DdManager* manager, unsigned pos ) { return Cudd_bddNewVar( manager ); };
+    std::vector<unsigned> ordering;
   };
 
   /**
