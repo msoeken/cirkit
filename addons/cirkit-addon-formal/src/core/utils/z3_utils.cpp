@@ -61,15 +61,57 @@ const bool expr_to_bool( const z3::expr& e )
   return ( ss.str() == "true" );
 }
 
+/*
+ * Based on metaSMT's
+ *   result_type operator() (bvtags::bvhex_tag,boost::any arg) in
+ *   ''Z3_Backend.hpp''.
+ */
+std::string hex_string_to_bin_string( const std::string& hex )
+{
+  std::string bin( 4u*hex.size(), '\0' );
+  for ( unsigned i = 0; i < hex.size(); ++i )
+  {
+    switch ( tolower( hex[i] ) )
+    {
+    case '0': bin.replace( 4u*i, 4u, "0000" ); break;
+    case '1': bin.replace( 4u*i, 4u, "0001" ); break;
+    case '2': bin.replace( 4u*i, 4u, "0010" ); break;
+    case '3': bin.replace( 4u*i, 4u, "0011" ); break;
+    case '4': bin.replace( 4u*i, 4u, "0100" ); break;
+    case '5': bin.replace( 4u*i, 4u, "0101" ); break;
+    case '6': bin.replace( 4u*i, 4u, "0110" ); break;
+    case '7': bin.replace( 4u*i, 4u, "0111" ); break;
+    case '8': bin.replace( 4u*i, 4u, "1000" ); break;
+    case '9': bin.replace( 4u*i, 4u, "1001" ); break;
+    case 'a': bin.replace( 4u*i, 4u, "1010" ); break;
+    case 'b': bin.replace( 4u*i, 4u, "1011" ); break;
+    case 'c': bin.replace( 4u*i, 4u, "1100" ); break;
+    case 'd': bin.replace( 4u*i, 4u, "1101" ); break;
+    case 'e': bin.replace( 4u*i, 4u, "1110" ); break;
+    case 'f': bin.replace( 4u*i, 4u, "1111" ); break;
+    }
+  }
+  return bin;
+}
+
 const std::string expr_to_bin( const z3::expr &e )
 {
   assert( e.decl().decl_kind() == Z3_OP_BNUM );
   std::ostringstream ss; ss << e;
   std::string val = ss.str();
-  assert( val[0] == '#' && val[1] == 'b' );
-  val = val.substr(2, val.size()-2);
-  assert( val.size() == e.decl().range().bv_size() );
-  return val;
+  if ( val[0] == '#' && val[1] == 'b' )
+  {
+    assert( val[0] == '#' && val[1] == 'b' );
+    val = val.substr(2, val.size()-2);
+    assert( val.size() == e.decl().range().bv_size() );
+    return val;
+  }
+  else
+  {
+    assert ( val[0] == '#' && val[1] == 'x' );
+    val = val.substr(2, val.size()-2);
+    return hex_string_to_bin_string( val );
+  }
 }
 
 }
