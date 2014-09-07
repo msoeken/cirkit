@@ -5,4 +5,5 @@ ext/lib
 ext/circuits
 ext/functions
 ext/bin
+ext/share
 tmp
