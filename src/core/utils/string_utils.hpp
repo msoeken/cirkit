@@ -31,6 +31,7 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/adaptors.hpp>
@@ -45,8 +46,11 @@ void parse_string_list( std::vector<T>& list, const std::string& s, const std::s
 
   if ( s.empty() ) return;
 
+  std::string s_copy = s;
+  boost::trim( s_copy );
+
   std::vector<std::string> str_list;
-  boost::split( str_list, s, boost::is_any_of( delimiter ) );
+  boost::split( str_list, s_copy, boost::is_any_of( delimiter ), boost::algorithm::token_compress_on );
   boost::push_back( list, str_list | transformed( []( const std::string& s ) { return boost::lexical_cast<T>( s ); } ) );
 }
 
