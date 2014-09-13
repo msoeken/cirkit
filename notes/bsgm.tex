@@ -22,22 +22,16 @@
 \def\eqmap{2}
 \def\eqexva{3}
 \def\eqfuncsem{4}
-\def\eqinjsem{5}
-\def\eqhvar{6}
-\def\eqhmatrix{7}
-\def\eqhjl{8}
-\def\eqttrue{9}
-\def\eqtfalse{10}
-\def\eqhclause{11}
-\def\eqonehota{12}
-\def\eqonehotb{13}
-\def\eqsinza{14}
-\def\eqsinzb{15}
-\def\eqcceq{16}
-\def\eqinjsemca{17}
-\def\eqinjsemcb{18}
-\def\eqinjsemcc{19}
-\def\eqinjsemcd{20}
+\def\eqonehota{5}
+\def\eqonehotb{6}
+\def\eqinjsem{7}
+\def\eqonehotc{8}
+\def\eqhvar{9}
+\def\eqhmatrix{10}
+\def\eqhjl{11}
+\def\eqttrue{12}
+\def\eqtfalse{13}
+\def\eqhclause{14}
 
 \centerline{\bf Reverse engineering using simulation graphs and bipartite subgraph isomorphism}
 \centerline{Mathias Soeken, University of Bremen}
@@ -127,19 +121,25 @@ comprehensibility.)
 This equivalent formulation makes it easy for us to describe the satisfiability
 function $f$.  The function $v$ is described by $mn$ variables $v_{j,i}$ such
 that $v(j)=i$ if and only if $v_{j,i}=1$ for all $1\le j\le m$ and $1\le i\le
-n$; in other words we have $v_{j,v(j)}=1$.  To ensure function semantics and
-injectivity of $v$, the clauses for the Boolean functions
+n$; in other words we have $v_{j,v(j)}=1$.  To ensure function semantics,
+i.e.~that each value $v(j)$ has exactly one value clauses for the Boolean
+functions
 $$ S_1(v_{j,1}, \dots, v_{j,n}) \qquad\hbox{for $1\le j\le m$} \eqno(\eqfuncsem) $$
-and
-$$ S_m(v_{1,1}\lor\cdots\lor v_{m,1}, v_{1,2}\lor\cdots\lor v_{m,2}, \dots, v_{1,n}\lor\cdots\lor v_{m,n}) \eqno(\eqinjsem) $$
-are contained in $f$, respectively.  ($S_m(x_1,\dots,x_n)$ describes the
-symmetric Boolean function that is true if and only if $k$ of the $n$ variables
-are true; see Eq.~7.1.1-({\oldstyle90}) in TAOCP.)  Notice that due to
-(\eqfuncsem) at most $m$ of the clauses in (\eqinjsem) can be true; the
-cardinality constraint ensures that {\it exactly\/} $m$ clauses will be true.
+are added.  ($S_1(x_1,\dots,x_n)$ describes the symmetric Boolean function that
+are true if and only if exactly one of the $n$ variables is true; see
+Eq.~7.1.1-({\oldstyle90}) in TAOCP.)  The encoding is sometimes referred to as
+{\it one hot encoding\/} and can be enforced by the clauses
+$$ v_{j,1}\lor\cdots\lor v_{j,n} \qquad \hbox{for $1\le j\le m$} \eqno(\eqonehota) $$
+to ensure that at least one bit is set to 1 and by the exclusion clauses
+$$ \bar v_{j,i}\lor \bar v_{j,i'} \qquad \hbox{for $1\le j\le m$ and $1\le i<i'\le n$}. \eqno(\eqonehotb) $$
+The injectivity property can be enforced by adding clauses for the functions
+$$ S_{\le1}(v_{1,i},\dots,v_{m,i}) \qquad\hbox{for $1\le i\le n$}. \eqno(\eqinjsem) $$
+This ensures that for each $i\in\{1,\dots,n\}$ there is at most one $j$ such
+that $v(j)=i$ and can be encoded using only the exclusion clauses
+$$ \bar v_{j,i}\lor \bar v_{j',i} \qquad \hbox{for $1\le j<j'\le m$ and $1\le i\le n$}. \eqno(\eqonehotc) $$
 Analogously, $rq$ variables $a_{l,k}$ describe function $a$ for $1\le j\le r$
-and $1\le k\le q$ and similar clauses as (\eqfuncsem) and (\eqinjsem) in $f$
-ensure the correct semantics.
+and $1\le k\le q$ and similar clauses to (\eqonehota), (\eqonehotb), and
+(\eqonehotc) ensure the correct semantics.
 
 We are now getting to the core of (\eqmap).  We will eventually add clauses for
 all function values of $v$ and $a$, i.e.~for all combinations of
@@ -208,56 +208,6 @@ $g^{(i)}_k$ are constant in (\eqhvar) we make a case distinction on them.  If
 $g^{(i)}_k=0$ we just add the unit clause $\bar h_{i,j,k,l}$ and if
 $g^{(i)}_k=1$, we add the three clauses
 $$ (h_{i,j,k,l}\lor \bar v_{j,i} \lor \bar a_{l,k}) \land (\bar h_{i,j,k,l}\lor v_{j,i}) \land (\bar h_{i,j,k,l} \lor a_{l,k}). \eqno(\eqhclause) $$
-
-\medskip\noindent{\bf Cardinality constraints.}  We are done with the main work,
-but we need to have a closer look into the cardinality constraints that occur in
-(\eqfuncsem) and (\eqinjsem).  The one hot encoding that is enfored by
-(\eqfuncsem) is readily achieved by the clauses
-$$ v_{j,1}\lor\cdots\lor v_{j,n} \qquad \hbox{for $1\le j\le m$} \eqno(\eqonehota) $$
-to ensure that at least one bit is set to 1 and by the exclusion clauses
-$$ \bar v_{j,i}\lor \bar v_{j,i'} \qquad \hbox{for $1\le j\le m$ and $1\le i<i'\le n$}. \eqno(\eqonehotb) $$
-For (\eqinjsem) a bit more work is required.  Since the arguments to $S_m$ are
-clauses, encodings for cardinality constraints need to be slightly
-adjusted. C.~Sinz has shown in [{\sl LNCS\/ \bf 3709} (2005), 827--831] that
-$S_{\le m}(x_1,\dots,x_n)$ can be expressed by introducing $(n-m)m$ auxiliary
-variables $s_i^k$ for $1\le i\le n-m$ and $1\le k\le m$ and the clauses
-$$
-  \displ@y\tabskip\centering\halign to\displaywidth{%
-    \hfil $\@lign\displaystyle {#}$\hfil\tabskip \z@skip &\qquad#\hfil\tabskip\centering &\llap{$\@lign #$}\tabskip \z@skip \crcr
-    \bar s^k_i \lor s^k_{i+1}, & for $1\le i< n-m$ and $1\le k\le m$, &(\eqsinza) \cr
-    \bar x_{i+k} \lor \bar s^k_i \lor s^{k+1}_i, & for $1\le i\le n-m$ and $0\le k\le m,$ &(\eqsinzb)
-    \crcr
-  }
-$$
-where $\bar s^k_i$ is omitted when $k=0$ and $s^{k+1}_i$ is omitted when $k=m$.
-The constraint can be used to derive cardinality constraints for a lower bound
-$S_{\ge m}(x_1,\dots,x_n) = S_{\le n-m}(\bar x_1,\dots,\bar x_n)$ and for an
-exact bound as required by (\eqinjsem):
-$$\eqalign{S_m(x_1,\dots,x_n) & = S_{\le m}(x_1,\dots,x_n)\land S_{\ge m}(x_1,\dots,x_n) \cr
-                             & = S_{\le m}(x_1,\dots,x_n)\land S_{\le n-m}(\bar x_1,\dots,\bar x_n)} \eqno(\eqcceq) $$
-
-\noindent We can unify the auxiliary variables for both constraints in
-(\eqcceq).  Assume that we are using the variables $s^k_i$ for the upper bound
-and ${s^\prime}^k_i$ for the lower bound, we can substitute ${s^\prime}^k_i$ by
-$\bar s^k_i$ (see exercise 7.2.2.2-31 in TAOCP).  Special attention is required
-for the clauses described by (\eqsinzb) since they contain the variables $x_i$
-of $S_m$.  By substituting $x_i$ with $v_{1,i}\lor\cdots\lor v_{m,i}$, we get
-the following clauses for (\eqinjsem):
-$$
-  \displ@y\tabskip\centering\halign to\displaywidth{%
-    \hfil $\@lign\displaystyle {#}$\hfil\tabskip \z@skip &\qquad#\hfil\tabskip\centering &\llap{$\@lign #$}\tabskip \z@skip \crcr
-    \bar s^k_i \lor s^k_{i+1}, & for $1\le i< n-m$ and $1\le k\le m$, &(\eqinjsemca) \cr
-    \bar v_{j,i+k} \lor \bar s^k_i \lor s^{k+1}_i, & for $1\le j\le m$, $1\le i\le n-m$, and $0\le k\le m,$ &(\eqinjsemcb) \cr
-    s^k_i \lor \bar s^k_{i+1}, & for $1\le i< m$ and $1\le k\le n-m$, &(\eqinjsemcc) \cr
-    v_{1,i+k} \lor \cdots \lor v_{m,i+k} \lor s^k_i \lor \bar s^{k+1}_i, & $1\le i\le m$ and $0\le k\le n-m,$ &(\eqinjsemcd) \cr
-    \crcr
-  }
-$$
-where $s^k_i$ and $\bar s^k_i$ are omitted when $k=0$, $s^{k+1}_i$ is omitted
-when $k=m$, and $\bar s^{k+1}_i$ is omitted when $k=n-m$.  We could have also
-based the encoding on the formalization of O.~Bailleux and Y.~Boufkhad [{\sl
-LNCS\/ \bf 2833} (2003), 108--122].  The substitution can be applied in the same
-manner.
 
 \medskip\noindent{\bf Complexity of the formula.} \dots
 
