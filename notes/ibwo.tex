@@ -1,0 +1,66 @@
+\magnification\magstephalf
+\parskip3pt
+\baselineskip14pt
+
+\def\band{\mathop{\hbox{\&}}}
+\def\ind{\phantom{a}}
+
+% macros for verbatim scanning
+% the max number of \tt chars/line is 66 (10pt), 73 (9pt), 81 (8pt), 93 (7pt)
+% minus 4 or 5 characters for indentation at the left
+\chardef\other=12
+\def\ttverbatim{\catcode`\\=\other
+  \catcode`\{=\other
+  \catcode`\}=\other
+  \catcode`\$=\other
+  \catcode`\&=\other
+  \catcode`\#=\other
+  \catcode`\%=\other
+  \catcode`\~=\other
+  \catcode`\_=\other
+  \catcode`\^=\other
+  \obeyspaces \obeylines \tt}
+\def\begintt{$$\ttverbatim \catcode`\|=0 \ttfinish}
+{\catcode`\|=0 \catcode`|\=\other % | is temporary escape character
+  |obeylines   % end of line is active
+  |gdef|intt#1^^M{|noalign{#1}}%
+  |gdef|ttfinish#1^^M#2\endtt{#1|let^^M=|cr %
+    |halign{|hskip|parindent##|hfil|cr#2}$$}}
+
+\centerline{\bf An interesting bitwise operation}
+\centerline{Mathias Soeken, University of Bremen}
+\centerline{Bremen, August 8, 2014}
+\bigskip\bigskip
+
+Let `$\circ$' be an operation on two bitstrings of equal lengths that indicates
+common ones projected to the positions where the first argument has ones.  Let
+us illustrate this operation first by means of some examples (For more clarity,
+the matched ones in the first argument are underlined):
+
+$$ 010\underline1\,\underline1010 \circ 0001\,1000 = 0110 \qquad
+   1\underline10\underline1\,1\underline100 \circ 0101\,0100 = 01101 $$
+
+Please note that the operation is not commutative and that the second argument
+is always contained in the first one, i.e.~$a\circ b$ is only well-defined if
+$a\band b=b$.  We are seeking for an efficient implementation of~`$\circ$'.
+
+A trivial implementation that iterates over all  1's of the first operand can be
+given as follows.
+\begintt
+typedef boost::dynamic_bitset<> pattern_t;
+
+pattern_t f( const pattern_t& a, const pattern_t& b )
+{
+|ind pattern_t p( a.count() );
+|ind unsigned bpos = 0u;
+|ind pattern_t::size_type pos = a.find_first();
+|ind while ( pos != pattern_t::npos )
+|ind {
+|ind |ind p[bpos++] = b[pos];
+|ind |ind pos = a.find_next( pos );
+|ind }
+|ind return p;
+}
+\endtt
+
+\bye

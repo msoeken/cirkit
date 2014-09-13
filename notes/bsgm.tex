@@ -1,0 +1,305 @@
+\let\safetikz\shipout
+\input pgf
+\input tikz
+\usetikzlibrary{calc,matrix}
+\tikzset{>=stealth}
+\let\shipout\safetikz
+
+\magnification\magstephalf
+\parskip3pt
+\baselineskip14pt
+
+\catcode`@=11
+\def\oldstyle{\fam\@ne\teni}
+
+\def\bbbb{{\rm I\!B}}
+
+\def\slug{\hbox{\kern1.5pt\vrule width2.5pt height6pt depth1.5pt\kern1.5pt}}
+\def\slugonright{\vrule width0pt\nobreak\hfill\slug}
+
+% Equations
+\def\eqex{1}
+\def\eqmap{2}
+\def\eqexva{3}
+\def\eqfuncsem{4}
+\def\eqinjsem{5}
+\def\eqhvar{6}
+\def\eqhmatrix{7}
+\def\eqhjl{8}
+\def\eqttrue{9}
+\def\eqtfalse{10}
+\def\eqhclause{11}
+\def\eqonehota{12}
+\def\eqonehotb{13}
+\def\eqsinza{14}
+\def\eqsinzb{15}
+\def\eqcceq{16}
+\def\eqinjsemca{17}
+\def\eqinjsemcb{18}
+\def\eqinjsemcc{19}
+\def\eqinjsemcd{20}
+
+\centerline{\bf Reverse engineering using simulation graphs and bipartite subgraph isomorphism}
+\centerline{Mathias Soeken, University of Bremen}
+\centerline{Bremen, September 4, 2014}
+\bigskip\bigskip
+
+\noindent {\bf 1. Bipartite subgraph isomorphism.} We refer to a {\it
+unidirected\/} bigraph as a digraph $G=(V,A)$ for which $V$ is a partition of
+two disjoint sets of sources $V'$ and sinks $V''$ and arcs $A\subseteq V'\times
+V''$, i.e.~the initial and final vertex of each arc lies in $V'$ and $V''$,
+respectively.  The adjacency matrix of such a unidirected bigraph has always the
+form $A=\big({O\atop O}{A'\atop O}\big)$ where each $O$ is a matrix containing
+only zeros when the columns are arranged in a way that first vertices are taken
+from $V'$ and then from $V''$.  Consequently, we can drop the $O$ matrices and
+end up with the {\it compact\/} adjacency matrix~$A'$.  Given two unidirected
+bigraphs called {\it target\/} $G=(V,A)$ and {\it pattern\/} $P=(W,B)$, the {\it
+bipartite subgraph isomorphism\/} problem asks whether there exists a subgraph
+$G'$ of $G$ such that~$G'$ is isomorphic to $P$, denoted $G'\cong P$.  In the
+remainder, we will use the graphs
+$$
+  G=\quad
+  \tikzpicture[baseline=(c.base),every node/.style={circle,draw,minimum size=.5cm,inner sep=1pt}]
+    \node (v1) at (0,0) {$1$};
+    \node (v2) at (0,-.75) {$2$};
+    \node (v3) at (0,-1.5) {$3$};
+    \node (v4) at (0,-2.25) {$4$};
+    \node (w1) at ([xshift=1.5cm] $(v1)!.5!(v2)$) {$\bar 1$};
+    \node (w2) at ([xshift=1.5cm] $(v2)!.5!(v3)$) {$\bar 2$};
+    \node (w3) at ([xshift=1.5cm] $(v3)!.5!(v4)$) {$\bar 3$};
+
+    \draw[->] (v1) to[bend left=10] (w1);
+    \draw[->] (v1) -- (w2);
+    \draw[->] (v2) -- (w1);
+    \draw[->] (v2) -- (w3);
+    \draw[->] (v3) -- (w2);
+    \draw[->] (v4) to[bend left=10] (w1);
+    \draw[->] (v4) to[bend right=10] (w2);
+    \coordinate (c) at (current bounding box.west);
+  \endtikzpicture
+  \qquad\hbox{and}\qquad
+  P=\quad
+  \tikzpicture[baseline=(c.base),every node/.style={circle,draw,minimum size=.5cm,inner sep=1pt}]
+    \node (v1) at (0,0) {$1$};
+    \node (v2) at (0,-.75) {$2$};
+    \node (v3) at (0,-1.5) {$3$};
+    \node (w1) at ([xshift=1.5cm] $(v1)!.5!(v2)$) {$\bar 1$};
+    \node (w2) at ([xshift=1.5cm] $(v2)!.5!(v3)$) {$\bar 2$};
+
+    \draw[->] (v1) to[bend left=10] (w1);
+    \draw[->] (v1) to[bend right=5] (w2);
+    \draw[->] (v2) -- (w1);
+    \draw[->] (v3) -- (w1);
+    \draw[->] (v3) to[bend right=10] (w2);
+
+    \coordinate (c) at (current bounding box.west);
+  \endtikzpicture
+  \eqno(\eqex)
+$$
+as target and pattern in a running example.  It can readily be verified, that
+there exists a subgraph isomorphism between these two graphs.
+
+\noindent {\bf SAT formulation.} We will now create a Boolean function $f$ that
+is satisfiable if and only if $P$ is isomorphic to a subgraph of $G$.  In case
+there exists such a subgraph it can be obtained from a satisfying assignment to
+$f$.
+
+First, we are looking to the bipartite subgraph isomorphism problem from a
+different angle.  Let $g^{(1)},\dots,g^{(n)}$ and $p^{(1)},\dots,p^{(m)}$ be the
+row vectors of the compact adjacency matrices of the target $G$ and pattern $P$.
+Their bitwidths are $q$ and $r$, respectively.  Obviously, we have $m\le n$ and
+$q\le r$.  The existence of a bipartite subgraph isomorphism is equivalent to
+the existence of two injective functions $v:[m]\to[n]$ and $a:[r]\to[q]$ such
+that
+$$ p^{(j)}_l=g^{(v(j))}_{a(l)} \eqno(\eqmap) $$
+for all $1\le j\le m$ and $1\le l\le r$.  (The notation $[n]$ is a shorthand for
+the set $\{1,\dots,n\}$.)  The function $v$ maps each initial vertex in $P$ to a
+distinct initial vertex in $G$, while the function $a$ maps each final vertex in
+$P$ to a distinct final vertex in $G$.  For the example in (\eqex) we have
+$$
+  v(1)=4,\qquad v(2)=3,\qquad v(3)=1,\qquad
+  a(\bar 1)=\bar 2,\qquad a(\bar 2)=\bar 1.
+  \eqno(\eqexva)
+$$
+(The barred notation for values in $a$ has intetionally been used to improve
+comprehensibility.)
+
+This equivalent formulation makes it easy for us to describe the satisfiability
+function $f$.  The function $v$ is described by $mn$ variables $v_{j,i}$ such
+that $v(j)=i$ if and only if $v_{j,i}=1$ for all $1\le j\le m$ and $1\le i\le
+n$; in other words we have $v_{j,v(j)}=1$.  To ensure function semantics and
+injectivity of $v$, the clauses for the Boolean functions
+$$ S_1(v_{j,1}, \dots, v_{j,n}) \qquad\hbox{for $1\le j\le m$} \eqno(\eqfuncsem) $$
+and
+$$ S_m(v_{1,1}\lor\cdots\lor v_{m,1}, v_{1,2}\lor\cdots\lor v_{m,2}, \dots, v_{1,n}\lor\cdots\lor v_{m,n}) \eqno(\eqinjsem) $$
+are contained in $f$, respectively.  ($S_m(x_1,\dots,x_n)$ describes the
+symmetric Boolean function that is true if and only if $k$ of the $n$ variables
+are true; see Eq.~7.1.1-({\oldstyle90}) in TAOCP.)  Notice that due to
+(\eqfuncsem) at most $m$ of the clauses in (\eqinjsem) can be true; the
+cardinality constraint ensures that {\it exactly\/} $m$ clauses will be true.
+Analogously, $rq$ variables $a_{l,k}$ describe function $a$ for $1\le j\le r$
+and $1\le k\le q$ and similar clauses as (\eqfuncsem) and (\eqinjsem) in $f$
+ensure the correct semantics.
+
+We are now getting to the core of (\eqmap).  We will eventually add clauses for
+all function values of $v$ and $a$, i.e.~for all combinations of
+$j\in\{1,\dots,m\}$ and $l\in\{1,\dots,r\}$ , but let us first take a look on
+how to represent the right hand side in (\eqmap) using the variables we have
+added so far.  For this purpose $nmqr$ variables $h_{i,j,k,l}$ are added for
+which
+$$h_{i,j,k,l} = g^{(i)}_k\land v_{j,i}\land a_{l,k} \eqno(\eqhvar)$$
+should hold.  This will the most complicated variable in our encoding and it
+requires some further discussion.  When we fix $j$ and $l$ and we range over all
+$1\le i\le n$ and $1\le k\le q$ the values for $h_{i,j,k,l}$ are the components
+of the result of the bitwise AND of the bitvectors $\hat g$, $\hat v$, and $\hat
+a$:
+$$
+\tikzpicture[baseline=(c.base)]
+  \matrix[matrix of math nodes] (m) {
+  g^{(1)}_1 & g^{(1)}_2 & \cdots & g^{(1)}_q & g^{(2)}_1 & g^{(2)}_2 & \cdots & g^{(2)}_q & \cdots & g^{(n)}_1 & g^{(n)}_2 & \cdots & g^{(n)}_q \\
+  \land & \land & & \land & \land & \land & & \land & & \land & \land & & \land \\
+  v_{j,1} & v_{j,1} & \cdots & v_{j,1} & v_{j,2} & v_{j,2} & \dots & v_{j,2} & \cdots & v_{j,n} & v_{j,n} & \dots & v_{j,n} \\
+  \land & \land & & \land & \land & \land & & \land & & \land & \land & & \land \\
+  a_{l,1} & a_{l,2} & \cdots & a_{l,q} & a_{l,1} & a_{l,2} & \cdots & a_{l,q} & \cdots & a_{l,1} & a_{l,2} & \cdots & a_{l,q} \\
+  };
+
+  \node[left] at (m-1-1.east) {$\hat g\;=\;\phantom{g^{(1)}_1}$};
+  \node[left] at (m-3-1.east) {$\hat v\;=\;\phantom{v_{j,1}}$};
+  \node[left] at (m-5-1.east) {$\hat a\;=\;\phantom{a_{l,1}}$};
+
+  \node[rotate=270,left] at (m-1-1.north) {$h_{1,j,1,l}=$};
+  \node[rotate=270,left] at (m-1-2.north) {$h_{1,j,2,l}=$};
+  \node[rotate=270,left] at (m-1-4.north) {$h_{1,j,q,l}=$};
+  \node[rotate=270,left] at (m-1-5.north) {$h_{2,j,1,l}=$};
+  \node[rotate=270,left] at (m-1-6.north) {$h_{2,j,2,l}=$};
+  \node[rotate=270,left] at (m-1-8.north) {$h_{2,j,q,l}=$};
+  \node[rotate=270,left] at (m-1-10.north) {$h_{n,j,1,l}=$};
+  \node[rotate=270,left] at (m-1-11.north) {$h_{n,j,2,l}=$};
+  \node[rotate=270,left] at (m-1-13.north) {$h_{n,j,q,l}=$};
+
+  \coordinate (c) at (current bounding box.west);
+\endtikzpicture
+\eqno(\eqhmatrix)
+$$
+The bitvector $\hat g$ results from the concatenation of all row vectors from
+the compact adjecency matrix of $G$.  The bitvector $\hat v$ is a mask of form
+$0\dots 01\dots 10\dots 0$,
+%more precisely $0^{(v(j)-1)p}1^p0^{(n-v(j))p}$,
+where we have ones only for the entries $v_{j,v(j)}$.  Hence, $\hat v$ selects
+the correct row vector $g^{(v(j))}$.  Finally, $\hat a = (a_{l,1}a_{l,2}\dots
+a_{l,q})^n$ is a mask with $n$ copies of $a_{l,1}a_{l,2}\dots a_{l,q}$ which has
+only one 1 at position $a_{l,a(l)}$.  We can see that $n-1$ of these copies are
+discarded by $\hat v$ and only the $v(j)$-th copy remains.  From this copy it
+selects the bit $g^{(v(l))}_{a(l)}$.  We collect all the bits $h_{i,j,k,l}$ in
+(\eqhmatrix) in the set
+$$H_{j,l} = \{h_{i,j,k,l}\mid1\le i\le n, 1\le k\le q\}. \eqno(\eqhjl) $$
+With the previous considerations it is easy to see that there is at most one
+variable in $H_{j,l}$ that is true in a satisfying assignment.  Moreover, there
+exists one true variable in $H_{j,l}$ if and only if $g^{(v(j))}_{a(l)}=1$.
+Now, we are ready to describe the main clauses that we add for all
+$j\in\{1,\dots,m\}$ and $l\in\{1,\dots,r\}$.  If $p^{(j)}_l=1$ we add one large clause
+$$ \bigvee_{h\in H_{j,l}} h \eqno(\eqttrue) $$
+with $nq$ literals to ensure that also $g^{(v(j))}_{a(l)}=1$, and if we have
+$p^{(j)}_l=0$ we add the $nq$ unit clauses
+$$ \bigwedge_{h\in H_{j,l}} \bar h \eqno(\eqtfalse) $$
+to ensure that also $g^{(v(j))}_{a(l)}=0$.  There is one last thing to do, since
+we have ignored to add clauses for $h_{i,j,k,l}$.  Since the values for
+$g^{(i)}_k$ are constant in (\eqhvar) we make a case distinction on them.  If
+$g^{(i)}_k=0$ we just add the unit clause $\bar h_{i,j,k,l}$ and if
+$g^{(i)}_k=1$, we add the three clauses
+$$ (h_{i,j,k,l}\lor \bar v_{j,i} \lor \bar a_{l,k}) \land (\bar h_{i,j,k,l}\lor v_{j,i}) \land (\bar h_{i,j,k,l} \lor a_{l,k}). \eqno(\eqhclause) $$
+
+\medskip\noindent{\bf Cardinality constraints.}  We are done with the main work,
+but we need to have a closer look into the cardinality constraints that occur in
+(\eqfuncsem) and (\eqinjsem).  The one hot encoding that is enfored by
+(\eqfuncsem) is readily achieved by the clauses
+$$ v_{j,1}\lor\cdots\lor v_{j,n} \qquad \hbox{for $1\le j\le m$} \eqno(\eqonehota) $$
+to ensure that at least one bit is set to 1 and by the exclusion clauses
+$$ \bar v_{j,i}\lor \bar v_{j,i'} \qquad \hbox{for $1\le j\le m$ and $1\le i<i'\le n$}. \eqno(\eqonehotb) $$
+For (\eqinjsem) a bit more work is required.  Since the arguments to $S_m$ are
+clauses, encodings for cardinality constraints need to be slightly
+adjusted. C.~Sinz has shown in [{\sl LNCS\/ \bf 3709} (2005), 827--831] that
+$S_{\le m}(x_1,\dots,x_n)$ can be expressed by introducing $(n-m)m$ auxiliary
+variables $s_i^k$ for $1\le i\le n-m$ and $1\le k\le m$ and the clauses
+$$
+  \displ@y\tabskip\centering\halign to\displaywidth{%
+    \hfil $\@lign\displaystyle {#}$\hfil\tabskip \z@skip &\qquad#\hfil\tabskip\centering &\llap{$\@lign #$}\tabskip \z@skip \crcr
+    \bar s^k_i \lor s^k_{i+1}, & for $1\le i< n-m$ and $1\le k\le m$, &(\eqsinza) \cr
+    \bar x_{i+k} \lor \bar s^k_i \lor s^{k+1}_i, & for $1\le i\le n-m$ and $0\le k\le m,$ &(\eqsinzb)
+    \crcr
+  }
+$$
+where $\bar s^k_i$ is omitted when $k=0$ and $s^{k+1}_i$ is omitted when $k=m$.
+The constraint can be used to derive cardinality constraints for a lower bound
+$S_{\ge m}(x_1,\dots,x_n) = S_{\le n-m}(\bar x_1,\dots,\bar x_n)$ and for an
+exact bound as required by (\eqinjsem):
+$$\eqalign{S_m(x_1,\dots,x_n) & = S_{\le m}(x_1,\dots,x_n)\land S_{\ge m}(x_1,\dots,x_n) \cr
+                             & = S_{\le m}(x_1,\dots,x_n)\land S_{\le n-m}(\bar x_1,\dots,\bar x_n)} \eqno(\eqcceq) $$
+
+\noindent We can unify the auxiliary variables for both constraints in
+(\eqcceq).  Assume that we are using the variables $s^k_i$ for the upper bound
+and ${s^\prime}^k_i$ for the lower bound, we can substitute ${s^\prime}^k_i$ by
+$\bar s^k_i$ (see exercise 7.2.2.2-31 in TAOCP).  Special attention is required
+for the clauses described by (\eqsinzb) since they contain the variables $x_i$
+of $S_m$.  By substituting $x_i$ with $v_{1,i}\lor\cdots\lor v_{m,i}$, we get
+the following clauses for (\eqinjsem):
+$$
+  \displ@y\tabskip\centering\halign to\displaywidth{%
+    \hfil $\@lign\displaystyle {#}$\hfil\tabskip \z@skip &\qquad#\hfil\tabskip\centering &\llap{$\@lign #$}\tabskip \z@skip \crcr
+    \bar s^k_i \lor s^k_{i+1}, & for $1\le i< n-m$ and $1\le k\le m$, &(\eqinjsemca) \cr
+    \bar v_{j,i+k} \lor \bar s^k_i \lor s^{k+1}_i, & for $1\le j\le m$, $1\le i\le n-m$, and $0\le k\le m,$ &(\eqinjsemcb) \cr
+    s^k_i \lor \bar s^k_{i+1}, & for $1\le i< m$ and $1\le k\le n-m$, &(\eqinjsemcc) \cr
+    v_{1,i+k} \lor \cdots \lor v_{m,i+k} \lor s^k_i \lor \bar s^{k+1}_i, & $1\le i\le m$ and $0\le k\le n-m,$ &(\eqinjsemcd) \cr
+    \crcr
+  }
+$$
+where $s^k_i$ and $\bar s^k_i$ are omitted when $k=0$, $s^{k+1}_i$ is omitted
+when $k=m$, and $\bar s^{k+1}_i$ is omitted when $k=n-m$.  We could have also
+based the encoding on the formalization of O.~Bailleux and Y.~Boufkhad [{\sl
+LNCS\/ \bf 2833} (2003), 108--122].  The substitution can be applied in the same
+manner.
+
+\medskip\noindent{\bf Complexity of the formula.} \dots
+
+
+% \smallskip\noindent{\bf Lemma 1.} \sl At most one variable in $H_{j,l}$ can be
+% true in a satisfying assignment. \rm
+
+% {\it Proof.} First, we assume that no negative unit clauses such as in (??) have
+% been added.  According to (2) there is exactly one $\hat\imath$ such that
+% $v_{j,\hat\imath}$ is true and therefore all $h_{i,j,k,l}$ for $i\neq\hat\imath$
+% can be discarded and we get $H\supseteq \hat H=\{v_{j,\hat\imath}\land
+% a_{l,k}\mid 1\le k\le p\}$.  With a similar argumentation there is also only one
+% $\hat k$ such that $a_{l,k}$ is true.\slugonright
+
+\medskip\noindent{\bf Further reading.}  Jacobo Tor\'an presents a SAT encoding
+for graph isomorphism in [{\sl SAT\/ \bf 16} (2013), 52--66].
+
+The subgraph isomorphism problem is known to be NP-complete for general graphs
+[M.\ R.\ Garey and D.\ S.\ Johnson, {\sl Computers and Intractibility} (1979)].
+Effecient implementations for special cases are discussed in [J.\ E.\ Hopcroft
+and J.\ K.\ Wong, {\sl STOC\/ \bf 6} (1974), 172--184] and [E.\ M.\ Luks, {\sl
+JCSS\/ \bf 25} (1982), 42--65].
+
+[J.\ A.\ Roy, I.\ L.\ Markov, and V.\ Bertacco, {\sl IWLS\/ \bf 13} (2004)]
+
+[C.\ Solnon, {\sl AI\/ \bf 174} (2010), 850--864]  [S.\ Zampelli and C.\ Solnon, {\sl Constraints\/ \bf 15} (2010), 327--353]
+
+\medskip\noindent{\bf 2. Simulation graphs.}
+
+\centerline{****}
+
+\noindent{\bf Consideration of inverters.}
+
+\centerline{****}
+
+\noindent{\bf Symmetry breaking.}
+
+\centerline{****}
+
+\noindent{\bf Further improvements with preprocessing.}
+
+
+
+\bye
+<
