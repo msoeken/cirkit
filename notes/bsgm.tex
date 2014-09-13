@@ -19,38 +19,39 @@
 
 % Equations
 \def\eqex{1}
-\def\eqmap{2}
-\def\eqexva{3}
-\def\eqfuncsem{4}
-\def\eqonehota{5}
-\def\eqonehotb{6}
-\def\eqinjsem{7}
-\def\eqonehotc{8}
-\def\eqhvar{9}
-\def\eqhmatrix{10}
-\def\eqhjl{11}
-\def\eqttrue{12}
-\def\eqtfalse{13}
-\def\eqhclause{14}
+\def\eqexadjmat{2}
+\def\eqmap{3}
+\def\eqexva{4}
+\def\eqfuncsem{5}
+\def\eqonehota{6}
+\def\eqonehotb{7}
+\def\eqinjsem{8}
+\def\eqonehotc{9}
+\def\eqhvar{10}
+\def\eqhmatrix{11}
+\def\eqhjl{12}
+\def\eqttrue{13}
+\def\eqtfalse{14}
+\def\eqhclause{15}
 
 \centerline{\bf Reverse engineering using simulation graphs and bipartite subgraph isomorphism}
 \centerline{Mathias Soeken, University of Bremen}
 \centerline{Bremen, September 4, 2014}
 \bigskip\bigskip
 
-\noindent {\bf 1. Bipartite subgraph isomorphism.} We refer to a {\it
-unidirected\/} bigraph as a digraph $G=(V,A)$ for which $V$ is a partition of
-two disjoint sets of sources $V'$ and sinks $V''$ and arcs $A\subseteq V'\times
-V''$, i.e.~the initial and final vertex of each arc lies in $V'$ and $V''$,
-respectively.  The adjacency matrix of such a unidirected bigraph has always the
-form $A=\big({O\atop O}{A'\atop O}\big)$ where each $O$ is a matrix containing
-only zeros when the columns are arranged in a way that first vertices are taken
-from $V'$ and then from $V''$.  Consequently, we can drop the $O$ matrices and
-end up with the {\it compact\/} adjacency matrix~$A'$.  Given two unidirected
-bigraphs called {\it target\/} $G=(V,A)$ and {\it pattern\/} $P=(W,B)$, the {\it
-bipartite subgraph isomorphism\/} problem asks whether there exists a subgraph
-$G'$ of $G$ such that~$G'$ is isomorphic to $P$, denoted $G'\cong P$.  In the
-remainder, we will use the graphs
+\noindent {\bf 1. Bipartite subgraph isomorphism.} A {\it unidirected\/} bigraph
+is a digraph $G=(V,A)$ for which $V$ is a partition of two disjoint sets of
+sources $V'$ and sinks $V''$ and arcs $A\subseteq V'\times V''$, i.e.~the
+initial and final vertex of each arc lies in $V'$ and $V''$, respectively.  The
+adjacency matrix of such a unidirected bigraph always has the form
+$M=\big({O\atop O}{M'\atop O}\big)$ where each $O$ is a matrix containing only
+zeros and the rows and columns of $M$ are arranged in a way that first vertices
+are taken from $V'$ and then from $V''$.  Consequently, we can drop the $O$
+matrices and end up with the {\it compact\/} adjacency matrix~$M'$.  Given two
+unidirected bigraphs called {\it target\/} $G=(V,A)$ and {\it pattern\/}
+$P=(W,B)$, the {\it bipartite subgraph isomorphism\/} problem asks whether there
+exists a subgraph $G'$ of $G$ such that~$G'$ is isomorphic to $P$, denoted
+$G'\cong P$.  In the remainder, we will use the graphs
 $$
   G=\quad
   \tikzpicture[baseline=(c.base),every node/.style={circle,draw,minimum size=.5cm,inner sep=1pt}]
@@ -90,54 +91,63 @@ $$
   \endtikzpicture
   \eqno(\eqex)
 $$
-as target and pattern in a running example.  It can readily be verified, that
-there exists a subgraph isomorphism between these two graphs.
+as target and pattern in a running example.  Their compact adjacency matrices
+are
+$$
+  M_G = \pmatrix{1 & 1 & 0 \cr 1 & 0 & 1 \cr 0 & 1 & 0 \cr 1 & 1 & 0}
+  \qquad\hbox{and}\qquad
+  M_P = \pmatrix{1 & 1 \cr 1 & 0 \cr 1 & 1}.
+  \eqno(\eqexadjmat)
+$$
+It can readily be verified, that there exists a subgraph isomorphism between
+these two graphs.
 
 \noindent {\bf SAT formulation.} We will now create a Boolean function $f$ that
 is satisfiable if and only if $P$ is isomorphic to a subgraph of $G$.  In case
 there exists such a subgraph it can be obtained from a satisfying assignment to
-$f$.
+$f$.  We assume that $G$ has $n+q$ vertices; $n$ sources and $q$ sinks.
+Analogously, $P$ has $m+r$ vertices.  Obviously, we have $m\le n$ and $q\le r$.
 
 First, we are looking to the bipartite subgraph isomorphism problem from a
 different angle.  Let $g^{(1)},\dots,g^{(n)}$ and $p^{(1)},\dots,p^{(m)}$ be the
 row vectors of the compact adjacency matrices of the target $G$ and pattern $P$.
-Their bitwidths are $q$ and $r$, respectively.  Obviously, we have $m\le n$ and
-$q\le r$.  The existence of a bipartite subgraph isomorphism is equivalent to
-the existence of two injective functions $v:[m]\to[n]$ and $a:[r]\to[q]$ such
-that
+Their bitwidths are $q$ and $r$, respectively.  The existence of a bipartite
+subgraph isomorphism is equivalent to the existence of two injective functions
+$v:[m]\to[n]$ and $a:[r]\to[q]$ such that
 $$ p^{(j)}_l=g^{(v(j))}_{a(l)} \eqno(\eqmap) $$
 for all $1\le j\le m$ and $1\le l\le r$.  (The notation $[n]$ is a shorthand for
-the set $\{1,\dots,n\}$.)  The function $v$ maps each initial vertex in $P$ to a
-distinct initial vertex in $G$, while the function $a$ maps each final vertex in
-$P$ to a distinct final vertex in $G$.  For the example in (\eqex) we have
+the set $\{1,\dots,n\}$.)  The function $v$ maps each source in $P$ to a
+distinct source in $G$, while the function $a$ maps each sink in $P$ to a
+distinct sink in $G$.  For the example in (\eqex) we have
 $$
   v(1)=4,\qquad v(2)=3,\qquad v(3)=1,\qquad
   a(\bar 1)=\bar 2,\qquad a(\bar 2)=\bar 1.
   \eqno(\eqexva)
 $$
-(The barred notation for values in $a$ has intetionally been used to improve
+(The barred notation for values in $a$ has intentionally been used to improve
 comprehensibility.)
 
 This equivalent formulation makes it easy for us to describe the satisfiability
 function $f$.  The function $v$ is described by $mn$ variables $v_{j,i}$ such
 that $v(j)=i$ if and only if $v_{j,i}=1$ for all $1\le j\le m$ and $1\le i\le
 n$; in other words we have $v_{j,v(j)}=1$.  To ensure function semantics,
-i.e.~that each value $v(j)$ has exactly one value clauses for the Boolean
+i.e.~each $v(j)$ is assigned exactly one value, clauses for the Boolean
 functions
 $$ S_1(v_{j,1}, \dots, v_{j,n}) \qquad\hbox{for $1\le j\le m$} \eqno(\eqfuncsem) $$
 are added.  ($S_1(x_1,\dots,x_n)$ describes the symmetric Boolean function that
-are true if and only if exactly one of the $n$ variables is true; see
+is true if and only if exactly one of the $n$ variables is true; see
 Eq.~7.1.1-({\oldstyle90}) in TAOCP.)  The encoding is sometimes referred to as
 {\it one hot encoding\/} and can be enforced by the clauses
 $$ v_{j,1}\lor\cdots\lor v_{j,n} \qquad \hbox{for $1\le j\le m$} \eqno(\eqonehota) $$
-to ensure that at least one bit is set to 1 and by the exclusion clauses
-$$ \bar v_{j,i}\lor \bar v_{j,i'} \qquad \hbox{for $1\le j\le m$ and $1\le i<i'\le n$}. \eqno(\eqonehotb) $$
+to ensure that at least one bit is set to 1 together with the exclusion clauses
+$$ \bar v_{j,i}\lor \bar v_{j,i'} \qquad \hbox{for $1\le j\le m$ and $1\le i<i'\le n$} \eqno(\eqonehotb) $$
+that ensure that at most one bit is set to 1.
 The injectivity property can be enforced by adding clauses for the functions
 $$ S_{\le1}(v_{1,i},\dots,v_{m,i}) \qquad\hbox{for $1\le i\le n$}. \eqno(\eqinjsem) $$
 This ensures that for each $i\in\{1,\dots,n\}$ there is at most one $j$ such
 that $v(j)=i$ and can be encoded using only the exclusion clauses
 $$ \bar v_{j,i}\lor \bar v_{j',i} \qquad \hbox{for $1\le j<j'\le m$ and $1\le i\le n$}. \eqno(\eqonehotc) $$
-Analogously, $rq$ variables $a_{l,k}$ describe function $a$ for $1\le j\le r$
+Analogously, $rq$ variables $a_{l,k}$ describe function $a$ for $1\le l\le r$
 and $1\le k\le q$ and similar clauses to (\eqonehota), (\eqonehotb), and
 (\eqonehotc) ensure the correct semantics.
 
@@ -148,11 +158,11 @@ how to represent the right hand side in (\eqmap) using the variables we have
 added so far.  For this purpose $nmqr$ variables $h_{i,j,k,l}$ are added for
 which
 $$h_{i,j,k,l} = g^{(i)}_k\land v_{j,i}\land a_{l,k} \eqno(\eqhvar)$$
-should hold.  This will the most complicated variable in our encoding and it
-requires some further discussion.  When we fix $j$ and $l$ and we range over all
-$1\le i\le n$ and $1\le k\le q$ the values for $h_{i,j,k,l}$ are the components
-of the result of the bitwise AND of the bitvectors $\hat g$, $\hat v$, and $\hat
-a$:
+should hold.  These will be the most complicated variables in our encoding and
+it requires some further discussion.  When we fix $j$ and $l$ and we range over
+all $i\in\{1,\dots,n\}$ and $k\in\{1,\dots,q\}$, the values for $h_{i,j,k,l}$
+are the components of the result of the bitwise AND of the bitvectors $\hat g$,
+$\hat v$, and $\hat a$:
 $$
 \tikzpicture[baseline=(c.base)]
   \matrix[matrix of math nodes] (m) {
@@ -187,8 +197,8 @@ $0\dots 01\dots 10\dots 0$,
 %more precisely $0^{(v(j)-1)p}1^p0^{(n-v(j))p}$,
 where we have ones only for the entries $v_{j,v(j)}$.  Hence, $\hat v$ selects
 the correct row vector $g^{(v(j))}$.  Finally, $\hat a = (a_{l,1}a_{l,2}\dots
-a_{l,q})^n$ is a mask with $n$ copies of $a_{l,1}a_{l,2}\dots a_{l,q}$ which has
-only one 1 at position $a_{l,a(l)}$.  We can see that $n-1$ of these copies are
+a_{l,q})^n$ is a mask with $n$ copies of $a_{l,1}a_{l,2}\dots a_{l,q}$ which
+only 1 is at position $a_{l,a(l)}$.  We can see that $n-1$ of these copies are
 discarded by $\hat v$ and only the $v(j)$-th copy remains.  From this copy it
 selects the bit $g^{(v(l))}_{a(l)}$.  We collect all the bits $h_{i,j,k,l}$ in
 (\eqhmatrix) in the set
@@ -211,6 +221,23 @@ $$ (h_{i,j,k,l}\lor \bar v_{j,i} \lor \bar a_{l,k}) \land (\bar h_{i,j,k,l}\lor 
 
 \medskip\noindent{\bf Complexity of the formula.} \dots
 
+(\eqonehota) \qquad $m+r$
+
+(\eqonehotb) \qquad $\left(m\atop 2\right)+\left(r\atop 2\right)$
+
+(\eqonehotc) \qquad $\left(n\atop 2\right)+\left(q\atop 2\right)$
+
+(\eqhclause) \qquad $|A|\cdot 3 + (nq-|A|)$
+
+(\eqhclause) \qquad $|B| + (mr-|B|)\cdot nq$
+
+$$
+  m+r
+  + \left(m\atop 2\right)+\left(r\atop 2\right)
+  + \left(n\atop 2\right)+\left(q\atop 2\right)
+  + |A|\cdot 3 + (nq-|A|)
+  + |B| + (mr-|B|)\cdot nq
+$$
 
 % \smallskip\noindent{\bf Lemma 1.} \sl At most one variable in $H_{j,l}$ can be
 % true in a satisfying assignment. \rm
