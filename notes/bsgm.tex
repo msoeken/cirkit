@@ -32,7 +32,8 @@
 \def\eqhjl{12}
 \def\eqttrue{13}
 \def\eqtfalse{14}
-\def\eqhclause{15}
+\def\eqhunitclause{15}
+\def\eqhclause{16}
 
 \centerline{\bf Reverse engineering using simulation graphs and bipartite subgraph isomorphism}
 \centerline{Mathias Soeken, University of Bremen}
@@ -106,7 +107,7 @@ these two graphs.
 is satisfiable if and only if $P$ is isomorphic to a subgraph of $G$.  In case
 there exists such a subgraph it can be obtained from a satisfying assignment to
 $f$.  We assume that $G$ has $n+q$ vertices; $n$ sources and $q$ sinks.
-Analogously, $P$ has $m+r$ vertices.  Obviously, we have $m\le n$ and $q\le r$.
+Analogously, $P$ has $m+r$ vertices.  Obviously, we have $m\le n$ and $r\le q$.
 
 First, we are looking to the bipartite subgraph isomorphism problem from a
 different angle.  Let $g^{(1)},\dots,g^{(n)}$ and $p^{(1)},\dots,p^{(m)}$ be the
@@ -215,28 +216,48 @@ $$ \bigwedge_{h\in H_{j,l}} \bar h \eqno(\eqtfalse) $$
 to ensure that also $g^{(v(j))}_{a(l)}=0$.  There is one last thing to do, since
 we have ignored to add clauses for $h_{i,j,k,l}$.  Since the values for
 $g^{(i)}_k$ are constant in (\eqhvar) we make a case distinction on them.  If
-$g^{(i)}_k=0$ we just add the unit clause $\bar h_{i,j,k,l}$ and if
-$g^{(i)}_k=1$, we add the three clauses
+$g^{(i)}_k=0$ we just add the unit clause
+$$ \bar h_{i,j,k,l} \eqno(\eqhunitclause) $$
+and if $g^{(i)}_k=1$, we add the three clauses
 $$ (h_{i,j,k,l}\lor \bar v_{j,i} \lor \bar a_{l,k}) \land (\bar h_{i,j,k,l}\lor v_{j,i}) \land (\bar h_{i,j,k,l} \lor a_{l,k}). \eqno(\eqhclause) $$
 
-\medskip\noindent{\bf Complexity of the formula.} \dots
-
-(\eqonehota) \qquad $m+r$
-
-(\eqonehotb) \qquad $\left(m\atop 2\right)+\left(r\atop 2\right)$
-
-(\eqonehotc) \qquad $\left(n\atop 2\right)+\left(q\atop 2\right)$
-
-(\eqhclause) \qquad $|A|\cdot 3 + (nq-|A|)$
-
-(\eqhclause) \qquad $|B| + (mr-|B|)\cdot nq$
-
+\medskip\noindent{\bf Complexity of the formula.}  Now we want to look into the
+size of the resulting formulas.  There are in total $mn+rq+nmqr\le O(|V|^4)$
+variables $v_{j,i}$, $a_{l,k}$, and $h_{i,j,k,l}$.  The total number of clauses
+is
 $$
-  m+r
-  + \left(m\atop 2\right)+\left(r\atop 2\right)
-  + \left(n\atop 2\right)+\left(q\atop 2\right)
+  \kappa(G,P)=
+  \underbrace{m+r}_{(\eqonehota)}
+  + \underbrace{\left(m\atop 2\right)+\left(r\atop 2\right)}_{(\eqonehotb)}
+  + \underbrace{\left(n\atop 2\right)+\left(q\atop 2\right)}_{(\eqonehotc)}
+  + \underbrace{|B|}_{(\eqttrue)}
+  + \underbrace{(mr-|B|)\cdot nq}_{(\eqtfalse)}
+  + \underbrace{(nq-|A|)}_{(\eqhunitclause)}
+  + \underbrace{|A|\cdot3}_{(\eqhclause)},
+$$
+where for (\eqonehota), (\eqonehotb), and (\eqonehotc) also the clauses to
+encode function $a$ are taken into account.  In order to derive the number of
+clauses for (\eqttrue)--(\eqhclause) take into account that the compact
+adjacency matrix for $G$ has $|A|$ ones and $nq-|A|$ zeros.  Similarly, the
+compact adjacency matrix for $P$ has $|B|$ ones and $mr-|B|$ zeros.  Considering
+that $|B|\le |A|$, $m\le n$, and $r\le q$, we have
+$$
+  \eqalign{
+  \kappa(G,P) &\le
+  n+q
+  + 2\cdot\left(n\atop 2\right)+2\cdot\left(q\atop 2\right)
   + |A|\cdot 3 + (nq-|A|)
-  + |B| + (mr-|B|)\cdot nq
+  + |A| + (nq-|A|)\cdot nq \cr
+  &=
+  n+q
+  + 2\cdot\left(n\atop 2\right)+2\cdot\left(q\atop 2\right)
+  + |A|\cdot 3 +  nq-|A|
+  + |A| + (nq)^2-|A| nq \cr
+  &=
+  n+q
+  + 2\cdot\left(n\atop 2\right)+2\cdot\left(q\atop 2\right)
+  + |A|\cdot(3-nq) +  nq
+  + (nq)^2.}
 $$
 
 % \smallskip\noindent{\bf Lemma 1.} \sl At most one variable in $H_{j,l}$ can be
@@ -258,11 +279,18 @@ Effecient implementations for special cases are discussed in [J.\ E.\ Hopcroft
 and J.\ K.\ Wong, {\sl STOC\/ \bf 6} (1974), 172--184] and [E.\ M.\ Luks, {\sl
 JCSS\/ \bf 25} (1982), 42--65].
 
-[J.\ A.\ Roy, I.\ L.\ Markov, and V.\ Bertacco, {\sl IWLS\/ \bf 13} (2004)]
-
 [C.\ Solnon, {\sl AI\/ \bf 174} (2010), 850--864]  [S.\ Zampelli and C.\ Solnon, {\sl Constraints\/ \bf 15} (2010), 327--353]
 
-\medskip\noindent{\bf 2. Simulation graphs.}
+\medskip\noindent{\bf 2. Simulation graphs.}  Let $y=f(x)$ be a multibit
+function which is defined over $m$ functions $f_1(x_1,\dots,x_n), \dots,
+f_m(x_1,\dots,x_n)$.  In other words, $y=f_1\dots f_m$ is a binary vector of
+length $m$ and $x=x_1\dots x_n$ is a binary vector of length $n$.  Given such a
+multibit function together with simulation vectors $x^{(1)},\dots, x^{(k)}$ a
+{\it simulation graph\/} is a unidirected bigraph $G=(V,A)$ with source vertices
+$v_1,\dots,v_k$ for each simulation vector and sink vertices
+$v_{k+1}, \dots, v_{k+m}$ for each output of $f$.  It has an arc
+$$ v_i \longrightarrow v_{k+j}, \quad \hbox{if and only if} \quad f_j(x^{(i)})=1 $$
+for $1\le i\le k$ and $1\le j\le m$.
 
 \centerline{****}
 
@@ -276,6 +304,10 @@ JCSS\/ \bf 25} (1982), 42--65].
 
 \noindent{\bf Further improvements with preprocessing.}
 
+\centerline{****}
+
+\noindent{\bf Further reading.}
+[J.\ A.\ Roy, I.\ L.\ Markov, and V.\ Bertacco, {\sl IWLS\/ \bf 13} (2004)]
 
 
 \bye
