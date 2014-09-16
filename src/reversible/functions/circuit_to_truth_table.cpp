@@ -20,6 +20,7 @@
 #include <boost/format.hpp>
 
 #include <core/properties.hpp>
+#include <core/utils/bitset_utils.hpp>
 
 namespace cirkit
 {
@@ -31,16 +32,6 @@ namespace cirkit
     {
       vec.push_back( number.test( i ) );
     }
-  }
-
-  boost::dynamic_bitset<>& inc( boost::dynamic_bitset<>& bitset )
-  {
-    for ( boost::dynamic_bitset<>::size_type i = 0; i < bitset.size(); ++i )
-    {
-      bitset.flip( i );
-      if ( bitset.test( i ) ) break;
-    }
-    return bitset;
   }
 
   bool circuit_to_truth_table( const circuit& circ, binary_truth_table& spec, const functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)>& simulation )

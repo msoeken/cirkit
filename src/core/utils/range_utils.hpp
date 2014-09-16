@@ -27,6 +27,10 @@
 #ifndef RANGE_UTILS_HPP
 #define RANGE_UTILS_HPP
 
+#include <boost/algorithm/string/join.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/range/adaptors.hpp>
+
 namespace cirkit
 {
 
@@ -111,6 +115,13 @@ template<typename T>
 Indexer<T> index( T& t )
 {
   return Indexer<T>( t );
+}
+
+template<typename C>
+std::string any_join( const C& container, const std::string& delim )
+{
+  using boost::adaptors::transformed;
+  return boost::join( container | transformed( []( const typename C::value_type& v ) { return boost::lexical_cast<std::string>( v ); } ), delim );
 }
 
 }
