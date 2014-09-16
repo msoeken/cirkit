@@ -17,6 +17,8 @@
 
 #include "z3_utils.hpp"
 
+#include <core/utils/conversion_utils.hpp>
+
 #include <iostream>
 
 namespace cirkit
@@ -66,10 +68,19 @@ const std::string expr_to_bin( const z3::expr &e )
   assert( e.decl().decl_kind() == Z3_OP_BNUM );
   std::ostringstream ss; ss << e;
   std::string val = ss.str();
-  assert( val[0] == '#' && val[1] == 'b' );
-  val = val.substr(2, val.size()-2);
-  assert( val.size() == e.decl().range().bv_size() );
-  return val;
+  if ( val[0] == '#' && val[1] == 'b' )
+  {
+    assert( val[0] == '#' && val[1] == 'b' );
+    val = val.substr(2, val.size()-2);
+    assert( val.size() == e.decl().range().bv_size() );
+    return val;
+  }
+  else
+  {
+    assert ( val[0] == '#' && val[1] == 'x' );
+    val = val.substr(2, val.size()-2);
+    return convert_hex2bin( val );
+  }
 }
 
 }
