@@ -16,10 +16,13 @@
  */
 
 #include <reversible/circuit.hpp>
+#include <reversible/truth_table.hpp>
+#include <reversible/functions/circuit_to_truth_table.hpp>
 #include <reversible/io/create_image.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_realization.hpp>
+#include <reversible/simulation/simple_simulation.hpp>
 #include <reversible/utils/reversible_program_options.hpp>
 
 using namespace cirkit;
@@ -29,9 +32,10 @@ int main( int argc, char ** argv )
   reversible_program_options opts;
   opts.add_read_realization_option();
   opts.add_options()
-    ( "circuit,c",    "Prints the circuit" )
-    ( "statistics,s", "Prints circuit statistics " )
-    ( "image,i",      "Creates circuit image in LaTeX" )
+    ( "circuit,c",     "Prints the circuit" )
+    ( "truth_table,t", "Prints truth table" )
+    ( "statistics,s",  "Prints circuit statistics " )
+    ( "image,i",       "Creates circuit image in LaTeX" )
     ;
 
   opts.parse( argc, argv );
@@ -48,6 +52,13 @@ int main( int argc, char ** argv )
   if ( opts.is_set( "circuit" ) )
   {
     std::cout << circ << std::endl;
+  }
+
+  if ( opts.is_set( "truth_table" ) )
+  {
+    binary_truth_table spec;
+    circuit_to_truth_table( circ, spec, simple_simulation_func() );
+    std::cout << spec << std::endl;
   }
 
   if ( opts.is_set( "statistics" ) )
