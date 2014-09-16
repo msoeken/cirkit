@@ -36,8 +36,9 @@
 \def\eqhclause{16}
 
 \centerline{\bf Reverse engineering using simulation graphs and bipartite subgraph isomorphism}
-\centerline{Mathias Soeken, University of Bremen}
-\centerline{Bremen, September 4, 2014}
+\centerline{--- {\it Preliminary notes on our discussions\/} ---}
+\centerline{Mathias Soeken}
+\centerline{September 4 -- \dots, 2014}
 \bigskip\bigskip
 
 \noindent {\bf 1. Bipartite subgraph isomorphism.} A {\it unidirected\/} bigraph
@@ -303,6 +304,23 @@ for $1\le i\le k$ and $1\le j\le m$.
 \centerline{****}
 
 \noindent{\bf Further improvements with preprocessing.}
+
+\centerline{****}
+
+\noindent{\bf Experiments.}
+
+\vbox{
+\offinterlineskip
+\hrule
+\tabskip=0em plus2em minus.5em
+\halign{\strut\enspace#\hfil & \hfil# & \hfil# & \hfil# \cr
+  Benchmark & MiniSAT & MinSAT (Imp.) & LAD \cr
+  \noalign{\hrule}
+  b1-4 &  1.86 &  1.26 & 0.00 \cr
+  b1-5 & 20.66 & 14.59 & 0.01 \cr
+  b1-6 & 53.52 & 40.94 & 0.02 \cr
+}
+\hrule}
 
 \centerline{****}
 
