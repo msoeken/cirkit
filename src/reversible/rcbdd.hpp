@@ -32,6 +32,8 @@
 
 #include <cuddObj.hh>
 
+#include <reversible/circuit.hpp>
+
 namespace cirkit
 {
 
@@ -73,7 +75,9 @@ namespace cirkit
     BDD remove_xs( const BDD& f ) const;
     BDD remove_ys( const BDD& f ) const;
 
-    BDD create_from_gate(unsigned target, const BDD& controlf) const;
+    BDD create_from_gate( unsigned target, const BDD& controlf ) const;
+    BDD create_from_gate( const gate& g ) const;
+    BDD create_from_circuit( const circuit& circ ) const;
 
     void print_truth_table();
     void write_pla( const std::string& filename );

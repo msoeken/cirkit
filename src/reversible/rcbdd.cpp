@@ -25,6 +25,9 @@
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/irange.hpp>
 
+#include <core/utils/range_utils.hpp>
+#include <reversible/target_tags.hpp>
+
 namespace cirkit
 {
 
@@ -215,7 +218,7 @@ BDD rcbdd::remove_ys(const BDD& f) const
   return f.ExistAbstract(fys);
 }
 
-BDD rcbdd::create_from_gate(unsigned target, const BDD& controlf) const
+BDD rcbdd::create_from_gate( unsigned target, const BDD& controlf ) const
 {
   BDD func = _manager->bddOne();
 
@@ -229,6 +232,45 @@ BDD rcbdd::create_from_gate(unsigned target, const BDD& controlf) const
     {
       func &= _ys[i].Xnor(_xs[i]);
     }
+  }
+
+  return func;
+}
+
+BDD rcbdd::create_from_gate( const gate& g ) const
+{
+  assert( is_toffoli( g ) );
+
+  BDD func = _manager->bddOne();
+
+  for (unsigned i = 0u; i < _n; ++i)
+  {
+    if (i == g.targets().front())
+    {
+      BDD controlf = _manager->bddOne();
+      for ( const auto& c : g.controls() )
+      {
+        controlf &= c.polarity() ? _xs[c.line()] : !_xs[c.line()];
+      }
+      func &= _ys[i].Xnor(_xs[i] ^ controlf);
+    }
+    else
+    {
+      func &= _ys[i].Xnor(_xs[i]);
+    }
+  }
+
+  return func;
+}
+
+BDD rcbdd::create_from_circuit( const circuit& circ ) const
+{
+  BDD func;
+
+  for ( const auto& g : index( circ ) )
+  {
+    BDD gfunc = create_from_gate( g.second );
+    func = ( g.first == 0u ) ? gfunc : compose( func, gfunc );
   }
 
   return func;
