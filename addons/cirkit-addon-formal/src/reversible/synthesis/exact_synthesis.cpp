@@ -367,8 +367,8 @@ void input_output_constraints(z3::context& ctx, z3::solver solver,
     bitpos = 0;
     for (const auto& bit : boost::make_iterator_range(iter->second))
     {
-      mask.set(bitpos, bit);
-      out.set(bitpos++, bit && *bit);
+      mask.set(bitpos, (bool)bit);
+      out.set(bitpos++, (bool)bit && *bit);
     }
     unsigned pos = std::distance<binary_truth_table::const_iterator>(
         spec.begin(), iter);
