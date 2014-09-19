@@ -69,11 +69,15 @@ namespace cirkit
 
     BDD compose(const BDD& left, const BDD& right) const;
     BDD cofactor( BDD f, unsigned var, bool input_polarity, bool output_polarity ) const;
-    BDD move_xs_to_tmp(const BDD& f) const;
-    BDD move_ys_to_tmp(const BDD& f) const;
-    BDD move_ys_to_xs(const BDD& f) const;
+    BDD move_xs_to_tmp( const BDD& f ) const;
+    BDD move_ys_to_tmp( const BDD& f ) const;
+    BDD move_tmp_to_ys( const BDD& f ) const;
+    BDD move_ys_to_xs( const BDD& f) const;
     BDD remove_xs( const BDD& f ) const;
     BDD remove_ys( const BDD& f ) const;
+    BDD remove_tmp( const BDD& f ) const;
+    BDD invert( const BDD&f ) const;
+    bool is_self_inverse( const BDD& f ) const;
 
     BDD create_from_gate( unsigned target, const BDD& controlf ) const;
     BDD create_from_gate( const gate& g ) const;

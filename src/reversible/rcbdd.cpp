@@ -192,6 +192,18 @@ BDD rcbdd::move_ys_to_tmp(const BDD& f) const
   return remove_ys(func);
 }
 
+BDD rcbdd::move_tmp_to_ys(const BDD& f) const
+{
+  BDD func = f;
+
+  for (unsigned i = 0u; i < _n; ++i)
+  {
+    func &= _ys[i].Xnor(_zs[i]);
+  }
+
+  return remove_tmp(func);
+}
+
 BDD rcbdd::move_ys_to_xs(const BDD& f) const
 {
   BDD func = f;
@@ -216,6 +228,23 @@ BDD rcbdd::remove_ys(const BDD& f) const
   BDD fys = _manager->bddOne();
   boost::for_each(_ys, [&fys](const BDD& y){ fys &= y; });
   return f.ExistAbstract(fys);
+}
+
+BDD rcbdd::remove_tmp(const BDD& f) const
+{
+  BDD fzs = _manager->bddOne();
+  boost::for_each(_zs, [&fzs](const BDD& z){ fzs &= z; });
+  return f.ExistAbstract(fzs);
+}
+
+BDD rcbdd::invert( const BDD&f ) const
+{
+  return move_tmp_to_ys( move_ys_to_xs( move_xs_to_tmp( f ) ) );
+}
+
+bool rcbdd::is_self_inverse( const BDD& f ) const
+{
+  return f == invert( f );
 }
 
 BDD rcbdd::create_from_gate( unsigned target, const BDD& controlf ) const

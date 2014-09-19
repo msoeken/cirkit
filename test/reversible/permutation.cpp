@@ -48,6 +48,8 @@ BOOST_AUTO_TEST_CASE(simple)
   foreach_vshape( 3u, [&cf]( const circuit& circ ) {
       permutation_t perm = circuit_to_permutation( circ );
       BDD func = cf.create_from_circuit( circ );
+
+      std::cout << cf.is_self_inverse( func ) << std::endl;
       /* ... */
     });
 }
