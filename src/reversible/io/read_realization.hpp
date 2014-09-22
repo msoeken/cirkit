@@ -102,6 +102,7 @@ namespace cirkit
   struct read_realization_settings
   {
     bool read_gates = true;
+    std::function<boost::optional<boost::any>(const std::string&)> string_to_target_tag = revlib_parser_string_to_target_tag;
   };
 
   /**

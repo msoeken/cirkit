@@ -98,7 +98,7 @@ namespace cirkit
   {
     specification_processor processor( spec );
 
-    return revlib_parser( in, processor, ".", true, error );
+    return revlib_parser( in, processor, revlib_parser_settings(), error );
   }
 
   bool read_specification( binary_truth_table& spec, const std::string& filename, std::string* error )

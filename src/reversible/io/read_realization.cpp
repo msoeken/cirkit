@@ -192,7 +192,11 @@ namespace cirkit
   {
     circuit_processor processor( circ );
 
-    return revlib_parser( in, processor, ".", settings.read_gates, error );
+    revlib_parser_settings rp_settings;
+    rp_settings.read_gates = settings.read_gates;
+    rp_settings.string_to_target_tag = settings.string_to_target_tag;
+
+    return revlib_parser( in, processor, rp_settings, error );
   }
 
   bool read_realization( circuit& circ, const std::string& filename, const read_realization_settings& settings, std::string* error )
@@ -211,7 +215,11 @@ namespace cirkit
 
     boost::filesystem::path pfilename( filename );
     circuit_processor processor( circ );
-    return revlib_parser( is, processor, pfilename.parent_path().string(), settings.read_gates, error );
+    revlib_parser_settings rp_settings;
+    rp_settings.base_directory = pfilename.parent_path().string();
+    rp_settings.read_gates = settings.read_gates;
+    rp_settings.string_to_target_tag = settings.string_to_target_tag;
+    return revlib_parser( is, processor, rp_settings, error );
   }
 
 }

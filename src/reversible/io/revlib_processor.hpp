@@ -79,7 +79,7 @@ namespace cirkit
     virtual ~revlib_processor();
 
   private:
-    friend bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string&, bool read_gates, std::string* error );
+    friend bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_parser_settings&, std::string* error );
 
   protected:
     /**
