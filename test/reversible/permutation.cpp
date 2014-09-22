@@ -22,21 +22,11 @@
 
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
-#include <reversible/truth_table.hpp>
-#include <reversible/functions/circuit_to_truth_table.hpp>
 #include <reversible/io/print_circuit.hpp>
-#include <reversible/simulation/simple_simulation.hpp>
 #include <reversible/utils/foreach_vshape.hpp>
 #include <reversible/utils/permutation.hpp>
 
 using namespace cirkit;
-
-permutation_t circuit_to_permutation( const circuit& circ )
-{
-  binary_truth_table spec;
-  circuit_to_truth_table( circ, spec, simple_simulation_func() );
-  return truth_table_to_permutation( spec );
-}
 
 BOOST_AUTO_TEST_CASE(simple)
 {

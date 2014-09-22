@@ -26,6 +26,8 @@
 #include <boost/range/algorithm_ext/push_back.hpp>
 
 #include <core/utils/range_utils.hpp>
+#include <reversible/functions/circuit_to_truth_table.hpp>
+#include <reversible/simulation/simple_simulation.hpp>
 
 using namespace boost::assign;
 using boost::adaptors::transformed;
@@ -47,6 +49,13 @@ permutation_t truth_table_to_permutation( const binary_truth_table& spec )
   }
 
   return perm;
+}
+
+permutation_t circuit_to_permutation( const circuit& circ )
+{
+  binary_truth_table spec;
+  circuit_to_truth_table( circ, spec, simple_simulation_func() );
+  return truth_table_to_permutation( spec );
 }
 
 cycles_t permutation_to_cycles( const permutation_t& perm )
@@ -114,10 +123,10 @@ std::string permutation_to_string( const permutation_t& perm )
   return "[" + any_join( perm, " " ) + "]";
 }
 
-std::string cycles_to_string( const cycles_t& cycles )
+std::string cycles_to_string( const cycles_t& cycles, bool print_fixpoints )
 {
-  return boost::join( cycles | transformed( []( const permutation_t& cycle ) {
-        return "(" + any_join( cycle, " " ) + ")";
+  return boost::join( cycles | transformed( [&print_fixpoints]( const permutation_t& cycle ) {
+        return ( cycle.size() > 1u || print_fixpoints ) ? ( "(" + any_join( cycle, " " ) + ")" ) : std::string();
       } ), "" );
 }
 
