@@ -4,6 +4,7 @@
 \usetikzlibrary{calc,matrix}
 \tikzset{>=stealth}
 \let\shipout\safetikz
+\input stmary
 
 \magnification\magstephalf
 \parskip3pt
@@ -27,13 +28,8 @@
 \def\eqonehotb{7}
 \def\eqinjsem{8}
 \def\eqonehotc{9}
-\def\eqhvar{10}
-\def\eqhmatrix{11}
-\def\eqhjl{12}
-\def\eqttrue{13}
-\def\eqtfalse{14}
-\def\eqhunitclause{15}
-\def\eqhclause{16}
+\def\eqedgep{10}
+\def\eqedge{11}
 
 \centerline{\bf Reverse engineering using simulation graphs and bipartite subgraph isomorphism}
 \centerline{--- {\it Preliminary notes on our discussions\/} ---}
@@ -96,13 +92,13 @@ $$
 as target and pattern in a running example.  Their compact adjacency matrices
 are
 $$
-  M_G = \pmatrix{1 & 1 & 0 \cr 1 & 0 & 1 \cr 0 & 1 & 0 \cr 1 & 1 & 0}
+  G_{\rm A} = \pmatrix{1 & 1 & 0 \cr 1 & 0 & 1 \cr 0 & 1 & 0 \cr 1 & 1 & 0}
   \qquad\hbox{and}\qquad
-  M_P = \pmatrix{1 & 1 \cr 1 & 0 \cr 1 & 1}.
+  P_{\rm A} = \pmatrix{1 & 1 \cr 1 & 0 \cr 1 & 1}
   \eqno(\eqexadjmat)
 $$
-It can readily be verified, that there exists a subgraph isomorphism between
-these two graphs.
+with entries $g_{i,k}$ and $p_{j,l}$, respectively.  It can readily be verified,
+that there exists a subgraph isomorphism between these two graphs.
 
 \noindent {\bf SAT formulation.} We will now create a Boolean function $f$ that
 is satisfiable if and only if $P$ is isomorphic to a subgraph of $G$.  In case
@@ -111,12 +107,11 @@ $f$.  We assume that $G$ has $n+q$ vertices; $n$ sources and $q$ sinks.
 Analogously, $P$ has $m+r$ vertices.  Obviously, we have $m\le n$ and $r\le q$.
 
 First, we are looking to the bipartite subgraph isomorphism problem from a
-different angle.  Let $g^{(1)},\dots,g^{(n)}$ and $p^{(1)},\dots,p^{(m)}$ be the
-row vectors of the compact adjacency matrices of the target $G$ and pattern $P$.
-Their bitwidths are $q$ and $r$, respectively.  The existence of a bipartite
-subgraph isomorphism is equivalent to the existence of two injective functions
-$v:[m]\to[n]$ and $a:[r]\to[q]$ such that
-$$ p^{(j)}_l=g^{(v(j))}_{a(l)} \eqno(\eqmap) $$
+different angle.  Let $(g_{i,k})$ and $(p_{j,l})$ be the compact adjacency
+matrices of the target $G$ and pattern $P$, respectively.  The existence of a
+bipartite subgraph isomorphism is equivalent to the existence of two injective
+functions $v:[m]\to[n]$ and $a:[r]\to[q]$ such that
+$$ p_{j,l}=g_{v(j),a(l)} \eqno(\eqmap) $$
 for all $1\le j\le m$ and $1\le l\le r$.  (The notation $[n]$ is a shorthand for
 the set $\{1,\dots,n\}$.)  The function $v$ maps each source in $P$ to a
 distinct source in $G$, while the function $a$ maps each sink in $P$ to a
@@ -133,19 +128,16 @@ This equivalent formulation makes it easy for us to describe the satisfiability
 function $f$.  The function $v$ is described by $mn$ variables $v_{j,i}$ such
 that $v(j)=i$ if and only if $v_{j,i}=1$ for all $1\le j\le m$ and $1\le i\le
 n$; in other words we have $v_{j,v(j)}=1$.  To ensure function semantics,
-i.e.~each $v(j)$ is assigned exactly one value, clauses for the Boolean
-functions
-$$ S_1(v_{j,1}, \dots, v_{j,n}) \qquad\hbox{for $1\le j\le m$} \eqno(\eqfuncsem) $$
-are added.  ($S_1(x_1,\dots,x_n)$ describes the symmetric Boolean function that
-is true if and only if exactly one of the $n$ variables is true; see
-Eq.~7.1.1-({\oldstyle90}) in TAOCP.)  The encoding is sometimes referred to as
-{\it one hot encoding\/} and can be enforced by the clauses
+i.e.~each $v(j)$ is assigned exactly one value, clauses to express
+$$ v_{j,1}+v_{j,2}+\cdots+v_{j,n}=1 \qquad\hbox{for $1\le j\le m$} \eqno(\eqfuncsem) $$
+are added.  The encoding is sometimes referred to as {\it one hot encoding\/}
+and can be enforced by the clauses
 $$ v_{j,1}\lor\cdots\lor v_{j,n} \qquad \hbox{for $1\le j\le m$} \eqno(\eqonehota) $$
 to ensure that at least one bit is set to 1 together with the exclusion clauses
 $$ \bar v_{j,i}\lor \bar v_{j,i'} \qquad \hbox{for $1\le j\le m$ and $1\le i<i'\le n$} \eqno(\eqonehotb) $$
 that ensure that at most one bit is set to 1.
-The injectivity property can be enforced by adding clauses for the functions
-$$ S_{\le1}(v_{1,i},\dots,v_{m,i}) \qquad\hbox{for $1\le i\le n$}. \eqno(\eqinjsem) $$
+The injectivity property can be enforced by adding clauses expressing
+$$ v_{1,i}+v_{2,i}+\cdots+v_{m,i} \le 1 \qquad\hbox{for $1\le i\le n$}. \eqno(\eqinjsem) $$
 This ensures that for each $i\in\{1,\dots,n\}$ there is at most one $j$ such
 that $v(j)=i$ and can be encoded using only the exclusion clauses
 $$ \bar v_{j,i}\lor \bar v_{j',i} \qquad \hbox{for $1\le j<j'\le m$ and $1\le i\le n$}. \eqno(\eqonehotc) $$
@@ -153,74 +145,16 @@ Analogously, $rq$ variables $a_{l,k}$ describe function $a$ for $1\le l\le r$
 and $1\le k\le q$ and similar clauses to (\eqonehota), (\eqonehotb), and
 (\eqonehotc) ensure the correct semantics.
 
-We are now getting to the core of (\eqmap).  We will eventually add clauses for
-all function values of $v$ and $a$, i.e.~for all combinations of
-$j\in\{1,\dots,m\}$ and $l\in\{1,\dots,r\}$ , but let us first take a look on
-how to represent the right hand side in (\eqmap) using the variables we have
-added so far.  For this purpose $nmqr$ variables $h_{i,j,k,l}$ are added for
-which
-$$h_{i,j,k,l} = g^{(i)}_k\land v_{j,i}\land a_{l,k} \eqno(\eqhvar)$$
-should hold.  These will be the most complicated variables in our encoding and
-it requires some further discussion.  When we fix $j$ and $l$ and we range over
-all $i\in\{1,\dots,n\}$ and $k\in\{1,\dots,q\}$, the values for $h_{i,j,k,l}$
-are the components of the result of the bitwise AND of the bitvectors $\hat g$,
-$\hat v$, and $\hat a$:
-$$
-\tikzpicture[baseline=(c.base)]
-  \matrix[matrix of math nodes] (m) {
-  g^{(1)}_1 & g^{(1)}_2 & \cdots & g^{(1)}_q & g^{(2)}_1 & g^{(2)}_2 & \cdots & g^{(2)}_q & \cdots & g^{(n)}_1 & g^{(n)}_2 & \cdots & g^{(n)}_q \\
-  \land & \land & & \land & \land & \land & & \land & & \land & \land & & \land \\
-  v_{j,1} & v_{j,1} & \cdots & v_{j,1} & v_{j,2} & v_{j,2} & \dots & v_{j,2} & \cdots & v_{j,n} & v_{j,n} & \dots & v_{j,n} \\
-  \land & \land & & \land & \land & \land & & \land & & \land & \land & & \land \\
-  a_{l,1} & a_{l,2} & \cdots & a_{l,q} & a_{l,1} & a_{l,2} & \cdots & a_{l,q} & \cdots & a_{l,1} & a_{l,2} & \cdots & a_{l,q} \\
-  };
-
-  \node[left] at (m-1-1.east) {$\hat g\;=\;\phantom{g^{(1)}_1}$};
-  \node[left] at (m-3-1.east) {$\hat v\;=\;\phantom{v_{j,1}}$};
-  \node[left] at (m-5-1.east) {$\hat a\;=\;\phantom{a_{l,1}}$};
-
-  \node[rotate=270,left] at (m-1-1.north) {$h_{1,j,1,l}=$};
-  \node[rotate=270,left] at (m-1-2.north) {$h_{1,j,2,l}=$};
-  \node[rotate=270,left] at (m-1-4.north) {$h_{1,j,q,l}=$};
-  \node[rotate=270,left] at (m-1-5.north) {$h_{2,j,1,l}=$};
-  \node[rotate=270,left] at (m-1-6.north) {$h_{2,j,2,l}=$};
-  \node[rotate=270,left] at (m-1-8.north) {$h_{2,j,q,l}=$};
-  \node[rotate=270,left] at (m-1-10.north) {$h_{n,j,1,l}=$};
-  \node[rotate=270,left] at (m-1-11.north) {$h_{n,j,2,l}=$};
-  \node[rotate=270,left] at (m-1-13.north) {$h_{n,j,q,l}=$};
-
-  \coordinate (c) at (current bounding box.west);
-\endtikzpicture
-\eqno(\eqhmatrix)
-$$
-The bitvector $\hat g$ results from the concatenation of all row vectors from
-the compact adjecency matrix of $G$.  The bitvector $\hat v$ is a mask of form
-$0\dots 01\dots 10\dots 0$,
-%more precisely $0^{(v(j)-1)p}1^p0^{(n-v(j))p}$,
-where we have ones only for the entries $v_{j,v(j)}$.  Hence, $\hat v$ selects
-the correct row vector $g^{(v(j))}$.  Finally, $\hat a = (a_{l,1}a_{l,2}\dots
-a_{l,q})^n$ is a mask with $n$ copies of $a_{l,1}a_{l,2}\dots a_{l,q}$ which
-only 1 is at position $a_{l,a(l)}$.  We can see that $n-1$ of these copies are
-discarded by $\hat v$ and only the $v(j)$-th copy remains.  From this copy it
-selects the bit $g^{(v(l))}_{a(l)}$.  We collect all the bits $h_{i,j,k,l}$ in
-(\eqhmatrix) in the set
-$$H_{j,l} = \{h_{i,j,k,l}\mid1\le i\le n, 1\le k\le q\}. \eqno(\eqhjl) $$
-With the previous considerations it is easy to see that there is at most one
-variable in $H_{j,l}$ that is true in a satisfying assignment.  Moreover, there
-exists one true variable in $H_{j,l}$ if and only if $g^{(v(j))}_{a(l)}=1$.
-Now, we are ready to describe the main clauses that we add for all
-$j\in\{1,\dots,m\}$ and $l\in\{1,\dots,r\}$.  If $p^{(j)}_l=1$ we add one large clause
-$$ \bigvee_{h\in H_{j,l}} h \eqno(\eqttrue) $$
-with $nq$ literals to ensure that also $g^{(v(j))}_{a(l)}=1$, and if we have
-$p^{(j)}_l=0$ we add the $nq$ unit clauses
-$$ \bigwedge_{h\in H_{j,l}} \bar h \eqno(\eqtfalse) $$
-to ensure that also $g^{(v(j))}_{a(l)}=0$.  There is one last thing to do, since
-we have ignored to add clauses for $h_{i,j,k,l}$.  Since the values for
-$g^{(i)}_k$ are constant in (\eqhvar) we make a case distinction on them.  If
-$g^{(i)}_k=0$ we just add the unit clause
-$$ \bar h_{i,j,k,l} \eqno(\eqhunitclause) $$
-and if $g^{(i)}_k=1$, we add the three clauses
-$$ (h_{i,j,k,l}\lor \bar v_{j,i} \lor \bar a_{l,k}) \land (\bar h_{i,j,k,l}\lor v_{j,i}) \land (\bar h_{i,j,k,l} \lor a_{l,k}). \eqno(\eqhclause) $$
+We are now describing (\eqmap) in terms of clauses.  It can easily be seen that
+the functions $v$ and $a$ must ensure the property
+$$ (v(j)=i) \land (a(l)=k) \quad\Longrightarrow\quad g_{i,k}=p_{j,l}. \eqno(\eqedgep) $$
+In other words, when $v$ maps vertex $j$ in $P$ to vertex $i$ in $G$ and when
+$a$ maps vertex $l$ in $P$ to vertex $k$ in $G$, then we either have $i
+\longrightarrow k$ and $j \longrightarrow l$ or we have $i
+\longarrownot\longrightarrow k$ and $j \longarrownot\longrightarrow l$.  By
+changing the direction of (\eqedgep) and using the variables that encode $v$ and
+$a$ we see that for all $i,j,k$ and $l$ we add the clause
+$$ (\bar v_{j,i} \lor \bar a_{l,k}) \qquad \hbox{if $g_{i,k}\neq p_{j,l}$}. \eqno(\eqedge) $$
 
 \medskip\noindent{\bf Complexity of the formula.}  Now we want to look into the
 size of the resulting formulas.  There are in total $mn+rq+nmqr\le O(|V|^4)$
@@ -231,45 +165,28 @@ $$
   \underbrace{m+r}_{(\eqonehota)}
   + \underbrace{\left(m\atop 2\right)+\left(r\atop 2\right)}_{(\eqonehotb)}
   + \underbrace{\left(n\atop 2\right)+\left(q\atop 2\right)}_{(\eqonehotc)}
-  + \underbrace{|B|}_{(\eqttrue)}
-  + \underbrace{(mr-|B|)\cdot nq}_{(\eqtfalse)}
-  + \underbrace{(nq-|A|)}_{(\eqhunitclause)}
-  + \underbrace{|A|\cdot3}_{(\eqhclause)},
+  + \underbrace{(nq-|A|)\cdot|B|+|A|\cdot(mr-|B|)}_{(\eqedge)},
 $$
 where for (\eqonehota), (\eqonehotb), and (\eqonehotc) also the clauses to
-encode function $a$ are taken into account.  In order to derive the number of
-clauses for (\eqttrue)--(\eqhclause) take into account that the compact
-adjacency matrix for $G$ has $|A|$ ones and $nq-|A|$ zeros.  Similarly, the
-compact adjacency matrix for $P$ has $|B|$ ones and $mr-|B|$ zeros.  Considering
-that $|B|\le |A|$, $m\le n$, and $r\le q$, we have
+encode function $a$ are taken into account.  Only the last term is not obvious.
+Matrix $G_{\rm A}$ has $|A|$ ones and $nq-|A|$ zeros and matrix $P_{\rm A}$ has
+$|B|$ ones and $mr-|B|$ zeros.  Now each element of matrix $G_{\rm A}$ is
+compared to each element of matrix $P_{\rm A}$ and two cases can occur. In case
+the element is $0$, which is the case for $(nq-|A|)$ entries, one needs to add a
+clause for each element that is $1$ in matrix $P_{\rm A}$ which are $|B|$ many.
+A similar argument hods for the case that the element is $1$.
+
+Considering that $|B|\le |A|$, $m\le n$, and $r\le q$, we have
 $$
   \eqalign{
   \kappa(G,P) &\le
   n+q
   + 2\cdot\left(n\atop 2\right)+2\cdot\left(q\atop 2\right)
-  + |A|\cdot 3 + (nq-|A|)
-  + |A| + (nq-|A|)\cdot nq \cr
-  &=
-  n+q
-  + 2\cdot\left(n\atop 2\right)+2\cdot\left(q\atop 2\right)
-  + |A|\cdot 3 +  nq-|A|
-  + |A| + (nq)^2-|A| nq \cr
-  &=
-  n+q
-  + 2\cdot\left(n\atop 2\right)+2\cdot\left(q\atop 2\right)
-  + |A|\cdot(3-nq) +  nq
-  + (nq)^2.}
+  + 2\cdot (nq-|A|)\cdot |A|.}
 $$
 
-% \smallskip\noindent{\bf Lemma 1.} \sl At most one variable in $H_{j,l}$ can be
-% true in a satisfying assignment. \rm
+\medskip\noindent{\bf Preprocessing.}
 
-% {\it Proof.} First, we assume that no negative unit clauses such as in (??) have
-% been added.  According to (2) there is exactly one $\hat\imath$ such that
-% $v_{j,\hat\imath}$ is true and therefore all $h_{i,j,k,l}$ for $i\neq\hat\imath$
-% can be discarded and we get $H\supseteq \hat H=\{v_{j,\hat\imath}\land
-% a_{l,k}\mid 1\le k\le p\}$.  With a similar argumentation there is also only one
-% $\hat k$ such that $a_{l,k}$ is true.\slugonright
 
 \medskip\noindent{\bf Further reading.}  Jacobo Tor\'an presents a SAT encoding
 for graph isomorphism in [{\sl SAT\/ \bf 16} (2013), 52--66].
@@ -309,24 +226,49 @@ for $1\le i\le k$ and $1\le j\le m$.
 
 \noindent{\bf Experiments.}
 
+\topinsert
+\noindent\hfil
 \vbox{
 \offinterlineskip
 \hrule
 \tabskip=0em plus2em minus.5em
-\halign{\strut\enspace#\hfil & \hfil# & \hfil# & \hfil# \cr
-  Benchmark & MiniSAT & MinSAT (Imp.) & LAD \cr
+\halign{\strut\enspace#\hfil & \hfil# & \hfil# & \hfil# & \hfil# & \hfil# \cr
+  Benchmark & MiniSAT & SAT13 & LAD & MiniSAT (inv.) & SAT13 (inv.) \cr
   \noalign{\hrule}
-  b1-4 &  1.86 &  1.26 & 0.00 \cr
-  b1-5 & 20.66 & 14.59 & 0.01 \cr
-  b1-6 & 53.52 & 40.94 & 0.02 \cr
+  b1-4 &   0.12 &  0.00 & 0.00 & 111.32 &   67.58 \cr
+  b1-5 &   0.27 &  0.01 & 0.01 &        & 1161.11 \cr
+  b1-6 &  22.20 &  0.21 & 0.02 \cr
+  b1-7 &   2.14 &  0.14 & 0.04 \cr
+  b1-8 & 614.48 & 11.77 & 0.08 \cr
+  b2-4 &   0.13 &  0.09 & 0.00 \cr
+  b2-5 &   0.85 &  0.41 & 0.00 \cr
+  b2-6 &   2.19 &  1.86 & 0.00 \cr
+  b2-7 &   5.93 &  5.88 & 0.00 \cr
+  b2-8 &  13.41 & 16.24 & 0.00 \cr
 }
 \hrule}
+\endinsert
 
 \centerline{****}
 
 \noindent{\bf Further reading.}
 [J.\ A.\ Roy, I.\ L.\ Markov, and V.\ Bertacco, {\sl IWLS\/ \bf 13} (2004)]
 
+\centerline{****}
+
+\noindent{\bf AND-inverter chains.} For a function of $n$ variables
+$(x_1,\dots,x_n)$ let $(x_{n+1},\dots,x_{n+r})$ be a Boolean chain as defined in
+[TAOCP, Sect.~7.1.2].  Index $i\in\{n+1,\dots,n+r\}$ is called an {\it inner
+operation\/} if there exists an index $i'>i$ such that $j(i')=i$ or if there
+exists an index $i''>i$ such that $k(i'')=i$.  In other words, the outcome of
+operation $i$ is used as input by some later operation.  An index that is not an
+inner operation is called {\it outer operation}.  For Boolean chains that
+represent a Boolean function, index $n+r$ is the only outer operation.  An {\it
+AND-inverter chain\/} is a Boolean chain $(x_{n+1},\dots,x_{n+r})$ with the
+property that $\circ_i\in\{\land,>,<,\bar\lor\}$ for all inner operations $i$
+and $\circ_i\in\{\lor,\ge,\le,\bar\land\}$ for all outer operations $i$.  Also
+we may have $\circ_{n+1}=\bot$ with $j(n+1)$ and $k(n+1)$ being undefined to
+represent the constant $0$ input.
+
 
 \bye
-<
