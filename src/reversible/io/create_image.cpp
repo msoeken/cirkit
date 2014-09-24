@@ -231,7 +231,7 @@ namespace cirkit
     for ( unsigned i = 0; i < circ.lines(); ++i )
     {
       settings.draw_line( os, x1, x2, settings.height - y );
-      settings.draw_input( os, x1, settings.height - y, ( circ.inputs().size() > i ? circ.inputs().at( i ) : "" ), circ.constants().at( i ) );
+      settings.draw_input( os, x1, settings.height - y, ( circ.inputs().size() > i ? circ.inputs().at( i ) : "" ), (bool)circ.constants().at( i ) );
       settings.draw_output( os, x2, settings.height - y, ( circ.outputs().size() > i ? circ.outputs().at( i ) : "" ), circ.garbage().at( i ) );
 
       y += settings.elem_height;

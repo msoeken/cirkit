@@ -33,6 +33,7 @@
 #include <boost/range/numeric.hpp>
 
 #include <core/io/read_pla_to_bdd.hpp>
+#include <core/utils/range_utils.hpp>
 #include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 
@@ -379,10 +380,9 @@ public:
     std::cout << "Number of cubes:    " << cube_count() << std::endl;
     std::cout << "Number of literals: " << literal_count() << std::endl;
     std::cout << "Cubes:" << std::endl;
-    auto range = _cubes | indexed( 0u );
-    for ( auto it = range.begin(); it != range.end(); ++it )
+    for ( auto it : index( _cubes ) )
     {
-      std::cout << boost::format( "%4d: " ) % it.index() << *it << std::endl;
+      std::cout << boost::format( "%4d: " ) % it.first << it.second << std::endl;
     }
     std::cout << "Distance lists:" << std::endl;
     for ( unsigned i = 0u; i < 3u; ++i )
@@ -598,11 +598,12 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, ch
     }
     boost::dynamic_bitset<> lits( n, 0u ), care( n, 0u );
 
-    auto range = boost::make_iterator_range( var_values, var_values + Cudd_ReadSize( cudd ) ) | indexed( 0u );
-    for ( auto it = range.begin(); it != range.end(); ++it )
+    unsigned index = 0u;
+    for ( auto it : boost::make_iterator_range( var_values, var_values + Cudd_ReadSize( cudd ) ) )
     {
-      lits.set( it.index(), *it == VariablePositive );
-      care.set( it.index(), *it != VariableAbsent );
+      lits.set( index, it == VariablePositive );
+      care.set( index, it != VariableAbsent );
+      ++index;
     }
 
     esop.add_cube( std::make_pair( lits, care ) );

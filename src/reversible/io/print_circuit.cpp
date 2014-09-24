@@ -140,7 +140,7 @@ namespace cirkit
       };
 
       unsigned pos = 0u;
-      for ( const auto& lc : line_chars.at( i ) | indexed( 0u ) )
+      for ( const auto& lc : line_chars.at( i ) )
       {
         add_line_char( pos, std::get<0>( lc ) );
         for ( unsigned k = 0u; k < settings.gate_spacing; ++k ) line_str += settings.line_char;

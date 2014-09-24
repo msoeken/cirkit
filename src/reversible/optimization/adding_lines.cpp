@@ -40,9 +40,9 @@ namespace cirkit
   {
     for ( Iterator it = first; it != last; ++it )
     {
-      if ( factor.test( it.index() ) )
+      if ( factor.test( it->index() ) )
       {
-        *output++ = *it;
+        *output++ = it->value();
       }
     }
 

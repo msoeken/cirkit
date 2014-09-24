@@ -26,6 +26,8 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <boost/regex.hpp>
 #include <boost/variant.hpp>
 
@@ -169,6 +171,13 @@ namespace cirkit
       module_gate.set_type( module );
 
       added_gate = &module_gate;
+    }
+    else
+    {
+      added_gate = &d->circs.top()->append_gate();
+      std::for_each( line_indices.begin(), line_indices.end() - 1, [added_gate]( variable l ) { added_gate->add_control( l ); } );
+      added_gate->add_target( line_indices.back().line() );
+      added_gate->set_type( target_type );
     }
 
     /* Annotations */
