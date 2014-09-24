@@ -1,0 +1,83 @@
+\let\safetikz\shipout
+\input pgf
+\input tikz
+\usetikzlibrary{calc}
+\let\shipout\safetikz
+
+\magnification\magstephalf
+\parskip3pt
+\baselineskip14pt
+
+\def\|#1>{|#1\rangle}
+
+\centerline{\bf Decomposition of controlled unitary matrices}
+\centerline{Mathias Soeken}
+\centerline{September 18, 2014}
+
+\bigskip
+\bigskip
+
+\noindent Let $f$ be a Boolean function on $n$ variables and $U$ be a unity
+matrix for which an integer $k>1$ exists such that $U^k=I$.  We are interested
+in decomposing the controlled quantum gate
+$$
+  \tikzpicture[baseline=(c.base)]
+    \draw (0,0)    node[left] (i1) {$\|x_1>$} -- ++(right:1) node[right] (o1) {$\|x_1>$};
+    \draw (0,-.5)  node[left] (i2) {$\|x_2>$} -- ++(right:1) node[right] (o2) {$\|x_2>$};
+    \draw (0,-1.5) node[left] (i3) {$\|x_n>$} -- ++(right:1) node[right] (o3) {$\|x_n>$};
+    \draw (0,-2)   node[left] (i4) {$\|x_{n+1}>$} -- ++(right:1) node[right] (o4) {$U^{f(\|x_1>,\|x_2>,\dots,\|x_n>)}\|x_{n+1}>$};
+
+    \node at ($(i2)!.45!(i3)$) {$\vdots$};
+    \node at ($(o2)!.45!(o3)$) {$\vdots$};
+
+    \draw[fill=white,rounded corners=3pt] ([xshift=-4pt,yshift=3pt] $(i1.east)!.5!(o1.west)$) coordinate (a) rectangle
+                                          ([xshift=4pt,yshift=-3pt] $(i3.east)!.5!(o3.west)$) coordinate (b);
+    \coordinate (c) at ($(a)!.5!(b)$);
+    \node at (c) {$f$};
+
+    \draw[fill=white] ([xshift=-7pt,yshift=7pt] $(i4.east)!.5!(o4.west)$) coordinate (d) rectangle
+                      ([xshift=7pt,yshift=-7pt] $(i4.east)!.5!(o4.west)$) coordinate (e);
+    \coordinate (f) at ($(d)!.5!(e)$);
+    \node at (f) {$U$};
+
+    \draw (c |- b) -- (f |- d);
+    \coordinate (c) at (current bounding box.center);
+  \endtikzpicture
+  \eqno(1)
+$$
+into a sequence of controlled $U$ gates, however, each control function of these
+gates must be representable as a single product term (possibly with negative
+literals).  This problem has a close relationship to disjoint sum-of-product
+representations.
+
+A cube is a Boolean function that can be expressed as $x_{i_1}^{p_1}\land
+x_{i_2}^{p_2}\land\cdots\land x_{i_k}^{p_k}$ for some $k$, where $x^0=\bar x$
+and $x^1=x$.  Any Boolean function can be expressed as a cube set
+$C=\{c_1,c_2,\dots,c_m\}$, i.e.
+$$ f(x_1,\dots,x_n)=c_1\lor c_2\lor\cdots\lor c_m. \eqno(2) $$
+The formula is often also referred to as sum-of-product representation or
+disjunctive normal form.  We will use the terms cube set and sum-of-product
+representation synomymously.  The on-set of a function $f$, denoted ${\rm
+on}(f)$, contains all vectors $x$ such that $f(x)=1$.  A cube set $C$ for a
+function $f$ is {\it disjoint\/} if and only if
+$$ |\{c \in C \mid c(x)=1 \}|=1 \qquad\hbox{for all $x\in{\rm on}(f)$}. \eqno(3) $$
+We can also say that for each assignment from the on set, only one cube can be
+{\it active\/} at the same time, a concept that can be generalized as follows.
+Given a set $M\subseteq\{1,\dots,n\}$ a cube set $C$ is called $M$-{\it active},
+if and only if
+$$ |\{c \in C \mid c(x)=1 \}|\in M \qquad\hbox{for all $x\in{\rm on}(f)$}. \eqno(4) $$
+
+\smallskip\noindent{\bf Theorem 1.} Let $f$ be a Boolean function and $U$ be a
+unitary matrix as given in (1).  Then it can be decomposed into a circuit where
+each gate corresponds to cube from an $M$-active cube set of $f$, with
+$M=\{1,k+1,2k+1,3k+1,\dots\}$.
+
+\bye
+
+
+%%% Local Variables:
+%%% mode: plain-tex
+%%% mode: flyspell
+%%% mode: fci
+%%% TeX-master: t
+%%% End:
