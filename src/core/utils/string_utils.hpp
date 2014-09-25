@@ -27,6 +27,8 @@
 #ifndef STRING_UTILS_HPP
 #define STRING_UTILS_HPP
 
+#include <functional>
+#include <regex>
 #include <string>
 
 #include <boost/algorithm/string/classification.hpp>
@@ -53,6 +55,8 @@ void parse_string_list( std::vector<T>& list, const std::string& s, const std::s
   boost::split( str_list, s_copy, boost::is_any_of( delimiter ), boost::algorithm::token_compress_on );
   boost::push_back( list, str_list | transformed( []( const std::string& s ) { return boost::lexical_cast<T>( s ); } ) );
 }
+
+void line_parser( const std::string& filename, const std::vector<std::pair<std::regex, std::function<void(const std::smatch&)>>>& matchers );
 
 }
 
