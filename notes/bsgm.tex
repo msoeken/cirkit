@@ -19,17 +19,18 @@
 \def\slugonright{\vrule width0pt\nobreak\hfill\slug}
 
 % Equations
-\def\eqex{1}
-\def\eqexadjmat{2}
-\def\eqmap{3}
-\def\eqexva{4}
-\def\eqfuncsem{5}
-\def\eqonehota{6}
-\def\eqonehotb{7}
-\def\eqinjsem{8}
-\def\eqonehotc{9}
-\def\eqedgep{10}
-\def\eqedge{11}
+\def\eqsimgraph{1}
+\def\eqex{2}
+\def\eqexadjmat{3}
+\def\eqmap{4}
+\def\eqexva{5}
+\def\eqfuncsem{6}
+\def\eqonehota{7}
+\def\eqonehotb{8}
+\def\eqinjsem{9}
+\def\eqonehotc{10}
+\def\eqedgep{11}
+\def\eqedge{12}
 
 \centerline{\bf Reverse engineering using simulation graphs and bipartite subgraph isomorphism}
 \centerline{--- {\it Preliminary notes on our discussions\/} ---}
@@ -37,9 +38,58 @@
 \centerline{September 4 -- \dots, 2014}
 \bigskip\bigskip
 
-\noindent {\bf 1. Bipartite subgraph isomorphism.} A {\it unidirected\/} bigraph
-is a digraph $G=(V,A)$ for which $V$ is a partition of two disjoint sets of
-sources $V'$ and sinks $V''$ and arcs $A\subseteq V'\times V''$, i.e.~the
+\noindent{\bf 1. Simulation graphs.}  Let $y=f(x)$ be a multibit function which
+is defined over $m$ functions $f_1(x_1,\dots,x_n), \dots, f_m(x_1,\dots,x_n)$.
+In other words, $y=f_1\dots f_m$ is a binary vector of length $m$ and
+$x=x_1\dots x_n$ is a binary vector of length $n$.  Given such a multibit
+function together with simulation vectors $x^{(1)},\dots, x^{(k)}$ a {\it
+simulation graph\/} is a directed bigraph $G=(V,A)$ with source vertices
+$v_1,\dots,v_k$ for each simulation vector and sink vertices $v_{k+1}, \dots,
+v_{k+m}$ for each output of $f$.  It has an arc
+$$ v_i \longrightarrow v_{k+j}, \quad \hbox{if and only if} \quad f_j(x^{(i)})=1\eqno(\eqsimgraph) $$
+for $1\le i\le k$ and $1\le j\le m$.  If $f$ describes a 2-bit adder with 4
+input variables and 3 output variables, the simulation graph for all patterns
+that consist of a single ones, two ones, and all ones looks as follows:
+$$
+\font\sevenrm=cmr7
+\tikzpicture
+  \foreach \y/\p in {0/0001,1/0010,2/0100,3/1000,4/0011,5/0101,6/0110,7/1001,8/1010,9/1100,10/1111} {%
+    \coordinate (sim\p) at ($(0,0)-.35*(0,\y)$);
+    \fill (sim\p) circle (2pt);
+    \node[left,inner sep=1pt,font=\sevenrm] at ([xshift=-4pt] sim\p) {\p};
+  }
+  \coordinate (y1) at ([xshift=4cm] $(sim0001)!.3!(sim1111)$);
+  \fill (y1) circle (2pt);
+  \node[right,inner sep=1pt,font=\sevenrm] at ([xshift=4pt] y1) {$y_1$};
+  \coordinate (y2) at ([xshift=4cm] $(sim0001)!.5!(sim1111)$);
+  \fill (y2) circle (2pt);
+  \node[right,inner sep=1pt,font=\sevenrm] at ([xshift=4pt] y2) {$y_2$};
+  \coordinate (y3) at ([xshift=4cm] $(sim0001)!.7!(sim1111)$);
+  \fill (y3) circle (2pt);
+  \node[right,inner sep=1pt,font=\sevenrm] at ([xshift=4pt] y3) {$y_3$};
+
+  \draw (sim0001) to[bend left=30] (y1);
+  \draw (sim0010) to[bend left=25] (y2);
+  \draw (sim0100) to[bend left=5] (y1);
+  \draw (sim1000) to[bend left=5] (y2);
+  \draw (sim0011) to (y1);
+  \draw (sim0011) to (y2);
+  \draw (sim0101) to (y2);
+  \draw (sim0110) to (y1);
+  \draw (sim0110) to (y2);
+  \draw (sim1001) to (y1);
+  \draw (sim1001) to (y2);
+  \draw (sim1010) to (y3);
+  \draw (sim1100) to[bend right=5] (y1);
+  \draw (sim1100) to[bend right=10] (y2);
+  \draw (sim1111) to[bend right=25] (y2);
+  \draw (sim1111) to[bend right=30] (y3);
+\endtikzpicture
+$$
+
+\medskip\noindent {\bf 2. Bipartite subgraph isomorphism.} A {\it unidirected\/}
+bigraph is a digraph $G=(V,A)$ for which $V$ is a partition of two disjoint sets
+of sources $V'$ and sinks $V''$ and arcs $A\subseteq V'\times V''$, i.e.~the
 initial and final vertex of each arc lies in $V'$ and $V''$, respectively.  The
 adjacency matrix of such a unidirected bigraph always has the form
 $M=\big({O\atop O}{M'\atop O}\big)$ where each $O$ is a matrix containing only
@@ -155,11 +205,19 @@ $a$ maps vertex $l$ in $P$ to vertex $k$ in $G$, then we either have $i
 changing the direction of (\eqedgep) and using the variables that encode $v$ and
 $a$ we see that for all $i,j,k$ and $l$ we add the clause
 $$ (\bar v_{j,i} \lor \bar a_{l,k}) \qquad \hbox{if $g_{i,k}\neq p_{j,l}$}. \eqno(\eqedge) $$
+A similar encoding has been proposed for general subgraph isomorphism by
+C\v{a}lin Anton and Lane Olson in [{\sl Canadian AI\/ \bf 22} (2009), 16--26].
+Our formalism allows a smaller number of variables since vertices are
+partitioned into two disjoint sets which corresponds to bounded color
+multiplicity subgraph isomorphism (see e.g.~[V.~Arvind, P.~P.~Kurur, and
+T.~C.~Vijayaraghavan, {\sl CoCo\/ \bf 20} (2005), 13--27]).  With minor
+adjustments the encoding can also be used for graph isomorphism as shown by
+Jacobo Tor\'an in [{\sl SAT\/ \bf 16} (2013), 52--66].
 
-\medskip\noindent{\bf Complexity of the formula.}  Now we want to look into the
-size of the resulting formulas.  There are in total $mn+rq+nmqr\le O(|V|^4)$
-variables $v_{j,i}$, $a_{l,k}$, and $h_{i,j,k,l}$.  The total number of clauses
-is
+\medskip\noindent{\bf \llap{*}Complexity of the formula.}  Now we want to look
+into the size of the resulting formulas.  There are in total $mn+rq+nmqr\le
+O(|V|^4)$ variables $v_{j,i}$, $a_{l,k}$, and $h_{i,j,k,l}$.  The total number
+of clauses is
 $$
   \kappa(G,P)=
   \underbrace{m+r}_{(\eqonehota)}
@@ -188,27 +246,13 @@ $$
 \medskip\noindent{\bf Preprocessing.}
 
 
-\medskip\noindent{\bf Further reading.}  Jacobo Tor\'an presents a SAT encoding
-for graph isomorphism in [{\sl SAT\/ \bf 16} (2013), 52--66].
-
-The subgraph isomorphism problem is known to be NP-complete for general graphs
-[M.\ R.\ Garey and D.\ S.\ Johnson, {\sl Computers and Intractibility} (1979)].
-Effecient implementations for special cases are discussed in [J.\ E.\ Hopcroft
-and J.\ K.\ Wong, {\sl STOC\/ \bf 6} (1974), 172--184] and [E.\ M.\ Luks, {\sl
-JCSS\/ \bf 25} (1982), 42--65].
+\medskip\noindent{\bf Further reading.}  The subgraph isomorphism problem is
+known to be NP-complete for general graphs [M.\ R.\ Garey and D.\ S.\ Johnson,
+{\sl Computers and Intractibility} (1979)].  Effecient implementations for
+special cases are discussed in [J.\ E.\ Hopcroft and J.\ K.\ Wong, {\sl STOC\/
+\bf 6} (1974), 172--184] and [E.\ M.\ Luks, {\sl JCSS\/ \bf 25} (1982), 42--65].
 
 [C.\ Solnon, {\sl AI\/ \bf 174} (2010), 850--864]  [S.\ Zampelli and C.\ Solnon, {\sl Constraints\/ \bf 15} (2010), 327--353]
-
-\medskip\noindent{\bf 2. Simulation graphs.}  Let $y=f(x)$ be a multibit
-function which is defined over $m$ functions $f_1(x_1,\dots,x_n), \dots,
-f_m(x_1,\dots,x_n)$.  In other words, $y=f_1\dots f_m$ is a binary vector of
-length $m$ and $x=x_1\dots x_n$ is a binary vector of length $n$.  Given such a
-multibit function together with simulation vectors $x^{(1)},\dots, x^{(k)}$ a
-{\it simulation graph\/} is a unidirected bigraph $G=(V,A)$ with source vertices
-$v_1,\dots,v_k$ for each simulation vector and sink vertices
-$v_{k+1}, \dots, v_{k+m}$ for each output of $f$.  It has an arc
-$$ v_i \longrightarrow v_{k+j}, \quad \hbox{if and only if} \quad f_j(x^{(i)})=1 $$
-for $1\le i\le k$ and $1\le j\le m$.
 
 \centerline{****}
 
