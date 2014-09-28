@@ -17,12 +17,14 @@
 
 #include "adding_lines.hpp"
 
+#include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/irange.hpp>
 
 #include <core/functor.hpp>
+#include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
 
 #include <reversible/target_tags.hpp>
@@ -32,33 +34,21 @@
 #include <reversible/functions/copy_metadata.hpp>
 #include <reversible/utils/costs.hpp>
 
+using namespace boost::assign;
+
 namespace cirkit
 {
-
-  template<typename Iterator, typename OutputIterator>
-  OutputIterator _make_factor( Iterator first, Iterator last, const boost::dynamic_bitset<>& factor, OutputIterator output )
+  gate::control_container make_factor( const gate::control_container& controls, const boost::dynamic_bitset<>& factor )
   {
-    for ( Iterator it = first; it != last; ++it )
+    gate::control_container factored;
+    for ( auto it : index( controls ) )
     {
-      if ( factor.test( it->index() ) )
+      if ( factor.test( it.first ) )
       {
-        *output++ = it->value();
+        factored += it.second;
       }
     }
-
-    return output;
-  }
-
-  template<typename SinglePassRange, typename OutputIterator>
-  OutputIterator _make_factor( const SinglePassRange& range, const boost::dynamic_bitset<>& factor, OutputIterator output )
-  {
-    return _make_factor( boost::begin( range ), boost::end( range ), factor, output );
-  }
-
-  template<typename SinglePassRange, typename OutputContainer>
-  void make_factor( const SinglePassRange& range, const boost::dynamic_bitset<>& factor, OutputContainer& output )
-  {
-    _make_factor( range | boost::adaptors::indexed( 0u ), factor, std::insert_iterator<OutputContainer>( output, output.begin() ) );
+    return factored;
   }
 
   unsigned find_suitable_gates( const circuit& base, unsigned index, const gate::control_container& factor )
@@ -166,8 +156,7 @@ namespace cirkit
           if ( factor.count() <= 1u ) continue; /* only consider factors of size > 1 */
 
           /* create factor */
-          gate::control_container factored;
-          make_factor( current_gate.controls(), factor, factored );
+          gate::control_container factored = make_factor( current_gate.controls(), factor );
 
           /* determine upper bound */
           unsigned j = find_suitable_gates( circ, current_index, factored );
@@ -187,8 +176,7 @@ namespace cirkit
         /* was a factor found? */
         if ( best_factor != 0u )
         {
-          gate::control_container factored;
-          make_factor( current_gate.controls(), boost::dynamic_bitset<>( current_gate.controls().size(), best_factor), factored );
+          gate::control_container factored = make_factor( current_gate.controls(), boost::dynamic_bitset<>( current_gate.controls().size(), best_factor) );
 
           /* apply factor */
           for ( unsigned i : boost::irange( current_index, best_j ) )
