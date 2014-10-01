@@ -166,3 +166,5 @@ if __name__ == "__main__":
         locals()["cmd_%s" % sys.argv[1]]( locals()["package_%s" % sys.argv[2]] )
     else:
         print( "usage: %s command [package_name]" % sys.argv[0] )
+        print()
+        print( "type '%s commands' to get a list of all commands" % sys.argv[0] )
