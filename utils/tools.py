@@ -26,7 +26,8 @@
 # This is a very small package manager that helps to download and install some #
 # often used executables which are no necessary requirement for building       #
 # cirkit. Hence, they are not integrated into the cmake build flow to keep     #
-# that one as simple as possible.                                              #
+# that one as simple as possible.  Also the flow is not suitable for           #
+# installing libraries.                                                        #
 #                                                                              #
 # New packages can be added in the Packages section.  The flow works for the   #
 # most common scenarios. A new scenario usually only requires the addition of  #
@@ -77,10 +78,18 @@ class package_minisat:
     build       = [ "MROOT=`pwd` make -C core rs" ]
     install     = [ "cp -v core/minisat_static %s/minisat" ]
 
+class package_picosat:
+    decription  = "PicoSAT SAT solver"
+    subdir      = "picosat-959"
+    url         = "http://fmv.jku.at/picosat/picosat-959.tar.gz"
+    fmt         = "tar-gz"
+    build       = [ "./configure", "make" ]
+    install     = [ "cp -v picogcnf picomcs picomus picosat %s" ]
+
 class package_sat13:
     description = "Knuth's CDCL SAT solver"
     subdir      = "sat13"
-    url         = [ "http://www-cs-faculty.stanford.edu/~uno/programs/sat13.w", "http://tug.ctan.org/support/graphbase/gb_flip.w", "http://tug.ctan.org/support/graphbase/boilerplate.w"]
+    url         = [ "http://www-cs-faculty.stanford.edu/~uno/programs/sat13.w", "http://tug.ctan.org/support/graphbase/gb_flip.w", "http://tug.ctan.org/support/graphbase/boilerplate.w" ]
     fmt         = "wget-list"
     build       = [ "ctangle gb_flip.w", "ctangle sat13.w", "gcc -o sat13 gb_flip.c sat13.c" ]
     install     = [ "cp -v sat13 %s" ]
