@@ -79,7 +79,7 @@ class package_minisat:
     install     = [ "cp -v core/minisat_static %s/minisat" ]
 
 class package_picosat:
-    decription  = "PicoSAT SAT solver"
+    description = "PicoSAT SAT solver"
     subdir      = "picosat-959"
     url         = "http://fmv.jku.at/picosat/picosat-959.tar.gz"
     fmt         = "tar-gz"
@@ -93,6 +93,22 @@ class package_sat13:
     fmt         = "wget-list"
     build       = [ "ctangle gb_flip.w", "ctangle sat13.w", "gcc -o sat13 gb_flip.c sat13.c" ]
     install     = [ "cp -v sat13 %s" ]
+
+class package_dimacs2sat:
+    description = "Convert DIMACS to SAT for Knuth's SAT solvers"
+    subdir      = "dimacs2sat"
+    url         = [ "http://www-cs-faculty.stanford.edu/~uno/programs/dimacs-to-sat.w" ]
+    fmt         = "wget-list"
+    build       = [ "ctangle dimacs-to-sat.w", "gcc -o dimacs-to-sat dimacs-to-sat.c" ]
+    install     = [ "cp -v dimacs-to-sat %s" ]
+
+class package_espresso:
+    description = "Espresso is a multi-valued PLA minimization (adjusted version)"
+    subdir      = "espresso-ab-1.0"
+    url         = "https://eqntott.googlecode.com/files/espresso-ab-1.0.tar.gz"
+    fmt         = "tar-gz"
+    build       = [ "./configure", "make" ]
+    install     = [ "cp -v src/espresso %s" ]
 
 ################################################################################
 # Helper functions                                                             #
