@@ -27,6 +27,8 @@
 #ifndef RANGE_UTILS_HPP
 #define RANGE_UTILS_HPP
 
+#include <functional>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
@@ -123,6 +125,8 @@ std::string any_join( const C& container, const std::string& delim )
   using boost::adaptors::transformed;
   return boost::join( container | transformed( []( const typename C::value_type& v ) { return boost::lexical_cast<std::string>( v ); } ), delim );
 }
+
+void ntimes( unsigned n, std::function<void()> f );
 
 }
 
