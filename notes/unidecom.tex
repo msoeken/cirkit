@@ -72,6 +72,48 @@ unitary matrix as given in (1).  Then it can be decomposed into a circuit where
 each gate corresponds to cube from an $M$-active cube set of $f$, with
 $M=\{1,k+1,2k+1,3k+1,\dots\}$.
 
+\bigskip \centerline{* * * *} \bigskip
+
+\noindent Given a Boolean function $f$ represented as a set of cubes $C=\{c_1,
+c_2, \dots, c_m\}$ a decomposition
+$$ f = b_1 \lor b_2 \lor \cdots \lor b_p \eqno(3) $$
+can be found where the $b_i$'s have the following property: for all assignments
+$x\in{\rm on}(b_i)$, the number of asserting cubes is $i$.  Furthermore, we
+require that $b_q\neq\bot$.  It is easy to see that $b_i \land b_j = \bot$ for
+all $i\neq j$.  We call such a decomposition {\it active set decomposition}.  It
+is always unique with respect to the cube set and can be generated using the
+following algorithm.
+
+\item{1.}  Set $i\leftarrow 1$ and $p\leftarrow 0$.  ($p$ is the same index as
+in (3) and is increasing while the algorithm runs.)
+
+\item{2.}  For $j=1,\dots,q$ perform step 3.
+
+\item{3.}  Let $b=b_j$ and set $b_j\leftarrow b\oplus c_i$, and $c_i\leftarrow
+b\land c_i$.
+
+\item{4.}  If $c_i \neq \bot$, set $p \leftarrow p + 1$ and $b_p \leftarrow
+c_i$.
+
+\item{5.}  If $i<m$, set $i\leftarrow i + 1$ and return to step 1; otherwise
+terminate.
+
+\medskip\noindent The algorithm constructs all $b_i$'s in (3) by going through
+all cubes.  Then with each cube the list of all existing $b_i$'s \dots
+
+\bigskip \centerline{* * * *} \bigskip
+
+\noindent {\bf Theorem 2.}  Let $f$ be a Boolean function represented as a set
+of cubes $C$ and an active set decomposition $b_1\lor b_2\lor \cdots\lor b_q$
+and let $D_i$ be a DSOP representation for $b_i$.  Then the active set
+decomposition of $f$ with respect to $C\cup D_i$ is
+$$ b_1 \lor b_2 \lor \cdots \lor b_i' \lor b_{i+1}' \lor \cdots \lor b_q $$
+with $b_i' = \bot$ and $b_{i+1}'=b_i \lor b_{i+1}$.  We have $b_{q+1}=\bot$ for
+the corner case $i=q$.
+
+\smallskip\noindent{\it Proof.}
+
+
 \bye
 
 
