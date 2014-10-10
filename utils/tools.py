@@ -141,6 +141,28 @@ def checkout_or_download( package ):
     else:
         print( "[e] unknown format: %s" % package.fmt )
 
+def update( package ):
+    if package.fmt == "hg":
+        os.system( "hg pull" )
+        os.system( "hg update" )
+    else:
+        print( "[e] format does not support update: %s" % package.fmt )
+
+def build( package ):
+    for cmd in package.build:
+        os.system( cmd )
+
+def install( package, curpath ):
+    for cmd in package.install:
+        if cmd.find( "%s" ) != -1:
+            os.system( cmd % ( curpath + "/ext/bin" ) )
+        else:
+            os.system( cmd )
+
+def build_and_install( package, curpath ):
+    build( package )
+    intall( package, curpath )
+
 ################################################################################
 # Command functions                                                            #
 ################################################################################
@@ -151,17 +173,20 @@ def cmd_install( package ):
     with cd( "build/tools" ):
         checkout_or_download( package )
         with cd( package.subdir ):
-            for cmd in package.build:
-                os.system( cmd )
-            for cmd in package.install:
-                if cmd.find( "%s" ) != -1:
-                    os.system( cmd % ( curpath + "/ext/bin" ) )
-                else:
-                    os.system( cmd )
+            build_and_install( package, curpath )
 
 def cmd_update( package ):
-    """Updates a package (not yet implemented)"""
-    pass
+    """Updates a package"""
+    curpath = os.getcwd()
+    with cd( "build/tools/%s" % package.subdir ):
+        update( package )
+        build_and_install( package, curpath )
+
+def cmd_rebuild( package ):
+    """Rebuilds a package"""
+    curpath = os.getcwd()
+    with cd( "build/tools/%s" % package.subdir ):
+        build_and_install( package, curpath )
 
 def cmd_commands():
     """Shows list of commands"""
