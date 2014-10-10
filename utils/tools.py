@@ -110,6 +110,23 @@ class package_espresso:
     build       = [ "./configure", "make" ]
     install     = [ "cp -v src/espresso %s" ]
 
+class package_directed_lad:
+    description = "LAD is a program (in C) for solving the subgraph isomorphism problem (for directed and labelled graphs)"
+    subdir      = "directedLAD"
+    url         = "http://liris.cnrs.fr/csolnon/directedLAD.tgz"
+    fmt         = "tgz"
+    build       = [ "make" ]
+    install     = [ "cp -v main %s/directed_lad" ]
+
+class package_lad:
+    description = "LAD is a program (in C) for solving the subgraph isomorphism problem"
+    subdir      = "LAD"
+    url         = "http://liris.cnrs.fr/csolnon/LAD.tgz"
+    fmt         = "tgz"
+    build       = [ "make" ]
+    install     = [ "cp -v main %s/lad" ]
+
+
 ################################################################################
 # Helper functions                                                             #
 ################################################################################
@@ -130,7 +147,7 @@ class cd:
 def checkout_or_download( package ):
     if package.fmt == "hg":
         os.system( "hg clone %s" % package.url )
-    elif package.fmt == "tar-gz":
+    elif package.fmt in ["tar-gz", "tgz"]:
         os.system( "wget %s" % package.url )
         os.system( "tar xvfz `basename %s`" % package.url )
         os.system( "rm `basename %s`" % package.url )
@@ -140,6 +157,7 @@ def checkout_or_download( package ):
             os.system( "wget %s -O %s/`basename %s`" % ( u, package.subdir, u ) )
     else:
         print( "[e] unknown format: %s" % package.fmt )
+        exit(1)
 
 def update( package ):
     if package.fmt == "hg":
@@ -147,6 +165,7 @@ def update( package ):
         os.system( "hg update" )
     else:
         print( "[e] format does not support update: %s" % package.fmt )
+        exit(1)
 
 def build( package ):
     for cmd in package.build:
@@ -161,7 +180,7 @@ def install( package, curpath ):
 
 def build_and_install( package, curpath ):
     build( package )
-    intall( package, curpath )
+    install( package, curpath )
 
 ################################################################################
 # Command functions                                                            #
