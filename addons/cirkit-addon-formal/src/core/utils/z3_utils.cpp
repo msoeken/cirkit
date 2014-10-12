@@ -49,9 +49,7 @@ z3::expr operator<<( const z3::expr& a, const z3::expr& b )
 
 boost::dynamic_bitset<> to_bitset( const z3::expr& a )
 {
-  std::stringstream s;
-  s << a;
-  return boost::dynamic_bitset<>( s.str().substr( 2u ) );
+  return boost::dynamic_bitset<>( expr_to_bin( a ) );
 }
 
 const bool expr_to_bool( const z3::expr& e )
