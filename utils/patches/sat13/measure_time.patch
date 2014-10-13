@@ -1,0 +1,30 @@
+--- sat13.w	2014-05-06 19:24:33.000000000 +0200
++++ sat13_new.w	2014-10-13 09:48:04.059300253 +0200
+@@ -94,6 +94,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <time.h>
+ #include "gb_flip.h"
+ typedef unsigned int uint; /* a convenient abbreviation */
+ typedef unsigned long long ullng; /* ditto */
+@@ -105,6 +106,7 @@
+   register int h,hp,i,j,jj,k,kk,l,ll,lll,p,q,r,s;
+   register int c,cc,endc,la,t,u,v,w,x,y;
+   register double au,av;
++  clock_t start, end;
+   @<Process the command line@>;
+   @<Initialize everything@>;
+   @<Input the clauses@>;
+@@ -112,7 +114,11 @@
+     @<Report the successful completion of the input phase@>;
+   @<Set up the main data structures@>;
+   imems=mems, mems=0;
++  start = clock();
+   @<Solve the problem@>;
++  end = clock();
++  double elapsed_time = (end - start) / (double)CLOCKS_PER_SEC;
++  printf("Elapsed time: %.2f.\n", elapsed_time);
+ all_done:@+@<Close the files@>;
+   @<Print farewell messages@>;
+ }

@@ -34,8 +34,14 @@
 # a new fmt entry together with its handling in the checkout_or_download       #
 # function                                                                     #
 #                                                                              #
+# Patches are automatically applied if they are provided as file in the        #
+# directory utils/patches/<package_name>/*.patch (in case this script is used  #
+# in a different context than cirkit, the patches directory must be in the     #
+# folder as this file.                                                         #
+#                                                                              #
 ################################################################################
 
+import glob
 import inspect
 import os
 import shutil
@@ -159,6 +165,15 @@ def checkout_or_download( package ):
         print( "[e] unknown format: %s" % package.fmt )
         exit(1)
 
+def get_name( package ):
+    return next((k for k, v in globals().items() if v == package), None)[8:]
+
+def patch( package, curpath ):
+    patch_dir = "%s/patches/%s" % ( os.path.dirname( curpath + "/" + sys.argv[0] ), get_name( package ) )
+    if os.path.exists( patch_dir ):
+        for file in glob.glob( "%s/*.patch" % patch_dir ):
+            os.system( "patch < %s" % file )
+
 def update( package ):
     if package.fmt == "hg":
         os.system( "hg pull" )
@@ -192,6 +207,7 @@ def cmd_install( package ):
     with cd( "build/tools" ):
         checkout_or_download( package )
         with cd( package.subdir ):
+            patch( package, curpath )
             build_and_install( package, curpath )
 
 def cmd_update( package ):
