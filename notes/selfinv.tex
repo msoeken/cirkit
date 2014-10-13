@@ -2,29 +2,80 @@
 \parskip3pt
 \baselineskip14pt
 
+\def\slug{\hbox{\kern1.5pt\vrule width2.5pt height6pt depth1.5pt\kern1.5pt}}
+\def\slugonright{\vrule width0pt\nobreak\hfill\slug}
+
 \centerline{\bf Self-inverse functions and palindromic circuits}
+\centerline{--- {\it Preliminary notes\/} ---}
 \centerline{Mathias Soeken}
-\centerline{September 24, 2014}
+\centerline{September 24 -- \dots, 2014}
 
 \bigskip
 \bigskip
 
-\dots TODO: definition of palindromic circuit --- definition of self-inverse function \dots
-
-\bigskip
+\noindent{\bf 1. Introduction.}\enspace For a {\it self-inverse\/} reversible
+function $f$ we have $f(f(x))=x$ for all input assignments $x$.  A circuit
+$C=g_1g_2\dots g_k$ is called {\it palindromic\/} if $ g_i = g_{k+1-i}$ for all
+$i \in \{1,\dots,\lfloor{k\over 2}\rfloor\}$.  The circuit is called {\it
+even\/} if $k$ is even and {\it odd\/} otherwise.  The first simple observation
+that is described by Lemma~1 follows from the fact that every gate $g_i$ is
+self-inverse.
 
 \noindent{\bf Lemma 1.} \sl Every palindromic circuit represents a self-inverse
 function.\rm
 
+\smallskip\noindent However, the inverse direction of that lemma is not so
+obvious and remains a conjecture so far.
+
 \smallskip \noindent{\bf Conjecture 1.} \sl Every self-inverse function can be
 realized by a palindromic circuit.\rm
 
-\smallskip \noindent{\bf Lemma 2.} \sl A palindromic circuit has an even number
-of gates, if and only if it realizes the identity function. \rm
+\smallskip\noindent For all interesting cases of self-inverse functions,
+i.e.~for all functions that are not the identity, a palindromic circuit must be
+odd if it exists.
 
-\smallskip \noindent{\bf Open problem.} \sl When synthesizing a self-inverse
-function with the Young subgroup algorithm, is there always an assignment of the
-variable ordering and the 0/1 assignments, such that a palindromic circuit
-results. \rm
+\smallskip \noindent{\bf Lemma 2.} \sl A palindromic circuit is even if and only
+if it realizes the identity function. \rm
+
+\smallskip\noindent {\it Proof.} Let $C=g_1g_2\dots g_{2k}$ be an even
+palindromic circuit.  Then $g_{k}=g_{2k+1-k}=g_{k+1}$ and $C$ is functionally
+equivalent to the circuit $g_1g_2\dots g_{k-1}g_{k+2} \dots g_{2k}$.  Again, the
+two ``middle gates'' are equal and therefore we can continue this procedure
+until no gates remain and we have that $C$ represents the identity function.
+
+Now let $C=g_1g_2\dots g_kg_{k+1}g_{k+2}\dots g_{2k+1}$ be an odd palindromic
+circuit and let $h$ be the function that is represented by the first $k$ gates
+$g_1g_2\dots g_k$.  Since $C$ is palindromic the last $k$ gates $g_{k+2}\dots
+g_{2k+1}$ represents the function $h^{-1}$.  Since $g_{k+1}$ is a Toffoli gate
+there exists some $x$ such that $g_{k+1}(x)=y\neq x$.  Propagating $x$ to the
+left yields $h^{-1}(x)$ at the inputs of $C$ and propagating $y$ to the right
+yiels $h^{-1}(y)$ at the outputs of $C$.  Since $x\neq y$ we also have
+$h^{-1}(x)\neq h^{-1}(y)$ and hence $C$ does not represent the identity
+function.\qquad\slug
+
+\smallskip \noindent{\bf Open problem 1.} \sl Assuming that there exists a
+palindromic circuit for each self-inverse function, the question is whether
+there also exists a palindromic circuit in a V-shape for each self-inverse
+function. \rm
+
+\medskip\noindent{\bf 2. Connection to permutations.}\enspace New insight can be
+gained by investigating the respective permutations, i.e.~elements from the
+symmetric group $S_{2^n}$, instead of self-inverse functions on $n$ variables.
+
+\smallskip \noindent{\bf Lemma 3.} \sl Let $f$ be a self-inverse function and
+$\pi_f$ its corresponding permutation.  Then, the cycle representation of
+$\pi_f$ consists only of transpositions or fixpoints. \rm
+
+\smallskip\noindent {\it Proof.} The cycle representation is unique when
+disregarding order of cycles and order of elements within cycles.  Assume that
+the cycle representation of $\pi_f$ consists of a cycle $(i_1\; i_2\; \ldots \;
+i_k)$ with $k>2$.  Then $\pi_f^{-1}$ consists of the cycle $(i_k \; \ldots \;
+i_2 \; i_1)$ and hence $\pi_f\neq \pi_f^{-1}$. \qquad\slug
+
+\medskip\noindent With Lemma~3 we can readily count all self-inverse function on
+$n$ variables, in the following referred to as $s_n$:
+$$ s_n = \prod \dots \eqno(1) $$
+
+\medskip\noindent {\bf 3. Synthesis of self-inverse functions.}\enspace \dots
 
 \bye
