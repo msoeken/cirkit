@@ -132,6 +132,13 @@ class package_lad:
     build       = [ "make" ]
     install     = [ "cp -v main %s/lad" ]
 
+class package_bdd14:
+    description = "Knuth's BDD package"
+    subdir      = "bdd14"
+    url         = [ "http://www-cs-faculty.stanford.edu/~uno/programs/bdd14.w", "http://tug.ctan.org/support/graphbase/gb_flip.w", "http://tug.ctan.org/support/graphbase/boilerplate.w" ]
+    fmt         = "wget-list"
+    build       = [ "ctangle gb_flip.w", "ctangle bdd14.w", "gcc -o bdd14 gb_flip.c bdd14.c" ]
+    install     = [ "cp -v bdd14 %s" ]
 
 ################################################################################
 # Helper functions                                                             #
