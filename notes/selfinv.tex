@@ -14,12 +14,15 @@
 \bigskip
 
 \noindent{\bf 1. Introduction.}\enspace For a {\it self-inverse\/} reversible
-function $f$ we have $f(f(x))=x$ for all input assignments $x$.  A circuit
-$C=g_1g_2\dots g_k$ is called {\it palindromic\/} if $ g_i = g_{k+1-i}$ for all
-$i \in \{1,\dots,\lfloor{k\over 2}\rfloor\}$.  The circuit is called {\it
-even\/} if $k$ is even and {\it odd\/} otherwise.  The first simple observation
-that is described by Lemma~1 follows from the fact that every gate $g_i$ is
-self-inverse.
+function $f$ we have $f(f(x))=x$ for all input assignments $x$.  In the
+remainder, we just use the name self-inverse function and say that a
+self-inverse function $f$ is {\it trivial\/} if $f$ is the identity function.  A
+circuit $C=g_1g_2\dots g_k$, which consists of mixed-polarity
+multiple-controlled Toffoli gates $g_i$, is called {\it palindromic\/} if $ g_i
+= g_{k+1-i}$ for all $i \in \{1,\dots,\lfloor{k\over 2}\rfloor\}$.  The circuit
+is called {\it even\/} if $k$ is even and {\it odd\/} otherwise.  The first
+simple observation that is described by Lemma~1 follows from the fact that every
+gate $g_i$ is self-inverse.
 
 \noindent{\bf Lemma 1.} \sl Every palindromic circuit represents a self-inverse
 function.\rm
@@ -61,6 +64,10 @@ function. \rm
 \medskip\noindent{\bf 2. Connection to permutations.}\enspace New insight can be
 gained by investigating the respective permutations, i.e.~elements from the
 symmetric group $S_{2^n}$, instead of self-inverse functions on $n$ variables.
+In the literature a self-inverse permutation or self-conjugate permutation is
+also often called an {\it involution\/}.  The permutation that represents the
+identity is denoted $\pi_{\rm id}$.  The permutation matrix of an involution is
+symmetric.
 
 \smallskip \noindent{\bf Lemma 3.} \sl Let $f$ be a self-inverse function and
 $\pi_f$ its corresponding permutation.  Then, the cycle representation of
@@ -72,10 +79,45 @@ the cycle representation of $\pi_f$ consists of a cycle $(i_1\; i_2\; \ldots \;
 i_k)$ with $k>2$.  Then $\pi_f^{-1}$ consists of the cycle $(i_k \; \ldots \;
 i_2 \; i_1)$ and hence $\pi_f\neq \pi_f^{-1}$. \qquad\slug
 
-\medskip\noindent With Lemma~3 we can readily count all self-inverse function on
-$n$ variables, in the following referred to as $s_n$:
-$$ s_n = \prod \dots \eqno(1) $$
+\medskip\noindent From the book of T.~Muir [{\sl A Treatise on the Theory of
+Determinants\/} (1960)] we have that the number of involutions on $n$ elements
+is
+$$ I(n) = 1 + \sum_{k=0}^{\lceil(n-1)/2\rceil}{1\over{(k+1)!}}
+          \prod_{i=0}{k}\left(\matrix{ n-2i \cr 2}\right), \eqno(1) $$ or
+alternative according to S.~Skiena [{\sl Implementing Discrete Mathematics\/}
+(1990)] we have
+$$ I(n) = n!\sum_{k=0}^{\lceil n/2\rceil}{1\over{2^kk!(n-2k)!}}. \eqno(2) $$
+The number of self-inverse functions on $n$ variables is $I(2^n)$.  From (2) it
+can easily be seen that the percentage of self-inverse functions with respect to
+all reversible functions is
+$$ {I(2^n)\over{2^n!}} = \sum_{k=0}^{2^{n-1}}{1\over{2^kk!(2^n-2k)!}}. \eqno(3) $$
+Working with involutions, we can find an equivalent conjecture to Conjecture~1
+based on the notation of permutations.  First, we prove a further lemma.
+
+\smallskip\noindent{\bf Lemma 4.} \sl A permutation $\pi$ is an involution if
+and only if it can be written as $\pi = \pi_1\circ\pi_2\circ\pi_1^{-1}$ where
+$\pi_1\neq \pi_{\rm id}$ and $\pi_2\neq \pi$ is an involution. \rm
+
+\smallskip\noindent {\it Proof.}  Let $\pi = \pi_1\circ\pi_2\circ\pi_1^{-1}$ and
+let $\pi_1(x)=y$, $\pi_2(y)=z$, and $\pi_1^{-1}(z)=w$.  Since $\pi_2$ is an
+involution we have $\pi(x)=w$ and $\pi(w)=x$ and therefore $\pi$ is also an
+involution.
+
+Now assume that $\pi$ is an involution.  From the previous proof direction we
+obtain another involution $\pi_2\neq \pi$ by taking any permutation $\pi_1\neq
+\pi_{\rm id}$ by calculating $\pi_2=\pi_1\circ\pi\circ \pi_1^{-1}$.  Multiplying
+the left side of the equation with $\pi_1^{-1}$ and the right side with $\pi_1$
+we obtain $\pi=\pi_1^{-1}\circ\pi_2\circ\pi_1$, concluding the
+proof. \qquad\slug
+
+\smallskip\noindent {\bf Conjecture 2.} \sl Every involution $\pi$ can be
+decomposed into $\pi = \pi_1\circ \pi_g\circ \pi_1^{-1}$ where $\pi_g$ is a
+permutation that can be realized using a single Toffoli gate. \rm
+
+\smallskip\noindent Conjecture 2 is equivalent to Conjecture 1.
 
 \medskip\noindent {\bf 3. Synthesis of self-inverse functions.}\enspace \dots
+
+\medskip\noindent {\bf 4. Lower and upper bounds.}\enspace \dots
 
 \bye
