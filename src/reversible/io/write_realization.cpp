@@ -66,9 +66,32 @@ namespace cirkit
   };
 
   write_realization_settings::write_realization_settings()
-    : version( "2.0" ),
-      header( boost::str( boost::format( "This file has been generated using RevKit %s (www.revkit.org)" ) % cirkit_version() ) )
+    : header( boost::str( boost::format( "This file has been generated using RevKit %s (www.revkit.org)" ) % cirkit_version() ) )
   {
+  }
+
+  std::string write_realization_settings::type_label( const gate& g ) const
+  {
+    if ( is_toffoli( g ) )
+    {
+      return boost::str( boost::format( "t%d" ) % g.size() );
+    }
+    else if ( is_fredkin( g ) )
+    {
+      return boost::str( boost::format( "f%d" ) % g.size() );
+    }
+    else if ( is_peres( g ) )
+    {
+      return "p";
+    }
+    else if ( is_module( g ) )
+    {
+      return boost::any_cast<module_tag>( g.type() ).name;
+    }
+    else
+    {
+      return "UNKNOWN";
+    }
   }
 
   void write_realization( const circuit& circ, std::ostream& os, const write_realization_settings& settings )
@@ -188,22 +211,7 @@ namespace cirkit
 
     for ( const auto& g : circ )
     {
-      if ( is_toffoli( g ) )
-      {
-        cmd = boost::str( boost::format( "t%d" ) % g.size() );
-      }
-      else if ( is_fredkin( g ) )
-      {
-        cmd = boost::str( boost::format( "f%d" ) % g.size() );
-      }
-      else if ( is_peres( g ) )
-      {
-        cmd = "p";
-      }
-      else if ( is_module( g ) )
-      {
-        cmd = boost::any_cast<module_tag>( g.type() ).name;
-      }
+      cmd = settings.type_label( g );
 
       std::vector<std::string> lines;
 

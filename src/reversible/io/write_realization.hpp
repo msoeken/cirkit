@@ -58,7 +58,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    std::string version;
+    std::string version = "2.0";
 
     /**
      * @brief A header for the file
@@ -83,6 +83,8 @@ namespace cirkit
      * @since  1.0
      */
     std::string header;
+
+    std::string type_label( const gate& g ) const;
   };
 
   /**
