@@ -204,7 +204,15 @@ function.\qquad\slug
 \noindent{\bf Lemma 3.} \sl A self-inverse function is a palindromic function if
 and only if it can be realized by an odd palindromic circuit. \rm
 
-\smallskip\noindent {\it Proof.} \dots
+\smallskip\noindent {\it Proof.} Given an odd palindromic circuit.  Then it
+realizes a self-inverse function which permutation representation is $f\circ
+g\circ f^{-1}$ with $g$ being a permutation representing a single Toffoli
+gate. We know that ${\rm cyc}(g)=2^k$ for some nonnegative integer $k$.
+According to Theorem 9.131 in [N.\ A.\ Loehr, {\sl Bijective Combinatorics\/}
+(2011)] we have ${\rm cyc}(f\circ g\circ f^{-1}) = {\rm cyc}(g)$ and therefore
+$f\circ g\circ f^{-1}$ is palindromic.
+
+\dots \qquad\slug
 
 % \smallskip \noindent{\bf Open question 1.} \sl Assuming that there exists a
 % palindromic circuit for each self-inverse function, the question is whether
