@@ -73,58 +73,7 @@ unsigned hamming_distance( const std::pair<boost::dynamic_bitset<>, boost::dynam
   return ( p.first ^ p.second ).count();
 }
 
-void insert_gate( circuit& circ, unsigned& pos, const boost::dynamic_bitset<>& mask, unsigned target_line, unsigned current_line, bitset_vector_t& output_values )
-{
-  auto controls = get_control_lines_from_mask( mask );
-
-  insert_toffoli( circ, pos, controls, target_line );
-
-  for ( unsigned i = current_line; i < output_values.size(); ++i )
-  {
-    if ( ( output_values.at( i ) & mask ) == mask )
-    {
-      output_values[i].flip( circ.lines() - 1 - target_line );
-    }
-  }
-}
-
-void insert_gate_front( circuit& circ, unsigned& pos, const boost::dynamic_bitset<>& mask, unsigned target_line, unsigned current_line, bitset_vector_t& output_values )
-{
-  auto controls = get_control_lines_from_mask( mask );
-
-  insert_toffoli( circ, pos, controls, target_line );
-
-  for ( unsigned i = current_line; i < output_values.size(); ++i )
-  {
-    if ( ( boost::dynamic_bitset<>( circ.lines(), i ) & mask ) == mask )
-    {
-      unsigned otherpos = i ^ ( 1u << ( circ.lines() - 1 - target_line ) );
-      std::cout << "otherpos = " << otherpos << " i = " << i << std::endl;
-      if ( otherpos > i )
-      {
-        std::cout << "[i] swap" << std::endl;
-        output_values[i].swap( output_values[otherpos] );
-      }
-    }
-  }
-}
-
-void basic_first_step( circuit& circ, bitset_vector_t& output_values )
-{
-  for ( unsigned i = 0; i < circ.lines(); ++i )
-  {
-    if ( output_values[0u][i] )
-    {
-      prepend_not( circ, i );
-      for ( auto& output : output_values )
-      {
-        output.flip( i );
-      }
-    }
-  }
-}
-
-void basic_first_step2( circuit& circ, bitset_pair_vector_t& tt )
+void basic_first_step( circuit& circ, bitset_pair_vector_t& tt )
 {
   boost::dynamic_bitset<>::size_type bpos = tt[0].second.find_first();
 
@@ -139,35 +88,7 @@ void basic_first_step2( circuit& circ, bitset_pair_vector_t& tt )
   }
 }
 
-void insert_from_back( circuit& circ, unsigned& pos, unsigned line, bitset_vector_t& output_values )
-{
-  unsigned bw = circ.lines();
-  boost::dynamic_bitset<> bline( bw, line ), mask;
-
-  /* change 0 -> 1 */
-  boost::dynamic_bitset<> p = ( bline ^ output_values[line] ) & bline;
-  boost::dynamic_bitset<>::size_type bpos = p.find_first();
-  while ( bpos != boost::dynamic_bitset<>::npos )
-  {
-    mask = output_values[line];
-    mask.reset( bpos );
-    insert_gate( circ, pos, mask, ( bw - 1u - bpos ), line, output_values );
-    bpos = p.find_next( bpos );
-  }
-
-  /* change 1 -> 0 */
-  boost::dynamic_bitset<> q = ( bline ^ output_values[line] ) & output_values[line];
-  bpos = q.find_first();
-  while ( bpos != boost::dynamic_bitset<>::npos )
-  {
-    mask = output_values[line];
-    mask.reset( bpos );
-    insert_gate( circ, pos, mask, ( bw - 1u - bpos ), line, output_values );
-    bpos = q.find_next( bpos );
-  }
-}
-
-void insert_gate2( circuit& circ, unsigned&pos, boost::dynamic_bitset<> controls, unsigned target, bitset_pair_vector_t& tt, direction_t dir )
+void insert_gate( circuit& circ, unsigned&pos, boost::dynamic_bitset<> controls, unsigned target, bitset_pair_vector_t& tt, direction_t dir )
 {
   insert_toffoli( circ, pos, get_control_lines_from_mask( controls ), circ.lines() - 1u - target );
 
@@ -191,78 +112,30 @@ void adjust_line( circuit& circ, unsigned& pos, bitset_pair_vector_t& tt, unsign
 {
   unsigned bw = circ.lines();
 
-  /* change 0 -> 1 */
   auto p = ( tt[line].first ^ tt[line].second ) & ( dir == direction_back ? tt[line].first : tt[line].second );
+  auto q = ( tt[line].first ^ tt[line].second ) & ( dir == direction_back ? tt[line].second : tt[line].first );
+
+  /* change 0 -> 1 */
   auto bpos = p.find_first();
   auto mask = dir == direction_back ? tt[line].second : tt[line].first;
   while ( bpos != boost::dynamic_bitset<>::npos )
   {
-    insert_gate2( circ, pos, mask, bpos, tt, dir );
+    insert_gate( circ, pos, mask, bpos, tt, dir );
     mask.set( bpos );
     bpos = p.find_next( bpos );
   }
 
   /* change 1 -> 0 */
-  auto q = ( tt[line].first ^ tt[line].second ) & ( dir == direction_back ? tt[line].second : tt[line].first );
   bpos = q.find_first();
-  //mask = dir == direction_back ? tt[line].second : tt[line].first;
   while ( bpos != boost::dynamic_bitset<>::npos )
   {
     mask.reset( bpos );
-    insert_gate2( circ, pos, mask, bpos, tt, dir );
+    insert_gate( circ, pos, mask, bpos, tt, dir );
     bpos = q.find_next( bpos );
   }
 }
 
-void insert_from_front( circuit& circ, unsigned& pos, unsigned line, bitset_vector_t& output_values )
-{
-  unsigned bw = circ.lines();
-  boost::dynamic_bitset<> bline( bw, line ), mask;
-  boost::dynamic_bitset<>::size_type bpos;
-
-  while ( bline != output_values[line] )
-  {
-    auto p = ( bline ^ output_values[line] ) & output_values[line];
-    auto q = ( bline ^ output_values[line] ) & bline;
-
-    auto value = output_values[line];
-
-    // change 0 -> 1
-    bpos = p.find_first();
-    if ( bpos != boost::dynamic_bitset<>::npos )
-    {
-      mask = bline;
-      bline.reset( bpos );
-      insert_gate_front( circ, pos, mask, bw - 1u - bpos, 0u, output_values );
-      ++pos;
-    }
-
-    // change 1 -> 0
-    if ( p.none() && q.any() )
-    {
-      bpos = q.find_first();
-      if ( bpos != boost::dynamic_bitset<>::npos )
-      {
-        mask = bline;
-        bline.reset( bpos );
-        insert_gate_front( circ, pos, mask, bw - 1u - bpos, 0u, output_values );
-        ++pos;
-      }
-    }
-
-    line = boost::find( output_values, value ) - output_values.begin();
-    bline = boost::dynamic_bitset<>( bw, line );
-  }
-}
-
-void print_current_state( unsigned index, const circuit& circ, const bitset_vector_t& output_values )
-{
-  std::cout << "[i] state at index " << index << std::endl;
-  std::cout << "[i] current circuit: " << std::endl << circ << std::endl;
-  std::cout << "[i] current spec: " << std::endl << any_join( output_values, "\n" ) << std::endl << std::endl;
-}
-
-void print_current_state2( unsigned index, const circuit& circ, const bitset_pair_vector_t& tt )
+void print_current_state( unsigned index, const circuit& circ, const bitset_pair_vector_t& tt )
 {
   std::cout << "[i] state at index " << index << std::endl;
   std::cout << "[i] current circuit: " << std::endl << circ << std::endl;
@@ -305,8 +178,6 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
   }
 
   /* truth table to bitsets */
-  bitset_vector_t output_values = truth_table_to_bitset_vector( spec );
-
   bitset_pair_vector_t tt = truth_table_to_bitset_pair_vector( spec );
   sort_truth_table( tt );
 
@@ -321,11 +192,10 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
   {
     if ( verbose )
     {
-      print_current_state2( 0u, circ, tt );
+      print_current_state( 0u, circ, tt );
     }
 
-    /*basic_first_step( circ, output_values );*/
-    basic_first_step2( circ, tt );
+    basic_first_step( circ, tt );
   }
 
   /* Step 2 */
@@ -339,13 +209,9 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
   {
     if ( verbose )
     {
-      print_current_state2( i, circ, tt );
+      print_current_state( i, circ, tt );
     }
 
-    /*if ( boost::dynamic_bitset<>( bw, i ) == output_values[i] )
-    {
-      continue;
-      }*/
     if ( tt[i].first == tt[i].second )
     {
       continue;
@@ -364,30 +230,11 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
       }
     }
 
-    // NOTE maybe have two for loops so that the check has not to be done every time
-    /*if ( bidirectional )
-    {
-      index = boost::find( output_values, boost::dynamic_bitset<>( bw, i ) ) - output_values.begin();
-      std::cout << "[i] index: " << index << std::endl;
-      from_back = hamming_distance( boost::dynamic_bitset<>( bw, index ), output_values[index] )
-               >= hamming_distance( boost::dynamic_bitset<>( bw, i ), output_values[i] );
-               }*/
-
-    /*if ( from_back )
-      {*/
-      //        std::cout << "insert from back (line: " << i << ")" << std::endl;
-      //insert_from_back( circ, pos, i, output_values );
     if ( verbose )
     {
       std::cout << "[i] adjust line: " << index << std::endl;
     }
     adjust_line( circ, pos, tt, index, dir );
-      /*}
-    else
-    {*/
-      //        std::cout << "insert from font (line: " << i << ", index: " << index << ")" << std::endl;
-      //insert_from_front( circ, pos, index, output_values );
-      // }
   }
 
   return true;
