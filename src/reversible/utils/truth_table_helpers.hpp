@@ -37,14 +37,16 @@ namespace cirkit
 {
 
 typedef std::vector<boost::dynamic_bitset<> > bitset_vector_t;
+typedef std::vector<std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<>>> bitset_pair_vector_t;
 
 /**
  * Transforms a truth table into a vector of bitsets
  *
  * @param spec A fully specified truth table for a total reversible function
- * @param vec  An empty vector
  */
-void truth_table_to_bitset_vector( const binary_truth_table& spec, bitset_vector_t& vec );
+bitset_vector_t truth_table_to_bitset_vector( const binary_truth_table& spec );
+
+bitset_pair_vector_t truth_table_to_bitset_pair_vector( const binary_truth_table& spec );
 
 }
 
