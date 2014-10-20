@@ -58,22 +58,13 @@ namespace cirkit
     typedef std::map<unsigned, std::map<std::vector<boost::optional<bool> >, bool> > truth_table_map;
 
     /**
-     * @brief Standard constructor
-     *
-     * Initializes default values
-     *
-     * @since  1.0
-     */
-    write_blif_settings();
-
-    /**
      * @brief Prefix for the auxiliary variables which are created by the algorithm
      *
      * Default value is \b tmp
      *
      * @since  1.0
      */
-    std::string tmp_signal_name;
+    std::string tmp_signal_name = "tmp";
 
     /**
      * @brief Sets if output should comply to BlifMV
@@ -85,7 +76,14 @@ namespace cirkit
      *
      * @since  1.2
      */
-    bool blif_mv;
+    bool blif_mv = false;
+
+    /**
+     * @brief Output prefix for output signals
+     *
+     * @since 2.0
+     */
+    std::string output_prefix;
 
     /**
      * @brief Sets an state prefix for output signals
@@ -97,7 +95,7 @@ namespace cirkit
      *
      * @since  1.3
      */
-    std::string state_prefix;
+    std::string state_prefix = "out_";
 
     /**
      * @brief Sets if constant signals should keep their name
@@ -108,7 +106,7 @@ namespace cirkit
      *
      * @since  1.3
      */
-    bool keep_constant_names;
+    bool keep_constant_names = false;
 
     /**
      * @brief Operator for transforming the gates into BLIF code

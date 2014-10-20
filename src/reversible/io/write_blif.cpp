@@ -131,20 +131,12 @@ namespace cirkit
     {
       std::string signalname = bus.has_bus( i ) ? boost::str( boost::format( "%s<%d>" ) % bus.find_bus( i ) % bus.signal_index( i ) ) : signals.at( i );
       signalname = boost::regex_replace( signalname, boost::regex( "\\[(\\d+)\\]" ), "<*\\1*>", boost::match_default | boost::format_sed );
-      if ( bus.has_bus( i ) )
-      {
-        signalname = prefix + signalname;
-      }
+      //if ( bus.has_bus( i ) )
+      //{
+      signalname = prefix + signalname;
+      //}
       signals.at( i ) = signalname;
     }
-  }
-
-  write_blif_settings::write_blif_settings()
-    : tmp_signal_name( "tmp" ),
-      blif_mv( false ),
-      state_prefix( "out_" ),
-      keep_constant_names( false )
-  {
   }
 
   void write_blif_settings::operator()( const gate& g, truth_table_map& map ) const
@@ -257,7 +249,7 @@ namespace cirkit
     std::vector<std::string> _outputs( circ.outputs().begin(), circ.outputs().end() );
     rephrase_signal_names( _inputs, circ.inputbuses() );
     rephrase_signal_names( _inputs, circ.statesignals() );
-    rephrase_signal_names( _outputs, circ.outputbuses() );
+    rephrase_signal_names( _outputs, circ.outputbuses(), settings.output_prefix );
     rephrase_signal_names( _outputs, circ.statesignals(), settings.state_prefix );
 
     /* zip inputs and outputs */

@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <fstream>
+
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>
@@ -22,6 +24,7 @@
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_realization.hpp>
+#include <reversible/io/write_blif.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
 #include <reversible/utils/reversible_program_options.hpp>
 
@@ -29,13 +32,18 @@ using namespace cirkit;
 
 int main( int argc, char ** argv )
 {
+  using boost::program_options::value;
+
+  std::string blifname;
+
   reversible_program_options opts;
   opts.add_read_realization_option();
   opts.add_options()
-    ( "circuit,c",     "Prints the circuit" )
-    ( "truth_table,t", "Prints truth table" )
-    ( "statistics,s",  "Prints circuit statistics " )
-    ( "image,i",       "Creates circuit image in LaTeX" )
+    ( "circuit,c",                         "Prints the circuit" )
+    ( "truth_table,t",                     "Prints truth table" )
+    ( "statistics,s",                      "Prints circuit statistics " )
+    ( "image,i",                           "Creates circuit image in LaTeX" )
+    ( "blifname",      value( &blifname ), "If given, then the circuit is written to a blif file" )
     ;
 
   opts.parse( argc, argv );
@@ -70,6 +78,13 @@ int main( int argc, char ** argv )
   {
     create_tikz_settings settings;
     create_image( std::cout, circ, settings );
+  }
+
+  if ( opts.is_set( "blifname" ) )
+  {
+    std::ofstream os( blifname.c_str(), std::ofstream::out );
+    write_blif( circ, os );
+    os.close();
   }
 
   return 0;
