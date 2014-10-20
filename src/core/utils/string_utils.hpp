@@ -56,6 +56,12 @@ void parse_string_list( std::vector<T>& list, const std::string& s, const std::s
   boost::push_back( list, str_list | transformed( []( const std::string& s ) { return boost::lexical_cast<T>( s ); } ) );
 }
 
+void split_string( std::vector<std::string>& list, const std::string& s, const std::string& delimiter );
+
+void foreach_string( const std::string& str, const std::string& delimiter, std::function<void(const std::string&)> func );
+
+std::pair<std::string, std::string> split_string_pair( const std::string& str, const std::string& delimiter );
+
 void line_parser( const std::string& filename, const std::vector<std::pair<std::regex, std::function<void(const std::smatch&)>>>& matchers );
 
 }

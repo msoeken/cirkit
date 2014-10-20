@@ -19,8 +19,47 @@
 
 #include <fstream>
 
+#include <boost/range/algorithm.hpp>
+
 namespace cirkit
 {
+
+void split_string( std::vector<std::string>& list, const std::string& s, const std::string& delimiter )
+{
+  using boost::adaptors::transformed;
+
+  if ( s.empty() ) return;
+
+  std::string s_copy = s;
+  boost::trim( s_copy );
+
+  std::vector<std::string> str_list;
+  boost::split( list, s_copy, boost::is_any_of( delimiter ), boost::algorithm::token_compress_on );
+}
+
+void foreach_string( const std::string& str, const std::string& delimiter, std::function<void(const std::string&)> func )
+{
+  if ( str.empty() ) return;
+
+  std::string s_copy = str;
+  boost::trim( s_copy );
+
+  std::vector<std::string> str_list;
+  boost::split( str_list, s_copy, boost::is_any_of( delimiter ), boost::algorithm::token_compress_on );
+  boost::for_each( str_list, func );
+}
+
+std::pair<std::string, std::string> split_string_pair( const std::string& str, const std::string& delimiter )
+{
+  std::string s_copy = str;
+  boost::trim( s_copy );
+
+  std::vector<std::string> str_list;
+  boost::split( str_list, s_copy, boost::is_any_of( delimiter ), boost::algorithm::token_compress_on );
+  assert( str_list.size() == 2u );
+  return {str_list[0u], str_list[1u]};
+}
+
 
 void line_parser( const std::string& filename, const std::vector<std::pair<std::regex, std::function<void(const std::smatch&)>>>& matchers )
 {

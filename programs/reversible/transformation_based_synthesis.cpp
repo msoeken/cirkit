@@ -35,12 +35,14 @@ int main( int argc, char ** argv )
   using boost::program_options::value;
 
   bool bidirectional = true;
+  bool fredkin       = false;
 
   reversible_program_options opts;
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
     ( "bidirectional",       value_with_default( &bidirectional ), "Bidirectional synthesis" )
+    ( "fredkin",             value_with_default( &fredkin ),       "Use Fredkin gates" )
     ( "print_circuit,c",                                           "Prints the circuit" )
     ( "print_truth_table,t",                                       "Prints the truth table of the circuit" )
     ( "verbose,v",                                                 "Be verbose" )
@@ -61,6 +63,7 @@ int main( int argc, char ** argv )
   properties::ptr settings( new properties );
   properties::ptr statistics( new properties );
   settings->set( "bidirectional", bidirectional );
+  settings->set( "fredkin",       fredkin );
   settings->set( "verbose",       opts.is_set( "verbose" ) );
 
   transformation_based_synthesis( circ, spec, settings, statistics );

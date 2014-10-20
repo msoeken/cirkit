@@ -50,6 +50,18 @@ enum direction_t
  * Private functions                                                          *
  ******************************************************************************/
 
+/* returns true if all bits have been checked and false if while loop was broken */
+bool foreach_bit( const boost::dynamic_bitset<>& bits, std::function<bool(boost::dynamic_bitset<>::size_type)> func )
+{
+  auto bpos = bits.find_first();
+  while ( bpos != boost::dynamic_bitset<>::npos )
+  {
+    if ( !func( bpos ) ) return false;
+    bpos = bits.find_next( bpos );
+  }
+  return true;
+}
+
 gate::control_container get_control_lines_from_mask( const boost::dynamic_bitset<>& mask )
 {
   gate::control_container controls;
@@ -88,7 +100,7 @@ void basic_first_step( circuit& circ, bitset_pair_vector_t& tt )
   }
 }
 
-void insert_gate( circuit& circ, unsigned&pos, boost::dynamic_bitset<> controls, unsigned target, bitset_pair_vector_t& tt, direction_t dir )
+void insert_toffoli_gate( circuit& circ, unsigned& pos, boost::dynamic_bitset<> controls, unsigned target, bitset_pair_vector_t& tt, direction_t dir )
 {
   insert_toffoli( circ, pos, get_control_lines_from_mask( controls ), circ.lines() - 1u - target );
 
@@ -108,19 +120,79 @@ void insert_gate( circuit& circ, unsigned&pos, boost::dynamic_bitset<> controls,
   }
 }
 
-void adjust_line( circuit& circ, unsigned& pos, bitset_pair_vector_t& tt, unsigned line, direction_t dir )
+void insert_fredkin_gate( circuit& circ, unsigned& pos, boost::dynamic_bitset<> controls, unsigned t1, unsigned t2, bitset_pair_vector_t& tt, direction_t dir )
+{
+  insert_fredkin( circ, pos, get_control_lines_from_mask( controls ), circ.lines() - 1u - t1, circ.lines() - 1u - t2 );
+
+  for ( auto& p : tt )
+  {
+    auto& bits = ( dir == direction_back ) ? p.second : p.first;
+    if ( ( bits & controls ) == controls )
+    {
+      bool tmp = bits[t1]; bits[t1] = bits[t2]; bits[t2] = tmp;
+    }
+  }
+
+  if ( dir == direction_front )
+  {
+    ++pos;
+    tt = sort_truth_table( tt );
+  }
+}
+
+void adjust_line( circuit& circ, unsigned& pos, bitset_pair_vector_t& tt, unsigned line, direction_t dir, bool try_fredkin )
 {
   unsigned bw = circ.lines();
 
-  auto p = ( tt[line].first ^ tt[line].second ) & ( dir == direction_back ? tt[line].first : tt[line].second );
-  auto q = ( tt[line].first ^ tt[line].second ) & ( dir == direction_back ? tt[line].second : tt[line].first );
+  auto input = tt[line].first;
+  auto output = tt[line].second;
+  auto p = ( input ^ output ) & ( dir == direction_back ? input : output );
+  auto q = ( input ^ output ) & ( dir == direction_back ? output : input );
+  auto mask = dir == direction_back ? output : input;
+
+  /* fredkin */
+  if ( try_fredkin )
+  {
+    bool found;
+
+    do
+    {
+      found = false;
+
+      auto b1 = p.find_first();
+      while ( b1 != boost::dynamic_bitset<>::npos )
+      {
+        auto b2 = q.find_first();
+        while ( b2 != boost::dynamic_bitset<>::npos )
+        {
+          auto mask_copy = mask;
+          mask_copy.reset( b1 );
+          mask_copy.reset( b2 );
+          if ( mask_copy.any() && ( dir == direction_back ? ( mask_copy > input ) : ( mask_copy > output ) ) )
+          {
+            //std::cout << "[i] insert fred on " << b1 << " and " << b2 << " with mask = " << mask_copy << std::endl;
+            insert_fredkin_gate( circ, pos, mask_copy, b1, b2, tt, dir );
+            p.reset( b1 );
+            q.reset( b2 );
+            mask.set( b1 );
+            mask.reset( b2 );
+            found = true;
+            break;
+          }
+          b2 = q.find_next( b2 );
+        }
+
+        if ( found ) break;
+        b1 = p.find_next( b1 );
+      }
+    } while ( found);
+  }
 
   /* change 0 -> 1 */
   auto bpos = p.find_first();
-  auto mask = dir == direction_back ? tt[line].second : tt[line].first;
   while ( bpos != boost::dynamic_bitset<>::npos )
   {
-    insert_gate( circ, pos, mask, bpos, tt, dir );
+    insert_toffoli_gate( circ, pos, mask, bpos, tt, dir );
     mask.set( bpos );
     bpos = p.find_next( bpos );
   }
@@ -130,7 +202,7 @@ void adjust_line( circuit& circ, unsigned& pos, bitset_pair_vector_t& tt, unsign
   while ( bpos != boost::dynamic_bitset<>::npos )
   {
     mask.reset( bpos );
-    insert_gate( circ, pos, mask, bpos, tt, dir );
+    insert_toffoli_gate( circ, pos, mask, bpos, tt, dir );
     bpos = q.find_next( bpos );
   }
 }
@@ -157,6 +229,7 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
 {
   /* Settings */
   bool bidirectional = get( settings, "bidirectional", true  );
+  bool fredkin       = get( settings, "fredkin",       false );
   bool verbose       = get( settings, "verbose",       false );
 
   timer<properties_timer> t;
@@ -234,7 +307,7 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
     {
       std::cout << "[i] adjust line: " << index << std::endl;
     }
-    adjust_line( circ, pos, tt, index, dir );
+    adjust_line( circ, pos, tt, index, dir, fredkin );
   }
 
   return true;
