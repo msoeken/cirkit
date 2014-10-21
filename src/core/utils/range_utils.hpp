@@ -128,6 +128,12 @@ std::string any_join( const C& container, const std::string& delim )
 
 void ntimes( unsigned n, std::function<void()> f );
 
+template<typename P>
+std::function<bool(const P&)> first_matches( const typename P::first_type& v )
+{
+  return [&v]( const P& p ) { return p.first == v; };
+}
+
 }
 
 #endif
