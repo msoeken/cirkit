@@ -61,7 +61,9 @@ int main( int argc, char ** argv )
   program_options opts;
   opts.add_options()
     ( "path",    value( &path ),                 "Path of circuit files" )
-    ( "pattern", value_with_default( &pattern ), "Pattern for parsing, must contain at least one capture group for benchmark name and may contain a second one for column name" )
+    ( "pattern", value_with_default( &pattern ), "Pattern for parsing, must contain at least "
+                                                 "one capture group for benchmark name and may "
+                                                 "contain a second one for column name" )
     ( "columns", value( &columns ),              "Columns, e.g. \"00=Col 1,01=Col 2\"" )
     ( "global",  value( &global ),               "Global properties with type, e.g. \"Lines:u,Runtime:f\"" )
     ( "local",   value( &local ),                "Local properties with type, e.g. \"Lines:u,Runtime:f\"" )
@@ -130,9 +132,14 @@ int main( int argc, char ** argv )
                 auto it = boost::find_if( globals, first_matches<label_type_vector_t::value_type>( m[1u] ) );
                 if ( it != globals.end() )
                 {
-                  std::get<1>( *prow )[it - globals.begin()] =
-                    ( it->second == 'u' ) ? boost::lexical_cast<unsigned>( m[2u] )
-                                          : boost::lexical_cast<double>( m[2u] );
+                  if ( it->second == 'u' )
+                  {
+                    std::get<1>( *prow )[it - globals.begin()] = boost::lexical_cast<unsigned>( m[2u] );
+                  }
+                  else
+                  {
+                    std::get<1>( *prow )[it - globals.begin()] = boost::lexical_cast<double>( m[2u] );
+                  }
                 }
 
                 if ( m[1u] == "Runtime" )
