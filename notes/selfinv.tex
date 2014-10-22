@@ -1,3 +1,9 @@
+\let\safetikz\shipout
+\input pgf
+\input tikz
+\usetikzlibrary{calc}
+\let\shipout\safetikz
+
 \magnification\magstephalf
 \parskip3pt
 \baselineskip14pt
@@ -245,6 +251,174 @@ $f\circ g\circ f^{-1}$ is palindromic.
 % permutation that can be realized using a single Toffoli gate. \rm
 
 % \smallskip\noindent Conjecture 2 is equivalent to Conjecture 1.
+
+\medskip\noindent{\bf Transpositions.}\enspace Any transposition $(a,b)$ can be
+realized with $2h-1$ gates where $h$ is the hamming distance between the binary
+expansions of $a=a_1a_2\dots a_n$ and $b=b_1b_2\dots b_n$.  More precisely, the
+circuit consists of $2(h-1)$ CNOT gates and one fully controlled Toffoli gate.
+In the worst case we have $h=n$.  The circuit to represent a transposition has
+the form $ABA$ and is constructed as follows: Let $i_1,\dots,i_h$ be the indexes
+in which the binary expansions of $a$ and $b$ differ.  Part $A$ consists of CNOT
+gates ${\rm T}(\{x_h^{a_h}\}, x_j)$ for $1\le j< h$ and part $B$ consists of the
+single Toffoli gate ${\rm T}(\{x_j^{b_j}\mid j\neq h\}, x_h)$.  Note that all
+gates in part $A$ can be positioned in any order and hence $A=A^{-1}$ for each
+chosen order.  Given $a=001$ and $b=110$ we can choose $h \in \{1,2,3\}$ and get
+the following circuits:
+
+$$
+\tikzpicture[baseline=(c)]
+\draw[line width=0.30] (0.50,1.25) -- (3.00,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (3.00,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (3.00,0.25);
+\draw[line width=0.30] (0.75,0.25) -- (0.75,1.25);
+\draw[fill] (0.75,0.25) circle (0.10);
+\draw[line width=0.3] (0.75,1.25) circle (0.2) (0.75,1.05) -- (0.75,1.45);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,0.75);
+\draw[fill] (1.25,0.25) circle (0.10);
+\draw[line width=0.3] (1.25,0.75) circle (0.2) (1.25,0.55) -- (1.25,0.95);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,1.25);
+\draw[fill] (1.75,1.25) circle (0.10);
+\draw[fill] (1.75,0.75) circle (0.10);
+\draw[line width=0.3] (1.75,0.25) circle (0.2) (1.75,0.05) -- (1.75,0.45);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,0.75);
+\draw[fill] (2.25,0.25) circle (0.10);
+\draw[line width=0.3] (2.25,0.75) circle (0.2) (2.25,0.55) -- (2.25,0.95);
+\draw[line width=0.30] (2.75,0.25) -- (2.75,1.25);
+\draw[fill] (2.75,0.25) circle (0.10);
+\draw[line width=0.3] (2.75,1.25) circle (0.2) (2.75,1.05) -- (2.75,1.45);
+\coordinate (c) at ($(current bounding box.north west)!.5!(current bounding box.south east)$);
+\endtikzpicture
+\qquad\qquad
+\tikzpicture[baseline=(c)]
+\draw[line width=0.30] (0.50,1.25) -- (3.00,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (3.00,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (3.00,0.25);
+\draw[line width=0.30] (0.75,0.75) -- (0.75,1.25);
+\draw[fill=white] (0.75,0.75) circle (0.10);
+\draw[line width=0.3] (0.75,1.25) circle (0.2) (0.75,1.05) -- (0.75,1.45);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,0.75);
+\draw[fill=white] (1.25,0.75) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,1.25);
+\draw[fill] (1.75,1.25) circle (0.10);
+\draw[fill=white] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,0.75) circle (0.2) (1.75,0.55) -- (1.75,0.95);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,0.75);
+\draw[fill=white] (2.25,0.75) circle (0.10);
+\draw[line width=0.3] (2.25,0.25) circle (0.2) (2.25,0.05) -- (2.25,0.45);
+\draw[line width=0.30] (2.75,0.75) -- (2.75,1.25);
+\draw[fill=white] (2.75,0.75) circle (0.10);
+\draw[line width=0.3] (2.75,1.25) circle (0.2) (2.75,1.05) -- (2.75,1.45);
+\coordinate (c) at ($(current bounding box.north west)!.5!(current bounding box.south east)$);
+\endtikzpicture
+\qquad\qquad
+\tikzpicture[baseline=(c)]
+\draw[line width=0.30] (0.50,1.25) -- (3.00,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (3.00,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (3.00,0.25);
+\draw[line width=0.30] (0.75,0.75) -- (0.75,1.25);
+\draw[fill=white] (0.75,1.25) circle (0.10);
+\draw[line width=0.3] (0.75,0.75) circle (0.2) (0.75,0.55) -- (0.75,0.95);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,1.25);
+\draw[fill=white] (1.25,1.25) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,1.25);
+\draw[fill] (1.75,0.75) circle (0.10);
+\draw[fill=white] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,1.25) circle (0.2) (1.75,1.05) -- (1.75,1.45);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,1.25);
+\draw[fill=white] (2.25,1.25) circle (0.10);
+\draw[line width=0.3] (2.25,0.25) circle (0.2) (2.25,0.05) -- (2.25,0.45);
+\draw[line width=0.30] (2.75,0.75) -- (2.75,1.25);
+\draw[fill=white] (2.75,1.25) circle (0.10);
+\draw[line width=0.3] (2.75,0.75) circle (0.2) (2.75,0.55) -- (2.75,0.95);
+\coordinate (c) at ($(current bounding box.north west)!.5!(current bounding box.south east)$);
+\endtikzpicture
+\eqno(6)
+$$
+
+\noindent Since $(a,b)=(b,a)$ we also get the following three circuits:
+$$
+\tikzpicture[baseline=(c)]
+\draw[line width=0.30] (0.50,1.25) -- (3.00,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (3.00,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (3.00,0.25);
+\draw[line width=0.30] (0.75,0.25) -- (0.75,1.25);
+\draw[fill=white] (0.75,0.25) circle (0.10);
+\draw[line width=0.3] (0.75,1.25) circle (0.2) (0.75,1.05) -- (0.75,1.45);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,0.75);
+\draw[fill=white] (1.25,0.25) circle (0.10);
+\draw[line width=0.3] (1.25,0.75) circle (0.2) (1.25,0.55) -- (1.25,0.95);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,1.25);
+\draw[fill=white] (1.75,1.25) circle (0.10);
+\draw[fill=white] (1.75,0.75) circle (0.10);
+\draw[line width=0.3] (1.75,0.25) circle (0.2) (1.75,0.05) -- (1.75,0.45);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,0.75);
+\draw[fill=white] (2.25,0.25) circle (0.10);
+\draw[line width=0.3] (2.25,0.75) circle (0.2) (2.25,0.55) -- (2.25,0.95);
+\draw[line width=0.30] (2.75,0.25) -- (2.75,1.25);
+\draw[fill=white] (2.75,0.25) circle (0.10);
+\draw[line width=0.3] (2.75,1.25) circle (0.2) (2.75,1.05) -- (2.75,1.45);
+\coordinate (c) at ($(current bounding box.north west)!.5!(current bounding box.south east)$);
+\endtikzpicture
+\qquad\qquad
+\tikzpicture[baseline=(c)]
+\draw[line width=0.30] (0.50,1.25) -- (3.00,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (3.00,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (3.00,0.25);
+\draw[line width=0.30] (0.75,0.75) -- (0.75,1.25);
+\draw[fill] (0.75,0.75) circle (0.10);
+\draw[line width=0.3] (0.75,1.25) circle (0.2) (0.75,1.05) -- (0.75,1.45);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,0.75);
+\draw[fill] (1.25,0.75) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,1.25);
+\draw[fill=white] (1.75,1.25) circle (0.10);
+\draw[fill] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,0.75) circle (0.2) (1.75,0.55) -- (1.75,0.95);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,0.75);
+\draw[fill] (2.25,0.75) circle (0.10);
+\draw[line width=0.3] (2.25,0.25) circle (0.2) (2.25,0.05) -- (2.25,0.45);
+\draw[line width=0.30] (2.75,0.75) -- (2.75,1.25);
+\draw[fill] (2.75,0.75) circle (0.10);
+\draw[line width=0.3] (2.75,1.25) circle (0.2) (2.75,1.05) -- (2.75,1.45);
+\coordinate (c) at ($(current bounding box.north west)!.5!(current bounding box.south east)$);
+\endtikzpicture
+\qquad\qquad
+\tikzpicture[baseline=(c)]
+\draw[line width=0.30] (0.50,1.25) -- (3.00,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (3.00,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (3.00,0.25);
+\draw[line width=0.30] (0.75,0.75) -- (0.75,1.25);
+\draw[fill] (0.75,1.25) circle (0.10);
+\draw[line width=0.3] (0.75,0.75) circle (0.2) (0.75,0.55) -- (0.75,0.95);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,1.25);
+\draw[fill] (1.25,1.25) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,1.25);
+\draw[fill=white] (1.75,0.75) circle (0.10);
+\draw[fill] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,1.25) circle (0.2) (1.75,1.05) -- (1.75,1.45);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,1.25);
+\draw[fill] (2.25,1.25) circle (0.10);
+\draw[line width=0.3] (2.25,0.25) circle (0.2) (2.25,0.05) -- (2.25,0.45);
+\draw[line width=0.30] (2.75,0.75) -- (2.75,1.25);
+\draw[fill] (2.75,1.25) circle (0.10);
+\draw[line width=0.3] (2.75,0.75) circle (0.2) (2.75,0.55) -- (2.75,0.95);
+\coordinate (c) at ($(current bounding box.north west)!.5!(current bounding box.south east)$);
+\endtikzpicture
+\eqno(7)
+$$
+
+\smallskip\noindent{\bf Lemma 4.} \sl One requires at least $2h-1$ gates to
+represent a transpositon $(a,b)$ when the hamming distance between the binary
+expansion of $a$ and $b$ is $h$. \rm
+
+\smallskip\noindent {\it Proof.} We proof it by induction on $h$.  Since $(a,b)$
+is a transposition, we have $a\neq b$ and hence $h>0$.  For the base case $h=1$,
+obviously at least one gate is required since otherwise the circuit realizes the
+identity.  We assume that the lemma holds for $h$ and now consider the case
+$h+1$.  In this case the hamming distance between $a$ and $b$ is $h+1$. \dots
 
 \medskip\noindent {\bf 3. Synthesis of self-inverse functions.}\enspace \dots
 
