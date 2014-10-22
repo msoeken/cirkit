@@ -26,7 +26,12 @@
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/write_blif.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
+#include <reversible/utils/costs.hpp>
 #include <reversible/utils/reversible_program_options.hpp>
+
+#if ADDON_QUANTUM
+#include <quantum/utils/costs.hpp>
+#endif
 
 using namespace cirkit;
 
@@ -71,7 +76,11 @@ int main( int argc, char ** argv )
 
   if ( opts.is_set( "statistics" ) )
   {
-    print_statistics( circ );
+    print_statistics_settings settings;
+#if ADDON_QUANTUM
+    settings.main_template += boost::str( boost::format( "T-depth:          %d\n" ) % costs( circ, costs_by_gate_func( t_depth_costs() ) ) );
+#endif
+    print_statistics( circ, -1.0, settings );
   }
 
   if ( opts.is_set( "image" ) )
