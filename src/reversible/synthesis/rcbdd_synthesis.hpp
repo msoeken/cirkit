@@ -36,14 +36,20 @@
 namespace cirkit
 {
 
-  /**
-   * @brief Embedding of an irreversible specification
-   *
-   * @since  2.0
-   */
-  bool rcbdd_synthesis( circuit& circ, const rcbdd& cf,
-                        properties::ptr settings = properties::ptr(),
-                        properties::ptr statistics = properties::ptr() );
+enum SynthesisMethod {
+  ResolveCycles,
+  TranspositionsX,
+  TranspositionsY
+};
+
+/**
+ * @brief Embedding of an irreversible specification
+ *
+ * @since  2.0
+ */
+bool rcbdd_synthesis( circuit& circ, const rcbdd& cf,
+                      properties::ptr settings = properties::ptr(),
+                      properties::ptr statistics = properties::ptr() );
 
 }
 

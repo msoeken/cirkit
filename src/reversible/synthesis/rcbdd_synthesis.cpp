@@ -19,13 +19,17 @@
 #include "synthesis_utils_p.hpp"
 
 #include <core/utils/timer.hpp>
+#include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/add_gates.hpp>
+#include <reversible/functions/pattern_to_circuit.hpp>
 #include <classical/optimization/optimization.hpp>
 
 #include <fstream>
 
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
+
+#include <cuddInt.h>
 
 namespace cirkit
 {
@@ -34,6 +38,66 @@ enum Direction {
   ChangeLeft = 0,
   ChangeRight
 };
+
+int Cudd_bddPickOneCubeForRCBDD( DdManager * ddm, DdNode * node, char * repr)
+{
+  DdNode *N, *T, *E;
+  DdNode *one, *bzero;
+  char   dir;
+  int    i;
+
+  if ( repr == nullptr || node == nullptr ) return 0;
+
+  /* The constant 0 function has no on-set cubes. */
+  one = DD_ONE(ddm);
+  bzero = Cudd_Not(one);
+  if (node == bzero) return 0;
+
+  for ( i = 0; i < ddm->size; i++ ) repr[i] = 2;
+
+  for (;;)
+  {
+    if ( node == one ) break;
+
+    N = Cudd_Regular(node);
+
+    T = cuddT(N); E = cuddE(N);
+    if ( Cudd_IsComplement( node ) )
+    {
+	    T = Cudd_Not(T); E = Cudd_Not(E);
+    }
+    if ( T == bzero )
+    {
+	    repr[N->index] = 0;
+	    node = E;
+    }
+    else if ( E == bzero )
+    {
+	    repr[N->index] = 1;
+	    node = T;
+    }
+    else
+    {
+      if ( N->index % 3 == 1 )
+      {
+        repr[N->index] = repr[N->index - 1];
+        node = repr[N->index] ? T : E;
+      }
+      else
+      {
+        dir = (char) ((Cudd_Random() & 0x2000) >> 13);
+        repr[N->index] = dir;
+        node = dir ? T : E;
+      }
+    }
+  }
+  return 1;
+}
+
+int pick_one_cube_for_rcbdd( BDD node, char * repr )
+{
+  return Cudd_bddPickOneCubeForRCBDD( node.manager(), node.getNode(), repr );
+}
 
 struct rcbdd_synthesis_manager
 {
@@ -319,6 +383,117 @@ struct rcbdd_synthesis_manager
     }
   }
 
+  void resolve_cycles_with_transpositions_y()
+  {
+    if ( verbose )
+    {
+      std::cout << "[i] resolve cycles for var " << _var << std::endl;
+    }
+
+    while (cf.cofactor(f, _var, true, false) != cf.manager().bddZero() || cf.cofactor(f, _var, false, true) != cf.manager().bddZero())
+    {
+      compute_cofactors();
+
+      // 1. Extract one cube from ppy and one cube from npy
+      //    and save in dynamic_bitset
+      boost::dynamic_bitset<> p1( cf.num_vars() ); // from ppy
+      boost::dynamic_bitset<> p2( cf.num_vars() ); // from npy
+
+      p1[_var] = false;
+      p2[_var] = true;
+
+      char *scube = new char[3u * cf.num_vars()];
+
+      BDD fc = ppy & cf.move_ys_to_tmp( npy );
+
+      for ( unsigned j = 0u; j < _var; ++j )
+      {
+        fc &= ( cf.y( j ).Xnor( cf.z( j ) ) );
+      }
+
+      if ( !smart_pickcube )
+      {
+        fc.PickOneCube( scube );
+      }
+      else
+      {
+        pick_one_cube_for_rcbdd( fc, scube );
+      }
+
+      for ( unsigned i = 0u; i < cf.num_vars(); ++i )
+      {
+        if ( i == _var ) continue;
+        p1[i] = scube[3u * i + 1u];
+        p2[i] = scube[3u * i + 2u];
+      }
+
+      // 2. Create circuit for p1 and p2
+      circuit c( cf.num_vars() );
+      pattern_to_circuit( c, p1, p2 );
+
+      // 3. Apply circuit to f
+      BDD gcirc = cf.create_from_circuit( c );
+      f = cf.compose(f, gcirc);
+
+      prepend_circuit( circ, c );
+    }
+  }
+
+  void resolve_cycles_with_transpositions_x()
+  {
+    if ( verbose )
+    {
+      std::cout << "[i] resolve cycles for var " << _var << std::endl;
+    }
+
+    while (cf.cofactor(f, _var, true, false) != cf.manager().bddZero() || cf.cofactor(f, _var, false, true) != cf.manager().bddZero())
+    {
+      compute_cofactors();
+
+      // 1. Extract one cube from ppx and one cube from npx
+      //    and save in dynamic_bitset
+      boost::dynamic_bitset<> p1( cf.num_vars() ); // from ppx
+      boost::dynamic_bitset<> p2( cf.num_vars() ); // from npx
+
+      p1[_var] = true;
+      p2[_var] = false;
+
+      char *scube = new char[3u * cf.num_vars()];
+
+      BDD fc = ppx & cf.move_xs_to_tmp( npx );
+      for ( unsigned j = 0u; j < _var; ++j )
+      {
+        fc &= ( cf.x( j ).Xnor( cf.z( j ) ) );
+      }
+
+      if ( !smart_pickcube )
+      {
+        fc.PickOneCube( scube );
+      }
+      else
+      {
+        pick_one_cube_for_rcbdd( fc, scube );
+      }
+
+      for ( unsigned i = 0u; i < cf.num_vars(); ++i )
+      {
+        if ( i == _var ) continue;
+        p1[i] = scube[3u * i];
+        p2[i] = scube[3u * i + 2u];
+      }
+
+      // 2. Create circuit for p1 and p2
+      circuit c( cf.num_vars() );
+      pattern_to_circuit( c, p1, p2 );
+
+      // 3. Apply circuit to f
+      BDD gcirc = cf.create_from_circuit( c );
+      f = cf.compose(gcirc, f);
+
+      append_circuit( circ, c );
+    }
+  }
+
   void add_toffoli_gate( const cube_t& cube, unsigned offset )
   {
     gate::control_container controls;
@@ -447,21 +622,33 @@ struct rcbdd_synthesis_manager
         std::cout << "Adjust variable " << var << " / " << cf.num_vars() << std::endl;
       }
       set_var(var);
-      only_left_gate_shortcut();
-      resolve_one_cycles();
-      resolve_two_cycles();
-      resolve_k_cycles();
 
-      if ( verbose )
+      if ( synthesis_method == ResolveCycles )
       {
-        std::cout << "Target: " << _var << std::endl << " - left control function:" << std::endl;
-        left_f.PrintMinterm();
-        std::cout << " - right control function:" << std::endl;
-        right_f.PrintMinterm();
-      }
+        only_left_gate_shortcut();
+        resolve_one_cycles();
+        resolve_two_cycles();
+        resolve_k_cycles();
 
-      create_toffoli_gates_with_exorcism(left_f, var, 0u);
-      create_toffoli_gates_with_exorcism(right_f, var, 1u);
+        if ( verbose )
+        {
+          std::cout << "Target: " << _var << std::endl << " - left control function:" << std::endl;
+          left_f.PrintMinterm();
+          std::cout << " - right control function:" << std::endl;
+          right_f.PrintMinterm();
+        }
+
+        create_toffoli_gates_with_exorcism(left_f, var, 0u);
+        create_toffoli_gates_with_exorcism(right_f, var, 1u);
+      }
+      else if ( synthesis_method == TranspositionsX )
+      {
+        resolve_cycles_with_transpositions_x();
+      }
+      else if ( synthesis_method == TranspositionsY )
+      {
+        resolve_cycles_with_transpositions_y();
+      }
     }
   }
 
@@ -616,6 +803,8 @@ struct rcbdd_synthesis_manager
   bool genesop;
   dd_based_esop_optimization_func esopmin;
   bool create_gates;
+  bool smart_pickcube;
+  SynthesisMethod synthesis_method;
 
   BDD f;
   BDD left_f, right_f;
@@ -630,14 +819,16 @@ struct rcbdd_synthesis_manager
 bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  bool                            verbose      = get( settings, "verbose",      false                             );
-  bool                            progress     = get( settings, "progress",     false                             );
-  std::string                     name         = get( settings, "name",         std::string( "test" )             );
-  bool                            genesop      = get( settings, "genesop",      false                             );
-  dd_based_esop_optimization_func esopmin      = get( settings, "esopmin",      dd_based_esop_optimization_func() );
-  bool                            create_gates = get( settings, "create_gates", true                              );
+  bool                            verbose          = get( settings, "verbose",          false                             );
+  bool                            progress         = get( settings, "progress",         false                             );
+  std::string                     name             = get( settings, "name",             std::string( "test" )             );
+  bool                            genesop          = get( settings, "genesop",          false                             );
+  dd_based_esop_optimization_func esopmin          = get( settings, "esopmin",          dd_based_esop_optimization_func() );
+  bool                            create_gates     = get( settings, "create_gates",     true                              );
   /* 0: default, 1: swap, 2: hamming */
-  unsigned                        mode         = get( settings, "mode",         0u                                );
+  unsigned                        mode             = get( settings, "mode",             0u                                );
+  SynthesisMethod                 synthesis_method = get( settings, "synthesis_method", ResolveCycles                     );
+  bool                            smart_pickcube   = get( settings, "smart_pickcube",   true                              );
 
   /* Timing */
   timer<properties_timer> t;
@@ -648,12 +839,14 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   }
 
   rcbdd_synthesis_manager mgr( cf, circ );
-  mgr.verbose      = verbose;
-  mgr.progress     = progress;
-  mgr.name         = name;
-  mgr.genesop      = genesop;
-  mgr.esopmin      = esopmin;
-  mgr.create_gates = create_gates;
+  mgr.verbose          = verbose;
+  mgr.progress         = progress;
+  mgr.name             = name;
+  mgr.genesop          = genesop;
+  mgr.esopmin          = esopmin;
+  mgr.create_gates     = create_gates;
+  mgr.synthesis_method = synthesis_method;
+  mgr.smart_pickcube   = smart_pickcube;
   switch ( mode )
   {
   case 1u:

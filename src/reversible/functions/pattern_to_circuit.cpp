@@ -34,30 +34,20 @@ namespace cirkit
     assert( pattern1.size() == pattern2.size() );
     assert( circ.lines() == pattern1.size() );
 
-    boost::dynamic_bitset<> pattern_and; 
+    boost::dynamic_bitset<> pattern_and;
     pattern_and = pattern1 ^ pattern2;   // bitwise xor
     unsigned last_position = 0u;                    // last position where the bits are different
-    bool last_position_polarity = false; 
+    bool last_position_polarity = false;
     for(unsigned i = 1; i <= pattern_and.size(); i++)
     {
        if(pattern_and[pattern_and.size() - i] == 1u)
        {
          last_position = pattern_and.size() - i;
-	 last_position_polarity = (pattern1[pattern_and.size() - i] == 1u);
+         last_position_polarity = (pattern1[pattern_and.size() - i] == 1u);
          // last_position_polarity = (pattern1[pattern1.size() - 1u] == 1u);
-         std::cout << "polarity" << last_position_polarity << std::endl; 
-	 break;
+         break;
        }
     }
-
-     for(unsigned i = 0; i < pattern_and.size(); ++i)
-     {
-       std::cout << "pattern_and[" << i << "] = " << pattern_and[i] << std::endl;    
-     }
-
-     std::cout << "last position = " << last_position << std::endl;
-
-
 
     for(unsigned i = 0; i < last_position; ++i)
     {
@@ -66,19 +56,17 @@ namespace cirkit
       {
         controls += make_var(last_position, last_position_polarity);
         // controls += make_var(pattern1.size() - 1u, last_position_polarity);
-	append_toffoli(circ, controls, i);
+        append_toffoli(circ, controls, i);
       }
     }
 
     gate::control_container controls;
-    //for(unsigned i = 0; i < last_position; i++)
     for(unsigned i = 0; i < pattern2.size(); i++)
     {
       if (i != last_position)
-       controls += make_var(i, pattern2[i] == 1u);     
+        controls += make_var(i, pattern2[i] == 1u);
     }
     append_toffoli(circ, controls, last_position);
-
 
     for(unsigned i=1; i <= last_position; i++)
     {
@@ -86,11 +74,10 @@ namespace cirkit
       if(pattern_and[last_position - i] == 1u)
       {
         controls += make_var(last_position, last_position_polarity);
-        // controls += make_var(pattern1.size() -1u, last_position_polarity);
-	append_toffoli(circ, controls, last_position - i);
+        append_toffoli(circ, controls, last_position - i);
       }
     }
-   
+
     return true;
   }
 }
