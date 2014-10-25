@@ -16,70 +16,61 @@
  */
 
 #include "pattern_to_circuit.hpp"
-#include <iostream>
+
 #include <boost/assign/std/vector.hpp>
 
-#include "../gate.hpp"
-
-#include "add_circuit.hpp"
-#include "add_gates.hpp"
-#include "reverse_circuit.hpp"
+#include <reversible/gate.hpp>
+#include <reversible/functions/add_gates.hpp>
 
 using namespace boost::assign;
 
 namespace cirkit
 {
-  bool pattern_to_circuit( circuit& circ, const boost::dynamic_bitset<>& pattern1, const boost::dynamic_bitset<>& pattern2 )
+
+void pattern_to_circuit( circuit& circ, const boost::dynamic_bitset<>& pattern1, const boost::dynamic_bitset<>& pattern2 )
+{
+  assert( pattern1.size() == pattern2.size() );
+  assert( circ.lines() == pattern1.size() );
+
+  auto diff = pattern1 ^ pattern2;
+
+  /* Patterns are equal */
+  if ( diff.none() ) return;
+
+  /* Find last position in diff and its polarity */
+  auto last_pos = 0u;
+  auto pos = diff.find_first();
+
+  do
   {
-    assert( pattern1.size() == pattern2.size() );
-    assert( circ.lines() == pattern1.size() );
+    last_pos = pos;
+    pos = diff.find_next( pos );
+  } while ( pos != boost::dynamic_bitset<>::npos );
 
-    boost::dynamic_bitset<> pattern_and;
-    pattern_and = pattern1 ^ pattern2;   // bitwise xor
-    unsigned last_position = 0u;                    // last position where the bits are different
-    bool last_position_polarity = false;
-    for(unsigned i = 1; i <= pattern_and.size(); i++)
-    {
-       if(pattern_and[pattern_and.size() - i] == 1u)
-       {
-         last_position = pattern_and.size() - i;
-         last_position_polarity = (pattern1[pattern_and.size() - i] == 1u);
-         // last_position_polarity = (pattern1[pattern1.size() - 1u] == 1u);
-         break;
-       }
-    }
+  bool last_pos_polarity = pattern1[last_pos];
 
-    for(unsigned i = 0; i < last_position; ++i)
-    {
-      gate::control_container controls;
-      if(pattern_and[i] == 1u)
-      {
-        controls += make_var(last_position, last_position_polarity);
-        // controls += make_var(pattern1.size() - 1u, last_position_polarity);
-        append_toffoli(circ, controls, i);
-      }
-    }
+  /* Build circuit */
+  auto index = 0u;
+  gate::control_container controls;
+  pos = diff.find_first();
+  do
+  {
+    if ( pos == last_pos ) continue;
 
-    gate::control_container controls;
-    for(unsigned i = 0; i < pattern2.size(); i++)
-    {
-      if (i != last_position)
-        controls += make_var(i, pattern2[i] == 1u);
-    }
-    append_toffoli(circ, controls, last_position);
+    /* middle part controls */
+    controls += make_var( pos, pattern2[pos] );
 
-    for(unsigned i=1; i <= last_position; i++)
-    {
-      gate::control_container controls;
-      if(pattern_and[last_position - i] == 1u)
-      {
-        controls += make_var(last_position, last_position_polarity);
-        append_toffoli(circ, controls, last_position - i);
-      }
-    }
+    /* first and last part */
+    insert_cnot( circ, index, make_var( last_pos, last_pos_polarity ), pos );
+    insert_cnot( circ, index, make_var( last_pos, last_pos_polarity ), pos );
+    ++index;
 
-    return true;
-  }
+    pos = diff.find_next( pos );
+  } while ( pos != boost::dynamic_bitset<>::npos );
+
+  insert_toffoli( circ, index, controls, last_pos );
+}
+
 }
 
 // Local Variables:

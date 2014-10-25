@@ -24,8 +24,9 @@
  * @author Laura Tague
  * @since  1.3
  */
-#ifndef PATTERN_TO_CIRCUIT
-#define PATTERN_TO_CIRCUIT
+
+#ifndef PATTERN_TO_CIRCUIT_HPP
+#define PATTERN_TO_CIRCUIT_HPP
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -33,28 +34,26 @@ namespace cirkit
 {
   class circuit;
 
-  /**
-   * @brief Creates a circuit realization for a permutation of two patterns
-   *
-   * This function takes two lines from a reversible truth table (inputs -> pattern1)
-   * (inputs -> pattern2) which need to be swapped, 
-   * and returns a circuit that will swap the two patterns assigment
-   * and vice versa by leaving all other input and output assignments unaltered.
-   *
-   * @param circ An empty circuit that will be created. The number of lines of the circuit
-   *             must coincide with the length of the input and output assignments.
-   * @param inputs pattern1 Assignment
-   * @param outputs pattern2 Assignment
-   *
-   * @since  1.3
-   */
-  bool pattern_to_circuit( circuit& circ,
-      const boost::dynamic_bitset<>& pattern1,
-      const boost::dynamic_bitset<>& pattern2);
+/**
+ * @brief Creates a circuit realization for a permutation of two patterns
+ *
+ * This function takes two lines from a reversible truth table (inputs -> pattern1)
+ * (inputs -> pattern2) which need to be swapped,
+ * and returns a circuit that will swap the two patterns assigment
+ * and vice versa by leaving all other input and output assignments unaltered.
+ *
+ * @param circ An empty circuit that will be created. The number of lines of the circuit
+ *             must coincide with the length of the input and output assignments.
+ * @param inputs pattern1 Assignment
+ * @param outputs pattern2 Assignment
+ *
+ * @since 2.0
+ */
+void pattern_to_circuit( circuit& circ, const boost::dynamic_bitset<>& pattern1, const boost::dynamic_bitset<>& pattern2);
 
 }
 
-#endif /* PATTERN_TO_CIRCUIT */
+#endif
 
 // Local Variables:
 // c-basic-offset: 2
