@@ -55,18 +55,21 @@ void pattern_to_circuit( circuit& circ, const boost::dynamic_bitset<>& pattern1,
   pos = diff.find_first();
   do
   {
-    if ( pos == last_pos ) continue;
-
-    /* middle part controls */
-    controls += make_var( pos, pattern2[pos] );
-
-    /* first and last part */
-    insert_cnot( circ, index, make_var( last_pos, last_pos_polarity ), pos );
-    insert_cnot( circ, index, make_var( last_pos, last_pos_polarity ), pos );
-    ++index;
-
+    if ( pos != last_pos )
+    {
+      /* first and last part */
+      insert_cnot( circ, index, make_var( last_pos, last_pos_polarity ), pos );
+      insert_cnot( circ, index, make_var( last_pos, last_pos_polarity ), pos );
+      ++index;
+    }
     pos = diff.find_next( pos );
   } while ( pos != boost::dynamic_bitset<>::npos );
+
+  for ( unsigned pos = 0u; pos < pattern2.size(); ++pos )
+  {
+    if ( pos == last_pos ) continue;
+    controls += make_var( pos, pattern2[pos] );
+  }
 
   insert_toffoli( circ, index, controls, last_pos );
 }
