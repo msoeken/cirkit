@@ -34,18 +34,20 @@ int main( int argc, char ** argv )
 {
   using boost::program_options::value;
 
-  bool bidirectional = true;
-  bool fredkin       = false;
+  bool bidirectional    = true;
+  bool fredkin          = false;
+  bool fredkin_lookback = false;
 
   reversible_program_options opts;
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
-    ( "bidirectional",       value_with_default( &bidirectional ), "Bidirectional synthesis" )
-    ( "fredkin",             value_with_default( &fredkin ),       "Use Fredkin gates" )
-    ( "print_circuit,c",                                           "Prints the circuit" )
-    ( "print_truth_table,t",                                       "Prints the truth table of the circuit" )
-    ( "verbose,v",                                                 "Be verbose" )
+    ( "bidirectional",       value_with_default( &bidirectional ),    "Bidirectional synthesis" )
+    ( "fredkin",             value_with_default( &fredkin ),          "Use Fredkin gates" )
+    ( "fredkin_lookback",    value_with_default( &fredkin_lookback ), "Optimized Fredkin gate insertion (required `fredkin' enabled)" )
+    ( "print_circuit,c",                                              "Prints the circuit" )
+    ( "print_truth_table,t",                                          "Prints the truth table of the circuit" )
+    ( "verbose,v",                                                    "Be verbose" )
     ;
 
   opts.parse( argc, argv );
@@ -62,9 +64,10 @@ int main( int argc, char ** argv )
   circuit circ;
   properties::ptr settings( new properties );
   properties::ptr statistics( new properties );
-  settings->set( "bidirectional", bidirectional );
-  settings->set( "fredkin",       fredkin );
-  settings->set( "verbose",       opts.is_set( "verbose" ) );
+  settings->set( "bidirectional",    bidirectional );
+  settings->set( "fredkin",          fredkin );
+  settings->set( "fredkin_lookback", fredkin_lookback );
+  settings->set( "verbose",          opts.is_set( "verbose" ) );
 
   transformation_based_synthesis( circ, spec, settings, statistics );
 

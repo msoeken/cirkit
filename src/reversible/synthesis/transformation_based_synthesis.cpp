@@ -20,6 +20,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/range/algorithm.hpp>
 
+#include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <reversible/circuit.hpp>
@@ -140,7 +141,7 @@ void insert_fredkin_gate( circuit& circ, unsigned& pos, boost::dynamic_bitset<> 
   }
 }
 
-void adjust_line( circuit& circ, unsigned& pos, bitset_pair_vector_t& tt, unsigned line, direction_t dir, bool try_fredkin )
+void adjust_line( circuit& circ, unsigned& pos, bitset_pair_vector_t& tt, unsigned line, direction_t dir, bool try_fredkin, bool fredkin_lookback )
 {
   unsigned bw = circ.lines();
 
@@ -168,7 +169,25 @@ void adjust_line( circuit& circ, unsigned& pos, bitset_pair_vector_t& tt, unsign
           auto mask_copy = mask;
           mask_copy.reset( b1 );
           mask_copy.reset( b2 );
-          if ( mask_copy.any() && ( dir == direction_back ? ( mask_copy > input ) : ( mask_copy > output ) ) )
+
+          auto mask_compare = ( dir == direction_back ) ? input : output;
+          bool mask_valid = dir == direction_back ? ( mask_copy > input ) : ( mask_copy > output );
+
+          if ( !mask_valid && fredkin_lookback ) /* try harder */
+          {
+            mask_valid = true;
+            boost::dynamic_bitset<> current( bw );
+            do {
+              if ( ( mask_copy & current ) == mask_copy && ( current[b1] != current[b2] ) )
+              {
+                mask_valid = false;
+                break;
+              }
+              inc( current );
+            } while ( current != mask_compare );
+          }
+
+          if ( mask_valid )
           {
             //std::cout << "[i] insert fred on " << b1 << " and " << b2 << " with mask = " << mask_copy << std::endl;
             insert_fredkin_gate( circ, pos, mask_copy, b1, b2, tt, dir );
@@ -228,9 +247,16 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
                                      properties::ptr statistics )
 {
   /* Settings */
-  bool bidirectional = get( settings, "bidirectional", true  );
-  bool fredkin       = get( settings, "fredkin",       false );
-  bool verbose       = get( settings, "verbose",       false );
+  bool bidirectional    = get( settings, "bidirectional",    true  );
+  bool fredkin          = get( settings, "fredkin",          false );
+  bool fredkin_lookback = get( settings, "fredkin_lookback", false );
+  bool verbose          = get( settings, "verbose",          false );
+
+  /* Warning */
+  if ( !fredkin && fredkin_lookback && verbose )
+  {
+    std::cout << "[w] fredkin_lookback option has no effect since fredkin option is disabled." << std::endl;
+  }
 
   timer<properties_timer> t;
 
@@ -307,7 +333,7 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
     {
       std::cout << "[i] adjust line: " << index << std::endl;
     }
-    adjust_line( circ, pos, tt, index, dir, fredkin );
+    adjust_line( circ, pos, tt, index, dir, fredkin, fredkin_lookback );
   }
 
   return true;
