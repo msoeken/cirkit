@@ -133,7 +133,7 @@ using a single mixed-polarity multiple-controlled Toffoli gate.
 permutation representation $\pi_f$ is a transposition.
 \item{--} A self-inverse function $f$ is called {\it palindromic\/} if the
 number of cycles in its permutation representation $\pi_f$ is $2^k$ for some
-nonnegative integer $k$.
+nonnegative integer $k$. 
 
 \smallskip\noindent From the book of T.~Muir [{\sl A Treatise on the Theory of
 Determinants\/} (1960)] we have that the number of involutions on $n$ elements
@@ -155,6 +155,7 @@ transpositions is $\big({{2^n}\atop 2}\big)$.  Finally, the number of
 self-inverse functions on $n$ variables that are palindromic is
 $$ \sum_{k=0}^{n-1} {1\over{2^k!}} \prod_{i=0}^{2^k-1} \left(\matrix{2^n-2i \cr 2}\right).\eqno(4) $$
 
+
 \topinsert \centerline{Table 1: Number of self-inverse functions}
 
 \ninepoint
@@ -164,12 +165,13 @@ $$ \sum_{k=0}^{n-1} {1\over{2^k!}} \prod_{i=0}^{2^k-1} \left(\matrix{2^n-2i \cr 
 \hrule
 \tabskip=0em plus2em minus.5em
 \halign{\strut\enspace#\hfil & \quad\hfil# & \quad\hfil# & \quad\hfil# & \quad\hfil# & \quad\hfil# & \quad\hfil# \cr
-    & $n=1$ & $n=2$ & $n=3$ & $n=4$ & $n=5$ & $n=6$ \cr
-  reversible     & 2 & 24 & 40,320 & 20,922,789,888,000 & $>2\cdot 10^{35}$ & $>10^{89}$ \cr
-  self-inverse   & 2 & 10 &    764 &         46,206,736 & $>2\cdot 10^{19}$ & $>10^{47}$ \cr
-  palindromic    & 1 &  9 &    343 &          3,383,955 &        $>10^{17}$ & $>10^{44}$ \cr
-  transpositions & 1 &  6 &     28 &                120 &              496 &     2,016 \cr
-  simple         & 1 &  6 &     27 &                108 &              405 &     1,458 \cr
+                   & $n=1$ & $n=2$ & $n=3$ & $n=4$ & $n=5$ & $n=6$ \cr
+  reversible       & 2 & 24 & 40,320 & 20,922,789,888,000 & $>2\cdot 10^{35}$ & $>10^{89}$ \cr
+  self-inverse     & 2 & 10 &    764 &         46,206,736 & $>2\cdot 10^{19}$ & $>10^{47}$ \cr
+  palindromic      & 1 &  9 &    343 &          3,383,955 &        $>10^{17}$ & $>10^{44}$ \cr
+  transpositions   & 1 &  6 &     28 &                120 &              496 &     2,016 \cr
+  simple           & 1 &  6 &     27 &                108 &              405 &     1,458 \cr
+  fully-controlled & 1 &  4 &     12 &                 32 &               80 &       192 \cr
 }
 \hrule}
 \endinsert
@@ -182,13 +184,47 @@ $$
 holds.  We have `$\hbox{simple}\not\subset\hbox{transpositions}$' but
 `$\hbox{simple}\subset\hbox{palindromic}$'.
 
+
+
+\medskip \noindent{\bf 1.1. Mixed-polarity fully-controlled Toffoli gates.}\enspace We define a mixed-polarity fully-controlled Toffoli gate as a Toffoli gate in which all possible ($n - 1$) controls are used. For each $n$ target lines there are $2^{n-1}$ possible ways to set the two states of the $n-1$ controls and, thus, there are $n \cdot 2^{n-1}$ possible gates.
+
+\smallskip \noindent{\bf Lemma 2.} A self-inverse function $f$ is both {\it simple\/} and {\it transposition\/} iff $f$ can be realized using a single mixed-polarity fully-controlled ($2^n-1$ controls) Toffoli gate.
+
+\smallskip\noindent {\it Proof.} All mixed-polarity fully-controlled Toffoli gates have a Hamming distance of one and it thus implementable using only one transposition. \qquad\slug
+
+Given that this is all fully-controlled Toffoli gates this is set is universal or a generating set for all other rest of reversible functions. We know how the circuit look, but how can we characterise these gates as transpositions?
+
+\smallskip \noindent{\bf Definition 1.} Given a transposition $(a\,b)$ we define the {\it length} of the transposition to be absolute difference of $a$ and $b$:
+$$
+length (a\,b) = |a - b|
+$$
+
+Now we divide them into $n$ classes (denoted $T_i$) each containing $2^{n-1}$ transpositions, where all transpositions in a class compute a gate with the target on the $i$'th line, $i \in {1,...,n-1}$.
+
+\smallskip \noindent{\bf Lemma 2.1.} The class $T_i$, $i \in \{1,...,n-1\}$, is equal to the set of transpositions $(a\,b)$ where 
+$$
+\{(a\,b) \,|\, a = a_1 + a_2 \cdot 2^i, a_1 \in \{0,..,2^{i-1}-1\}, a_2 \in \{0,..,2^{n-i}-1\}, length (a\,b) = 2^{i-1} \}
+$$
+
+\smallskip\noindent {\it Proof.} MKT: There must be an easier way to define this. Also perhaps it should be a definition instead of a lemma.\qquad\slug
+
+Note that all transposition of a class are disjoint and, thus, all numbers from 0 to $n-1$ is represented exactly ones in a transposition.
+
+\smallskip\noindent {\bf Example 1.} See the other paper for examples for $n$ equal to 2 and 3. 
+
+\smallskip \noindent{\bf Lemma 2.2.} A $k$-controlled mixed-polarity Toffoli gate with target on line $i$ is represented by $2^{n-k-1}$ transpositions from class $T_i$.
+
+\smallskip\noindent {\it Proof.} Follows from [SoekenThomsen (2013)]. \qquad\slug
+
+Any transposition $(a\,b)$ can be represented by a palindromic circuit of $2^h-1$ transpositions from $h$ different classes $T_i$, where $h$ is the Hamming distance of the binary representation of between $a = a_i...a_n$ and $b = b_0...b_n$, and $i \in \{ j \,|\, a_j \oplus b_j = 1 \}$ ($i$ is given by the positions in which $a$ and $b$ differs.
+
 \medskip \noindent{\bf 2. Palindromic circuits.}\enspace A circuit
 $C=g_1g_2\dots g_k$, which consists of mixed-polarity multiple-controlled
 Toffoli gates $g_i$, is called {\it palindromic\/} if $ g_i = g_{k+1-i}$ for all
 $i \in \{1,\dots,\lfloor{k\over 2}\rfloor\}$.  The circuit is called {\it
 even\/} if $k$ is even and {\it odd\/} otherwise.
 
-\smallskip \noindent{\bf Lemma 2.} \sl A palindromic circuit is even if and only
+\smallskip \noindent{\bf Lemma 3.} \sl A palindromic circuit is even if and only
 if it realizes the identity function. \rm
 
 \smallskip\noindent {\it Proof.} Let $C=g_1g_2\dots g_{2k}$ be an even
@@ -207,7 +243,7 @@ yiels $h^{-1}(y)$ at the outputs of $C$.  Since $x\neq y$ we also have
 $h^{-1}(x)\neq h^{-1}(y)$ and hence $C$ does not represent the identity
 function.\qquad\slug
 
-\noindent{\bf Lemma 3.} \sl A self-inverse function is a palindromic function if
+\noindent{\bf Lemma 4.} \sl A self-inverse function is a palindromic function if
 and only if it can be realized by an odd palindromic circuit. \rm
 
 \smallskip\noindent {\it Proof.} Given an odd palindromic circuit.  Then it
@@ -410,9 +446,9 @@ $$
 \eqno(7)
 $$
 
-\smallskip\noindent{\bf Lemma 4.} \sl One requires at least $2h-1$ gates to
+\smallskip\noindent{\bf Lemma 5.} \sl One requires at least $2h-1$ gates to
 represent a transpositon $(a,b)$ when the hamming distance between the binary
-expansion of $a$ and $b$ is $h$. \rm
+expansion of $a$ and $b$ is $h$. \rm 
 
 \smallskip\noindent {\it Proof.} We proof it by induction on $h$.  Since $(a,b)$
 is a transposition, we have $a\neq b$ and hence $h>0$.  For the base case $h=1$,
