@@ -18,16 +18,17 @@
 #include "rcbdd_synthesis.hpp"
 #include "synthesis_utils_p.hpp"
 
-#include <core/utils/timer.hpp>
-#include <reversible/functions/add_circuit.hpp>
-#include <reversible/functions/add_gates.hpp>
-#include <reversible/functions/pattern_to_circuit.hpp>
-#include <classical/optimization/optimization.hpp>
-
 #include <fstream>
 
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
+
+#include <core/utils/timer.hpp>
+#include <reversible/functions/add_circuit.hpp>
+#include <reversible/functions/add_gates.hpp>
+#include <reversible/functions/pattern_to_circuit.hpp>
+#include <reversible/io/print_circuit.hpp>
+#include <classical/optimization/optimization.hpp>
 
 #include <cuddInt.h>
 
@@ -383,33 +384,63 @@ struct rcbdd_synthesis_manager
     }
   }
 
-  void resolve_cycles_with_transpositions_y()
+  typedef std::tuple<
+    bool,                                                   // p1[_var] value
+    std::function<BDD(rcbdd_synthesis_manager*)>,           // compute fc
+    unsigned,                                               // scube offset
+    std::function<BDD(rcbdd_synthesis_manager*, BDD, BDD)>, // update f
+    std::function<void(circuit&, const circuit&)>           // update circ
+    > resolve_cycles_configuration_t;
+
+  resolve_cycles_configuration_t resolve_x = std::make_tuple(
+    true,
+    []( rcbdd_synthesis_manager* manager ) {
+      BDD fc = manager->ppx & manager->cf.move_xs_to_tmp( manager->npx );
+      for ( unsigned j = 0u; j < manager->_var; ++j )
+      {
+        fc &= ( manager->cf.x( j ).Xnor( manager->cf.z( j ) ) );
+      }
+      return fc;
+    },
+    0u,
+    []( rcbdd_synthesis_manager* manager, BDD gcirc, BDD f ) { return manager->cf.compose( gcirc, f ); },
+    []( circuit& circ, const circuit& c ) { append_circuit( circ, c ); } );
+
+  resolve_cycles_configuration_t resolve_y = std::make_tuple(
+    false,
+    []( rcbdd_synthesis_manager* manager ) {
+      BDD fc = manager->ppy & manager->cf.move_ys_to_tmp( manager->npy );
+      for ( unsigned j = 0u; j < manager->_var; ++j )
+      {
+        fc &= ( manager->cf.y( j ).Xnor( manager->cf.z( j ) ) );
+      }
+      return fc;
+    },
+    1u,
+    []( rcbdd_synthesis_manager* manager, BDD gcirc, BDD f ) { return manager->cf.compose( f, gcirc ); },
+    []( circuit& circ, const circuit& c ) { prepend_circuit( circ, c ); } );
+
+  void resolve_cycles_with_transpositions( const resolve_cycles_configuration_t& configuration )
   {
     if ( verbose )
     {
-      std::cout << "[i] resolve cycles for var " << _var << std::endl;
+      std::cout << boost::format( "[i] resolve cycles for var %d" ) % _var << std::endl;
     }
 
-    while (cf.cofactor(f, _var, true, false) != cf.manager().bddZero() || cf.cofactor(f, _var, false, true) != cf.manager().bddZero())
+    while ( cf.cofactor( f, _var, true, false ) != cf.manager().bddZero() ||
+            cf.cofactor( f, _var, false, true ) != cf.manager().bddZero() )
     {
       compute_cofactors();
 
-      // 1. Extract one cube from ppy and one cube from npy
-      //    and save in dynamic_bitset
-      boost::dynamic_bitset<> p1( cf.num_vars() ); // from ppy
-      boost::dynamic_bitset<> p2( cf.num_vars() ); // from npy
+      /* Extract two cubes and save them into bitset */
+      boost::dynamic_bitset<> p1( cf.num_vars() ), p2( cf.num_vars() );
 
-      p1[_var] = false;
-      p2[_var] = true;
+      p1[_var] =  std::get<0>( configuration );
+      p2[_var] = !std::get<0>( configuration );
 
       char *scube = new char[3u * cf.num_vars()];
 
-      BDD fc = ppy & cf.move_ys_to_tmp( npy );
-
-      for ( unsigned j = 0u; j < _var; ++j )
-      {
-        fc &= ( cf.y( j ).Xnor( cf.z( j ) ) );
-      }
+      BDD fc = std::get<1>( configuration )( this );
 
       if ( !smart_pickcube )
       {
@@ -423,74 +454,28 @@ struct rcbdd_synthesis_manager
       for ( unsigned i = 0u; i < cf.num_vars(); ++i )
       {
         if ( i == _var ) continue;
-        p1[i] = scube[3u * i + 1u];
+        p1[i] = scube[3u * i + std::get<2>( configuration )];
         p2[i] = scube[3u * i + 2u];
       }
 
-      // 2. Create circuit for p1 and p2
+      delete scube;
+
+      /* Create circuit for p1 and p2 */
+      if ( verbose )
+      {
+        //std::cout << "[i] realize transposition (" << p1 << " " << p2 << ")" << std::endl;
+      }
       circuit c( cf.num_vars() );
       pattern_to_circuit( c, p1, p2 );
+      if ( verbose )
+      {
+        //std::cout << "[i] result: " << std::endl << c;
+      }
 
-      // 3. Apply circuit to f
+      /* Apply circuit to f */
       BDD gcirc = cf.create_from_circuit( c );
-      f = cf.compose(f, gcirc);
-
-      prepend_circuit( circ, c );
-    }
-  }
-
-  void resolve_cycles_with_transpositions_x()
-  {
-    if ( verbose )
-    {
-      std::cout << "[i] resolve cycles for var " << _var << std::endl;
-    }
-
-    while (cf.cofactor(f, _var, true, false) != cf.manager().bddZero() || cf.cofactor(f, _var, false, true) != cf.manager().bddZero())
-    {
-      compute_cofactors();
-
-      // 1. Extract one cube from ppx and one cube from npx
-      //    and save in dynamic_bitset
-      boost::dynamic_bitset<> p1( cf.num_vars() ); // from ppx
-      boost::dynamic_bitset<> p2( cf.num_vars() ); // from npx
-
-      p1[_var] = true;
-      p2[_var] = false;
-
-      char *scube = new char[3u * cf.num_vars()];
-
-      BDD fc = ppx & cf.move_xs_to_tmp( npx );
-      for ( unsigned j = 0u; j < _var; ++j )
-      {
-        fc &= ( cf.x( j ).Xnor( cf.z( j ) ) );
-      }
-
-      if ( !smart_pickcube )
-      {
-        fc.PickOneCube( scube );
-      }
-      else
-      {
-        pick_one_cube_for_rcbdd( fc, scube );
-      }
-
-      for ( unsigned i = 0u; i < cf.num_vars(); ++i )
-      {
-        if ( i == _var ) continue;
-        p1[i] = scube[3u * i];
-        p2[i] = scube[3u * i + 2u];
-      }
-
-      // 2. Create circuit for p1 and p2
-      circuit c( cf.num_vars() );
-      pattern_to_circuit( c, p1, p2 );
-
-      // 3. Apply circuit to f
-      BDD gcirc = cf.create_from_circuit( c );
-      f = cf.compose(gcirc, f);
-
-      append_circuit( circ, c );
+      f = std::get<3>( configuration )( this, gcirc, f );
+      std::get<4>( configuration )( circ, c );
     }
   }
 
@@ -643,11 +628,11 @@ struct rcbdd_synthesis_manager
       }
       else if ( synthesis_method == TranspositionsX )
       {
-        resolve_cycles_with_transpositions_x();
+        resolve_cycles_with_transpositions( resolve_x );
       }
       else if ( synthesis_method == TranspositionsY )
       {
-        resolve_cycles_with_transpositions_y();
+        resolve_cycles_with_transpositions( resolve_y );
       }
     }
   }
