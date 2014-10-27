@@ -171,7 +171,7 @@ void adjust_line( circuit& circ, unsigned& pos, bitset_pair_vector_t& tt, unsign
           mask_copy.reset( b2 );
 
           auto mask_compare = ( dir == direction_back ) ? input : output;
-          bool mask_valid = dir == direction_back ? ( mask_copy > input ) : ( mask_copy > output );
+          bool mask_valid = mask_copy > mask_compare;
 
           if ( !mask_valid && fredkin_lookback ) /* try harder */
           {
