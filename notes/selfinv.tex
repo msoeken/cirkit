@@ -156,6 +156,7 @@ self-inverse functions on $n$ variables that are palindromic is
 $$ \sum_{k=0}^{n-1} {1\over{2^k!}} \prod_{i=0}^{2^k-1} \left(\matrix{2^n-2i \cr 2}\right).\eqno(4) $$
 
 
+
 \topinsert \centerline{Table 1: Number of self-inverse functions}
 
 \ninepoint
@@ -192,31 +193,36 @@ holds.  We have `$\hbox{simple}\not\subset\hbox{transpositions}$' but
 
 \smallskip\noindent {\it Proof.} All mixed-polarity fully-controlled Toffoli gates have a Hamming distance of one and it thus implementable using only one transposition. \qquad\slug
 
-Given that this is all fully-controlled Toffoli gates this is set is universal or a generating set for all other rest of reversible functions. We know how the circuit look, but how can we characterise these gates as transpositions?
+Given that this is all fully-controlled Toffoli gates this is set is universal or, in other words, a generating set for all other rest of reversible functions. We know how the circuit look, but how can we characterise these gates as transpositions?
 
 \smallskip \noindent{\bf Definition 1.} Given a transposition $(a\,b)$ we define the {\it length} of the transposition to be absolute difference of $a$ and $b$:
 $$
 length (a\,b) = |a - b|
 $$
 
-Now we divide them into $n$ classes (denoted $T_i$) each containing $2^{n-1}$ transpositions, where all transpositions in a class compute a gate with the target on the $i$'th line, $i \in {1,...,n-1}$.
+Now we divide them into $n$ classes (denoted $T_i$) each containing $2^{n-1}$ transpositions, where all transpositions in a class compute a gate with the target on the $i$'th line, $i \in {0,...,n-1}$.
 
-\smallskip \noindent{\bf Lemma 2.1.} The class $T_i$, $i \in \{1,...,n-1\}$, is equal to the set of transpositions $(a\,b)$ where 
+\smallskip \noindent{\bf Definition 2.} The class $T_i$, $i \in \{0,...,n-1\}$, is equal to the set of transpositions $(a\,b)$ where 
 $$
 \{(a\,b) \,|\, a = a_1 + a_2 \cdot 2^i, a_1 \in \{0,..,2^{i-1}-1\}, a_2 \in \{0,..,2^{n-i}-1\}, length (a\,b) = 2^{i-1} \}
 $$
 
-\smallskip\noindent {\it Proof.} MKT: There must be an easier way to define this. Also perhaps it should be a definition instead of a lemma.\qquad\slug
+In other words a transposition $(a\,b)$ is in $T_i$ iff the bit-wise exclusive-or product of the binary representations $a$ and $b$ have a 1 one the $i$'th position and 0 on the rest (or equal to $2^i$). The other notes shows this represented as a graph of permutations.
 
 Note that all transposition of a class are disjoint and, thus, all numbers from 0 to $n-1$ is represented exactly ones in a transposition.
 
-\smallskip\noindent {\bf Example 1.} See the other paper for examples for $n$ equal to 2 and 3. 
+\smallskip\noindent {\bf Example 1.} See the other notes for examples for $n$ equal to 2 and 3. 
 
 \smallskip \noindent{\bf Lemma 2.2.} A $k$-controlled mixed-polarity Toffoli gate with target on line $i$ is represented by $2^{n-k-1}$ transpositions from class $T_i$.
 
 \smallskip\noindent {\it Proof.} Follows from [SoekenThomsen (2013)]. \qquad\slug
 
-Any transposition $(a\,b)$ can be represented by a palindromic circuit of $2^h-1$ transpositions from $h$ different classes $T_i$, where $h$ is the Hamming distance of the binary representation of between $a = a_i...a_n$ and $b = b_0...b_n$, and $i \in \{ j \,|\, a_j \oplus b_j = 1 \}$ ($i$ is given by the positions in which $a$ and $b$ differs.
+\smallskip \noindent{\bf Lemma 2.3.} Any transposition $(a\,b)$ can be represented by a palindromic circuit of $2^h-1$ transpositions from $h$ different classes $T_i$, where $h$ is the Hamming distance of the binary representation between $a = a_0...a_n$ and $b = b_0...b_n$, and $i \in \{ j \,|\, a_j \oplus b_j = 1, 0\leq j \leq n\}$ ($i$ is given by the bit positions in which $a$ and $b$ differs.
+
+\smallskip\noindent {\it Proof.} Given a transposition $(a\,b)$, then it is all shortest paths in the graph notation between nodes $a$ to $b$ \qquad\slug
+
+
+
 
 \medskip \noindent{\bf 2. Palindromic circuits.}\enspace A circuit
 $C=g_1g_2\dots g_k$, which consists of mixed-polarity multiple-controlled
