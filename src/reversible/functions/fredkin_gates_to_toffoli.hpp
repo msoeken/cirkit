@@ -15,14 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+/**
+ * @file fredkin_gates_to_toffoli.hpp
+ *
+ * @brief Converts Fredkin gates in a circuit to Toffoli gates
+ *
+ * @author Mathias Soeken
+ * @since  2.0
+ */
 
-int main( int argc, char ** argv )
+#ifndef FREDKIN_GATES_TO_TOFFOLI_HPP
+#define FREDKIN_GATES_TO_TOFFOLI_HPP
+
+#include <reversible/circuit.hpp>
+
+namespace cirkit
 {
-  std::cout << "[i] this program will be removed in a future version. please use `transform_circuit -n' instead." << std::endl;
 
-  return 0;
+void fredkin_gates_to_toffoli( const circuit& src, circuit& dest );
+
 }
+
+#endif
 
 // Local Variables:
 // c-basic-offset: 2
