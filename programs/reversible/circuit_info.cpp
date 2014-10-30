@@ -18,6 +18,7 @@
 #include <fstream>
 
 #include <reversible/circuit.hpp>
+#include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>
 #include <reversible/io/create_image.hpp>
@@ -46,8 +47,9 @@ int main( int argc, char ** argv )
   opts.add_options()
     ( "circuit,c",                         "Prints the circuit" )
     ( "truth_table,t",                     "Prints truth table" )
-    ( "statistics,s",                      "Prints circuit statistics " )
+    ( "statistics,s",                      "Prints circuit statistics" )
     ( "image,i",                           "Creates circuit image in LaTeX" )
+    ( "rcbdd,r",                           "Prints rcbdd statistics" )
     ( "blifname",      value( &blifname ), "If given, then the circuit is written to a blif file" )
     ;
 
@@ -87,6 +89,16 @@ int main( int argc, char ** argv )
   {
     create_tikz_settings settings;
     create_image( std::cout, circ, settings );
+  }
+
+  if ( opts.is_set( "rcbdd" ) )
+  {
+    rcbdd mgr;
+    mgr.initialize_manager();
+    mgr.create_variables( circ.lines() );
+    BDD f = mgr.create_from_circuit( circ );
+
+    std::cout << "RCBDD nodes:      " << f.nodeCount() << std::endl;
   }
 
   if ( opts.is_set( "blifname" ) )
