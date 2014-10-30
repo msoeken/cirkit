@@ -58,7 +58,7 @@ permutation_t circuit_to_permutation( const circuit& circ )
   return truth_table_to_permutation( spec );
 }
 
-cycles_t permutation_to_cycles( const permutation_t& perm )
+cycles_t permutation_to_cycles( const permutation_t& perm, bool sort )
 {
   cycles_t cycles;
 
@@ -83,6 +83,11 @@ cycles_t permutation_to_cycles( const permutation_t& perm )
   }
 
   assert( vismask.none() );
+
+  if ( sort )
+  {
+    boost::sort( cycles, []( const std::vector<unsigned>& x1, const std::vector<unsigned>& x2 ) { return x1.size() > x2.size(); } );
+  }
 
   return cycles;
 }
@@ -118,6 +123,12 @@ std::vector<unsigned> cycles_type( const cycles_t& cycles )
   return type;
 }
 
+bool is_involution( const permutation_t& perm )
+{
+  auto c = permutation_to_cycles( perm );
+  return boost::find_if( c, []( const std::vector<unsigned>& cycle ) { return cycle.size() > 2u; } ) == c.end();
+}
+
 std::string permutation_to_string( const permutation_t& perm )
 {
   return "[" + any_join( perm, " " ) + "]";
@@ -128,6 +139,11 @@ std::string cycles_to_string( const cycles_t& cycles, bool print_fixpoints )
   return boost::join( cycles | transformed( [&print_fixpoints]( const permutation_t& cycle ) {
         return ( cycle.size() > 1u || print_fixpoints ) ? ( "(" + any_join( cycle, " " ) + ")" ) : std::string();
       } ), "" );
+}
+
+std::string cycles_to_string( const permutation_t& perm, bool print_fixpoints )
+{
+  return cycles_to_string( permutation_to_cycles( perm ), print_fixpoints );
 }
 
 std::string type_to_string( const std::vector<unsigned>& type )

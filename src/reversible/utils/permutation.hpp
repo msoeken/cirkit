@@ -40,13 +40,15 @@ typedef std::vector<std::vector<unsigned>> cycles_t;
 
 permutation_t truth_table_to_permutation( const binary_truth_table& spec );
 permutation_t circuit_to_permutation( const circuit& circ );
-cycles_t permutation_to_cycles( const permutation_t& perm );
+cycles_t permutation_to_cycles( const permutation_t& perm, bool sort = true );
 unsigned permutation_inv( const permutation_t& perm );
 int permutation_sign( const permutation_t& perm );
 std::vector<unsigned> cycles_type( const cycles_t& cycles );
+bool is_involution( const permutation_t& perm );
 
 std::string permutation_to_string( const permutation_t& perm );
 std::string cycles_to_string( const cycles_t& cycles, bool print_fixpoints = false );
+std::string cycles_to_string( const permutation_t& perm, bool print_fixpoints = false );
 std::string type_to_string( const std::vector<unsigned>& type );
 
 }
