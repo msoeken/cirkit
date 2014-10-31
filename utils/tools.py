@@ -140,6 +140,14 @@ class package_bdd14:
     build       = [ "ctangle gb_flip.w", "ctangle bdd14.w", "gcc -o bdd14 gb_flip.c bdd14.c" ]
     install     = [ "cp -v bdd14 %s" ]
 
+class package_cmake:
+    description = "A cross-platform, open-source build system"
+    subdir      = "cmake-3.0.2"
+    url         = "http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz"
+    fmt         = "tar-gz"
+    build       = [ "./bootstrap --prefix=../../../ext", "make -j5" ]
+    install     = [ "make install" ]
+
 ################################################################################
 # Helper functions                                                             #
 ################################################################################
