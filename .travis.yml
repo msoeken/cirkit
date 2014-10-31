@@ -1,2 +1,3 @@
 language: cpp
+before_script: ./setup-travis.sh
 script: mkdir build && cd build && cmake .. && make
