@@ -1,3 +1,3 @@
 language: cpp
-before_script: ./setup-travis.sh
+before_script: ./utils/tools.py install cmake && export PATH=`pwd`/ext/bin:$PATH
 script: mkdir build && cd build && cmake .. && make
