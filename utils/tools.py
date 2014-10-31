@@ -148,6 +148,14 @@ class package_cmake:
     build       = [ "./bootstrap --prefix=../../../ext", "make -j5" ]
     install     = [ "make install" ]
 
+class package_boost:
+    description = "Boost C++ libraries"
+    subdir      = "boost_1_56_0"
+    url         = "http://downloads.sourceforge.net/project/boost/boost/1.56.0/boost_1_56_0.tar.gz"
+    fmt         = "tar-gz"
+    build       = [ "./bootstrap.sh --prefix=../../../ext", "./b2 -j5" ]
+    install     = [ "./b2 install" ]
+
 ################################################################################
 # Helper functions                                                             #
 ################################################################################
