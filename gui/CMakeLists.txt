@@ -33,6 +33,7 @@ set(revkit_gui_SRCS
     programs/gui/core/flow_widget.cpp
     programs/gui/core/main_widget.cpp
     programs/gui/core/messages_widget.cpp
+    programs/gui/core/port_item.cpp
     programs/gui/main_window.cpp
     programs/gui/main.cpp)
 

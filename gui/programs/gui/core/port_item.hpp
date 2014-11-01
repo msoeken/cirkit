@@ -17,57 +17,29 @@
 
 #pragma once
 
-#include <QtWidgets/QGraphicsScene>
+#include <boost/any.hpp>
 
-#include <boost/optional.hpp>
+#include <QtWidgets/QGraphicsObject>
 
-class QAction;
-
-class PortItem;
-
-class FlowScenePortConnecter : public QObject
+class PortItem : public QGraphicsObject
 {
   Q_OBJECT
 
 public:
-  FlowScenePortConnecter( QObject * parent = nullptr );
+  PortItem( const QString& datatype, int direction = Qt::AlignTop, QGraphicsItem * parent = nullptr );
 
-Q_SIGNALS:
-  void edgeCreated(PortItem*, PortItem*);
-};
+  QRectF boundingRect() const;
+  void paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = nullptr );
 
-class FlowSceneGraph : public QObject
-{
-  Q_OBJECT
-
-public:
-  FlowSceneGraph( QObject * parent = nullptr );
-};
-
-class FlowScene : public QGraphicsScene
-{
-  Q_OBJECT
-
-public:
-  FlowScene( QObject * parent = nullptr );
+  void setValue( boost::any value );
+  boost::any value() const;
 
 private:
-  void setupActions();
-
-private slots:
-  void slotLoad();
-  void slotSave();
-  void slotSaveAs();
-  void run();
-
-private:
-  boost::optional<QString> filename;
-  bool modified = false;
-
-  FlowSceneGraph * graph;
-  FlowScenePortConnecter * connecter;
-
-  QAction * loadAction, * saveAction, * saveAsAction, * runAction;
+  unsigned radius = 8u;
+  QString datatype;
+  int direction;
+  int datatypeWidth, datatypeHeight;
+  boost::any _value;
 };
 
 // Local Variables:

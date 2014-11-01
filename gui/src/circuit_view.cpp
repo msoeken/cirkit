@@ -133,7 +133,7 @@ void CircuitView::load( const std::shared_ptr<circuit>& circ )
     auto line = new CircuitLineItem( i, circ->num_gates() );
     scene()->addItem( line );
 
-    addLineLabel( 0u, i * 30u, circ->inputs()[i].c_str(), Qt::AlignRight, circ->constants()[i] );
+    addLineLabel( 0u, i * 30u, circ->inputs()[i].c_str(), Qt::AlignRight, (bool)circ->constants()[i] );
     addLineLabel( width, i * 30u, circ->outputs()[i].c_str(), Qt::AlignLeft, circ->garbage()[i] );
   }
 
