@@ -23,8 +23,6 @@
 
 #include <iostream>
 
-#if ADDON_FORMAL
-
 #include <reversible/truth_table.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>
 #include <reversible/io/print_circuit.hpp>
@@ -32,24 +30,29 @@
 #include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_realization.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
+#if ADDON_FORMAL
 #include <reversible/synthesis/exact_synthesis.hpp>
+#endif
+#include <reversible/synthesis/quantified_exact_synthesis.hpp>
 #include <reversible/utils/reversible_program_options.hpp>
 
 using namespace cirkit;
 
 int main( int argc, char ** argv )
 {
+  unsigned mode = 0u;
   unsigned max_depth = 20u;
 
   reversible_program_options opts;
   opts.add_read_specification_option();
   opts.add_write_realization_option();
   opts.add_options()
+    ( "mode",                value_with_default( &mode ),      "Mode (0: BDD, 1: SAT)" )
     ( "max_depth",           value_with_default( &max_depth ), "Maximum search depth" )
     ( "print_circuit,c",                                       "Prints the circuit" )
     ( "print_truth_table,t",                                   "Prints the truth table of the circuit" )
-    ( "negative,n",                                            "Allow negative control lines" )
-    ( "multiple,m",                                            "Allow multiple target lines" )
+    ( "negative,n",                                            "Allow negative control lines (only with SAT)" )
+    ( "multiple,m",                                            "Allow multiple target lines (only with SAT)" )
     ( "verbose,v",                                             "Be verbose" )
     ;
 
@@ -72,7 +75,24 @@ int main( int argc, char ** argv )
   settings->set( "verbose", opts.is_set( "verbose" ) );
   properties::ptr statistics( new properties );
 
-  exact_synthesis( circ, spec, settings, statistics );
+  if ( mode == 0u )
+  {
+    quantified_exact_synthesis( circ, spec, settings, statistics );
+  }
+  else if ( mode == 1u )
+  {
+#if ADDON_FORMAL
+    exact_synthesis( circ, spec, settings, statistics );
+#else
+    std::cout << "[e] exact synthesis with SAT requires formal addon enabled" << std::endl;
+    return 1;
+#endif
+  }
+  else
+  {
+    std::cout << "[e] mode " << mode << " invalid." << std::endl;
+    return 1;
+  }
 
   if ( opts.is_set( "print_circuit" ) )
   {
@@ -95,16 +115,6 @@ int main( int argc, char ** argv )
 
   return 0;
 }
-
-#else
-
-int main( int argc, char ** argv )
-{
-  std::cout << "[E] Addon `formal' is not installed." << std::endl;
-  return 1;
-}
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2
