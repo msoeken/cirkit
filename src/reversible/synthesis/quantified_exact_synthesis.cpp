@@ -23,7 +23,6 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/pending/integer_log2.hpp>
-#include <boost/range/algorithm.hpp>
 #include <boost/range/combine.hpp>
 #include <boost/range/numeric.hpp>
 
@@ -43,6 +42,11 @@ namespace cirkit
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
+inline std::vector<BDD> create_variables( Cudd& manager, unsigned count )
+{
+  return generate_vector<BDD>( count, [&manager]() { return manager.bddVar(); } );
+}
+
 std::vector<BDD> perform_gate( Cudd& manager, const std::vector<BDD>& inputs, const std::vector<BDD>& gate )
 {
   unsigned n = inputs.size();
@@ -170,8 +174,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
   Cudd manager;
 
   /* input variables and gate variables */
-  std::vector<BDD> xs( n );
-  boost::generate( xs, [&manager]() { return manager.bddVar(); } );
+  auto xs = create_variables( manager, n );
   BDD xscube = boost::accumulate( xs, manager.bddOne(), []( const BDD& x1, const BDD& x2 ) { return x1 & x2; } );
 
   /* specification */
@@ -203,8 +206,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
     else
     {
       /* extend circuit */
-      std::vector<BDD> gate( n + nbits );
-      boost::generate( gate, [&manager]() { return manager.bddVar(); } );
+      auto gate = create_variables( manager, n + nbits );
       current = perform_gate( manager, current, gate );
     }
   } while ( !result && ++gate_count < max_depth );

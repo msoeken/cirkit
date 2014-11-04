@@ -32,6 +32,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
 
 namespace cirkit
 {
@@ -132,6 +133,14 @@ template<typename P>
 std::function<bool(const P&)> first_matches( const typename P::first_type& v )
 {
   return [&v]( const P& p ) { return p.first == v; };
+}
+
+template<typename T>
+std::vector<T> generate_vector( unsigned size, const std::function<T()>& generator )
+{
+  std::vector<T> v( size );
+  boost::generate( v, generator );
+  return v;
 }
 
 }
