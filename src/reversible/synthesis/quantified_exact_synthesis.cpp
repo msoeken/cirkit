@@ -26,6 +26,7 @@
 #include <boost/range/combine.hpp>
 #include <boost/range/numeric.hpp>
 
+#include <core/utils/bdd_utils.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <reversible/gate.hpp>
@@ -175,7 +176,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
 
   /* input variables and gate variables */
   auto xs = create_variables( manager, n );
-  BDD xscube = boost::accumulate( xs, manager.bddOne(), []( const BDD& x1, const BDD& x2 ) { return x1 & x2; } );
+  BDD xscube = make_cube( manager, xs );
 
   /* specification */
   auto function = bdd_for_function( manager, spec, xs );
