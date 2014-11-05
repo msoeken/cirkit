@@ -1,0 +1,275 @@
+\let\safetikz\shipout
+\input pgf
+\input tikz
+\usetikzlibrary{calc}
+\let\shipout\safetikz
+
+\magnification\magstephalf
+\parskip3pt
+\baselineskip14pt
+
+\centerline{\bf Provably minimal circuit classes}
+\centerline{--- {\it Preliminary notes on our discussions\/} ---}
+\centerline{Mathias Soeken}
+\centerline{October 22 -- \dots, 2014}
+
+\bigskip
+\bigskip
+
+\noindent{\bf 1. One-hot shift.}\enspace We are looking for minimal circuits of
+$n$ lines that realize the permutation $(2^0 \; 2^1 \; \ldots \; 2^{n-1})$.  We
+conjecture that the circuits have the following form illustrated for the first
+$n=3,\dots,7$.
+
+$$
+\tikzpicture[scale=.7,baseline=(c)]
+\draw[line width=0.30] (0.50,1.25) -- (2.50,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (2.50,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (2.50,0.25);
+\draw[line width=0.30] (0.75,0.25) -- (0.75,1.25);
+\draw[fill=white] (0.75,0.75) circle (0.10);
+\draw[fill=white] (0.75,0.25) circle (0.10);
+\draw[line width=0.3] (0.75,1.25) circle (0.2) (0.75,1.05) -- (0.75,1.45);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,1.25);
+\draw[fill=white] (1.25,1.25) circle (0.10);
+\draw[fill=white] (1.25,0.75) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,1.25);
+\draw[fill=white] (1.75,1.25) circle (0.10);
+\draw[fill=white] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,0.75) circle (0.2) (1.75,0.55) -- (1.75,0.95);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,1.25);
+\draw[fill=white] (2.25,0.75) circle (0.10);
+\draw[fill=white] (2.25,0.25) circle (0.10);
+\draw[line width=0.3] (2.25,1.25) circle (0.2) (2.25,1.05) -- (2.25,1.45);
+\node[below] at (current bounding box.south) {$(1\; 2\; 4)$};
+\coordinate (c) at (current bounding box.south);
+\endtikzpicture
+\qquad
+\tikzpicture[scale=.7,baseline=(c)]
+\draw[line width=0.30] (0.50,1.75) -- (3.00,1.75);
+\draw[line width=0.30] (0.50,1.25) -- (3.00,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (3.00,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (3.00,0.25);
+\draw[line width=0.30] (0.75,0.25) -- (0.75,1.75);
+\draw[fill=white] (0.75,1.25) circle (0.10);
+\draw[fill=white] (0.75,0.75) circle (0.10);
+\draw[fill=white] (0.75,0.25) circle (0.10);
+\draw[line width=0.3] (0.75,1.75) circle (0.2) (0.75,1.55) -- (0.75,1.95);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,1.75);
+\draw[fill=white] (1.25,1.75) circle (0.10);
+\draw[fill=white] (1.25,1.25) circle (0.10);
+\draw[fill=white] (1.25,0.75) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,1.75);
+\draw[fill=white] (1.75,1.75) circle (0.10);
+\draw[fill=white] (1.75,1.25) circle (0.10);
+\draw[fill=white] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,0.75) circle (0.2) (1.75,0.55) -- (1.75,0.95);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,1.75);
+\draw[fill=white] (2.25,1.75) circle (0.10);
+\draw[fill=white] (2.25,0.75) circle (0.10);
+\draw[fill=white] (2.25,0.25) circle (0.10);
+\draw[line width=0.3] (2.25,1.25) circle (0.2) (2.25,1.05) -- (2.25,1.45);
+\draw[line width=0.30] (2.75,0.25) -- (2.75,1.75);
+\draw[fill=white] (2.75,1.25) circle (0.10);
+\draw[fill=white] (2.75,0.75) circle (0.10);
+\draw[fill=white] (2.75,0.25) circle (0.10);
+\draw[line width=0.3] (2.75,1.75) circle (0.2) (2.75,1.55) -- (2.75,1.95);
+\node[below] at (current bounding box.south) {$(1\; 2\; 4\; 8)$};
+\coordinate (c) at (current bounding box.south);
+\endtikzpicture
+\qquad
+\tikzpicture[scale=.7,baseline=(c)]
+\draw[line width=0.30] (0.50,2.25) -- (3.50,2.25);
+\draw[line width=0.30] (0.50,1.75) -- (3.50,1.75);
+\draw[line width=0.30] (0.50,1.25) -- (3.50,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (3.50,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (3.50,0.25);
+\draw[line width=0.30] (0.75,0.25) -- (0.75,2.25);
+\draw[fill=white] (0.75,1.75) circle (0.10);
+\draw[fill=white] (0.75,1.25) circle (0.10);
+\draw[fill=white] (0.75,0.75) circle (0.10);
+\draw[fill=white] (0.75,0.25) circle (0.10);
+\draw[line width=0.3] (0.75,2.25) circle (0.2) (0.75,2.05) -- (0.75,2.45);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,2.25);
+\draw[fill=white] (1.25,2.25) circle (0.10);
+\draw[fill=white] (1.25,1.75) circle (0.10);
+\draw[fill=white] (1.25,1.25) circle (0.10);
+\draw[fill=white] (1.25,0.75) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,2.25);
+\draw[fill=white] (1.75,2.25) circle (0.10);
+\draw[fill=white] (1.75,1.75) circle (0.10);
+\draw[fill=white] (1.75,1.25) circle (0.10);
+\draw[fill=white] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,0.75) circle (0.2) (1.75,0.55) -- (1.75,0.95);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,2.25);
+\draw[fill=white] (2.25,2.25) circle (0.10);
+\draw[fill=white] (2.25,1.75) circle (0.10);
+\draw[fill=white] (2.25,0.75) circle (0.10);
+\draw[fill=white] (2.25,0.25) circle (0.10);
+\draw[line width=0.3] (2.25,1.25) circle (0.2) (2.25,1.05) -- (2.25,1.45);
+\draw[line width=0.30] (2.75,0.25) -- (2.75,2.25);
+\draw[fill=white] (2.75,2.25) circle (0.10);
+\draw[fill=white] (2.75,1.25) circle (0.10);
+\draw[fill=white] (2.75,0.75) circle (0.10);
+\draw[fill=white] (2.75,0.25) circle (0.10);
+\draw[line width=0.3] (2.75,1.75) circle (0.2) (2.75,1.55) -- (2.75,1.95);
+\draw[line width=0.30] (3.25,0.25) -- (3.25,2.25);
+\draw[fill=white] (3.25,1.75) circle (0.10);
+\draw[fill=white] (3.25,1.25) circle (0.10);
+\draw[fill=white] (3.25,0.75) circle (0.10);
+\draw[fill=white] (3.25,0.25) circle (0.10);
+\draw[line width=0.3] (3.25,2.25) circle (0.2) (3.25,2.05) -- (3.25,2.45);
+\node[below] at (current bounding box.south) {$(1\; 2\; 4\; 8\; 16)$};
+\coordinate (c) at (current bounding box.south);
+\endtikzpicture
+\qquad
+\tikzpicture[scale=.7,baseline=(c)]
+\draw[line width=0.30] (0.50,2.75) -- (4.00,2.75);
+\draw[line width=0.30] (0.50,2.25) -- (4.00,2.25);
+\draw[line width=0.30] (0.50,1.75) -- (4.00,1.75);
+\draw[line width=0.30] (0.50,1.25) -- (4.00,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (4.00,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (4.00,0.25);
+\draw[line width=0.30] (0.75,0.25) -- (0.75,2.75);
+\draw[fill=white] (0.75,2.25) circle (0.10);
+\draw[fill=white] (0.75,1.75) circle (0.10);
+\draw[fill=white] (0.75,1.25) circle (0.10);
+\draw[fill=white] (0.75,0.75) circle (0.10);
+\draw[fill=white] (0.75,0.25) circle (0.10);
+\draw[line width=0.3] (0.75,2.75) circle (0.2) (0.75,2.55) -- (0.75,2.95);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,2.75);
+\draw[fill=white] (1.25,2.75) circle (0.10);
+\draw[fill=white] (1.25,2.25) circle (0.10);
+\draw[fill=white] (1.25,1.75) circle (0.10);
+\draw[fill=white] (1.25,1.25) circle (0.10);
+\draw[fill=white] (1.25,0.75) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,2.75);
+\draw[fill=white] (1.75,2.75) circle (0.10);
+\draw[fill=white] (1.75,2.25) circle (0.10);
+\draw[fill=white] (1.75,1.75) circle (0.10);
+\draw[fill=white] (1.75,1.25) circle (0.10);
+\draw[fill=white] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,0.75) circle (0.2) (1.75,0.55) -- (1.75,0.95);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,2.75);
+\draw[fill=white] (2.25,2.75) circle (0.10);
+\draw[fill=white] (2.25,2.25) circle (0.10);
+\draw[fill=white] (2.25,1.75) circle (0.10);
+\draw[fill=white] (2.25,0.75) circle (0.10);
+\draw[fill=white] (2.25,0.25) circle (0.10);
+\draw[line width=0.3] (2.25,1.25) circle (0.2) (2.25,1.05) -- (2.25,1.45);
+\draw[line width=0.30] (2.75,0.25) -- (2.75,2.75);
+\draw[fill=white] (2.75,2.75) circle (0.10);
+\draw[fill=white] (2.75,2.25) circle (0.10);
+\draw[fill=white] (2.75,1.25) circle (0.10);
+\draw[fill=white] (2.75,0.75) circle (0.10);
+\draw[fill=white] (2.75,0.25) circle (0.10);
+\draw[line width=0.3] (2.75,1.75) circle (0.2) (2.75,1.55) -- (2.75,1.95);
+\draw[line width=0.30] (3.25,0.25) -- (3.25,2.75);
+\draw[fill=white] (3.25,2.75) circle (0.10);
+\draw[fill=white] (3.25,1.75) circle (0.10);
+\draw[fill=white] (3.25,1.25) circle (0.10);
+\draw[fill=white] (3.25,0.75) circle (0.10);
+\draw[fill=white] (3.25,0.25) circle (0.10);
+\draw[line width=0.3] (3.25,2.25) circle (0.2) (3.25,2.05) -- (3.25,2.45);
+\draw[line width=0.30] (3.75,0.25) -- (3.75,2.75);
+\draw[fill=white] (3.75,2.25) circle (0.10);
+\draw[fill=white] (3.75,1.75) circle (0.10);
+\draw[fill=white] (3.75,1.25) circle (0.10);
+\draw[fill=white] (3.75,0.75) circle (0.10);
+\draw[fill=white] (3.75,0.25) circle (0.10);
+\draw[line width=0.3] (3.75,2.75) circle (0.2) (3.75,2.55) -- (3.75,2.95);
+\node[below] at (current bounding box.south) {$(1\; 2\; 4\; 8\; 16\; 32)$};
+\coordinate (c) at (current bounding box.south);
+\endtikzpicture
+\qquad
+\tikzpicture[scale=.7,baseline=(c)]
+\draw[line width=0.30] (0.50,3.25) -- (4.50,3.25);
+\draw[line width=0.30] (0.50,2.75) -- (4.50,2.75);
+\draw[line width=0.30] (0.50,2.25) -- (4.50,2.25);
+\draw[line width=0.30] (0.50,1.75) -- (4.50,1.75);
+\draw[line width=0.30] (0.50,1.25) -- (4.50,1.25);
+\draw[line width=0.30] (0.50,0.75) -- (4.50,0.75);
+\draw[line width=0.30] (0.50,0.25) -- (4.50,0.25);
+\draw[line width=0.30] (0.75,0.25) -- (0.75,3.25);
+\draw[fill=white] (0.75,2.75) circle (0.10);
+\draw[fill=white] (0.75,2.25) circle (0.10);
+\draw[fill=white] (0.75,1.75) circle (0.10);
+\draw[fill=white] (0.75,1.25) circle (0.10);
+\draw[fill=white] (0.75,0.75) circle (0.10);
+\draw[fill=white] (0.75,0.25) circle (0.10);
+\draw[line width=0.3] (0.75,3.25) circle (0.2) (0.75,3.05) -- (0.75,3.45);
+\draw[line width=0.30] (1.25,0.25) -- (1.25,3.25);
+\draw[fill=white] (1.25,3.25) circle (0.10);
+\draw[fill=white] (1.25,2.75) circle (0.10);
+\draw[fill=white] (1.25,2.25) circle (0.10);
+\draw[fill=white] (1.25,1.75) circle (0.10);
+\draw[fill=white] (1.25,1.25) circle (0.10);
+\draw[fill=white] (1.25,0.75) circle (0.10);
+\draw[line width=0.3] (1.25,0.25) circle (0.2) (1.25,0.05) -- (1.25,0.45);
+\draw[line width=0.30] (1.75,0.25) -- (1.75,3.25);
+\draw[fill=white] (1.75,3.25) circle (0.10);
+\draw[fill=white] (1.75,2.75) circle (0.10);
+\draw[fill=white] (1.75,2.25) circle (0.10);
+\draw[fill=white] (1.75,1.75) circle (0.10);
+\draw[fill=white] (1.75,1.25) circle (0.10);
+\draw[fill=white] (1.75,0.25) circle (0.10);
+\draw[line width=0.3] (1.75,0.75) circle (0.2) (1.75,0.55) -- (1.75,0.95);
+\draw[line width=0.30] (2.25,0.25) -- (2.25,3.25);
+\draw[fill=white] (2.25,3.25) circle (0.10);
+\draw[fill=white] (2.25,2.75) circle (0.10);
+\draw[fill=white] (2.25,2.25) circle (0.10);
+\draw[fill=white] (2.25,1.75) circle (0.10);
+\draw[fill=white] (2.25,0.75) circle (0.10);
+\draw[fill=white] (2.25,0.25) circle (0.10);
+\draw[line width=0.3] (2.25,1.25) circle (0.2) (2.25,1.05) -- (2.25,1.45);
+\draw[line width=0.30] (2.75,0.25) -- (2.75,3.25);
+\draw[fill=white] (2.75,3.25) circle (0.10);
+\draw[fill=white] (2.75,2.75) circle (0.10);
+\draw[fill=white] (2.75,2.25) circle (0.10);
+\draw[fill=white] (2.75,1.25) circle (0.10);
+\draw[fill=white] (2.75,0.75) circle (0.10);
+\draw[fill=white] (2.75,0.25) circle (0.10);
+\draw[line width=0.3] (2.75,1.75) circle (0.2) (2.75,1.55) -- (2.75,1.95);
+\draw[line width=0.30] (3.25,0.25) -- (3.25,3.25);
+\draw[fill=white] (3.25,3.25) circle (0.10);
+\draw[fill=white] (3.25,2.75) circle (0.10);
+\draw[fill=white] (3.25,1.75) circle (0.10);
+\draw[fill=white] (3.25,1.25) circle (0.10);
+\draw[fill=white] (3.25,0.75) circle (0.10);
+\draw[fill=white] (3.25,0.25) circle (0.10);
+\draw[line width=0.3] (3.25,2.25) circle (0.2) (3.25,2.05) -- (3.25,2.45);
+\draw[line width=0.30] (3.75,0.25) -- (3.75,3.25);
+\draw[fill=white] (3.75,3.25) circle (0.10);
+\draw[fill=white] (3.75,2.25) circle (0.10);
+\draw[fill=white] (3.75,1.75) circle (0.10);
+\draw[fill=white] (3.75,1.25) circle (0.10);
+\draw[fill=white] (3.75,0.75) circle (0.10);
+\draw[fill=white] (3.75,0.25) circle (0.10);
+\draw[line width=0.3] (3.75,2.75) circle (0.2) (3.75,2.55) -- (3.75,2.95);
+\draw[line width=0.30] (4.25,0.25) -- (4.25,3.25);
+\draw[fill=white] (4.25,2.75) circle (0.10);
+\draw[fill=white] (4.25,2.25) circle (0.10);
+\draw[fill=white] (4.25,1.75) circle (0.10);
+\draw[fill=white] (4.25,1.25) circle (0.10);
+\draw[fill=white] (4.25,0.75) circle (0.10);
+\draw[fill=white] (4.25,0.25) circle (0.10);
+\draw[line width=0.3] (4.25,3.25) circle (0.2) (4.25,3.05) -- (4.25,3.45);
+\node[below] at (current bounding box.south) {$(1\; 2\; 4\; 8\; 16\; 32\; 64)$};
+\coordinate (c) at (current bounding box.south);
+\endtikzpicture
+$$
+
+\smallskip\noindent Minimality can be shown using exhaustive search techniques
+up to at least $n=9$, however, we are interested in finding a proof for all $n$.
+Note that the circuit structure is in fact more general than the pictures
+indicate.  The first gate must be fully negatively controlled but can have its
+target line at any position.  The successive gates must have its target line at
+one lower line.  If the target is at the first circuit line, then the next
+target will be at last circuit line.  The first chosen gate is repeated at the
+end of the circuit.
+
+\bye
