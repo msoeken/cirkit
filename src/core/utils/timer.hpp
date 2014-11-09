@@ -36,6 +36,8 @@
 #include <stdarg.h>
 #include <sys/times.h>
 
+#include <boost/format.hpp>
+
 #include <core/properties.hpp>
 
 namespace cirkit {
@@ -66,7 +68,7 @@ namespace cirkit {
      *
      * @since  1.0
      */
-    print_timer() : os( std::cout ) {}
+    print_timer() {}
 
     /**
      * @brief Default constructor
@@ -75,7 +77,8 @@ namespace cirkit {
      *
      * @since  1.0
      */
-    explicit print_timer( std::ostream& _os = std::cout ) : os( _os ) {}
+    explicit print_timer( std::ostream& _os = std::cout, const std::string& _format = "Runtime: %.2f secs", bool _print_enable = true )
+      : os( _os ), format( _format ), print_enable( _print_enable ) {}
 
     /**
      * @brief Prints the measured run-time
@@ -85,11 +88,16 @@ namespace cirkit {
      * @since  1.0
      */
     void operator()( double runtime ) const {
-      os << "Runtime: " << runtime << " secs" << std::endl;
+      if ( print_enable )
+      {
+        os << boost::format( format ) % runtime << std::endl;
+      }
     }
 
   private:
-    std::ostream& os;
+    std::ostream& os   = std::cout;
+    std::string format = "Runtime: %.2f secs";
+    bool print_enable  = true;
   };
 
   /**
