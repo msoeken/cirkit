@@ -137,6 +137,11 @@ bool cube::operator==( const cube& other ) const
   return data == other.data;
 }
 
+bool cube::operator!=( const cube& other ) const
+{
+  return data != other.data;
+}
+
 bool cube::operator<( const cube& other ) const
 {
   return data < other.data;
@@ -294,7 +299,6 @@ cube_vec_t common_pla_espresso( const cube_vec_t& cubes )
   system( "espresso -t /tmp/test.pla > /tmp/test2.pla" );
   return common_pla_read_single( "/tmp/test2.pla" );
 }
-
 
 }
 

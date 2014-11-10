@@ -1,5 +1,4 @@
-/* RevKit (www.revkit.org)
- * Copyright (C) 2009-2014  University of Bremen
+/* Copyright (C) 2009-2014  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,6 +71,7 @@ public:
   std::string to_string() const;
 
   bool operator==( const cube& other ) const;
+  bool operator!=( const cube& other ) const;
   bool operator<( const cube& other ) const;
 private:
   std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<>> data;
