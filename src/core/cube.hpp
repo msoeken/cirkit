@@ -77,11 +77,14 @@ private:
   std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<>> data;
 };
 
-typedef std::vector<cube> cube_vec_t;
+typedef std::vector<cube>       cube_vec_t;
+typedef std::vector<cube_vec_t> cube_vec_vec_t;
 
-cube_vec_t common_pla_read( const std::string& filename );
-void       common_pla_write( const cube_vec_t& cubes, const std::string& filename );
-void       common_pla_print( const cube_vec_t& cubes, std::ostream& os = std::cout );
+cube_vec_t     common_pla_read_single( const std::string& filename, unsigned output = 0u );
+cube_vec_vec_t common_pla_read( const std::string& filename );
+void           common_pla_write_single( const cube_vec_t& cubes, const std::string& filename );
+void           common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename );
+void           common_pla_print( const cube_vec_t& cubes, std::ostream& os = std::cout );
 
 cube_vec_t common_pla_espresso( const cube_vec_t& cubes );
 

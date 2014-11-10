@@ -142,36 +142,76 @@ bool cube::operator<( const cube& other ) const
   return data < other.data;
 }
 
-class common_pla_read_processor : public pla_processor
+class common_pla_read_single_processor : public pla_processor
 {
 public:
-  explicit common_pla_read_processor( cube_vec_t& cubes ) : cubes( cubes ) {}
+  explicit common_pla_read_single_processor( cube_vec_t& cubes, unsigned output )
+    : cubes( cubes ),
+      output( output )
+  {
+  }
 
   void on_num_outputs( unsigned num_outputs )
   {
-    assert( num_outputs == 1u );
+    assert( output < num_outputs );
   }
 
   void on_cube( const std::string& in, const std::string& out )
   {
-    assert( out == "1" );
-
-    cube c( in.size() );
-
-    for ( auto it : index( in ) )
+    if ( out[output] == '1' )
     {
-      c[it.first] = it.second;
+      cubes += cube( in );
     }
-    cubes += c;
   }
 
 private:
   cube_vec_t& cubes;
+  unsigned output;
 };
 
-cube_vec_t common_pla_read( const std::string& filename )
+class common_pla_read_processor : public pla_processor
+{
+public:
+  explicit common_pla_read_processor( cube_vec_vec_t& cubes )
+    : cubes( cubes )
+  {
+  }
+
+  void on_num_outputs( unsigned num_outputs )
+  {
+    cubes.resize( num_outputs );
+  }
+
+  void on_cube( const std::string& in, const std::string& out )
+  {
+    cube c( in );
+
+    for ( auto it : index( out ) )
+    {
+      if ( it.second == '1' )
+      {
+        cubes[it.first] += c;
+      }
+    }
+  }
+
+private:
+  cube_vec_vec_t& cubes;
+};
+
+cube_vec_t common_pla_read_single( const std::string& filename, unsigned output )
 {
   cube_vec_t cubes;
+  common_pla_read_single_processor p( cubes, output );
+
+  pla_parser( filename, p );
+
+  return cubes;
+}
+
+cube_vec_vec_t common_pla_read( const std::string& filename )
+{
+  cube_vec_vec_t cubes;
   common_pla_read_processor p( cubes );
 
   pla_parser( filename, p );
@@ -179,7 +219,7 @@ cube_vec_t common_pla_read( const std::string& filename )
   return cubes;
 }
 
-void common_pla_write( const cube_vec_t& cubes, const std::string& filename )
+void common_pla_write_single( const cube_vec_t& cubes, const std::string& filename )
 {
   assert( cubes.size() );
 
@@ -197,6 +237,49 @@ void common_pla_write( const cube_vec_t& cubes, const std::string& filename )
   os.close();
 }
 
+void common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename )
+{
+  assert( cubes.size() );
+
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+
+  os << boost::format( ".i %d" ) % cubes.front().front().length() << std::endl
+     << boost::format( ".o %d" ) % cubes.size() << std::endl;
+
+  /* share cubes */
+  std::map<cube, boost::dynamic_bitset<>> cube_map;
+  for ( auto it : index( cubes ) )
+  {
+    for ( const auto& c : it.second )
+    {
+      auto itc = cube_map.find( c );
+      if ( itc == cube_map.end() )
+      {
+        boost::dynamic_bitset<> mask( cubes.size() );
+        mask.set( it.first );
+        cube_map[c] = mask;
+      }
+      else
+      {
+        itc->second.set( it.first );
+      }
+    }
+  }
+
+  /* print cubes */
+  for ( const auto& p : cube_map )
+  {
+    os << p.first.to_string() << " ";
+    for ( unsigned i = 0u; i < p.second.size(); ++i )
+    {
+      os << ( p.second[i] ? "1" : "0" );
+    }
+    os << std::endl;
+  }
+
+  os.close();
+}
+
 void common_pla_print( const cube_vec_t& cubes, std::ostream& os )
 {
   for ( const auto& c : cubes )
@@ -207,9 +290,9 @@ void common_pla_print( const cube_vec_t& cubes, std::ostream& os )
 
 cube_vec_t common_pla_espresso( const cube_vec_t& cubes )
 {
-  common_pla_write( cubes, "/tmp/test.pla" );
+  common_pla_write_single( cubes, "/tmp/test.pla" );
   system( "espresso -t /tmp/test.pla > /tmp/test2.pla" );
-  return common_pla_read( "/tmp/test2.pla" );
+  return common_pla_read_single( "/tmp/test2.pla" );
 }
 
 

@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(simple)
 
   properties::ptr settings( new properties );
   settings->set( "verbose", true );
-  compact_dsop( "/tmp/test.pla", "../test/tcad-1.pla", settings );
+  compact_dsop( "/tmp/test.pla", "../test/tcad.pla", settings );
 }
 
 // Local Variables:
