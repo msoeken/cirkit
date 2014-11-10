@@ -85,7 +85,7 @@ bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_
       assert( line.size() && ( line[0] == '0' || line[0] == '1' || line[0] == '-' ) );
 
       std::vector<std::string> inout;
-      boost::split( inout, line, boost::is_space(), boost::token_compress_on );
+      boost::split( inout, line, boost::is_any_of(" \t|" ), boost::token_compress_on );
       assert( inout.size() == 2 );
       reader.on_cube( inout[0], inout[1] );
 
