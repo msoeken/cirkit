@@ -42,6 +42,7 @@
 ################################################################################
 
 import glob
+import importlib
 import inspect
 import os
 import shutil
@@ -155,6 +156,20 @@ class package_boost:
     fmt         = "tar-gz"
     build       = [ "./bootstrap.sh --prefix=../../../ext", "./b2 -j5" ]
     install     = [ "./b2 install" ]
+
+################################################################################
+# Foreign packages                                                             #
+################################################################################
+
+# Foreign packages are described as packages in here but are placed in separate
+# files. They need to be located in the same directory as the tools.py script
+# in filenames that end on _packages.py, e.g. my_packages.py,
+# thirdparty_packages.py
+
+for modulename in glob.glob( "%s/*_packages.py" % os.path.dirname( sys.argv[0] ) ):
+    p = importlib.import_module( os.path.basename( modulename )[:-3] )
+    for attr in [a for a in dir( p ) if a.startswith( "package_" )]:
+        globals()[attr] = getattr( p, attr )
 
 ################################################################################
 # Helper functions                                                             #
