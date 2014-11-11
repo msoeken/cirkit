@@ -46,6 +46,7 @@ namespace cirkit
   std::ostream& operator<<( std::ostream& os, const variable& var )
   {
     os << (var.polarity() ? "" : "!") << var.line();
+    return os;
   }
 
   variable make_var( unsigned line, bool polarity )
