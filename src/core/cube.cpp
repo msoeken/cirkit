@@ -248,7 +248,19 @@ void common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename 
 
   std::ofstream os( filename.c_str(), std::ofstream::out );
 
-  os << boost::format( ".i %d" ) % cubes.front().front().length() << std::endl
+  unsigned num_inputs = 0u;
+  for ( const auto& c : cubes )
+  {
+    if ( !c.empty() )
+    {
+      num_inputs = c.front().length();
+      break;
+    }
+  }
+
+  if ( num_inputs == 0u ) return;
+
+  os << boost::format( ".i %d" ) % num_inputs << std::endl
      << boost::format( ".o %d" ) % cubes.size() << std::endl;
 
   /* share cubes */
