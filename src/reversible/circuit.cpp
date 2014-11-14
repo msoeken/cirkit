@@ -196,19 +196,16 @@ namespace cirkit
 
     gate& operator()( standard_circuit& circ ) const
     {
-      gate* g = new gate();
-      circ.gates.push_back( std::shared_ptr<gate>( g ) );
-      //c.gate_added( *g );
-      return *g;
+      circ.gates.push_back( std::make_shared<gate>() );
+      return *circ.gates.back();
     }
 
     gate& operator()( subcircuit& circ ) const
     {
-      circ.base->gates.insert( circ.base->gates.begin() + circ.to, std::shared_ptr<gate>( new gate() ) );
+      circ.base->gates.insert( circ.base->gates.begin() + circ.to, std::make_shared<gate>() );
       ++circ.to;
 
       gate& g = **( circ.base->gates.begin() + circ.to - 1 );
-      //c.gate_added( g );
       return g;
     }
 
@@ -222,19 +219,16 @@ namespace cirkit
 
     gate& operator()( standard_circuit& circ ) const
     {
-      gate* g = new gate();
-      circ.gates.insert( circ.gates.begin(), std::shared_ptr<gate>( g ) );
-      //c.gate_added( *g );
-      return *g;
+      circ.gates.insert( circ.gates.begin(), std::make_shared<gate>() );
+      return *circ.gates.front();
     }
 
     gate& operator()( subcircuit& circ ) const
     {
-      circ.base->gates.insert( circ.base->gates.begin() + circ.from, std::shared_ptr<gate>( new gate() ) );
+      circ.base->gates.insert( circ.base->gates.begin() + circ.from, std::make_shared<gate>() );
       ++circ.to;
 
       gate& g = **( circ.base->gates.begin() + circ.from );
-      //c.gate_added( g );
       return g;
     }
 
@@ -248,19 +242,16 @@ namespace cirkit
 
     gate& operator()( standard_circuit& circ ) const
     {
-      gate* g = new gate();
-      circ.gates.insert( circ.gates.begin() + pos, std::shared_ptr<gate>( g ) );
-      //c.gate_added( *g );
-      return *g;
+      circ.gates.insert( circ.gates.begin() + pos, std::make_shared<gate>() );
+      return *circ.gates.at( pos );
     }
 
     gate& operator()( subcircuit& circ ) const
     {
-      circ.base->gates.insert( circ.base->gates.begin() + circ.from + pos, std::shared_ptr<gate>( new gate() ) );
+      circ.base->gates.insert( circ.base->gates.begin() + circ.from + pos, std::make_shared<gate>() );
       ++circ.to;
 
       gate& g = **( circ.base->gates.begin() + circ.from + pos );
-      //c.gate_added( g );
       return g;
     }
 

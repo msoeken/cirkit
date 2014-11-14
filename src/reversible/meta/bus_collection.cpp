@@ -44,8 +44,8 @@ namespace cirkit
 
   bus_collection::~bus_collection()
   {
-    // NOTE uncommenting this line leads to an segmentation fault
-    //    delete d;
+    /* HINT this caused problems in the past */
+    delete d;
   }
 
   bus_collection& bus_collection::operator=( const bus_collection& other )
