@@ -27,12 +27,16 @@
 #ifndef BITSET_UTILS_HPP
 #define BITSET_UTILS_HPP
 
+#include <vector>
+
 #include <boost/dynamic_bitset.hpp>
 
 namespace cirkit
 {
 
 boost::dynamic_bitset<>& inc( boost::dynamic_bitset<>& bitset );
+
+std::vector<boost::dynamic_bitset<>> transpose( const std::vector<boost::dynamic_bitset<>>& vs );
 
 }
 

@@ -30,6 +30,20 @@ boost::dynamic_bitset<>& inc( boost::dynamic_bitset<>& bitset )
   return bitset;
 }
 
+std::vector<boost::dynamic_bitset<>> transpose( const std::vector<boost::dynamic_bitset<>>& vs )
+{
+  std::vector<boost::dynamic_bitset<>> ts( vs.front().size(), boost::dynamic_bitset<>( vs.size() ) );
+
+  for ( unsigned i = 0u; i < vs.size(); ++i )
+  {
+    for ( unsigned j = 0u; j < vs[i].size(); ++j )
+    {
+      ts[j][i] = vs[i][j];
+    }
+  }
+
+  return ts;
+}
 
 }
 
