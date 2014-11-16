@@ -122,7 +122,7 @@ class package_directed_lad:
     subdir      = "directedLAD"
     url         = "http://liris.cnrs.fr/csolnon/directedLAD.tgz"
     fmt         = "tgz"
-    build       = [ "make all" ]
+    build       = [ "make" ]
     install     = [ "cp -v main %s/directed_lad" ]
 
 class package_lad:
