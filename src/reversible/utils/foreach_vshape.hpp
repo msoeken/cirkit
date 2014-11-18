@@ -21,7 +21,7 @@
  * @brief Iterates through all V-shapes
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef FOREACH_VSHAPE_HPP

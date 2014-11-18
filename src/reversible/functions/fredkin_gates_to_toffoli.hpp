@@ -21,7 +21,7 @@
  * @brief Converts Fredkin gates in a circuit to Toffoli gates
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef FREDKIN_GATES_TO_TOFFOLI_HPP

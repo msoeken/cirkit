@@ -22,7 +22,7 @@
  *
  * @author Mathias Soeken
  * @author Heinz Riener
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef CONVERSION_UTILS_HPP

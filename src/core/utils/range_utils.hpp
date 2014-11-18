@@ -21,7 +21,7 @@
  * @brief Some helper functions for ranges
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef RANGE_UTILS_HPP

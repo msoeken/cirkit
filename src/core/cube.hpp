@@ -21,7 +21,7 @@
  * @brief Data structure for cube representation
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef CUBE_HPP

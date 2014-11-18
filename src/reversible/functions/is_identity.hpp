@@ -21,7 +21,7 @@
  * @brief Checks whether a circuit represents the identity
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef IS_IDENTITY_HPP

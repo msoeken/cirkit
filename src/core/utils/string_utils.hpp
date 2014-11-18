@@ -21,7 +21,7 @@
  * @brief Some helper functions for strings
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef STRING_UTILS_HPP

@@ -22,8 +22,6 @@
 
 #include <core/cube.hpp>
 
-#include <classical/optimization/compact_dsop.hpp>
-
 using namespace cirkit;
 
 BOOST_AUTO_TEST_CASE(simple)
@@ -55,10 +53,6 @@ BOOST_AUTO_TEST_CASE(simple)
 
   auto result2 = ds_c2.disjoint_sharp( ds_c1 );
   BOOST_CHECK( result2.empty() );
-
-  properties::ptr settings( new properties );
-  settings->set( "verbose", true );
-  compact_dsop( "/tmp/test.pla", "../test/tcad.pla", settings );
 }
 
 // Local Variables:

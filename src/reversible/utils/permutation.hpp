@@ -21,7 +21,7 @@
  * @brief Permutation helpers
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef PERMUTATION_HPP

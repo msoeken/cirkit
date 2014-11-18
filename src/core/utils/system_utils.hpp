@@ -21,7 +21,7 @@
  * @brief Some helper functions for system managing
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef SYSTEM_UTILS_HPP

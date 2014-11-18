@@ -21,7 +21,7 @@
  * @brief Extracts one output from a PLA
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.1
  */
 
 #ifndef EXTRACT_PLA_HPP

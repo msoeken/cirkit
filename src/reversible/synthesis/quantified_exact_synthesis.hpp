@@ -21,7 +21,8 @@
  * @brief Quantified exact synthesis using BDDs
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @author Hoang M. Le
+ * @since  2.1
  */
 
 #ifndef QUANTIFIED_EXACT_SYNTHESIS_HPP
