@@ -157,6 +157,14 @@ class package_boost:
     build       = [ "./bootstrap.sh --prefix=../../../ext", "./b2 -j5" ]
     install     = [ "./b2 install" ]
 
+class package_yosys:
+    description = "Yosys Open SYnthesis Suite"
+    subdir      = "yosys"
+    url         = "https://github.com/cliffordwolf/yosys"
+    fmt         = "git"
+    build       = [ "make config-clang", "make -j5" ]
+    install     = [ "cp -v yosys %s" ]
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
@@ -189,7 +197,9 @@ class cd:
         os.chdir(self.savedPath)
 
 def checkout_or_download( package ):
-    if package.fmt == "hg":
+    if package.fmt == "git":
+        os.system( "git clone %s" % package.url )
+    elif package.fmt == "hg":
         os.system( "hg clone %s" % package.url )
     elif package.fmt in ["tar-gz", "tgz"]:
         os.system( "wget %s" % package.url )

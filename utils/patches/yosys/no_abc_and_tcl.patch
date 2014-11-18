@@ -1,0 +1,15 @@
+diff --git a/Makefile b/Makefile
+index 8e3022c..03cd359 100644
+--- a/Makefile
++++ b/Makefile
+@@ -6,8 +6,8 @@ CONFIG := clang
+ # CONFIG := mxe
+ 
+ # features (the more the better)
+-ENABLE_TCL := 1
+-ENABLE_ABC := 1
++ENABLE_TCL := 0
++ENABLE_ABC := 0
+ ENABLE_PLUGINS := 1
+ ENABLE_READLINE := 1
+ ENABLE_VERIFIC := 0
