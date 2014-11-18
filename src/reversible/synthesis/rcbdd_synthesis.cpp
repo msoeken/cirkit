@@ -392,6 +392,7 @@ struct rcbdd_synthesis_manager
     std::function<void(circuit&, const circuit&)>           // update circ
     > resolve_cycles_configuration_t;
 
+  /* DISABLE FOR NOW
   resolve_cycles_configuration_t resolve_x = std::make_tuple(
     true,
     []( rcbdd_synthesis_manager* manager ) {
@@ -419,6 +420,7 @@ struct rcbdd_synthesis_manager
     1u,
     []( rcbdd_synthesis_manager* manager, BDD gcirc, BDD f ) { return manager->cf.compose( f, gcirc ); },
     []( circuit& circ, const circuit& c ) { prepend_circuit( circ, c ); } );
+  */
 
   void resolve_cycles_with_transpositions( const resolve_cycles_configuration_t& configuration )
   {
@@ -628,11 +630,11 @@ struct rcbdd_synthesis_manager
       }
       else if ( synthesis_method == TranspositionsX )
       {
-        resolve_cycles_with_transpositions( resolve_x );
+        //resolve_cycles_with_transpositions( resolve_x );
       }
       else if ( synthesis_method == TranspositionsY )
       {
-        resolve_cycles_with_transpositions( resolve_y );
+        //resolve_cycles_with_transpositions( resolve_y );
       }
     }
   }
