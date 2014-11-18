@@ -1,0 +1,12 @@
+--- a/Makefile
++++ b/Makefile
+@@ -216,6 +216,9 @@ top-all: $(TARGETS) $(EXTRA_TARGETS)
+ yosys$(EXE): $(OBJS)
+ 	$(P) $(CXX) -o yosys$(EXE) $(LDFLAGS) $(OBJS) $(LDLIBS)
+ 
++lib: $(OBJS)
++	$(CXX) -shared -o libyosys.so $(filter kernel/driver.o, $(OBJS))
++
+ %.o: %.cc
+ 	$(P) $(CXX) -o $@ -c $(CXXFLAGS) $<
+ 

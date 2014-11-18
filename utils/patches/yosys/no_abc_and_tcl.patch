@@ -1,5 +1,3 @@
-diff --git a/Makefile b/Makefile
-index 8e3022c..03cd359 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -6,8 +6,8 @@ CONFIG := clang

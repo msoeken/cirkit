@@ -162,8 +162,8 @@ class package_yosys:
     subdir      = "yosys"
     url         = "https://github.com/cliffordwolf/yosys"
     fmt         = "git"
-    build       = [ "make config-clang", "make -j5" ]
-    install     = [ "cp -v yosys %s" ]
+    build       = [ "make config-clang", "make -j5", "make lib" ]
+    install     = [ "for i in `find backends frontends kernel libs passes -type f \( -name '*.h' -o -name '*.hh' \) -printf '%h\n' | sort -u`; do mkdir -p ../../../ext/include/yosys/$i; done", "for i in `find backends frontends kernel libs passes -type f \( -name '*.h' -o -name '*.hh' \)`; do cp -v $i ../../../ext/include/yosys/$i; done", "cp -v yosys %s", "cp -v libyosys.so ../../../ext/lib" ]
 
 ################################################################################
 # Foreign packages                                                             #
