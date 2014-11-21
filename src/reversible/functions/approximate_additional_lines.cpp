@@ -21,6 +21,7 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/range/algorithm.hpp>
@@ -123,7 +124,8 @@ unsigned approximate_additional_lines( const std::string& filename, properties::
 
       /* Assign cubes to local variables */
       const std::string& incube = split_result.at(0u);
-      const std::string& outcube = split_result.at(1u);
+      std::string outcube = split_result.at(1u);
+      boost::replace_all( outcube, "-", "0" );
 
       /* Calculate number of patterns */
       BDD cube = create_bdd_from_incube(mgr, incube, variables);
