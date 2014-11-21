@@ -20,7 +20,7 @@ set(revkit_viewer_SRCS
     programs/viewer/main.cpp)
 
 add_executable(revkit_viewer ${revkit_viewer_SRCS})
-target_link_libraries(revkit_viewer Qt5::Gui Qt5::Widgets cirkit_core_static cirkit_reversible_static cirkit_classical_static ${Boost_LIBRARIES})
+target_link_libraries(revkit_viewer Qt5::Gui Qt5::Widgets cirkit_reversible_static cirkit_classical_static cirkit_core_static ${Boost_LIBRARIES})
 
 set(revkit_gui_FORMS programs/gui/main_widget.ui)
 qt5_wrap_ui(revkit_gui_FORMS_HEADERS ${revkit_gui_FORMS})
@@ -38,4 +38,4 @@ set(revkit_gui_SRCS
     programs/gui/main.cpp)
 
 add_executable(revkit_gui ${revkit_gui_SRCS} ${revkit_gui_FORMS_HEADERS})
-target_link_libraries(revkit_gui Qt5::Gui Qt5::Widgets cirkit_core_static cirkit_reversible_static cirkit_classical_static ${Boost_LIBRARIES})
+target_link_libraries(revkit_gui Qt5::Gui Qt5::Widgets cirkit_reversible_static cirkit_classical_static cirkit_core_static ${Boost_LIBRARIES})
