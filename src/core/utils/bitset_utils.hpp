@@ -27,6 +27,7 @@
 #ifndef BITSET_UTILS_HPP
 #define BITSET_UTILS_HPP
 
+#include <random>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
@@ -37,6 +38,27 @@ namespace cirkit
 boost::dynamic_bitset<>& inc( boost::dynamic_bitset<>& bitset );
 
 std::vector<boost::dynamic_bitset<>> transpose( const std::vector<boost::dynamic_bitset<>>& vs );
+
+template<class URNG>
+boost::dynamic_bitset<> random_bitset( unsigned n, URNG& g )
+{
+  std::uniform_int_distribution<unsigned long> dist( 0ul, std::numeric_limits<unsigned long>::max() );
+
+  boost::dynamic_bitset<> b( n );
+  unsigned pos = 0u;
+  while ( pos < n )
+  {
+    boost::dynamic_bitset<> c( sizeof( unsigned long ) * 8u, dist( g ) );
+    for ( unsigned i = 0u; i < c.size(); ++i )
+    {
+      b[pos + i] = c[i];
+    }
+    pos += c.size();
+  }
+  return b;
+}
+
+boost::dynamic_bitset<> random_bitset( unsigned n );
 
 }
 

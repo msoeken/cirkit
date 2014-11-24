@@ -17,6 +17,8 @@
 
 #include "bitset_utils.hpp"
 
+#include <chrono>
+
 namespace cirkit
 {
 
@@ -43,6 +45,13 @@ std::vector<boost::dynamic_bitset<>> transpose( const std::vector<boost::dynamic
   }
 
   return ts;
+}
+
+boost::dynamic_bitset<> random_bitset( unsigned n )
+{
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine generator( seed );
+  return random_bitset( n, generator );
 }
 
 }
