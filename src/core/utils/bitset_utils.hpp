@@ -49,7 +49,8 @@ boost::dynamic_bitset<> random_bitset( unsigned n, URNG& g )
   while ( pos < n )
   {
     boost::dynamic_bitset<> c( sizeof( unsigned long ) * 8u, dist( g ) );
-    for ( unsigned i = 0u; i < c.size(); ++i )
+    auto to = std::min( c.size(), b.size() - pos );
+    for ( unsigned i = 0u; i < to; ++i )
     {
       b[pos + i] = c[i];
     }
