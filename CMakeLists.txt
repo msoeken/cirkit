@@ -2,7 +2,7 @@ project("CirKit" CXX)
 cmake_minimum_required(VERSION 2.8.9)
 #add_definitions(-std=c++11 -g -fsanitize=address -fsanitize=leak -DBOOST_RESULT_OF_USE_DECLTYPE)
 #set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS} -fsanitize=address -fsanitize=leak" )
-add_definitions(-std=c++11 -O3 -DBOOST_RESULT_OF_USE_DECLTYPE)
+add_definitions(-std=c++11 -O3 -fno-omit-frame-pointer -g -DBOOST_RESULT_OF_USE_DECLTYPE -D__extern_always_inline=inline)
 
 include(CTest)
 
