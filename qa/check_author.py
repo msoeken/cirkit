@@ -4,8 +4,8 @@ import os
 from termcolor import colored
 
 count = 0; total = 0
-for top in ["src"]:
-    for root, dirnames, filenames in os.walk( top ):
+for top in [".", "addons/cirkit-addon-formal", "addons/cirkit-addon-mini", "addons/cirkit-addon-revlib", "addons/cirkit-addon-experimental", "addons/cirkit-addon-verific", "addons/cirkit-addon-yosys"]:
+    for root, dirnames, filenames in os.walk( top + "/src" ):
         for filename in fnmatch.filter( filenames, "*.hpp" ):
             name = os.path.join( root, filename )
             lines = [line for line in open( name, "r" ).readlines() if line.find( "@author" ) >= 0]
