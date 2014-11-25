@@ -15,6 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @brief Prints a message
+ *
+ * @file mini.hpp
+ *
+ * @author Mathias Soeken
+ * @since  2.0
+ */
+
 #ifndef _MINI
 #define _MINI
 
@@ -23,8 +32,6 @@ namespace cirkit
 
   /**
    * @brief Prints a message
-   *
-   * @author RevKit
    */
   void mini();
 

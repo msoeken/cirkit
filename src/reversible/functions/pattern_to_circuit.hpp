@@ -16,7 +16,7 @@
  */
 
 /**
- * @file transposition_to_circuit.hpp
+ * @file pattern_to_circuit.hpp
  *
  * @brief Creates a circuit realization for a transposition
  *
