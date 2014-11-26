@@ -32,7 +32,7 @@ namespace cirkit
     bool enable     = get<bool>( settings, "enable", true );
     bool exhaustive = get<bool>( settings, "exhaustive", false );
     truth_table_synthesis_func synth = get<truth_table_synthesis_func>( settings, "synthesis", transformation_based_synthesis_func() );
-    cost_function cf = get<cost_function>( settings, "cost_function", costs_by_circuit_func( gate_costs() ) );
+    cost_function cf = get( settings, "cost_function", cost_function( costs_by_circuit_func( gate_costs() ) ) );
     swop_step_func stepfunc = get<boost::function<void()> >( settings, "stepfunc", swop_step_func() );
 
     timer<properties_timer> t;
