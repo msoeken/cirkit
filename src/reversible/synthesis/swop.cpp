@@ -29,11 +29,11 @@ namespace cirkit
              properties::ptr settings,
              properties::ptr statistics )
   {
-    bool enable     = get<bool>( settings, "enable", true );
-    bool exhaustive = get<bool>( settings, "exhaustive", false );
-    truth_table_synthesis_func synth = get<truth_table_synthesis_func>( settings, "synthesis", transformation_based_synthesis_func() );
-    cost_function cf = get( settings, "cost_function", cost_function( costs_by_circuit_func( gate_costs() ) ) );
-    swop_step_func stepfunc = get<boost::function<void()> >( settings, "stepfunc", swop_step_func() );
+    bool enable                      = get( settings, "enable",        true );
+    bool exhaustive                  = get( settings, "exhaustive",    false );
+    truth_table_synthesis_func synth = get( settings, "synthesis",     truth_table_synthesis_func( transformation_based_synthesis_func() ) );
+    cost_function cf                 = get( settings, "cost_function", cost_function( costs_by_circuit_func( gate_costs() ) ) );
+    swop_step_func stepfunc          = get( settings, "stepfunc",      swop_step_func( swop_step_func() ) );
 
     timer<properties_timer> t;
 

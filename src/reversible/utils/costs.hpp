@@ -27,7 +27,6 @@
 #ifndef COSTS_HPP
 #define COSTS_HPP
 
-#include <boost/function.hpp>
 #include <boost/variant.hpp>
 
 #include <reversible/circuit.hpp>
@@ -51,14 +50,14 @@ namespace cirkit
    *
    * @since  1.0
    */
-  typedef boost::function<cost_t( const circuit& circ )> costs_by_circuit_func;
+  typedef std::function<cost_t( const circuit& circ )> costs_by_circuit_func;
 
   /**
    * @brief Functor for cost function measured by each gate
    *
    * @since  1.0
    */
-  typedef boost::function<cost_t( const gate& gate, unsigned lines )> costs_by_gate_func;
+  typedef std::function<cost_t( const gate& gate, unsigned lines )> costs_by_gate_func;
 
   /**
    * @brief Cost Function type

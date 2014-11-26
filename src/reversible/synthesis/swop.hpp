@@ -27,7 +27,6 @@
 #ifndef SWOP_HPP
 #define SWOP_HPP
 
-#include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <core/utils/timer.hpp>
@@ -53,7 +52,7 @@ namespace cirkit
    *
    * @since  1.0
    */
-  typedef boost::function<void()> swop_step_func;
+  typedef std::function<void()> swop_step_func;
 
   /**
    * @brief SWOP Synthesis Approach
