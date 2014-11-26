@@ -238,7 +238,14 @@ namespace cirkit
   template<typename T>
   T get( const properties::ptr& settings, const properties::key_type& k, const T& default_value )
   {
-    return settings ? settings->get<T>( k, default_value ) : default_value;
+    if ( settings )
+    {
+      return settings->get<T>( k, default_value );
+    }
+    else
+    {
+      return default_value;
+    }
   }
 
   /**
