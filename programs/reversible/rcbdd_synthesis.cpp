@@ -78,13 +78,16 @@ int main( int argc, char ** argv )
 
   read_pla_settings settings;
   settings.extend = false;
+  if ( opts.is_set( "verbose" ) ) { std::cout << "[i] read PLA" << std::endl; }
   read_pla( pla, filename, settings );
+  if ( opts.is_set( "verbose" ) ) { std::cout << "[i] extend PLA" << std::endl; }
   extend_pla( pla, extended );
   write_pla( extended, "/tmp/extended.pla" );
 
   properties::ptr ep_settings( new properties );
   ep_settings->set( "truth_table", opts.is_set( "truth_table" ) );
   ep_settings->set( "write_pla", embedded_pla );
+  if ( opts.is_set( "verbose" ) ) { std::cout << "[i] embed PLA" << std::endl; }
   embed_pla( cf, "/tmp/extended.pla", ep_settings );
 
   properties::ptr rs_settings( new properties );
