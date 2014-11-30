@@ -30,28 +30,22 @@
 namespace cirkit
 {
 
-  struct transform_pla_to_constants
+  inline constant transform_pla_to_constants( const char& c )
   {
-    constant operator()( const char& c ) const
-    {
-      switch ( c ) {
-      case '-':
-      case '~':
-        return constant();
-        break;
+    switch ( c ) {
+    case '-':
+    case '~':
+      return constant();
 
-      case '0':
-      case '1':
-        return constant( c == '1' );
-        break;
+    case '0':
+    case '1':
+      return constant( c == '1' );
 
-      default:
-        assert( false );
-        return constant();
-        break;
-      }
+    default:
+      assert( false );
+      return constant();
     }
-  };
+  }
 
   // A function to combine an input and an output cube
   //   @assumes that c1 and c2 have the same size
@@ -91,35 +85,40 @@ namespace cirkit
 
     void on_cube( const std::string& in, const std::string& out )
     {
-      std::vector<boost::optional<bool> > cube_in( in.size() );
-      boost::transform( in, cube_in.begin(), transform_pla_to_constants() );
-
-      std::vector<boost::optional<bool> > cube_out( out.size() );
-      boost::transform( out, cube_out.begin(), transform_pla_to_constants() );
-
-      bool match = false;
-      for ( binary_truth_table::iterator spec_cube = spec.begin(); spec_cube != spec.end(); ++spec_cube )
+      auto it = cube_map.find( in );
+      if ( it == cube_map.end() )
       {
-        binary_truth_table::cube_type spec_in( spec_cube->first.first, spec_cube->first.second );
-        binary_truth_table::cube_type spec_out( spec_cube->second.first, spec_cube->second.second );
-
-        if ( cube_in == spec_in )
-        {
-          spec.remove_entry( spec_cube );
-          spec.add_entry( cube_in, combine_pla_cube( cube_out, spec_out ) );
-          match = true;
-          break;
-        }
+        cube_map.insert( {in, out} );
       }
-
-      if ( !match )
+      else
       {
+        std::string new_out;
+        for ( unsigned i = 0u; i < out.size(); ++i )
+        {
+          auto v1 = out[i]; auto v2 = it->second[i];
+          new_out += ( v1 == '1' || v2 == '1' ) ? '1' : '0';
+        }
+        it->second = out;
+      }
+    }
+
+    void on_end()
+    {
+      for ( const auto& p : cube_map )
+      {
+        std::vector<boost::optional<bool> > cube_in( p.first.size() );
+        boost::transform( p.first, cube_in.begin(), transform_pla_to_constants );
+
+        std::vector<boost::optional<bool> > cube_out( p.second.size() );
+        boost::transform( p.second, cube_out.begin(), transform_pla_to_constants );
+
         spec.add_entry( cube_in, cube_out );
       }
     }
 
   private:
     binary_truth_table& spec;
+    std::map<std::string, std::string> cube_map;
   };
 
   class read_pla_size_processor : public pla_processor
