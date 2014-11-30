@@ -253,6 +253,10 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
     garbage += cf.y(i);
   }
 
+  /* Memoize dec garbage */
+  std::vector<std::vector<BDD>> dec_garbage_store;
+  dec_garbage_store += garbage;
+
   for (const auto& cube : p.cubes) {
     /* Assign cubes to local variables */
     const std::string& incube = cube.first;
@@ -281,11 +285,20 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
       p.mu[outcube] = 0u;
     }
 
-    std::vector<BDD> dec_garbage = garbage;
-    for (unsigned i = 0u; i < p.mu[outcube]; ++i)
+    if ( p.mu[outcube].get_ui() >= dec_garbage_store.size() )
+    {
+      for ( unsigned i = dec_garbage_store.size(); i <= p.mu[outcube].get_ui(); ++i )
+      {
+        dec_garbage_store += _dec( cf, dec_garbage_store[i - 1u] );
+      }
+    }
+    auto dec_garbage = dec_garbage_store[p.mu[outcube].get_ui()];
+    //std::vector<BDD> dec_garbage = garbage;
+
+    /*for (unsigned i = 0u; i < p.mu[outcube]; ++i)
     {
       dec_garbage = _dec(cf, dec_garbage);
-    }
+      }*/
 
     /* Assign don't cares to dec_garbage (from back to front) */
     for (unsigned i = 0u; i < (req_vars - p.m); ++i)
