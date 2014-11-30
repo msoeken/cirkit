@@ -62,8 +62,8 @@ int main( int argc, char ** argv )
   read_specification( spec, opts.read_specification_filename() );
 
   circuit circ;
-  properties::ptr settings( new properties );
-  properties::ptr statistics( new properties );
+  auto settings = std::make_shared<properties>();
+  auto statistics = std::make_shared<properties>();
   settings->set( "bidirectional",    bidirectional );
   settings->set( "fredkin",          fredkin );
   settings->set( "fredkin_lookback", fredkin_lookback );
