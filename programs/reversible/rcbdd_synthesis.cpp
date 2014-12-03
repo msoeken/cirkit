@@ -41,12 +41,11 @@ int main( int argc, char ** argv )
   using boost::program_options::value;
 
   std::string filename;
-  unsigned    mode           = 0u;
-  unsigned    method         = 0u;
-  bool        smart_pickcube = true;
+  auto        mode           = 0u;
+  auto        method         = 0u;
+  auto        smart_pickcube = true;
   std::string embedded_pla;
-  unsigned    timeout        = 5000u;
-  unsigned    esop_minimizer = 0u;
+  auto        esop_minimizer = 0u;
 
   reversible_program_options opts;
   opts.add_write_realization_option();
@@ -57,7 +56,6 @@ int main( int argc, char ** argv )
     //( "smart_pickcube", value_with_default( &smart_pickcube ), "Use smarter version of pickcube" )
     ( "embedded_pla",   value( &embedded_pla ),                "Filename of the embedded PLA file (default is empty)" )
     ( "truth_table,t",                                         "Prints truth table of embedded PLA (with constants and garbage)" )
-    //    ( "timeout",        value_with_default( &timeout ),        "Timeout in seconds" )
     ( "esop_minimizer", value_with_default( &esop_minimizer ), "ESOP minizer (0: built-in, 1: exorcism)" )
     ( "verbose,v",                                             "Be verbose" )
     ;
@@ -68,9 +66,6 @@ int main( int argc, char ** argv )
     std::cout << opts << std::endl;
     return 1;
   }
-
-  /* timeout */
-  //std::thread t1( [&timeout]() { timeout_after( timeout ); } );
 
   binary_truth_table pla, extended;
   rcbdd cf;
@@ -84,19 +79,19 @@ int main( int argc, char ** argv )
   extend_pla( pla, extended );
   write_pla( extended, "/tmp/extended.pla" );
 
-  properties::ptr ep_settings( new properties );
+  auto ep_settings = std::make_shared<properties>();
   ep_settings->set( "truth_table", opts.is_set( "truth_table" ) );
   ep_settings->set( "write_pla", embedded_pla );
   if ( opts.is_set( "verbose" ) ) { std::cout << "[i] embed PLA" << std::endl; }
   embed_pla( cf, "/tmp/extended.pla", ep_settings );
 
-  properties::ptr rs_settings( new properties );
-  properties::ptr rs_statistics( new properties );
+  auto rs_settings = std::make_shared<properties>();
+  auto rs_statistics = std::make_shared<properties>();
   rs_settings->set( "verbose", opts.is_set( "verbose" ) );
   rs_settings->set( "mode", mode );
   rs_settings->set( "synthesis_method", (SynthesisMethod)method );
   rs_settings->set( "smart_pickcube", smart_pickcube );
-  properties::ptr esopmin_settings( new properties );
+  auto esopmin_settings = std::make_shared<properties>();
   esopmin_settings->set( "verbose", opts.is_set( "verbose" ) );
   rs_settings->set( "esopmin", esop_minimizer ? dd_based_exorcism_minimization_func( esopmin_settings ) : dd_based_esop_minimization_func( esopmin_settings ) );
   rcbdd_synthesis( circ, cf, rs_settings, rs_statistics );
