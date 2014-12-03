@@ -28,6 +28,7 @@
 #define GRAPH_UTILS_HPP
 
 #include <map>
+#include <vector>
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -49,10 +50,9 @@ template<class G>
 using edge_t = typename boost::graph_traits<G>::edge_descriptor;
 
 template<class G>
-inline std::map<typename boost::graph_traits<G>::vertex_descriptor,
-                std::vector<typename boost::graph_traits<G>::edge_descriptor>> precompute_ingoing_edges( const G& g )
+inline std::map<vertex_t<G>, std::vector<edge_t<G>>> precompute_ingoing_edges( const G& g )
 {
-  std::map<typename boost::graph_traits<G>::vertex_descriptor, std::vector<typename boost::graph_traits<G>::edge_descriptor>> m;
+  std::map<vertex_t<G>, std::vector<edge_t<G>>> m;
   for ( const auto& e : boost::make_iterator_range( boost::edges( g ) ) )
   {
     m[boost::target( e, g )] += e;
