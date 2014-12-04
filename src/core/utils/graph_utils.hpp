@@ -38,17 +38,43 @@ using namespace boost::assign;
 namespace cirkit
 {
 
+/* These are some graph type aliases that make definition of graphs a bit less verbose. */
+
+/**
+ * @brief Digraph alias
+ *
+ * Since I often use directed graphs with boost::vecS/boost::vecS access, there is
+ * an alias digraph_t for that purpose to which vertex, edge, and graph properties can
+ * be provided.
+ */
 template<class VertexProperty = boost::no_property,
          class EdgeProperty = boost::no_property,
          class GraphProperty = boost::no_property>
 using digraph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, VertexProperty, EdgeProperty, GraphProperty>;
 
+/**
+ * @brief Vertex alias
+ *
+ * Less verbose vertex type alias
+ */
 template<class G>
 using vertex_t = typename boost::graph_traits<G>::vertex_descriptor;
 
+/**
+ * @brief Edge alias
+ *
+ * Less verbose edge type alias
+ */
 template<class G>
 using edge_t = typename boost::graph_traits<G>::edge_descriptor;
 
+/**
+ * @brief Precomputes ingoing edges for directed graphs
+ *
+ * Directed graphs have no access to their ingoing edges, but sometimes
+ * a bi-directional graph is too heavey to use.  This allows to precompute
+ * the ingoing edges once in O(|E|) and store them in a map.
+ */
 template<class G>
 inline std::map<vertex_t<G>, std::vector<edge_t<G>>> precompute_ingoing_edges( const G& g )
 {
