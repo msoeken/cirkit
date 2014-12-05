@@ -34,7 +34,7 @@ std::vector<std::string> execute_and_return( const std::string& cmd )
 {
   std::vector<std::string> result;
 
-  system( boost::str( boost::format( "( %s ) > /tmp/er.log" ) % cmd ).c_str() );
+  auto sresult = system( boost::str( boost::format( "( %s ) > /tmp/er.log" ) % cmd ).c_str() );
   std::ifstream is( "/tmp/er.log", std::ifstream::in );
   std::string line;
   while ( getline( is, line ) )

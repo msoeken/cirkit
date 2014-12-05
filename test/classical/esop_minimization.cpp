@@ -48,12 +48,12 @@ BOOST_AUTO_TEST_CASE(simple)
   esop_minimization( filename, settings, statistics );
 
 #if COMPARE_WITH_EXORCISM
-  system( boost::str( boost::format( "(exorcism %s; echo) > /dev/null" ) % filename ).c_str() );
+  auto sresult = system( boost::str( boost::format( "(exorcism %s; echo) > /dev/null" ) % filename ).c_str() );
 
   std::cout << "EXORCISM cubes:     "; std::cout.flush();
-  system( boost::str( boost::format( "cat %sesop | grep \"Final\" | awk '{print $6}' ") % filename.substr( 0u, filename.size() - 3u ) ).c_str() );
+  auto sresult = system( boost::str( boost::format( "cat %sesop | grep \"Final\" | awk '{print $6}' ") % filename.substr( 0u, filename.size() - 3u ) ).c_str() );
   std::cout << "EXORCISM literals:  "; std::cout.flush();
-  system( boost::str( boost::format( "cat %sesop | grep \"Final\" | awk '{print $9}' ") % filename.substr( 0u, filename.size() - 3u ) ).c_str() );
+  auto sresult = system( boost::str( boost::format( "cat %sesop | grep \"Final\" | awk '{print $9}' ") % filename.substr( 0u, filename.size() - 3u ) ).c_str() );
 #endif
 
   std::cout << "Number of cubes:    " << statistics->get<unsigned>( "cube_count" ) << std::endl
