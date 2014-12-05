@@ -13,7 +13,7 @@ externalProject_add(cudd
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
-add_ext_library("libcudd_cudd.so;libcudd_dddmp.so;libcudd_epd.so;libcudd_mtr.so;libcudd_nanotrav.so;libcudd_obj.so;libcudd_st.so;libcudd_util.so")
+add_ext_library("libcudd_obj.so;libcudd_cudd.so;libcudd_mtr.so;libcudd_st.so;libcudd_epd.so;libcudd_util.so;libcudd_dddmp.so;libcudd_nanotrav.so")
 
 set(puma_SRC ${CMAKE_BINARY_DIR}/ext/puma-prefix/src/puma)
 set(puma_HEADERS
