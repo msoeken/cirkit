@@ -113,6 +113,7 @@ if __name__ == "__main__":
     argc = len( sys.argv )
     if argc == 1 or argc > 4:
         print( "usage: make_src_file.py path/name [addon [author]]" )
+        exit( 1 )
 
     name   = sys.argv[1]
     addon  = sys.argv[2] if argc > 2 else "."
