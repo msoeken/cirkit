@@ -86,6 +86,21 @@ inline std::map<vertex_t<G>, std::vector<edge_t<G>>> precompute_ingoing_edges( c
   return m;
 }
 
+/**
+ * @brief Precomputes in-degrees for directed graphs
+ *
+ * @see precompute_ingoing_edges
+ */
+template<class G>
+inline std::vector<unsigned> precompute_in_degrees( const G& g )
+{
+  std::vector<unsigned> v( boost::num_vertices( g ), 0u );
+  for ( const auto& e : boost::make_iterator_range( boost::edges( g ) ) )
+  {
+    v[boost::target( e, g )]++;
+  }
+  return v;
+}
 
 }
 
