@@ -36,7 +36,6 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/irange.hpp>
-#include <boost/tuple/tuple.hpp>
 
 namespace cirkit
 {
@@ -115,7 +114,7 @@ template<class TupleT, int N, class T, typename... Arguments> struct print_row_t
 {
   static void print( const TupleT& t, const std::vector<unsigned>& column_lengths )
   {
-    std::cout << "| " << print_cell( boost::get<N>( t ), column_lengths[N] ) << " ";
+    std::cout << "| " << print_cell( std::get<N>( t ), column_lengths[N] ) << " ";
     print_row_t<TupleT, N + 1, Arguments...>::print( t, column_lengths );
   }
 };
@@ -123,7 +122,7 @@ template<class TupleT, int N, class T> struct print_row_t<TupleT, N, T>
 {
   static void print( const TupleT& t, const std::vector<unsigned>& column_lengths )
   {
-    std::cout << "| " << print_cell( boost::get<N>( t ), column_lengths[N] ) << " |" << std::endl;
+    std::cout << "| " << print_cell( std::get<N>( t ), column_lengths[N] ) << " |" << std::endl;
   }
 };
 
@@ -138,7 +137,7 @@ template<class... Arguments>
 class benchmark_table
 {
 public:
-  typedef boost::tuple<Arguments...> benchmark;
+  typedef std::tuple<Arguments...> benchmark;
 
   benchmark_table( std::initializer_list<std::string> column_names, bool verbose = false ) : verbose( verbose )
   {
@@ -174,9 +173,9 @@ public:
   template<class... Args>
   void add(Args&&... args)
   {
-    results.push_back(boost::make_tuple(std::forward<Args>(args)...));
     length_i = 0u;
     compute_lengths( args... );
+    results.push_back(std::make_tuple(std::forward<Args>(args)...));
 
     if ( verbose )
     {
