@@ -20,13 +20,14 @@
 #include "pla_processor.hpp"
 
 #include <fstream>
+#include <regex>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
 
 namespace cirkit
 {
@@ -34,16 +35,17 @@ namespace cirkit
 bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_cube )
 {
   std::string line;
+  std::regex  whitespace( "\\s+" );
 
   while ( in.good() && getline( in, line ) )
   {
     boost::trim( line );
-    boost::regex_replace( line, boost::regex( "\\s+" ), " ", boost::match_default | boost::format_all );
+    line = std::regex_replace( line, whitespace, " " );
     if ( !line.size() ) { continue; }
 
     if ( boost::starts_with( line, "#" ) )
     {
-      std::string comment( std::find_if_not( line.begin(), line.end(), []( char c ) { return c == '#'; } ), line.end() );
+      std::string comment( boost::find_if( line, []( char c ) { return c != '#'; } ), line.end() );
       reader.on_comment( comment );
     }
     else if ( boost::starts_with( line, ".i " ) )
@@ -101,10 +103,10 @@ bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_
 
 bool pla_parser( const std::string& filename, pla_processor& reader, bool skip_after_first_cube )
 {
-  std::ifstream is;
-  is.open(filename.c_str());
-
-  return pla_parser( is, reader, skip_after_first_cube );
+  std::ifstream is( filename.c_str(), std::ifstream::in );
+  auto r = pla_parser( is, reader, skip_after_first_cube );
+  is.close();
+  return r;
 }
 
 }
