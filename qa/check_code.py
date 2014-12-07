@@ -4,11 +4,12 @@ import os
 import re
 from termcolor import colored
 
-forbidden_boost_headers = [ "foreach", "bind", "lambda/lambda.hpp", "shared_ptr.hpp", "regex" ]
+forbidden_boost_headers = [ "foreach", "bind", "lambda/lambda", "shared_ptr", "regex", "tuple/tuple" ]
 
 def check_for_string( line, str ):
     if re.search( str, line ):
-        print( "{0} File {1} contains {2}".format( colored( '[E]', 'red', attrs = ['bold'] ), colored( name, 'green' ), colored( str, 'blue' ) ) )
+        suffix = colored( ' [ignored]', 'yellow', attrs = ['bold'] ) if line.endswith( "//:QA_IGN\n" ) else ""
+        print( "{0} File {1} contains {2}{3}".format( colored( '[E]', 'red', attrs = ['bold'] ), colored( name, 'green' ), colored( str, 'blue' ), suffix ) )
         return True
     return False
 
