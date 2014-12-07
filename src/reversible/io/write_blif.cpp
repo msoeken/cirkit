@@ -28,7 +28,7 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/regex.hpp>
+#include <boost/regex.hpp>                      //:QA_IGN
 #include <boost/tuple/tuple.hpp>
 
 #include "../circuit.hpp"

@@ -28,7 +28,6 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/regex.hpp>
 #include <boost/variant.hpp>
 
 #include "revlib_parser.hpp"

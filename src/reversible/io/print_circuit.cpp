@@ -23,10 +23,9 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/irange.hpp>
-#include <boost/regex.hpp>
 
-#include "../circuit.hpp"
-#include "../target_tags.hpp"
+#include <reversible/circuit.hpp>
+#include <reversible/target_tags.hpp>
 
 namespace cirkit
 {
