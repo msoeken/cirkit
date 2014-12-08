@@ -222,7 +222,7 @@ namespace cirkit
    *
    * @since  1.0
    */
-  optimization_func line_reduction_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
+  optimization_func line_reduction_func(  properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>() );
 }
 
 #endif /* LINE_REDUCTION_HPP */

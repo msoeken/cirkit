@@ -88,7 +88,7 @@ namespace cirkit
    *
    * @since  1.3
    */
-  truth_table_synthesis_func reed_muller_synthesis_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
+  truth_table_synthesis_func reed_muller_synthesis_func( properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>() );
 
 }
 

@@ -53,7 +53,7 @@ bool lnn_optimization( circuit& circ, const circuit& base, properties::ptr setti
  * @return A functor which complies with the optimization_func interface
  *
  */
-optimization_func lnn_optimization_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
+optimization_func lnn_optimization_func( properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>() );
 
 }
 

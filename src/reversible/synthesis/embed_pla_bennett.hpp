@@ -40,7 +40,7 @@ namespace cirkit
                           properties::ptr statistics = properties::ptr() );
 
 
-  pla_embedding_func embed_pla_bennett_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
+  pla_embedding_func embed_pla_bennett_func( properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>() );
 
 }
 

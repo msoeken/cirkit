@@ -20,7 +20,6 @@
 #include <algorithm>
 
 #include <boost/range/algorithm.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include "../circuit.hpp"
 

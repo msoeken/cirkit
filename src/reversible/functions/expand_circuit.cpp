@@ -17,8 +17,6 @@
 
 #include "expand_circuit.hpp"
 
-#include <boost/tuple/tuple.hpp>
-
 #include <reversible/functions/copy_circuit.hpp>
 
 namespace cirkit

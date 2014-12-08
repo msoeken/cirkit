@@ -44,7 +44,7 @@ namespace cirkit
     {
       /* dont forget to reset in case of second call */
       pos = 0u;
-      return circuit();
+      return circuit_filter_pair( circuit(), std::vector<unsigned>() );
     }
 
     unsigned length = std::min( window_length, base.num_gates() - pos );
@@ -85,7 +85,7 @@ namespace cirkit
         else
         {
           line_count = 2u;
-          return circuit();
+          return circuit_filter_pair( circuit(), std::vector<unsigned>() );
         }
       }
 
@@ -179,7 +179,7 @@ namespace cirkit
       /* select the window */
       circuit s;
       std::vector<unsigned> filter;
-      boost::tie( s, filter ) = select_window( circ );
+      std::tie( s, filter ) = select_window( circ );
 
       /* check if window is still valid */
       if ( s.num_gates() == 0 )

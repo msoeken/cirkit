@@ -106,7 +106,7 @@ namespace cirkit
    *
    * @since  1.0
    */
-  embedding_func embed_truth_table_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
+  embedding_func embed_truth_table_func( properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>() );
 
 }
 

@@ -17,8 +17,6 @@
 
 #include "simple_simulation.hpp"
 
-#include <boost/tuple/tuple.hpp>
-
 #include <core/utils/timer.hpp>
 
 #include <reversible/gate.hpp>

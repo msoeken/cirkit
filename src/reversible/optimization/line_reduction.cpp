@@ -31,7 +31,6 @@
 #include <boost/function.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/irange.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include <core/utils/timer.hpp>
 

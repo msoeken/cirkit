@@ -29,8 +29,6 @@
 
 #include <vector>
 
-#include <boost/tuple/tuple.hpp>
-
 #include <core/properties.hpp>
 
 #include <reversible/utils/costs.hpp>
@@ -42,7 +40,7 @@
 namespace cirkit
 {
 
-  typedef boost::tuple<circuit, std::vector<unsigned> > circuit_filter_pair;
+  typedef std::tuple<circuit, std::vector<unsigned> > circuit_filter_pair;
 
   /**
    * @brief Functor for selecting the windows
@@ -316,7 +314,8 @@ namespace cirkit
    *
    * @since  1.0
    */
-  optimization_func window_optimization_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
+  optimization_func window_optimization_func( properties::ptr settings = std::make_shared<properties>(),
+                                              properties::ptr statistics = std::make_shared<properties>() );
 
 }
 
