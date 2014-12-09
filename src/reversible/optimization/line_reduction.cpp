@@ -514,7 +514,7 @@ namespace cirkit
 
       circuit window;
       std::vector<unsigned> index_map;
-      boost::tie( window, index_map ) = find_window_with_max_lines( circ, last_control_position, max_lines );
+      std::tie( window, index_map ) = find_window_with_max_lines( circ, last_control_position, max_lines );
 
       /* find constant line */
       unsigned constant_line = find_constant_line( circ, window.offset() + window.num_gates() );
