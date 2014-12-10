@@ -40,7 +40,7 @@ bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_
   while ( in.good() && getline( in, line ) )
   {
     boost::trim( line );
-    line = std::regex_replace( line, whitespace, " " );
+    line = std::regex_replace( line, whitespace, std::string( " " ) );
     if ( !line.size() ) { continue; }
 
     if ( boost::starts_with( line, "#" ) )
