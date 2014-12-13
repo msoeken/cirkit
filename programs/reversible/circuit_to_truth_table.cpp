@@ -15,6 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @author Mathias Soeken
+ */
+
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>

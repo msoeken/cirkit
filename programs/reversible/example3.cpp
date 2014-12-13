@@ -15,8 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @author Mathias Soeken
+ */
+
 #include <iostream>
-#include <iterator>   // for std::distance
 
 #include <reversible/circuit.hpp>
 #include <reversible/gate.hpp>

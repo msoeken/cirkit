@@ -15,6 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @author Mathias Soeken
+ */
+
 #include <boost/assign/std/vector.hpp>
 
 #include <reversible/circuit.hpp>
