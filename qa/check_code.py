@@ -21,6 +21,7 @@ def check_file( name ):
                 found = found or check_for_string( line, "boost/%s.hpp" % header )
             found = found or check_for_string( line, "shared_ptr\(.*new" )
             found = found or check_for_string( line, "::ptr\(.*new" )
+            found = found or check_for_string( line, "typedef" )
     return not found
 
 count = 0; total = 0
