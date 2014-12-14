@@ -29,6 +29,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/range/iterator_range.hpp>
 
@@ -45,41 +46,41 @@ namespace cirkit
 {
 using namespace boost::assign;
 
-typedef void (*gate_constraint_fun)(z3::context& ctx, z3::solver& solver,
-                                    circuit&, std::vector<std::vector<z3::expr> >& network,
-                                    std::vector<std::vector<z3::expr> >& gate_values, const binary_truth_table&,
-                                    unsigned k, unsigned n);
+using gate_constraint_fun = std::function<void( z3::context& ctx, z3::solver& solver,
+                                                circuit&, std::vector<std::vector<z3::expr>>& network,
+                                                std::vector<std::vector<z3::expr> >& gate_values, const binary_truth_table&,
+                                                unsigned k, unsigned n )>;
 
-typedef bool (*evaluation_fun)(z3::solver& solver, circuit& circ,
-                               std::vector<std::vector<z3::expr>>& network, unsigned k, unsigned n);
+using evaluation_fun = std::function<bool( z3::solver& solver, circuit& circ,
+                                           std::vector<std::vector<z3::expr>>& network, unsigned k, unsigned n )>;
 
-void gate_constraints_original(z3::context& ctx, z3::solver& solver, circuit&,
-    std::vector<std::vector<z3::expr> >& network,
-    std::vector<std::vector<z3::expr> >& gate_values,
-    const binary_truth_table& spec, unsigned k, unsigned n)
+void gate_constraints_original( z3::context& ctx, z3::solver& solver, circuit&,
+                                std::vector<std::vector<z3::expr> >& network,
+                                std::vector<std::vector<z3::expr> >& gate_values,
+                                const binary_truth_table& spec, unsigned k, unsigned n )
 {
   using boost::str;
   using boost::format;
 
-  unsigned rows = std::distance(spec.begin(), spec.end());
+  auto rows = boost::distance( spec );
 
-  z3::expr zero = ctx.bv_val(0, n);
-  z3::expr one = ctx.bv_val(1, n);
-  for (int i : boost::irange(0u, k))
+  auto zero = ctx.bv_val(0, n);
+  auto one = ctx.bv_val(1, n);
+
+  for ( auto i = 0u; i < k; ++i )
   {
-    z3::expr control = ctx.bv_const(str(format("control-%d") % i).c_str(), n);
-    z3::expr target = ctx.bv_const(str(format("target-%d") % i).c_str(), n);
+    auto control = ctx.bv_const(str(format("control-%d") % i).c_str(), n);
+    auto target = ctx.bv_const(str(format("target-%d") % i).c_str(), n);
 
-    network += std::vector<z3::expr>
-    { control, target };
+    network += std::vector<z3::expr>{ control, target };
 
-    solver.add((control | (one << target)) != control);
-    solver.add(z3::ule(target, ctx.bv_val(n, n)));
+    solver.add( (control | (one << target)) != control );
+    solver.add( z3::ule(target, ctx.bv_val(n, n)) );
 
-    for (unsigned j = 0u; j < rows; ++j)
+    for ( auto j = 0u; j < rows; ++j )
     {
-      z3::expr hit = ctx.bool_const(str(format("hit-%d-%d") % i % j).c_str());
-      solver.add(hit == ((gate_values[i][j] & control) == control));
+      auto hit = ctx.bool_const(str(format("hit-%d-%d") % i % j).c_str());
+      solver.add( hit == ((gate_values[i][j] & control) == control) );
       solver.add(
           gate_values[i + 1][j]
           == (gate_values[i][j] ^ (ite(hit, one, zero) << target)));
@@ -87,33 +88,32 @@ void gate_constraints_original(z3::context& ctx, z3::solver& solver, circuit&,
   }
 }
 
-void gate_constraints_negative_control(z3::context& ctx, z3::solver& solver,
-    circuit&, std::vector<std::vector<z3::expr> >& network,
-    std::vector<std::vector<z3::expr> >& gate_values,
-    const binary_truth_table& spec, unsigned k, unsigned n)
+void gate_constraints_negative_control( z3::context& ctx, z3::solver& solver,
+                                        circuit&, std::vector<std::vector<z3::expr> >& network,
+                                        std::vector<std::vector<z3::expr> >& gate_values,
+                                        const binary_truth_table& spec, unsigned k, unsigned n )
 {
   using boost::str;
   using boost::format;
 
-  unsigned rows = std::distance(spec.begin(), spec.end());
+  auto rows = boost::distance( spec );
 
-  z3::expr zero = ctx.bv_val(0, n);
-  z3::expr one = ctx.bv_val(1, n);
-  for (int i : boost::irange(0u, k))
+  auto zero = ctx.bv_val(0, n);
+  auto one = ctx.bv_val(1, n);
+  for ( auto i = 0u; i < k; ++i )
   {
-    z3::expr control = ctx.bv_const(str(format("control-%d") % i).c_str(), n);
-    z3::expr target = ctx.bv_const(str(format("target-%d") % i).c_str(), n);
-    z3::expr polarity = ctx.bv_const(str(format("polarity-%d") % i).c_str(), n);
+    auto control = ctx.bv_const(str(format("control-%d") % i).c_str(), n);
+    auto target = ctx.bv_const(str(format("target-%d") % i).c_str(), n);
+    auto polarity = ctx.bv_const(str(format("polarity-%d") % i).c_str(), n);
 
-    network += std::vector<z3::expr>
-    { control, target, polarity };
+    network += std::vector<z3::expr>{ control, target, polarity };
 
-    solver.add((control | (one << target)) != control);
-    solver.add(z3::ule(target, ctx.bv_val(n, n)));
+    solver.add( (control | (one << target)) != control );
+    solver.add( z3::ule(target, ctx.bv_val(n, n)) );
 
-    for (unsigned j = 0u; j < rows; ++j)
+    for ( auto j = 0u; j < rows; ++j )
     {
-      z3::expr hit = ctx.bool_const(str(format("hit-%d-%d") % i % j).c_str());
+      auto hit = ctx.bool_const(str(format("hit-%d-%d") % i % j).c_str());
       solver.add(
           hit == (((gate_values[i][j] ^ polarity) & control) == control));
       solver.add(
@@ -123,32 +123,32 @@ void gate_constraints_negative_control(z3::context& ctx, z3::solver& solver,
   }
 }
 
-void gate_constraints_negative_control_multiple_target(z3::context& ctx,
-    z3::solver& solver, circuit&, std::vector<std::vector<z3::expr> >& gates,
-    std::vector<std::vector<z3::expr> >& line_values,
-    const binary_truth_table& spec, unsigned k, unsigned n)
+void gate_constraints_negative_control_multiple_target( z3::context& ctx,
+                                                        z3::solver& solver, circuit&, std::vector<std::vector<z3::expr> >& gates,
+                                                        std::vector<std::vector<z3::expr> >& line_values,
+                                                        const binary_truth_table& spec, unsigned k, unsigned n )
 {
 
   using boost::str;
   using boost::format;
 
-  unsigned rows = std::distance(spec.begin(), spec.end());
-  z3::expr zero = ctx.bv_val(0, n);
-  z3::expr one = ctx.bv_val(1, n);
-  for (int i : boost::irange(0u, k))
-  {
-    z3::expr control = ctx.bv_const(str(format("control-%d") % i).c_str(), n);
-    z3::expr target = ctx.bv_const(str(format("target-%d") % i).c_str(), n);
-    z3::expr polarity = ctx.bv_const(str(format("polarity-%d") % i).c_str(), n);
+  auto rows = boost::distance( spec );
 
-    gates += std::vector<z3::expr>
-    { control, target, polarity };
+  auto zero = ctx.bv_val(0, n);
+  auto one = ctx.bv_val(1, n);
+  for ( auto i = 0u; i < k; ++i )
+  {
+    auto control = ctx.bv_const(str(format("control-%d") % i).c_str(), n);
+    auto target = ctx.bv_const(str(format("target-%d") % i).c_str(), n);
+    auto polarity = ctx.bv_const(str(format("polarity-%d") % i).c_str(), n);
+
+    gates += std::vector<z3::expr>{ control, target, polarity };
 
     solver.add((control & target) == zero);
 
-    for (unsigned j = 0u; j < rows; ++j)
+    for ( auto j = 0u; j < rows; ++j )
     {
-      z3::expr hit = ctx.bool_const(str(format("hit-%d-%d") % i % j).c_str());
+      auto hit = ctx.bool_const(str(format("hit-%d-%d") % i % j).c_str());
       solver.add(
           hit == (((line_values[i][j] ^ polarity) & control) == control));
       solver.add(
@@ -158,31 +158,31 @@ void gate_constraints_negative_control_multiple_target(z3::context& ctx,
   }
 }
 
-void gate_constraints_multiple_target(z3::context& ctx, z3::solver& solver,
-    circuit&, std::vector<std::vector<z3::expr> >& network,
-    std::vector<std::vector<z3::expr> >& gate_values,
-    const binary_truth_table& spec, unsigned k, unsigned n)
+void gate_constraints_multiple_target( z3::context& ctx, z3::solver& solver,
+                                       circuit&, std::vector<std::vector<z3::expr> >& network,
+                                       std::vector<std::vector<z3::expr> >& gate_values,
+                                       const binary_truth_table& spec, unsigned k, unsigned n )
 {
   using boost::str;
   using boost::format;
 
-  unsigned rows = std::distance(spec.begin(), spec.end());
+  auto rows = boost::distance( spec );
 
-  z3::expr zero = ctx.bv_val(0, n);
-  z3::expr one = ctx.bv_val(1, n);
-  for (int i : boost::irange(0u, k))
+  auto zero = ctx.bv_val(0, n);
+  auto one = ctx.bv_val(1, n);
+
+  for ( auto i = 0u; i < k; ++i )
   {
-    z3::expr control = ctx.bv_const(str(format("control-%d") % i).c_str(), n);
-    z3::expr target = ctx.bv_const(str(format("target-%d") % i).c_str(), n);
+    auto control = ctx.bv_const(str(format("control-%d") % i).c_str(), n);
+    auto target = ctx.bv_const(str(format("target-%d") % i).c_str(), n);
 
-    network += std::vector<z3::expr>
-    { control, target };
+    network += std::vector<z3::expr>{ control, target };
 
     solver.add((control & target) == zero);
 
-    for (unsigned j = 0u; j < rows; ++j)
+    for ( auto j = 0u; j < rows; ++j )
     {
-      z3::expr hit = ctx.bool_const(str(format("hit-%d-%d") % i % j).c_str());
+      auto hit = ctx.bool_const(str(format("hit-%d-%d") % i % j).c_str());
       solver.add(hit == ((gate_values[i][j] & control) == control));
       solver.add(
           gate_values[i + 1][j]
