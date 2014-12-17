@@ -15,10 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @author Mathias Soeken
- */
-
 #include <fstream>
 
 #include <reversible/circuit.hpp>
@@ -30,6 +26,7 @@
 #include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/write_blif.hpp>
+#include <reversible/simulation/partial_simulation.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
 #include <reversible/utils/costs.hpp>
 #include <reversible/utils/reversible_program_options.hpp>
@@ -51,6 +48,7 @@ int main( int argc, char ** argv )
   opts.add_options()
     ( "circuit,c",                         "Prints the circuit" )
     ( "truth_table,t",                     "Prints truth table" )
+    ( "partial_truth_table,p",             "Prints partial truth table" )
     ( "statistics,s",                      "Prints circuit statistics" )
     ( "image,i",                           "Creates circuit image in LaTeX" )
     ( "rcbdd,r",                           "Prints rcbdd statistics" )
@@ -77,6 +75,15 @@ int main( int argc, char ** argv )
   {
     binary_truth_table spec;
     circuit_to_truth_table( circ, spec, simple_simulation_func() );
+    std::cout << spec << std::endl;
+  }
+
+  if ( opts.is_set( "partial_truth_table" ) )
+  {
+    auto settings = std::make_shared<properties>();
+    settings->set( "partial", true );
+    binary_truth_table spec;
+    circuit_to_truth_table( circ, spec, partial_simulation_func( settings ) );
     std::cout << spec << std::endl;
   }
 
