@@ -22,7 +22,7 @@ namespace cirkit
 
   const char* cirkit_version()
   {
-    static const char* version = "2.2";
+    static const char* version = "2.3";
     return version;
   }
 
