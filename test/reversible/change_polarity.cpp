@@ -15,49 +15,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file variable.hpp
- *
- * @brief All about lines and variables
- *
- * @author Mathias Soeken
- * @since  2.0
- */
 
-#ifndef VARIABLE_HPP
-#define VARIABLE_HPP
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE change_polarity
 
 #include <iostream>
-#include <string>
 
-namespace cirkit
+#include <boost/range/algorithm.hpp>
+#include <boost/test/unit_test.hpp>
+
+#include <reversible/circuit.hpp>
+#include <reversible/functions/add_gates.hpp>
+#include <reversible/io/print_circuit.hpp>
+
+using namespace cirkit;
+
+BOOST_AUTO_TEST_CASE(simple)
 {
 
-  struct variable
+  circuit c( 3 );
+  append_toffoli( c )( 0u, 1u )( 2u );
+  append_cnot( c, 0u, 1u );
+  append_not( c, 0u );
+
+  std::cout << "[i] before:" << std::endl << c << std::endl;
+
+  /* find CNOT gate */
+  auto it = boost::find_if( c, []( const gate& g ) { return g.controls().size() == 1u; } );
+  if ( it != c.end() )
   {
-  public:
-    explicit variable( unsigned v );
-    variable( const std::string& s );
+    /* change polarity and line */
+    std::cout << "HERE" << std::endl;
+    it->controls()[0u].set_line( 2u );
+    it->controls()[0u].set_polarity( false );
+  }
 
-    unsigned line() const;
-    bool polarity() const;
-
-    void set_line( unsigned l );
-    void set_polarity( bool p );
-
-    friend bool operator==( variable v1, variable v2 );
-    friend bool operator<( variable v1, variable v2 );
-
-  private:
-    unsigned v;
-  };
-
-  std::ostream& operator<<( std::ostream& os, const variable& var );
-  variable make_var( unsigned line, bool polarity = true );
-
+  std::cout << "[i] after:" << std::endl << c << std::endl;
 }
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2

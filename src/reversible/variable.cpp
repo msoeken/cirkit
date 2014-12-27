@@ -30,8 +30,10 @@ namespace cirkit
     v = 2 * line + (polarity ? 0u : 1u);
   }
 
-  unsigned variable::line() const { return v / 2u; }
+  unsigned variable::line() const { return v >> 1u; }
   bool variable::polarity() const { return !(v % 2u); }
+  void variable::set_line( unsigned l ) { v = ( l << 1u ) + !polarity(); }
+  void variable::set_polarity( bool p ) { v = ( line() << 1u ) + !p; }
 
   bool operator==( variable v1, variable v2 )
   {

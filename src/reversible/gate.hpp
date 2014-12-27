@@ -111,14 +111,14 @@ namespace cirkit
      *
      * @since  2.0
      */
-    gate::control_container controls() const;
+    gate::control_container& controls() const;
 
     /**
      * @brief Returns the target lines
      *
      * @since  2.0
      */
-    gate::target_container targets() const;
+    gate::target_container& targets() const;
 
     /**
      * @brief Returns the number of control and target lines as sum

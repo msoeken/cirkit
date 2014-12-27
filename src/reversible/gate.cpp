@@ -71,12 +71,12 @@ namespace cirkit
     return *this;
   }
 
-    gate::control_container gate::controls() const
+  gate::control_container& gate::controls() const
   {
     return d->controls;
   }
 
-  gate::target_container gate::targets() const
+  gate::target_container& gate::targets() const
   {
     return d->targets;
   }
