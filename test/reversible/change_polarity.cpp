@@ -45,7 +45,6 @@ BOOST_AUTO_TEST_CASE(simple)
   if ( it != c.end() )
   {
     /* change polarity and line */
-    std::cout << "HERE" << std::endl;
     it->controls()[0u].set_line( 2u );
     it->controls()[0u].set_polarity( false );
   }
