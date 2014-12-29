@@ -21,6 +21,8 @@
 
 #include <thread>
 
+#include <boost/format.hpp>
+
 #include <core/utils/timeout.hpp>
 
 #include <classical/optimization/esop_minimization.hpp>
@@ -105,7 +107,9 @@ int main( int argc, char ** argv )
     write_realization( circ, opts.write_realization_filename() );
   }
 
-  print_statistics( circ, rs_statistics->get<double>( "runtime" ) );
+  print_statistics_settings ps_settings;
+  ps_settings.main_template += boost::str( boost::format( "Access:       %d\n" ) % rs_statistics->get<unsigned long long>( "access" ) );
+  print_statistics( circ, rs_statistics->get<double>( "runtime" ), ps_settings );
 
   return 0;
 }

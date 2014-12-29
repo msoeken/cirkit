@@ -255,6 +255,8 @@ struct rcbdd_synthesis_manager
     BDD cube_part;
     char *scube = new char[3u * cf.num_vars()];
 
+    ++access;
+
     do
     {
       if (change == ChangeLeft)
@@ -278,14 +280,6 @@ struct rcbdd_synthesis_manager
       {
         BDD unused_outputs = !cf.remove_xs(f);
         BDD unused_inputs = !cf.remove_ys(f);
-        if (false && verbose)
-        {
-          std::cout << "change: " << (unsigned)change << std::endl;
-          double uim = unused_inputs.CountMinterm(cf.num_vars());
-          double uom = unused_outputs.CountMinterm(cf.num_vars());
-          std::cout << uim << " " << uom << std::endl;
-          if (uim != uom) exit(0);
-        }
 
         BDD icube, ocube;
 
@@ -327,32 +321,14 @@ struct rcbdd_synthesis_manager
         }
 
         cube = icube & ocube;
-
-        if (false && verbose)
-        {
-          std::cout << "icube: " << std::endl;
-          icube.PrintMinterm();
-          std::cout << "ocube: " << std::endl;
-          ocube.PrintMinterm();
-          std::cout << "cube: " << std::endl;
-          cube.PrintMinterm();
-          std::cout << "f & cube (before): " << std::endl;
-          (f & cube).PrintMinterm();
-        }
-
         f |= cube;
-
-        if (false && verbose)
-        {
-          std::cout << "f & cube (after): " << std::endl;
-          (f & cube).PrintMinterm();
-        }
 
         compute_cofactors();
       }
 
       change = ((char)1u - change);
-    } while((cube & (pp | np)) == cf.manager().bddZero());
+      ++access;
+    } while ( ( cube & ( pp | np ) ) == cf.manager().bddZero() );
 
     /* Cleanup */
     delete[] scube;
@@ -801,28 +777,30 @@ struct rcbdd_synthesis_manager
   BDD nx, ppx, npx, px;
   BDD ny,  ppy, npy, py;
   unsigned total_control_lines = 0u, total_toffoli_gates = 0u;
+  unsigned long long access = 0ull;
 };
 
 bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  bool                            verbose          = get( settings, "verbose",          false                             );
-  bool                            progress         = get( settings, "progress",         false                             );
-  std::string                     name             = get( settings, "name",             std::string( "test" )             );
-  bool                            genesop          = get( settings, "genesop",          false                             );
-  dd_based_esop_optimization_func esopmin          = get( settings, "esopmin",          dd_based_esop_optimization_func() );
-  bool                            create_gates     = get( settings, "create_gates",     true                              );
+  auto verbose          = get( settings, "verbose",          false                             );
+  auto progress         = get( settings, "progress",         false                             );
+  auto name             = get( settings, "name",             std::string( "test" )             );
+  auto genesop          = get( settings, "genesop",          false                             );
+  auto esopmin          = get( settings, "esopmin",          dd_based_esop_optimization_func() );
+  auto create_gates     = get( settings, "create_gates",     true                              );
   /* 0: default, 1: swap, 2: hamming */
-  unsigned                        mode             = get( settings, "mode",             0u                                );
-  SynthesisMethod                 synthesis_method = get( settings, "synthesis_method", ResolveCycles                     );
-  bool                            smart_pickcube   = get( settings, "smart_pickcube",   true                              );
+  auto mode             = get( settings, "mode",             0u                                );
+  auto synthesis_method = get( settings, "synthesis_method", ResolveCycles                     );
+  auto smart_pickcube   = get( settings, "smart_pickcube",   true                              );
 
   /* Timing */
   timer<properties_timer> t;
 
-  if (statistics) {
-    properties_timer rt(statistics);
-    t.start(rt);
+  if ( statistics )
+  {
+    properties_timer rt( statistics );
+    t.start( rt );
   }
 
   rcbdd_synthesis_manager mgr( cf, circ );
@@ -845,6 +823,11 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   default:
     mgr.default_synthesis();
   };
+
+  if ( statistics )
+  {
+    statistics->set( "access", mgr.access );
+  }
 
   return true;
 }
