@@ -155,6 +155,72 @@ namespace cirkit
   {
     cost_t operator()( const gate& g, unsigned lines ) const;
   };
+  
+  /**
+     * @brief Quantum costs from Barenco:1995 based on the NCV Library
+     *
+     * Reference: {Barenco, Adriano and Bennett, Charles H and Cleve, Richard 
+     * and DiVincenzo, David P and Margolus, Norman and Shor, Peter 
+     * and Sleator, Tycho and Smolin, John A and Weinfurter, Harald
+     * Elementary gates for quantum computation 
+     * Physical Review A, 1995
+     * 
+     */
+    struct ncv_quantum_costs {
+        cost_t operator()(const gate& g, unsigned lines) const;
+    };
+
+    /**
+     * @brief Quantum costs from Barenco:1995 based on the Clifford+T Library
+     *
+     * Reference: {Barenco, Adriano and Bennett, Charles H and Cleve, Richard 
+     * and DiVincenzo, David P and Margolus, Norman and Shor, Peter 
+     * and Sleator, Tycho and Smolin, John A and Weinfurter, Harald
+     * Elementary gates for quantum computation
+     * Physical Review A, 1995
+     */
+    struct clifford_t_quantum_costs {
+        cost_t operator()(const gate& g, unsigned lines) const;
+    };
+
+    /**
+     * @brief T depth from Barenco:1995 based on the Clifford+T Library
+     *
+     * Reference: {Barenco, Adriano and Bennett, Charles H and Cleve, Richard 
+     * and DiVincenzo, David P and Margolus, Norman and Shor, Peter 
+     * and Sleator, Tycho and Smolin, John A and Weinfurter, Harald
+     * Elementary gates for quantum computation
+     * Physical Review A, 1995
+     */
+    struct t_depth_costs {
+        cost_t operator()(const gate& g, unsigned lines) const;
+    };
+
+    /**
+     * @brief T cost from Barenco:1995 based on the Clifford+T Library
+     *
+     * Reference: {Barenco, Adriano and Bennett, Charles H and Cleve, Richard 
+     * and DiVincenzo, David P and Margolus, Norman and Shor, Peter 
+     * and Sleator, Tycho and Smolin, John A and Weinfurter, Harald
+     * Elementary gates for quantum computation
+     * Physical Review A, 1995
+     */
+    struct t_costs {
+        cost_t operator()(const gate& g, unsigned lines) const;
+    };
+
+    /**
+     * @brief H cost from Barenco:1995 based on the Clifford+T Library
+     *
+     * Reference: {Barenco, Adriano and Bennett, Charles H and Cleve, Richard 
+     * and DiVincenzo, David P and Margolus, Norman and Shor, Peter 
+     * and Sleator, Tycho and Smolin, John A and Weinfurter, Harald
+     * Elementary gates for quantum computation
+     * Physical Review A, 1995
+     */
+    struct h_costs {
+        cost_t operator()(const gate& g, unsigned lines) const;
+    };
 
   /**
    * @brief Calculates the costs of a circuit by a given cost function
