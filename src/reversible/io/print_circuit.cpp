@@ -42,10 +42,6 @@ namespace cirkit
   {
   }
 
-  print_circuit_settings::~print_circuit_settings()
-  {
-  }
-
   std::string print_circuit_settings::target_type_char( const gate& g ) const
   {
     if ( is_toffoli( g ) || is_peres( g ) )
