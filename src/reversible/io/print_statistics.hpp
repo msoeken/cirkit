@@ -71,7 +71,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    std::string runtime_template = "Runtime:          %.2f\n";
+    std::string runtime_template = "Runtime:      %.2f\n";
   };
 
   /**
