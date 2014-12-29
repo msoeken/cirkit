@@ -45,8 +45,9 @@ namespace cirkit
    *
    * @since  1.0
    */
-  struct print_circuit_settings
+  class print_circuit_settings
   {
+  public:
     /**
      * @brief Default constructor
      *
@@ -57,13 +58,7 @@ namespace cirkit
      * @since  1.0
      */
     print_circuit_settings( std::ostream& os = std::cout );
-
-    /**
-     * @brief Default deconstructor
-     *
-     * @since  1.1
-     */
-    virtual ~print_circuit_settings();
+    virtual ~print_circuit_settings() {}
 
     /**
      * @brief The stream to dump the circuit to (default: \b std::ostream)
