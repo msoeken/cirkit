@@ -59,8 +59,8 @@ void exorcism_minimization( const std::string& filename,
                             properties::ptr settings = properties::ptr(),
                             properties::ptr statistics = properties::ptr() );
 
-dd_based_esop_optimization_func dd_based_exorcism_minimization_func( properties::ptr settings = properties::ptr(),
-                                                                     properties::ptr statistics = properties::ptr() );
+dd_based_esop_optimization_func dd_based_exorcism_minimization_func( properties::ptr settings = std::make_shared<properties>(),
+                                                                     properties::ptr statistics = std::make_shared<properties>() );
 
 pla_based_esop_optimization_func pla_based_exorcism_minimization_func( properties::ptr settings = std::make_shared<properties>(),
                                                                        properties::ptr statistics = std::make_shared<properties>() );
