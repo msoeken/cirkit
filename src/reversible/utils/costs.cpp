@@ -48,6 +48,78 @@ namespace cirkit
     return 2ull * nc + 2ull * ac * ac - 2ull * ac + 1ull;
   }
 
+  cost_t toffoli_gates( unsigned controls )
+  {
+    switch ( controls )
+    {
+      case 0u:
+      case 1u:
+        return 0;
+        break;
+      case 2u:
+        return 1;
+        break;
+      case 3u:
+        return 4;
+        break;
+      case 4u:
+        return 10;
+        break;
+      default:
+        return 8 * ( controls - 3 );
+    }
+  }
+  
+  inline bool all_negative( const gate& g )
+  {
+    return boost::find_if( g.controls(), []( const variable& v ) { return v.polarity(); } ) == g.controls().end();
+  }
+
+  cost_t ncv_quantum_costs::operator()( const gate& g, unsigned lines ) const
+  {
+    unsigned ac = g.controls().size();
+    unsigned nc = all_negative( g ) ? 1u : 0u;
+    return nc + ( ( ac < 2 ) ? 1ull : 5ull ) * toffoli_gates( ac );
+  }
+
+  cost_t clifford_t_quantum_costs::operator()( const gate& g, unsigned lines ) const
+  {
+    unsigned ac = g.controls().size();
+    unsigned nc = all_negative( g ) ? 1u : 0u;
+    return nc + ((ac < 2) ? 1ull : 16ull) * toffoli_gates(ac);
+  }
+
+  cost_t t_depth_costs::operator()( const gate& g, unsigned lines ) const
+  {
+    unsigned ac;
+    if ( is_toffoli( g  ) )
+    {
+      ac = g.controls().size();
+    }
+    else if ( is_fredkin( g ) )
+    {
+      ac = g.controls().size() + 1u;
+    }
+    else
+    {
+      assert( false );
+    }
+    return 3ull * toffoli_gates( ac );
+  }
+
+  cost_t t_costs::operator()( const gate& g, unsigned lines ) const
+  {
+    unsigned ac = g.controls().size();
+    return 7ull * toffoli_gates( ac );
+  }
+
+  cost_t h_costs::operator()( const gate& g, unsigned lines ) const
+  {
+    unsigned ac = g.controls().size();
+    if ( ac == 0u ) return 2ull;
+    return ( (ac < 2) ? 0ull : 2ull ) * toffoli_gates( ac );
+  }
+
   struct costs_visitor : public boost::static_visitor<cost_t>
   {
     explicit costs_visitor( const circuit& circ ) : circ( circ ) {}

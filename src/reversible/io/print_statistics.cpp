@@ -40,8 +40,12 @@ namespace cirkit
 
     os << fmt
       % runtime_string
-      % circ.num_gates()
       % circ.lines()
+      % circ.num_gates()
+      % costs( circ, costs_by_gate_func( ncv_quantum_costs() ) )
+      % costs( circ, costs_by_gate_func( t_depth_costs() ) )
+      % costs( circ, costs_by_gate_func( t_costs() ) )
+      % costs( circ, costs_by_gate_func( h_costs() ) )
       % costs( circ, costs_by_gate_func( transistor_costs() ) )
       % costs( circ, costs_by_gate_func( sk2013_quantum_costs() ) );
   }

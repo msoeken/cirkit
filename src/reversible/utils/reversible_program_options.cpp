@@ -61,7 +61,7 @@ namespace cirkit
   reversible_program_options& reversible_program_options::add_read_realization_option()
   {
     assert( !( d->has_in_realization || d->has_in_specification ) );
-    add_options()( "filename", boost::program_options::value<std::string>( &d->in_realization ), "circuit realization in RevLib *.real format" );
+    add_options()( "filename", boost::program_options::value( &d->in_realization ), "circuit realization in RevLib *.real format" );
     d->has_in_realization = true;
 
     return *this;
@@ -70,7 +70,7 @@ namespace cirkit
   reversible_program_options& reversible_program_options::add_read_specification_option()
   {
     assert( !( d->has_in_realization || d->has_in_specification ) );
-    add_options()( "filename", boost::program_options::value<std::string>( &d->in_specification ), "circuit specification in RevLib *.spec format" );
+    add_options()( "filename", boost::program_options::value( &d->in_specification ), "circuit specification in RevLib *.spec format" );
     d->has_in_specification = true;
 
     return *this;
@@ -78,7 +78,7 @@ namespace cirkit
 
   reversible_program_options& reversible_program_options::add_write_realization_option()
   {
-    add_options()( "realname", boost::program_options::value<std::string>( &d->out_realization ), "output circuit realization in RevLib *.real format" );
+    add_options()( "realname", boost::program_options::value( &d->out_realization ), "output circuit realization in RevLib *.real format" );
     d->has_out_realization = true;
 
     return *this;
@@ -86,7 +86,7 @@ namespace cirkit
 
   reversible_program_options& reversible_program_options::add_costs_option()
   {
-    add_options()( "costs", boost::program_options::value<unsigned>( &d->costs )->default_value( 0 ), "0: Gate Costs\n1: Line Costs\n2: Transistor Costs" );
+    add_options()( "costs", value_with_default( &d->costs ), "0: Gate Costs\n1: Line Costs\n2: Transistor Costs\n3: NCV Quantum Costs\n4: T-depth" );
     d->has_costs = true;
 
     return *this;
@@ -119,6 +119,10 @@ namespace cirkit
       return costs_by_circuit_func( line_costs() );
     case 2:
       return costs_by_gate_func( transistor_costs() );
+    case 3:
+      return costs_by_gate_func( ncv_quantum_costs() );
+    case 4:
+      return costs_by_gate_func( t_depth_costs() );
     default:
       assert( false );
       return cost_function();
