@@ -21,6 +21,7 @@
  * @brief Easier access to program options
  *
  * @author Mathias Soeken
+ * @author Nabila Abdessaied
  * @since  1.0
  */
 

@@ -21,6 +21,7 @@
  * @brief Print statistics about a circuit
  *
  * @author Mathias Soeken
+ * @author Nabila Abdessaied
  * @since  1.0
  */
 

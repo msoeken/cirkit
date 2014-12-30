@@ -21,6 +21,7 @@
  * @brief Cost calculation for circuits
  *
  * @author Mathias Soeken
+ * @author Nabila Abdessaied
  * @since  1.0
  */
 
