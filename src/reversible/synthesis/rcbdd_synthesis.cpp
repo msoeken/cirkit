@@ -126,6 +126,8 @@ struct rcbdd_synthesis_manager
     std::vector<bool> garbage( _cf.num_vars(), true );
     std::fill( garbage.begin(), garbage.begin() + _cf.num_outputs(), false );
     circ.set_garbage( garbage );
+
+    node_count += f.nodeCount();
   }
 
   void set_var(unsigned v)
@@ -162,6 +164,7 @@ struct rcbdd_synthesis_manager
     BDD gate_left = cf.create_from_gate(_var, lf);
     BDD gate_right = cf.create_from_gate(_var, cf.move_ys_to_xs(rf));
     f = cf.compose(cf.compose(gate_left, f), gate_right);
+    node_count += f.nodeCount();
   }
 
   void only_left_gate_shortcut()
@@ -778,6 +781,7 @@ struct rcbdd_synthesis_manager
   BDD ny,  ppy, npy, py;
   unsigned total_control_lines = 0u, total_toffoli_gates = 0u;
   unsigned long long access = 0ull;
+  std::vector<int> node_count;
 };
 
 bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, properties::ptr statistics )
@@ -827,6 +831,7 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   if ( statistics )
   {
     statistics->set( "access", mgr.access );
+    statistics->set( "node_count", mgr.node_count );
   }
 
   return true;

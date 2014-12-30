@@ -21,8 +21,15 @@
 
 #include <thread>
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/min.hpp>
 #include <boost/format.hpp>
+#include <boost/range/algorithm.hpp>
 
+#include <core/utils/range_utils.hpp>
 #include <core/utils/timeout.hpp>
 
 #include <classical/optimization/esop_minimization.hpp>
@@ -41,6 +48,16 @@
 #include <reversible/synthesis/rcbdd_synthesis.hpp>
 
 using namespace cirkit;
+
+std::tuple<int, int, double> compute_stats( const std::vector<int>& sizes )
+{
+  using namespace boost::accumulators;
+
+  accumulator_set<double, stats<tag::mean, tag::min, tag::max>> acc;
+  acc = boost::for_each( sizes, acc );
+
+  return std::make_tuple( min( acc ), max( acc ), mean( acc ) );
+}
 
 int main( int argc, char ** argv )
 {
@@ -108,7 +125,10 @@ int main( int argc, char ** argv )
   }
 
   print_statistics_settings ps_settings;
-  ps_settings.main_template += boost::str( boost::format( "Access:       %d\n" ) % rs_statistics->get<unsigned long long>( "access" ) );
+  auto stats = compute_stats( rs_statistics->get<std::vector<int>>( "node_count" ) );
+  ps_settings.main_template += boost::str( boost::format( "Sizes:        (%d, %d, %.2f)\nAccess:       %d\n" )
+                                           % std::get<0>( stats ) % std::get<1>( stats ) % std::get<2>( stats )
+                                           % rs_statistics->get<unsigned long long>( "access" ) );
   print_statistics( circ, rs_statistics->get<double>( "runtime" ), ps_settings );
 
   return 0;
