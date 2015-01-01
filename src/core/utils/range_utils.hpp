@@ -42,13 +42,13 @@ namespace cirkit
 template<typename T>
 struct iterator_extractor
 {
-  typedef typename T::iterator type;
+  using type = typename T::iterator;
 };
 
 template<typename T>
 struct iterator_extractor<T const>
 {
-  typedef typename T::const_iterator type;
+  using type = typename T::const_iterator;
 };
 
 template<typename T>
@@ -57,11 +57,11 @@ class Indexer
 public:
   class iterator
   {
-    typedef typename iterator_extractor<T>::type inner_iterator;
-    typedef typename std::iterator_traits<inner_iterator>::reference inner_reference;
+    using inner_iterator  = typename iterator_extractor<T>::type;
+    using inner_reference = typename std::iterator_traits<inner_iterator>::reference;
 
   public:
-    typedef std::pair<size_t, inner_reference> reference;
+    using reference = std::pair<size_t, inner_reference>;
     iterator( inner_iterator it ) : _pos( 0 ), _it( it ) {}
 
     reference operator*() const

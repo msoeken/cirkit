@@ -54,14 +54,14 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef std::map<std::string, boost::any>                     storage_type;
+    using storage_type = std::map<std::string, boost::any>;
 
     /**
      * @brief Value type of the property map, i.e. \p std::string
      *
      * @since  1.0
      */
-    typedef storage_type::mapped_type value_type;
+    using value_type = storage_type::mapped_type;
 
     /**
      * @brief Key type of the property map, i.e. \p boost::any
@@ -71,7 +71,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef storage_type::key_type   key_type;
+    using key_type = storage_type::key_type;
 
     /**
      * @brief Smart Pointer version of this class
@@ -86,7 +86,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef std::shared_ptr<properties>                         ptr;
+    using ptr = std::shared_ptr<properties>;
 
     /**
      * @brief Standard constructor

@@ -59,7 +59,7 @@ namespace cirkit {
      *
      * @since  1.0
      */
-    typedef void result_type;
+    using result_type = void;
 
     /**
      * @brief Default constructor
@@ -130,7 +130,7 @@ namespace cirkit {
      *
      * @since  1.0
      */
-    typedef double result_type;
+    using result_type = double;
 
     /**
      * @brief Default constructor
@@ -187,7 +187,7 @@ namespace cirkit {
      *
      * @since  1.0
      */
-    typedef double result_type;
+    using result_type = double;
 
     /**
      * @brief Default constructor
@@ -233,18 +233,15 @@ namespace cirkit {
    *
    * This class is only holding one enumeration
    * used for the timer::set_measure_method method.
+   *
+   * Flags which can be used (also in combination) by the
+   * timer::set_measure_method method.
+   *
+   * @since 1.1
    */
-  struct measure_method
+  enum class measure_method : unsigned
   {
-    /**
-     * @brief Flags for different times to measure
-     *
-     * Flags which can be used (also in combination) by the
-     * timer::set_measure_method method.
-     *
-     * @since  1.1
-     */
-    enum { none = 0, user_time = 1, system_time = 2 };
+    none = 0, user_time = 1, system_time = 2
   };
 
   /**
@@ -266,41 +263,6 @@ namespace cirkit {
    * - print_timer: Prints the run-time to a given output stream
    * - reference_timer: Assigns the run-time to a variable
    *
-   * @section sec_example_timer Example
-   *
-   * This example demonstrates how to create a timer functor which
-   * outputs the run-time to STDOUT and how to use the timer class
-   * with that functor.
-   *
-   * It is important to specify a result_type which is the result of the
-   * () operator.
-   *
-   * @sa timer::operator()()
-   *
-   * @code
-   * #include <core/utils/timer.hpp>
-   *
-   * struct output_timer {
-   *   typedef void result_type;
-   *
-   *   void operator()( double runtime ) const {
-   *     std::cout << runtime << std::endl;
-   *   }
-   * };
-   *
-   * ...
-   *
-   * // some other code for which no time should be measured
-   * {
-   *   output_timer ot;
-   *   revkit::timer<output_timer> t( ot );
-   *   // code for which time should be measured
-   * }
-   * // some other code for which no time should be measured
-   *
-   *
-   * @endcode
-   *
    * @since  1.0
    */
   template<typename Outputter>
@@ -316,8 +278,7 @@ namespace cirkit {
      * @since  1.0
      */
     timer()
-      : started( false ),
-        _measure_method( measure_method::user_time )
+      : started( false )
     {
     }
 
@@ -333,8 +294,7 @@ namespace cirkit {
      */
     explicit timer( const Outputter& outputter )
       : p( outputter ),
-        started( true ),
-        _measure_method( measure_method::user_time )
+        started( true )
     {
       times( &_start );
     }
@@ -407,12 +367,12 @@ namespace cirkit {
 
       clock_t end_t = 0, start_t = 0;
 
-      if ( _measure_method & measure_method::user_time )
+      if ( _measure_method & static_cast<unsigned>( measure_method::user_time ) )
       {
         end_t += end.tms_utime + end.tms_cutime;
         start_t += _start.tms_utime + _start.tms_cutime;
       }
-      else if ( _measure_method & measure_method::system_time )
+      else if ( _measure_method & static_cast<unsigned>( measure_method::system_time ) )
       {
         end_t += end.tms_stime + end.tms_cstime;
         start_t += _start.tms_stime + _start.tms_cstime;
@@ -441,7 +401,7 @@ namespace cirkit {
     struct tms _start;
     Outputter p; // NOTE: has to be copy
     bool started;
-    unsigned _measure_method;
+    unsigned _measure_method = static_cast<unsigned>( measure_method::user_time );
   };
 
 }

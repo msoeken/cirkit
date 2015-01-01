@@ -41,7 +41,7 @@ namespace cirkit
 {
 
 /* this is to format a cell */
-typedef boost::optional<unsigned> length_t;
+using length_t = boost::optional<unsigned>;
 
 template<typename T>
 std::string print_cell( const T& value, const length_t& length = length_t() )
@@ -137,7 +137,7 @@ template<class... Arguments>
 class benchmark_table
 {
 public:
-  typedef std::tuple<Arguments...> benchmark;
+  using benchmark = std::tuple<Arguments...>;
 
   benchmark_table( std::initializer_list<std::string> column_names, bool verbose = false ) : verbose( verbose )
   {
