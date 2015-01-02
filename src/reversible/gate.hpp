@@ -51,19 +51,19 @@ namespace cirkit
      * @brief Vector type of gates
      * @since  1.0
      */
-    typedef std::vector<gate>  vector;
+    using vector = std::vector<gate>;
 
     /**
      * @brief Container for storing control lines
      * @since  2.0
      */
-    typedef std::vector<variable> control_container;
+    using control_container = std::vector<variable>;
 
     /**
      * @brief Container for storing target lines
      * @since 2.0
      */
-    typedef std::vector<unsigned> target_container;
+    using target_container = std::vector<unsigned>;
 
   public:
     /**

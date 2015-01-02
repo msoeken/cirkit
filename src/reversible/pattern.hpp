@@ -82,7 +82,7 @@ namespace cirkit
      *
      * @since  1.2
      */
-    typedef std::map<std::string, unsigned> initializer_map;
+    using initializer_map = std::map<std::string, unsigned>;
 
     /**
      * @brief Pattern Type
@@ -93,14 +93,14 @@ namespace cirkit
      *
      * @since  1.2
      */
-    typedef std::vector<unsigned> pattern_t;
+    using pattern_t = std::vector<unsigned>;
 
     /**
      * @brief Vector of pattern
      *
      * @since  1.2
      */
-    typedef std::vector<pattern_t> pattern_vec;
+    using pattern_vec = std::vector<pattern_t>;
 
     /**
      * @brief Adds an initializer

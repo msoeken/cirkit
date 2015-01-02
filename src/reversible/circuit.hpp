@@ -95,7 +95,7 @@ namespace cirkit
    *
    * @since  1.0
    */
-  typedef boost::optional<bool> constant;
+  using constant = boost::optional<bool>;
 
   /**
    * @brief Represents a circuit
@@ -207,7 +207,7 @@ namespace cirkit
    *
    * @since  1.0
    */
-  typedef boost::variant<standard_circuit, subcircuit> circuit_variant;
+  using circuit_variant = boost::variant<standard_circuit, subcircuit>;
 
   /**
    * @brief Represents a sub-circuit
@@ -368,21 +368,21 @@ namespace cirkit
     /**
      * @brief Mutable iterator for accessing the gates in a circuit
      */
-    typedef boost::indirect_iterator<std::vector<std::shared_ptr<gate> >::iterator> iterator;
+    using iterator = boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::iterator>;
 
     /**
      * @brief Constant iterator for accessing the gates in a circuit
      */
-    typedef boost::indirect_iterator<std::vector<std::shared_ptr<gate> >::const_iterator> const_iterator;
+    using const_iterator = boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::const_iterator>;
 
     /**
      * @brief Mutable reverse iterator for accessing the gates in a circuit
      */
-    typedef boost::indirect_iterator<std::vector<std::shared_ptr<gate> >::reverse_iterator> reverse_iterator;
+    using reverse_iterator = boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::reverse_iterator>;
     /**
      * @brief Constant reverse iterator for accessing the gates in a circuit
      */
-    typedef boost::indirect_iterator<std::vector<std::shared_ptr<gate> >::const_reverse_iterator> const_reverse_iterator;
+    using const_reverse_iterator = boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::const_reverse_iterator>;
 
     /**
      * @brief Returns the number of gates

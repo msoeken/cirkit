@@ -98,7 +98,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef T                                     value_type;
+    using value_type = T;
 
     /**
      * @brief Type representing a cube
@@ -107,7 +107,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef std::vector<T>                        cube_type;
+    using cube_type = std::vector<T>;
 
     /**
      * @brief Represents a map from input to output cube
@@ -116,7 +116,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef std::map<cube_type, cube_type> cube_vector;
+    using cube_vector = std::map<cube_type, cube_type>;
 
     /**
      * @brief Constant Iterator of input cubes
@@ -125,7 +125,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef typename cube_type::const_iterator in_const_iterator;
+    using in_const_iterator = typename cube_type::const_iterator;
 
     /**
      * @brief Constant Iterator of output cubes
@@ -134,7 +134,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef boost::permutation_iterator<typename cube_type::const_iterator, std::vector<unsigned>::const_iterator> out_const_iterator;
+    using out_const_iterator = boost::permutation_iterator<typename cube_type::const_iterator, std::vector<unsigned>::const_iterator>;
 
     /**
      * @brief Truth Table's constant iterator
@@ -143,14 +143,14 @@ namespace cirkit
      *
      * @since  1.0
      */
-    typedef boost::transform_iterator<transform_cube<T>, typename cube_vector::const_iterator> const_iterator;
+    using const_iterator = boost::transform_iterator<transform_cube<T>, typename cube_vector::const_iterator>;
 
     /**
      * @brief Truth Table's iterator
      *
      * @since  2.0
      */
-    typedef boost::transform_iterator<transform_cube<T>, typename cube_vector::iterator> iterator;
+    using iterator = boost::transform_iterator<transform_cube<T>, typename cube_vector::iterator>;
 
     /**
      * @brief Returns the number of inputs
@@ -517,9 +517,9 @@ namespace cirkit
   {
     explicit transform_cube( const std::vector<unsigned>& permutation ) : permutation( permutation ) {}
 
-    typedef std::pair<typename truth_table<T>::in_const_iterator, typename truth_table<T>::in_const_iterator> in_const_iterator_pair;
-    typedef std::pair<typename truth_table<T>::out_const_iterator, typename truth_table<T>::out_const_iterator> out_const_iterator_pair;
-    typedef std::pair<in_const_iterator_pair, out_const_iterator_pair> result_type;
+    using in_const_iterator_pair  = std::pair<typename truth_table<T>::in_const_iterator, typename truth_table<T>::in_const_iterator>;
+    using out_const_iterator_pair = std::pair<typename truth_table<T>::out_const_iterator, typename truth_table<T>::out_const_iterator>;
+    using result_type = std::pair<in_const_iterator_pair, out_const_iterator_pair>;
 
     result_type operator()( const typename truth_table<T>::cube_vector::value_type& ct ) const
     {
@@ -566,7 +566,7 @@ namespace cirkit
      *   </tr>
      * </table>
    */
-  typedef truth_table<boost::optional<bool> > binary_truth_table;
+  using binary_truth_table = truth_table<boost::optional<bool>>;
 
   /**
    * @brief Outputs a truth table
