@@ -50,7 +50,7 @@ header_template = env.from_string('''
  * @brief TODO
  *
  * @author {{ author }}
- * @since  2.2
+ * @since  2.3
  */
 
 #ifndef {{ basename.upper() }}_HPP
