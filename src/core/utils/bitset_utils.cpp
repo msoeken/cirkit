@@ -58,14 +58,11 @@ std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b )
 {
   auto pos = b.find_first();
 
-  os << "{";
-  bool first = true;
+  os << "{ ";
 
   while ( pos != boost::dynamic_bitset<>::npos )
   {
-    if ( !first ) { os << ", "; }
-    first = false;
-    os << pos;
+    os << pos << " ";
     pos = b.find_next( pos );
   }
 
