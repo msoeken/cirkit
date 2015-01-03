@@ -54,6 +54,24 @@ boost::dynamic_bitset<> random_bitset( unsigned n )
   return random_bitset( n, generator );
 }
 
+std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b )
+{
+  auto pos = b.find_first();
+
+  os << "{";
+  bool first = true;
+
+  while ( pos != boost::dynamic_bitset<>::npos )
+  {
+    if ( !first ) { os << ", "; }
+    first = false;
+    os << pos;
+    pos = b.find_next( pos );
+  }
+
+  return os << "}";
+}
+
 }
 
 // Local Variables:

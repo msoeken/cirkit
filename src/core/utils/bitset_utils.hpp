@@ -27,6 +27,7 @@
 #ifndef BITSET_UTILS_HPP
 #define BITSET_UTILS_HPP
 
+#include <iostream>
 #include <random>
 #include <vector>
 
@@ -60,6 +61,8 @@ boost::dynamic_bitset<> random_bitset( unsigned n, URNG& g )
 }
 
 boost::dynamic_bitset<> random_bitset( unsigned n );
+
+std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b );
 
 }
 
