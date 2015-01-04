@@ -24,6 +24,8 @@
 #include <core/utils/program_options.hpp>
 #include <core/utils/timeout.hpp>
 
+#include <classical/optimization/compact_dsop.hpp>
+
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -42,18 +44,18 @@ int main( int argc, char ** argv )
   using boost::program_options::value;
 
   std::string filename;
-  unsigned    mode = 0u;
+  auto        mode = 0u;
+  auto        dsop = 0u;
   std::string planame;
-  unsigned    timeout      = 5000u;
 
   program_options opts;
   opts.add_options()
-    ( "filename", value<std::string>( &filename ),                           "PLA filename" )
-    ( "mode",     value<unsigned>   ( &mode     )->default_value( 0u ),      "0: Exact cube-based embedding\n1: Heuristic BDD-based embedding" )
-    ( "planame",  value<std::string>( &planame  ),                           "Filename of the embedded PLA file (default is empty)" )
-    ( "timeout",  value<unsigned>   ( &timeout  )->default_value( timeout ), "Timeout in seconds" )
-    ( "truth_table,t",                                                       "Prints truth table of embedded PLA (with constants and garbage)" )
-    ( "verbose,v",                                                           "Be verbose" )
+    ( "filename", value( &filename ),          "PLA filename" )
+    ( "mode",     value_with_default( &mode ), "0: Exact cube-based embedding\n1: Heuristic BDD-based embedding" )
+    ( "dsop",     value_with_default( &dsop ), "0: Naive extending\n1: Compact DSOP" )
+    ( "planame",  value( &planame ),           "Filename of the embedded PLA file (default is empty)" )
+    ( "truth_table,t",                         "Prints truth table of embedded PLA (with constants and garbage)" )
+    ( "verbose,v",                             "Be verbose" )
     ;
   opts.parse( argc, argv );
 
@@ -63,18 +65,35 @@ int main( int argc, char ** argv )
     return 1;
   }
 
-  /* timeout */
-  //std::thread t1( [&timeout]() { timeout_after( timeout ); } );
-
   /* extend for exact embedding */
   if ( mode == 0u )
   {
-    binary_truth_table pla, extended;
-    read_pla_settings rp_settings;
-    rp_settings.extend = false;
-    read_pla( pla, filename, rp_settings );
-    extend_pla( pla, extended );
-    write_pla( extended, "/tmp/extended.pla" );
+    if ( opts.is_set( "verbose" ) )
+    {
+      std::cout << "[i] generate DSOP..." << std::endl;
+    }
+    if ( dsop == 0u )
+    {
+      binary_truth_table pla, extended;
+      read_pla_settings rp_settings;
+      rp_settings.extend = false;
+      read_pla( pla, filename, rp_settings );
+      extend_pla( pla, extended );
+      write_pla( extended, "/tmp/extended.pla" );
+    }
+    else if ( dsop == 1u )
+    {
+      properties::ptr cd_settings( new properties );
+      cd_settings->set( "verbose", opts.is_set( "verbose" ) );
+      cd_settings->set( "sortfunc", sort_cube_meta_func_t( sort_by_dimension_first ) );
+      cd_settings->set( "optfunc", opt_cube_func_t( opt_dsop_3 ) );
+      compact_dsop( "/tmp/extended.pla", filename, cd_settings );
+    }
+  }
+
+  if ( opts.is_set( "verbose" ) )
+  {
+    std::cout << "[i] embedding pla..." << std::endl;
   }
 
   rcbdd cf;
