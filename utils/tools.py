@@ -165,6 +165,14 @@ class package_yosys:
     build       = [ "make config-clang", "make -j5", "make lib" ]
     install     = [ "for i in `find backends frontends kernel libs passes -type f \( -name '*.h' -o -name '*.hh' \) -printf '%h\n' | sort -u`; do mkdir -p ../../../ext/include/yosys/$i; done", "for i in `find backends frontends kernel libs passes -type f \( -name '*.h' -o -name '*.hh' \)`; do cp -v $i ../../../ext/include/yosys/$i; done", "cp -v yosys %s", "cp -v libyosys.so ../../../ext/lib" ]
 
+class package_yices:
+    description = "Yices SMT Solver"
+    subdir      = "yices-2.2.2"
+    url         = [ "http://yices.csl.sri.com/cgi-bin/yices2-newnewdownload.cgi\?file\=yices-2.2.2-src.tar.gz\&accept\=I+accept", "yices-2.2.2-src.tar.gz" ]
+    fmt         = "tar-gz-mv"
+    build       = [ "./configure --prefix=`pwd`/../../../ext", "make -j8" ]
+    install     = [ "make install" ]
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
@@ -205,6 +213,10 @@ def checkout_or_download( package ):
         os.system( "wget %s" % package.url )
         os.system( "tar xvfz `basename %s`" % package.url )
         os.system( "rm `basename %s`" % package.url )
+    elif package.fmt in ["tar-gz-mv"]:
+        os.system( "wget %s -O %s" % tuple( package.url ) )
+        os.system( "tar xvfz %s" % package.url[1] )
+        os.system( "rm %s" % package.url[1] )
     elif package.fmt == "wget-list":
         os.mkdir( package.subdir )
         for u in package.url:
