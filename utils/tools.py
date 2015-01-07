@@ -173,6 +173,14 @@ class package_yices:
     build       = [ "./configure --prefix=`pwd`/../../../ext", "make -j8" ]
     install     = [ "make install" ]
 
+class package_efsmt:
+    description = "Exists-Forall SMT Problem Solving"
+    subdir      = "efsmt"
+    url         = "http://www6.in.tum.de/~chengch/efsmt/efsmt_20130208.zip"
+    fmt         = "zip"
+    build       = [ "make lib" ]
+    install     = [ "cp -v libefsmt.so ../../../ext/lib", "cp -v efsmt.h ../../../ext/include" ]
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
@@ -212,6 +220,10 @@ def checkout_or_download( package ):
     elif package.fmt in ["tar-gz", "tgz"]:
         os.system( "wget %s" % package.url )
         os.system( "tar xvfz `basename %s`" % package.url )
+        os.system( "rm `basename %s`" % package.url )
+    elif package.fmt in ["zip"]:
+        os.system( "wget %s" % package.url )
+        os.system( "unzip `basename %s`" % package.url )
         os.system( "rm `basename %s`" % package.url )
     elif package.fmt in ["tar-gz-mv"]:
         os.system( "wget %s -O %s" % tuple( package.url ) )
