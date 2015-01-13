@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(simple)
 {
   double runtime;
 
-  typedef std::function<void(unsigned, double&)> exp_func_t;
-  typedef std::tuple<unsigned, unsigned, std::string, exp_func_t> exp_tuple_t;
+  using exp_func_t  = std::function<void(unsigned, double&)>;
+  using exp_tuple_t = std::tuple<unsigned, unsigned, std::string, exp_func_t>;
   std::vector<exp_tuple_t> experiments =
     { std::make_tuple( 1u, 150u, std::string( "identity" ),         exp_func_t( synthesize_identity         ) ),
       std::make_tuple( 1u, 150u, std::string( "invert" ),           exp_func_t( synthesize_inverter         ) ),

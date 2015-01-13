@@ -38,10 +38,10 @@
 using namespace boost::assign;
 using namespace cirkit;
 
-typedef boost::variant<unsigned, double> entry_t;
-typedef std::vector<entry_t> column_t;
-typedef std::vector<std::tuple<std::string, column_t, std::vector<column_t>>> table_t;
-typedef std::vector<std::pair<std::string, char>> label_type_vector_t;
+using entry_t             = boost::variant<unsigned, double>;
+using column_t            = std::vector<entry_t>;
+using table_t             = std::vector<std::tuple<std::string, column_t, std::vector<column_t>>>;
+using label_type_vector_t = std::vector<std::pair<std::string, char>>;
 
 label_type_vector_t parse_label_type_string( const std::string& str )
 {
@@ -121,7 +121,7 @@ int main( int argc, char ** argv )
   }
 
   /* Parse columns */
-  typedef std::vector<std::pair<std::string, std::string>> columns_vector_t;
+  using columns_vector_t = std::vector<std::pair<std::string, std::string>>;
   columns_vector_t columns_vector;
   if ( !columns.empty() )
   {

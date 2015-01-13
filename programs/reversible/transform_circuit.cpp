@@ -53,7 +53,7 @@ int main( int argc, char ** argv )
   std::vector<circuit> circuits( 1u );
   read_realization( circuits.front(), opts.read_realization_filename() );
 
-  typedef std::function<void(const circuit&, circuit&)> func_t;
+  using func_t = std::function<void(const circuit&, circuit&)>;
   std::vector<std::pair<std::string, func_t>> transformations = {
     { "negative_to_positive", func_t( negative_controls_to_positive ) },
     { "fredkin_to_toffoli",   func_t( fredkin_gates_to_toffoli ) }
