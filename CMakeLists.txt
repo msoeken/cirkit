@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 2.8.9)
 #set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS} -fsanitize=address -fsanitize=leak" )
 add_definitions(-std=c++11 -O3 -fno-omit-frame-pointer -g -DBOOST_RESULT_OF_USE_DECLTYPE -D__extern_always_inline=inline)
 
+add_definitions ("-DDATA_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
+
 include(CTest)
 
 # Some user defined macros (INFO: maybe they can be moved somewhere else)
