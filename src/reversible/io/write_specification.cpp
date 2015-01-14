@@ -131,7 +131,7 @@ namespace cirkit
        << ".garbage " << _garbage << std::endl
        << ".begin" << std::endl;
 
-    typedef std::map<unsigned, std::pair<binary_truth_table::out_const_iterator, binary_truth_table::out_const_iterator> > table_type;
+    using table_type = std::map<unsigned, std::pair<binary_truth_table::out_const_iterator, binary_truth_table::out_const_iterator> >;
     table_type table;
 
     for ( binary_truth_table::const_iterator it = spec.begin(); it != spec.end(); ++it )

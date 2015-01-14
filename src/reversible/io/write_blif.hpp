@@ -55,7 +55,7 @@ namespace cirkit
      *
      * @since  1.1.1
      */
-    typedef std::map<unsigned, std::map<std::vector<boost::optional<bool> >, bool> > truth_table_map;
+    using truth_table_map = std::map<unsigned, std::map<std::vector<boost::optional<bool> >, bool> >;
 
     /**
      * @brief Prefix for the auxiliary variables which are created by the algorithm

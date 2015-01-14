@@ -36,8 +36,8 @@
 namespace cirkit
 {
 
-typedef std::vector<boost::dynamic_bitset<> > bitset_vector_t;
-typedef std::vector<std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<>>> bitset_pair_vector_t;
+using bitset_vector_t      = std::vector<boost::dynamic_bitset<> >;
+using bitset_pair_vector_t = std::vector<std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<>>>;
 
 /**
  * Transforms a truth table into a vector of bitsets

@@ -35,8 +35,8 @@
 namespace cirkit
 {
 
-typedef std::vector<unsigned> permutation_t;
-typedef std::vector<std::vector<unsigned>> cycles_t;
+using permutation_t = std::vector<unsigned>;
+using cycles_t      = std::vector<std::vector<unsigned>>;
 
 permutation_t truth_table_to_permutation( const binary_truth_table& spec );
 permutation_t circuit_to_permutation( const circuit& circ );
