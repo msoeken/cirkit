@@ -1,4 +1,4 @@
-/* CirKit: A circuit toolkit
+/* RevKit (www.revkit.org)
  * Copyright (C) 2009-2015  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
