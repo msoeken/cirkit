@@ -39,7 +39,7 @@ macro(srcdirlist result curdir)
 endmacro()
 
 # Dependencies
-set( MAIN_Boost_LIBRARIES unit_test_framework regex filesystem graph program_options system )
+set( MAIN_Boost_LIBRARIES unit_test_framework regex filesystem graph program_options system timer )
 find_package(Boost REQUIRED COMPONENTS ${MAIN_Boost_LIBRARIES} )
 
 include_directories(${Boost_INCLUDE_DIR} ext/include)

@@ -37,6 +37,7 @@
 #include <sys/times.h>
 
 #include <boost/format.hpp>
+#include <boost/timer/timer.hpp>
 
 #include <core/properties.hpp>
 
@@ -403,6 +404,36 @@ namespace cirkit {
     bool started;
     unsigned _measure_method = static_cast<unsigned>( measure_method::user_time );
   };
+
+/* this will soon replace the old print_timer */
+class new_print_timer : public boost::timer::cpu_timer
+{
+public:
+  new_print_timer( const std::string& format, bool verbose = false, std::ostream& os = std::cout )
+    : format( format ),
+      verbose( verbose ),
+      os( os )
+  {
+    start();
+  }
+
+  ~new_print_timer()
+  {
+    if ( !is_stopped() )
+    {
+      stop();
+      if ( verbose )
+      {
+        os << cpu_timer::format( 2, format ) << std::endl;
+      }
+    }
+  }
+
+private:
+  std::string   format;
+  bool          verbose;
+  std::ostream& os;
+};
 
 }
 
