@@ -181,6 +181,14 @@ class package_efsmt:
     build       = [ "make lib" ]
     install     = [ "cp -v libefsmt.so ../../../ext/lib", "cp -v efsmt.h ../../../ext/include" ]
 
+class package_aiger:
+    description = "AIGER is a format, library and set of utilities for And-Inverter Graphs (AIGs)"
+    subdir      = "aiger-1.9.9"
+    url         = "http://fmv.jku.at/aiger/aiger-1.9.9.tar.gz"
+    fmt         = "tar-gz"
+    build       = [ "./configure.sh", "make -j8" ]
+    install     = [ "cp -v aigand aigdd aigflip aigfuzz aiginfo aigjoin aigmiter aigmove aignm aigor aigreset aigsim aigsplit aigstrip aigtoaig aigtoblif aigtocnf aigtodot aigtosmv aigunconstraint aigunroll aigvis andtoaig bliftoaig smvtoaig soltostim wrapstim %s" ]
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
