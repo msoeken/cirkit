@@ -102,6 +102,104 @@ inline std::vector<unsigned> precompute_in_degrees( const G& g )
   return v;
 }
 
+/**
+ * @brief Predicate to keep vertices that have a certain property
+ */
+template<class PropertyMap>
+struct vertex_has_property
+{
+  using value_type = typename boost::property_traits<PropertyMap>::value_type;
+
+  vertex_has_property() {}
+  vertex_has_property( const PropertyMap& map, const value_type& value )
+    : map( &map ), value( &value ) {}
+
+  template<typename Vertex>
+  bool operator()( const Vertex& v ) const
+  {
+    return boost::get( *map, v ) == *value;
+  }
+
+private:
+  PropertyMap const* map;
+  value_type const* value;
+};
+
+/**
+ * @brief Predicate to keep vertices that do not have a certain property
+ */
+template<class PropertyMap>
+struct vertex_has_not_property
+{
+  using value_type = typename boost::property_traits<PropertyMap>::value_type;
+
+  vertex_has_not_property() {}
+  vertex_has_not_property( const PropertyMap& map, const value_type& value )
+    : map( &map ), value( &value ) {}
+
+  template<typename Vertex>
+  bool operator()( const Vertex& v ) const
+  {
+    return boost::get( *map, v ) != *value;
+  }
+
+private:
+  PropertyMap const* map;
+  value_type const* value;
+};
+
+/**
+ * @brief Predicate to keep edges whose adjacent vertices have a certain property
+ */
+template<class Graph, class PropertyMap>
+struct edge_has_property
+{
+  using value_type = typename boost::property_traits<PropertyMap>::value_type;
+
+  edge_has_property() {}
+  edge_has_property( const Graph& g, const PropertyMap& map, const value_type& value )
+    : g( &g ), map( &map ), value( &value ) {}
+
+  template<typename Edge>
+  bool operator()( const Edge& e ) const
+  {
+    const auto& s = boost::source( e, *g );
+    const auto& t = boost::target( e, *g );
+    return ( boost::get( *map, s ) == *value ) && ( boost::get( *map, t ) == *value );
+  }
+
+private:
+  Graph const* g;
+  PropertyMap const* map;
+  value_type const* value;
+};
+
+/**
+ * @brief Predicate to keep edges whose adjacent vertices do not have a certain property
+ */
+template<class Graph, class PropertyMap>
+struct edge_has_not_property
+{
+  using value_type = typename boost::property_traits<PropertyMap>::value_type;
+
+  edge_has_not_property() {}
+  edge_has_not_property( const Graph& g, const PropertyMap& map, const value_type& value )
+    : g( &g ), map( &map ), value( &value ) {}
+
+  template<typename Edge>
+  bool operator()( const Edge& e ) const
+  {
+    const auto& s = boost::source( e, *g );
+    const auto& t = boost::target( e, *g );
+    return ( boost::get( *map, s ) != *value ) || ( boost::get( *map, t ) != *value );
+  }
+
+private:
+  Graph const* g;
+  PropertyMap const* map;
+  value_type const* value;
+};
+
 }
 
 #endif
