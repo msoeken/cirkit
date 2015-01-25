@@ -435,6 +435,36 @@ private:
   std::ostream& os;
 };
 
+/* this will soon replace the old properties timer */
+class new_properties_timer : public boost::timer::cpu_timer
+{
+public:
+  new_properties_timer( const properties::ptr& statistics, const std::string& key = "runtime" )
+    : statistics( statistics ), key( key )
+  {
+    start();
+  }
+
+  ~new_properties_timer()
+  {
+    if ( !is_stopped() )
+    {
+      stop();
+      if ( statistics )
+      {
+        const double sec = 1000000000.0L;
+        boost::timer::cpu_times const elapsed_times(elapsed());
+        double total_sec = ( elapsed_times.system + elapsed_times.user ) / sec;
+        statistics->set( key, total_sec );
+      }
+    }
+  }
+
+private:
+  const properties::ptr& statistics;
+  std::string            key;
+};
+
 }
 
 #endif
