@@ -51,3 +51,14 @@ externalProject_add(aiger
 )
 add_ext_library("libaiger.so")
 
+externalProject_add(igraphex
+  DOWNLOAD_DIR .
+  URL "http://igraph.org/nightly/get/c/igraph-0.7.1.tar.gz"
+  CONFIGURE_COMMAND ./configure --prefix=${CMAKE_SOURCE_DIR}/ext
+  BUILD_COMMAND make -j5
+  BUILD_IN_SOURCE 1
+  INSTALL_COMMAND make install
+  LOG_DOWNLOAD 1
+  LOG_BUILD 1
+  LOG_INSTALL 1)
+add_ext_library("libigraph.so")
