@@ -6,9 +6,10 @@ The following software is required in order to build CirKit
 
 * git
 * cmake (at least version 2.8.9)
-* g++ or clang++ (with C++11 support)
+* g++ (at least version 4.9.0) or clang++ (at least version 3.5.0)
 * boost (at least version 1.48.0)
 * GNU MP, and its C++ interface GMP++
+* libxml2
 * Qt5 (only for the GUI)
 
 ## Build CirKit
