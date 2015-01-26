@@ -259,7 +259,7 @@ struct lad_domain
   vec_int_t global_matching_p;
   vec_int_t global_matching_t;
 
-  lad_domain( const lad_graph& gp, const lad_graph& gt );
+  lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints = false );
 
   inline bool to_filter_empty() const
   {
@@ -349,7 +349,7 @@ inline bool is_compatible( int dir_gp, int dir_gt )
 }
 
 bool compatible_vertices( int u, int v,
-                          const lad_graph& gp, const lad_graph& gt )
+                          const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints )
 {
   if ( !compatible_vertex_labels( gp.vertex_label[u], gt.vertex_label[v] ) )
   {
@@ -364,11 +364,12 @@ bool compatible_vertices( int u, int v,
   //if ( gp.nb_pred[u] > gt.adj[v].size() ) return false;
   //if ( gp.nb_succ[u] > gt.adj[v].size() - gt.nb_pred[v] ) return false;
   //if ( gp.adj[u].size() - gp.nb_pred[u] - gp.nb_succ[u] > gt.adj[v].size() - gt.nb_pred[v] - gt.nb_succ[v] ) return false;
-  if ( gt.support[v] != gp.support[u] ) return false;
+  if ( functional_support_constraints && ( gt.support[v] != gp.support[u] ) ) return false;
+  if ( !functional_support_constraints && ( gt.support[v] < gp.support[u] ) ) return false;
   return true;
 }
 
-lad_domain::lad_domain( const lad_graph& gp, const lad_graph& gt )
+lad_domain::lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints )
 {
   /* create */
   global_matching_p.resize( gp.nb_vertices, -1 );
@@ -390,7 +391,7 @@ lad_domain::lad_domain( const lad_graph& gp, const lad_graph& gt )
     first_val[u] = val_size;
     for ( v = 0u; v < gt.nb_vertices; ++v )
     {
-      if ( !compatible_vertices( u, v, gp, gt ) ) /* v not in D[u] */
+      if ( !compatible_vertices( u, v, gp, gt, functional_support_constraints ) ) /* v not in D[u] */
       {
         pos_in_val[u][v] = first_val[u] + gt.nb_vertices;
       }
@@ -1308,7 +1309,8 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
                             properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() )
 {
   /* Settings */
-  bool verbose = get( settings, "verbose", false );
+  bool functional = get( settings, "functional", false );
+  bool verbose    = get( settings, "verbose",    false );
 
   /* Timer */
   timer<properties_timer> t;
@@ -1321,7 +1323,7 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
 
   lad_graph gp( pattern, selector, verbose );
   lad_graph gt( target, selector, verbose );
-  lad_domain d( gp, gt );
+  lad_domain d( gp, gt, functional );
 
   if ( verbose )
   {
