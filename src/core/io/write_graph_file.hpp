@@ -78,7 +78,7 @@ void write_labeled_graph_file( const Graph& g,
   std::ofstream os( filename.c_str(), std::ofstream::out );
 
   os << boost::num_vertices( g ) << std::endl;
-  for ( const auto& v : boost::make_iterator_range( boost::vertices( g ) ) )
+  for ( auto v = 0u; v < boost::num_vertices( g ); ++v )
   {
     os << vertex_label( v ) << " " << boost::out_degree( v, g );
     for ( const auto& e : boost::make_iterator_range( boost::out_edges( v, g ) ) )
