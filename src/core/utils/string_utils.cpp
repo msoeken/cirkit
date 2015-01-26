@@ -61,18 +61,18 @@ std::pair<std::string, std::string> split_string_pair( const std::string& str, c
 }
 
 
-void line_parser( const std::string& filename, const std::vector<std::pair<std::regex, std::function<void(const std::smatch&)>>>& matchers )
+void line_parser( const std::string& filename, const std::vector<std::pair<boost::regex, std::function<void(const boost::smatch&)>>>& matchers )
 {
   std::ifstream in( filename.c_str(), std::ifstream::in );
   std::string line;
 
-  std::smatch m;
+  boost::smatch m;
 
   while ( getline( in, line ) )
   {
     for ( const auto& matcher : matchers )
     {
-      if ( std::regex_search( line, m, matcher.first ) )
+      if ( boost::regex_search( line, m, matcher.first ) )
       {
         matcher.second( m );
       }

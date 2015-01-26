@@ -37,6 +37,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/adaptors.hpp>
+#include <boost/regex.hpp>
 
 namespace cirkit
 {
@@ -62,7 +63,7 @@ void foreach_string( const std::string& str, const std::string& delimiter, std::
 
 std::pair<std::string, std::string> split_string_pair( const std::string& str, const std::string& delimiter );
 
-void line_parser( const std::string& filename, const std::vector<std::pair<std::regex, std::function<void(const std::smatch&)>>>& matchers );
+void line_parser( const std::string& filename, const std::vector<std::pair<boost::regex, std::function<void(const boost::smatch&)>>>& matchers );
 
 }
 
