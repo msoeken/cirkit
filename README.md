@@ -35,5 +35,5 @@ The easiest way to enable addons is by typing `ccmake ..' in the build directory
 
 ## Executing CirKit Programs
 
-Executables can be found in the directory `build/programs'. Form the build
+Executables can be found in the directory `build/programs'. From the build
 directory call e.g. `programs/circuit_info'
