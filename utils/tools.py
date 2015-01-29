@@ -189,6 +189,24 @@ class package_aiger:
     build       = [ "./configure.sh", "make -j8" ]
     install     = [ "cp -v aigand aigdd aigflip aigfuzz aiginfo aigjoin aigmiter aigmove aignm aigor aigreset aigsim aigsplit aigstrip aigtoaig aigtoblif aigtocnf aigtodot aigtosmv aigunconstraint aigunroll aigvis andtoaig bliftoaig smvtoaig soltostim wrapstim %s" ]
 
+class package_cbmc_i386:
+    description = "C Bounded Model Checker 5.0 (32bit)"
+    subdir      = "cbmc-5.0-i386"
+    url         = "http://www.cprover.org/cbmc/download/cbmc-5-0-linux-32.tgz"
+    fmt         = "tgz"
+    build       = [ "" ]
+    install     = [ "cp -v cbmc goto-cc goto-instrument hw-cbmc %s" ]
+    makedir     = True
+
+class package_cbmc_x64:
+    description = "C Bounded Model Checker 5.0 (64bit)"
+    subdir      = "cbmc-5.0-x64"
+    url         = "http://www.cprover.org/cbmc/download/cbmc-5-0-linux-64.tgz"
+    fmt         = "tgz"
+    build       = [ "" ]
+    install     = [ "cp -v cbmc goto-cc goto-instrument hw-cbmc %s" ]
+    makedir     = True
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
