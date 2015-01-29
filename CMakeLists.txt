@@ -27,3 +27,5 @@ externalProject_add(revlib_circuits
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
+
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/reversible)
