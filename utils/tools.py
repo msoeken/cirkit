@@ -325,6 +325,10 @@ if __name__ == "__main__":
         if not os.path.exists( path ):
             os.makedirs( path )
 
+    if len( sys.argv ) > 1:
+        if ( not "cmd_%s" % sys.argv[1] in locals() ):
+            print( "error: Unknown command '" + sys.argv[1] + "'" )
+            sys.exit(0)
 
     if len( sys.argv ) == 2:
         locals()["cmd_%s" % sys.argv[1]]()
