@@ -323,7 +323,8 @@ if __name__ == "__main__":
     # Setup some paths
     for path in [ "build/tools", "ext/bin" ]:
         if not os.path.exists( path ):
-            os.mkdir( path )
+            os.makedirs( path )
+
 
     if len( sys.argv ) == 2:
         locals()["cmd_%s" % sys.argv[1]]()
