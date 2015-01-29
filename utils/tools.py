@@ -189,6 +189,24 @@ class package_aiger:
     build       = [ "./configure.sh", "make -j8" ]
     install     = [ "cp -v aigand aigdd aigflip aigfuzz aiginfo aigjoin aigmiter aigmove aignm aigor aigreset aigsim aigsplit aigstrip aigtoaig aigtoblif aigtocnf aigtodot aigtosmv aigunconstraint aigunroll aigvis andtoaig bliftoaig smvtoaig soltostim wrapstim %s" ]
 
+class package_cbmc_i386:
+    description = "C Bounded Model Checker 5.0 (32bit)"
+    subdir      = "cbmc-5.0-i386"
+    url         = "http://www.cprover.org/cbmc/download/cbmc-5-0-linux-32.tgz"
+    fmt         = "tgz"
+    build       = [ "" ]
+    install     = [ "cp -v cbmc goto-cc goto-instrument hw-cbmc %s" ]
+    makedir     = True
+
+class package_cbmc_x64:
+    description = "C Bounded Model Checker 5.0 (64bit)"
+    subdir      = "cbmc-5.0-x64"
+    url         = "http://www.cprover.org/cbmc/download/cbmc-5-0-linux-64.tgz"
+    fmt         = "tgz"
+    build       = [ "" ]
+    install     = [ "cp -v cbmc goto-cc goto-instrument hw-cbmc %s" ]
+    makedir     = True
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
@@ -227,8 +245,13 @@ def checkout_or_download( package ):
         os.system( "hg clone %s" % package.url )
     elif package.fmt in ["tar-gz", "tgz"]:
         os.system( "wget %s" % package.url )
-        os.system( "tar xvfz `basename %s`" % package.url )
-        os.system( "rm `basename %s`" % package.url )
+        if hasattr( package, "makedir" ) and package.makedir:
+            subdir = package.subdir
+            os.system( "mkdir {1}; mv `basename {0}` {1}".format(package.url,subdir) )
+        else:
+            subdir = "."
+        os.system( "tar xvfz {1}/`basename {0}` -C {1}".format(package.url,subdir) )
+        os.system( "rm {1}/`basename {0}`".format(package.url,subdir) )
     elif package.fmt in ["zip"]:
         os.system( "wget %s" % package.url )
         os.system( "unzip `basename %s`" % package.url )
@@ -323,7 +346,12 @@ if __name__ == "__main__":
     # Setup some paths
     for path in [ "build/tools", "ext/bin" ]:
         if not os.path.exists( path ):
-            os.mkdir( path )
+            os.makedirs( path )
+
+    if len( sys.argv ) > 1:
+        if ( not "cmd_%s" % sys.argv[1] in locals() ):
+            print( "error: Unknown command '" + sys.argv[1] + "'" )
+            sys.exit(0)
 
     if len( sys.argv ) == 2:
         locals()["cmd_%s" % sys.argv[1]]()
