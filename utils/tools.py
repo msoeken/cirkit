@@ -68,6 +68,8 @@ import sys
 # install     - A list of commands that should be executed for installing
 #               One can place a "%s" into a command to refer to the ext/bin
 #               directory
+# makedir     - Flag to enable the creation of directories (set it to
+#               'True' if the archive is packed whithout directories)
 
 class package_abc:
     description = "ABC: System for Sequential Logic Synthesis and Formal Verification"
