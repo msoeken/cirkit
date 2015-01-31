@@ -39,19 +39,21 @@ header_cirkit = """/* CirKit: A circuit toolkit
  */
 """
 
-count = 0; total = 0
-for _dirs, header in [([".", "addons/cirkit-addon-formal", "addons/cirkit-addon-mini", "addons/cirkit-addon-revlib"], header_revkit), \
-                      (["addons/cirkit-addon-experimental", "addons/cirkit-addon-verific", "addons/cirkit-addon-yosys"], header_cirkit)]:
-    lines = header.count( "\n" )
-    for _dir in _dirs:
-        for top in ["src", "programs", "test"]:
-            for root, dirnames, filenames in os.walk( "{0}/{1}".format( _dir, top ) ):
-                for filename in fnmatch.filter( filenames, "*.?pp" ):
-                    name = os.path.join( root, filename )
-                    file_header = ''.join( open( name, "r" ).readlines()[0:lines] )
-                    if file_header != header:
-                        count += 1
-                        print( "{0} File {1} has wrong header.".format( colored( '[E]', 'red', attrs = ['bold'] ), colored( name, 'green' ) ) )
-                    total += 1
+def get_directories( *addon_names ):
+    return ["."] + ["addons/cirkit-addon-%s" % a for a in addon_names]
+
+count = 0; total = 0; header = header_cirkit
+lines = header.count( "\n" )
+for _dir in get_directories( "formal", "mini", "reversible", "experimental", "verific", "yosys" ):
+#for _dir in [".", "addons/cirkit-addon-formal", "addons/cirkit-addon-mini", "addons/cirkit-addon-reversible", "addons/cirkit-addon-experimental", "addons/cirkit-addon-verific", "addons/cirkit-addon-yosys"]:
+    for top in ["src", "programs", "test"]:
+        for root, dirnames, filenames in os.walk( "{0}/{1}".format( _dir, top ) ):
+            for filename in fnmatch.filter( filenames, "*.?pp" ):
+                name = os.path.join( root, filename )
+                file_header = ''.join( open( name, "r" ).readlines()[0:lines] )
+                if file_header != header:
+                    count += 1
+                    print( "{0} File {1} has wrong header.".format( colored( '[E]', 'red', attrs = ['bold'] ), colored( name, 'green' ) ) )
+                total += 1
 
 print( "{0} {1} from {2} files have a wrong header.".format( colored( '[I]', 'white', attrs = ['bold'] ), count, total ) )
