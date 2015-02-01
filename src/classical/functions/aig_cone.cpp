@@ -73,15 +73,6 @@ void aig_cone_search( const aig_graph& aig, const ColorMap& color, const aig_nod
   boost::detail::depth_first_visit_impl( aig, start, vis, color, boost::detail::nontruth2() );
 }
 
-aig_graph copy_from_filtered( const filter_graph_t& fg, std::vector<aig_node>& copy_map )
-{
-  aig_graph new_aig;
-  copy_map.resize( boost::num_vertices( fg ) );
-  iso_map_t copy_imap( copy_map.begin(), boost::get( boost::vertex_index, fg ) );
-  boost::copy_graph( fg, new_aig, boost::orig_to_copy( copy_imap ) );
-  return new_aig;
-}
-
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -117,7 +108,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
 
   /* copy graph */
   std::vector<aig_node> copy_map;
-  aig_graph new_aig = copy_from_filtered( fg, copy_map );
+  aig_graph new_aig = copy_from_filtered<aig_graph, filter_graph_t>( fg, copy_map );
 
   if ( verbose )
   {
