@@ -32,6 +32,8 @@
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/copy.hpp>
+#include <boost/graph/filtered_graph.hpp>
 
 using namespace boost::assign;
 
@@ -199,6 +201,22 @@ private:
   PropertyMap const* map;
   value_type const* value;
 };
+
+template<class Dest, class Source>
+Dest copy_from_filtered( const Source& source,
+                         std::vector<typename boost::graph_traits<Dest>::vertex_descriptor>& copy_map )
+{
+  using source_vertex_t = typename boost::graph_traits<Source>::vertex_descriptor;
+  using dest_vertex_t   = typename boost::graph_traits<Dest>::vertex_descriptor;
+  using index_map_t     = typename boost::property_map<Source, boost::vertex_index_t>::type;
+  using iso_map_t       = boost::iterator_property_map<typename std::vector<dest_vertex_t>::iterator, index_map_t, source_vertex_t, source_vertex_t&>;
+
+  Dest dest;
+  copy_map.resize( boost::num_vertices( source ) );
+  iso_map_t copy_imap( copy_map.begin(), boost::get( boost::vertex_index, source ) );
+  boost::copy_graph( source, dest, boost::orig_to_copy( copy_imap ) );
+  return dest;
+}
 
 }
 
