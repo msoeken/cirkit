@@ -32,6 +32,7 @@
 import fnmatch
 import itertools
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -56,6 +57,14 @@ def files( path, wildcard ):
     _f = ( ( root, filename ) for root, dirnames, filenames in os.walk( path ) for filename in fnmatch.filter( filenames, wildcard ) )
     return itertools.groupby( _f, lambda a: a[0] )
 
+def add_file( cfg, base, file ):
+    name = os.path.join( base, file )
+    if "only" in cfg:
+        for p in cfg['only']:
+            if re.match( p, name ): return True
+        return False
+    return True
+
 ################################################################################
 # Functions                                                                    #
 ################################################################################
@@ -66,7 +75,7 @@ addon_files = [ ( "src", "*.?pp" ), ( "programs", "*.?pp" ), ( "test", "*.?pp" )
 def make_dist( config ):
     if "name" not in config: error( "name has not been specified", True )
     name = config['name']
-    version = command( "cat src/core/version.cpp | grep static | awk '{print $6}' | sed -e \"s/[\\\";]//g\"" )
+    version = config['version'] if "version" in config else command( "cat src/core/version.cpp | grep static | awk '{print $6}' | sed -e \"s/[\\\";]//g\"" )
     info( "make package for %s %s" % ( colored( name, 'green' ), colored( version, 'green' ) ) )
 
     # Create directory
@@ -103,9 +112,11 @@ def make_dist( config ):
         for base, pattern in addon_files:
             for p, g in files( os.path.join( apath, base ), pattern ):
                 destpath = os.path.join( path, p[len(apath) + 1:] )
-                if not os.path.exists( destpath ): os.makedirs( destpath )
-                for _, f in g:
-                    shutil.copyfile( os.path.join( p, f ), os.path.join( destpath, f ) )
+                copy_files = [f for _, f in g if add_file( ma, p[len(apath) + 1:], f )]
+                if len( copy_files ) != 0:
+                    if not os.path.exists( destpath ): os.makedirs( destpath )
+                    for f in copy_files:
+                        shutil.copyfile( os.path.join( p, f ), os.path.join( destpath, f ) )
 
         # Merge CMakeLists.txt
         if "merge_cmake" in ma:
@@ -113,6 +124,11 @@ def make_dist( config ):
             dest = os.path.join( mc['dest'] if "dest" in mc else "ext", "CMakeLists.txt" )
 
             cmake = open( os.path.join( apath, "CMakeLists.txt" ), "r" ).readlines()
+
+            if "overrides" in mc:
+                for ov in mc['overrides']:
+                    cmake[int(ov['line']) - 1] = ov['new'] + "\n"
+
             if "lines" in mc:
                 lines = [int( l ) - 1 for l in mc['lines'].split( "-" )]
                 cmake = cmake[lines[0]:lines[1]]
@@ -123,6 +139,10 @@ def make_dist( config ):
                     f.write( c )
 
     # Rename stuff?
+    if "header_title" in config:
+        info( "change header title" )
+        command( "find %s -type f | xargs sed -i -e \"s/CirKit: A circuit toolkit/%s/g\"" % ( path, config['header_title'] ) )
+
     if "title" in config:
         info( "rename title" )
         command( "find %s -type f | xargs sed -i -e \"s/CirKit/%s/g\"" % ( path, config['title'] ) )
@@ -131,9 +151,9 @@ def make_dist( config ):
         info( "rename namespace" )
         command( "find %s -type f | xargs sed -i -e \"s/cirkit/%s/g\"" % ( path, config['namespace'] ) )
 
-    if "header_title" in config:
-        info( "change header title" )
-        command( "find %s -type f | xargs sed -i -e \"s/CirKit: A circuit toolkit/%s/g\"" % ( path, config['header_title'] ) )
+    if "version" in config:
+        info( "override version" )
+        command( "find %s -type f | xargs sed -i -e \"s/@since.*$/@since %s/g\"" % ( path, config['version'] ) )
 
     # Create archive
     info( "create archive %s" % ( colored( archive, 'green' ) ) )
