@@ -40,7 +40,7 @@ namespace cirkit
    * @param pla PLA given as truth table (can contain don't cares)
    * @param filename PLA filename
    *
-   * @version 2.0
+   * @since 2.0
    */
   void write_pla( const binary_truth_table& pla, const std::string& filename );
 

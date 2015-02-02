@@ -43,7 +43,7 @@ namespace cirkit
    *
    * @return Number of additional lines that are sufficient for embedding
    *
-   * @version 2.0
+   * @since 2.0
    */
   unsigned approximate_additional_lines( const std::string& filename,
                                          properties::ptr settings = properties::ptr(),

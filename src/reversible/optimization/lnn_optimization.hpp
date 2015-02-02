@@ -21,7 +21,7 @@
  * @brief Linear nearest Neighbor
  *
  * @author  Aaron Lye
- * @version 2.0
+ * @since 2.0
  */
 
 #ifndef LNN_OPTIMIZATION_HPP
