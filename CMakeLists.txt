@@ -2,7 +2,10 @@ project("CirKit" CXX)
 cmake_minimum_required(VERSION 2.8.9)
 #add_definitions(-std=c++11 -g -fsanitize=address -fsanitize=leak -DBOOST_RESULT_OF_USE_DECLTYPE)
 #set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS} -fsanitize=address -fsanitize=leak" )
-add_definitions(-std=c++11 -O3 -fno-omit-frame-pointer -fcolor-diagnostics -g -DBOOST_RESULT_OF_USE_DECLTYPE -D__extern_always_inline=inline)
+add_definitions(-std=c++11 -O3 -fno-omit-frame-pointer -g -DBOOST_RESULT_OF_USE_DECLTYPE -D__extern_always_inline=inline)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  add_definitions(-fcolor-diagnostics)
+endif()
 
 add_definitions ("-DDATA_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
