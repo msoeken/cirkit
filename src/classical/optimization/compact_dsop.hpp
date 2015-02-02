@@ -21,7 +21,7 @@
  * @brief Compact DSOP computation [Bernasconi et al., TCS 53 (2013), 583-608.]
  *
  * @author  Mathias Soeken
- * @version 2.0
+ * @since 2.0
  */
 
 #ifndef COMPACT_DSOP_HPP

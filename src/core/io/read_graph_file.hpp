@@ -21,7 +21,7 @@
  * @brief Reads a simple vertex/edge graph file
  *
  * @author  Mathias Soeken
- * @version 2.0
+ * @since 2.0
  */
 
 #ifndef READ_GRAPH_FILE

@@ -22,7 +22,7 @@
  *
  * @author  Mathias Soeken
  * @author  Heinz Riener
- * @version 2.0
+ * @since 2.0
  */
 
 #ifndef Z3_UTILS_HPP

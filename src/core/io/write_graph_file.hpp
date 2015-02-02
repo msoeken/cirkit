@@ -21,7 +21,7 @@
  * @brief Writes a simple vertex/edge graph file
  *
  * @author  Mathias Soeken
- * @version 2.0
+ * @since 2.0
  */
 
 #ifndef WRITE_GRAPH_FILE
