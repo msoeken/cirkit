@@ -35,7 +35,7 @@ CirKit uses some external (mainly academic) programs that are typically not
 shipped with Linux distributions.  To ease their installation CirKit provides
 its own small package manager, that can be invoked via `utils/tools.py`.  Run
 
-    utils/tools.py
+    utils/tools.py commands
 
 to learn how it can be executed.  The programs are automatically downloaded and
 build, binaries are installed in `ext/bin`.
