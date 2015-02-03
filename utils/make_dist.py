@@ -138,6 +138,14 @@ def make_dist( config ):
                 for c in cmake:
                     f.write( c )
 
+    # Package manager?
+    if "package_manager" in config and config['package_manager']:
+        info( "copy package manager" )
+        utils = os.path.join( path, "utils" )
+        if not os.path.exists( utils ): os.makedirs( utils )
+        shutil.copyfile( "utils/tools.py", os.path.join( utils, "tools.py" ) )
+        shutil.copytree( "utils/patches", os.path.join( utils, "patches" ) )
+
     # Rename stuff?
     if "header_title" in config:
         info( "change header title" )

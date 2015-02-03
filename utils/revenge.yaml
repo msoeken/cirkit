@@ -2,11 +2,12 @@ name: revenge
 title: Revenge
 namespace: revenge
 header_title: Revenge - Reverse Engineering
-version: 1.0       # force version, otherwise use from file (also overrides all @since's)
-merge_addon:       # src, programs, and test will be copied
+version: 1.0         # force version, otherwise use from file (also overrides all @since's)
+package_manager: Yes # Default is No
+merge_addon:         # src, programs, and test will be copied
   name: experimental
   only: [src/formal/graph/.*, src/formal/sat/.*, src/formal/revenge/.*, src/formal/verification/.*, src/core/utils/.*, src/classical/io/aigmeta.*, programs/classical/find_subcircuit.cpp, programs/classical/random_circuit.cpp, programs/classical/component_equivalence_check.cpp]
-  merge_cmake:     # ext is automatically assumed as destination
+  merge_cmake:       # ext is automatically assumed as destination
     lines: 6-36
     overrides:
       - {line: 6, new: "set(minisat_SRC ${CMAKE_BINARY_DIR}/ext/minisat-prefix/src/minisat)"}

@@ -2,6 +2,7 @@ name: revkit
 title: RevKit
 namespace: revkit
 header_title: RevKit (www.revkit.org)
+package_manager: Yes
 merge_addon:       # src, programs, and test will be copied
   name: reversible
   merge_cmake:     # ext is automatically assumed as destination
