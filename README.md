@@ -28,3 +28,14 @@ The easiest way to enable addons is by typing `ccmake ..' in the build directory
 
 Executables can be found in the directory `build/programs'. From the build
 directory call e.g. `programs/bdd_info'
+
+## Package Manager
+
+CirKit uses some external (mainly academic) programs that are typically not
+shipped with Linux distributions.  To ease their installation CirKit provides
+its own small package manager, that can be invoked via `utils/tools.py'.  Run
+
+    utils/tools.py
+
+to learn how it can be executed.  The programs are automatically downloaded and
+build, binaries are installed in `ext/bin'.
