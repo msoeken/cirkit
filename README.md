@@ -13,21 +13,26 @@ The following software is required in order to build CirKit
 
 ## Build CirKit
 
-After cloning CirKit perform the following steps
+After extracting or cloning CirKit perform the following steps
 
     mkdir build
     cd build
     cmake ..
     make
 
-## Build CirKit Addons
-
-The easiest way to enable addons is by typing `ccmake ..` in the build directory
-
 ## Executing CirKit Programs
 
 Executables can be found in the directory `build/programs`. From the build
 directory call e.g. `programs/bdd_info`
+
+## Build CirKit Addons
+
+CirKit can be extended by addons, you can learn more in the `addons/README.md`
+file.  The addons are not included into the build process by default.  The
+easiest way to enable addons is by typing `ccmake ..` in the build directory
+which opens the ncurses GUI of cmake.  An addon can be enabled by toggling the
+flag at the entry `enable_cirkit-addon-*`.  Afterwards, press `c` followed by
+`g` and then recompile with `make`.
 
 ## Package Manager
 
