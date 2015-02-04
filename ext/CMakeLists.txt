@@ -62,3 +62,5 @@ externalProject_add(igraphex
   LOG_BUILD 1
   LOG_INSTALL 1)
 add_ext_library("libigraph.so")
+
+set(ext_dependencies cudd puma aiger igraphex PARENT_SCOPE)

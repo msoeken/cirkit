@@ -11,4 +11,6 @@ externalProject_add(z3ep
   INSTALL_COMMAND sed "/usr/d" -i build/Makefile COMMAND make install -C build
 )
 
+set(ext_dependencies ${ext_dependencies} z3ep PARENT_SCOPE)
+
 add_ext_library("z3")
