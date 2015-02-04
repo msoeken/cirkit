@@ -93,12 +93,12 @@ def make_dist( config ):
                 destpath = os.path.join( path, p )
                 if not os.path.exists( destpath ): os.makedirs( destpath )
                 for _, f in g:
-                    shutil.copyfile( os.path.join( p, f ), os.path.join( destpath, f ) )
+                    shutil.copy( os.path.join( p, f ), os.path.join( destpath, f ) )
         else:
             p, file = os.path.split( pattern )
             destpath = os.path.join( path, p )
             if not os.path.exists( destpath ): os.makedirs( destpath )
-            shutil.copyfile( pattern, os.path.join( destpath, file ) )
+            shutil.copy( pattern, os.path.join( destpath, file ) )
 
     # Merge addon
     if "merge_addon" in config:
@@ -116,7 +116,7 @@ def make_dist( config ):
                 if len( copy_files ) != 0:
                     if not os.path.exists( destpath ): os.makedirs( destpath )
                     for f in copy_files:
-                        shutil.copyfile( os.path.join( p, f ), os.path.join( destpath, f ) )
+                        shutil.copy( os.path.join( p, f ), os.path.join( destpath, f ) )
 
         # Merge CMakeLists.txt
         if "merge_cmake" in ma:
@@ -138,12 +138,25 @@ def make_dist( config ):
                 for c in cmake:
                     f.write( c )
 
+    # Merge README?
+    if "readme_extra" in config:
+        info( "merge README.md" )
+        with open( os.path.join( path, "README.md" ), "a" ) as f:
+            f.write( "\n" )
+            f.write( config['readme_extra'] )
+
+    # Merge extras?
+    if "merge_extra" in config:
+        for extra in config['merge_extra']:
+            info( "merge %s" % colored( extra, 'green' ) )
+            command( "tar xfz %s -C %s" % ( extra, path ) )
+
     # Package manager?
     if "package_manager" in config and config['package_manager']:
         info( "copy package manager" )
         utils = os.path.join( path, "utils" )
         if not os.path.exists( utils ): os.makedirs( utils )
-        shutil.copyfile( "utils/tools.py", os.path.join( utils, "tools.py" ) )
+        shutil.copy( "utils/tools.py", os.path.join( utils, "tools.py" ) )
         shutil.copytree( "utils/patches", os.path.join( utils, "patches" ) )
 
     # Rename stuff?
@@ -164,7 +177,7 @@ def make_dist( config ):
         command( "find %s -type f | xargs sed -i -e \"s/@since.*$/@since %s/g\"" % ( path, config['version'] ) )
 
     # Create archive
-    info( "create archive %s" % ( colored( archive, 'green' ) ) )
+    info( "create archive %s" % colored( archive, 'green' ) )
     command( "tar cfz {0}.tar.gz {0}".format( path ) )
 
 ################################################################################
