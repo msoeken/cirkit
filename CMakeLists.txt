@@ -28,4 +28,6 @@ externalProject_add(revlib_circuits
   LOG_BUILD 1
   LOG_INSTALL 1)
 
+set(ext_dependencies ${ext_dependencies} revlib_functions revlib_circuits PARENT_SCOPE)
+
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/reversible)
