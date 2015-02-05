@@ -6,4 +6,4 @@ package_manager: Yes
 merge_addon:       # src, programs, and test will be copied
   name: reversible
   merge_cmake:     # ext is automatically assumed as destination
-    lines: 3-30
+    lines: 3-32
