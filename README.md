@@ -11,6 +11,14 @@ The following software is required in order to build CirKit
 * GNU MP, and its C++ interface GMP++
 * libxml2
 
+In *Ubuntu* the packages can be installed with
+
+    sudo apt-get install build-essential git g++ cmake libboost-all-dev libgmp3-dev libxml2-dev
+
+In *arch* the packages can be installed with
+
+    sudo pacman -S base-devel git g++ cmake boost boost-libs gmp libxml2
+
 ## Build CirKit
 
 After extracting or cloning CirKit perform the following steps
@@ -38,7 +46,7 @@ flag at the entry `enable_cirkit-addon-*`.  Afterwards, press `c` followed by
 
 CirKit uses some external (mainly academic) programs that are typically not
 shipped with Linux distributions.  To ease their installation CirKit provides
-its own small package manager, that can be invoked via `utils/tools.py`.  Run
+its own small package manager that can be invoked via `utils/tools.py`.  Run
 
     utils/tools.py commands
 
