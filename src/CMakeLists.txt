@@ -1,6 +1,6 @@
 # Configuration
 add_definitions(-Werror -fPIC)
-add_ext_library("gmp;gmpxx")
+add_ext_library("gmp;gmpxx;pthread")
 
 srcdirlist(directories ".")
 foreach(dir ${directories})
