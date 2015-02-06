@@ -37,8 +37,6 @@ aig_function aig_from_bdd_rec( aig_graph& aig, DdManager* dd, DdNode* node )
 {
   const auto& graph_info = boost::get_property( aig, boost::graph_name );
 
-  unsigned n = Cudd_ReadSize( dd );
-
   bool is_complement = Cudd_IsComplement( node );
   DdNode * r = Cudd_Regular( node );
 

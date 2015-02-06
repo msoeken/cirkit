@@ -67,7 +67,6 @@ void create_possible_inverter( std::ostream& os, const aig_function& f, std::vec
 void write_verilog( const aig_graph& aig, std::ostream& os )
 {
   const auto& aig_info = boost::get_property( aig, boost::graph_name );
-  const auto& name = boost::get( boost::vertex_name, aig );
 
   std::vector<std::string> inputs, outputs;
   std::vector<aig_node> inverter_created;

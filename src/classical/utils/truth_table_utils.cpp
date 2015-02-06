@@ -339,7 +339,6 @@ void tt_to_minbase_and_discard( tt& t, unsigned max_size, boost::dynamic_bitset<
 
 void tt_from_minbase( tt& t, const boost::dynamic_bitset<> pattern )
 {
-  unsigned n = pattern.size();
   std::deque<unsigned> positions;
 
   tt_extend( t, pattern.size() );
