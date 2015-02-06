@@ -42,5 +42,6 @@ merge_addon:         # src, programs, and test will be copied
     lines: 6-38
     overrides:
       - {line: 6, new: "set(minisat_SRC ${CMAKE_BINARY_DIR}/ext/minisat-prefix/src/minisat)"}
+      - {line: 37, new: "set(ext_dependencies cudd puma aiger igraphex minisat PARENT_SCOPE)"}
 merge_extra:         # these are archives that are extracted into the package
   - utils/revenge-experiments.tar.gz
