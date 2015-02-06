@@ -103,6 +103,9 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
     aig_cone_search( aig, acolor, info.outputs[index].first.first );
   }
 
+  /* make sure that we copy the constant vertex */
+  put( acolor, info.constant, color_t::black() );
+
   /* filter graph */
   filter_graph_t fg( aig, edge_filter_t( aig, acolor, color_t::white() ), vertex_filter_t( acolor, color_t::white() ) );
 
@@ -117,6 +120,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
 
   /* restore info */
   auto& new_info = aig_info( new_aig );
+  new_info.constant_used = false;
 
   /* restore PIs */
   for ( const auto& v : boost::make_iterator_range( boost::vertices( fg ) ) )
@@ -127,6 +131,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
       {
         new_info.constant = copy_map[v];
         new_info.constant_used = true;
+        assert( new_info.constant == 0 );
 
         if ( verbose ) { std::cout << "[i] constant is in cone" << std::endl; }
       }
