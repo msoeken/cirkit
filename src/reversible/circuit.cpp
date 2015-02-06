@@ -192,8 +192,6 @@ namespace cirkit
 
   struct append_gate_visitor : public boost::static_visitor<gate&>
   {
-    explicit append_gate_visitor( circuit& c ) : c ( c ) {}
-
     gate& operator()( standard_circuit& circ ) const
     {
       circ.gates.push_back( std::make_shared<gate>() );
@@ -208,15 +206,10 @@ namespace cirkit
       gate& g = **( circ.base->gates.begin() + circ.to - 1 );
       return g;
     }
-
-  private:
-    circuit& c;
   };
 
   struct prepend_gate_visitor : public boost::static_visitor<gate&>
   {
-    explicit prepend_gate_visitor( circuit& c ) : c ( c ) {}
-
     gate& operator()( standard_circuit& circ ) const
     {
       circ.gates.insert( circ.gates.begin(), std::make_shared<gate>() );
@@ -231,14 +224,11 @@ namespace cirkit
       gate& g = **( circ.base->gates.begin() + circ.from );
       return g;
     }
-
-  private:
-    circuit& c;
   };
 
   struct insert_gate_visitor : public boost::static_visitor<gate&>
   {
-    insert_gate_visitor( unsigned _pos, circuit& c ) : pos( _pos ), c( c ) {}
+    explicit insert_gate_visitor( unsigned _pos ) : pos( _pos ) {}
 
     gate& operator()( standard_circuit& circ ) const
     {
@@ -257,7 +247,6 @@ namespace cirkit
 
   private:
     unsigned pos;
-    circuit& c;
   };
 
   struct remove_gate_at_visitor : public boost::static_visitor<>
@@ -715,17 +704,17 @@ namespace cirkit
 
   gate& circuit::append_gate()
   {
-    return boost::apply_visitor( append_gate_visitor( *this ), circ );
+    return boost::apply_visitor( append_gate_visitor(), circ );
   }
 
   gate& circuit::prepend_gate()
   {
-    return boost::apply_visitor( prepend_gate_visitor( *this ), circ );
+    return boost::apply_visitor( prepend_gate_visitor(), circ );
   }
 
   gate& circuit::insert_gate( unsigned pos )
   {
-    return boost::apply_visitor( insert_gate_visitor( pos, *this ), circ );
+    return boost::apply_visitor( insert_gate_visitor( pos ), circ );
   }
 
   void circuit::remove_gate_at( unsigned pos )

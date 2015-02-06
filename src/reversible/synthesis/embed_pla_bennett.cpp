@@ -39,9 +39,8 @@ bool embed_pla_bennett( rcbdd& cf, const std::string& filename,
                         properties::ptr statistics = properties::ptr() )
 {
   /* Settings */
-  bool        verbose     = get( settings, "verbose",     false         );
-  bool        truth_table = get( settings, "truth_table", false         ); /* prints the truth table (for debugging) */
-  std::string write_pla   = get( settings, "write_pla",   std::string() );
+  auto truth_table = get( settings, "truth_table", false         ); /* prints the truth table (for debugging) */
+  auto write_pla   = get( settings, "write_pla",   std::string() );
 
   /* Timing */
   timer<properties_timer> t;
