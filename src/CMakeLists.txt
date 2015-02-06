@@ -1,5 +1,5 @@
 # Configuration
-add_definitions(-Werror -fPIC)
+add_definitions(-Wall -fPIC)
 add_ext_library("gmp;gmpxx;pthread")
 
 srcdirlist(directories ".")
