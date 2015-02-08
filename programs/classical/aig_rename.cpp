@@ -64,11 +64,11 @@ int main( int argc, char ** argv )
   read_aiger( aig, filename );
 
   std::map<std::string, std::string> imap, omap;
-  for ( const std::string& input : inputs )
+  for ( const auto& input : inputs )
   {
     imap.insert( split_string_pair( input, "=" ) );
   }
-  for ( const std::string& output : outputs )
+  for ( const auto& output : outputs )
   {
     omap.insert( split_string_pair( output, "=" ) );
   }
