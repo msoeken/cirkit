@@ -1,0 +1,11 @@
+name: revkit
+title: RevKit
+namespace: revkit
+header_title: RevKit (www.revkit.org)
+package_manager: Yes
+merge_addon:       # src, programs, and test will be copied
+  name: reversible
+  merge_cmake:     # ext is automatically assumed as destination
+    lines: 3-32
+    overrides:
+      - {line: 31, new: "set(ext_dependencies cudd puma aiger igraphex revlib_functions revlib_circuits PARENT_SCOPE)"}
