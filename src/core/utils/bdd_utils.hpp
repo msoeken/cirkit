@@ -36,6 +36,11 @@ namespace cirkit
 
 BDD make_cube( Cudd& manager, const std::vector<BDD>& vars );
 
+bool is_selfdual( const Cudd& manager, const BDD& f );
+bool is_monotone( const Cudd& manager, const BDD& f );
+bool is_horn( const Cudd& manager, const BDD& f, const BDD& g, const BDD& h );
+bool is_horn( const Cudd& manager, const BDD& f );
+
 }
 
 #endif
