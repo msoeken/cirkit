@@ -59,6 +59,7 @@ using aig_function = std::pair<detail::traits_t::vertex_descriptor, bool>; /* th
 
 struct aig_graph_info
 {
+  std::string                                                   model_name;
   detail::traits_t::vertex_descriptor                           constant;
   bool                                                          constant_used = false;
   std::map<detail::traits_t::vertex_descriptor, std::string>    node_names;
@@ -87,7 +88,7 @@ using aig_graph = digraph_t<detail::vertex_properties_t,
 using aig_node = vertex_t<aig_graph>;
 using aig_edge = edge_t<aig_graph>;
 
-void aig_initialize( aig_graph& aig );
+void aig_initialize( aig_graph& aig, const std::string& model_name = std::string() );
 aig_function aig_get_constant( aig_graph& aig, bool value );
 bool aig_is_constant_used( const aig_graph& aig );
 aig_function aig_create_pi( aig_graph& aig, const std::string& name );

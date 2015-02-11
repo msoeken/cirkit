@@ -140,11 +140,13 @@ private:
  * Public functions                                                           *
  ******************************************************************************/
 
-void aig_initialize( aig_graph& aig )
+void aig_initialize( aig_graph& aig, const std::string& model_name )
 {
   assert( num_vertices( aig ) == 0u );
 
   auto& info = boost::get_property( aig, boost::graph_name );
+
+  info.model_name = model_name;
 
   /* create constant node */
   info.constant = add_vertex( aig );

@@ -31,6 +31,7 @@
 #include <classical/aig.hpp>
 
 #include <string>
+#include <iostream>
 
 namespace cirkit
 {
@@ -46,6 +47,7 @@ unsigned aig_input_index( const aig_graph& aig, const aig_node& input );
 unsigned aig_input_index( const aig_graph_info& info, const aig_node& input );
 unsigned aig_output_index( const aig_graph& aig, const std::string& name );
 unsigned aig_output_index( const aig_graph_info& info, const std::string& name );
+void aig_print_stats( const aig_graph& aig, std::ostream& os = std::cout );
 
 }
 

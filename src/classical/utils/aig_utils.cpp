@@ -18,6 +18,7 @@
 #include "aig_utils.hpp"
 
 #include <boost/format.hpp>
+#include <boost/graph/adjacency_list.hpp>
 #include <boost/range/algorithm.hpp>
 
 #include <regex>
@@ -153,6 +154,19 @@ unsigned aig_output_index( const aig_graph_info& info, const std::string& name )
   assert( false );
 }
 
+void aig_print_stats( const aig_graph& aig, std::ostream& os )
+{
+  const auto& info = aig_info( aig );
+  auto n = info.inputs.size();
+
+  std::string name = info.model_name;
+  if ( name.empty() )
+  {
+    name = "(unnamed)";
+  }
+
+  os << boost::format( "[i] %20s: i/o = %7d / %7d  and = %7d" ) % name % n % info.outputs.size() % ( boost::num_vertices( aig ) - n ) << std::endl;
+}
 
 }
 
@@ -161,3 +175,13 @@ unsigned aig_output_index( const aig_graph_info& info, const std::string& name )
 // eval: (c-set-offset 'substatement-open 0)
 // eval: (c-set-offset 'innamespace 0)
 // End:
+
+
+
+
+
+
+
+
+
+

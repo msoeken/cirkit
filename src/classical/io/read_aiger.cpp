@@ -17,7 +17,10 @@
 
 #include "read_aiger.hpp"
 
+#include <classical/utils/aig_utils.hpp>
+
 #include <boost/assign/std/vector.hpp>
+#include <boost/filesystem.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -49,6 +52,8 @@ void read_aiger( aig_graph& aig, std::string& comment, const std::string &filena
 {
   std::ifstream is( filename.c_str() );
   read_aiger( aig, comment, is );
+  auto& info = aig_info( aig );
+  info.model_name = boost::filesystem::path( filename ).stem().string();
   is.close();
 }
 
