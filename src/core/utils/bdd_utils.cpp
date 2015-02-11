@@ -17,6 +17,7 @@
 
 #include "bdd_utils.hpp"
 
+#include <boost/range/algorithm.hpp>
 #include <boost/range/numeric.hpp>
 
 #include <cuddInt.h>
@@ -79,6 +80,89 @@ bool is_horn( const Cudd& manager, const BDD& f )
   return is_horn( manager, f, f, f );
 }
 
+#define EXTRA_BDD_COMPARE_TAG 0x96
+#define EXTRA_BDD_COMPARE_EQ ((DdNode*)1)
+#define EXTRA_BDD_COMPARE_IC ((DdNode*)2)
+#define EXTRA_BDD_COMPARE_LT ((DdNode*)3)
+#define EXTRA_BDD_COMPARE_GT ((DdNode*)4)
+
+DdNode * Extra_bddCompare( DdManager * dd, DdNode * f, DdNode * g )
+{
+  DdNode * one = DD_ONE( dd );
+  DdNode * zero = Cudd_Not( one );
+
+  if ( f == g ) { return EXTRA_BDD_COMPARE_EQ; }
+  if ( f == zero || g == one ) { return EXTRA_BDD_COMPARE_LT; }
+  if ( f == one || g == zero ) { return EXTRA_BDD_COMPARE_GT; }
+
+  DdNode * r = nullptr;
+  /*if ( ( r = cuddConstantLookup( dd, EXTRA_BDD_COMPARE_TAG, f, g, nullptr ) ) )
+  {
+    return r;
+  }*/
+
+  auto fl = Cudd_NotCond( Cudd_E( Cudd_Regular( f ) ), Cudd_IsComplement( f ) );
+  auto fh = Cudd_NotCond( Cudd_T( Cudd_Regular( f ) ), Cudd_IsComplement( f ) );
+  auto gl = Cudd_NotCond( Cudd_E( Cudd_Regular( g ) ), Cudd_IsComplement( g ) );
+  auto gh = Cudd_NotCond( Cudd_T( Cudd_Regular( g ) ), Cudd_IsComplement( g ) );
+
+  auto rl = Extra_bddCompare( dd, fl, gl );
+  if ( rl == EXTRA_BDD_COMPARE_IC ) { r = EXTRA_BDD_COMPARE_IC; }
+  else
+  {
+    auto rh = Extra_bddCompare( dd, fh, gh );
+    if ( rh == EXTRA_BDD_COMPARE_IC ) { r = EXTRA_BDD_COMPARE_IC; }
+    else if ( rl == EXTRA_BDD_COMPARE_EQ ) { r = rh; }
+    else if ( rh == EXTRA_BDD_COMPARE_EQ ) { r = rl; }
+    else if ( rl == rh ) { r = rl; }
+    else { r = EXTRA_BDD_COMPARE_IC; }
+  }
+
+  //cuddCacheInsert( dd, EXTRA_BDD_COMPARE_TAG, f, g, nullptr, r );
+  return r;
+}
+
+bool Extra_bddUnate( DdManager * dd, DdNode * f, std::vector<int>& ps )
+{
+  /* Initialize */
+  ps.resize( Cudd_ReadSize( dd ) );
+  boost::fill( ps, 0 );
+
+  if ( Cudd_IsConstant( f ) ) return true;
+
+  auto fr = Cudd_Regular( f );
+
+  auto fl = Cudd_NotCond( Cudd_E( fr ), Cudd_IsComplement( f ) );
+  auto fh = Cudd_NotCond( Cudd_T( fr ), Cudd_IsComplement( f ) );
+
+  if ( !Extra_bddUnate( dd, fl, ps ) || !Extra_bddUnate( dd, fh, ps ) ) { return false; }
+
+  auto r = Extra_bddCompare( dd, fl, fh );
+  if ( r == EXTRA_BDD_COMPARE_IC ) { return false; }
+
+  if ( r == EXTRA_BDD_COMPARE_LT )
+  {
+    if ( ps[fr->index] < 0 ) { return false; }
+    ps[fr->index] = 1;
+    return true;
+  }
+  if ( r == EXTRA_BDD_COMPARE_GT )
+  {
+    if ( ps[fr->index] > 0 ) { return false; }
+    ps[fr->index] = -1;
+    return true;
+  }
+
+  /* this should not happen */
+  assert( r == EXTRA_BDD_COMPARE_EQ );
+  assert( false );
+}
+
+bool is_unate( const Cudd& manager, const BDD& f, std::vector<int>& ps )
+{
+  return Extra_bddUnate( manager.getManager(), f.getNode(), ps );
+}
+
 }
 
 // Local Variables:
@@ -86,6 +170,10 @@ bool is_horn( const Cudd& manager, const BDD& f )
 // eval: (c-set-offset 'substatement-open 0)
 // eval: (c-set-offset 'innamespace 0)
 // End:
+
+
+
+
 
 
 

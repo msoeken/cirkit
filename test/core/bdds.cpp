@@ -1,4 +1,4 @@
-/* CirKit: A circuit toolkit
+/* RevKit (www.revkit.org)
  * Copyright (C) 2009-2015  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,36 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file bdd_utils.hpp
- *
- * @brief Some helper functions for BDDs
- *
- * @author Mathias Soeken
- * @since  2.0
- */
 
-#ifndef BDD_UTILS_HPP
-#define BDD_UTILS_HPP
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE bdds
 
-#include <vector>
+#include <iostream>
+
+#include <boost/test/unit_test.hpp>
 
 #include <cuddObj.hh>
 
-namespace cirkit
+#include <core/utils/bdd_utils.hpp>
+
+using namespace cirkit;
+
+BOOST_AUTO_TEST_CASE(simple)
 {
 
-BDD make_cube( Cudd& manager, const std::vector<BDD>& vars );
+  Cudd mgr;
 
-bool is_selfdual( const Cudd& manager, const BDD& f );
-bool is_monotone( const Cudd& manager, const BDD& f );
-bool is_horn( const Cudd& manager, const BDD& f, const BDD& g, const BDD& h );
-bool is_horn( const Cudd& manager, const BDD& f );
-bool is_unate( const Cudd& manager, const BDD& f, std::vector<int>& ps );
+  BDD f = mgr.bddVar( 0u ) & mgr.bddVar( 1u );
+
+  std::vector<int> ps;
+  BOOST_CHECK( is_unate( mgr, f, ps ) );
+  BOOST_CHECK( ps[0] == 1 );
+  BOOST_CHECK( ps[1] == 1 );
 
 }
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2
