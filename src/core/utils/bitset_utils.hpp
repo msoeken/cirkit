@@ -64,6 +64,8 @@ boost::dynamic_bitset<> random_bitset( unsigned n );
 
 std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b );
 
+boost::dynamic_bitset<> onehot_bitset( unsigned n, unsigned pos );
+
 }
 
 #endif

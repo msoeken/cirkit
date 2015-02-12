@@ -69,6 +69,13 @@ std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b )
   return os << "}";
 }
 
+boost::dynamic_bitset<> onehot_bitset( unsigned n, unsigned pos )
+{
+  boost::dynamic_bitset<> b( n );
+  b.set( pos );
+  return b;
+}
+
 }
 
 // Local Variables:
