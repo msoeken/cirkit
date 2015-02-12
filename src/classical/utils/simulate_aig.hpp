@@ -35,6 +35,8 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
+#include <core/properties.hpp>
+#include <core/utils/timer.hpp>
 #include <classical/aig.hpp>
 #include <classical/utils/aig_dfs_visitor.hpp>
 #include <classical/utils/truth_table_utils.hpp>
@@ -293,8 +295,16 @@ T simulate_aig_function( const aig_graph& aig, const aig_function& f,
 }
 
 template<typename T>
-void simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator, std::map<aig_function, T>& results, bool verbose = false )
+void simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator, std::map<aig_function, T>& results,
+                   const properties::ptr& settings = properties::ptr(),
+                   const properties::ptr& statistics = properties::ptr() )
 {
+  /* settings */
+  auto verbose = get( settings, "verbose", false );
+
+  /* timer */
+  new_properties_timer t( statistics );
+
   aig_node_color_map colors;
   std::map<aig_node, T> node_values;
 
@@ -302,7 +312,7 @@ void simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator, std:
   {
     if ( verbose )
     {
-      std::cout << "[I] simulate '" << o.second << "'" << std::endl;
+      std::cout << "[i] simulate '" << o.second << "'" << std::endl;
     }
     T value = simulate_aig_node<T>( aig, o.first.first, simulator, colors, node_values );
     if ( o.first.second )
@@ -310,6 +320,11 @@ void simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator, std:
       value = simulator.invert( value );
     }
     results[o.first] = value;
+  }
+
+  if ( statistics )
+  {
+    statistics->set( "node_values", node_values );
   }
 }
 
