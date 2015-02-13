@@ -5,6 +5,7 @@ include(cmake/CCache.cmake)
 include(cmake/CompilerFlags.cmake)
 include(cmake/ListDir.cmake)
 include(cmake/AddExtLibrary.cmake)
+include(cmake/Addons.cmake)
 
 include(CTest)
 
@@ -28,19 +29,7 @@ include_directories(src)
 
 # Addons
 add_subdirectory(addons)
-foreach (dir ${addon_directories})
-  string(REGEX REPLACE "cirkit-" "" def ${dir})
-  string(REGEX REPLACE "-" "_" def ${def})
-  string(TOUPPER ${def} def)
-  add_definitions(-D${def})
-  include_directories(addons/${dir}/src)
-endforeach()
-foreach (dir ${addon_include_directories})
-  include_directories(${dir})
-endforeach()
-foreach (dir ${addon_link_directories})
-  link_directories(${dir})
-endforeach()
+add_addon_flags()
 
 # Libraries
 add_subdirectory(src)
