@@ -74,7 +74,8 @@ public:
 
 private:
   const aig_graph& _aig;
-  color_amap       _color;
+  color_map        _color_map;
+  color_amap       _color = make_assoc_property_map( _color_map );
 };
 
 }

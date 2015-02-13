@@ -26,6 +26,7 @@
 
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/timer.hpp>
+#include <classical/utils/aig_dfs.hpp>
 #include <classical/utils/aig_utils.hpp>
 
 using namespace boost::assign;
@@ -37,10 +38,8 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
-using color_map_t     = std::map<aig_node, boost::default_color_type>;
-using color_amap_t    = boost::associative_property_map<color_map_t>;
-using color_value_t   = boost::property_traits<color_amap_t>::value_type;
-using color_t         = boost::color_traits<color_value_t>;
+using color_amap_t    = aig_partial_dfs::color_amap;
+using color_t         = aig_partial_dfs::color_type;
 using edge_filter_t   = edge_has_not_property<aig_graph, color_amap_t>;
 using vertex_filter_t = vertex_has_not_property<color_amap_t>;
 using filter_graph_t  = boost::filtered_graph<aig_graph, edge_filter_t, vertex_filter_t>;
@@ -52,26 +51,6 @@ using iso_map_t       = boost::iterator_property_map<std::vector<aig_node>::iter
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
-
-template<class ColorMap>
-void aig_cone_search_init( const aig_graph& aig, const ColorMap& color )
-{
-  for ( const auto& v : boost::make_iterator_range( boost::vertices( aig ) ) )
-  {
-    put( color, v, color_t::white() );
-  }
-}
-
-/**
- * @brief A different implementation of the DFS search that does not
- *        re-initialize the vertex colors.
- */
-template<class ColorMap>
-void aig_cone_search( const aig_graph& aig, const ColorMap& color, const aig_node& start )
-{
-  boost::dfs_visitor<> vis;
-  boost::detail::depth_first_visit_impl( aig, start, vis, color, boost::detail::nontruth2() );
-}
 
 /******************************************************************************
  * Public functions                                                           *
@@ -90,9 +69,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
   const auto& info = aig_info( aig );
 
   /* depth first search */
-  color_map_t color;
-  auto acolor = make_assoc_property_map( color );
-  aig_cone_search_init( aig, acolor );
+  aig_partial_dfs dfs( aig );
   for ( const auto& name : names )
   {
     auto index = aig_output_index( info, name );
@@ -100,14 +77,14 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
     {
       std::cout << boost::format( "[i] starting dfs for output %s at index %d" ) % name % index << std::endl;
     }
-    aig_cone_search( aig, acolor, info.outputs[index].first.first );
+    dfs.search( info.outputs[index].first.first );
   }
 
   /* make sure that we copy the constant vertex */
-  put( acolor, info.constant, color_t::black() );
+  put( dfs.color(), info.constant, color_t::black() );
 
   /* filter graph */
-  filter_graph_t fg( aig, edge_filter_t( aig, acolor, color_t::white() ), vertex_filter_t( acolor, color_t::white() ) );
+  filter_graph_t fg( aig, edge_filter_t( aig, dfs.color(), color_t::white() ), vertex_filter_t( dfs.color(), color_t::white() ) );
 
   /* copy graph */
   std::vector<aig_node> copy_map;
