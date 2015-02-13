@@ -14,7 +14,6 @@ set( MAIN_Boost_LIBRARIES unit_test_framework regex filesystem graph program_opt
 find_package(Boost REQUIRED COMPONENTS ${MAIN_Boost_LIBRARIES} )
 
 include_directories(${Boost_INCLUDE_DIR} ext/include)
-link_directories(${CMAKE_SOURCE_DIR}/ext/lib)
 add_subdirectory(ext)
 
 # Options
