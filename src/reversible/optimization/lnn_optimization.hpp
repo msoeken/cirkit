@@ -20,7 +20,7 @@
  *
  * @brief Linear nearest Neighbor
  *
- * @author  Aaron Lye
+ * @author Aaron Lye
  * @since 2.0
  */
 
