@@ -4,18 +4,9 @@ cmake_minimum_required(VERSION 2.8.9)
 include(cmake/CCache.cmake)
 include(cmake/CompilerFlags.cmake)
 include(cmake/ListDir.cmake)
+include(cmake/AddExtLibrary.cmake)
 
 include(CTest)
-
-# Some user defined macros (INFO: maybe they can be moved somewhere else)
-set(ext_libraries "" CACHE STRING "external libraries" FORCE)
-function(add_ext_library library)
-  if ("${ext_libraries}" STREQUAL "")
-    set(ext_libraries "${library}" CACHE STRING "external libraries" FORCE)
-  else()
-    set(ext_libraries "${ext_libraries};${library}" CACHE STRING "external libraries" FORCE)
-  endif()
-endfunction(add_ext_library)
 
 
 # Dependencies
