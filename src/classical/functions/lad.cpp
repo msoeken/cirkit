@@ -188,8 +188,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
     map[aig_info.inputs[word.first]] = word.second;
   }
 
-  std::map<aig_function, boost::dynamic_bitset<>> results;
-  simulate_aig( aig, word_node_assignment_simulator( map ), results );
+  auto results = simulate_aig( aig, word_node_assignment_simulator( map ) );
 
   /* create edges */
   for ( unsigned i = 0; i < vectors.size(); ++i )

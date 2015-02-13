@@ -295,9 +295,9 @@ T simulate_aig_function( const aig_graph& aig, const aig_function& f,
 }
 
 template<typename T>
-void simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator, std::map<aig_function, T>& results,
-                   const properties::ptr& settings = properties::ptr(),
-                   const properties::ptr& statistics = properties::ptr() )
+std::map<aig_function, T> simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator,
+                                        const properties::ptr& settings = properties::ptr(),
+                                        const properties::ptr& statistics = properties::ptr() )
 {
   /* settings */
   auto verbose = get( settings, "verbose", false );
@@ -308,6 +308,8 @@ void simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator, std:
   aig_node_color_map colors;
   std::map<aig_node, T> node_values;
 
+  std::map<aig_function, T> results;
+
   for ( const auto& o : boost::get_property( aig, boost::graph_name ).outputs )
   {
     if ( verbose )
@@ -315,17 +317,14 @@ void simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator, std:
       std::cout << "[i] simulate '" << o.second << "'" << std::endl;
     }
     T value = simulate_aig_node<T>( aig, o.first.first, simulator, colors, node_values );
-    if ( o.first.second )
-    {
-      value = simulator.invert( value );
-    }
-    results[o.first] = value;
+
+    /* value may need to be inverted */
+    results[o.first] = o.first.second ? simulator.invert( value ) : value;
   }
 
-  if ( statistics )
-  {
-    statistics->set( "node_values", node_values );
-  }
+  set( statistics, "node_values", node_values );
+
+  return results;
 }
 
 }

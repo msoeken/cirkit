@@ -66,8 +66,7 @@ void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const s
     m[graph_info.inputs[word.first]] = word.second;
   }
 
-  std::map<aig_function, boost::dynamic_bitset<>> results;
-  simulate_aig( aig, word_node_assignment_simulator( m ), results );
+  auto results = simulate_aig( aig, word_node_assignment_simulator( m ) );
 
   /* create edges */
   for ( unsigned i = 0; i < sim_vectors.size(); ++i )
