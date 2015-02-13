@@ -76,7 +76,6 @@ namespace cirkit
    *
    * @return true if successful, false otherwise
    *
-   * @author RevKit
    * @since  1.0
    */
   bool exact_synthesis( circuit& circ
@@ -92,7 +91,6 @@ namespace cirkit
    *
    * @return A functor which complies with the \ref revkit::exact_synthesis "exact_synthesis_func" interface
    *
-   * @author RevKit
    * @since  1.0
    */
   truth_table_synthesis_func exact_synthesis_func( properties::ptr settings = std::make_shared<properties>(),
