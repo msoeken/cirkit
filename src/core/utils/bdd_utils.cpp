@@ -170,13 +170,3 @@ bool is_unate( const Cudd& manager, const BDD& f, std::vector<int>& ps )
 // eval: (c-set-offset 'substatement-open 0)
 // eval: (c-set-offset 'innamespace 0)
 // End:
-
-
-
-
-
-
-
-
-
-

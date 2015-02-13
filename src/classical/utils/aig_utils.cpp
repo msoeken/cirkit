@@ -175,13 +175,3 @@ void aig_print_stats( const aig_graph& aig, std::ostream& os )
 // eval: (c-set-offset 'substatement-open 0)
 // eval: (c-set-offset 'innamespace 0)
 // End:
-
-
-
-
-
-
-
-
-
-

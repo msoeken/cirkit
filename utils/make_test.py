@@ -5,25 +5,7 @@ import sys
 
 from jinja2 import Environment
 
-header_revkit = """/* RevKit (www.revkit.org)
- * Copyright (C) 2009-2015  University of Bremen
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-"""
-
-header_cirkit = """/* CirKit: A circuit toolkit
+header = """/* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -77,7 +59,6 @@ if __name__ == "__main__":
     name   = sys.argv[1]
     addon  = sys.argv[2] if argc > 2 else "."
 
-    header   = header_revkit if addon == "." else header_cirkit
     basename = os.path.basename( name )
 
     pathname = "./" if addon == "." else "addons/cirkit-addon-%s/" % addon
