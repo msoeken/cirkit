@@ -74,8 +74,7 @@ int main( int argc, char ** argv )
   {
     if ( method == 0u )
     {
-      std::map<aig_function, tt> values;
-      simulate_aig( aig, tt_simulator(), values );
+      auto values = simulate_aig( aig, tt_simulator() );
 
       for ( const auto& f : values )
       {
@@ -91,8 +90,7 @@ int main( int argc, char ** argv )
                have a reference to the Cudd manager that is stored inside the bdd_simulator
                class. */
       bdd_simulator simulator;
-      std::map<aig_function, BDD> values;
-      simulate_aig( aig, simulator, values );
+      auto values = simulate_aig( aig, simulator );
 
       for ( const auto& f : values )
       {
@@ -147,8 +145,7 @@ int main( int argc, char ** argv )
     //   std::cout << e.first << " " << e.second << '\n';
     // }
 
-    std::map<aig_function, bool> values;
-    simulate_aig( aig, simple_assignment_simulator( massignment ), values );
+    auto values = simulate_aig( aig, simple_assignment_simulator( massignment ) );
 
     for ( const auto& o : boost::get_property( aig, boost::graph_name ).outputs )
     {
