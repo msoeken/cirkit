@@ -16,16 +16,16 @@
  */
 
 /**
- * @file aig_dfs_visitor.hpp
+ * @file aig_dfs.hpp
  *
- * @brief A DFS visitor for AIGs
+ * @brief Aig DFS functions
  *
  * @author Mathias Soeken
  * @since  2.0
  */
 
-#ifndef AIG_DFS_VISITOR_HPP
-#define AIG_DFS_VISITOR_HPP
+#ifndef AIG_DFS_HPP
+#define AIG_DFS_HPP
 
 #include <boost/graph/depth_first_search.hpp>
 
@@ -47,6 +47,34 @@ public:
 
 protected:
   const aig_graph_info& graph_info;
+};
+
+/**
+ * @brief Allows iterative DFS calls
+ *
+ * A problem with the Boost.Graph DFS algorithm is that for each call all vertices are
+ * re-initialized.  Hence, it cannot be called for multiple start vertices.  This class
+ * helps to initialize all vertices once and then call DFS on selected vertices by keeping
+ * old coloring information.
+ */
+class aig_partial_dfs
+{
+public:
+  using color_map   = std::map<aig_node, boost::default_color_type>;
+  using color_amap  = boost::associative_property_map<color_map>;
+  using color_value = boost::property_traits<color_amap>::value_type;
+  using color_type  = boost::color_traits<color_value>;
+
+public:
+  aig_partial_dfs( const aig_graph& aig );
+
+  void search( const aig_node& node );
+
+  color_amap& color();
+
+private:
+  const aig_graph& _aig;
+  color_amap       _color;
 };
 
 }

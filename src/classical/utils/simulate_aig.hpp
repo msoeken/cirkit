@@ -38,7 +38,7 @@
 #include <core/properties.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/aig.hpp>
-#include <classical/utils/aig_dfs_visitor.hpp>
+#include <classical/utils/aig_dfs.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 #include <cuddObj.hh>

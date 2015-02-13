@@ -15,12 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "aig_dfs_visitor.hpp"
+#include "aig_dfs.hpp"
 
 #include <boost/range/algorithm.hpp>
+#include <boost/range/iterator_range.hpp>
 
 namespace cirkit
 {
+
+/******************************************************************************
+ * aig_dfs_visitor                                                            *
+ ******************************************************************************/
 
 aig_dfs_visitor::aig_dfs_visitor( const aig_graph& aig )
   : boost::default_dfs_visitor(),
@@ -49,6 +54,30 @@ void aig_dfs_visitor::finish_vertex( const aig_node& node, const aig_graph& aig 
     const auto& right = *( itEdge + 1 );
     finish_aig_node( node, {boost::target( left, aig ), complement_map[left]}, {boost::target( right, aig ), complement_map[right]}, aig );
   }
+}
+
+/******************************************************************************
+ * aig_partial_dfs                                                            *
+ ******************************************************************************/
+
+aig_partial_dfs::aig_partial_dfs( const aig_graph& aig )
+  : _aig( aig )
+{
+  for ( const auto& v : boost::make_iterator_range( boost::vertices( _aig ) ) )
+  {
+    put( _color, v, color_type::white() );
+  }
+}
+
+void aig_partial_dfs::search( const aig_node& node )
+{
+  boost::dfs_visitor<> vis;
+  boost::detail::depth_first_visit_impl( _aig, node, vis, _color, boost::detail::nontruth2() );
+}
+
+aig_partial_dfs::color_amap& aig_partial_dfs::color()
+{
+  return _color;
 }
 
 }
