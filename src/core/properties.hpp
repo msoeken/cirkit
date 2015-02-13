@@ -249,6 +249,22 @@ namespace cirkit
   }
 
   /**
+   * @brief A helper method to access the set method on a properties smart pointer
+   *
+   * It doesn't fail if the properties smart pointer has no pointee.
+   *
+   * @since 2.3
+   */
+  template<typename T>
+  void set( const properties::ptr& settings, const properties::key_type& k, const T& value )
+  {
+    if ( settings )
+    {
+      settings->set( k, value );
+    }
+  }
+
+  /**
    * @brief Sets an error message to a statistics smart pointer
    *
    * This function checks first if the smart pointer references something,
