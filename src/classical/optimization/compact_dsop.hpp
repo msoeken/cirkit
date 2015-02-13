@@ -20,7 +20,7 @@
  *
  * @brief Compact DSOP computation [Bernasconi et al., TCS 53 (2013), 583-608.]
  *
- * @author  Mathias Soeken
+ * @author Mathias Soeken
  * @since 2.0
  */
 

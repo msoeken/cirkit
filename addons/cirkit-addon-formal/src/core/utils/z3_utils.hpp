@@ -20,8 +20,8 @@
  *
  * @brief Helper functions to extend the Z3 C++ API.
  *
- * @author  Mathias Soeken
- * @author  Heinz Riener
+ * @author Mathias Soeken
+ * @author Heinz Riener
  * @since 2.0
  */
 

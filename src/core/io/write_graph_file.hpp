@@ -20,7 +20,7 @@
  *
  * @brief Writes a simple vertex/edge graph file
  *
- * @author  Mathias Soeken
+ * @author Mathias Soeken
  * @since 2.0
  */
 
