@@ -1,13 +1,7 @@
 project("CirKit" CXX)
 cmake_minimum_required(VERSION 2.8.9)
 
-# ccache if available
-find_program(ccache_cmd NAMES ccache)
-if (ccache_cmd)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-  message(STATUS "Using ccache for building")
-endif()
+include(cmake/CCache.cmake)
 
 # compiler definitions
 add_definitions(-std=c++11 -O3 -fno-omit-frame-pointer -g -DBOOST_RESULT_OF_USE_DECLTYPE -D__extern_always_inline=inline -DDATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
