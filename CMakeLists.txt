@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8.9)
 
 include(cmake/CCache.cmake)
 include(cmake/CompilerFlags.cmake)
+include(cmake/ListDir.cmake)
 
 include(CTest)
 
@@ -16,25 +17,6 @@ function(add_ext_library library)
   endif()
 endfunction(add_ext_library)
 
-macro(subdirlist result curdir)
-  file(GLOB children ${curdir} ${curdir}/*)
-  set(dirlist "")
-  foreach(child ${children})
-    if(IS_DIRECTORY ${child})
-      get_filename_component(base_name ${child} NAME_WE)
-      set(dirlist ${dirlist} ${base_name})
-    endif()
-  endforeach()
-  set(${result} ${dirlist})
-endmacro()
-
-macro(srcdirlist result curdir)
-  if("${cirkit_PACKAGES}" STREQUAL "")
-    subdirlist(${result} ${curdir})
-  else()
-    set(${result} ${cirkit_PACKAGES})
-  endif()
-endmacro()
 
 # Dependencies
 set( MAIN_Boost_LIBRARIES unit_test_framework regex filesystem graph program_options system timer )
