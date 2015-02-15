@@ -84,13 +84,7 @@ namespace cirkit
     std::string garbage_name           = get<std::string>( settings, "garbage_name", "g" );
     std::vector<unsigned> output_order = get<std::vector<unsigned> >( settings, "output_order", std::vector<unsigned>() );
 
-    timer<properties_timer> t;
-
-    if ( statistics )
-    {
-      properties_timer rt( statistics );
-      t.start( rt );
-    }
+    new_properties_timer t( statistics );
 
     /* get number of additional garbage lines needed */
     std::vector<unsigned> values;

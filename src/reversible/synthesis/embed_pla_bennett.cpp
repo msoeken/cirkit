@@ -43,12 +43,7 @@ bool embed_pla_bennett( rcbdd& cf, const std::string& filename,
   auto write_pla   = get( settings, "write_pla",   std::string() );
 
   /* Timing */
-  timer<properties_timer> t;
-
-  if (statistics) {
-    properties_timer rt(statistics);
-    t.start(rt);
-  }
+  new_properties_timer t( statistics );
 
   unsigned n, m;
   std::tie( n, m ) = read_pla_size( filename );
@@ -61,13 +56,7 @@ bool embed_pla_bennett( rcbdd& cf, const std::string& filename,
 
   BDDTable table( cf.manager().getManager() );
   {
-    timer<properties_timer> it;
-
-    if ( statistics )
-    {
-      properties_timer rt( statistics, "runtime_read" );
-      it.start( rt );
-    }
+    new_properties_timer t( statistics, "runtime_read" );
 
     read_pla_to_bdd_settings rp_settings;
     rp_settings.input_generation_func = [&cf, &m]( DdManager*, unsigned pos ) { return cf.x( m + pos ).getNode(); };

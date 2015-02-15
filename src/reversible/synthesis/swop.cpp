@@ -35,13 +35,7 @@ namespace cirkit
     cost_function cf                 = get( settings, "cost_function", cost_function( costs_by_circuit_func( gate_costs() ) ) );
     swop_step_func stepfunc          = get( settings, "stepfunc",      swop_step_func( swop_step_func() ) );
 
-    timer<properties_timer> t;
-
-    if ( statistics )
-    {
-      properties_timer rt( statistics );
-      t.start( rt );
-    }
+    new_properties_timer t( statistics );
 
     /* copy truth table since we want to change it (permutation) */
     binary_truth_table spec2 = spec;

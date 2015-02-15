@@ -155,13 +155,7 @@ namespace cirkit
     }
 
     // Run-time measuring
-    timer<properties_timer> t;
-
-    if ( statistics )
-    {
-      properties_timer rt( statistics );
-      t.start( rt );
-    }
+    new_properties_timer t( statistics );
 
     // parse ESOP file
     binary_truth_table spec;

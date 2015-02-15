@@ -202,13 +202,7 @@ namespace cirkit
     bool bidirectional = get( settings, "bidirectional", true );
 
     // Run-time measuring
-    timer<properties_timer> t;
-
-    if ( statistics )
-    {
-      properties_timer rt( statistics );
-      t.start( rt );
-    }
+    new_properties_timer t( statistics );
 
     // circuit has to be empty
     clear_circuit( circ );

@@ -431,13 +431,7 @@ bool exact_synthesis(circuit& circ, const binary_truth_table& spec,
   bool     multiple  = get<bool>(     settings, "multiple",  false );
   bool     verbose   = get<bool>(     settings, "verbose",   false );
 
-  timer<properties_timer> t;
-
-  if (statistics)
-  {
-    properties_timer rt(statistics);
-    t.start(rt);
-  }
+  new_properties_timer t( statistics );
 
   circ.set_lines(spec.num_inputs());
 
