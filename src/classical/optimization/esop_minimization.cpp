@@ -671,13 +671,7 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
 
   /* block for timing */
   {
-    timer<properties_timer> t;
-
-    if ( statistics )
-    {
-      properties_timer rt( statistics );
-      t.start( rt );
-    }
+    new_properties_timer t( statistics );
 
     /* get initial cover using exact PSDKRO optimization */
     exp_cache_t exp_cache;

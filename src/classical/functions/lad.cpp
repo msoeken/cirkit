@@ -1273,16 +1273,10 @@ bool directed_lad( std::vector<unsigned>& mapping, const std::string& target, co
                    properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  bool verbose = get( settings, "verbose", false );
+  auto verbose = get( settings, "verbose", false );
 
   /* Timer */
-  timer<properties_timer> t;
-
-  if ( statistics )
-  {
-    properties_timer rt( statistics );
-    t.start( rt );
-  }
+  new_properties_timer t( statistics );
 
   lad_graph gp( pattern );
   lad_graph gt( target );
@@ -1294,11 +1288,8 @@ bool directed_lad( std::vector<unsigned>& mapping, const std::string& target, co
               << "Target graph:" << std::endl << gt << d;
   }
 
-  if ( statistics )
-  {
-    statistics->set( "pattern_vertices", (unsigned)gp.nb_vertices );
-    statistics->set( "target_vertices", (unsigned)gt.nb_vertices );
-  }
+  set( statistics, "pattern_vertices", (unsigned)gp.nb_vertices );
+  set( statistics, "target_vertices", (unsigned)gt.nb_vertices );
 
   lad_manager mgr( d, gp, gt );
   return start_lad( mgr, mapping, verbose );
@@ -1308,17 +1299,11 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
                             properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() )
 {
   /* Settings */
-  bool functional = get( settings, "functional", false );
-  bool verbose    = get( settings, "verbose",    false );
+  auto functional = get( settings, "functional", false );
+  auto verbose    = get( settings, "verbose",    false );
 
   /* Timer */
-  timer<properties_timer> t;
-
-  if ( statistics )
-  {
-    properties_timer rt( statistics );
-    t.start( rt );
-  }
+  new_properties_timer t( statistics );
 
   lad_graph gp( pattern, selector, verbose );
   lad_graph gt( target, selector, verbose );
@@ -1332,11 +1317,8 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
               << format( "[i] pattern graph has %d vertices" ) % gp.nb_vertices << std::endl;
   }
 
-  if ( statistics )
-  {
-    statistics->set( "pattern_vertices", (unsigned)gp.nb_vertices );
-    statistics->set( "target_vertices", (unsigned)gt.nb_vertices );
-  }
+  set( statistics, "pattern_vertices", (unsigned)gp.nb_vertices );
+  set( statistics, "target_vertices", (unsigned)gt.nb_vertices );
 
   lad_manager mgr( d, gp, gt );
   return start_lad( mgr, mapping, /*verbose*/ false );
