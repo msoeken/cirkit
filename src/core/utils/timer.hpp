@@ -167,69 +167,6 @@ namespace cirkit {
   };
 
   /**
-   * @brief Functor for the timer class which assigns the run-time to a property map
-   *
-   * This functor writes the \em runtime field of a property map
-   * after the time was measured and is thus similar to the
-   * reference_timer.
-   *
-   * @since  1.0
-   */
-  struct properties_timer
-  {
-
-    /**
-     * Result value of the reference_timer is double,
-     * since it returns the value of the run-time
-     * in the operator call. This is only useful, when using the intermediate measurement
-     * in timer.
-     *
-     * @sa timer::operator()()
-     *
-     * @since  1.0
-     */
-    using result_type = double;
-
-    /**
-     * @brief Default constructor
-     *
-     * Available for delayed starting of the timer.
-     *
-     * @since  1.0
-     */
-    properties_timer() {}
-
-    /**
-     * @brief Default constructor
-     *
-     * @param _statistics A smart pointer to a statistics properties object. Can be empty.
-     *
-     * @since  1.0
-     */
-    properties_timer( properties::ptr _statistics, const std::string& key = "runtime" ) : statistics( _statistics ), key( key ) {}
-
-    /**
-     * @brief Saves the run-time to the \b runtime field of the statistics variable
-     *
-     * @param r The run-time
-     *
-     * @since  1.0
-     */
-    double operator()( double r ) const
-    {
-      if ( statistics )
-      {
-        statistics->set( key, r );
-      }
-      return r;
-    }
-
-  private:
-    properties::ptr statistics;
-    std::string key = "runtime";
-  };
-
-  /**
    * @brief Measure Method for timer
    *
    * This class is only holding one enumeration
