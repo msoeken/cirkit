@@ -42,65 +42,6 @@
 #include <core/properties.hpp>
 
 namespace cirkit {
-
-  /**
-   * @brief Functor for the timer class which prints the run-time to an output stream
-   *
-   * This functor prints the run-time to a given output stream which can be
-   * specified in the constructor.
-   *
-   * @since  1.0
-   */
-  struct print_timer {
-    /**
-     * Result value of the print_timer is void,
-     * since it does not return anything in the operator call.
-     *
-     * @sa timer::operator()()
-     *
-     * @since  1.0
-     */
-    using result_type = void;
-
-    /**
-     * @brief Default constructor
-     *
-     * Available for delayed starting of the timer.
-     *
-     * @since  1.0
-     */
-    print_timer() {}
-
-    /**
-     * @brief Default constructor
-     *
-     * @param _os Stream where to write the run-time after measuring
-     *
-     * @since  1.0
-     */
-    explicit print_timer( std::ostream& _os = std::cout, const std::string& _format = "Runtime: %.2f secs", bool _print_enable = true )
-      : os( _os ), format( _format ), print_enable( _print_enable ) {}
-
-    /**
-     * @brief Prints the measured run-time
-     *
-     * @param runtime The run-time
-     *
-     * @since  1.0
-     */
-    void operator()( double runtime ) const {
-      if ( print_enable )
-      {
-        os << boost::format( format ) % runtime << std::endl;
-      }
-    }
-
-  private:
-    std::ostream& os   = std::cout;
-    std::string format = "Runtime: %.2f secs";
-    bool print_enable  = true;
-  };
-
   /**
    * @brief Functor for the timer class which assigns the run-time to a given variable
    *
@@ -346,7 +287,7 @@ namespace cirkit {
 class new_print_timer : public boost::timer::cpu_timer
 {
 public:
-  new_print_timer( const std::string& format, bool verbose = false, std::ostream& os = std::cout )
+  new_print_timer( const std::string& format = "[i] run-time: %w secs\n", bool verbose = false, std::ostream& os = std::cout )
     : format( format ),
       verbose( verbose ),
       os( os )

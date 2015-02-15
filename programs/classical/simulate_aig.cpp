@@ -67,8 +67,7 @@ int main( int argc, char ** argv )
 
   const bool little_endian = opts.is_set( "little-endian" );
 
-  print_timer pt( std::cout );
-  timer<print_timer> t( pt );
+  new_print_timer t;
 
   if ( assignment.empty() )
   {

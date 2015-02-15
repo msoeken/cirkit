@@ -785,8 +785,7 @@ void test_change_performance()
                                                                       std::make_pair( boost::dynamic_bitset<>( n, dist( gen ) ), boost::dynamic_bitset<>( n, dist( gen ) ) ) ); } );
 
   {
-    print_timer pt( std::cout );
-    timer<print_timer> t( pt );
+    new_print_timer t;
 
     for ( const auto& p : cubes )
     {
@@ -796,8 +795,7 @@ void test_change_performance()
   }
 
   {
-    print_timer pt( std::cout );
-    timer<print_timer> t( pt );
+    new_print_timer t;
 
     for ( const auto& p : cubes )
     {
