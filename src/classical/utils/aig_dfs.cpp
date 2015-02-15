@@ -60,8 +60,9 @@ void aig_dfs_visitor::finish_vertex( const aig_node& node, const aig_graph& aig 
  * aig_partial_dfs                                                            *
  ******************************************************************************/
 
-aig_partial_dfs::aig_partial_dfs( const aig_graph& aig )
-  : _aig( aig )
+aig_partial_dfs::aig_partial_dfs( const aig_graph& aig, const term_func_opt& term )
+  : _aig( aig ),
+    _term( term )
 {
   for ( const auto& v : boost::make_iterator_range( boost::vertices( _aig ) ) )
   {
@@ -72,7 +73,14 @@ aig_partial_dfs::aig_partial_dfs( const aig_graph& aig )
 void aig_partial_dfs::search( const aig_node& node )
 {
   boost::dfs_visitor<> vis;
-  boost::detail::depth_first_visit_impl( _aig, node, vis, _color, boost::detail::nontruth2() );
+  if ( (bool)_term )
+  {
+    boost::detail::depth_first_visit_impl( _aig, node, vis, _color, boost::detail::nontruth2() );
+  }
+  else
+  {
+    boost::detail::depth_first_visit_impl( _aig, node, vis, _color, _term.get() );
+  }
 }
 
 aig_partial_dfs::color_amap& aig_partial_dfs::color()

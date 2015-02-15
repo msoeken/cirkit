@@ -27,7 +27,10 @@
 #ifndef AIG_DFS_HPP
 #define AIG_DFS_HPP
 
+#include <functional>
+
 #include <boost/graph/depth_first_search.hpp>
+#include <boost/optional.hpp>
 
 #include <classical/aig.hpp>
 
@@ -60,13 +63,15 @@ protected:
 class aig_partial_dfs
 {
 public:
-  using color_map   = std::map<aig_node, boost::default_color_type>;
-  using color_amap  = boost::associative_property_map<color_map>;
-  using color_value = boost::property_traits<color_amap>::value_type;
-  using color_type  = boost::color_traits<color_value>;
+  using color_map     = std::map<aig_node, boost::default_color_type>;
+  using color_amap    = boost::associative_property_map<color_map>;
+  using color_value   = boost::property_traits<color_amap>::value_type;
+  using color_type    = boost::color_traits<color_value>;
+  using term_func     = std::function<bool(const aig_node&, const aig_graph&)>;
+  using term_func_opt = boost::optional<term_func>;
 
 public:
-  aig_partial_dfs( const aig_graph& aig );
+  aig_partial_dfs( const aig_graph& aig, const term_func_opt& term = boost::none );
 
   void search( const aig_node& node );
 
@@ -76,6 +81,7 @@ private:
   const aig_graph& _aig;
   color_map        _color_map;
   color_amap       _color = make_assoc_property_map( _color_map );
+  term_func_opt    _term;
 };
 
 }
