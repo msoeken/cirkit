@@ -33,8 +33,7 @@ void two_level_redundancy_function( unsigned p, unsigned q, double& runtime )
 {
   using namespace cirkit;
 
-  reference_timer rt( &runtime );
-  timer<reference_timer> t( rt );
+  new_reference_timer t( &runtime );
 
   unsigned n = p + p * q;
 
