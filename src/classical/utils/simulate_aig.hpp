@@ -303,7 +303,7 @@ std::map<aig_function, T> simulate_aig( const aig_graph& aig, const aig_simulato
   auto verbose = get( settings, "verbose", false );
 
   /* timer */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   aig_node_color_map colors;
   std::map<aig_node, T> node_values;

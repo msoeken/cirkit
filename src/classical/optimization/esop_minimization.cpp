@@ -671,7 +671,7 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
 
   /* block for timing */
   {
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     /* get initial cover using exact PSDKRO optimization */
     exp_cache_t exp_cache;
@@ -785,7 +785,7 @@ void test_change_performance()
                                                                       std::make_pair( boost::dynamic_bitset<>( n, dist( gen ) ), boost::dynamic_bitset<>( n, dist( gen ) ) ) ); } );
 
   {
-    new_print_timer t;
+    print_timer t;
 
     for ( const auto& p : cubes )
     {
@@ -795,7 +795,7 @@ void test_change_performance()
   }
 
   {
-    new_print_timer t;
+    print_timer t;
 
     for ( const auto& p : cubes )
     {

@@ -64,7 +64,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
   auto verbose = get( settings, "verbose", false );
 
   /* Timer */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   const auto& info = aig_info( aig );
 

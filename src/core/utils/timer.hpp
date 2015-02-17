@@ -44,10 +44,10 @@
 namespace cirkit {
 
 /* this will soon replace the old print_timer */
-class new_print_timer : public boost::timer::cpu_timer
+class print_timer : public boost::timer::cpu_timer
 {
 public:
-  new_print_timer( const std::string& format = "[i] run-time: %w secs\n", bool verbose = false, std::ostream& os = std::cout )
+  print_timer( const std::string& format = "[i] run-time: %w secs\n", bool verbose = false, std::ostream& os = std::cout )
     : format( format ),
       verbose( verbose ),
       os( os )
@@ -55,7 +55,7 @@ public:
     start();
   }
 
-  ~new_print_timer()
+  ~print_timer()
   {
     if ( !is_stopped() )
     {
@@ -74,16 +74,16 @@ private:
 };
 
 /* this will soon replace the old properties timer */
-class new_properties_timer : public boost::timer::cpu_timer
+class properties_timer : public boost::timer::cpu_timer
 {
 public:
-  new_properties_timer( const properties::ptr& statistics, const std::string& key = "runtime" )
+  properties_timer( const properties::ptr& statistics, const std::string& key = "runtime" )
     : statistics( statistics ), key( key )
   {
     start();
   }
 
-  ~new_properties_timer()
+  ~properties_timer()
   {
     if ( !is_stopped() )
     {
@@ -103,16 +103,16 @@ private:
   std::string            key;
 };
 
-class new_reference_timer : public boost::timer::cpu_timer
+class reference_timer : public boost::timer::cpu_timer
 {
 public:
-  new_reference_timer( double* runtime )
+  reference_timer( double* runtime )
     : runtime( runtime )
   {
     start();
   }
 
-  ~new_reference_timer()
+  ~reference_timer()
   {
     if ( !is_stopped() )
     {

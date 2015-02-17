@@ -1276,7 +1276,7 @@ bool directed_lad( std::vector<unsigned>& mapping, const std::string& target, co
   auto verbose = get( settings, "verbose", false );
 
   /* Timer */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   lad_graph gp( pattern );
   lad_graph gt( target );
@@ -1303,7 +1303,7 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
   auto verbose    = get( settings, "verbose",    false );
 
   /* Timer */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   lad_graph gp( pattern, selector, verbose );
   lad_graph gt( target, selector, verbose );

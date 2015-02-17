@@ -352,7 +352,7 @@ void compact_dsop( const std::string& destination, const std::string& filename,
   bool                  verbose  = get( settings, "verbose",  false );
 
   /* Run-time */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   cube_vec_vec_t cs = common_pla_read( filename );
   cube_vec_vec_t ds;
