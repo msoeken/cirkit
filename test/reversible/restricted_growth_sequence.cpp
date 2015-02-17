@@ -34,7 +34,7 @@ void restricted_growth_sequence( unsigned p, double& runtime )
 {
   using namespace cirkit;
 
-  new_reference_timer t( &runtime );
+  reference_timer t( &runtime );
 
   unsigned i = 0u;
   std::map<std::pair<unsigned,unsigned>,unsigned> a;

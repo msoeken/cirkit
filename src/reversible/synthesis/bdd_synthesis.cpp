@@ -38,7 +38,7 @@ namespace cirkit
     std::string infofilename        = get<std::string>( settings, "infofilename", std::string() );
 
     // run-time measurement
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     dd_from_bdd_settings _settings;
     _settings.complemented_edges = complemented_edges;

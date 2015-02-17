@@ -180,7 +180,7 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
   bool        const_value = get( settings, "const_value", false         ); /* value that is used for constant embedding */
 
   /* Timing */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   /* BDD manager? */
   cf.initialize_manager();

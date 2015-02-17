@@ -72,7 +72,7 @@ BDD create_bdd_from_incube(Cudd& mgr, const std::string& incube, const std::vect
 unsigned approximate_additional_lines( const std::string& filename, properties::ptr settings, properties::ptr statistics )
 {
   /* Timer */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   /* Number of inputs and outputs */
   unsigned n = 0u;

@@ -272,7 +272,7 @@ bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, pro
   std::vector<unsigned>           ordering = get( settings, "ordering", std::vector<unsigned>()           );
   dd_based_esop_optimization_func esopmin  = get( settings, "esopmin",  dd_based_esop_optimization_func() );
 
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   // circuit has to be empty
   clear_circuit(circ);

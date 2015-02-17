@@ -145,7 +145,7 @@ namespace cirkit
     gate_simulation_func gate_simulation = get<gate_simulation_func>( settings, "gate_simulation", core_gate_simulation() );
     step_result_func     step_result     = get<step_result_func>( settings, "step_result", step_result_func() );
 
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     output = input;
     output = gate_simulation( g, output );
@@ -163,7 +163,7 @@ namespace cirkit
     gate_simulation_func gate_simulation = get<gate_simulation_func>( settings, "gate_simulation", core_gate_simulation() );
     step_result_func     step_result     = get<step_result_func>( settings, "step_result", step_result_func() );
 
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     output = input;
     while ( first != last )

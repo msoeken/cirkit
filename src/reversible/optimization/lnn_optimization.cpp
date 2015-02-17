@@ -615,7 +615,7 @@ unsigned apply_global_reordering_scheme( circuit& circ, const circuit& base) {
     unsigned reordering_mode = get<unsigned>(settings, "reordering_mode", 0u);
     
     // Run-time measuring
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     unsigned number_of_swaps;
     switch(reordering_mode) {

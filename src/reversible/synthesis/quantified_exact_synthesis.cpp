@@ -159,7 +159,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
   //bool     multiple  = get<bool>(     settings, "multiple",  false );
   bool     verbose   = get<bool>(     settings, "verbose",   false );
 
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   unsigned n = spec.num_inputs();
   unsigned nbits = (unsigned)ceil( log( n ) / log( 2.0) );

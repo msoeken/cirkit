@@ -119,7 +119,7 @@ namespace cirkit
     cost_function cf = get<cost_function>( settings, "cost_function", costs_by_gate_func( transistor_costs() ) );
 
     // Run-time measuring
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     // copy circuit
     copy_circuit( base, circ );

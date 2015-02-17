@@ -37,7 +37,7 @@ using namespace cirkit;
 
 void create_and_synthesize( unsigned n, double& runtime, std::function<void(BDD&, const rcbdd&)> func )
 {
-  new_reference_timer t( &runtime );
+  reference_timer t( &runtime );
 
   rcbdd cf;
   cf.initialize_manager();

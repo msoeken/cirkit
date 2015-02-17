@@ -76,7 +76,7 @@ int main( int argc, char ** argv )
   std::thread t1( [&timeout]() { timeout_after( timeout ); } );
 
   /* stop time */
-  new_print_timer t;
+  print_timer t;
 
   if ( mode == 0u )
   {

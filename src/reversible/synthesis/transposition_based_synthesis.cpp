@@ -51,7 +51,7 @@ namespace cirkit
   {
     // Settings parsing
     // Run-time measuring
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     unsigned bw = spec.num_outputs();
     circ.set_lines( bw );

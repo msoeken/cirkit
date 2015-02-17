@@ -61,7 +61,7 @@ bool pidd_debugging( const circuit& circ, const binary_truth_table& spec,
   auto with_negated = get( settings, "with_negated", false );
 
   /* timer */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   std::ofstream os( "/tmp/pidd.perm", std::ofstream::out );
 

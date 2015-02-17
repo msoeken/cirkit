@@ -799,7 +799,7 @@ bool rcbdd_synthesis( circuit& circ, const rcbdd& cf, properties::ptr settings, 
   auto smart_pickcube   = get( settings, "smart_pickcube",   true                              );
 
   /* Timing */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   rcbdd_synthesis_manager mgr( cf, circ );
   mgr.verbose          = verbose;

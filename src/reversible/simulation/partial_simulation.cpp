@@ -32,7 +32,7 @@ namespace cirkit
     simulation_func simulation = get<simulation_func>( settings, "simulation", simple_simulation_func() );
     bool keep_full_output = get<bool>( settings, "keep_full_output", false );
 
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     boost::dynamic_bitset<> full_input( circ.lines(), 0ul );
     

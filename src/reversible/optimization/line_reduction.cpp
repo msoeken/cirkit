@@ -481,7 +481,7 @@ namespace cirkit
     unsigned skipped_no_constant_line = 0u;
     unsigned skipped_synthesis_failed = 0u;
 
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     copy_circuit( base, circ );
 

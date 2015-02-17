@@ -183,7 +183,7 @@ namespace cirkit
     sequential_step_result_func step_result = get<sequential_step_result_func>( settings, "step_result", sequential_step_result_func() );
 
     // Run-time measuring
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     // Wavefile Generation
     bool write_wavefile = !vcd_filename.empty();

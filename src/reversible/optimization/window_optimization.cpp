@@ -164,7 +164,7 @@ namespace cirkit
     optimization_func  optimization  = get<optimization_func>( settings, "optimization", resynthesis_optimization() );
     cost_function cf = get<cost_function>( settings, "cost_function", costs_by_circuit_func( gate_costs() ) );
 
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     copy_circuit( base, circ );
 

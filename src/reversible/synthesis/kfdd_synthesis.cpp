@@ -36,7 +36,7 @@ namespace cirkit
     std::string dotfilename           = get<std::string>( settings, "dotfilename", std::string() );
 
     // run-time measurement
-    new_properties_timer t( statistics );
+    properties_timer t( statistics );
 
     dd_from_kfdd_settings _settings;
     _settings.default_decomposition = default_decomposition;

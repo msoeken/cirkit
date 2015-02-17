@@ -65,7 +65,7 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
   std::string dotname = get( settings, "dotname", std::string() );
 
   /* Timer */
-  new_properties_timer t( statistics );
+  properties_timer t( statistics );
 
   BDDTable bdd;
   read_pla_to_characteristic_bdd( bdd, filename, false, false );
