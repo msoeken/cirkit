@@ -58,8 +58,8 @@ bool embed_pla_bennett( rcbdd& cf, const std::string& filename,
   {
     properties_timer t( statistics, "runtime_read" );
 
-    read_pla_to_bdd_settings rp_settings;
-    rp_settings.input_generation_func = [&cf, &m]( DdManager*, unsigned pos ) { return cf.x( m + pos ).getNode(); };
+    auto rp_settings = std::make_shared<properties>();
+    rp_settings->set( "input_generation_func", generation_func_type( [&]( DdManager*, unsigned pos ) { return cf.x( m + pos ).getNode(); } ) );
     read_pla_to_bdd( table, filename, rp_settings );
   }
 
