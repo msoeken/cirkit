@@ -27,6 +27,7 @@
 #ifndef READ_PLA_TO_BDD_HPP
 #define READ_PLA_TO_BDD_HPP
 
+#include <functional>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -34,6 +35,8 @@
 #include <boost/optional.hpp>
 
 #include <cudd.h>
+
+#include <core/properties.hpp>
 
 namespace cirkit
 {
@@ -93,21 +96,16 @@ namespace cirkit
     bool external_manager = false;
   };
 
-  /**
-   * @since  2.0
-   */
-  struct read_pla_to_bdd_settings
-  {
-    std::function<DdNode*(DdManager*, unsigned)> input_generation_func = []( DdManager* manager, unsigned pos ) { return Cudd_bddNewVar( manager ); };
-    std::vector<unsigned> ordering;
-  };
+  using generation_func_type = std::function<DdNode*(DdManager*, unsigned)>;
 
   /**
    * @brief Reads a BDD from a PLA file
    *
    * @since  1.3
    */
-  bool read_pla_to_bdd( BDDTable& bdd, const std::string& filename, const read_pla_to_bdd_settings& settings = read_pla_to_bdd_settings() );
+  bool read_pla_to_bdd( BDDTable& bdd, const std::string& filename,
+                        const properties::ptr& settings = properties::ptr(),
+                        const properties::ptr& statistics = properties::ptr() );
 
   /**
    * @brief Reads a characteristic BDD from a PLA file

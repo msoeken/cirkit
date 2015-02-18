@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#include <boost/format.hpp>
+
 #include <core/io/read_pla_to_bdd.hpp>
 #include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
@@ -29,6 +31,7 @@ using namespace cirkit;
 
 int main( int argc, char ** argv )
 {
+  using boost::format;
   using boost::program_options::value;
 
   std::string filename;
@@ -49,12 +52,16 @@ int main( int argc, char ** argv )
     return 1;
   }
 
-  read_pla_to_bdd_settings settings;
-  parse_string_list( settings.ordering, ordering );
+  std::vector<unsigned> vordering;
+  parse_string_list( vordering, ordering );
+  auto settings = std::make_shared<properties>();
+  settings->set( "ordering", vordering );
+  auto statistics = std::make_shared<properties>();
 
   BDDTable bdd;
-  read_pla_to_bdd( bdd, filename, settings );
+  read_pla_to_bdd( bdd, filename, settings, statistics );
 
+  std::cout << format( "Run-time:   %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
   std::cout << "Node count: " << Cudd_ReadNodeCount( bdd.cudd ) << std::endl;
   for ( const auto& p : bdd.outputs )
   {

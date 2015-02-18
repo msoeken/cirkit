@@ -26,6 +26,8 @@
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/irange.hpp>
 
+#include <core/utils/timer.hpp>
+
 #include "pla_parser.hpp"
 
 using namespace boost::assign;
@@ -129,9 +131,19 @@ namespace cirkit
     return true;
   }
 
-  bool read_pla_to_bdd( BDDTable& bdd, const std::string& filename, const read_pla_to_bdd_settings& settings )
+  bool read_pla_to_bdd( BDDTable& bdd, const std::string& filename,
+                        const properties::ptr& settings,
+                        const properties::ptr& statistics )
   {
     using boost::adaptors::map_values;
+
+    /* settings */
+    auto input_generation_func = get( settings, "input_generation_func", generation_func_type( []( DdManager* manager, unsigned pos ) {
+          return Cudd_bddNewVar( manager ); } ) );
+    auto ordering              = get( settings, "ordering",              std::vector<unsigned>() );
+
+    /* timing */
+    properties_timer t( statistics );
 
     pla_t pla;
 
@@ -141,38 +153,37 @@ namespace cirkit
     }
 
     // Check ordering
-    assert( settings.ordering.empty() || settings.ordering.size() == *pla.num_inputs );
+    assert( ordering.empty() || ordering.size() == *pla.num_inputs );
 
     // Inputs
     boost::transform( pla.input_labels,
                       std::back_inserter( bdd.inputs ),
                       []( const std::string& label ) { return std::make_pair( label, (DdNode*)0 ); } );
-    //boost::generate( bdd.inputs | map_values, [&bdd]() { return Cudd_bddNewVar( bdd.cudd ); } );
-    unsigned pos = 0u;
-    boost::generate( bdd.inputs | map_values, [&settings, &bdd, &pos]() { return settings.input_generation_func( bdd.cudd, pos++ ); } );
+    auto pos = 0u;
+    boost::generate( bdd.inputs | map_values, [&]() { return input_generation_func( bdd.cudd, pos++ ); } );
 
     // Outputs
     boost::transform( pla.output_labels,
                       std::back_inserter( bdd.outputs ),
-                      [&bdd]( const std::string& label ) { return std::make_pair( label, Cudd_ReadLogicZero( bdd.cudd ) ); } );
+                      [&]( const std::string& label ) { return std::make_pair( label, Cudd_ReadLogicZero( bdd.cudd ) ); } );
     boost::for_each( bdd.outputs | map_values, Cudd_Ref );
 
 
     // Iterate through cubes
     for ( const auto& cube : pla.cubes )
     {
-      const std::string& in = cube.first;
-      const std::string& out = cube.second;
+      const auto& in = cube.first;
+      const auto& out = cube.second;
 
       DdNode *tmp, *var;
       DdNode* prod = Cudd_ReadOne( bdd.cudd );
       Cudd_Ref( prod );
 
-      for ( unsigned i = 0u; i < *pla.num_inputs; ++i )
+      for ( auto i = 0u; i < *pla.num_inputs; ++i )
       {
         if ( in[i] == '-' ) continue;
 
-        var = settings.ordering.empty() ? bdd.inputs[i].second : bdd.inputs[settings.ordering[i]].second;
+        var = ordering.empty() ? bdd.inputs[i].second : bdd.inputs[ordering[i]].second;
         Cudd_Ref( var );
         if ( in[i] == '0' ) var = Cudd_Not( var );
         tmp = Cudd_bddAnd( bdd.cudd, prod, var );
@@ -182,7 +193,7 @@ namespace cirkit
         prod = tmp;
       }
 
-      for ( unsigned i = 0u; i < *pla.num_outputs; ++i )
+      for ( auto i = 0u; i < *pla.num_outputs; ++i )
       {
         if ( out[i] == '0' || out[i] == '~' ) continue;
 
@@ -227,7 +238,7 @@ namespace cirkit
     boost::transform( labels,
                       std::back_inserter( bdd.inputs ),
                       []( const std::string& label ) { return std::make_pair( label, (DdNode*)0 ); } );
-    boost::generate( bdd.inputs | map_values, [&bdd]() { return Cudd_bddNewVar( bdd.cudd ); } );
+    boost::generate( bdd.inputs | map_values, [&]() { return Cudd_bddNewVar( bdd.cudd ); } );
 
     auto xnodes = inputs_first ? boost::make_iterator_range( bdd.inputs.begin(), bdd.inputs.begin() + *pla.num_inputs )
                                : boost::make_iterator_range( bdd.inputs.begin() + *pla.num_outputs, bdd.inputs.end() );
@@ -377,7 +388,7 @@ namespace cirkit
     bdd.num_real_outputs = *pla.num_outputs;
 
     Cudd_RecursiveDeref( bdd.cudd, ys );
-    boost::for_each( bdd.inputs | map_values, [&bdd](DdNode* node) { Cudd_RecursiveDeref( bdd.cudd, node ); } );
+    boost::for_each( bdd.inputs | map_values, [&](DdNode* node) { Cudd_RecursiveDeref( bdd.cudd, node ); } );
 
     return true;
   }
