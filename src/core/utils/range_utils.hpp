@@ -28,11 +28,16 @@
 #define RANGE_UTILS_HPP
 
 #include <functional>
+#include <vector>
 
 #include <boost/algorithm/string/join.hpp>
+#include <boost/assign/std/vector.hpp>
+#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
+
+using namespace boost::assign;
 
 namespace cirkit
 {
@@ -125,6 +130,20 @@ std::string any_join( const C& container, const std::string& delim )
 {
   using boost::adaptors::transformed;
   return boost::join( container | transformed( []( const typename C::value_type& v ) { return boost::lexical_cast<std::string>( v ); } ), delim );
+}
+
+template<typename C>
+std::string indexed_join( const C& container, const std::string& delim, unsigned offset = 0u )
+{
+  using boost::format;
+  using boost::str;
+
+  std::vector<std::string> v;
+  for ( auto it : index( container ) )
+  {
+    v += str( format( "%d: %s" ) % ( it.first + offset ) % boost::lexical_cast<std::string>( it.second ) );
+  }
+  return boost::join( v, delim );
 }
 
 void ntimes( unsigned n, std::function<void()> f );
