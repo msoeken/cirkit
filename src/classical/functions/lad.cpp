@@ -23,6 +23,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
@@ -34,10 +35,12 @@
 #include <classical/aig.hpp>
 #include <classical/functions/aig_support.hpp>
 #include <classical/functions/simulation_graph.hpp>
+#include <classical/utils/aig_utils.hpp>
 #include <classical/utils/simulate_aig.hpp>
 
 using namespace boost::assign;
 using boost::format;
+using boost::adaptors::transformed;
 
 namespace cirkit
 {
@@ -131,9 +134,9 @@ lad_graph::lad_graph( const std::string& filename )
 lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
 {
   /* AIG info */
-  const auto& aig_info = boost::get_property( aig, boost::graph_name );
-  unsigned n = aig_info.inputs.size();
-  unsigned m = aig_info.outputs.size();
+  const auto& info = aig_info( aig );
+  unsigned n = info.inputs.size();
+  unsigned m = info.outputs.size();
 
   /* Simulate vectors */
   std::vector<unsigned> partition;
@@ -149,6 +152,12 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
     std::cout << format( "[i] number of inputs: %d" ) % n << std::endl
               << format( "[i] number of outputs: %d" ) % m << std::endl
               << format( "[i] number of simulation vectors: %d" ) % vectors.size() << std::endl;
+
+    const auto& input_names  = info.inputs | transformed( [&]( aig_node n ) { return info.node_names.at( n ); } );
+    const auto& output_names = info.outputs | transformed( [&]( const std::pair<aig_function, std::string>& p ) { return p.second; } );
+    std::cout << "[i] input vertices: " << indexed_join( input_names, ", " ) << std::endl;
+    std::cout << "[i] simulation vertices: " << indexed_join( vectors, ", ", n ) << std::endl;
+    std::cout << "[i] output vertices: " << indexed_join( output_names, ", ", n + vectors.size() ) << std::endl;
   }
 
   /* Prepare data structures */
@@ -185,7 +194,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
   word_node_assignment_simulator::aig_node_value_map map;
   for ( auto word : index( vectors_t ) )
   {
-    map[aig_info.inputs[word.first]] = word.second;
+    map[info.inputs[word.first]] = word.second;
   }
 
   auto results = simulate_aig( aig, word_node_assignment_simulator( map ) );
@@ -195,7 +204,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
   {
     for ( unsigned j = 0; j < m; ++j )
     {
-      if ( results[aig_info.outputs[j].first][i] )
+      if ( results[info.outputs[j].first][i] )
       {
         nb_succ[n + i]++;
         nb_pred[n + vectors.size() + j]++;
@@ -211,7 +220,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
   /* support */
   support.resize( nb_vertices );
   auto s = aig_structural_support( aig );
-  for ( auto o : index( aig_info.outputs ) )
+  for ( auto o : index( info.outputs ) )
   {
     support[n + vectors.size() + o.first] = s[o.second.first];
   }
