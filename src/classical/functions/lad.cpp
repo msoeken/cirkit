@@ -69,6 +69,9 @@ struct lad_graph
   /* support */
   vec_int_t support;
 
+  /* only filled when verbose */
+  std::vector<std::string> vertex_names;
+
   explicit lad_graph( const std::string& filename );
   explicit lad_graph( const aig_graph& aig, unsigned selector, bool verbose = false );
 };
@@ -154,10 +157,15 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
               << format( "[i] number of simulation vectors: %d" ) % vectors.size() << std::endl;
 
     const auto& input_names  = info.inputs | transformed( [&]( aig_node n ) { return info.node_names.at( n ); } );
+    const auto& vector_names = vectors | transformed( []( const boost::dynamic_bitset<>& b ) { return boost::lexical_cast<std::string>( b ); } );
     const auto& output_names = info.outputs | transformed( [&]( const std::pair<aig_function, std::string>& p ) { return p.second; } );
     std::cout << "[i] input vertices: " << indexed_join( input_names, ", " ) << std::endl;
     std::cout << "[i] simulation vertices: " << indexed_join( vectors, ", ", n ) << std::endl;
     std::cout << "[i] output vertices: " << indexed_join( output_names, ", ", n + vectors.size() ) << std::endl;
+
+    boost::push_back( vertex_names, input_names );
+    boost::push_back( vertex_names, vector_names );
+    boost::push_back( vertex_names, output_names );
   }
 
   /* Prepare data structures */
@@ -337,6 +345,7 @@ struct lad_domain
   }
 
   void dump( const std::string& filename );
+  void list_with_names( std::ostream& os, const lad_graph& gp, const lad_graph& gt ); /* can only be called with vertex names */
 };
 
 inline bool compatible_vertex_labels( int l1, int l2 )
@@ -612,6 +621,20 @@ void lad_domain::dump( const std::string& filename )
      << "globalMatchingT: " << any_join( global_matching_t, " " ) << std::endl;
 
   os.close();
+}
+
+void lad_domain::list_with_names( std::ostream& os, const lad_graph& gp, const lad_graph& gt )
+{
+  for ( auto u = 0; u < nb_val.size(); ++u )
+  {
+    const auto offset = first_val[u];
+    os << format( "%s |->" ) % gp.vertex_names[u];
+    for ( auto i = 0; i < nb_val[u]; ++i )
+    {
+      os << format( " %s" ) % gt.vertex_names[val[offset + i]];
+    }
+    os << std::endl;
+  }
 }
 
 /******************************************************************************
@@ -1324,6 +1347,8 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
     //          << "Target graph:" << std::endl << gt << d;
     std::cout << format( "[i] target graph has %d vertices" ) % gt.nb_vertices << std::endl
               << format( "[i] pattern graph has %d vertices" ) % gp.nb_vertices << std::endl;
+    std::cout << "[i] domain:" << std::endl;
+    d.list_with_names( std::cout, gp, gt );
   }
 
   set( statistics, "pattern_vertices", (unsigned)gp.nb_vertices );
