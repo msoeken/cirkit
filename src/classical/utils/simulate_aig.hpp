@@ -80,7 +80,7 @@ public:
 class simple_assignment_simulator : public aig_simulator<bool>
 {
 public:
-  typedef std::map<std::string, bool> aig_name_value_map;
+  using aig_name_value_map = std::map<std::string, bool>;
 
   simple_assignment_simulator( const aig_name_value_map& assignment );
 
@@ -96,7 +96,7 @@ private:
 class simple_node_assignment_simulator : public aig_simulator<bool>
 {
 public:
-  typedef std::map<aig_node, bool> aig_node_value_map;
+  using aig_node_value_map = std::map<aig_node, bool>;
 
   simple_node_assignment_simulator( const aig_node_value_map& assignment );
 
@@ -113,7 +113,7 @@ private:
 class word_assignment_simulator : public aig_simulator<boost::dynamic_bitset<>>
 {
 public:
-  typedef std::map<std::string, boost::dynamic_bitset<>> aig_name_value_map;
+  using aig_name_value_map = std::map<std::string, boost::dynamic_bitset<>>;
 
   word_assignment_simulator( const aig_name_value_map& assignment );
 
@@ -129,7 +129,7 @@ private:
 class word_node_assignment_simulator : public aig_simulator<boost::dynamic_bitset<>>
 {
 public:
-  typedef std::map<aig_node, boost::dynamic_bitset<>> aig_node_value_map;
+  using aig_node_value_map = std::map<aig_node, boost::dynamic_bitset<>>;
 
   word_node_assignment_simulator( const aig_node_value_map& assignment );
 
@@ -213,7 +213,7 @@ private:
  * DFS visitor for actual simulation                                          *
  ******************************************************************************/
 
-typedef std::map<aig_node, boost::default_color_type> aig_node_color_map;
+using aig_node_color_map = std::map<aig_node, boost::default_color_type>;
 
 template<typename T>
 struct simulate_aig_node_visitor : public aig_dfs_visitor

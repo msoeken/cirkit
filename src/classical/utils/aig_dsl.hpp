@@ -39,7 +39,7 @@ class aig_dsl
 public:
   aig_dsl();
 
-  typedef std::pair<aig_graph*, aig_function> node;
+  using node = std::pair<aig_graph*, aig_function>;
 
   inline aig_graph& aig() { return g; }
   inline const aig_graph& aig() const { return g; }

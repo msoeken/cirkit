@@ -35,7 +35,7 @@ using namespace boost::assign;
  * Types                                                                      *
  ******************************************************************************/
 
-typedef std::map<std::string, std::string> properties_map_t;
+using properties_map_t = std::map<std::string, std::string>;
 
 /******************************************************************************
  * Private functions                                                          *
