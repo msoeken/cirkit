@@ -39,7 +39,7 @@ namespace cirkit
 template<typename Graph>
 void write_graph_file( const Graph& g, const std::string& filename, bool verbose = false )
 {
-  typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_t;
+  using vertex_t = typename boost::graph_traits<Graph>::vertex_descriptor;
 
   if ( verbose )
   {
@@ -68,7 +68,7 @@ void write_labeled_graph_file( const Graph& g,
                                EdgeLabelFunc&& edge_label,
                                const std::string& filename, bool verbose = false )
 {
-  typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_t;
+  using vertex_t = typename boost::graph_traits<Graph>::vertex_descriptor;
 
   if ( verbose )
   {

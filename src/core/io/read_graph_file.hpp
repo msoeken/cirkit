@@ -41,7 +41,7 @@ namespace cirkit
 template<typename Graph>
 void read_graph_file( Graph& g, const std::string& filename, bool verbose = false )
 {
-  typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_t;
+  using vertex_t = typename boost::graph_traits<Graph>::vertex_descriptor;
 
   if ( verbose )
   {
