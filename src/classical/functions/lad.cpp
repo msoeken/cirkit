@@ -1196,6 +1196,11 @@ bool solve( lad_manager& mgr, unsigned& nb_sol, std::vector<unsigned>& mapping, 
     return true;
   }
 
+  /**
+   * min_dom = argmin { #D_u | u ∈ V_P such that #D_u > 1 }
+   *
+   * otherwise, min_dom = -1
+   */
   min_dom = -1;
   for ( u = 0; u < mgr.gp.nb_vertices; ++u )
   {
@@ -1212,13 +1217,25 @@ bool solve( lad_manager& mgr, unsigned& nb_sol, std::vector<unsigned>& mapping, 
   {
     ++nb_sol;
     mapping.resize( mgr.gp.nb_vertices );
-    std::cout << format( "Solution %d:" ) % nb_sol;
+    if ( verbose )
+    {
+      std::cout << format( "Solution %d:" ) % nb_sol;
+    }
     for ( u = 0; u < mgr.gp.nb_vertices; ++u )
     {
       mapping[u] = mgr.d.val[mgr.d.first_val[u]];
-      std::cout << format( " %d=%d" ) % u % mgr.d.val[mgr.d.first_val[u]];
+      if ( verbose )
+      {
+        std::cout << format( " %d=%d" ) % u % mgr.d.val[mgr.d.first_val[u]];
+      }
     }
-    std::cout << std::endl;
+    if ( verbose )
+    {
+      std::cout << std::endl;
+
+      std::cout << "[i] domain:" << std::endl;
+      mgr.d.list_with_names( std::cout, mgr.gp, mgr.gt );
+    }
     mgr.d.reset_to_filter( mgr.gp.nb_vertices );
     return true;
   }
@@ -1355,7 +1372,7 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
   set( statistics, "target_vertices", (unsigned)gt.nb_vertices );
 
   lad_manager mgr( d, gp, gt );
-  return start_lad( mgr, mapping, /*verbose*/ false );
+  return start_lad( mgr, mapping, verbose );
 }
 
 }
