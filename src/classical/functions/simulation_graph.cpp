@@ -22,6 +22,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/combine.hpp>
 
 #include <core/io/write_graph_file.hpp>
 #include <core/utils/bitset_utils.hpp>
@@ -46,40 +47,38 @@ void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const s
   properties_timer t( statistics );
 
   /* AIG */
-  const auto& graph_info = aig_info( aig );
+  const auto& info = aig_info( aig );
+  auto n = info.inputs.size();
+  auto m = info.outputs.size();
 
   /* add vertices */
-  auto nodes = add_vertices( g, graph_info.inputs.size() + sim_vectors.size() + graph_info.outputs.size() );
+  auto nodes = add_vertices( g, n + sim_vectors.size() + m );
 
   /* edges from inputs to simulation vectors */
-  for ( unsigned i = 0u; i < sim_vectors.size(); ++i )
+  for ( auto it : index( sim_vectors ) )
   {
-    auto pos = sim_vectors[i].find_first();
-    while ( pos != boost::dynamic_bitset<>::npos )
-    {
-      add_edge( nodes[pos], nodes[graph_info.inputs.size() + i], g );
-      pos = sim_vectors[i].find_next( pos );
-    }
+    foreach_bit( it.second, [&]( unsigned pos ) {
+        add_edge( nodes[pos], nodes[n + it.first], g );
+      } );
   }
 
   /* simulate */
-  auto sim_vectors_t = transpose( sim_vectors );
-  word_node_assignment_simulator::aig_node_value_map m;
-  for ( auto word : index( sim_vectors_t ) )
+  word_node_assignment_simulator::aig_node_value_map map;
+  for ( const auto& p : boost::combine( info.inputs, transpose( sim_vectors ) ) )
   {
-    m[graph_info.inputs[word.first]] = word.second;
+    map[boost::get<0>( p )] = boost::get<1>( p );
   }
 
-  auto results = simulate_aig( aig, word_node_assignment_simulator( m ) );
+  auto results = simulate_aig( aig, word_node_assignment_simulator( map ) );
 
   /* create edges */
-  for ( unsigned i = 0; i < sim_vectors.size(); ++i )
+  for ( auto i = 0u; i < sim_vectors.size(); ++i )
   {
-    for ( unsigned j = 0; j < graph_info.outputs.size(); ++j )
+    for ( auto j = 0u; j < m; ++j )
     {
-      if ( results[graph_info.outputs[j].first][i] )
+      if ( results[info.outputs[j].first][i] )
       {
-        add_edge( nodes[graph_info.inputs.size() + i], nodes[graph_info.inputs.size() + sim_vectors.size() + j], g );
+        add_edge( nodes[n + i], nodes[n + sim_vectors.size() + j], g );
       }
     }
   }
@@ -100,13 +99,13 @@ void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const s
   if ( !labeledname.empty() )
   {
     // TODO be more flexible
-    write_labeled_graph_file( g, [&graph_info, &sim_vectors]( const simulation_node& v ) {
-        if ( v < graph_info.inputs.size() ) return 1u;
-        if ( v < graph_info.inputs.size() + sim_vectors.size() ) return 2u + (unsigned)std::min( (unsigned)sim_vectors[v - graph_info.inputs.size()].count(), 3u );
+    write_labeled_graph_file( g, [&]( const simulation_node& v ) {
+        if ( v < n ) return 1u;
+        if ( v < n + sim_vectors.size() ) return 2u + (unsigned)std::min( (unsigned)sim_vectors[v - n].count(), 3u );
         return 0u;
-      }, [&g, &graph_info, &sim_vectors]( const simulation_edge& e ) {
-        if ( boost::source( e, g ) < graph_info.inputs.size() ) return 0u;
-        else return 1u + (unsigned)std::min( (unsigned)sim_vectors[boost::source( e, g ) - graph_info.inputs.size()].count(), 3u );
+      }, [&]( const simulation_edge& e ) {
+        if ( boost::source( e, g ) < n ) return 0u;
+        else return 1u + (unsigned)std::min( (unsigned)sim_vectors[boost::source( e, g ) - n].count(), 3u );
       }, labeledname );
   }
 }

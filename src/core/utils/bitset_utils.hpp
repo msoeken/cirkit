@@ -66,6 +66,8 @@ std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b )
 
 boost::dynamic_bitset<> onehot_bitset( unsigned n, unsigned pos );
 
+void foreach_bit( const boost::dynamic_bitset<>& b, const std::function<void(unsigned)>& func );
+
 }
 
 #endif
