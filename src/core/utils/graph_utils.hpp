@@ -34,6 +34,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/range/algorithm.hpp>
 
 using namespace boost::assign;
 
@@ -216,6 +217,14 @@ Dest copy_from_filtered( const Source& source,
   iso_map_t copy_imap( copy_map.begin(), boost::get( boost::vertex_index, source ) );
   boost::copy_graph( source, dest, boost::orig_to_copy( copy_imap ) );
   return dest;
+}
+
+template<class Graph>
+std::vector<vertex_t<Graph>> add_vertices( Graph& g, unsigned n )
+{
+  std::vector<vertex_t<Graph>> nodes( n );
+  boost::generate( nodes, [&]() { return boost::add_vertex( g ); } );
+  return nodes;
 }
 
 }

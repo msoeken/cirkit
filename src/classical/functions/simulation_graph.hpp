@@ -35,15 +35,15 @@
 #include <igraph/igraph.h>
 
 #include <core/properties.hpp>
+#include <core/utils/graph_utils.hpp>
 #include <classical/aig.hpp>
 
 namespace cirkit
 {
 
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> simulation_graph;
-
-typedef boost::graph_traits<simulation_graph>::vertex_descriptor simulation_node;
-typedef boost::graph_traits<simulation_graph>::edge_descriptor simulation_edge;
+using simulation_graph = digraph_t<>;
+using simulation_node  = vertex_t<simulation_graph>;
+using simulation_edge  = edge_t<simulation_graph>;
 
 enum class simulation_pattern : unsigned
 {
@@ -55,7 +55,9 @@ enum class simulation_pattern : unsigned
   two_cold = 0x20
 };
 
-void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors, properties::ptr settings = properties::ptr() );
+void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors,
+                              const properties::ptr& settings = properties::ptr(),
+                              const properties::ptr& statistics = properties::ptr() );
 
 /**
  * @param partition If not nullptr then the number of patterns for each selector is written into it.

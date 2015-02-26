@@ -26,6 +26,7 @@
 #include <core/io/write_graph_file.hpp>
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
+#include <classical/utils/aig_utils.hpp>
 #include <classical/utils/simulate_aig.hpp>
 
 using namespace boost::assign;
@@ -33,19 +34,22 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors, properties::ptr settings )
+void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors,
+                              const properties::ptr& settings, const properties::ptr& statistics )
 {
   /* Settings */
-  std::string dotname     = get( settings, "dotname",     std::string() );
-  std::string graphname   = get( settings, "graphname",   std::string() );
-  std::string labeledname = get( settings, "labeledname", std::string() );
+  auto dotname     = get( settings, "dotname",     std::string() );
+  auto graphname   = get( settings, "graphname",   std::string() );
+  auto labeledname = get( settings, "labeledname", std::string() );
+
+  /* Timing */
+  properties_timer t( statistics );
 
   /* AIG */
-  const auto& graph_info = boost::get_property( aig, boost::graph_name );
+  const auto& graph_info = aig_info( aig );
 
   /* add vertices */
-  std::vector<simulation_node> nodes( graph_info.inputs.size() + sim_vectors.size() + graph_info.outputs.size() );
-  boost::generate( nodes, [&g]() { return boost::add_vertex( g ); } );
+  auto nodes = add_vertices( g, graph_info.inputs.size() + sim_vectors.size() + graph_info.outputs.size() );
 
   /* edges from inputs to simulation vectors */
   for ( unsigned i = 0u; i < sim_vectors.size(); ++i )
