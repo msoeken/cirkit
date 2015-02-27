@@ -35,9 +35,11 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors,
-                              const properties::ptr& settings, const properties::ptr& statistics )
+simulation_graph create_simulation_graph( const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors,
+                                          const properties::ptr& settings, const properties::ptr& statistics )
 {
+  simulation_graph g;
+
   /* Settings */
   auto dotname     = get( settings, "dotname",     std::string() );
   auto graphname   = get( settings, "graphname",   std::string() );
@@ -108,6 +110,8 @@ void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const s
         else return 1u + (unsigned)std::min( (unsigned)sim_vectors[boost::source( e, g ) - n].count(), 3u );
       }, labeledname );
   }
+
+  return g;
 }
 
 void create_simulation_vectors( std::vector<boost::dynamic_bitset<>>& sim_vectors, unsigned width, unsigned selector,

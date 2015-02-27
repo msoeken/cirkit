@@ -55,9 +55,9 @@ enum class simulation_pattern : unsigned
   two_cold = 0x20
 };
 
-void create_simulation_graph( simulation_graph& g, const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors,
-                              const properties::ptr& settings = properties::ptr(),
-                              const properties::ptr& statistics = properties::ptr() );
+simulation_graph create_simulation_graph( const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors,
+                                          const properties::ptr& settings = properties::ptr(),
+                                          const properties::ptr& statistics = properties::ptr() );
 
 /**
  * @param partition If not nullptr then the number of patterns for each selector is written into it.
