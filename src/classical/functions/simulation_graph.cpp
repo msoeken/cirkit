@@ -66,9 +66,10 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
   /* simulate */
   word_node_assignment_simulator::aig_node_value_map map;
-  for ( const auto& p : boost::combine( info.inputs, transpose( sim_vectors ) ) )
+  auto sim_vectors_t = transpose( sim_vectors );
+  for ( const auto& p : boost::combine( info.inputs, sim_vectors_t ) )
   {
-    map[boost::get<0>( p )] = boost::get<1>( p );
+    map.insert( {boost::get<0>( p ), boost::get<1>( p )} );
   }
 
   auto results = simulate_aig( aig, word_node_assignment_simulator( map ) );
