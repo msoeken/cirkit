@@ -28,6 +28,7 @@
 #define SIMULATE_AIG_HPP
 
 #include <map>
+#include <unordered_map>
 
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/property_map/property_map.hpp>
@@ -80,7 +81,7 @@ public:
 class simple_assignment_simulator : public aig_simulator<bool>
 {
 public:
-  using aig_name_value_map = std::map<std::string, bool>;
+  using aig_name_value_map = std::unordered_map<std::string, bool>;
 
   simple_assignment_simulator( const aig_name_value_map& assignment );
 
@@ -96,7 +97,7 @@ private:
 class simple_node_assignment_simulator : public aig_simulator<bool>
 {
 public:
-  using aig_node_value_map = std::map<aig_node, bool>;
+  using aig_node_value_map = std::unordered_map<aig_node, bool>;
 
   simple_node_assignment_simulator( const aig_node_value_map& assignment );
 
@@ -113,7 +114,7 @@ private:
 class word_assignment_simulator : public aig_simulator<boost::dynamic_bitset<>>
 {
 public:
-  using aig_name_value_map = std::map<std::string, boost::dynamic_bitset<>>;
+  using aig_name_value_map = std::unordered_map<std::string, boost::dynamic_bitset<>>;
 
   word_assignment_simulator( const aig_name_value_map& assignment );
 
@@ -129,7 +130,7 @@ private:
 class word_node_assignment_simulator : public aig_simulator<boost::dynamic_bitset<>>
 {
 public:
-  using aig_node_value_map = std::map<aig_node, boost::dynamic_bitset<>>;
+  using aig_node_value_map = std::unordered_map<aig_node, boost::dynamic_bitset<>>;
 
   word_node_assignment_simulator( const aig_node_value_map& assignment );
 

@@ -56,12 +56,12 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
   /* add vertices */
   const auto vertices_count = n + sim_vectors.size() + m;
-  auto nodes = add_vertices( g, vertices_count );
+  add_vertices( g, vertices_count );
   edge_lookup.reserve( vertices_count << 3u );
 
   /* edge inserting */
   const auto add_edge_func = [&]( unsigned from, unsigned to ) {
-    add_edge( nodes[from], nodes[to], g );
+    add_edge( from, to, g );
     edge_lookup.insert( {from, to} );
   };
 
@@ -74,14 +74,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   }
 
   /* simulate */
-  word_node_assignment_simulator::aig_node_value_map map;
+  word_assignment_simulator::aig_name_value_map map( info.inputs.size() );
   const auto sim_vectors_t = transpose( sim_vectors );
   for ( const auto& p : boost::combine( info.inputs, sim_vectors_t ) )
   {
-    map.insert( {boost::get<0>( p ), boost::get<1>( p )} );
+    map.insert( {info.node_names.at( boost::get<0>( p ) ), boost::get<1>( p )} );
   }
 
-  const auto results = simulate_aig( aig, word_node_assignment_simulator( map ) );
+  const auto results = simulate_aig( aig, word_assignment_simulator( map ) );
 
   /* create edges */
   for ( auto j = 0u; j < m; ++j )
