@@ -27,9 +27,11 @@
 #ifndef SIMULATION_GRAPH_HPP
 #define SIMULATION_GRAPH_HPP
 
+#include <unordered_set>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/functional/hash.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 #include <igraph/igraph.h>
@@ -38,12 +40,37 @@
 #include <core/utils/graph_utils.hpp>
 #include <classical/aig.hpp>
 
+namespace boost
+{
+
+enum graph_edge_lookup_t { graph_edge_lookup };
+BOOST_INSTALL_PROPERTY(graph, edge_lookup);
+
+}
+
 namespace cirkit
 {
 
-using simulation_graph = digraph_t<>;
-using simulation_node  = vertex_t<simulation_graph>;
-using simulation_edge  = edge_t<simulation_graph>;
+using vertex_pair_t    = std::pair<unsigned, unsigned>;
+
+struct edge_lookup_hash_t
+{
+  inline std::size_t operator()( const vertex_pair_t& p ) const
+  {
+    std::size_t seed = 0;
+    boost::hash_combine( seed, p.first );
+    boost::hash_combine( seed, p.second );
+    return seed;
+  }
+};
+
+using edge_lookup_t                 = std::unordered_set<vertex_pair_t, edge_lookup_hash_t>;
+
+using simulation_graph_properties_t = boost::property<boost::graph_edge_lookup_t, edge_lookup_t>;
+
+using simulation_graph              = digraph_t<boost::no_property, boost::no_property, simulation_graph_properties_t>;
+using simulation_node               = vertex_t<simulation_graph>;
+using simulation_edge               = edge_t<simulation_graph>;
 
 enum class simulation_pattern : unsigned
 {

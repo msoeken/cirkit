@@ -39,49 +39,59 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
                                           const properties::ptr& settings, const properties::ptr& statistics )
 {
   simulation_graph g;
+  auto& edge_lookup = boost::get_property( g, boost::graph_edge_lookup );
 
   /* Settings */
-  auto dotname     = get( settings, "dotname",     std::string() );
-  auto graphname   = get( settings, "graphname",   std::string() );
-  auto labeledname = get( settings, "labeledname", std::string() );
+  const auto dotname     = get( settings, "dotname",     std::string() );
+  const auto graphname   = get( settings, "graphname",   std::string() );
+  const auto labeledname = get( settings, "labeledname", std::string() );
 
   /* Timing */
   properties_timer t( statistics );
 
   /* AIG */
   const auto& info = aig_info( aig );
-  auto n = info.inputs.size();
-  auto m = info.outputs.size();
+  const auto n = info.inputs.size();
+  const auto m = info.outputs.size();
 
   /* add vertices */
-  auto nodes = add_vertices( g, n + sim_vectors.size() + m );
+  const auto vertices_count = n + sim_vectors.size() + m;
+  auto nodes = add_vertices( g, vertices_count );
+  edge_lookup.reserve( vertices_count << 3u );
+
+  /* edge inserting */
+  const auto add_edge_func = [&]( unsigned from, unsigned to ) {
+    add_edge( nodes[from], nodes[to], g );
+    edge_lookup.insert( {from, to} );
+  };
 
   /* edges from inputs to simulation vectors */
   for ( auto it : index( sim_vectors ) )
   {
     foreach_bit( it.second, [&]( unsigned pos ) {
-        add_edge( nodes[pos], nodes[n + it.first], g );
+        add_edge_func( pos, n + it.first );
       } );
   }
 
   /* simulate */
   word_node_assignment_simulator::aig_node_value_map map;
-  auto sim_vectors_t = transpose( sim_vectors );
+  const auto sim_vectors_t = transpose( sim_vectors );
   for ( const auto& p : boost::combine( info.inputs, sim_vectors_t ) )
   {
     map.insert( {boost::get<0>( p ), boost::get<1>( p )} );
   }
 
-  auto results = simulate_aig( aig, word_node_assignment_simulator( map ) );
+  const auto results = simulate_aig( aig, word_node_assignment_simulator( map ) );
 
   /* create edges */
-  for ( auto i = 0u; i < sim_vectors.size(); ++i )
+  for ( auto j = 0u; j < m; ++j )
   {
-    for ( auto j = 0u; j < m; ++j )
+    const auto& ovalue = results.at( info.outputs[j].first );
+    for ( auto i = 0u; i < sim_vectors.size(); ++i )
     {
-      if ( results[info.outputs[j].first][i] )
+      if ( ovalue[i] )
       {
-        add_edge( nodes[n + i], nodes[n + sim_vectors.size() + j], g );
+        add_edge_func( n + i, n + sim_vectors.size() + j );
       }
     }
   }
