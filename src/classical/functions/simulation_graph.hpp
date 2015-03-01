@@ -64,13 +64,22 @@ struct edge_lookup_hash_t
   }
 };
 
-using edge_lookup_t                 = std::unordered_set<vertex_pair_t, edge_lookup_hash_t>;
+using edge_lookup_t                        = std::unordered_set<vertex_pair_t, edge_lookup_hash_t>;
 
-using simulation_graph_properties_t = boost::property<boost::graph_edge_lookup_t, edge_lookup_t>;
+/* In order to allow an O(1) lookup for edges in the graph, this
+ * edge lookup table is added as a property to the simulation graph
+ */
+using simulation_graph_properties_t        = boost::property<boost::graph_edge_lookup_t, edge_lookup_t>;
 
-using simulation_graph              = digraph_t<boost::no_property, boost::no_property, simulation_graph_properties_t>;
-using simulation_node               = vertex_t<simulation_graph>;
-using simulation_edge               = edge_t<simulation_graph>;
+/* In order to allow an O(1) access to the vertex in- and out-degree,
+ * they are stored additionally as property maps for the vertices.
+ */
+using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_degree_t, unsigned,
+                                             boost::property<boost::vertex_out_degree_t, unsigned>>;
+
+using simulation_graph                     = digraph_t<simulation_graph_vertex_properties_t, boost::no_property, simulation_graph_properties_t>;
+using simulation_node                      = vertex_t<simulation_graph>;
+using simulation_edge                      = edge_t<simulation_graph>;
 
 enum class simulation_pattern : unsigned
 {

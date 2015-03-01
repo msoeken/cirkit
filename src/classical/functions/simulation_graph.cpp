@@ -39,7 +39,9 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
                                           const properties::ptr& settings, const properties::ptr& statistics )
 {
   simulation_graph g;
-  auto& edge_lookup = boost::get_property( g, boost::graph_edge_lookup );
+  auto& edge_lookup       = boost::get_property( g, boost::graph_edge_lookup );
+  const auto& vertex_in_degree  = boost::get( boost::vertex_in_degree, g );
+  const auto& vertex_out_degree = boost::get( boost::vertex_out_degree, g );
 
   /* Settings */
   const auto dotname     = get( settings, "dotname",     std::string() );
@@ -57,12 +59,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   /* add vertices */
   const auto vertices_count = n + sim_vectors.size() + m;
   add_vertices( g, vertices_count );
-  edge_lookup.reserve( vertices_count << 3u );
+  edge_lookup.reserve( vertices_count << 5u );
 
   /* edge inserting */
   const auto add_edge_func = [&]( unsigned from, unsigned to ) {
     add_edge( from, to, g );
     edge_lookup.insert( {from, to} );
+    vertex_in_degree[to]++;
+    vertex_out_degree[from]++;
   };
 
   /* edges from inputs to simulation vectors */
