@@ -1354,8 +1354,8 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
   /* Timer */
   properties_timer t( statistics );
 
-  lad_graph gp( pattern, selector, verbose );
-  lad_graph gt( target, selector, verbose );
+  lad_graph gp( pattern, selector, false /* verbose */ );
+  lad_graph gt( target, selector, false /* verbose */ );
   lad_domain d( gp, gt, functional );
 
   if ( verbose )
@@ -1364,15 +1364,15 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
     //          << "Target graph:" << std::endl << gt << d;
     std::cout << format( "[i] target graph has %d vertices" ) % gt.nb_vertices << std::endl
               << format( "[i] pattern graph has %d vertices" ) % gp.nb_vertices << std::endl;
-    std::cout << "[i] domain:" << std::endl;
-    d.list_with_names( std::cout, gp, gt );
+    //std::cout << "[i] domain:" << std::endl;
+    //d.list_with_names( std::cout, gp, gt );
   }
 
   set( statistics, "pattern_vertices", (unsigned)gp.nb_vertices );
   set( statistics, "target_vertices", (unsigned)gt.nb_vertices );
 
   lad_manager mgr( d, gp, gt );
-  return start_lad( mgr, mapping, verbose );
+  return start_lad( mgr, mapping, /* verbose */ false );
 }
 
 }
