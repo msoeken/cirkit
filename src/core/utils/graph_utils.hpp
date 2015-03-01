@@ -56,6 +56,16 @@ template<class VertexProperty = boost::no_property,
 using digraph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, VertexProperty, EdgeProperty, GraphProperty>;
 
 /**
+ * @brief Graph alias
+ *
+ * Similar to digraph_t
+ */
+template<class VertexProperty = boost::no_property,
+         class EdgeProperty = boost::no_property,
+         class GraphProperty = boost::no_property>
+using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, VertexProperty, EdgeProperty, GraphProperty>;
+
+/**
  * @brief Vertex alias
  *
  * Less verbose vertex type alias

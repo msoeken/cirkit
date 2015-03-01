@@ -20,9 +20,11 @@
 #include <fstream>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/format.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/combine.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include <core/io/write_graph_file.hpp>
 #include <core/utils/bitset_utils.hpp>
@@ -40,7 +42,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
                                           const properties::ptr& settings, const properties::ptr& statistics )
 {
   simulation_graph g;
-  auto& edge_lookup       = boost::get_property( g, boost::graph_edge_lookup );
+  auto& edge_lookup             = boost::get_property( g, boost::graph_edge_lookup );
   const auto& vertex_in_degree  = boost::get( boost::vertex_in_degree, g );
   const auto& vertex_out_degree = boost::get( boost::vertex_out_degree, g );
 
@@ -124,11 +126,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
   if ( !graphname.empty() )
   {
+    assert( false ); /* write_graph_file is written for directed graphs */
     write_graph_file( g, graphname );
   }
 
   if ( !labeledname.empty() )
   {
+    assert( false ); /* write_labeled_graph_file is written for directed graphs */
+
     // TODO be more flexible
     write_labeled_graph_file( g, [&]( const simulation_node& v ) {
         if ( v < n ) return 1u;
@@ -209,6 +214,51 @@ std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, 
   }
 
   return sim_vectors;
+}
+
+simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selector,
+                                          const properties::ptr& settings,
+                                          const properties::ptr& statistics )
+{
+  std::vector<unsigned> partition;
+
+  const auto& info    = aig_info( aig );
+  const auto  n       = info.inputs.size();
+  const auto  m       = info.outputs.size();
+  const auto  vectors = create_simulation_vectors( info.inputs.size(), selector, &partition );
+  auto        graph   = create_simulation_graph( aig, vectors, settings, statistics );
+
+  properties_timer t( statistics, "labeling_runtime" );
+
+  const auto& vertex_label = boost::get( boost::vertex_name, graph );
+  const auto& edge_label   = boost::get( boost::edge_name, graph );
+
+  for ( auto i = 0; i < n; ++i )
+  {
+    vertex_label[i] = 0u;
+  }
+  for ( auto i = 0; i < m; ++i )
+  {
+    vertex_label[n + vectors.size() + i] = 1u;
+  }
+
+  auto offset = n;
+  for ( const auto& p : index( partition ) )
+  {
+    for ( auto i = 0; i < p.second; ++i )
+    {
+      vertex_label[offset + i] = 2u + p.first;
+
+      for ( const auto& edge : boost::make_iterator_range( boost::out_edges( offset + i, graph ) ) )
+      {
+        const auto is_syedge = ( boost::target( edge, graph ) > offset + i ) ? 1u : 0u;
+        edge_label[edge] = is_syedge * partition.size() + p.first;
+      }
+    }
+    offset += p.second;
+  }
+
+  return graph;
 }
 
 igraph_t simulation_graph_to_igraph( const simulation_graph& g )

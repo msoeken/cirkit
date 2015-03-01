@@ -79,9 +79,14 @@ using simulation_graph_properties_t        = boost::property<boost::graph_edge_l
  */
 using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_degree_t, unsigned,
                                              boost::property<boost::vertex_out_degree_t, unsigned,
-                                             boost::property<boost::vertex_support_t, unsigned>>>;
+                                             boost::property<boost::vertex_support_t, unsigned,
+                                             boost::property<boost::vertex_name_t, unsigned>>>>;
 
-using simulation_graph                     = digraph_t<simulation_graph_vertex_properties_t, boost::no_property, simulation_graph_properties_t>;
+using simulation_graph_edge_properties_t   = boost::property<boost::edge_name_t, unsigned>;
+
+using simulation_graph                     = graph_t<simulation_graph_vertex_properties_t,
+                                                     simulation_graph_edge_properties_t,
+                                                     simulation_graph_properties_t>;
 using simulation_node                      = vertex_t<simulation_graph>;
 using simulation_edge                      = edge_t<simulation_graph>;
 
@@ -95,6 +100,9 @@ enum class simulation_pattern : unsigned
   two_cold = 0x20
 };
 
+/**
+ * This function does not assign labels
+ */
 simulation_graph create_simulation_graph( const aig_graph& aig, const std::vector<boost::dynamic_bitset<>>& sim_vectors,
                                           const properties::ptr& settings = properties::ptr(),
                                           const properties::ptr& statistics = properties::ptr() );
@@ -104,6 +112,10 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
  */
 std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, unsigned selector,
                                                                 std::vector<unsigned>* partition = nullptr );
+
+simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selector,
+                                          const properties::ptr& settings = properties::ptr(),
+                                          const properties::ptr& statistics = properties::ptr() );
 
 igraph_t simulation_graph_to_igraph( const simulation_graph& g );
 
