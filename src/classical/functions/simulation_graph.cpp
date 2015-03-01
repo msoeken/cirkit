@@ -143,9 +143,11 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   return g;
 }
 
-void create_simulation_vectors( std::vector<boost::dynamic_bitset<>>& sim_vectors, unsigned width, unsigned selector,
-                                std::vector<unsigned>* partition )
+std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, unsigned selector,
+                                                                std::vector<unsigned>* partition )
 {
+  std::vector<boost::dynamic_bitset<>> sim_vectors;
+
   if ( selector & static_cast<unsigned>( simulation_pattern::all_hot ) )
   {
     sim_vectors += ~boost::dynamic_bitset<>( width );
@@ -205,6 +207,8 @@ void create_simulation_vectors( std::vector<boost::dynamic_bitset<>>& sim_vector
     }
     if ( partition ) *partition += ( width * (width -  1) ) / 2;
   }
+
+  return sim_vectors;
 }
 
 igraph_t simulation_graph_to_igraph( const simulation_graph& g )

@@ -102,8 +102,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 /**
  * @param partition If not nullptr then the number of patterns for each selector is written into it.
  */
-void create_simulation_vectors( std::vector<boost::dynamic_bitset<>>& sim_vectors, unsigned width, unsigned selector,
-                                std::vector<unsigned>* partition = nullptr );
+std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, unsigned selector,
+                                                                std::vector<unsigned>* partition = nullptr );
 
 igraph_t simulation_graph_to_igraph( const simulation_graph& g );
 

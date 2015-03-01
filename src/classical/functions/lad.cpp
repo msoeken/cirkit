@@ -143,8 +143,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
 
   /* Simulate vectors */
   std::vector<unsigned> partition;
-  std::vector<boost::dynamic_bitset<>> vectors;
-  create_simulation_vectors( vectors, n, selector, &partition );
+  auto vectors = create_simulation_vectors( n, selector, &partition );
 
   /* Read number of vertices */
   nb_vertices = n + vectors.size() + m;
