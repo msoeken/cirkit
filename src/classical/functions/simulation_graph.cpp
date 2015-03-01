@@ -27,6 +27,7 @@
 #include <core/io/write_graph_file.hpp>
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
+#include <classical/functions/aig_support.hpp>
 #include <classical/utils/aig_utils.hpp>
 #include <classical/utils/simulate_aig.hpp>
 
@@ -47,6 +48,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto dotname     = get( settings, "dotname",     std::string() );
   const auto graphname   = get( settings, "graphname",   std::string() );
   const auto labeledname = get( settings, "labeledname", std::string() );
+  const bool support     = get( settings, "support",     false );
 
   /* Timing */
   properties_timer t( statistics );
@@ -97,6 +99,18 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
       {
         add_edge_func( n + i, n + sim_vectors.size() + j );
       }
+    }
+  }
+
+  /* annotate support size */
+  if ( support )
+  {
+    const auto& vertex_support = boost::get( boost::vertex_support, g );
+
+    const auto s = aig_structural_support( aig );
+    for ( const auto& o : index( info.outputs ) )
+    {
+      vertex_support[n + sim_vectors.size() + o.first] = s.at( o.second.first );
     }
   }
 

@@ -46,6 +46,9 @@ namespace boost
 enum graph_edge_lookup_t { graph_edge_lookup };
 BOOST_INSTALL_PROPERTY(graph, edge_lookup);
 
+enum vertex_support_t { vertex_support };
+BOOST_INSTALL_PROPERTY(vertex, support);
+
 }
 
 namespace cirkit
@@ -75,7 +78,8 @@ using simulation_graph_properties_t        = boost::property<boost::graph_edge_l
  * they are stored additionally as property maps for the vertices.
  */
 using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_degree_t, unsigned,
-                                             boost::property<boost::vertex_out_degree_t, unsigned>>;
+                                             boost::property<boost::vertex_out_degree_t, unsigned,
+                                             boost::property<boost::vertex_support_t, unsigned>>>;
 
 using simulation_graph                     = digraph_t<simulation_graph_vertex_properties_t, boost::no_property, simulation_graph_properties_t>;
 using simulation_node                      = vertex_t<simulation_graph>;
