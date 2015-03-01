@@ -115,7 +115,7 @@ int main( int argc, char ** argv )
       wassignment.insert( {vv[0u], vv[1u]} );
     }
 
-    std::map<std::string, bool> massignment;
+    simple_assignment_simulator::aig_name_value_map massignment;
     for ( const auto& e : wassignment )
     {
       const unsigned size = e.second.size();
