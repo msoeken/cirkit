@@ -67,8 +67,9 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
   /* edge inserting */
   const auto add_edge_func = [&]( unsigned from, unsigned to ) {
-    add_edge( from, to, g );
-    edge_lookup.insert( {from, to} );
+    auto e = add_edge( from, to, g ).first;
+    edge_lookup.insert( std::make_pair( std::make_pair( from, to ), e ) );
+    edge_lookup.insert( std::make_pair( std::make_pair( to, from ), e ) );
     vertex_in_degree[to]++;
     vertex_out_degree[from]++;
   };

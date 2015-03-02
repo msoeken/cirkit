@@ -27,7 +27,7 @@
 #ifndef SIMULATION_GRAPH_HPP
 #define SIMULATION_GRAPH_HPP
 
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
@@ -67,7 +67,12 @@ struct edge_lookup_hash_t
   }
 };
 
-using edge_lookup_t                        = std::unordered_set<vertex_pair_t, edge_lookup_hash_t>;
+namespace detail
+{
+  using simulation_graph_traits_t          = boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>;
+}
+
+using edge_lookup_t                        = std::unordered_map<vertex_pair_t, detail::simulation_graph_traits_t::edge_descriptor, edge_lookup_hash_t>;
 
 /* In order to allow an O(1) lookup for edges in the graph, this
  * edge lookup table is added as a property to the simulation graph
