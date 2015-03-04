@@ -41,21 +41,25 @@ int main( int argc, char ** argv )
   using boost::program_options::value;
 
   std::string filename;
-  unsigned    mode         = 0u;
-  bool        post_compact = true;
-  unsigned    timeout      = 5000u;
-  std::string tmpname      = "/tmp/test.pla";
+  unsigned    mode           = 0u;
+  auto        post_compact   = true;
+  auto        timeout        = 5000u;
+  auto        dumpadd        = false;
+  auto        explicit_zeros = false;
+  std::string tmpname        = "/tmp/test.pla";
   std::string dotname;
 
   program_options opts;
   opts.add_options()
-    ( "filename",     value<std::string>( &filename     ),                                "PLA filename" )
-    ( "mode",         value<unsigned>   ( &mode         )->default_value( mode         ), "Mode (0: extend, 1: BDD, 2: approximate)" )
-    ( "post_compact", value<bool>       ( &post_compact )->default_value( post_compact ), "Compress PLA after extending (only for mode = 0)" )
-    ( "timeout",      value<unsigned>   ( &timeout      )->default_value( timeout      ), "Timeout in seconds" )
-    ( "tmpname",      value<std::string>( &tmpname      )->default_value( tmpname      ), "Temporary filename for extended PLA" )
-    ( "dotname",      value<std::string>( &dotname      ),                                "If non-empty and mode = 1, the BDD is dumped to that file" )
-    ( "verbose,v",                                                                        "Be verbose" )
+    ( "filename",       value( &filename ),                    "PLA filename" )
+    ( "mode",           value_with_default( &mode ),           "Mode (0: extend, 1: BDD, 2: approximate)" )
+    ( "post_compact",   value_with_default( &post_compact ),   "Compress PLA after extending (only for mode = 0)" )
+    ( "timeout",        value_with_default( &timeout ),        "Timeout in seconds" )
+    ( "tmpname",        value_with_default( &tmpname ),        "Temporary filename for extended PLA" )
+    ( "dotname",        value( &dotname ),                     "If non-empty and mode = 1, the BDD is dumped to that file" )
+    ( "dumpadd",        value_with_default( &dumpadd ),        "Dump ADD instead of BDD, if dotname is set and mode = 1" )
+    ( "explicit_zeros", value_with_default( &explicit_zeros ), "Have explicit zeros in characteristic BDD, if mode = 1" )
+    ( "verbose,v",                                             "Be verbose" )
     ;
 
   opts.parse( argc, argv );
@@ -95,7 +99,9 @@ int main( int argc, char ** argv )
   }
   else if ( mode == 1u )
   {
-    settings->set( "dotname", dotname );
+    settings->set( "dotname",        dotname );
+    settings->set( "dumpadd",        dumpadd );
+    settings->set( "explicit_zeros", explicit_zeros );
     additional = calculate_additional_lines( filename, settings, statistics );
   }
   else if ( mode == 2u )

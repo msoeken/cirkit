@@ -61,14 +61,16 @@ void count_output_pattern_recurse( const BDDTable& bdd, DdNode* node, const std:
 unsigned calculate_additional_lines( const std::string& filename, properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  bool        verbose = get( settings, "verbose", false         );
-  std::string dotname = get( settings, "dotname", std::string() );
+  auto verbose        = get( settings, "verbose",        false         );
+  auto dotname        = get( settings, "dotname",        std::string() );
+  auto dumpadd        = get( settings, "dumpadd",        false         );
+  auto explicit_zeros = get( settings, "explicit_zeros", false         );
 
   /* Timer */
   properties_timer t( statistics );
 
   BDDTable bdd;
-  read_pla_to_characteristic_bdd( bdd, filename, false, false );
+  read_pla_to_characteristic_bdd( bdd, filename, false, explicit_zeros );
 
   std::vector<mpz_class> counts;
 
@@ -81,7 +83,14 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
     char ** inames = new char*[bdd.inputs.size()];
     boost::transform( bdd.inputs, inames, []( const std::pair<std::string, DdNode*>& p ) { return const_cast<char*>( p.first.c_str() ); } );
     char* onames[] = { const_cast<char*>( "f" ) };
-    Cudd_DumpDot( bdd.cudd, 1, &bdd.outputs.at( 0u ).second, inames, onames, fp );
+    if ( dumpadd )
+    {
+      Cudd_DumpDot( bdd.cudd, 1, &add, inames, onames, fp );
+    }
+    else
+    {
+      Cudd_DumpDot( bdd.cudd, 1, &bdd.outputs.at( 0u ).second, inames, onames, fp );
+    }
     fclose( fp );
   }
 
