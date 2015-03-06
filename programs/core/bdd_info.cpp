@@ -20,12 +20,17 @@
  */
 
 #include <iostream>
+#include <vector>
 
 #include <boost/format.hpp>
 
 #include <core/io/read_pla_to_bdd.hpp>
+#include <core/utils/bdd_utils.hpp>
 #include <core/utils/program_options.hpp>
+#include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
+
+#include <cuddObj.hh>
 
 using namespace cirkit;
 
@@ -61,8 +66,11 @@ int main( int argc, char ** argv )
   BDDTable bdd;
   read_pla_to_bdd( bdd, filename, settings, statistics );
 
+  auto voutputs = get_map_values( bdd.outputs );
+
   std::cout << format( "Run-time:   %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-  std::cout << "Node count: " << Cudd_ReadNodeCount( bdd.cudd ) << std::endl;
+  std::cout << "Node count:  " << Cudd_ReadNodeCount( bdd.cudd ) << std::endl;
+  std::cout << "Level sizes: " << any_join( level_sizes( bdd.cudd, voutputs ), " " ) << std::endl;
   for ( const auto& p : bdd.outputs )
   {
     std::cout << "Info for output " << p.first << ":" << std::endl;

@@ -17,6 +17,9 @@
 
 #include "bdd_utils.hpp"
 
+#include <functional>
+
+#include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/numeric.hpp>
 
@@ -161,6 +164,79 @@ bool Extra_bddUnate( DdManager * dd, DdNode * f, std::vector<int>& ps )
 bool is_unate( const Cudd& manager, const BDD& f, std::vector<int>& ps )
 {
   return Extra_bddUnate( manager.getManager(), f.getNode(), ps );
+}
+
+class node_table
+{
+public:
+  node_table()
+    : table( st_init_table( st_ptrcmp, st_ptrhash ) )
+  {
+  }
+
+  ~node_table()
+  {
+    // st_free_table( table );
+  }
+
+  void collect( DdNode *f )
+  {
+    cuddCollectNodes( Cudd_Regular( f ), table );
+  }
+
+  void foreach_node( const std::function<void(DdNode*)>& f )
+  {
+    DdNode * scan = nullptr;
+    auto * gen = st_init_gen( table );
+    while ( st_gen( gen, &scan, nullptr ) )
+    {
+      f( scan );
+    }
+    st_free_gen( gen );
+  }
+
+  void foreach_nonconstant_node( const std::function<void(DdNode*)>& f )
+  {
+    DdNode * scan = nullptr;
+    auto * gen = st_init_gen( table );
+    while ( st_gen( gen, &scan, nullptr ) )
+    {
+      if ( cuddIsConstant( scan ) ) continue;
+      f( Cudd_Regular( scan ) );
+    }
+    st_free_gen( gen );
+  }
+
+private:
+  st_table * table = nullptr;
+};
+
+std::vector<unsigned> level_sizes( DdManager * dd, const std::vector<DdNode*>& fs )
+{
+  using namespace std::placeholders;
+
+  std::vector<unsigned> sizes( Cudd_ReadSize( dd ) );
+
+  /* collect all nodes in the BDDs */
+  node_table visited;
+  boost::for_each( fs, std::bind( &node_table::collect, visited, _1 ) );
+
+  visited.foreach_nonconstant_node( [&]( DdNode * node ) {
+      sizes[node->index]++;
+    } );
+
+  return sizes;
+}
+
+std::vector<unsigned> level_sizes( const Cudd& manager, const std::vector<BDD>& fs )
+{
+  using namespace std::placeholders;
+  using boost::adaptors::transformed;
+
+  std::vector<DdNode*> fs_native( fs.size() );
+  boost::copy( fs | transformed( std::bind( &BDD::getNode, _1 ) ), fs_native.begin() );
+
+  return level_sizes( manager.getManager(), fs_native );
 }
 
 }

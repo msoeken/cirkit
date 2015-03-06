@@ -36,6 +36,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
 
 using namespace boost::assign;
 
@@ -159,6 +160,26 @@ std::vector<T> generate_vector( unsigned size, const std::function<T()>& generat
 {
   std::vector<T> v( size );
   boost::generate( v, generator );
+  return v;
+}
+
+template<typename K, typename T>
+std::vector<T> get_map_values( const std::map<K, T>& map )
+{
+  using boost::adaptors::values;
+
+  std::vector<T> v;
+  boost::push_back( v, map | values );
+  return v;
+}
+
+template<typename K, typename T>
+std::vector<T> get_map_values( const std::vector<std::pair<K, T>>& vp )
+{
+  using boost::adaptors::transformed;
+
+  std::vector<T> v;
+  boost::push_back( v, vp | transformed( []( const std::pair<K, T>& p ) { return p.second; } ) );
   return v;
 }
 
