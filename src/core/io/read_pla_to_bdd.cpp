@@ -360,7 +360,7 @@ namespace cirkit
     if ( with_output_zero_patterns )
     {
       // Input patterns of f
-      DdNode *h = Cudd_bddExistAbstract( bdd.cudd, f, ys );
+      DdNode *h = Cudd_Not( Cudd_bddExistAbstract( bdd.cudd, f, ys ) );
       Cudd_Ref( h );
 
       DdNode *yzero = Cudd_ReadOne( bdd.cudd );
