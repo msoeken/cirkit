@@ -49,9 +49,9 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
-typedef std::vector<int> vec_int_t;
-typedef std::stack<int> stack_int_t;
-typedef std::vector<vec_int_t> vec_vec_int_t;
+using vec_int_t     = std::vector<int>;
+using stack_int_t   = std::stack<int>;
+using vec_vec_int_t = std::vector<vec_int_t>;
 
 /******************************************************************************
  * Graph                                                                      *

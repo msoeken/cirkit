@@ -42,7 +42,7 @@ namespace cirkit
  *
  * We assume a truth table argues on variables x_0, ..., x_{n-1}
  */
-typedef boost::dynamic_bitset<> tt;
+using tt = boost::dynamic_bitset<>;
 
 class tt_store
 {
