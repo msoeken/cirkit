@@ -18,6 +18,8 @@
 #include "bdd_utils.hpp"
 
 #include <functional>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
@@ -27,6 +29,14 @@
 
 namespace cirkit
 {
+
+/******************************************************************************
+ * Types                                                                      *
+ ******************************************************************************/
+
+/******************************************************************************
+ * Functions                                                                  *
+ ******************************************************************************/
 
 BDD make_cube( Cudd& manager, const std::vector<BDD>& vars )
 {
@@ -166,50 +176,49 @@ bool is_unate( const Cudd& manager, const BDD& f, std::vector<int>& ps )
   return Extra_bddUnate( manager.getManager(), f.getNode(), ps );
 }
 
-class node_table
+void collect_nodes( DdNode * f, std::unordered_set<DdNode*>& visited )
 {
-public:
-  node_table()
-    : table( st_init_table( st_ptrcmp, st_ptrhash ) )
+  assert( f );
+  assert( !Cudd_IsComplement( f ) );
+
+  /* node visited before? */
+  if ( visited.find( f ) != visited.end() ) { return; }
+
+  /* mark node as visited */
+  visited.insert( f );
+
+  /* terminate? */
+  if ( cuddIsConstant( f ) ) { return; }
+
+  /* recur */
+  collect_nodes( cuddT( f ), visited );
+  collect_nodes( Cudd_Regular( cuddE( f ) ), visited );
+}
+
+void collect_nodes_and_count( DdNode * f, std::unordered_map<DdNode*, unsigned>& visited )
+{
+  assert( f );
+  assert( !Cudd_IsComplement( f ) );
+
+  /* node visited before? */
+  auto it = visited.find( f );
+  if ( it != visited.end() )
   {
+    /* visited once more */
+    it->second++;
+    return;
   }
 
-  ~node_table()
-  {
-    // st_free_table( table );
-  }
+  /* mark node as visited */
+  visited.insert( {f, 1u} );
 
-  void collect( DdNode *f )
-  {
-    cuddCollectNodes( Cudd_Regular( f ), table );
-  }
+  /* terminate? */
+  if ( cuddIsConstant( f ) ) { return; }
 
-  void foreach_node( const std::function<void(DdNode*)>& f )
-  {
-    DdNode * scan = nullptr;
-    auto * gen = st_init_gen( table );
-    while ( st_gen( gen, &scan, nullptr ) )
-    {
-      f( scan );
-    }
-    st_free_gen( gen );
-  }
-
-  void foreach_nonconstant_node( const std::function<void(DdNode*)>& f )
-  {
-    DdNode * scan = nullptr;
-    auto * gen = st_init_gen( table );
-    while ( st_gen( gen, &scan, nullptr ) )
-    {
-      if ( cuddIsConstant( scan ) ) continue;
-      f( Cudd_Regular( scan ) );
-    }
-    st_free_gen( gen );
-  }
-
-private:
-  st_table * table = nullptr;
-};
+  /* recur */
+  collect_nodes_and_count( cuddT( f ), visited );
+  collect_nodes_and_count( Cudd_Regular( cuddE( f ) ), visited );
+}
 
 std::vector<unsigned> level_sizes( DdManager * dd, const std::vector<DdNode*>& fs )
 {
@@ -218,12 +227,19 @@ std::vector<unsigned> level_sizes( DdManager * dd, const std::vector<DdNode*>& f
   std::vector<unsigned> sizes( Cudd_ReadSize( dd ) );
 
   /* collect all nodes in the BDDs */
-  node_table visited;
-  boost::for_each( fs, std::bind( &node_table::collect, visited, _1 ) );
+  std::unordered_set<DdNode*> visited;
+  for ( const auto* f : fs )
+  {
+    collect_nodes( Cudd_Regular( f ), visited );
+  }
 
-  visited.foreach_nonconstant_node( [&]( DdNode * node ) {
+  for ( const auto* node : visited )
+  {
+    if ( !cuddIsConstant( node ) )
+    {
       sizes[node->index]++;
-    } );
+    }
+  }
 
   return sizes;
 }
@@ -234,7 +250,7 @@ std::vector<unsigned> level_sizes( const Cudd& manager, const std::vector<BDD>& 
   using boost::adaptors::transformed;
 
   std::vector<DdNode*> fs_native( fs.size() );
-  boost::copy( fs | transformed( std::bind( &BDD::getNode, _1 ) ), fs_native.begin() );
+  boost::copy( fs | transformed( std::bind( &BDD::getRegularNode, _1 ) ), fs_native.begin() );
 
   return level_sizes( manager.getManager(), fs_native );
 }
