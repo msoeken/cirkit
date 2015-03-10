@@ -50,7 +50,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto dotname     = get( settings, "dotname",     std::string() );
   const auto graphname   = get( settings, "graphname",   std::string() );
   const auto labeledname = get( settings, "labeledname", std::string() );
-  const bool support     = get( settings, "support",     false );
+  const auto support     = get( settings, "support",     false );
+  const auto vertexnames = get( settings, "vertexnames", false );
 
   /* Timing */
   properties_timer t( statistics );
@@ -114,6 +115,29 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     for ( const auto& o : index( info.outputs ) )
     {
       vertex_support[n + sim_vectors.size() + o.first] = s.at( o.second.first );
+    }
+  }
+
+  /* add vertex names */
+  if ( vertexnames )
+  {
+    const auto& vertex_names = boost::get( boost::vertex_name, g );
+
+    for ( const auto& i : index( info.inputs ) )
+    {
+      vertex_names[i.first] = info.node_names.at( i.second );
+    }
+
+    std::string bitstring;
+    for ( const auto& v : index( sim_vectors ) )
+    {
+      boost::to_string( v.second, bitstring );
+      vertex_names[n + v.first] = bitstring;
+    }
+
+    for ( const auto& o : index( info.outputs ) )
+    {
+      vertex_names[n + sim_vectors.size() + o.first] = o.second.second;
     }
   }
 
@@ -231,8 +255,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
 
   properties_timer t( statistics, "labeling_runtime" );
 
-  const auto& vertex_label = boost::get( boost::vertex_name, graph );
-  const auto& edge_label   = boost::get( boost::edge_name, graph );
+  const auto& vertex_label = boost::get( boost::vertex_label, graph );
+  const auto& edge_label   = boost::get( boost::edge_label, graph );
 
   for ( auto i = 0; i < n; ++i )
   {

@@ -49,6 +49,12 @@ BOOST_INSTALL_PROPERTY(graph, edge_lookup);
 enum vertex_support_t { vertex_support };
 BOOST_INSTALL_PROPERTY(vertex, support);
 
+enum vertex_label_t { vertex_label };
+BOOST_INSTALL_PROPERTY(vertex, label);
+
+enum edge_label_t { edge_label };
+BOOST_INSTALL_PROPERTY(edge, label);
+
 }
 
 namespace cirkit
@@ -85,9 +91,10 @@ using simulation_graph_properties_t        = boost::property<boost::graph_edge_l
 using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_degree_t, unsigned,
                                              boost::property<boost::vertex_out_degree_t, unsigned,
                                              boost::property<boost::vertex_support_t, unsigned,
-                                             boost::property<boost::vertex_name_t, unsigned>>>>;
+                                             boost::property<boost::vertex_name_t, std::string,
+                                             boost::property<boost::vertex_label_t, unsigned>>>>>;
 
-using simulation_graph_edge_properties_t   = boost::property<boost::edge_name_t, unsigned>;
+using simulation_graph_edge_properties_t   = boost::property<boost::edge_label_t, unsigned>;
 
 using simulation_graph                     = graph_t<simulation_graph_vertex_properties_t,
                                                      simulation_graph_edge_properties_t,
