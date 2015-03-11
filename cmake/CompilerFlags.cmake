@@ -2,7 +2,7 @@
 # The default build should be optimized with proper stack traces and debug symbols
 # Therefore we override RELWITHDEBINFO and set this compile mode when noone is selected.
 
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -fno-omit-frame-pointer -g -DNODEBUG" 
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -fno-omit-frame-pointer -g -DNODEBUG"
   CACHE STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
