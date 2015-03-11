@@ -46,6 +46,9 @@ namespace boost
 enum graph_edge_lookup_t { graph_edge_lookup };
 BOOST_INSTALL_PROPERTY(graph, edge_lookup);
 
+enum graph_meta_t { graph_meta };
+BOOST_INSTALL_PROPERTY(graph, meta);
+
 enum vertex_support_t { vertex_support };
 BOOST_INSTALL_PROPERTY(vertex, support);
 
@@ -80,10 +83,18 @@ namespace detail
 
 using edge_lookup_t                        = std::unordered_map<vertex_pair_t, detail::simulation_graph_traits_t::edge_descriptor, edge_lookup_hash_t>;
 
+struct simulation_graph_meta_t
+{
+  unsigned num_inputs;
+  unsigned num_vectors;
+  unsigned num_outputs;
+};
+
 /* In order to allow an O(1) lookup for edges in the graph, this
  * edge lookup table is added as a property to the simulation graph
  */
-using simulation_graph_properties_t        = boost::property<boost::graph_edge_lookup_t, edge_lookup_t>;
+using simulation_graph_properties_t        = boost::property<boost::graph_meta_t, simulation_graph_meta_t,
+                                             boost::property<boost::graph_edge_lookup_t, edge_lookup_t>>;
 
 /* In order to allow an O(1) access to the vertex in- and out-degree,
  * they are stored additionally as property maps for the vertices.
