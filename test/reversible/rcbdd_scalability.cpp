@@ -22,7 +22,7 @@
 #include <list>
 
 #include <boost/format.hpp>
-#include <boost/range/irange.hpp>
+#include <boost/range/counting_range.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <core/properties.hpp>
@@ -131,15 +131,15 @@ BOOST_AUTO_TEST_CASE(simple)
 
   for ( const auto& exp : experiments )
   {
-    const unsigned& from    = std::get<0>( exp );
-    const unsigned& to      = std::get<1>( exp );
-    const std::string& name = std::get<2>( exp );
-    const exp_func_t&  func = std::get<3>( exp );
+    const auto& from = std::get<0>( exp );
+    const auto& to   = std::get<1>( exp );
+    const auto& name = std::get<2>( exp );
+    const auto& func = std::get<3>( exp );
 
     benchmark_table<unsigned, double> table( {"n", "Run-time"} );
 
     std::cout << "Experiment: " << name << std::endl;
-    for ( unsigned i : boost::irange( from, to ) )
+    for ( auto i : boost::counting_range( from, to ) )
     {
       func( i, runtime );
       table.add( i, runtime );
