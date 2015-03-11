@@ -29,10 +29,9 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/irange.hpp>
 
-#include "../circuit.hpp"
-#include "../pattern.hpp"
+#include <reversible/circuit.hpp>
+#include <reversible/pattern.hpp>
 
 using namespace boost::assign;
 

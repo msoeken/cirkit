@@ -30,7 +30,7 @@
 #include <boost/format.hpp>
 #include <boost/function.hpp>
 #include <boost/range/algorithm.hpp>
-#include <boost/range/irange.hpp>
+#include <boost/range/algorithm_ext/iota.hpp>
 
 #include <core/utils/timer.hpp>
 
@@ -486,7 +486,7 @@ namespace cirkit
     copy_circuit( base, circ );
 
     std::vector<unsigned> original_lines( base.lines() );
-    boost::copy( boost::irange( 0u, base.lines() ), original_lines.begin() );
+    boost::iota( original_lines, 0u );
 
     std::vector<unsigned> lines_to_skip;
     unsigned max_lines = max_window_lines;

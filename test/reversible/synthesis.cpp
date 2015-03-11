@@ -23,7 +23,7 @@
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/range/combine.hpp>
-#include <boost/range/irange.hpp>
+#include <boost/range/counting_range.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/output_test_stream.hpp>
 
@@ -40,12 +40,12 @@ using namespace cirkit;
 void add_entries_from_permutation( binary_truth_table& spec, const std::vector<unsigned>& permutation )
 {
   using boost::combine;
-  using boost::irange;
+  using boost::counting_range;
   using boost::get;
 
-  unsigned n = (unsigned)ceil( log( permutation.size() ) / log( 2 ) );
+  auto n = (unsigned)ceil( log( permutation.size() ) / log( 2 ) );
 
-  for ( const auto& i : combine( irange( 0u, (unsigned)permutation.size() ),
+  for ( const auto& i : combine( counting_range( 0u, (unsigned)permutation.size() ),
                                  permutation ) )
   {
     spec.add_entry( number_to_truth_table_cube( get<0>( i ), n ),

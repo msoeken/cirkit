@@ -23,7 +23,7 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/irange.hpp>
+#include <boost/range/counting_range.hpp>
 
 #include <core/utils/range_utils.hpp>
 #include <reversible/target_tags.hpp>
@@ -328,9 +328,9 @@ void rcbdd::print_truth_table()
 
   Cudd_ForeachCube( manager().getManager(), _chi.getNode(), gen, cube, value )
   {
-    std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" ).insert( vars - n, " " );
+    std::cout << boost::join( boost::counting_range( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" ).insert( vars - n, " " );
     std::cout << " | ";
-    std::cout << boost::join( boost::irange( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" ).insert( m, " " );
+    std::cout << boost::join( boost::counting_range( 0u, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" ).insert( m, " " );
     std::cout << std::endl;
   }
 }
@@ -358,9 +358,9 @@ void rcbdd::write_pla( const std::string& filename )
 
   Cudd_ForeachCube( manager().getManager(), _chi.getNode(), gen, cube, value )
   {
-    os << boost::join( boost::irange( vars - n, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" )
+    os << boost::join( boost::counting_range( vars - n, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" )
        << " "
-       << boost::join( boost::irange( 0u, m ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" )
+       << boost::join( boost::counting_range( 0u, m ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" )
        << std::endl;
   }
 

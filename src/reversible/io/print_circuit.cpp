@@ -22,7 +22,7 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
-#include <boost/range/irange.hpp>
+#include <boost/range/counting_range.hpp>
 
 #include <reversible/circuit.hpp>
 #include <reversible/target_tags.hpp>
@@ -119,7 +119,7 @@ namespace cirkit
         settings.os << std::string( longest_input_length + 1, ' ' );
       }
 
-      boost::for_each( boost::irange( 0u, circ.num_gates() ), [&settings]( unsigned n ) { settings.os << ( n % 10 ); } );
+      boost::for_each( boost::counting_range( 0u, circ.num_gates() ), [&settings]( unsigned n ) { settings.os << ( n % 10 ); } );
       settings.os << std::endl;
     }
 
