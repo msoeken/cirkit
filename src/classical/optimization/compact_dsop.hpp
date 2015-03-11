@@ -37,9 +37,9 @@
 namespace cirkit
 {
 
-typedef std::map<cube, int>                                       cube_weight_map_t;
-typedef std::function<bool(const cube&, const cube&)>             sort_cube_func_t;
-typedef std::function<sort_cube_func_t(const cube_weight_map_t&)> sort_cube_meta_func_t;
+using cube_weight_map_t     = std::map<cube, int>;
+using sort_cube_func_t      = std::function<bool(const cube&, const cube&)>;
+using sort_cube_meta_func_t = std::function<sort_cube_func_t(const cube_weight_map_t&)>;
 
 class connected_cube_list
 {
@@ -62,16 +62,16 @@ public:
   inline bool empty() const { return _cubes.empty(); }
 
 private:
-  typedef std::pair<cube, unsigned>         cube_common_pair_t;
-  typedef std::vector<cube_common_pair_t>   cube_common_vec_t;
-  typedef std::map<cube, cube_common_vec_t> cube_common_map_t;
+  using cube_common_pair_t = std::pair<cube, unsigned>;
+  using cube_common_vec_t  = std::vector<cube_common_pair_t>;
+  using cube_common_map_t  = std::map<cube, cube_common_vec_t>;
 
   cube_vec_t _cubes;
   cube_common_map_t _connected_cubes;
   cube_weight_map_t cube_weights;
 };
 
-typedef std::function<void(const cube&, const cube_vec_t&, connected_cube_list&, cube_vec_t&, const sort_cube_meta_func_t&)> opt_cube_func_t;
+using opt_cube_func_t = std::function<void(const cube&, const cube_vec_t&, connected_cube_list&, cube_vec_t&, const sort_cube_meta_func_t&)>;
 
 sort_cube_func_t sort_by_dimension_first( const cube_weight_map_t& cube_weights );
 sort_cube_func_t sort_by_weight_first( const cube_weight_map_t& cube_weights );

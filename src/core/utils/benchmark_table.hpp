@@ -35,7 +35,7 @@
 #include <boost/optional.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/irange.hpp>
+#include <boost/range/counting_range.hpp>
 
 namespace cirkit
 {
@@ -185,7 +185,7 @@ public:
 
   void print() const
   {
-    for ( unsigned n : boost::irange( 0u, (unsigned)_column_names.size() ) )
+    for ( unsigned n : boost::counting_range( 0u, (unsigned)_column_names.size() ) )
     {
       std::cout.setf( std::ios::left );
       std::cout << "| " << std::setw( lengths[n] ) << _column_names[n] << " ";

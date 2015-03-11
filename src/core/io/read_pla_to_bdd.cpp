@@ -24,7 +24,7 @@
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/irange.hpp>
+#include <boost/range/counting_range.hpp>
 
 #include <core/utils/timer.hpp>
 
@@ -94,7 +94,7 @@ namespace cirkit
     // Auto Generate input and output labels if they do not exist
     if ( p.input_labels.empty() )
     {
-      for ( unsigned i : boost::irange( 0u, *p.num_inputs ) )
+      for ( unsigned i : boost::counting_range( 0u, *p.num_inputs ) )
       {
         p.input_labels += boost::str( boost::format( "i%d" ) % i );
       }
@@ -102,7 +102,7 @@ namespace cirkit
 
     if ( p.output_labels.empty() )
     {
-      for ( unsigned i : boost::irange( 0u, *p.num_outputs ) )
+      for ( unsigned i : boost::counting_range( 0u, *p.num_outputs ) )
       {
         p.output_labels += boost::str( boost::format( "o%d" ) % i );
       }
@@ -212,7 +212,6 @@ namespace cirkit
   bool read_pla_to_characteristic_bdd( BDDTable& bdd, const std::string& filename, bool inputs_first, bool with_output_zero_patterns )
   {
     using boost::adaptors::map_values;
-    using boost::irange;
 
     pla_t pla;
 

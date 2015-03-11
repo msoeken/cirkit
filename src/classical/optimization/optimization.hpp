@@ -39,12 +39,12 @@
 namespace cirkit
 {
 
-  typedef std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<> > cube_t;
-  typedef std::function<void(const cube_t&)> cube_function_t;
+  using cube_t          = std::pair<boost::dynamic_bitset<>, boost::dynamic_bitset<>>;
+  using cube_function_t = std::function<void(const cube_t&)>;
 
 
-  typedef functor<void( DdManager*, DdNode* )> dd_based_esop_optimization_func;
-  typedef functor<void( const std::string& )> pla_based_esop_optimization_func;
+  using dd_based_esop_optimization_func  = functor<void( DdManager*, DdNode* )>;
+  using pla_based_esop_optimization_func = functor<void( const std::string& )>;
 
 }
 
