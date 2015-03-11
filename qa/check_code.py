@@ -7,7 +7,7 @@ from termcolor import colored
 from textwrap import dedent
 from jinja2 import Environment
 
-forbidden_boost_headers = [ "foreach", "bind", "lambda/lambda", "shared_ptr", "regex", "tuple/tuple" ]
+forbidden_boost_headers = [ "foreach", "bind", "lambda/lambda", "shared_ptr", "regex", "tuple/tuple", "range/irange" ]
 
 def check_for_string( id, line, str, explanation = None ):
     if re.search( str, line ):
@@ -40,6 +40,7 @@ def print_help( id = None ):
 
           Boost.Bind            C++ lambda expressions
           Boost.Foreach         Range-based for loop
+          Boost.irange          Boost.counting_range
           Boost.Lambda          C++ lambda expressions
           Boost Smart Pointers  C++ smart pointers (std::shared_ptr, std::unique_ptr, ...)
           Boost.Regex           std::regex
