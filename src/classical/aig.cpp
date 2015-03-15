@@ -113,6 +113,19 @@ struct aig_dot_writer
       os << ";" << std::endl;
       ++index;
     }
+
+    index = 0u;
+    for ( const auto& l : graph_info.latch )
+    {
+      os << "l" << index << "[label=\"" << graph_info.node_names.at( l.second.first ) << "\",shape=box];" << std::endl;
+      os << "l" << index << " -> " << l.first.first << " ";
+      if ( l.first.second )
+      {
+        os << "[style=dashed]";
+      }
+      os << ";" << std::endl;
+      ++index;
+    }
   }
 
 private:
@@ -207,6 +220,13 @@ aig_function aig_create_ci( aig_graph& aig, const std::string& name )
 void aig_create_co( aig_graph& aig, const aig_function& f )
 {
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
+
+  if ( f.first == 0u )
+  {
+    auto& info = boost::get_property( aig, boost::graph_name );
+    info.constant_used = true;
+  }
+
   boost::get_property( aig, boost::graph_name ).cos += f;
 }
 

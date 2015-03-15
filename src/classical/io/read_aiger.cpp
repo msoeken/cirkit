@@ -159,10 +159,18 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
     aig_node node_out = nodes[lit2var(lit_out)];
     aig_node node_in = nodes[lit2var(lit_in)];
 
+    if ( node_in == 0u )
+    {
+      boost::get_property( aig, boost::graph_name ).constant_used = true;
+    }
+
+    auto in = std::make_pair( node_in, lit_in%2 );
+
     boost::get_property( aig, boost::graph_name ).cis += node_out;
 
-    boost::get_property( aig, boost::graph_name ).cos +=
-      std::make_pair( node_in, lit_in%2 );
+    boost::get_property( aig, boost::graph_name ).cos += in;
+
+    boost::get_property( aig, boost::graph_name ).latch[in] = std::make_pair( node_out, false );
   }
 
   /* read outputs and mark them in AIG */
