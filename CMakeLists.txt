@@ -31,3 +31,5 @@ externalProject_add(revlib_circuits
 set(ext_dependencies ${ext_dependencies} revlib_functions revlib_circuits PARENT_SCOPE)
 
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/reversible)
+
+add_definitions( equivalence_check HAS_METASMT=$<BOOL:metaSMT_FOUND>)
