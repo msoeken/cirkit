@@ -51,6 +51,19 @@ std::vector < metaSMT::logic::predicate > get_control_predicates (
 ) {
   using namespace metaSMT::logic;
 
+  // check that all controls are positive polarity
+  bool positive = std::all_of (
+        controls.begin()
+      , controls.end()
+      , [] ( const variable& control )
+  {
+    return control.polarity();
+  });
+  if ( !positive ) {
+    throw std::runtime_error ( "Only positive polarity control lines are supported."
+  }
+
+
   std::vector < metaSMT::logic::predicate > control_predicates;
 
   if ( controls.empty() ) {
@@ -61,7 +74,6 @@ std::vector < metaSMT::logic::predicate > get_control_predicates (
   else if ( controls.size() == 1 ) {
     auto control_line = controls[0];
     metaSMT::logic::predicate pred = vars[control_line.line() ];
-
     control_predicates.push_back( pred );
   }
   else {
