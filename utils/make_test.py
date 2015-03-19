@@ -66,3 +66,5 @@ if __name__ == "__main__":
 
     with open( filename + ".cpp", "w" ) as f:
         f.write( make_test( header, basename ) + "\n" )
+
+    os.system( "cmake build" )
