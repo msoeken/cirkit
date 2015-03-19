@@ -5,7 +5,7 @@
  	$(P) $(CXX) -o yosys$(EXE) $(LDFLAGS) $(OBJS) $(LDLIBS)
  
 +lib: $(OBJS)
-+	$(CXX) -shared -o libyosys.so $(filter kernel/driver.o, $(OBJS))
++	$(CXX) -shared -o libyosys.so $(filter-out kernel/driver.o, $(OBJS))
 +
  %.o: %.cc
  	$(P) $(CXX) -o $@ -c $(CXXFLAGS) $<
