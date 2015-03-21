@@ -69,7 +69,7 @@ if len( sys.argv ) in [2, 3] and sys.argv[1] == '-h':
     print_help( int( sys.argv[2] ) if len( sys.argv ) == 3 else None )
 else:
     count = 0; total = 0
-    for _dir in [".", "addons/cirkit-addon-formal", "addons/cirkit-addon-mini", "addons/cirkit-addon-revlib", "addons/cirkit-addon-experimental", "addons/cirkit-addon-verific", "addons/cirkit-addon-yosys"]:
+    for _dir in [".", "addons/cirkit-addon-formal", "addons/cirkit-addon-mini", "addons/cirkit-addon-revlib", "addons/cirkit-addon-reversible", "addons/cirkit-addon-experimental", "addons/cirkit-addon-verific", "addons/cirkit-addon-yosys"]:
         for top in ["src", "programs", "test"]:
             for root, dirnames, filenames in os.walk( "{0}/{1}".format( _dir, top ) ):
                 for filename in fnmatch.filter( filenames, "*.?pp" ):
