@@ -18,7 +18,7 @@
 #include "swop.hpp"
 
 #include <boost/range/algorithm.hpp>
-#include <boost/range/irange.hpp>
+#include <boost/range/algorithm_ext/iota.hpp>
 
 #include "transformation_based_synthesis.hpp"
 
@@ -63,7 +63,7 @@ namespace cirkit
     else
     {
       std::vector<unsigned> perm( spec2.num_outputs() );
-      boost::copy( boost::irange( 0u, spec2.num_outputs() ), perm.begin() );
+      boost::iota( perm, 0u );
       std::vector<unsigned> best_perm = perm;
 
       if ( enable )
