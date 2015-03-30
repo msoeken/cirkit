@@ -32,6 +32,11 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
+inline thread_pool::thread_pool()
+  : thread_pool( std::thread::hardware_concurrency() )
+{
+}
+
 inline thread_pool::thread_pool( unsigned num_threads )
 {
   for ( auto i = 0u; i < num_threads; ++i )

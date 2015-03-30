@@ -46,6 +46,8 @@ namespace cirkit
 class thread_pool
 {
 public:
+  /* number of threads is the same as number of cores */
+  thread_pool();
   thread_pool( unsigned num_threads );
   ~thread_pool();
 
