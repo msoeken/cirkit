@@ -30,15 +30,17 @@
 
 #include <cuddInt.h>
 
+#include <classical/utils/aig_utils.hpp>
+
 namespace cirkit
 {
 
 aig_function aig_from_bdd_rec( aig_graph& aig, DdManager* dd, DdNode* node )
 {
-  const auto& graph_info = boost::get_property( aig, boost::graph_name );
+  const auto& info = aig_info( aig );
 
-  bool is_complement = Cudd_IsComplement( node );
-  DdNode * r = Cudd_Regular( node );
+  auto   is_complement = Cudd_IsComplement( node );
+  auto * r = Cudd_Regular( node );
 
   aig_function f;
 
@@ -48,12 +50,12 @@ aig_function aig_from_bdd_rec( aig_graph& aig, DdManager* dd, DdNode* node )
   }
   else
   {
-    unsigned index = Cudd_NodeReadIndex( r );
+    auto index = Cudd_NodeReadIndex( r );
 
-    aig_function f_true  = aig_from_bdd_rec( aig, dd, cuddT( r ) );
-    aig_function f_false = aig_from_bdd_rec( aig, dd, cuddE( r ) );
+    auto f_true  = aig_from_bdd_rec( aig, dd, cuddT( r ) );
+    auto f_false = aig_from_bdd_rec( aig, dd, cuddE( r ) );
 
-    f = aig_create_ite( aig, {graph_info.inputs[index], false}, f_true, f_false );
+    f = aig_create_ite( aig, {info.inputs[index], false}, f_true, f_false );
   }
 
   return is_complement ? !f : f;
@@ -61,12 +63,12 @@ aig_function aig_from_bdd_rec( aig_graph& aig, DdManager* dd, DdNode* node )
 
 aig_function aig_from_bdd( aig_graph& aig, DdManager* dd, DdNode* node )
 {
-  const auto& graph_info = boost::get_property( aig, boost::graph_name );
+  const auto& info = aig_info( aig );
 
-  unsigned n = Cudd_ReadSize( dd );
-  unsigned num_pis = graph_info.inputs.size();
+  auto n = Cudd_ReadSize( dd );
+  auto num_pis = info.inputs.size();
 
-  for ( unsigned i = num_pis; i < n; ++i )
+  for ( auto i = num_pis; i < n; ++i )
   {
     aig_create_pi( aig, boost::str( boost::format( "x%d" ) % i ) );
   }
