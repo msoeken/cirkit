@@ -23,6 +23,7 @@
 #include <boost/format.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/combine.hpp>
 #include <boost/range/iterator_range.hpp>
 
@@ -251,12 +252,17 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
                                           const properties::ptr& settings,
                                           const properties::ptr& statistics )
 {
+  auto additional_vectors = get( settings, "additional_vectors", std::vector<boost::dynamic_bitset<>>() );
+
   std::vector<unsigned> partition;
 
   const auto& info    = aig_info( aig );
   const auto  n       = info.inputs.size();
   const auto  m       = info.outputs.size();
-  const auto  vectors = create_simulation_vectors( info.inputs.size(), selector, &partition );
+  auto        vectors = create_simulation_vectors( info.inputs.size(), selector, &partition );
+
+  boost::push_back( vectors, additional_vectors );
+
   auto        graph   = create_simulation_graph( aig, vectors, settings, statistics );
 
   properties_timer t( statistics, "labeling_runtime" );
