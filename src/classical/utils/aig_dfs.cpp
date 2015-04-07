@@ -75,11 +75,11 @@ void aig_partial_dfs::search( const aig_node& node )
   boost::dfs_visitor<> vis;
   if ( (bool)_term )
   {
-    boost::detail::depth_first_visit_impl( _aig, node, vis, _color, boost::detail::nontruth2() );
+    boost::detail::depth_first_visit_impl( _aig, node, vis, _color, _term.get() );
   }
   else
   {
-    boost::detail::depth_first_visit_impl( _aig, node, vis, _color, _term.get() );
+    boost::detail::depth_first_visit_impl( _aig, node, vis, _color, boost::detail::nontruth2() );
   }
 }
 
