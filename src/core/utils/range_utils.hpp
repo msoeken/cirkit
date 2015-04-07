@@ -164,12 +164,32 @@ std::vector<T> generate_vector( unsigned size, const std::function<T()>& generat
 }
 
 template<typename K, typename T>
+std::vector<K> get_map_keys( const std::map<K, T>& map )
+{
+  using boost::adaptors::map_keys;
+
+  std::vector<K> v;
+  boost::push_back( v, map | map_keys );
+  return v;
+}
+
+template<typename K, typename T>
+std::vector<K> get_map_keys( const std::vector<std::pair<K, T>>& vp )
+{
+  using boost::adaptors::transformed;
+
+  std::vector<K> v;
+  boost::push_back( v, vp | transformed( []( const std::pair<K, T>& p ) { return p.first; } ) );
+  return v;
+}
+
+template<typename K, typename T>
 std::vector<T> get_map_values( const std::map<K, T>& map )
 {
-  using boost::adaptors::values;
+  using boost::adaptors::map_values;
 
   std::vector<T> v;
-  boost::push_back( v, map | values );
+  boost::push_back( v, map | map_values );
   return v;
 }
 
