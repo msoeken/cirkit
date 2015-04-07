@@ -121,7 +121,7 @@ aig_node aig_node_by_name( const aig_graph_info& info, const std::string& name )
     }
   }
 
-  assert( false );
+  throw boost::str( boost::format( "cannot find input named '%s'" ) % name );
 }
 
 unsigned aig_input_index( const aig_graph& aig, const aig_node& input )

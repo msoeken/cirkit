@@ -40,16 +40,24 @@ void aig_rename( aig_graph& aig, const name_map_t& imap, const name_map_t& omap 
 {
   auto& info = aig_info( aig );
 
-  for ( const auto& p : imap )
+  try
   {
-    auto node = aig_node_by_name( info, p.first );
-    info.node_names[node] = p.second;
-  }
+    for ( const auto& p : imap )
+    {
+      auto node = aig_node_by_name( info, p.first );
+      info.node_names[node] = p.second;
+    }
 
-  for ( const auto& p : omap )
+    for ( const auto& p : omap )
+    {
+      auto index = aig_output_index( info, p.first );
+      info.outputs[index].second = p.second;
+    }
+  }
+  catch ( const std::string& s )
   {
-    auto index = aig_output_index( info, p.first );
-    info.outputs[index].second = p.second;
+    std::cerr << "[e] " << s << std::endl;
+    assert( false );
   }
 }
 
