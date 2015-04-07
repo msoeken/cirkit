@@ -80,6 +80,15 @@ void line_parser( const std::string& filename, const std::vector<std::pair<boost
   }
 }
 
+bool any_line_contains( const std::string& filename, const boost::regex& r )
+{
+  bool r = false;
+
+  line_parser( filename, { { r, [&]( const boost::smatch& m ) { r = true; } } } );
+
+  return r;
+}
+
 }
 
 // Local Variables:

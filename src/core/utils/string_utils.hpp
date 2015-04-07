@@ -65,6 +65,8 @@ std::pair<std::string, std::string> split_string_pair( const std::string& str, c
 
 void line_parser( const std::string& filename, const std::vector<std::pair<boost::regex, std::function<void(const boost::smatch&)>>>& matchers );
 
+bool any_line_contains( const std::string& filename, const boost::regex& r );
+
 }
 
 #endif
