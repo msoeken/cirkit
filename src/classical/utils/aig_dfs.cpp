@@ -38,8 +38,15 @@ void aig_dfs_visitor::finish_vertex( const aig_node& node, const aig_graph& aig 
   boost::default_dfs_visitor::finish_vertex( node, aig );
   if ( boost::find( graph_info.inputs, node ) != graph_info.inputs.end() )
   {
-    const auto& name = graph_info.node_names.find( node )->second;
-    finish_input( node, name, aig );
+    const auto& it = graph_info.node_names.find( node );
+    if ( it != graph_info.node_names.end() )
+    {
+      finish_input( node, it->second, aig );
+    }
+    else
+    {
+      finish_input( node, "", aig );
+    }
   }
   else if ( node == graph_info.constant )
   {
