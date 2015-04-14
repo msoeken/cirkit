@@ -19,10 +19,13 @@
  * @author Mathias Soeken
  */
 
+#include <cstdio>
+#include <functional>
 #include <iostream>
 #include <vector>
 
 #include <boost/format.hpp>
+#include <boost/range/adaptors.hpp>
 
 #include <core/io/read_pla_to_bdd.hpp>
 #include <core/utils/bdd_utils.hpp>
@@ -41,11 +44,13 @@ int main( int argc, char ** argv )
 
   std::string filename;
   std::string ordering;
+  std::string dotname;
 
   program_options opts;
   opts.add_options()
     ( "filename",  value( &filename ), "PLA filename" )
     ( "ordering",  value( &ordering ), "Complete variable ordering (space separated)" )
+    ( "dotname",   value( &dotname ),  "Writes BDD to this file" )
     ( "verbose,v",                     "Be verbose" )
     ;
 
@@ -76,6 +81,26 @@ int main( int argc, char ** argv )
     std::cout << "Info for output " << p.first << ":" << std::endl;
     std::cout << "- Path count:               " << Cudd_CountPath( p.second ) << std::endl;
     std::cout << "- Path count (to non-zero): " << Cudd_CountPathsToNonZero( p.second ) << std::endl;
+  }
+
+  if ( !dotname.empty() )
+  {
+    using namespace std::placeholders;
+    using boost::adaptors::transformed;
+
+    FILE * fd = fopen( dotname.c_str(), "w" );
+
+    auto rinames = get_map_keys( bdd.inputs );
+    auto ronames = get_map_keys( bdd.outputs );
+    auto outputs = get_map_values( bdd.outputs );
+
+    std::vector<char*> inames( bdd.inputs.size() ), onames( outputs.size() );
+    boost::transform( rinames, inames.begin(), []( const std::string& s ) { return const_cast<char*>( s.c_str() ); } );
+    boost::transform( ronames, onames.begin(), []( const std::string& s ) { return const_cast<char*>( s.c_str() ); } );
+
+    Cudd_DumpDot( bdd.cudd, outputs.size(), &outputs[0], &inames[0], &onames[0], fd );
+
+    fclose( fd );
   }
 
   return 0;
