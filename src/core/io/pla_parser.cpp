@@ -20,14 +20,14 @@
 #include "pla_processor.hpp"
 
 #include <fstream>
-#include <regex>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/range/algorithm.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/regex.hpp>
 
 namespace cirkit
 {
@@ -35,12 +35,12 @@ namespace cirkit
 bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_cube )
 {
   std::string line;
-  std::regex  whitespace( "\\s+" );
+  boost::regex  whitespace( "\\s+" );
 
   while ( in.good() && getline( in, line ) )
   {
     boost::trim( line );
-    line = std::regex_replace( line, whitespace, std::string( " " ) );
+    line = boost::regex_replace( line, whitespace, std::string( " " ) );
     if ( !line.size() ) { continue; }
 
     if ( boost::starts_with( line, "#" ) )
