@@ -29,17 +29,19 @@
 
 #include <map>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include <core/properties.hpp>
 #include <classical/aig.hpp>
 
 namespace cirkit
 {
 
-using support_count_t = std::map<aig_function, unsigned>;
+using support_map_t = std::map<aig_function, boost::dynamic_bitset<>>;
 
-support_count_t aig_structural_support( const aig_graph& aig,
-                                        properties::ptr settings = properties::ptr(),
-                                        properties::ptr statistics = properties::ptr() );
+support_map_t aig_structural_support( const aig_graph& aig,
+                                      properties::ptr settings = properties::ptr(),
+                                      properties::ptr statistics = properties::ptr() );
 
 }
 

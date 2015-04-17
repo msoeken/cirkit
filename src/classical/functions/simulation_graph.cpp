@@ -49,11 +49,17 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto& vertex_out_degree = boost::get( boost::vertex_out_degree, g );
 
   /* Settings */
-  const auto dotname     = get( settings, "dotname",     std::string() );
-  const auto graphname   = get( settings, "graphname",   std::string() );
-  const auto labeledname = get( settings, "labeledname", std::string() );
-  const auto support     = get( settings, "support",     false );
-  const auto vertexnames = get( settings, "vertexnames", false );
+  const auto dotname       = get( settings, "dotname",       std::string() );
+  const auto graphname     = get( settings, "graphname",     std::string() );
+  const auto labeledname   = get( settings, "labeledname",   std::string() );
+  const auto support       = get( settings, "support",       false );
+  const auto support_edges = get( settings, "support_edges", false );
+  const auto vertexnames   = get( settings, "vertexnames",   false );
+
+  if ( support_edges && !support )
+  {
+    std::cout << "[w] support_edges can only be actived when support is actived; setting will be ignored" << std::endl;
+  }
 
   /* Timing */
   properties_timer t( statistics );
@@ -121,7 +127,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     const auto s = aig_structural_support( aig );
     for ( const auto& o : index( info.outputs ) )
     {
-      vertex_support[n + sim_vectors.size() + o.first] = s.at( o.second.first );
+      vertex_support[n + sim_vectors.size() + o.first] = s.at( o.second.first ).count();
     }
   }
 
