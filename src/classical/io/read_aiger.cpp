@@ -192,6 +192,8 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
       std::make_pair( std::make_pair( nodes[lit2var(lit)], lit%2 ), "" );
   }
 
+  auto& graph_info = boost::get_property( aig, boost::graph_name );
+
   /* read and gates and create edges in AIG */
   for ( unsigned u = 0u; u < num_gates; ++u )
   {
@@ -224,9 +226,12 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
 
     aig_edge re = add_edge( node, right, aig ).first;
     boost::get( boost::edge_complement, aig )[re] = lit_re%2;
-  }
 
-  auto& graph_info = boost::get_property( aig, boost::graph_name );
+    if ( left <= 1u || right <= 1u )
+    {
+      graph_info.constant_used = true;
+    }
+  }
 
   /* read optional symbol table and assign names to nodes */
   for ( ;; )
