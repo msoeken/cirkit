@@ -34,7 +34,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <core/utils/timer.hpp>
-#include <core/utils/z3_utils.hpp>
+#include <formal/utils/z3_utils.hpp>
 
 #include <reversible/functions/fully_specified.hpp>
 #include <reversible/functions/add_gates.hpp>
