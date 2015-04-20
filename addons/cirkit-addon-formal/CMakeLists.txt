@@ -14,3 +14,5 @@ externalProject_add(z3ep
 set(ext_dependencies ${ext_dependencies} z3ep PARENT_SCOPE)
 
 add_ext_library("z3")
+
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/formal)
