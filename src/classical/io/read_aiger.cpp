@@ -227,7 +227,7 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
     aig_edge re = add_edge( node, right, aig ).first;
     boost::get( boost::edge_complement, aig )[re] = lit_re%2;
 
-    if ( left <= 1u || right <= 1u )
+    if ( lit_le <= 1u || lit_re <= 1u )
     {
       graph_info.constant_used = true;
     }
