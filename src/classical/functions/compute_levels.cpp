@@ -83,6 +83,7 @@ std::map<aig_node, unsigned> compute_levels( const aig_graph& aig, const propert
   {
     max_level = std::max( max_level, ol.second );
   }
+  set( statistics, "max_level", max_level );
 
   auto levels = sa_statistics->get<std::map<aig_node, unsigned>>( "node_values" );
 
