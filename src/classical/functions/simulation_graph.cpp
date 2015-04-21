@@ -169,7 +169,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   if ( !dotname.empty() )
   {
     std::ofstream os( dotname.c_str(), std::ofstream::out );
-    boost::write_graphviz( os, g );
+    if ( vertexnames )
+    {
+      boost::write_graphviz( os, g, boost::make_label_writer( boost::get( boost::vertex_name, g ) ) );
+    }
+    else
+    {
+      boost::write_graphviz( os, g );
+    }
     os.close();
   }
 
