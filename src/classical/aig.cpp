@@ -25,6 +25,9 @@
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/range/adaptors.hpp>
+#include <boost/optional.hpp>
+
+#include <core/utils/range_utils.hpp>
 
 namespace cirkit
 {
@@ -50,7 +53,10 @@ std::string make_string( const properties_map_t& properties, const std::string& 
 
 struct aig_dot_writer
 {
-  aig_dot_writer( const aig_graph& aig ) : aig( aig ) {}
+  aig_dot_writer( const aig_graph& aig, const properties::ptr& settings ) : aig( aig )
+  {
+    vertex_levels = get( settings, "vertex_levels", boost::optional<std::map<aig_node, unsigned>>() );
+  }
 
   /* vertex properties */
   void operator()( std::ostream& os, const aig_node& v )
@@ -101,6 +107,7 @@ struct aig_dot_writer
   {
     const auto& graph_info = boost::get_property( aig, boost::graph_name );
 
+    /* outputs */
     unsigned index = 0u;
     for ( const auto& o : graph_info.outputs )
     {
@@ -114,6 +121,7 @@ struct aig_dot_writer
       ++index;
     }
 
+    /* latches (latch inputs) */
     index = 0u;
     for ( const auto& l : graph_info.latch )
     {
@@ -126,10 +134,27 @@ struct aig_dot_writer
       os << ";" << std::endl;
       ++index;
     }
+
+    /* levels */
+    if ( static_cast<bool>( vertex_levels ) )
+    {
+      std::map<unsigned, std::vector<aig_node>> level_to_nodes;
+
+      for ( const auto& p : *vertex_levels )
+      {
+        level_to_nodes[p.second] += p.first;
+      }
+
+      for ( const auto& p : level_to_nodes )
+      {
+        os << "{rank=same " << any_join( p.second, " " ) << "}" << std::endl;
+      }
+    }
   }
 
 private:
   const aig_graph& aig;
+  boost::optional<std::map<aig_node, unsigned>> vertex_levels;
 };
 
 struct remove_constant_if_unused
@@ -401,22 +426,22 @@ aig_function aig_create_lat( aig_graph& aig, const aig_function& in, const std::
   return info.latch[in] = std::make_pair( node, false );
 }
 
-void write_dot( const aig_graph& aig, std::ostream& os )
+void write_dot( const aig_graph& aig, std::ostream& os, const properties::ptr& settings )
 {
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
   boost::filtered_graph<aig_graph, boost::keep_all, remove_constant_if_unused> fg( aig, boost::keep_all(), remove_constant_if_unused( aig ) );
 
-  aig_dot_writer writer( aig );
+  aig_dot_writer writer( aig, settings );
   boost::write_graphviz( os, fg, writer, writer, writer );
 }
 
-void write_dot( const aig_graph& aig, const std::string& filename )
+void write_dot( const aig_graph& aig, const std::string& filename, const properties::ptr& settings )
 {
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
   std::filebuf fb;
   fb.open( filename.c_str(), std::ios::out );
   std::ostream os( &fb );
-  write_dot( aig, os );
+  write_dot( aig, os, settings );
   fb.close();
 }
 
