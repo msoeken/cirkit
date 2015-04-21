@@ -65,7 +65,7 @@ private:
 
 support_map_t aig_structural_support( const aig_graph& aig, properties::ptr settings, properties::ptr statistics )
 {
-  return simulate_aig( aig, aig_structural_support_simulator( boost::get_property( aig, boost::graph_name ).inputs.size() ) );
+  return simulate_aig( aig, aig_structural_support_simulator( boost::get_property( aig, boost::graph_name ).inputs.size() ), settings, statistics );
 }
 
 }
