@@ -97,9 +97,17 @@ std::map<aig_node, unsigned> compute_levels( const aig_graph& aig, const propert
     for ( const auto& v : topsort )
     {
       auto it = ingoing.find( v );
+
+      /* no ingoing edges (outputs) */
       if ( it == ingoing.end() )
       {
         levels[v] = max_level;
+        continue;
+      }
+
+      /* no outgoing edges (inputs) */
+      if ( boost::out_degree( v, aig ) == 0u )
+      {
         continue;
       }
 
