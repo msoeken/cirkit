@@ -23,7 +23,7 @@ function( add_cirkit_library )
     "arg"
     ""
     "NAME"
-    "SOURCES;AUTO_DIRS"
+    "SOURCES;AUTO_DIRS;USE"
     ${ARGN}
   )
 
@@ -46,6 +46,18 @@ function( add_cirkit_library )
     endforeach( )
   endif( )
 
+  set( libs_static "" )
+  set( libs_shared "" )
+  foreach( item ${arg_USE} )
+
+    if( TARGET ${item}_static)
+      list( APPEND libs_static ${item}_static )
+    else( )
+      list( APPEND libs_static ${item} )
+    endif( )
+
+    list( APPEND libs_shared ${item} )
+  endforeach( )
 
   set( objlib cirkit_${arg_NAME}_objlib )
   set( shared cirkit_${arg_NAME} )
@@ -56,22 +68,18 @@ function( add_cirkit_library )
     ${arg_SOURCES}
   )
 
-  add_dependencies( ${objlib} ${ext_dependencies} )
   set_property( TARGET ${objlib} PROPERTY POSITION_INDEPENDENT_CODE on )
 
-  set( link_libs
-    ${Boost_LIBRARIES}
-    ${ext_libraries}
-  )
+  set( link_libs )
 
   if( cirkit_BUILD_SHARED )
     add_library( ${shared} SHARED $<TARGET_OBJECTS:${objlib}> )
-    target_link_libraries( ${shared} ${link_libs} )
+    target_link_libraries( ${shared} ${link_libs} ${libs_shared} )
   endif( )
 
   if(cirkit_BUILD_STATIC)
     add_library( ${static} STATIC $<TARGET_OBJECTS:${objlib}> )
-    target_link_libraries( ${static} ${link_libs} )
+    target_link_libraries( ${static} ${link_libs} ${libs_static} )
   endif( )
 
 endfunction( )
