@@ -27,8 +27,8 @@ function( add_cirkit_library )
     ${ARGN}
   )
 
-  if( DEFINED arg_UNUSED )
-    message( FATAL_ERROR "invalid arguments passed to cirkit_add_library: ${arg_UNUSED}" )
+  if( DEFINED arg_UNPARSED_ARGUMENTS )
+    message( FATAL_ERROR "invalid arguments passed to cirkit_add_library: ${arg_UNPARSED_ARGUMENTS}" )
   endif( )
 
   if( NOT DEFINED arg_NAME )
