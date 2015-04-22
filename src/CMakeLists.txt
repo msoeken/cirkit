@@ -4,11 +4,8 @@ add_ext_library(gmp gmpxx pthread)
 
 srcdirlist(directories ".")
 foreach(dir ${directories})
-  set( addon_dirs "")
-  foreach(adir ${addon_directories})
-    list( APPEND addon_dirs ${CMAKE_SOURCE_DIR}/addons/${adir}/src/${dir} )
-  endforeach( )
 
+  find_cirkit_addon_dirs( addon_dirs ${dir} )
   add_cirkit_library(
     NAME ${dir}
     AUTO_DIRS ${dir} ${addon_dirs}

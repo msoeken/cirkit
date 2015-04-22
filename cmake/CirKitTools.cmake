@@ -66,3 +66,13 @@ function( add_cirkit_library )
   endif( )
 
 endfunction( )
+
+
+function( find_cirkit_addon_dirs OUTPUT_VARIABLE name )
+  set( _addon_dirs "")
+  foreach(dir ${addon_directories})
+    list( APPEND _addon_dirs ${CMAKE_SOURCE_DIR}/addons/${dir}/src/${name} )
+  endforeach( )
+
+  set( ${OUTPUT_VARIABLE} ${_addon_dirs} PARENT_SCOPE )
+endfunction( )
