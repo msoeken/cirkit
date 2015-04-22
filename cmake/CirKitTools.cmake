@@ -1,5 +1,11 @@
 include( CMakeParseArguments )
 
+set(
+  CirKitTools_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+  CACHE PATH "Where CirKitTools finds its own files"
+  FORCE
+)
+mark_as_advanced( CirKitTools_DIRECTORY )
 
 ###
 # add_cirkit_library(
@@ -45,7 +51,10 @@ function( add_cirkit_library )
   set( shared cirkit_${arg_NAME} )
   set( static cirkit_${arg_NAME}_static )
 
-  add_library( ${objlib} OBJECT ${arg_SOURCES} )
+  add_library( ${objlib} OBJECT
+    ${CirKitTools_DIRECTORY}/nothing.cpp
+    ${arg_SOURCES}
+  )
 
   add_dependencies( ${objlib} ${ext_dependencies} )
   set_property( TARGET ${objlib} PROPERTY POSITION_INDEPENDENT_CODE on )
