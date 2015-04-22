@@ -85,6 +85,64 @@ function( add_cirkit_library )
 endfunction( )
 
 
+function( add_cirkit_program )
+  cmake_parse_arguments(
+    "arg"
+    ""
+    "NAME"
+    "SOURCES;AUTO_DIRS;USE"
+    ${ARGN}
+  )
+
+  if( DEFINED arg_UNPARSED_ARGUMENTS )
+    message( FATAL_ERROR "invalid arguments passed to cirkit_add_library: ${arg_UNPARSED_ARGUMENTS}" )
+  endif( )
+
+  if( NOT DEFINED arg_NAME )
+    message( FATAL_ERROR "cirkit_add_library requires a NAME: cirkit_add_library( NAME abc ...)" )
+  endif( )
+
+  if( (NOT arg_AUTO_DIRS) AND (NOT DEFINED arg_SOURCES) )
+    message( FATAL_ERROR "library ${arg_NAME} specifies neither SOURCES nor AUTO_DIRS." )
+  endif( )
+
+  if( DEFINED arg_AUTO_DIRS )
+    foreach( dir ${arg_AUTO_DIRS} )
+      file( GLOB_RECURSE files ${dir}/*.cpp )
+      list( APPEND arg_SOURCES ${files} )
+    endforeach( )
+  endif( )
+
+  set( libs "" )
+  foreach( item ${arg_USE} )
+    if( ${cirkit_LINK_PROGRAMS_TO_STATIC} AND TARGET ${item}_static )
+      list( APPEND libs ${item}_static )
+    else( )
+      list( APPEND libs ${item} )
+    endif( )
+  endforeach( )
+
+  add_executable( ${arg_NAME} ${arg_SOURCES} )
+  target_link_libraries( ${arg_NAME} ${libs} )
+
+endfunction( )
+
+
+function( add_cirkit_test_program )
+  cmake_parse_arguments(
+    "arg"
+    ""
+    "NAME"
+    ""
+    ${ARGN}
+  )
+
+  set( name "test_${arg_NAME}" )
+  add_cirkit_program( NAME ${name} ${arg_UNPARSED_ARGUMENTS} )
+  add_test( ${name} ${name})
+endfunction( )
+
+
 function( find_cirkit_addon_dirs OUTPUT_VARIABLE name )
   set( _addon_dirs "")
   foreach(dir ${addon_directories})
