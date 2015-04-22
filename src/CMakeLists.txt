@@ -1,33 +1,14 @@
 # Configuration
-add_definitions(-Wall -fPIC)
-add_ext_library("gmp;gmpxx;pthread")
+add_definitions(-Wall)
+add_ext_library(gmp gmpxx pthread)
 
 srcdirlist(directories ".")
 foreach(dir ${directories})
-  file(GLOB_RECURSE files ${dir}/*.cpp)
-  foreach(adir ${addon_directories})
-    file(GLOB_RECURSE addon_files ${CMAKE_SOURCE_DIR}/addons/${adir}/src/${dir}/*.cpp)
-    # set_source_files_properties(${addon_files} PROPERTIES COMPILE_FLAGS -std=c++1y)
-    set(files ${files} ${addon_files})
-  endforeach()
-  if(NOT "${files}" STREQUAL "")
-    add_library(objlib_${dir} OBJECT ${files})
-    add_dependencies(objlib_${dir} ${ext_dependencies})
-    if(cirkit_BUILD_SHARED)
-      add_library(cirkit_${dir} SHARED $<TARGET_OBJECTS:objlib_${dir}>)
-      target_link_libraries(cirkit_${dir} ${Boost_LIBRARIES})
-    endif()
-    if(cirkit_BUILD_STATIC)
-      add_library(cirkit_${dir}_static STATIC $<TARGET_OBJECTS:objlib_${dir}>)
-      target_link_libraries(cirkit_${dir}_static ${Boost_LIBRARIES})
-    endif()
-    foreach(library ${ext_libraries})
-      if(cirkit_BUILD_SHARED)
-        target_link_libraries(cirkit_${dir} ${library})
-      endif()
-      if(cirkit_BUILD_STATIC)
-        target_link_libraries(cirkit_${dir}_static ${library})
-      endif()
-    endforeach()
-  endif()
+
+  find_cirkit_addon_dirs( addon_dirs ${dir} )
+  add_cirkit_library(
+    NAME ${dir}
+    AUTO_DIRS ${dir} ${addon_dirs}
+  )
+
 endforeach()
