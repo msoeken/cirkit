@@ -21,6 +21,7 @@
  * @brief Some helper functions for bitsets
  *
  * @author Mathias Soeken
+ * @author Arun Chandrasekharan
  * @since  2.0
  */
 
@@ -67,6 +68,17 @@ std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b )
 boost::dynamic_bitset<> onehot_bitset( unsigned n, unsigned pos );
 
 void foreach_bit( const boost::dynamic_bitset<>& b, const std::function<void(unsigned)>& func );
+
+template<class IntType>
+IntType to_multiprecision( const boost::dynamic_bitset<>& bs )
+{
+  IntType sum = 0;
+  const IntType one = 1;
+
+  foreach_bit( bs, [&]( unsigned pos ) { sum |= (one << pos); } );
+
+  return sum;
+}
 
 }
 

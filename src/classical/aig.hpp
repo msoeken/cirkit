@@ -34,6 +34,7 @@
 
 #include <boost/graph/adjacency_list.hpp>
 
+#include <core/properties.hpp>
 #include <core/utils/graph_utils.hpp>
 
 namespace boost
@@ -111,8 +112,8 @@ aig_function aig_create_nary_or( aig_graph& aig, const std::vector< aig_function
 aig_function aig_create_nary_nor( aig_graph& aig, const std::vector< aig_function >& v );
 aig_function aig_create_nary_xor( aig_graph& aig, const std::vector< aig_function >& v );
 
-void write_dot( const aig_graph& aig, std::ostream& os );
-void write_dot( const aig_graph& aig, const std::string& filename );
+void write_dot( const aig_graph& aig, std::ostream& os, const properties::ptr& settings = properties::ptr() );
+void write_dot( const aig_graph& aig, const std::string& filename, const properties::ptr& settings = properties::ptr() );
 
 unsigned aig_to_literal( const aig_graph& aig, const aig_function& f );
 unsigned aig_to_literal( const aig_graph& aig, const aig_node& node );

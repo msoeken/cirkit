@@ -16,20 +16,18 @@
  */
 
 /**
- * @file aig_support.hpp
+ * @file compute_levels.hpp
  *
- * @brief Calculates the support of an AIG
+ * @brief Compute levels of the AIG
  *
  * @author Mathias Soeken
- * @since  2.0
+ * @since  2.3
  */
 
-#ifndef AIG_SUPPORT_HPP
-#define AIG_SUPPORT_HPP
+#ifndef COMPUTE_LEVELS_HPP
+#define COMPUTE_LEVELS_HPP
 
 #include <map>
-
-#include <boost/dynamic_bitset.hpp>
 
 #include <core/properties.hpp>
 #include <classical/aig.hpp>
@@ -37,11 +35,9 @@
 namespace cirkit
 {
 
-using support_map_t = std::map<aig_function, boost::dynamic_bitset<>>;
-
-support_map_t aig_structural_support( const aig_graph& aig,
-                                      properties::ptr settings = properties::ptr(),
-                                      properties::ptr statistics = properties::ptr() );
+std::map<aig_node, unsigned> compute_levels( const aig_graph& aig,
+                                             const properties::ptr& settings = properties::ptr(),
+                                             const properties::ptr& statistics = properties::ptr() );
 
 }
 

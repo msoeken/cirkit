@@ -229,7 +229,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
   auto s = aig_structural_support( aig );
   for ( auto o : index( info.outputs ) )
   {
-    support[n + vectors.size() + o.first] = s[o.second.first];
+    support[n + vectors.size() + o.first] = s[o.second.first].count();
   }
 }
 

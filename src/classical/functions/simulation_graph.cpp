@@ -49,11 +49,17 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto& vertex_out_degree = boost::get( boost::vertex_out_degree, g );
 
   /* Settings */
-  const auto dotname     = get( settings, "dotname",     std::string() );
-  const auto graphname   = get( settings, "graphname",   std::string() );
-  const auto labeledname = get( settings, "labeledname", std::string() );
-  const auto support     = get( settings, "support",     false );
-  const auto vertexnames = get( settings, "vertexnames", false );
+  const auto dotname       = get( settings, "dotname",       std::string() );
+  const auto graphname     = get( settings, "graphname",     std::string() );
+  const auto labeledname   = get( settings, "labeledname",   std::string() );
+  const auto support       = get( settings, "support",       false );
+  const auto support_edges = get( settings, "support_edges", false );
+  const auto vertexnames   = get( settings, "vertexnames",   false );
+
+  if ( support_edges && !support )
+  {
+    std::cout << "[w] support_edges can only be actived when support is actived; setting will be ignored" << std::endl;
+  }
 
   /* Timing */
   properties_timer t( statistics );
@@ -121,7 +127,18 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     const auto s = aig_structural_support( aig );
     for ( const auto& o : index( info.outputs ) )
     {
-      vertex_support[n + sim_vectors.size() + o.first] = s.at( o.second.first );
+      const auto& mask = s.at( o.second.first );
+      vertex_support[n + sim_vectors.size() + o.first] = mask.count();
+
+      if ( support_edges )
+      {
+        auto it_bit = mask.find_first();
+        while ( it_bit != boost::dynamic_bitset<>::npos )
+        {
+          add_edge_func( n + sim_vectors.size() + o.first, it_bit );
+          it_bit = mask.find_next( it_bit );
+        }
+      }
     }
   }
 
@@ -152,7 +169,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   if ( !dotname.empty() )
   {
     std::ofstream os( dotname.c_str(), std::ofstream::out );
-    boost::write_graphviz( os, g );
+    if ( vertexnames )
+    {
+      boost::write_graphviz( os, g, boost::make_label_writer( boost::get( boost::vertex_name, g ) ) );
+    }
+    else
+    {
+      boost::write_graphviz( os, g );
+    }
     os.close();
   }
 
@@ -253,6 +277,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
                                           const properties::ptr& statistics )
 {
   auto additional_vectors = get( settings, "additional_vectors", std::vector<boost::dynamic_bitset<>>() );
+  auto support_edges      = get( settings, "support_edges",      false );
 
   std::vector<unsigned> partition;
 
@@ -277,8 +302,18 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
   for ( auto i = 0; i < m; ++i )
   {
     vertex_label[n + vectors.size() + i] = 1u;
+
+    /* edges (Y -> X) */
+    if ( support_edges )
+    {
+      for ( const auto& edge : boost::make_iterator_range( boost::out_edges( n + vectors.size() + i, graph ) ) )
+      {
+        edge_label[edge] = 2u * partition.size();
+      }
+    }
   }
 
+  /* edges ( X -> sim -> Y) */
   auto offset = n;
   for ( const auto& p : index( partition ) )
   {

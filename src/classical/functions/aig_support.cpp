@@ -63,15 +63,9 @@ private:
  * Public functions                                                           *
  ******************************************************************************/
 
-std::map<aig_function, unsigned> aig_structural_support( const aig_graph& aig, properties::ptr settings, properties::ptr statistics )
+support_map_t aig_structural_support( const aig_graph& aig, properties::ptr settings, properties::ptr statistics )
 {
-  std::map<aig_function, unsigned> results;
-  auto sim_results = simulate_aig( aig, aig_structural_support_simulator( boost::get_property( aig, boost::graph_name ).inputs.size() ) );
-  for ( const auto& p : sim_results )
-  {
-    results[p.first] = p.second.count();
-  }
-  return results;
+  return simulate_aig( aig, aig_structural_support_simulator( boost::get_property( aig, boost::graph_name ).inputs.size() ), settings, statistics );
 }
 
 }
