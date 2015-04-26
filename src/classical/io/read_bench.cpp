@@ -17,6 +17,7 @@
 
 #include "read_bench.hpp"
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <sstream>
 #include <iterator>
@@ -90,7 +91,7 @@ void read_bench( aig_graph& aig, std::ifstream& is )
       }
 
       const std::string res = *iit; ++iit;
-      const std::string kind = *iit; ++iit;
+      const std::string kind = boost::to_upper_copy( *iit ); ++iit;
       std::vector< aig_function > ops;
       while ( iit != eos )
       {
