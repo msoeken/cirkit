@@ -27,12 +27,14 @@
 #ifndef SIMULATION_GRAPH_HPP
 #define SIMULATION_GRAPH_HPP
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/optional.hpp>
 
 #include <igraph/igraph.h>
 
@@ -93,6 +95,8 @@ struct simulation_graph_meta_t
   unsigned num_outputs;
 };
 
+using simulation_signature_t               = boost::optional<std::array<unsigned, 6>>;
+
 /* In order to allow an O(1) lookup for edges in the graph, this
  * edge lookup table is added as a property to the simulation graph
  */
@@ -107,7 +111,7 @@ using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_de
                                              boost::property<boost::vertex_support_t, unsigned,
                                              boost::property<boost::vertex_name_t, std::string,
                                              boost::property<boost::vertex_label_t, unsigned,
-                                             boost::property<boost::vertex_simulation_signature_t, std::array<unsigned, 6>>>>>>>;
+                                             boost::property<boost::vertex_simulation_signature_t, simulation_signature_t>>>>>>;
 
 using simulation_graph_edge_properties_t   = boost::property<boost::edge_label_t, unsigned>;
 

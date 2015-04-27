@@ -173,8 +173,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
     word_assignment_simulator::aig_name_value_map map( info.inputs.size() );
     std::vector<unsigned> partition, offset( 6u );
-    const auto sim_vectors   = create_simulation_vectors( n, 63u /* all */, &partition );
-    const auto sim_vectors_t = transpose( sim_vectors );
+    const auto all_sim_vectors   = create_simulation_vectors( n, 63u /* all */, &partition );
+    const auto all_sim_vectors_t = transpose( all_sim_vectors );
 
     assert( partition.size() == 6u );
     offset[0] = 0;
@@ -183,7 +183,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
       offset[i] = offset[i - 1] + partition[i - 1];
     }
 
-    for ( const auto& p : boost::combine( info.inputs, sim_vectors_t ) )
+    for ( const auto& p : boost::combine( info.inputs, all_sim_vectors_t ) )
     {
       map.insert( {info.node_names.at( boost::get<0>( p ) ), boost::get<1>( p )} );
     }
@@ -193,10 +193,10 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     for ( auto j = 0u; j < m; ++j )
     {
       const auto& ovalue = results.at( info.outputs.at( j ).first );
-      std::array<unsigned, 6u> signature;
+      std::array<unsigned, 6> signature;
       for ( auto i = 0u; i < partition.size(); ++i )
       {
-        signature[i] = 0u;
+        signature[i] = 0;
         auto pos = ovalue.find_next( offset[i] );
         while ( pos < offset[i] + partition[i] && pos != boost::dynamic_bitset<>::npos )
         {
@@ -205,8 +205,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
         }
       }
 
-      std::cout << "[i] signature for " << info.outputs[j].second << ": " << any_join( signature, " " ) << std::endl;
-      vertex_simulation_signatures[n + sim_vectors.size() + j] = signature;
+      vertex_simulation_signatures[n + sim_vectors.size() + j] = signature; /* Watch out, this is a different sim_vectors (from original graph) */
     }
   }
 
