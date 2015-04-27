@@ -55,6 +55,9 @@ BOOST_INSTALL_PROPERTY(vertex, support);
 enum vertex_label_t { vertex_label };
 BOOST_INSTALL_PROPERTY(vertex, label);
 
+enum vertex_simulation_signature_t { vertex_simulation_signature };
+BOOST_INSTALL_PROPERTY(vertex, simulation_signature);
+
 enum edge_label_t { edge_label };
 BOOST_INSTALL_PROPERTY(edge, label);
 
@@ -103,7 +106,8 @@ using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_de
                                              boost::property<boost::vertex_out_degree_t, unsigned,
                                              boost::property<boost::vertex_support_t, unsigned,
                                              boost::property<boost::vertex_name_t, std::string,
-                                             boost::property<boost::vertex_label_t, unsigned>>>>>;
+                                             boost::property<boost::vertex_label_t, unsigned,
+                                             boost::property<boost::vertex_simulation_signature_t, std::array<unsigned, 6>>>>>>>;
 
 using simulation_graph_edge_properties_t   = boost::property<boost::edge_label_t, unsigned>;
 

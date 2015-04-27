@@ -49,12 +49,13 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto& vertex_out_degree = boost::get( boost::vertex_out_degree, g );
 
   /* Settings */
-  const auto dotname       = get( settings, "dotname",       std::string() );
-  const auto graphname     = get( settings, "graphname",     std::string() );
-  const auto labeledname   = get( settings, "labeledname",   std::string() );
-  const auto support       = get( settings, "support",       false );
-  const auto support_edges = get( settings, "support_edges", false );
-  const auto vertexnames   = get( settings, "vertexnames",   false );
+  const auto dotname               = get( settings, "dotname",               std::string() );
+  const auto graphname             = get( settings, "graphname",             std::string() );
+  const auto labeledname           = get( settings, "labeledname",           std::string() );
+  const auto support               = get( settings, "support",               false );
+  const auto support_edges         = get( settings, "support_edges",         false );
+  const auto vertexnames           = get( settings, "vertexnames",           false );
+  const auto simulation_signatures = get( settings, "simulation_signatures", false );
 
   if ( support_edges && !support )
   {
@@ -162,6 +163,50 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     for ( const auto& o : index( info.outputs ) )
     {
       vertex_names[n + sim_vectors.size() + o.first] = o.second.second;
+    }
+  }
+
+  /* simulation signatures */
+  if ( simulation_signatures )
+  {
+    const auto& vertex_simulation_signatures = boost::get( boost::vertex_simulation_signature, g );
+
+    word_assignment_simulator::aig_name_value_map map( info.inputs.size() );
+    std::vector<unsigned> partition, offset( 6u );
+    const auto sim_vectors   = create_simulation_vectors( n, 63u /* all */, &partition );
+    const auto sim_vectors_t = transpose( sim_vectors );
+
+    assert( partition.size() == 6u );
+    offset[0] = 0;
+    for ( auto i = 1u; i < partition.size(); ++i )
+    {
+      offset[i] = offset[i - 1] + partition[i - 1];
+    }
+
+    for ( const auto& p : boost::combine( info.inputs, sim_vectors_t ) )
+    {
+      map.insert( {info.node_names.at( boost::get<0>( p ) ), boost::get<1>( p )} );
+    }
+
+    const auto results = simulate_aig( aig, word_assignment_simulator( map ) );
+
+    for ( auto j = 0u; j < m; ++j )
+    {
+      const auto& ovalue = results.at( info.outputs.at( j ).first );
+      std::array<unsigned, 6u> signature;
+      for ( auto i = 0u; i < partition.size(); ++i )
+      {
+        signature[i] = 0u;
+        auto pos = ovalue.find_next( offset[i] );
+        while ( pos < offset[i] + partition[i] && pos != boost::dynamic_bitset<>::npos )
+        {
+          ++signature[i];
+          pos = ovalue.find_next( pos );
+        }
+      }
+
+      std::cout << "[i] signature for " << info.outputs[j].second << ": " << any_join( signature, " " ) << std::endl;
+      vertex_simulation_signatures[n + sim_vectors.size() + j] = signature;
     }
   }
 
