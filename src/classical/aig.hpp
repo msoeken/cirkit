@@ -63,6 +63,8 @@ struct aig_graph_info
   std::string                                                   model_name;
   detail::traits_t::vertex_descriptor                           constant;
   bool                                                          constant_used = false;
+  bool                                                          enable_strashing = true;
+  bool                                                          enable_local_optimization = true;
   std::map<detail::traits_t::vertex_descriptor, std::string>    node_names;
   std::vector<std::pair<aig_function, std::string> >            outputs;
   std::vector<detail::traits_t::vertex_descriptor>              inputs;
