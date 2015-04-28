@@ -10,6 +10,7 @@ The following software is required in order to build CirKit
 * boost (at least version 1.56.0)
 * GNU MP, and its C++ interface GMP++
 * libxml2
+* GNU readline
 
 In *Ubuntu* the packages can be installed with
 
