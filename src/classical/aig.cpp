@@ -262,26 +262,32 @@ aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig
   auto& info = boost::get_property( aig, boost::graph_name );
 
   /* constants */
-  if ( left.first == info.constant )
+  if ( info.enable_local_optimization )
   {
-    if ( !left.second ) { return aig_get_constant( aig, false ); }
-    else                { return right; }
+    if ( left.first == info.constant )
+    {
+      if ( !left.second ) { return aig_get_constant( aig, false ); }
+      else                { return right; }
+    }
+    if ( right.first == info.constant )
+    {
+      if ( !right.second ) { return aig_get_constant( aig, false ); }
+      else                 { return left; }
+    }
+    if ( left == right )   { return left; }
+    if ( left.first == right.first && left.second != right.second ) { return aig_get_constant( aig, false ); }
   }
-  if ( right.first == info.constant )
-  {
-    if ( !right.second ) { return aig_get_constant( aig, false ); }
-    else                 { return left; }
-  }
-  if ( left == right )   { return left; }
-  if ( left.first == right.first && left.second != right.second ) { return aig_get_constant( aig, false ); }
 
   /* structural hashing */
-  bool in_order = left.first < right.first;
+  const bool in_order = left.first < right.first;
   auto key = std::make_pair( in_order ? left : right, in_order ? right : left );
-  auto it = info.strash.find( key );
-  if ( it != info.strash.end() )
+  if ( info.enable_strashing )
   {
-    return it->second;
+    auto it = info.strash.find( key );
+    if ( it != info.strash.end() )
+    {
+      return it->second;
+    }
   }
 
   /* create node and connect to children */
@@ -294,7 +300,14 @@ aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig
   aig_edge re = add_edge( node, right.first, aig ).first;
   boost::get( boost::edge_complement, aig )[re] = right.second;
 
-  return info.strash[key] = std::make_pair( node, false );
+  if ( info.enable_strashing )
+  {
+    return info.strash[key] = std::make_pair( node, false );
+  }
+  else
+  {
+    return std::make_pair( node, false );
+  }
 }
 
 aig_function aig_create_nand( aig_graph& aig, const aig_function& left, const aig_function& right )
