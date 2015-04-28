@@ -31,7 +31,7 @@ namespace cirkit
 
 using namespace boost::assign;
 
-inline unsigned lit2var( const unsigned lit )
+unsigned aiger_lit2var( const unsigned lit )
 {
   return (lit - lit % 2) / 2;
 }
@@ -133,7 +133,7 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
       throw "Error: negated inputs are not permitted in definition";
 
     // std::cout << lit << '\n';
-    boost::get_property( aig, boost::graph_name ).inputs += nodes[lit2var(lit)];
+    boost::get_property( aig, boost::graph_name ).inputs += nodes[aiger_lit2var(lit)];
   }
 
   /* read latches */
@@ -156,8 +156,8 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
 
     // std::cout << lit_out << ' '  << lit_in << '\n';
 
-    aig_node node_out = nodes[lit2var(lit_out)];
-    aig_node node_in = nodes[lit2var(lit_in)];
+    aig_node node_out = nodes[aiger_lit2var(lit_out)];
+    aig_node node_in = nodes[aiger_lit2var(lit_in)];
 
     if ( node_in == 0u )
     {
@@ -189,7 +189,7 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
     // std::cout << lit << '\n';
 
     boost::get_property( aig, boost::graph_name ).outputs +=
-      std::make_pair( std::make_pair( nodes[lit2var(lit)], lit%2 ), "" );
+      std::make_pair( std::make_pair( nodes[aiger_lit2var(lit)], lit%2 ), "" );
   }
 
   auto& graph_info = boost::get_property( aig, boost::graph_name );
@@ -217,9 +217,9 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
 
     // std::cout << lit_out << ' ' << lit_le << ' ' << lit_re << '\n';
 
-    aig_node node = nodes[lit2var(lit_out)];
-    aig_node left = nodes[lit2var(lit_le)];
-    aig_node right = nodes[lit2var(lit_re)];
+    aig_node node = nodes[aiger_lit2var(lit_out)];
+    aig_node left = nodes[aiger_lit2var(lit_le)];
+    aig_node right = nodes[aiger_lit2var(lit_re)];
 
     aig_edge le = add_edge( node, left, aig ).first;
     boost::get( boost::edge_complement, aig )[le] = lit_le%2;
