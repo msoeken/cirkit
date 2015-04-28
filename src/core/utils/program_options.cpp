@@ -71,6 +71,11 @@ namespace cirkit
     return d->vm.count( option ) == 1;
   }
 
+  void program_options::clear()
+  {
+    d->vm.clear();
+  }
+
   void program_options::init()
   {
     add_options()( "help,h", "produce help message" );

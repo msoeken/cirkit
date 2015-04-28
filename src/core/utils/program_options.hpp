@@ -122,6 +122,8 @@ namespace cirkit
      */
     bool is_set( const std::string& option ) const;
 
+    void clear();
+
   protected:
     bool parsed() const;
 
