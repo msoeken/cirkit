@@ -19,6 +19,7 @@
 
 #include <fstream>
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/range/algorithm.hpp>
 
 namespace cirkit
@@ -77,6 +78,18 @@ void line_parser( const std::string& filename, const std::vector<std::pair<boost
         matcher.second( m );
       }
     }
+  }
+}
+
+void foreach_line_in_file( const std::string& filename, const std::function<void(const std::string&)>& f )
+{
+  std::ifstream in( filename.c_str(), std::ifstream::in );
+  std::string line;
+
+  while ( getline( in, line ) )
+  {
+    boost::trim( line );
+    f( line );
   }
 }
 
