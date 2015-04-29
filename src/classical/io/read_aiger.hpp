@@ -28,12 +28,13 @@
 #define READ_AIGER_HPP
 
 #include <classical/aig.hpp>
-
 #include <iostream>
 #include <string>
 
 namespace cirkit
 {
+
+unsigned aiger_lit2var( const unsigned lit );
 
 void read_aiger( aig_graph& aig, std::ifstream& in );
 void read_aiger( aig_graph& aig, const std::string& filename );
