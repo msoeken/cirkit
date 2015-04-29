@@ -75,8 +75,9 @@ int main( int argc, char ** argv )
   auto voutputs = get_map_values( bdd.outputs );
 
   std::cout << format( "Run-time:   %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-  std::cout << "Node count:  " << Cudd_ReadNodeCount( bdd.cudd ) << std::endl;
-  std::cout << "Level sizes: " << any_join( level_sizes( bdd.cudd, voutputs ), " " ) << std::endl;
+  std::cout << "Node count:     " << Cudd_ReadNodeCount( bdd.cudd ) << std::endl;
+  std::cout << "Level sizes:    " << any_join( level_sizes( bdd.cudd, voutputs ), " " ) << std::endl;
+  std::cout << "Maximum fanout: " << maximum_fanout( bdd.cudd, voutputs ) << std::endl;
   for ( const auto& p : bdd.outputs )
   {
     std::cout << "Info for output " << p.first << ":" << std::endl;

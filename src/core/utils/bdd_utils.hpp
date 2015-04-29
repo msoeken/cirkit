@@ -45,6 +45,9 @@ bool is_unate( const Cudd& manager, const BDD& f, std::vector<int>& ps );
 std::vector<unsigned> level_sizes( DdManager* manager, const std::vector<DdNode*>& fs );
 std::vector<unsigned> level_sizes( const Cudd& manager, const std::vector<BDD>& fs );
 
+unsigned maximum_fanout( DdManager* manager, const std::vector<DdNode*>& fs );
+unsigned maximum_fanout( const Cudd& manager, const std::vector<BDD>& fs );
+
 }
 
 #endif

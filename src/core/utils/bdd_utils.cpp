@@ -255,6 +255,35 @@ std::vector<unsigned> level_sizes( const Cudd& manager, const std::vector<BDD>& 
   return level_sizes( manager.getManager(), fs_native );
 }
 
+unsigned maximum_fanout( DdManager* manager, const std::vector<DdNode*>& fs )
+{
+  using boost::adaptors::map_values;
+
+  /* collect all nodes in the BDDs and count */
+  std::unordered_map<DdNode*, unsigned> visited;
+  for ( const auto* f : fs )
+  {
+    collect_nodes_and_count( Cudd_Regular( f ), visited );
+  }
+
+  /* erase constant nodes from visited list */
+  visited.erase( DD_ONE( manager ) );
+  visited.erase( Cudd_Not( DD_ONE( manager ) ) );
+
+  return *boost::max_element( visited | map_values );
+}
+
+unsigned maximum_fanout( const Cudd& manager, const std::vector<BDD>& fs )
+{
+  using namespace std::placeholders;
+  using boost::adaptors::transformed;
+
+  std::vector<DdNode*> fs_native( fs.size() );
+  boost::copy( fs | transformed( std::bind( &BDD::getRegularNode, _1 ) ), fs_native.begin() );
+
+  return maximum_fanout( manager.getManager(), fs_native );
+}
+
 }
 
 // Local Variables:
