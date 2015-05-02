@@ -56,7 +56,7 @@ std::vector<BDD> perform_gate( Cudd& manager, const std::vector<BDD>& inputs, co
   BDD match = manager.bddOne();
   for ( auto input : index( inputs ) )
   {
-    match &= ( !gate[input.first] | input.second );
+    match &= ( !gate[input.index] | input.value );
   }
 
   /* Outputs */

@@ -298,8 +298,8 @@ BDD rcbdd::create_from_circuit( const circuit& circ ) const
 
   for ( const auto& g : index( circ ) )
   {
-    BDD gfunc = create_from_gate( g.second );
-    func = ( g.first == 0u ) ? gfunc : compose( func, gfunc );
+    BDD gfunc = create_from_gate( g.value );
+    func = ( g.index == 0u ) ? gfunc : compose( func, gfunc );
   }
 
   return func;

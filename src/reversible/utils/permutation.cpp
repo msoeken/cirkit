@@ -41,10 +41,10 @@ permutation_t truth_table_to_permutation( const binary_truth_table& spec )
 
   for ( const auto& row : index( spec ) )
   {
-    auto from = row.second.first;
-    auto to   = row.second.second;
+    auto from = row.value.first;
+    auto to   = row.value.second;
 
-    assert( truth_table_cube_to_number( binary_truth_table::cube_type( from.first, from.second ) ) == row.first );
+    assert( truth_table_cube_to_number( binary_truth_table::cube_type( from.first, from.second ) ) == row.index );
     perm += truth_table_cube_to_number( binary_truth_table::cube_type( to.first, to.second ) );
   }
 

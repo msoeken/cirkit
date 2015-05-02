@@ -43,9 +43,9 @@ namespace cirkit
     gate::control_container factored;
     for ( auto it : index( controls ) )
     {
-      if ( factor.test( it.first ) )
+      if ( factor.test( it.index ) )
       {
-        factored += it.second;
+        factored += it.value;
       }
     }
     return factored;
