@@ -67,12 +67,18 @@ public:
     using inner_reference = typename std::iterator_traits<inner_iterator>::reference;
 
   public:
-    using reference = std::pair<size_t, inner_reference>;
+    struct iterator_pair
+    {
+      size_t          index;
+      inner_reference value;
+    };
+
+    using reference = iterator_pair;
     iterator( inner_iterator it ) : _pos( 0 ), _it( it ) {}
 
     reference operator*() const
     {
-      return reference( _pos, *_it );
+      return { _pos, *_it };
     }
 
     iterator& operator++()
@@ -142,7 +148,7 @@ std::string indexed_join( const C& container, const std::string& delim, unsigned
   std::vector<std::string> v;
   for ( auto it : index( container ) )
   {
-    v += str( format( "%d: %s" ) % ( it.first + offset ) % boost::lexical_cast<std::string>( it.second ) );
+    v += str( format( "%d: %s" ) % ( it.index + offset ) % boost::lexical_cast<std::string>( it.value ) );
   }
   return boost::join( v, delim );
 }

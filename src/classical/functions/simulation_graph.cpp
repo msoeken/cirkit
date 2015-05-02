@@ -92,8 +92,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   /* edges from inputs to simulation vectors */
   for ( auto it : index( sim_vectors ) )
   {
-    foreach_bit( it.second, [&]( unsigned pos ) {
-        add_edge_func( pos, n + it.first );
+    foreach_bit( it.value, [&]( unsigned pos ) {
+        add_edge_func( pos, n + it.index );
       } );
   }
 
@@ -128,15 +128,15 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     const auto s = aig_structural_support( aig );
     for ( const auto& o : index( info.outputs ) )
     {
-      const auto& mask = s.at( o.second.first );
-      vertex_support[n + sim_vectors.size() + o.first] = mask.count();
+      const auto& mask = s.at( o.value.first );
+      vertex_support[n + sim_vectors.size() + o.index] = mask.count();
 
       if ( support_edges )
       {
         auto it_bit = mask.find_first();
         while ( it_bit != boost::dynamic_bitset<>::npos )
         {
-          add_edge_func( n + sim_vectors.size() + o.first, it_bit );
+          add_edge_func( n + sim_vectors.size() + o.index, it_bit );
           it_bit = mask.find_next( it_bit );
         }
       }
@@ -150,19 +150,19 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
     for ( const auto& i : index( info.inputs ) )
     {
-      vertex_names[i.first] = info.node_names.at( i.second );
+      vertex_names[i.index] = info.node_names.at( i.value );
     }
 
     std::string bitstring;
     for ( const auto& v : index( sim_vectors ) )
     {
-      boost::to_string( v.second, bitstring );
-      vertex_names[n + v.first] = bitstring;
+      boost::to_string( v.value, bitstring );
+      vertex_names[n + v.index] = bitstring;
     }
 
     for ( const auto& o : index( info.outputs ) )
     {
-      vertex_names[n + sim_vectors.size() + o.first] = o.second.second;
+      vertex_names[n + sim_vectors.size() + o.index] = o.value.second;
     }
   }
 
@@ -361,17 +361,17 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
   auto offset = n;
   for ( const auto& p : index( partition ) )
   {
-    for ( auto i = 0; i < p.second; ++i )
+    for ( auto i = 0; i < p.value; ++i )
     {
-      vertex_label[offset + i] = 2u + p.first;
+      vertex_label[offset + i] = 2u + p.index;
 
       for ( const auto& edge : boost::make_iterator_range( boost::out_edges( offset + i, graph ) ) )
       {
         const auto is_syedge = ( boost::target( edge, graph ) > offset + i ) ? 1u : 0u;
-        edge_label[edge] = is_syedge * partition.size() + p.first;
+        edge_label[edge] = is_syedge * partition.size() + p.index;
       }
     }
-    offset += p.second;
+    offset += p.value;
   }
 
   return graph;

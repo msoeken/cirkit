@@ -201,7 +201,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
   word_node_assignment_simulator::aig_node_value_map map;
   for ( auto word : index( vectors_t ) )
   {
-    map[info.inputs[word.first]] = word.second;
+    map[info.inputs[word.index]] = word.value;
   }
 
   auto results = simulate_aig( aig, word_node_assignment_simulator( map ) );
@@ -229,7 +229,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
   auto s = aig_structural_support( aig );
   for ( auto o : index( info.outputs ) )
   {
-    support[n + vectors.size() + o.first] = s[o.second.first].count();
+    support[n + vectors.size() + o.index] = s[o.value.first].count();
   }
 }
 

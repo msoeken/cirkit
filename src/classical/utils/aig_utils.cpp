@@ -145,9 +145,9 @@ unsigned aig_output_index( const aig_graph_info& info, const std::string& name )
 {
   for ( const auto& p : index( info.outputs ) )
   {
-    if ( p.second.second == name )
+    if ( p.value.second == name )
     {
-      return p.first;
+      return p.index;
     }
   }
 

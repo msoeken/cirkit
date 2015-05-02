@@ -62,7 +62,7 @@ cube::cube( const std::string& s )
 {
   for ( auto it : index( s ) )
   {
-    operator[]( it.first ) = it.second;
+    operator[]( it.index ) = it.value;
   }
 }
 
@@ -193,9 +193,9 @@ public:
 
     for ( auto it : index( out ) )
     {
-      if ( it.second == '1' )
+      if ( it.value == '1' )
       {
-        cubes[it.first] += c;
+        cubes[it.index] += c;
       }
     }
   }
@@ -267,18 +267,18 @@ void common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename 
   std::map<cube, boost::dynamic_bitset<>> cube_map;
   for ( auto it : index( cubes ) )
   {
-    for ( const auto& c : it.second )
+    for ( const auto& c : it.value )
     {
       auto itc = cube_map.find( c );
       if ( itc == cube_map.end() )
       {
         boost::dynamic_bitset<> mask( cubes.size() );
-        mask.set( it.first );
+        mask.set( it.index );
         cube_map[c] = mask;
       }
       else
       {
-        itc->second.set( it.first );
+        itc->second.set( it.index );
       }
     }
   }

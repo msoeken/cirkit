@@ -382,7 +382,7 @@ public:
     std::cout << "Cubes:" << std::endl;
     for ( auto it : index( _cubes ) )
     {
-      std::cout << boost::format( "%4d: " ) % it.first << it.second << std::endl;
+      std::cout << boost::format( "%4d: " ) % it.index << it.value << std::endl;
     }
     std::cout << "Distance lists:" << std::endl;
     for ( unsigned i = 0u; i < 3u; ++i )
