@@ -56,7 +56,26 @@ namespace detail
   using traits_t = boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS>;
 }
 
-using aig_function = std::pair<detail::traits_t::vertex_descriptor, bool>; /* the second type is for the complement, and is true if function is complemented */
+struct aig_function
+{
+  detail::traits_t::vertex_descriptor node;
+  bool                                complemented;
+
+  inline aig_function operator!() const
+  {
+    return {node, !complemented};
+  }
+
+  inline bool operator==( const aig_function& other ) const
+  {
+    return node == other.node && complemented == other.complemented;
+  }
+
+  inline bool operator<( const aig_function& other ) const
+  {
+    return node < other.node || ( node == other.node && complemented < other.complemented );
+  }
+};
 
 struct aig_graph_info
 {
@@ -119,7 +138,6 @@ void write_dot( const aig_graph& aig, const std::string& filename, const propert
 
 unsigned aig_to_literal( const aig_graph& aig, const aig_function& f );
 unsigned aig_to_literal( const aig_graph& aig, const aig_node& node );
-aig_function operator!( const aig_function& f );
 
 std::ostream& operator<<( std::ostream& os, const aig_function &f );
 

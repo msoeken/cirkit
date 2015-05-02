@@ -74,7 +74,7 @@ void write_aiger( const aig_graph& aig, std::ostream& os, const bool fill_sym_ta
 
       for ( const auto& edge : boost::make_iterator_range( out_edges( node, aig ) ) )
       {
-        os << " " << aig_to_literal( aig, std::make_pair( target( edge, aig ), complementmap[edge] ) );
+        os << " " << aig_to_literal( aig, { target( edge, aig ), complementmap[edge] } );
       }
 
       os << std::endl;

@@ -68,17 +68,17 @@ void write_bench( const aig_graph& aig, std::ostream& os, const write_bench_sett
 
     auto operands = get_operands( v, aig );
     unsigned lut = 0x8;
-    if ( operands.first.second )  lut >>= 0x1;
-    if ( operands.second.second ) lut >>= 0x2;
+    if ( operands.first.complemented )  lut >>= 0x1;
+    if ( operands.second.complemented ) lut >>= 0x2;
 
-    os << boost::format( "%sn%d = LUT 0x%x ( %s, %s )" ) % settings.prefix % name[v] % lut % get_node_name( operands.first.first, aig, settings.prefix ) % get_node_name( operands.second.first, aig, settings.prefix ) << std::endl;
+    os << boost::format( "%sn%d = LUT 0x%x ( %s, %s )" ) % settings.prefix % name[v] % lut % get_node_name( operands.first.node, aig, settings.prefix ) % get_node_name( operands.second.node, aig, settings.prefix ) << std::endl;
   }
 
   /* Output functions */
   for ( const auto& v : aig_info.outputs )
   {
-    unsigned lut = v.first.second ? 0x1 : 0x2;
-    os << boost::format( "%s%s = LUT 0x%x ( %s )" ) % settings.prefix % v.second % lut % get_node_name( v.first.first, aig, settings.prefix ) << std::endl;
+    unsigned lut = v.first.complemented ? 0x1 : 0x2;
+    os << boost::format( "%s%s = LUT 0x%x ( %s )" ) % settings.prefix % v.second % lut % get_node_name( v.first.node, aig, settings.prefix ) << std::endl;
   }
 }
 

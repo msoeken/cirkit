@@ -77,7 +77,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
     {
       std::cout << boost::format( "[i] starting dfs for output %s at index %d" ) % name % index << std::endl;
     }
-    dfs.search( info.outputs[index].first.first );
+    dfs.search( info.outputs[index].first.node );
   }
 
   /* make sure that we copy the constant vertex */
@@ -126,7 +126,8 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
   for ( const auto& name : names )
   {
     const auto& output = info.outputs[aig_output_index( info, name )];
-    new_info.outputs += std::make_pair( std::make_pair( copy_map[output.first.first], output.first.second ), name );
+    const aig_function f = { copy_map[output.first.node], output.first.complemented };
+    new_info.outputs += std::make_pair( f, name );
   }
 
   /* restore internal IDs */

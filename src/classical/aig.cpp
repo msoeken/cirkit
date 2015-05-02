@@ -112,8 +112,8 @@ struct aig_dot_writer
     for ( const auto& o : graph_info.outputs )
     {
       os << "o" << index << "[label=\"" << o.second << "\",shape=box];" << std::endl;
-      os << "o" << index << " -> " << o.first.first << " ";
-      if ( o.first.second )
+      os << "o" << index << " -> " << o.first.node << " ";
+      if ( o.first.complemented )
       {
         os << "[style=dashed]";
       }
@@ -125,9 +125,9 @@ struct aig_dot_writer
     index = 0u;
     for ( const auto& l : graph_info.latch )
     {
-      os << "l" << index << "[label=\"" << graph_info.node_names.at( l.second.first ) << "\",shape=box];" << std::endl;
-      os << "l" << index << " -> " << l.first.first << " ";
-      if ( l.first.second )
+      os << "l" << index << "[label=\"" << graph_info.node_names.at( l.second.node ) << "\",shape=box];" << std::endl;
+      os << "l" << index << " -> " << l.first.node << " ";
+      if ( l.first.complemented )
       {
         os << "[style=dashed]";
       }
@@ -198,7 +198,7 @@ aig_function aig_get_constant( aig_graph& aig, bool value )
   auto& info = boost::get_property( aig, boost::graph_name );
 
   info.constant_used = true;
-  return std::make_pair( info.constant, value );
+  return { info.constant, value };
 }
 
 bool aig_is_constant_used( const aig_graph& aig )
@@ -220,7 +220,7 @@ aig_function aig_create_pi( aig_graph& aig, const std::string& name )
   boost::get_property( aig, boost::graph_name ).inputs += node;
   boost::get_property( aig, boost::graph_name ).node_names[node] = name;
 
-  return std::make_pair( node, false );
+  return { node, false };
 }
 
 void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name )
@@ -239,14 +239,14 @@ aig_function aig_create_ci( aig_graph& aig, const std::string& name )
   boost::get_property( aig, boost::graph_name ).cis += node;
   boost::get_property( aig, boost::graph_name ).node_names[node] = name;
 
-  return std::make_pair( node, false );
+  return { node, false };
 }
 
 void aig_create_co( aig_graph& aig, const aig_function& f )
 {
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
 
-  if ( f.first == 0u )
+  if ( f.node == 0u )
   {
     auto& info = boost::get_property( aig, boost::graph_name );
     info.constant_used = true;
@@ -264,22 +264,22 @@ aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig
   /* constants */
   if ( info.enable_local_optimization )
   {
-    if ( left.first == info.constant )
+    if ( left.node == info.constant )
     {
-      if ( !left.second ) { return aig_get_constant( aig, false ); }
-      else                { return right; }
+      if ( !left.complemented ) { return aig_get_constant( aig, false ); }
+      else                      { return right; }
     }
-    if ( right.first == info.constant )
+    if ( right.node == info.constant )
     {
-      if ( !right.second ) { return aig_get_constant( aig, false ); }
-      else                 { return left; }
+      if ( !right.complemented ) { return aig_get_constant( aig, false ); }
+      else                       { return left; }
     }
     if ( left == right )   { return left; }
-    if ( left.first == right.first && left.second != right.second ) { return aig_get_constant( aig, false ); }
+    if ( left.node == right.node && left.complemented != right.complemented ) { return aig_get_constant( aig, false ); }
   }
 
   /* structural hashing */
-  const bool in_order = left.first < right.first;
+  const bool in_order = left.node < right.node;
   auto key = std::make_pair( in_order ? left : right, in_order ? right : left );
   if ( info.enable_strashing )
   {
@@ -295,18 +295,18 @@ aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig
   boost::get( boost::vertex_name, aig )[node] = 2u * ( num_vertices( aig ) - 1u );
   assert( 2u * node == 2u * ( num_vertices( aig ) - 1u ) );
 
-  aig_edge le = add_edge( node, left.first, aig ).first;
-  boost::get( boost::edge_complement, aig )[le] = left.second;
-  aig_edge re = add_edge( node, right.first, aig ).first;
-  boost::get( boost::edge_complement, aig )[re] = right.second;
+  aig_edge le = add_edge( node, left.node, aig ).first;
+  boost::get( boost::edge_complement, aig )[le] = left.complemented;
+  aig_edge re = add_edge( node, right.node, aig ).first;
+  boost::get( boost::edge_complement, aig )[re] = right.complemented;
 
   if ( info.enable_strashing )
   {
-    return info.strash[key] = std::make_pair( node, false );
+    return info.strash[key] = { node, false };
   }
   else
   {
-    return std::make_pair( node, false );
+    return { node, false };
   }
 }
 
@@ -433,10 +433,10 @@ aig_function aig_create_lat( aig_graph& aig, const aig_function& in, const std::
   }
 
   /* create corresponding ci and co nodes */
-  aig_node node = aig_create_ci( aig, name ).first;
+  aig_node node = aig_create_ci( aig, name ).node;
   aig_create_co( aig, in );
 
-  return info.latch[in] = std::make_pair( node, false );
+  return info.latch[in] = { node, false };
 }
 
 void write_dot( const aig_graph& aig, std::ostream& os, const properties::ptr& settings )
@@ -463,7 +463,7 @@ unsigned aig_to_literal( const aig_graph& aig, const aig_function& f )
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
   const auto& indexmap = get( boost::vertex_name, aig );
 
-  return indexmap[f.first] + ( f.second ? 1u : 0u );
+  return indexmap[f.node] + ( f.complemented ? 1u : 0u );
 }
 
 unsigned aig_to_literal( const aig_graph& aig, const aig_node& node )
@@ -474,12 +474,7 @@ unsigned aig_to_literal( const aig_graph& aig, const aig_node& node )
 
 unsigned aig_to_literal( const aig_function& f )
 {
-  return 2*f.first + (f.second ? 1u : 0u);
-}
-
-aig_function operator!( const aig_function& f )
-{
-  return std::make_pair( f.first, !f.second );
+  return 2 * f.node + (f.complemented ? 1u : 0u);
 }
 
 std::ostream& operator<<( std::ostream& os, const aig_function &f )

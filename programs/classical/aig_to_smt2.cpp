@@ -186,11 +186,11 @@ void write_smt2( const aig_graph& aig, std::ostream& os, const bool word_level_v
   for ( const auto& output : graph_info.outputs )
   {
     // const std::string& name = output.second;
-    const unsigned id = output.first.first;
+    const unsigned id = output.first.node;
     // std::cerr << "o" << id << '\n';
     os << "(declare-fun " << (boost::format("output%d") % index).str() << "() Bool)" << std::endl;
     os << "(assert (= " << (boost::format("output%d") % index).str() << ' ';
-    if (output.first.second)
+    if (output.first.complemented)
     {
       std::cout << "(not " << names(id) << ")";
     }

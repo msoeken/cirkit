@@ -40,6 +40,7 @@
 #include <core/utils/timer.hpp>
 #include <classical/aig.hpp>
 #include <classical/utils/aig_dfs.hpp>
+#include <classical/utils/aig_utils.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 #include <cuddObj.hh>
@@ -238,10 +239,10 @@ public:
 
   void finish_aig_node( const aig_node& node, const aig_function& left, const aig_function& right, const aig_graph& aig )
   {
-    T tleft  = node_values[left.first];
-    T tright = node_values[right.first];
+    T tleft  = node_values[left.node];
+    T tright = node_values[right.node];
 
-    node_values[node] = simulator.and_op( node, left.second ? simulator.invert( tleft ) : tleft, right.second ? simulator.invert( tright ) : tright );
+    node_values[node] = simulator.and_op( node, left.complemented ? simulator.invert( tleft ) : tleft, right.complemented ? simulator.invert( tright ) : tright );
   }
 
 private:
@@ -283,16 +284,16 @@ T simulate_aig_function( const aig_graph& aig, const aig_function& f,
                          aig_node_color_map& colors,
                          std::map<aig_node, T>& node_values )
 {
-  T value = simulate_aig_node<T>( aig, f.first, simulator, colors, node_values );
-  return f.second ? simulator.invert( value ) : value;
+  T value = simulate_aig_node<T>( aig, f.node, simulator, colors, node_values );
+  return f.complemented ? simulator.invert( value ) : value;
 }
 
 template<typename T>
 T simulate_aig_function( const aig_graph& aig, const aig_function& f,
                          const aig_simulator<T>& simulator )
 {
-  T value = simulate_aig_node<T>( aig, f.first, simulator );
-  return f.second ? simulator.invert( value ) : value;
+  T value = simulate_aig_node<T>( aig, f.node, simulator );
+  return f.complemented ? simulator.invert( value ) : value;
 }
 
 template<typename T>
@@ -311,16 +312,16 @@ std::map<aig_function, T> simulate_aig( const aig_graph& aig, const aig_simulato
 
   std::map<aig_function, T> results;
 
-  for ( const auto& o : boost::get_property( aig, boost::graph_name ).outputs )
+  for ( const auto& o : aig_info( aig ).outputs )
   {
     if ( verbose )
     {
       std::cout << "[i] simulate '" << o.second << "'" << std::endl;
     }
-    T value = simulate_aig_node<T>( aig, o.first.first, simulator, colors, node_values );
+    T value = simulate_aig_node<T>( aig, o.first.node, simulator, colors, node_values );
 
     /* value may need to be inverted */
-    results[o.first] = o.first.second ? simulator.invert( value ) : value;
+    results[o.first] = o.first.complemented ? simulator.invert( value ) : value;
   }
 
   set( statistics, "node_values", node_values );

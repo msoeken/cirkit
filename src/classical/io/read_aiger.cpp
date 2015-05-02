@@ -164,13 +164,13 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
       boost::get_property( aig, boost::graph_name ).constant_used = true;
     }
 
-    auto in = std::make_pair( node_in, lit_in%2 );
+    aig_function in = { node_in, lit_in % 2 == 1 };
 
     boost::get_property( aig, boost::graph_name ).cis += node_out;
 
     boost::get_property( aig, boost::graph_name ).cos += in;
 
-    boost::get_property( aig, boost::graph_name ).latch[in] = std::make_pair( node_out, false );
+    boost::get_property( aig, boost::graph_name ).latch[in] = { node_out, false };
   }
 
   /* read outputs and mark them in AIG */
@@ -188,8 +188,9 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
 
     // std::cout << lit << '\n';
 
+    const aig_function f = { nodes[aiger_lit2var(lit)], lit%2 == 1 };
     boost::get_property( aig, boost::graph_name ).outputs +=
-      std::make_pair( std::make_pair( nodes[aiger_lit2var(lit)], lit%2 ), "" );
+      std::make_pair( f, "" );
   }
 
   auto& graph_info = boost::get_property( aig, boost::graph_name );
