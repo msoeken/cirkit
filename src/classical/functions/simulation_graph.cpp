@@ -197,7 +197,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
       for ( auto i = 0u; i < partition.size(); ++i )
       {
         signature[i] = 0;
-        auto pos = ovalue.find_next( offset[i] );
+        auto pos = ( i == 0 ) ? ovalue.find_first() : ovalue.find_next( offset[i] - 1u );
         while ( pos < offset[i] + partition[i] && pos != boost::dynamic_bitset<>::npos )
         {
           ++signature[i];
