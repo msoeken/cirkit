@@ -59,6 +59,8 @@ void read_bench( aig_graph& aig, std::ifstream& is )
   std::map< std::string, aig_function > the_map;
   std::list< std::string > pos;
 
+  aig_initialize( aig );
+
   std::string line;
   while ( std::getline( is, line ) )
   {
