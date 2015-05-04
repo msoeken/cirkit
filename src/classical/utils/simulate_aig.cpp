@@ -31,7 +31,7 @@ bool simple_assignment_simulator::get_input( const aig_node& node, const std::st
   auto it = assignment.find( name );
   if ( it == assignment.end() )
   {
-    std::cout << "[W] no assignment given for '" << name << "', assume 0" << std::endl;
+    std::cout << "[w] no assignment given for '" << name << "', assume 0" << std::endl;
     return false;
   }
   else
@@ -66,7 +66,7 @@ bool simple_node_assignment_simulator::get_input( const aig_node& node, const st
   auto it = assignment.find( node );
   if ( it == assignment.end() )
   {
-    std::cout << "[W] no assignment given for '" << node << "', assume 0" << std::endl;
+    std::cout << "[w] no assignment given for '" << node << "', assume 0" << std::endl;
     return false;
   }
   else
@@ -108,7 +108,7 @@ boost::dynamic_bitset<> word_assignment_simulator::get_input( const aig_node& no
   if ( it == assignment.end() )
   {
     boost::dynamic_bitset<> v( assignment.begin()->second.size() );
-    std::cout << "[W] no assignment given for '" << name << "', assume " << v << std::endl;
+    std::cout << "[w] no assignment given for '" << name << "', assume " << v << std::endl;
     return v;
   }
   else
@@ -144,7 +144,7 @@ boost::dynamic_bitset<> word_node_assignment_simulator::get_input( const aig_nod
   if ( it == assignment.end() )
   {
     boost::dynamic_bitset<> v( assignment.begin()->second.size() );
-    std::cout << "[W] no assignment given for '" << node << "', assume " << v << std::endl;
+    std::cout << "[w] no assignment given for '" << node << "', assume " << v << std::endl;
     return v;
   }
   else
