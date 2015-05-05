@@ -73,7 +73,7 @@ struct lad_graph
   std::vector<std::string> vertex_names;
 
   explicit lad_graph( const std::string& filename );
-  explicit lad_graph( const aig_graph& aig, unsigned selector, bool verbose = false );
+  explicit lad_graph( const aig_graph& aig, unsigned selector, bool support_edges, bool verbose = false );
 };
 
 lad_graph::lad_graph( const std::string& filename )
@@ -134,7 +134,7 @@ lad_graph::lad_graph( const std::string& filename )
   in.close();
 }
 
-lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
+lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool support_edges, bool verbose )
 {
   /* AIG info */
   const auto& info = aig_info( aig );
@@ -230,6 +230,19 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool verbose )
   for ( auto o : index( info.outputs ) )
   {
     support[n + vectors.size() + o.index] = s[o.value.first].count();
+
+    if ( support_edges )
+    {
+      foreach_bit ( s[o.value.first], [&]( unsigned pos ) {
+          nb_succ[n + vectors.size() + o.index]++;
+          nb_pred[pos]++;
+          adj[n + vectors.size() + o.index] += pos;
+          adj[pos] += n + vectors.size() + o.index;
+          edge_direction[n + vectors.size() + o.index][pos] = 1;
+          edge_direction[pos][n + vectors.size() + o.index] = 2;
+          edge_label[n + vectors.size() + o.index][pos] = 5;
+        } );
+    }
   }
 }
 
@@ -1347,14 +1360,15 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
                             properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() )
 {
   /* Settings */
-  auto functional = get( settings, "functional", false );
-  auto verbose    = get( settings, "verbose",    false );
+  auto functional    = get( settings, "functional",    false );
+  auto support_edges = get( settings, "support_edges", false );
+  auto verbose       = get( settings, "verbose",       false );
 
   /* Timer */
   properties_timer t( statistics );
 
-  lad_graph gp( pattern, selector, false /* verbose */ );
-  lad_graph gt( target, selector, false /* verbose */ );
+  lad_graph gp( pattern, selector, support_edges, false /* verbose */ );
+  lad_graph gt( target, selector, support_edges, false /* verbose */ );
   lad_domain d( gp, gt, functional );
 
   if ( verbose )
