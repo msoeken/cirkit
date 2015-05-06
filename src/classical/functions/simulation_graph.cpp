@@ -76,7 +76,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   meta.num_outputs = m;
 
   /* add vertices */
-  const auto vertices_count = n + sim_vectors.size() + m;
+  const auto vertices_count = n + m + sim_vectors.size();
   add_vertices( g, vertices_count );
   edge_lookup.reserve( vertices_count << 5u );
 
@@ -93,7 +93,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   for ( auto it : index( sim_vectors ) )
   {
     foreach_bit( it.value, [&]( unsigned pos ) {
-        add_edge_func( pos, n + it.index );
+        add_edge_func( pos, n + m + it.index );
       } );
   }
 
@@ -115,7 +115,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     {
       if ( ovalue[i] )
       {
-        add_edge_func( n + i, n + sim_vectors.size() + j );
+        add_edge_func( n + m + i, n + j );
       }
     }
   }
@@ -129,14 +129,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     for ( const auto& o : index( info.outputs ) )
     {
       const auto& mask = s.at( o.value.first );
-      vertex_support[n + sim_vectors.size() + o.index] = mask.count();
+      vertex_support[n + o.index] = mask.count();
 
       if ( support_edges )
       {
         auto it_bit = mask.find_first();
         while ( it_bit != boost::dynamic_bitset<>::npos )
         {
-          add_edge_func( n + sim_vectors.size() + o.index, it_bit );
+          add_edge_func( n + o.index, it_bit );
           it_bit = mask.find_next( it_bit );
         }
       }
@@ -157,12 +157,12 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     for ( const auto& v : index( sim_vectors ) )
     {
       boost::to_string( v.value, bitstring );
-      vertex_names[n + v.index] = bitstring;
+      vertex_names[n + m + v.index] = bitstring;
     }
 
     for ( const auto& o : index( info.outputs ) )
     {
-      vertex_names[n + sim_vectors.size() + o.index] = o.value.second;
+      vertex_names[n + o.index] = o.value.second;
     }
   }
 
@@ -171,41 +171,10 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   {
     const auto& vertex_simulation_signatures = boost::get( boost::vertex_simulation_signature, g );
 
-    word_assignment_simulator::aig_name_value_map map( info.inputs.size() );
-    std::vector<unsigned> partition, offset( 6u );
-    const auto all_sim_vectors   = create_simulation_vectors( n, 63u /* all */, &partition );
-    const auto all_sim_vectors_t = transpose( all_sim_vectors );
-
-    assert( partition.size() == 6u );
-    offset[0] = 0;
-    for ( auto i = 1u; i < partition.size(); ++i )
+    const auto signatures = compute_simulation_signatures( aig );
+    for ( const auto& s : index( signatures ) )
     {
-      offset[i] = offset[i - 1] + partition[i - 1];
-    }
-
-    for ( const auto& p : boost::combine( info.inputs, all_sim_vectors_t ) )
-    {
-      map.insert( {info.node_names.at( boost::get<0>( p ) ), boost::get<1>( p )} );
-    }
-
-    const auto results = simulate_aig( aig, word_assignment_simulator( map ) );
-
-    for ( auto j = 0u; j < m; ++j )
-    {
-      const auto& ovalue = results.at( info.outputs.at( j ).first );
-      std::array<unsigned, 6> signature;
-      for ( auto i = 0u; i < partition.size(); ++i )
-      {
-        signature[i] = 0;
-        auto pos = ( i == 0 ) ? ovalue.find_first() : ovalue.find_next( offset[i] - 1u );
-        while ( pos < offset[i] + partition[i] && pos != boost::dynamic_bitset<>::npos )
-        {
-          ++signature[i];
-          pos = ovalue.find_next( pos );
-        }
-      }
-
-      vertex_simulation_signatures[n + sim_vectors.size() + j] = signature; /* Watch out, this is a different sim_vectors (from original graph) */
+      vertex_simulation_signatures[n + s.index] = s.value;
     }
   }
 
@@ -345,12 +314,12 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
   }
   for ( auto i = 0; i < m; ++i )
   {
-    vertex_label[n + vectors.size() + i] = 1u;
+    vertex_label[n + i] = 1u;
 
     /* edges (Y -> X) */
     if ( support_edges )
     {
-      for ( const auto& edge : boost::make_iterator_range( boost::out_edges( n + vectors.size() + i, graph ) ) )
+      for ( const auto& edge : boost::make_iterator_range( boost::out_edges( n + i, graph ) ) )
       {
         edge_label[edge] = 2u * partition.size();
       }
@@ -358,7 +327,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
   }
 
   /* edges ( X -> sim -> Y) */
-  auto offset = n;
+  auto offset = n + m;
   for ( const auto& p : index( partition ) )
   {
     for ( auto i = 0; i < p.value; ++i )
@@ -375,6 +344,53 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
   }
 
   return graph;
+}
+
+std::vector<simulation_signature_t::value_type> compute_simulation_signatures( const aig_graph& aig )
+{
+  std::vector<simulation_signature_t::value_type> vec;
+
+  const auto& info = aig_info( aig );
+  const auto  n    = info.inputs.size();
+
+  word_assignment_simulator::aig_name_value_map map( n );
+  std::vector<unsigned> partition, offset( 6u );
+  const auto all_sim_vectors   = create_simulation_vectors( n, 63u /* all */, &partition );
+  const auto all_sim_vectors_t = transpose( all_sim_vectors );
+
+  assert( partition.size() == 6u );
+  offset[0] = 0;
+  for ( auto i = 1u; i < partition.size(); ++i )
+  {
+    offset[i] = offset[i - 1] + partition[i - 1];
+  }
+
+  for ( const auto& p : boost::combine( info.inputs, all_sim_vectors_t ) )
+  {
+    map.insert( {info.node_names.at( boost::get<0>( p ) ), boost::get<1>( p )} );
+  }
+
+  const auto results = simulate_aig( aig, word_assignment_simulator( map ) );
+
+  for ( const auto& output : info.outputs )
+  {
+    const auto& ovalue = results.at( output.first );
+    std::array<unsigned, 6> signature;
+    for ( auto i = 0u; i < partition.size(); ++i )
+    {
+      signature[i] = 0;
+      auto pos = ( i == 0 ) ? ovalue.find_first() : ovalue.find_next( offset[i] - 1u );
+      while ( pos < offset[i] + partition[i] && pos != boost::dynamic_bitset<>::npos )
+      {
+        ++signature[i];
+        pos = ovalue.find_next( pos );
+      }
+    }
+
+    vec += signature;
+  }
+
+  return vec;
 }
 
 igraph_t simulation_graph_to_igraph( const simulation_graph& g )

@@ -148,6 +148,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
                                           const properties::ptr& settings = properties::ptr(),
                                           const properties::ptr& statistics = properties::ptr() );
 
+std::vector<simulation_signature_t::value_type> compute_simulation_signatures( const aig_graph& aig );
+
 igraph_t simulation_graph_to_igraph( const simulation_graph& g );
 
 }
