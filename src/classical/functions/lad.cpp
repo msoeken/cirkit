@@ -71,9 +71,11 @@ struct lad_graph
 
   /* only filled when verbose */
   std::vector<std::string> vertex_names;
+  unsigned num_inputs = 0u;
+  std::vector<boost::optional<std::array<unsigned, 6>>> signatures;
 
   explicit lad_graph( const std::string& filename );
-  explicit lad_graph( const aig_graph& aig, unsigned selector, bool support_edges, bool verbose = false );
+  explicit lad_graph( const aig_graph& aig, unsigned selector, bool support_edges, bool simulation_signatures, bool verbose = false );
 };
 
 lad_graph::lad_graph( const std::string& filename )
@@ -134,7 +136,7 @@ lad_graph::lad_graph( const std::string& filename )
   in.close();
 }
 
-lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool support_edges, bool verbose )
+lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool support_edges, bool simulation_signatures, bool verbose )
 {
   /* AIG info */
   const auto& info = aig_info( aig );
@@ -147,6 +149,8 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool support_edge
 
   /* Read number of vertices */
   nb_vertices = n + vectors.size() + m;
+
+  num_inputs = n;
 
   /* some information */
   if ( verbose )
@@ -244,6 +248,17 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool support_edge
         } );
     }
   }
+
+  /* simulation signatures */
+  signatures.resize( nb_vertices );
+  if ( simulation_signatures )
+  {
+    const auto sigs = compute_simulation_signatures( aig );
+    for ( const auto& s : index( sigs ) )
+    {
+      signatures[n + vectors.size() + s.index] = s.value;
+    }
+  }
 }
 
 std::ostream& operator<<( std::ostream& os, const lad_graph& g )
@@ -287,7 +302,7 @@ struct lad_domain
   vec_int_t global_matching_p;
   vec_int_t global_matching_t;
 
-  lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints = false );
+  lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, bool simulation_signatures );
 
   inline bool to_filter_empty() const
   {
@@ -378,7 +393,7 @@ inline bool is_compatible( int dir_gp, int dir_gt )
 }
 
 bool compatible_vertices( int u, int v,
-                          const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints )
+                          const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, bool simulation_signatures )
 {
   if ( !compatible_vertex_labels( gp.vertex_label[u], gt.vertex_label[v] ) )
   {
@@ -395,10 +410,43 @@ bool compatible_vertices( int u, int v,
   //if ( gp.adj[u].size() - gp.nb_pred[u] - gp.nb_succ[u] > gt.adj[v].size() - gt.nb_pred[v] - gt.nb_succ[v] ) return false;
   if ( functional_support_constraints && ( gt.support[v] != gp.support[u] ) ) return false;
   if ( !functional_support_constraints && ( gt.support[v] < gp.support[u] ) ) return false;
+
+  if ( simulation_signatures )
+  {
+    /* order of signatures is
+       ah/0c 1h 2h
+       ac/0h 1c 2c */
+    const auto& sigp = gp.signatures[u];
+    const auto& sigt = gt.signatures[v];
+
+    const auto nmink = gt.num_inputs - gp.num_inputs;
+
+    if ( (bool)sigp && (bool)sigt )
+    {
+      /* 0h */
+      if ( (*sigt)[3u] != (*sigp)[3u] ) { return false; }
+
+      /* 0c */
+      if ( (*sigt)[0u] != (*sigp)[0u] ) { return false; }
+
+      /* 1h */
+      if ( (*sigt)[1u] != (*sigp)[1u] + (*sigp)[3u] * nmink ) { return false; }
+
+      /* 1c */
+      if ( (*sigt)[4u] != (*sigp)[4u] + (*sigp)[0u] * nmink ) { return false; }
+
+      /* 2h */
+      if ( (*sigt)[2u] != (*sigp)[2u] + (*sigp)[1u] * nmink + (*sigp)[3u] * ( ( nmink * ( nmink - 1 ) ) / 2 ) ) { return false; }
+
+      /* 2c */
+      if ( (*sigt)[5u] != (*sigp)[5u] + (*sigp)[4u] * nmink + (*sigp)[0u] * ( ( nmink * ( nmink - 1 ) ) / 2 ) ) { return false; }
+    }
+  }
+
   return true;
 }
 
-lad_domain::lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints )
+lad_domain::lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, bool simulation_signatures )
 {
   /* create */
   global_matching_p.resize( gp.nb_vertices, -1 );
@@ -420,7 +468,7 @@ lad_domain::lad_domain( const lad_graph& gp, const lad_graph& gt, bool functiona
     first_val[u] = val_size;
     for ( v = 0u; v < gt.nb_vertices; ++v )
     {
-      if ( !compatible_vertices( u, v, gp, gt, functional_support_constraints ) ) /* v not in D[u] */
+      if ( !compatible_vertices( u, v, gp, gt, functional_support_constraints, simulation_signatures ) ) /* v not in D[u] */
       {
         pos_in_val[u][v] = first_val[u] + gt.nb_vertices;
       }
@@ -1341,7 +1389,7 @@ bool directed_lad( std::vector<unsigned>& mapping, const std::string& target, co
 
   lad_graph gp( pattern );
   lad_graph gt( target );
-  lad_domain d( gp, gt );
+  lad_domain d( gp, gt, false, false );
 
   if ( verbose )
   {
@@ -1360,16 +1408,17 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
                             properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() )
 {
   /* Settings */
-  auto functional    = get( settings, "functional",    false );
-  auto support_edges = get( settings, "support_edges", false );
-  auto verbose       = get( settings, "verbose",       false );
+  auto functional            = get( settings, "functional",            false );
+  auto support_edges         = get( settings, "support_edges",         false );
+  auto simulation_signatures = get( settings, "simulation_signatures", false );
+  auto verbose               = get( settings, "verbose",               false );
 
   /* Timer */
   properties_timer t( statistics );
 
-  lad_graph gp( pattern, selector, support_edges, false /* verbose */ );
-  lad_graph gt( target, selector, support_edges, false /* verbose */ );
-  lad_domain d( gp, gt, functional );
+  lad_graph gp( pattern, selector, support_edges, simulation_signatures, false /* verbose */ );
+  lad_graph gt( target, selector, support_edges, simulation_signatures, false /* verbose */ );
+  lad_domain d( gp, gt, functional, simulation_signatures );
 
   if ( verbose )
   {
