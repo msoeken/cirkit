@@ -25,6 +25,8 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 
+#include <sys/wait.h>
+
 using namespace boost::assign;
 
 namespace cirkit
@@ -44,7 +46,7 @@ result_t execute_and_return( const std::string& cmd )
   }
   is.close();
 
-  return { sresult, result };
+  return { WEXITSTATUS( sresult ), result };
 }
 
 }
