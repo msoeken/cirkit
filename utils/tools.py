@@ -209,6 +209,15 @@ class package_cbmc_x64:
     install     = [ "cp -v cbmc goto-cc goto-instrument hw-cbmc %s" ]
     makedir     = True
 
+class package_demiurge:
+    description = "SAT- and QBF-based AIG synthesizer for implementation from safety specifications"
+    subdir      = "demiurge-1.1.0"
+    url         = "http://www.iaik.tugraz.at/content/research/design_verification/demiurge/demiurge-1.1.0.tar.gz"
+    fmt         = "tgz"
+    build       = [ "" ]
+    install     = [ "cp -v tool/build/src/demiurge-bin %s" ]
+    makedir     = False
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
