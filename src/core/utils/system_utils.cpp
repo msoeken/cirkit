@@ -30,7 +30,7 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-std::vector<std::string> execute_and_return( const std::string& cmd )
+result_t execute_and_return( const std::string& cmd )
 {
   std::vector<std::string> result;
 
@@ -44,7 +44,7 @@ std::vector<std::string> execute_and_return( const std::string& cmd )
   }
   is.close();
 
-  return result;
+  return { sresult, result };
 }
 
 }
