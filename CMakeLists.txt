@@ -37,11 +37,10 @@ set(cirkit_PACKAGES "" CACHE STRING "if non-empty, then only the packages in the
 include_directories(src)
 
 # Addons
-add_subdirectory(addons)
-add_addon_flags()
 
 # Libraries
 add_subdirectory(src)
+add_subdirectory(addons)
 
 # Programs
 if(cirkit_ENABLE_PROGRAMS)

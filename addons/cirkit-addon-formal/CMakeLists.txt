@@ -16,4 +16,13 @@ set(ext_dependencies ${ext_dependencies} z3ep PARENT_SCOPE)
 
 add_ext_library("z3")
 
-file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/formal)
+include_directories(src)
+link_directories(${CMAKE_SOURCE_DIR}/ext/lib)
+
+add_cirkit_library(
+  NAME addon_formal
+  AUTO_DIRS src
+  USE
+    cirkit_core
+    z3
+)
