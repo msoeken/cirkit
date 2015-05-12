@@ -12,8 +12,6 @@ externalProject_add(z3ep
 )
 add_dependencies(external z3ep)
 
-set(ext_dependencies ${ext_dependencies} z3ep PARENT_SCOPE)
-
 add_ext_library("z3")
 
 include_directories(src)

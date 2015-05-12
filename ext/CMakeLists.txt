@@ -89,4 +89,3 @@ add_dependencies(external igraphex)
 set(IGRAPH_LIBRARIES "${ext_LIB}/libigraph.so" PARENT_SCOPE)
 add_ext_library(${IGRAPH_LIBRARIES})
 
-set(ext_dependencies cudd puma aiger igraphex PARENT_SCOPE)
