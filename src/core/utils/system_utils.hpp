@@ -33,7 +33,8 @@
 namespace cirkit
 {
 
-std::vector<std::string> execute_and_return( const std::string& cmd );
+using result_t = std::pair< int, std::vector<std::string> >;
+result_t execute_and_return( const std::string& cmd );
 
 }
 
