@@ -12,8 +12,6 @@ externalProject_add(z3ep
 )
 add_dependencies(external z3ep)
 
-add_ext_library("z3")
-
 include_directories(src)
 link_directories(${CMAKE_SOURCE_DIR}/ext/lib)
 

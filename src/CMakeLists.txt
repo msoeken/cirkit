@@ -1,6 +1,5 @@
 # Configuration
 add_definitions(-Wall)
-add_ext_library(gmp gmpxx pthread)
 
 
 add_cirkit_library(
