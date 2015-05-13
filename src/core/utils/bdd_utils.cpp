@@ -220,6 +220,35 @@ void collect_nodes_and_count( DdNode * f, std::unordered_map<DdNode*, unsigned>&
   collect_nodes_and_count( Cudd_Regular( cuddE( f ) ), visited );
 }
 
+void collect_nodes_and_count_ignore_complemented( const DdNode * f, std::unordered_map<DdNode*, unsigned>& visited )
+{
+  assert( f );
+
+  auto fr = Cudd_Regular( f );
+
+  /* node visited before? */
+  auto it = visited.find( fr );
+  if ( it != visited.end() )
+  {
+    /* visited once more */
+    if ( !Cudd_IsComplement( f ) )
+    {
+      it->second++;
+    }
+    return;
+  }
+
+  /* mark node as visited */
+  visited.insert( {fr, (Cudd_IsComplement( f ) ? 0u : 1u)} );
+
+  /* terminate? */
+  if ( cuddIsConstant( fr ) ) { return; }
+
+  /* recur */
+  collect_nodes_and_count_ignore_complemented( cuddT( fr ), visited );
+  collect_nodes_and_count_ignore_complemented( cuddE( fr ), visited );
+}
+
 std::vector<unsigned> level_sizes( DdManager * dd, const std::vector<DdNode*>& fs )
 {
   using namespace std::placeholders;
@@ -263,7 +292,7 @@ unsigned maximum_fanout( DdManager* manager, const std::vector<DdNode*>& fs )
   std::unordered_map<DdNode*, unsigned> visited;
   for ( const auto* f : fs )
   {
-    collect_nodes_and_count( Cudd_Regular( f ), visited );
+    collect_nodes_and_count_ignore_complemented( f, visited );
   }
 
   /* erase constant nodes from visited list */
@@ -279,7 +308,7 @@ unsigned maximum_fanout( const Cudd& manager, const std::vector<BDD>& fs )
   using boost::adaptors::transformed;
 
   std::vector<DdNode*> fs_native( fs.size() );
-  boost::copy( fs | transformed( std::bind( &BDD::getRegularNode, _1 ) ), fs_native.begin() );
+  boost::copy( fs | transformed( std::bind( &BDD::getNode, _1 ) ), fs_native.begin() );
 
   return maximum_fanout( manager.getManager(), fs_native );
 }

@@ -45,6 +45,11 @@ bool is_unate( const Cudd& manager, const BDD& f, std::vector<int>& ps );
 std::vector<unsigned> level_sizes( DdManager* manager, const std::vector<DdNode*>& fs );
 std::vector<unsigned> level_sizes( const Cudd& manager, const std::vector<BDD>& fs );
 
+/**
+ * Computes the maximum fanout of a node without respecting the
+ * complemented edges.  This function should probably be moved
+ * to some memristor implementation code.
+ */
 unsigned maximum_fanout( DdManager* manager, const std::vector<DdNode*>& fs );
 unsigned maximum_fanout( const Cudd& manager, const std::vector<BDD>& fs );
 
