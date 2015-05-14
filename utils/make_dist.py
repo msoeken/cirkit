@@ -69,7 +69,7 @@ def add_file( cfg, base, file ):
 # Functions                                                                    #
 ################################################################################
 
-base_files = [ "CMakeLists.txt", "README.md", "ext/CMakeLists.txt", "addons/CMakeLists.txt", "src/CMakeLists.txt", "programs/CMakeLists.txt", "test/CMakeLists.txt", ( "src", "*.?pp" ), ( "programs", "*.?pp" ), ( "test", "*.?pp" ), ( "cmake", "*.cmake" )  ]
+base_files = [ "CMakeLists.txt", "README.md", "ext/CMakeLists.txt", "addons/CMakeLists.txt", "src/CMakeLists.txt", "programs/CMakeLists.txt", "test/CMakeLists.txt", ( "src", "*.?pp" ), ( "programs", "*.?pp" ), ( "test", "*.?pp" ), ( "cmake", "*.cmake" ), ( "cmake", "nothing.cpp" )  ]
 addon_files = [ ( "src", "*.?pp" ), ( "programs", "*.?pp" ), ( "test", "*.?pp" )  ]
 
 def make_dist( config ):
@@ -167,6 +167,8 @@ def make_dist( config ):
     if "title" in config:
         info( "rename title" )
         command( "find %s -type f | xargs sed -i -e \"s/CirKit/%s/g\"" % ( path, config['title'] ) )
+
+        command( "sed -i -e \"s/%sTools/CirKitTools/g\" %s-1.1/CMakeLists.txt" % ( config['title'], config['name'] ) )
 
     if "namespace" in config:
         info( "rename namespace" )
