@@ -107,8 +107,15 @@ void read_bench( aig_graph& aig, std::ifstream& is )
       /* unary operators */
       if ( num_ops == 1u )
       {
-        assert( kind == "NOT" );
-        the_map.insert( {res, !ops[0u]} );
+        assert( kind == "NOT" || kind == "BUF" );
+        if ( kind == "NOT" )
+        {
+          the_map.insert( {res, !ops[0u]} );
+        }
+        else if ( kind == "BUF" )
+        {
+          the_map.insert( {res, aig_create_and( aig, ops[0u], ops[0u] ) } );
+        }
         continue;
       }
 
