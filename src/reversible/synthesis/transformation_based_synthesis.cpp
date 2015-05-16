@@ -247,10 +247,10 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
                                      properties::ptr statistics )
 {
   /* Settings */
-  bool bidirectional    = get( settings, "bidirectional",    true  );
-  bool fredkin          = get( settings, "fredkin",          false );
-  bool fredkin_lookback = get( settings, "fredkin_lookback", false );
-  bool verbose          = get( settings, "verbose",          false );
+  const auto bidirectional    = get( settings, "bidirectional",    true  );
+  const auto fredkin          = get( settings, "fredkin",          false );
+  const auto fredkin_lookback = get( settings, "fredkin_lookback", false );
+  const auto verbose          = get( settings, "verbose",          false );
 
   /* Warning */
   if ( !fredkin && fredkin_lookback && verbose )
@@ -274,7 +274,7 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
   bitset_pair_vector_t tt = truth_table_to_bitset_pair_vector( spec );
   sort_truth_table( tt );
 
-  unsigned bw = spec.num_outputs();
+  const auto bw = spec.num_outputs();
   circ.set_lines( bw );
 
   /* copy metadata */
@@ -292,11 +292,11 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
   }
 
   /* Step 2 */
-  unsigned start_index = bidirectional ? 0u : 1u;
-  unsigned pos = 0u;
+  const auto start_index = bidirectional ? 0u : 1u;
+  auto pos = 0u;
 
   direction_t dir = direction_back;
-  unsigned index = 0u;
+  auto index = 0u;
 
   for ( unsigned i = start_index; i < tt.size(); ++i )
   {
@@ -315,7 +315,7 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
     if ( bidirectional )
     {
       typedef bitset_pair_vector_t::value_type value_type;
-      unsigned other_index = boost::find_if( tt, [&tt, &i]( const value_type& p ) { return p.second == tt[i].first; } ) - tt.begin();
+      const auto other_index = boost::find_if( tt, [&tt, &i]( const value_type& p ) { return p.second == tt[i].first; } ) - tt.begin();
       if ( hamming_distance( tt[other_index] ) < hamming_distance( tt[i] ) )
       {
         dir = direction_front;
