@@ -351,10 +351,10 @@ aig_function aig_create_nary_and( aig_graph& aig, const std::vector< aig_functio
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
 
   const auto size = v.size();
-  assert( size >= 2 );
+  assert( size >= 1u );
 
   aig_function result;
-  if ( size >= 2 )
+  if ( size >= 2u )
   {
     result = aig_create_and( aig, v[0], v[1] );
   }
@@ -375,10 +375,10 @@ aig_function aig_create_nary_or( aig_graph& aig, const std::vector< aig_function
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
 
   const auto size = v.size();
-  assert( size >= 2 );
+  assert( size >= 1u );
 
   aig_function result;
-  if ( size >= 2 )
+  if ( size >= 2u )
   {
     result = aig_create_or( aig, v[0], v[1] );
   }
@@ -399,10 +399,10 @@ aig_function aig_create_nary_xor( aig_graph& aig, const std::vector< aig_functio
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
 
   const auto size = v.size();
-  assert( size >= 2 );
+  assert( size >= 1u );
 
   aig_function result;
-  if ( size >= 2 )
+  if ( size >= 2u )
   {
     result = aig_create_xor( aig, v[0], v[1] );
   }
