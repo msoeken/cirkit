@@ -3,7 +3,7 @@ add_definitions(-Wall)
 
 
 add_cirkit_library(
-  NAME core
+  NAME cirkit_core
   AUTO_DIRS core
   USE
     ${Boost_REGEX_LIBRARIES}
@@ -13,11 +13,11 @@ add_cirkit_library(
     ${CUDD_LIBRARIES}
 )
 add_cirkit_library(
-  NAME classical
+  NAME cirkit_classical
   AUTO_DIRS classical
   USE
     cirkit_core
     ${Boost_FILESYSTEM_LIBRARIES}
     ${IGRAPH_LIBRARIES}
 )
-add_cirkit_library( NAME formal AUTO_DIRS formal )
+add_cirkit_library( NAME cirkit_formal AUTO_DIRS formal )

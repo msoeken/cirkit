@@ -16,7 +16,7 @@ include_directories(src)
 link_directories(${CMAKE_SOURCE_DIR}/ext/lib)
 
 add_cirkit_library(
-  NAME addon_formal
+  NAME cirkit_addon_formal
   AUTO_DIRS src
   USE
     cirkit_core

@@ -59,9 +59,9 @@ function( add_cirkit_library )
     list( APPEND libs_shared ${item} )
   endforeach( )
 
-  set( objlib cirkit_${arg_NAME}_objlib )
-  set( shared cirkit_${arg_NAME} )
-  set( static cirkit_${arg_NAME}_static )
+  set( objlib ${arg_NAME}_objlib )
+  set( shared ${arg_NAME} )
+  set( static ${arg_NAME}_static )
 
   add_library( ${objlib} OBJECT
     ${CirKitTools_DIRECTORY}/nothing.cpp
