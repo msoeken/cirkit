@@ -268,9 +268,9 @@ public:
 bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics)
 {
   /* Settings */
-  bool                            verbose  = get( settings, "verbose",  false                             );
-  std::vector<unsigned>           ordering = get( settings, "ordering", std::vector<unsigned>()           );
-  dd_based_esop_optimization_func esopmin  = get( settings, "esopmin",  dd_based_esop_optimization_func() );
+  const auto verbose  = get( settings, "verbose",  false                             );
+  const auto ordering = get( settings, "ordering", std::vector<unsigned>()           );
+  const auto esopmin  = get( settings, "esopmin",  dd_based_esop_optimization_func() );
 
   properties_timer t( statistics );
 
