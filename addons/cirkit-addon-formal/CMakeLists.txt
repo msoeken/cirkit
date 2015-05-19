@@ -10,6 +10,7 @@ externalProject_add(z3ep
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND sed "/usr/d" -i build/Makefile COMMAND make install -C build
 )
+add_dependencies(external z3ep)
 
 set(ext_dependencies ${ext_dependencies} z3ep PARENT_SCOPE)
 

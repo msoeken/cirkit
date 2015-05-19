@@ -6,6 +6,13 @@ set(ext_LIB ${CMAKE_SOURCE_DIR}/ext/lib)
 file(MAKE_DIRECTORY ${ext_INCLUDE})
 file(MAKE_DIRECTORY ${ext_LIB})
 
+
+add_custom_target(
+  external ALL
+  ${CMAKE_COMMAND} -E echo_append ""
+  COMMENT "Build external dependencies"
+)
+
 externalProject_add(cudd
   DOWNLOAD_DIR .
   URL "http://www.informatik.uni-bremen.de/revkit/files/cudd-2.5.0-revkit.tar.gz"
@@ -13,6 +20,7 @@ externalProject_add(cudd
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
+add_dependencies(external cudd)
 add_ext_library(
   ${ext_LIB}/libcudd_obj.so
   ${ext_LIB}/libcudd_cudd.so
@@ -41,6 +49,7 @@ externalProject_add(puma
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
+add_dependencies(external puma)
 add_ext_library("${ext_LIB}/libpuma.so")
 
 set(aiger_SRC ${CMAKE_BINARY_DIR}/ext/aiger-prefix/src/aiger)
@@ -58,6 +67,7 @@ externalProject_add(aiger
   LOG_BUILD 1
   LOG_INSTALL 1
 )
+add_dependencies(external aiger)
 add_ext_library("${ext_LIB}/libaiger.so")
 
 externalProject_add(igraphex
@@ -70,6 +80,7 @@ externalProject_add(igraphex
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
+add_dependencies(external igraphex)
 add_ext_library("${ext_LIB}/libigraph.so")
 
 set(ext_dependencies cudd puma aiger igraphex PARENT_SCOPE)
