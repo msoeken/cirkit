@@ -111,7 +111,7 @@ void foreach_function_as_truth_table( unsigned num_variables, _Fn&& __fn )
       spec.add_entry( in, out );
     }
 
-    __fn( spec );
+    __fn( bs, spec );
     inc( bs );
   } while ( bs.any() );
 }
