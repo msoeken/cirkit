@@ -31,6 +31,7 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
+#include <core/utils/bitset_utils.hpp>
 #include <reversible/truth_table.hpp>
 #include <reversible/io/read_pla.hpp>
 
@@ -79,6 +80,40 @@ void foreach_function_with_max_variables( unsigned num_variables, _Fn&& __fn )
       return ( spec.num_inputs() + spec.num_outputs() ) <= num_variables;
     });
 
+}
+
+/**
+ * @brief Creates truth tables from irreversible functions
+ *
+ * The function iterates over all functions of $n$ variables and
+ * creates a truth table, where the function is embedded in the
+ * first column.  If the function is not balanced an additional
+ * line is added, and the function is embedded at constant 0.
+ */
+template<typename _Fn>
+void foreach_function_as_truth_table( unsigned num_variables, _Fn&& __fn )
+{
+  boost::dynamic_bitset<> bs( 1u << num_variables );
+
+  do {
+    auto bw = ( ( bs.count() << 1u ) == bs.size() ) ? num_variables : num_variables + 1u;
+
+    binary_truth_table spec;
+
+    for ( auto i = 0u; i < ( 1u << bw ); ++i )
+    {
+      auto in = number_to_truth_table_cube( i, bw );
+      binary_truth_table::cube_type out( bw, boost::optional<bool>() );
+      if ( i < bs.size() )
+      {
+        out[0u] = bs[i];
+      }
+      spec.add_entry( in, out );
+    }
+
+    __fn( spec );
+    inc( bs );
+  } while ( bs.any() );
 }
 
 }
