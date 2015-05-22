@@ -211,6 +211,50 @@ private:
   std::vector<aig_node> real_inputs;
 };
 
+template<typename T>
+class partial_node_assignment_simulator : public aig_simulator<T>
+{
+public:
+  partial_node_assignment_simulator( const aig_simulator<T>& total_simulator,
+                                     const std::map<aig_node, T>& assignment,
+                                     const T& default_value )
+    : total_simulator( total_simulator ),
+      assignment( assignment ),
+      default_value( default_value ) {}
+
+  T get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
+  {
+    auto it = assignment.find( node );
+    if ( it == assignment.end() )
+    {
+      std::cout << "[w] no assignment given for '" << node << "', assume defaut" << std::endl;
+      return default_value;
+    }
+    else
+    {
+      return it->second;
+    }
+  }
+
+  T get_constant() const { return total_simulator.get_constant(); }
+  T invert( const T& v ) const { return total_simulator.invert( v ); }
+  T and_op( const aig_node& node, const T& v1, const T& v2 ) const
+  {
+    auto it = assignment.find( node );
+    return ( it == assignment.end() ) ? total_simulator.and_op( node, v1, v2 ) : it->second;
+  }
+
+  bool terminate( const aig_node& node, const aig_graph& aig ) const
+  {
+    return assignment.find( node ) != assignment.end();
+  }
+
+private:
+  const aig_simulator<T>& total_simulator;
+  const std::map<aig_node, T>& assignment;
+  T default_value;
+};
+
 /******************************************************************************
  * DFS visitor for actual simulation                                          *
  ******************************************************************************/
