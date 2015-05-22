@@ -27,6 +27,7 @@
 #ifndef SIMULATE_AIG_HPP
 #define SIMULATE_AIG_HPP
 
+#include <functional>
 #include <map>
 #include <unordered_map>
 
@@ -253,6 +254,48 @@ private:
   const aig_simulator<T>& total_simulator;
   const std::map<aig_node, T>& assignment;
   T default_value;
+};
+
+template<typename T>
+class lambda_simulator : public aig_simulator<T>
+{
+public:
+  lambda_simulator( const std::function<T(const aig_node&, const std::string&, unsigned, const aig_graph&)>& get_input_func,
+                    const std::function<T()>& get_constant_func,
+                    const std::function<T(const T&)>& invert_func,
+                    const std::function<T(const aig_node&, const T&, const T&)>& and_op_func )
+    : get_input_func( get_input_func ),
+      get_constant_func( get_constant_func ),
+      invert_func( invert_func ),
+      and_op_func( and_op_func )
+  {
+  }
+
+  T get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
+  {
+    return get_input_func( node, name, pos, aig );
+  }
+
+  T get_constant() const
+  {
+    return get_constant_func();
+  }
+
+  T invert( const T& v ) const
+  {
+    return invert_func( v );
+  }
+
+  T and_op( const aig_node& node, const T& v1, const T& v2 ) const
+  {
+    return and_op_func( node, v1, v2 );
+  }
+
+private:
+  std::function<T(const aig_node&, const std::string&, unsigned, const aig_graph&)> get_input_func;
+  std::function<T()> get_constant_func;
+  std::function<T(const T&)> invert_func;
+  std::function<T(const aig_node&, const T&, const T&)> and_op_func;
 };
 
 /******************************************************************************
