@@ -33,6 +33,7 @@
 
 #include <core/utils/bitset_utils.hpp>
 #include <reversible/truth_table.hpp>
+#include <reversible/functions/truth_table_from_bitset.hpp>
 #include <reversible/io/read_pla.hpp>
 
 namespace cirkit
@@ -96,22 +97,7 @@ void foreach_function_as_truth_table( unsigned num_variables, _Fn&& __fn )
   boost::dynamic_bitset<> bs( 1u << num_variables );
 
   do {
-    auto bw = ( ( bs.count() << 1u ) == bs.size() ) ? num_variables : num_variables + 1u;
-
-    binary_truth_table spec;
-
-    for ( auto i = 0u; i < ( 1u << bw ); ++i )
-    {
-      auto in = number_to_truth_table_cube( i, bw );
-      binary_truth_table::cube_type out( bw, boost::optional<bool>() );
-      if ( i < bs.size() )
-      {
-        out[0u] = bs[i];
-      }
-      spec.add_entry( in, out );
-    }
-
-    __fn( bs, spec );
+    __fn( bs, truth_table_from_bitset( bs ) );
     inc( bs );
   } while ( bs.any() );
 }
