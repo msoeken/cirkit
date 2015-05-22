@@ -92,6 +92,11 @@ void tt_extend( tt& t, unsigned to )
   }
 }
 
+void tt_shrink( tt& t, unsigned to )
+{
+  t.resize( 1u << to );
+}
+
 void tt_align( tt& t1, tt& t2 )
 {
   unsigned nv1 = tt_num_vars( t1 ), nv2 = tt_num_vars( t2 );

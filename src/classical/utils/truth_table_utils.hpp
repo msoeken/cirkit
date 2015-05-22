@@ -103,6 +103,13 @@ unsigned tt_num_vars( const tt& t );
 void tt_extend( tt& t, unsigned to );
 
 /**
+ * @brief Shrinks a truth table to fit n variables
+ *
+ * This may cut off variables
+ */
+void tt_shrink( tt& t, unsigned to );
+
+/**
  * @brief Aligns two truth tables two same size
  */
 void tt_align( tt& t1, tt& t2 );
