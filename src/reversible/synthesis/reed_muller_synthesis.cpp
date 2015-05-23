@@ -45,11 +45,12 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-  typedef std::vector<boost::dynamic_bitset<> > spectra_t;
+  using spectra_t = std::vector<boost::dynamic_bitset<>>;
 
   struct to_value
   {
-    typedef bool result_type;
+    using result_type = bool;
+
     bool operator()( const boost::optional<bool>& b ) const
     {
       return *b;
@@ -199,7 +200,7 @@ namespace cirkit
   {
 
     // Settings parsing
-    bool bidirectional = get( settings, "bidirectional", true );
+    const auto bidirectional = get( settings, "bidirectional", true );
 
     // Run-time measuring
     properties_timer t( statistics );
