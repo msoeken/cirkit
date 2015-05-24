@@ -242,7 +242,9 @@ void common_pla_write_single( const cube_vec_t& cubes, const std::string& filena
   os.close();
 }
 
-void common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename )
+void common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename,
+                       const properties::ptr& settings,
+                       const properties::ptr& statistics )
 {
   assert( cubes.size() );
 
@@ -282,6 +284,8 @@ void common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename 
       }
     }
   }
+
+  set( statistics, "cube_count", (unsigned)cube_map.size() );
 
   /* print cubes */
   for ( const auto& p : cube_map )

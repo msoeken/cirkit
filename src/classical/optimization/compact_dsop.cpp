@@ -260,7 +260,7 @@ sort_cube_func_t sort_by_dimension_first( const cube_weight_map_t& cube_weights 
     auto c2c = cube2.dimension();
     if ( c1c == c2c )
     {
-      return cube_weights.find( cube1 )->second > cube_weights.find( cube2 )->second;
+      return cube_weights.at( cube1 ) > cube_weights.at( cube2 );
     }
     else
     {
@@ -272,8 +272,8 @@ sort_cube_func_t sort_by_dimension_first( const cube_weight_map_t& cube_weights 
 sort_cube_func_t sort_by_weight_first( const cube_weight_map_t& cube_weights )
 {
   return [&cube_weights]( const cube& cube1, const cube& cube2 ) {
-    auto c1w = cube_weights.find( cube1 )->second;
-    auto c2w = cube_weights.find( cube2 )->second;
+    auto c1w = cube_weights.at( cube1 );
+    auto c2w = cube_weights.at( cube2 );
     if ( c1w == c2w )
     {
       return cube1.dimension() < cube2.dimension();
@@ -344,12 +344,13 @@ void opt_dsop_5( const cube& cubeq, const cube_vec_t& q, connected_cube_list& p,
 }
 
 void compact_dsop( const std::string& destination, const std::string& filename,
-                   properties::ptr settings, properties::ptr statistics )
+                   const properties::ptr& settings,
+                   const properties::ptr& statistics )
 {
   /* Settings */
-  sort_cube_meta_func_t sortfunc = get( settings, "sortfunc", sort_cube_meta_func_t( sort_by_dimension_first ) );
-  opt_cube_func_t       optfunc  = get( settings, "optfunc",  opt_cube_func_t( opt_dsop_1 ) );
-  bool                  verbose  = get( settings, "verbose",  false );
+  const auto sortfunc = get( settings, "sortfunc", sort_cube_meta_func_t( sort_by_dimension_first ) );
+  const auto optfunc  = get( settings, "optfunc",  opt_cube_func_t( opt_dsop_1 ) );
+  const auto verbose  = get( settings, "verbose",  false );
 
   /* Run-time */
   properties_timer t( statistics );
@@ -362,7 +363,11 @@ void compact_dsop( const std::string& destination, const std::string& filename,
     ds += compute_dsop( c, sortfunc, optfunc, verbose );
   }
 
-  common_pla_write( ds, destination );
+  auto cpw_settings   = std::make_shared<properties>();
+  auto cpw_statistics = std::make_shared<properties>();
+  common_pla_write( ds, destination, cpw_settings, cpw_statistics );
+
+  set( statistics, "cube_count", cpw_statistics->get<unsigned>( "cube_count" ) );
 }
 
 }

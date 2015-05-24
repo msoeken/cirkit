@@ -33,6 +33,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include <core/properties.hpp>
+
 namespace cirkit
 {
 
@@ -84,7 +86,9 @@ using cube_vec_vec_t = std::vector<cube_vec_t>;
 cube_vec_t     common_pla_read_single( const std::string& filename, unsigned output = 0u );
 cube_vec_vec_t common_pla_read( const std::string& filename );
 void           common_pla_write_single( const cube_vec_t& cubes, const std::string& filename );
-void           common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename );
+void           common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename,
+                                 const properties::ptr& settings = properties::ptr(),
+                                 const properties::ptr& statistics = properties::ptr() );
 void           common_pla_print( const cube_vec_t& cubes, std::ostream& os = std::cout );
 
 cube_vec_t common_pla_espresso( const cube_vec_t& cubes );

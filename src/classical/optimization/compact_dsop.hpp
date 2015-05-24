@@ -93,7 +93,8 @@ void opt_dsop_5( const cube& cubeq, const cube_vec_t& q, connected_cube_list& p,
  *                 +----------+-----------------------+------------------------------------------------+
  */
 void compact_dsop( const std::string& destination, const std::string& filename,
-                   properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() );
+                   const properties::ptr& settings = properties::ptr(),
+                   const properties::ptr& statistics = properties::ptr() );
 
 }
 
