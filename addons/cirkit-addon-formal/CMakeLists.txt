@@ -21,5 +21,5 @@ add_cirkit_library(
     cirkit_core
     z3
   INCLUDE
-    PUBLIC src
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
