@@ -127,7 +127,7 @@ function( add_cirkit_test_program )
 
   set( name "test_${arg_NAME}" )
   add_cirkit_program( NAME ${name} ${arg_UNPARSED_ARGUMENTS} )
-  add_test( ${name} ${name})
+  add_test( NAME ${name} COMMAND $<TARGET_FILE:${name}> )
 endfunction( )
 
 
