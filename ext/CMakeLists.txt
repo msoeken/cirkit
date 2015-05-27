@@ -54,6 +54,10 @@ externalProject_add(puma
   LOG_INSTALL 1)
 add_dependencies(external puma)
 
+set(PUMA_LIBRARIES
+  ${ext_LIB}/libpuma.so
+  PARENT_SCOPE)
+
 set(aiger_SRC ${CMAKE_BINARY_DIR}/ext/aiger-prefix/src/aiger)
 set(aiger_HEADERS ${aiger_SRC}/aiger.h)
 set(aiger_LIBS ${aiger_SRC}/libaiger.so.1.0.1)
