@@ -5,6 +5,7 @@ set(reversible_programs
   circuit_to_truth_table
   dd_synthesis
   embed_pla
+  exact_synthesis
   example1
   example2
   example3
@@ -41,15 +42,6 @@ if( metaSMT_FOUND )
       cirkit_formal
   )
 endif()
-
-add_cirkit_program(
-  NAME exact_synthesis
-  SOURCES
-    reversible/exact_synthesis.cpp
-  USE
-    cirkit_reversible
-    cirkit_formal
-)
 
 add_cirkit_program(
   NAME calculate_required_lines

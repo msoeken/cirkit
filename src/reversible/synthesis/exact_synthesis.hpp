@@ -26,8 +26,6 @@
  * @since  1.0
  */
 
-#if ADDON_FORMAL
-
 #ifndef EXACT_SYNTHESIS_HPP
 #define EXACT_SYNTHESIS_HPP
 
@@ -97,8 +95,6 @@ namespace cirkit
                                                    properties::ptr statistics = std::make_shared<properties>() );
 
 }
-
-#endif /* EXACT_SYNTHESIS_HPP */
 
 #endif
 

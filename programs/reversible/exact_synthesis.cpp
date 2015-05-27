@@ -30,9 +30,7 @@
 #include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_realization.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
-#if ADDON_FORMAL
 #include <reversible/synthesis/exact_synthesis.hpp>
-#endif
 #include <reversible/synthesis/quantified_exact_synthesis.hpp>
 #include <reversible/utils/reversible_program_options.hpp>
 
@@ -81,12 +79,7 @@ int main( int argc, char ** argv )
   }
   else if ( mode == 1u )
   {
-#if ADDON_FORMAL
     exact_synthesis( circ, spec, settings, statistics );
-#else
-    std::cout << "[e] exact synthesis with SAT requires formal addon enabled" << std::endl;
-    return 1;
-#endif
   }
   else
   {

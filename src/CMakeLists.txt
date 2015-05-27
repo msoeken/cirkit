@@ -4,6 +4,7 @@ add_cirkit_library(
   USE
     cirkit_core
     cirkit_classical
+    cirkit_formal
     ${PUMA_LIBRARIES}
     ${CUDD_LIBRARIES}
     gmpxx

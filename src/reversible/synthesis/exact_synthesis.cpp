@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if ADDON_FORMAL
-
 #include "exact_synthesis.hpp"
 
 #include <cmath>
@@ -494,8 +492,6 @@ truth_table_synthesis_func exact_synthesis_func(properties::ptr settings,
 }
 
 }
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2
