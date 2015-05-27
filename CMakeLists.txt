@@ -1,5 +1,5 @@
 project("CirKit" CXX)
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.0)
 
 include(cmake/CCache.cmake)
 include(cmake/CompilerFlags.cmake)
@@ -26,22 +26,21 @@ find_package(Boost REQUIRED COMPONENTS ${MAIN_Boost_LIBRARIES} )
 include_directories(${Boost_INCLUDE_DIR} ext/include)
 add_subdirectory(ext)
 
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs )
+
 # Options
 option(cirkit_ENABLE_PROGRAMS "build programs" on)
-option(cirkit_BUILD_SHARED "build shared libraries" off)
-option(cirkit_BUILD_STATIC "build static libraries" on)
-option(cirkit_LINK_PROGRAMS_TO_STATIC "links programs to static libraries" on)
+option(cirkit_BUILD_SHARED "build shared libraries" on)
 set(cirkit_PACKAGES "" CACHE STRING "if non-empty, then only the packages in the semicolon-separated lists are build")
 
 # Libraries (include)
 include_directories(src)
 
 # Addons
-add_subdirectory(addons)
-add_addon_flags()
 
 # Libraries
 add_subdirectory(src)
+add_subdirectory(addons)
 
 # Programs
 if(cirkit_ENABLE_PROGRAMS)

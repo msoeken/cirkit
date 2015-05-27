@@ -21,7 +21,8 @@ externalProject_add(cudd
   LOG_BUILD 1
   LOG_INSTALL 1)
 add_dependencies(external cudd)
-add_ext_library(
+
+set(CUDD_LIBRARIES
   ${ext_LIB}/libcudd_obj.so
   ${ext_LIB}/libcudd_cudd.so
   ${ext_LIB}/libcudd_mtr.so
@@ -30,6 +31,8 @@ add_ext_library(
   ${ext_LIB}/libcudd_util.so
   ${ext_LIB}/libcudd_dddmp.so
   ${ext_LIB}/libcudd_nanotrav.so
+
+  PARENT_SCOPE
 )
 
 set(puma_SRC ${CMAKE_BINARY_DIR}/ext/puma-prefix/src/puma)
@@ -50,7 +53,10 @@ externalProject_add(puma
   LOG_BUILD 1
   LOG_INSTALL 1)
 add_dependencies(external puma)
-add_ext_library("${ext_LIB}/libpuma.so")
+
+set(PUMA_LIBRARIES
+  ${ext_LIB}/libpuma.so
+  PARENT_SCOPE)
 
 set(aiger_SRC ${CMAKE_BINARY_DIR}/ext/aiger-prefix/src/aiger)
 set(aiger_HEADERS ${aiger_SRC}/aiger.h)
@@ -68,7 +74,6 @@ externalProject_add(aiger
   LOG_INSTALL 1
 )
 add_dependencies(external aiger)
-add_ext_library("${ext_LIB}/libaiger.so")
 
 externalProject_add(igraphex
   DOWNLOAD_DIR .
@@ -81,6 +86,6 @@ externalProject_add(igraphex
   LOG_BUILD 1
   LOG_INSTALL 1)
 add_dependencies(external igraphex)
-add_ext_library("${ext_LIB}/libigraph.so")
 
-set(ext_dependencies cudd puma aiger igraphex PARENT_SCOPE)
+set(IGRAPH_LIBRARIES "${ext_LIB}/libigraph.so" PARENT_SCOPE)
+

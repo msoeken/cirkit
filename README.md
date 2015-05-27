@@ -27,6 +27,7 @@ After extracting or cloning CirKit perform the following steps
     mkdir build
     cd build
     cmake ..
+    make external
     make
 
 ## Executing CirKit Programs

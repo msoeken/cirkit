@@ -12,8 +12,13 @@ externalProject_add(z3ep
 )
 add_dependencies(external z3ep)
 
-set(ext_dependencies ${ext_dependencies} z3ep PARENT_SCOPE)
+include_directories(src)
+link_directories(${CMAKE_SOURCE_DIR}/ext/lib)
 
-add_ext_library("z3")
-
-file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/formal)
+add_cirkit_library(
+  NAME cirkit_addon_formal
+  AUTO_DIRS src
+  USE
+    cirkit_core
+    z3
+)

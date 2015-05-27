@@ -1,43 +1,23 @@
-# A function to add a program based on a name
-# The name is the *.cpp basename without an extension
-function(add_program filename)
-  get_filename_component(name ${filename} NAME_WE)
-  add_executable(${name} ${filename})
-  target_link_libraries(${name} ${Boost_LIBRARIES})
-  foreach(library ${ext_libraries})
-    target_link_libraries(${name} ${library})
-  endforeach()
-  srcdirlist(directories "../src/")
-  foreach(dir ${directories})
-    if (cirkit_LINK_PROGRAMS_TO_STATIC)
-      target_link_libraries(${name} cirkit_${dir}_static)
-    else()
-      target_link_libraries(${name} cirkit_${dir})
-    endif()
-  endforeach()
-  # Link static libraries twice
-  if (cirkit_LINK_PROGRAMS_TO_STATIC)
-    foreach(dir ${directories})
-      target_link_libraries(${name} cirkit_${dir}_static)
-    endforeach()
-  endif()
-endfunction(add_program)
+add_cirkit_program(
+  NAME aig_to_smt2
+  SOURCES
+    classical/aig_to_smt2.cpp
+  USE
+    cirkit_classical
+)
 
-# Find all test source files and build unit tests from them
-srcdirlist(directories "../src/")
-foreach(dir ${directories})
-  file(GLOB programs "${dir}/*.cpp")
-  foreach(program ${programs})
-    add_program(${program})
-  endforeach()
-endforeach()
+add_cirkit_program(
+  NAME pretty_print_aig
+  SOURCES
+    classical/pretty_print_aig.cpp
+  USE
+    cirkit_classical
+)
 
-srcdirlist(directories "../src/")
-foreach(dir ${directories})
-  foreach(adir ${addon_directories})
-    file(GLOB programs ${CMAKE_SOURCE_DIR}/addons/${adir}/programs/${dir}/*.cpp)
-    foreach(program ${programs})
-      add_program(${program})
-    endforeach()
-  endforeach()
-endforeach()
+add_cirkit_program(
+  NAME bdd_info
+  SOURCES
+    core/bdd_info.cpp
+  USE
+    cirkit_core
+)
