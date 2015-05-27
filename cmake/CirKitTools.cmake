@@ -22,7 +22,7 @@ function( add_cirkit_library )
     "arg"
     ""
     "NAME"
-    "SOURCES;AUTO_DIRS;USE;INCLUDE"
+    "SOURCES;AUTO_DIRS;USE;INCLUDE;DEFINE"
     ${ARGN}
   )
 
@@ -65,6 +65,10 @@ function( add_cirkit_library )
 
   if( DEFINED arg_INCLUDE )
     target_include_directories( ${arg_NAME} ${arg_INCLUDE} )
+  endif( )
+
+  if( DEFINED arg_DEFINE )
+    target_compile_definitions( ${arg_NAME} ${arg_DEFINE} )
   endif( )
 
 endfunction( )
