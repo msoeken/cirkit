@@ -14,16 +14,15 @@ mark_as_advanced( CirKitTools_DIRECTORY )
 #     AUTO_DIRS <dir> ... - list of directories to search for cpp files (optional)
 # )
 #
-# Creates a circuit library. the targets will be called "cirkit_<name>" for the shared library
-# and "cirkit_<name>_static" for the static library (if the respective mode is enabled)
-#
+# Creates a circuit library. the targets will be called "<name>"
+# is will  be static or shared depending on 'cirkit_BUILD_SHARED'
 ###
 function( add_cirkit_library )
   cmake_parse_arguments(
     "arg"
     ""
     "NAME"
-    "SOURCES;AUTO_DIRS;USE"
+    "SOURCES;AUTO_DIRS;USE;INCLUDE"
     ${ARGN}
   )
 
@@ -46,40 +45,26 @@ function( add_cirkit_library )
     endforeach( )
   endif( )
 
-  set( libs_static "" )
-  set( libs_shared "" )
-  foreach( item ${arg_USE} )
 
-    if( TARGET ${item}_static)
-      list( APPEND libs_static ${item}_static )
-    else( )
-      list( APPEND libs_static ${item} )
-    endif( )
+  if( cirkit_BUILD_SHARED )
+    set( type SHARED )
+  else( )
+    set( type STATIC )
+  endif( )
 
-    list( APPEND libs_shared ${item} )
-  endforeach( )
-
-  set( objlib ${arg_NAME}_objlib )
-  set( shared ${arg_NAME} )
-  set( static ${arg_NAME}_static )
-
-  add_library( ${objlib} OBJECT
+  add_library( ${arg_NAME} ${type}
     ${CirKitTools_DIRECTORY}/nothing.cpp
     ${arg_SOURCES}
   )
 
-  set_property( TARGET ${objlib} PROPERTY POSITION_INDEPENDENT_CODE on )
+  set_property( TARGET ${arg_NAME} PROPERTY POSITION_INDEPENDENT_CODE on )
 
-  set( link_libs )
-
-  if( cirkit_BUILD_SHARED )
-    add_library( ${shared} SHARED $<TARGET_OBJECTS:${objlib}> )
-    target_link_libraries( ${shared} ${link_libs} ${libs_shared} )
+  if( DEFINED arg_USE )
+    target_link_libraries( ${arg_NAME} ${arg_USE} )
   endif( )
 
-  if(cirkit_BUILD_STATIC)
-    add_library( ${static} STATIC $<TARGET_OBJECTS:${objlib}> )
-    target_link_libraries( ${static} ${link_libs} ${libs_static} )
+  if( DEFINED arg_INCLUDE )
+    target_include_directories( ${arg_NAME} ${arg_INCLUDE} )
   endif( )
 
 endfunction( )
@@ -90,7 +75,7 @@ function( add_cirkit_program )
     "arg"
     ""
     "NAME"
-    "SOURCES;AUTO_DIRS;USE"
+    "SOURCES;AUTO_DIRS;USE;INCLUDE"
     ${ARGN}
   )
 
@@ -113,17 +98,16 @@ function( add_cirkit_program )
     endforeach( )
   endif( )
 
-  set( libs "" )
-  foreach( item ${arg_USE} )
-    if( ${cirkit_LINK_PROGRAMS_TO_STATIC} AND TARGET ${item}_static )
-      list( APPEND libs ${item}_static )
-    else( )
-      list( APPEND libs ${item} )
-    endif( )
-  endforeach( )
 
   add_executable( ${arg_NAME} ${arg_SOURCES} )
-  target_link_libraries( ${arg_NAME} ${libs} )
+
+  if( DEFINED arg_USE )
+    target_link_libraries( ${arg_NAME} ${arg_USE} )
+  endif( )
+
+  if( DEFINED arg_INCLUDE )
+    target_include_directories( ${arg_NAME} ${arg_INCLUDE} )
+  endif( )
 
 endfunction( )
 
