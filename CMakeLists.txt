@@ -26,6 +26,8 @@ find_package(Boost REQUIRED COMPONENTS ${MAIN_Boost_LIBRARIES} )
 include_directories(${Boost_INCLUDE_DIR} ext/include)
 add_subdirectory(ext)
 
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs )
+
 # Options
 option(cirkit_ENABLE_PROGRAMS "build programs" on)
 option(cirkit_BUILD_SHARED "build shared libraries" on)
