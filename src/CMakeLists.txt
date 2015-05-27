@@ -20,4 +20,3 @@ add_cirkit_library(
     ${Boost_FILESYSTEM_LIBRARIES}
     ${IGRAPH_LIBRARIES}
 )
-add_cirkit_library( NAME cirkit_formal AUTO_DIRS formal )
