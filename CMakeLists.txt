@@ -16,6 +16,7 @@ externalProject_add(revlib_functions
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
+add_dependencies(external revlib_functions)
 
 externalProject_add(revlib_circuits
   DOWNLOAD_DIR .
@@ -27,9 +28,12 @@ externalProject_add(revlib_circuits
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
+add_dependencies(external revlib_circuits)
 
-set(ext_dependencies ${ext_dependencies} revlib_functions revlib_circuits PARENT_SCOPE)
+if (metaSMT_FOUND)
+  add_definitions(-DHAS_METASMT=1)
+endif ()
 
-file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/reversible)
-
-add_definitions( equivalence_check HAS_METASMT=$<BOOL:metaSMT_FOUND>)
+add_subdirectory(src)
+add_subdirectory(programs)
+add_subdirectory(test)
