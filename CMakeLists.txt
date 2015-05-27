@@ -5,7 +5,6 @@ include(cmake/CCache.cmake)
 include(cmake/CompilerFlags.cmake)
 include(cmake/ListDir.cmake)
 include(cmake/AddExtLibrary.cmake)
-include(cmake/Addons.cmake)
 include(cmake/CirKitTools.cmake)
 
 include(CTest)
