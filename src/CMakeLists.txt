@@ -8,6 +8,7 @@ add_cirkit_library(
     ${PUMA_LIBRARIES}
     ${CUDD_LIBRARIES}
     gmpxx
+    gmp
   INCLUDE
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
