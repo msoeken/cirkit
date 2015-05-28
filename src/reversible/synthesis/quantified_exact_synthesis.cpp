@@ -164,8 +164,8 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
 
   properties_timer t( statistics );
 
-  unsigned n = spec.num_inputs();
-  unsigned nbits = (unsigned)ceil( log( n ) / log( 2.0) );
+  const auto n = spec.num_inputs();
+  const auto nbits = (unsigned)ceil( log( n ) / log( 2.0) );
 
   circ.set_lines( n );
 
