@@ -60,7 +60,7 @@ std::vector<BDD> perform_gate( Cudd& manager, const std::vector<BDD>& inputs, co
     if ( negative )
     {
       const auto neg_ctrl = gate[n + input.index];
-      match &= ( !pos_ctrl | input.value ) & ( !neg_ctrl | !input.value );
+      match &= ( !pos_ctrl | input.value ) & ( !neg_ctrl | !input.value ) & ( !pos_ctrl | !neg_ctrl );
     }
     else
     {
@@ -149,7 +149,7 @@ void extract_solution( circuit& circ, T * str, unsigned num_gates, unsigned n, u
       if ( str[offset + j] == 1 )
       {
         controls += make_var( j );
-        assert( negative || str[offset + n + j] != 1 );
+        assert( !( negative && str[offset + n + j] == 1 ) );
       }
 
       if ( negative && str[offset + n + j] == 1 )
