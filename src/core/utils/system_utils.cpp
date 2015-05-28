@@ -26,6 +26,7 @@
 #include <boost/format.hpp>
 
 #include <sys/wait.h>
+#include <unistd.h>
 
 using namespace boost::assign;
 
@@ -36,8 +37,9 @@ result_t execute_and_return( const std::string& cmd )
 {
   std::vector<std::string> result;
 
-  auto sresult = system( boost::str( boost::format( "( %s ) > /tmp/er.log" ) % cmd ).c_str() );
-  std::ifstream is( "/tmp/er.log", std::ifstream::in );
+  const std::string filename = ( boost::format( "/tmp/er-%s.log" ) % getpid() ).str();
+  auto sresult = system( boost::str( boost::format( "( %s ) > %s" ) % cmd % filename ).c_str() );
+  std::ifstream is( filename.c_str(), std::ifstream::in );
   std::string line;
   while ( getline( is, line ) )
   {
