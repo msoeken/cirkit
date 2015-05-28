@@ -191,10 +191,13 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
 
     if ( f != manager.bddZero() )
     {
-      char * str = new char[3u + gate_count * ( n + nbits )];
+      const auto num_vars = n + gate_count * ( n + nbits );
+      char * str = new char[num_vars];
       f.PickOneCube( str );
       extract_solution( circ, str, gate_count, n, nbits );
       delete str;
+
+      set( statistics, "num_circuits", (unsigned)( f.CountMinterm( num_vars ) / ( 1u << n ) ) );
 
       result = true;
     }

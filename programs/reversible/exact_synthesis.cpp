@@ -66,20 +66,22 @@ int main( int argc, char ** argv )
   read_specification( spec, opts.read_specification_filename() );
 
   circuit circ;
-  properties::ptr settings( new properties );
+  properties::ptr settings = std::make_shared<properties>();
   settings->set( "max_depth", max_depth );
   settings->set( "negative", opts.is_set( "negative" ) );
   settings->set( "multiple", opts.is_set( "multiple" ) );
   settings->set( "verbose", opts.is_set( "verbose" ) );
-  properties::ptr statistics( new properties );
+  properties::ptr statistics = std::make_shared<properties>();
+
+  auto result = false;
 
   if ( mode == 0u )
   {
-    quantified_exact_synthesis( circ, spec, settings, statistics );
+    result = quantified_exact_synthesis( circ, spec, settings, statistics );
   }
   else if ( mode == 1u )
   {
-    exact_synthesis( circ, spec, settings, statistics );
+    result = exact_synthesis( circ, spec, settings, statistics );
   }
   else
   {
@@ -105,6 +107,11 @@ int main( int argc, char ** argv )
   }
 
   print_statistics( circ, statistics->get<double>( "runtime" ) );
+
+  if ( mode == 0u && result )
+  {
+    std::cout << "Solutions:    " << statistics->get<unsigned>( "num_circuits" ) << std::endl;
+  }
 
   return 0;
 }
