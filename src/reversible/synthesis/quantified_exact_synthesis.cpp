@@ -119,9 +119,12 @@ inline BDD create_result_function( Cudd& manager, const std::vector<BDD>& circ, 
 }
 
 template<typename T>
-void extract_solution( circuit& circ, T * str, unsigned num_gates, unsigned n, unsigned nbits )
+void extract_solution( circuit& circ, T * str, unsigned num_gates, unsigned n, unsigned nbits, bool verbose )
 {
-  std::cout << "Extract solution for " << num_gates << " gates." << std::endl;
+  if ( verbose )
+  {
+    std::cout << "[i] extract solution for " << num_gates << " gates." << std::endl;
+  }
 
   for ( unsigned i = 0u; i < num_gates; ++i )
   {
@@ -194,7 +197,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
       const auto num_vars = n + gate_count * ( n + nbits );
       char * str = new char[num_vars];
       f.PickOneCube( str );
-      extract_solution( circ, str, gate_count, n, nbits );
+      extract_solution( circ, str, gate_count, n, nbits, verbose );
       delete str;
 
       set( statistics, "num_circuits", (unsigned)( f.CountMinterm( num_vars ) / ( 1u << n ) ) );
@@ -210,7 +213,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
         {
           circuit sol_circ( n );
           copy_metadata( spec, sol_circ );
-          extract_solution( sol_circ, cube, gate_count, n, nbits );
+          extract_solution( sol_circ, cube, gate_count, n, nbits, verbose );
           solutions += sol_circ;
         }
 
