@@ -48,27 +48,37 @@ inline std::vector<BDD> create_variables( Cudd& manager, unsigned count )
   return generate_vector<BDD>( count, [&manager]() { return manager.bddVar(); } );
 }
 
-std::vector<BDD> perform_gate( Cudd& manager, const std::vector<BDD>& inputs, const std::vector<BDD>& gate )
+std::vector<BDD> perform_gate( Cudd& manager, const std::vector<BDD>& inputs, const std::vector<BDD>& gate, bool negative )
 {
-  unsigned n = inputs.size();
+  const auto n = inputs.size();
 
   /* Match? */
   BDD match = manager.bddOne();
   for ( auto input : index( inputs ) )
   {
-    match &= ( !gate[input.index] | input.value );
+    const auto pos_ctrl = gate[input.index];
+    if ( negative )
+    {
+      const auto neg_ctrl = gate[n + input.index];
+      match &= ( !pos_ctrl | input.value ) & ( !neg_ctrl | !input.value );
+    }
+    else
+    {
+      match &= ( !pos_ctrl | input.value );
+    }
   }
 
   /* Outputs */
   std::vector<BDD> outputs;
+  const auto offset = negative ? ( n << 1u ) : n;
 
-  for ( unsigned i = 0u; i < n; ++i )
+  for ( auto i = 0u; i < n; ++i )
   {
-    boost::dynamic_bitset<> target( gate.size() - n, i );
+    boost::dynamic_bitset<> target( gate.size() - offset, i );
     BDD is_target = manager.bddOne();
     for ( unsigned j = 0u; j < target.size(); ++j )
     {
-      is_target &= target[j] ? gate[n + j] : !gate[n + j];
+      is_target &= target[j] ? gate[offset + j] : !gate[offset + j];
     }
 
     outputs += inputs[i] ^ ( match & is_target );
@@ -119,29 +129,37 @@ inline BDD create_result_function( Cudd& manager, const std::vector<BDD>& circ, 
 }
 
 template<typename T>
-void extract_solution( circuit& circ, T * str, unsigned num_gates, unsigned n, unsigned nbits, bool verbose )
+void extract_solution( circuit& circ, T * str, unsigned num_gates, unsigned n, unsigned nbits, bool negative, bool verbose )
 {
   if ( verbose )
   {
     std::cout << "[i] extract solution for " << num_gates << " gates." << std::endl;
   }
 
-  for ( unsigned i = 0u; i < num_gates; ++i )
+  const auto cbits = negative ? ( n << 1u ) : n;
+
+  for ( auto i = 0u; i < num_gates; ++i )
   {
-    unsigned offset = n + i * ( n + nbits );
+    auto offset = n + i * ( cbits + nbits );
 
     /* controls */
     gate::control_container controls;
-    for ( unsigned j = 0u; j < n; ++j )
+    for ( auto j = 0u; j < n; ++j )
     {
       if ( str[offset + j] == 1 )
       {
         controls += make_var( j );
+        assert( negative || str[offset + n + j] != 1 );
+      }
+
+      if ( negative && str[offset + n + j] == 1 )
+      {
+        controls += make_var( j, false );
       }
     }
 
     /* target */
-    offset += n;
+    offset += cbits;
     boost::dynamic_bitset<> target( nbits );
     for ( unsigned j = 0u; j < nbits; ++j )
     {
@@ -159,6 +177,7 @@ void extract_solution( circuit& circ, T * str, unsigned num_gates, unsigned n, u
 bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics )
 {
   const auto max_depth     = get( settings, "max_depth",     20u );
+  const auto negative      = get( settings, "negative",      false );
   const auto all_solutions = get( settings, "all_solutions", false );
   const auto verbose       = get( settings, "verbose",       false );
 
@@ -166,17 +185,18 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
 
   const auto n = spec.num_inputs();
   const auto nbits = (unsigned)ceil( log( n ) / log( 2.0) );
+  const auto cbits = negative ? ( n << 1u ) : n;
 
   circ.set_lines( n );
 
   Cudd manager;
 
   /* input variables and gate variables */
-  auto xs = create_variables( manager, n );
-  BDD xscube = make_cube( manager, xs );
+  const auto xs = create_variables( manager, n );
+  const BDD xscube = make_cube( manager, xs );
 
   /* specification */
-  auto function = bdd_for_function( manager, spec, xs );
+  const auto function = bdd_for_function( manager, spec, xs );
 
   /* find circuit */
   auto current    = xs;
@@ -194,10 +214,10 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
 
     if ( f != manager.bddZero() )
     {
-      const auto num_vars = n + gate_count * ( n + nbits );
+      const auto num_vars = n + gate_count * ( cbits + nbits );
       char * str = new char[num_vars];
       f.PickOneCube( str );
-      extract_solution( circ, str, gate_count, n, nbits, verbose );
+      extract_solution( circ, str, gate_count, n, nbits, negative, verbose );
       delete str;
 
       set( statistics, "num_circuits", (unsigned)( f.CountMinterm( num_vars ) / ( 1u << n ) ) );
@@ -213,7 +233,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
         {
           circuit sol_circ( n );
           copy_metadata( spec, sol_circ );
-          extract_solution( sol_circ, cube, gate_count, n, nbits, verbose );
+          extract_solution( sol_circ, cube, gate_count, n, nbits, negative, verbose );
           solutions += sol_circ;
         }
 
@@ -225,8 +245,8 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
     else
     {
       /* extend circuit */
-      auto gate = create_variables( manager, n + nbits );
-      current = perform_gate( manager, current, gate );
+      auto gate = create_variables( manager, cbits + nbits );
+      current = perform_gate( manager, current, gate, negative );
     }
   } while ( !result && ++gate_count < max_depth );
 
