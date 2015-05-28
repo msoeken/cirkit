@@ -51,6 +51,7 @@ int main( int argc, char ** argv )
     ( "print_truth_table,t",                                   "Prints the truth table of the circuit" )
     ( "negative,n",                                            "Allow negative control lines (only with SAT)" )
     ( "multiple,m",                                            "Allow multiple target lines (only with SAT)" )
+    ( "all_solutions,a",                                       "Extract all solutions (only with BDD)" )
     ( "verbose,v",                                             "Be verbose" )
     ;
 
@@ -67,10 +68,11 @@ int main( int argc, char ** argv )
 
   circuit circ;
   properties::ptr settings = std::make_shared<properties>();
-  settings->set( "max_depth", max_depth );
-  settings->set( "negative", opts.is_set( "negative" ) );
-  settings->set( "multiple", opts.is_set( "multiple" ) );
-  settings->set( "verbose", opts.is_set( "verbose" ) );
+  settings->set( "max_depth",     max_depth );
+  settings->set( "negative",      opts.is_set( "negative" ) );
+  settings->set( "multiple",      opts.is_set( "multiple" ) );
+  settings->set( "all_solutions", opts.is_set( "all_solutions" ) );
+  settings->set( "verbose",       opts.is_set( "verbose" ) );
   properties::ptr statistics = std::make_shared<properties>();
 
   auto result = false;
@@ -111,6 +113,14 @@ int main( int argc, char ** argv )
   if ( mode == 0u && result )
   {
     std::cout << "Solutions:    " << statistics->get<unsigned>( "num_circuits" ) << std::endl;
+  }
+
+  if ( mode == 0u && result && opts.is_set( "all_solutions" ) && opts.is_set( "print_circuit" ) )
+  {
+    for ( const auto& sol : statistics->get<std::vector<circuit>>( "solutions" ) )
+    {
+      std::cout << sol << std::endl;
+    }
   }
 
   return 0;

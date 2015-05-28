@@ -118,7 +118,8 @@ inline BDD create_result_function( Cudd& manager, const std::vector<BDD>& circ, 
                             } );
 }
 
-void extract_solution( circuit& circ, char * str, unsigned num_gates, unsigned n, unsigned nbits )
+template<typename T>
+void extract_solution( circuit& circ, T * str, unsigned num_gates, unsigned n, unsigned nbits )
 {
   std::cout << "Extract solution for " << num_gates << " gates." << std::endl;
 
@@ -154,10 +155,9 @@ void extract_solution( circuit& circ, char * str, unsigned num_gates, unsigned n
 
 bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics )
 {
-  unsigned max_depth = get<unsigned>( settings, "max_depth", 20u );
-  //bool     negative  = get<bool>(     settings, "negative",  false );
-  //bool     multiple  = get<bool>(     settings, "multiple",  false );
-  bool     verbose   = get<bool>(     settings, "verbose",   false );
+  const auto max_depth     = get( settings, "max_depth",     20u );
+  const auto all_solutions = get( settings, "all_solutions", false );
+  const auto verbose       = get( settings, "verbose",       false );
 
   properties_timer t( statistics );
 
@@ -198,6 +198,24 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
       delete str;
 
       set( statistics, "num_circuits", (unsigned)( f.CountMinterm( num_vars ) / ( 1u << n ) ) );
+
+      if ( all_solutions )
+      {
+        std::vector<circuit> solutions;
+
+        DdGen *gen;
+        CUDD_VALUE_TYPE value;
+        int * cube;
+        Cudd_ForeachCube( manager.getManager(), f.getNode(), gen, cube, value )
+        {
+          circuit sol_circ( n );
+          copy_metadata( spec, sol_circ );
+          extract_solution( sol_circ, cube, gate_count, n, nbits );
+          solutions += sol_circ;
+        }
+
+        set( statistics, "solutions", solutions );
+      }
 
       result = true;
     }
