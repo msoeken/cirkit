@@ -280,10 +280,10 @@ aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig
 
   /* structural hashing */
   const bool in_order = left.node < right.node;
-  auto key = std::make_pair( in_order ? left : right, in_order ? right : left );
+  const auto key = std::make_pair( in_order ? left : right, in_order ? right : left );
   if ( info.enable_strashing )
   {
-    auto it = info.strash.find( key );
+    const auto it = info.strash.find( key );
     if ( it != info.strash.end() )
     {
       return it->second;
