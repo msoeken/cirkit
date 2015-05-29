@@ -69,6 +69,9 @@ void foreach_line_in_file( const std::string& filename, const std::function<void
 
 bool any_line_contains( const std::string& filename, const boost::regex& r );
 
+using string_properties_map_t = std::map<std::string, std::string>;
+std::string make_properties_string( const string_properties_map_t& properties, const std::string& sep = "," );
+
 }
 
 #endif

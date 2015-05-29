@@ -19,7 +19,10 @@
 
 #include <fstream>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/format.hpp>
+#include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 
 namespace cirkit
@@ -101,6 +104,14 @@ bool any_line_contains( const std::string& filename, const boost::regex& r )
 
   return ret;
 }
+
+std::string make_properties_string( const string_properties_map_t& properties, const std::string& sep )
+{
+  using boost::adaptors::transformed;
+
+  return boost::join( properties | transformed( []( const std::pair<std::string, std::string>& p ) { return boost::str( boost::format( "%s=%s" ) % p.first % p.second ); } ), sep );
+}
+
 
 }
 

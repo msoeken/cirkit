@@ -28,6 +28,7 @@
 #include <boost/optional.hpp>
 
 #include <core/utils/range_utils.hpp>
+#include <core/utils/string_utils.hpp>
 
 namespace cirkit
 {
@@ -38,18 +39,9 @@ using namespace boost::assign;
  * Types                                                                      *
  ******************************************************************************/
 
-using properties_map_t = std::map<std::string, std::string>;
-
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
-
-std::string make_string( const properties_map_t& properties, const std::string& sep = "," )
-{
-  using boost::adaptors::transformed;
-
-  return boost::join( properties | transformed( []( const std::pair<std::string, std::string>& p ) { return boost::str( boost::format( "%s=%s" ) % p.first % p.second ); } ), sep );
-}
 
 struct aig_dot_writer
 {
@@ -61,7 +53,7 @@ struct aig_dot_writer
   /* vertex properties */
   void operator()( std::ostream& os, const aig_node& v )
   {
-    properties_map_t properties;
+    string_properties_map_t properties;
     const auto& graph_info    = boost::get_property( aig, boost::graph_name );
     const auto& namemap       = boost::get( boost::vertex_name, aig );
     const auto& annotationmap = boost::get( boost::vertex_annotation, aig );
@@ -74,7 +66,7 @@ struct aig_dot_writer
 
     /* vertex annotations */
     const auto& m = annotationmap[v];
-    std::string annotations = m.empty() ? "" : boost::str( boost::format( "<br/><font point-size=\"10\" color=\"blue\">%s</font>" ) % make_string( m, "<br/>" ) );
+    std::string annotations = m.empty() ? "" : boost::str( boost::format( "<br/><font point-size=\"10\" color=\"blue\">%s</font>" ) % make_properties_string( m, "<br/>" ) );
     std::string quotes = m.empty() ? "\"\"" : "<>"; /* if we do not use HTML, we should use normal quotes */
 
     /* vertex label */
@@ -88,7 +80,7 @@ struct aig_dot_writer
       properties["label"] = boost::str( boost::format( "%c%s%s%c" ) % quotes[0] % namemap[v] % annotations % quotes[1] );
     }
 
-    os << "[" << make_string( properties ) << "]";
+    os << "[" << make_properties_string( properties ) << "]";
   }
 
   /* edge properties */
