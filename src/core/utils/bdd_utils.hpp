@@ -53,6 +53,9 @@ std::vector<unsigned> level_sizes( const Cudd& manager, const std::vector<BDD>& 
 unsigned maximum_fanout( DdManager* manager, const std::vector<DdNode*>& fs );
 unsigned maximum_fanout( const Cudd& manager, const std::vector<BDD>& fs );
 
+unsigned count_complement_edges( DdManager* manager, const std::vector<DdNode*>& fs );
+unsigned count_complement_edges( const Cudd& manager, const std::vector<BDD>& fs );
+
 }
 
 #endif

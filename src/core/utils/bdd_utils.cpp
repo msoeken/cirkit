@@ -313,6 +313,56 @@ unsigned maximum_fanout( const Cudd& manager, const std::vector<BDD>& fs )
   return maximum_fanout( manager.getManager(), fs_native );
 }
 
+void count_complement_edges_rec( DdManager* manager, DdNode* f, unsigned& count, std::unordered_set<DdNode*>& visited )
+{
+  if ( visited.find( f ) != visited.end() )
+  {
+    return;
+  }
+
+  if ( Cudd_IsComplement( f ) )
+  {
+    ++count;
+  }
+
+  if ( Cudd_IsConstant( f ) )
+  {
+    return;
+  }
+
+  const auto fr = Cudd_Regular( f );
+
+  count_complement_edges_rec( manager, cuddT( fr ), count, visited );
+  count_complement_edges_rec( manager, cuddE( fr ), count, visited );
+
+  visited.insert( f );
+}
+
+unsigned count_complement_edges( DdManager* manager, const std::vector<DdNode*>& fs )
+{
+  std::unordered_set<DdNode*> visited;
+
+  auto count = 0u;
+
+  for ( const auto& f : fs )
+  {
+    count_complement_edges_rec( manager, f, count, visited );
+  }
+
+  return count;
+}
+
+unsigned count_complement_edges( const Cudd& manager, const std::vector<BDD>& fs )
+{
+  using namespace std::placeholders;
+  using boost::adaptors::transformed;
+
+  std::vector<DdNode*> fs_native( fs.size() );
+  boost::copy( fs | transformed( std::bind( &BDD::getNode, _1 ) ), fs_native.begin() );
+
+  return count_complement_edges( manager.getManager(), fs_native );
+}
+
 }
 
 // Local Variables:
