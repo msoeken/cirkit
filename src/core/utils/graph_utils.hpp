@@ -38,6 +38,17 @@
 
 using namespace boost::assign;
 
+namespace boost
+{
+
+enum vertex_annotation_t { vertex_annotation };
+BOOST_INSTALL_PROPERTY(vertex, annotation);
+
+enum edge_complement_t { edge_complement };
+BOOST_INSTALL_PROPERTY(edge, complement);
+
+}
+
 namespace cirkit
 {
 
@@ -54,6 +65,8 @@ template<class VertexProperty = boost::no_property,
          class EdgeProperty = boost::no_property,
          class GraphProperty = boost::no_property>
 using digraph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, VertexProperty, EdgeProperty, GraphProperty>;
+
+using digraph_traits_t = boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS>;
 
 /**
  * @brief Graph alias

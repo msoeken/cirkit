@@ -37,17 +37,6 @@
 #include <core/properties.hpp>
 #include <core/utils/graph_utils.hpp>
 
-namespace boost
-{
-
-enum vertex_annotation_t { vertex_annotation };
-BOOST_INSTALL_PROPERTY(vertex, annotation);
-
-enum edge_complement_t { edge_complement };
-BOOST_INSTALL_PROPERTY(edge, complement);
-
-}
-
 namespace cirkit
 {
 
