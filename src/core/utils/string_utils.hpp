@@ -30,6 +30,7 @@
 #include <functional>
 #include <regex>
 #include <string>
+#include <vector>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -71,6 +72,8 @@ bool any_line_contains( const std::string& filename, const boost::regex& r );
 
 using string_properties_map_t = std::map<std::string, std::string>;
 std::string make_properties_string( const string_properties_map_t& properties, const std::string& sep = "," );
+
+std::vector<std::string> split_with_quotes( const std::string& s );
 
 }
 

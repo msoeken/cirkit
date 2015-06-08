@@ -24,6 +24,8 @@
 #include <boost/format.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace cirkit
 {
@@ -110,6 +112,14 @@ std::string make_properties_string( const string_properties_map_t& properties, c
   using boost::adaptors::transformed;
 
   return boost::join( properties | transformed( []( const std::pair<std::string, std::string>& p ) { return boost::str( boost::format( "%s=%s" ) % p.first % p.second ); } ), sep );
+}
+
+std::vector<std::string> split_with_quotes( const std::string& s )
+{
+  std::vector<std::string> result;
+  boost::tokenizer<boost::escaped_list_separator<char>> tok( s, boost::escaped_list_separator<char>( '\\', ' ', '\"' ) );
+  boost::push_back( result, tok );
+  return result;
 }
 
 
