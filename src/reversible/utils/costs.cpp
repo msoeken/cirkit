@@ -1,4 +1,4 @@
-/* CirvKit: A circuit toolkit
+/* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,10 @@
 #include "costs.hpp"
 
 #include <boost/range/algorithm.hpp>
-#include 
-"../target_tags.hpp"
+
+#include "../target_tags.hpp"
 #include "../functions/flatten_circuit.hpp"
+
 #include <cmath.h> 
 namespace cirkit
 {
@@ -43,15 +44,14 @@ namespace cirkit
   cost_t sk2013_quantum_costs::operator()( const gate& g, unsigned lines ) const
   {
     unsigned ac = g.controls().size();
-    unsigned nc = boost::count_if( g.controls(), []( const variable & v ) {
-      return ! v.polarity(); } );
+    unsigned nc = boost::count_if( g.controls(), []( const variable & v ) { return ! v.polarity(); } );
 
     return 2ull * nc + 2ull * ac * ac - 2ull * ac + 1ull;
   }
 
   cost_t toffoli_gates( unsigned controls, unsigned lines )
   {
-    switch( controls )
+    switch ( controls )
     {
       case 0u:
       case 1u:
@@ -73,9 +73,8 @@ namespace cirkit
 
   inline unsigned all_negative( const gate& g, unsigned lines )
   {
-    bool ng = boost::find_if( g.controls(), []( const variable & v ) {
-      return v.polarity(); } ) == g.controls().end();
-    if( ng )
+    bool ng = boost::find_if( g.controls(), []( const variable & v ) { return v.polarity(); } ) == g.controls().end();
+    if ( ng )
       return ( ( ceil( ( lines + 1 ) / 2 ) >= g.controls().size() ) ? 2 : 4 );
     return 0;
   }
@@ -95,11 +94,11 @@ namespace cirkit
   cost_t t_depth_costs::operator()( const gate& g, unsigned lines ) const
   {
     unsigned ac;
-    if( is_toffoli( g ) )
+    if ( is_toffoli( g ) )
     {
       ac = g.controls().size();
     }
-    else if( is_fredkin( g ) )
+    else if ( is_fredkin( g ) )
     {
       ac = g.controls().size() + 1u;
     }
@@ -119,21 +118,19 @@ namespace cirkit
   cost_t h_costs::operator()( const gate& g, unsigned lines ) const
   {
     unsigned ac = g.controls().size();
-    if( ac == 0u ) return 2ull;
+    if ( ac == 0u ) return 2ull;
     return ( ( ac < 2 ) ? 0ull : 2ull * toffoli_gates( ac, lines ) );
   }
 
   struct costs_visitor : public boost::static_visitor<cost_t>
   {
 
-    explicit costs_visitor( const circuit& circ ) : circ( circ )
-    {
-    }
+    explicit costs_visitor( const circuit& circ ) : circ( circ ) {}
 
     cost_t operator()( const costs_by_circuit_func& f ) const
     {
       // flatten before if the circuit has modules
-      if( circ.modules().empty() )
+      if ( circ.modules().empty() )
       {
         return f( circ );
       }
@@ -148,10 +145,10 @@ namespace cirkit
     cost_t operator()( const costs_by_gate_func& f ) const
     {
       cost_t sum = 0ull;
-      for( const auto& g : circ )
+      for ( const auto& g : circ )
       {
         // respect modules
-        if( is_module( g ) )
+        if ( is_module( g ) )
         {
           sum += costs( *boost::any_cast<module_tag>( g.type() ).reference.get(), f );
         }
