@@ -44,7 +44,7 @@ namespace cirkit
   cost_t sk2013_quantum_costs::operator()( const gate& g, unsigned lines ) const
   {
     unsigned ac = g.controls().size();
-    unsigned nc = boost::count_if( g.controls(), []( const variable& v ) { return ! v.polarity(); } );
+    unsigned nc = boost::count_if( g.controls(), []( const variable& v ) { return !v.polarity(); } );
 
     return 2ull * nc + 2ull * ac * ac - 2ull * ac + 1ull;
   }
@@ -64,10 +64,10 @@ namespace cirkit
         return 4;
         break;
       case 4u:
-        return (( ceil( ( lines + 1 ) / 2 ) >= controls ) ? 8 : 10 );
+        return (( ceil(( lines + 1 ) / 2 ) >= controls ) ? 8 : 10 );
         break;
       default:
-        return (( ceil( ( lines + 1 ) / 2 ) >= controls ) ? 4 * ( controls - 2 ) : 8 * ( controls - 3 ) );
+        return (( ceil(( lines + 1 ) / 2 ) >= controls ) ? 4 * ( controls - 2 ) : 8 * ( controls - 3 ) );
     }
   }
 
@@ -75,20 +75,20 @@ namespace cirkit
   {
     bool ng = boost::find_if( g.controls(), []( const variable& v ) { return v.polarity(); } ) == g.controls().end();
     if ( ng )
-      return ( ( ceil( ( lines + 1 ) / 2 ) >= g.controls().size() ) ? 2 : 4 );
+      return (( ceil(( lines + 1 ) / 2 ) >= g.controls().size() ) ? 2 : 4 );
     return 0;
   }
 
   cost_t ncv_quantum_costs::operator()( const gate& g, unsigned lines ) const
   {
     unsigned ac = g.controls().size();
-    return ( ( ac < 2 ) ? 1ull : 5ull * toffoli_gates( ac, lines ) + all_negative( g, lines ) );
+    return ((ac < 2) ? 1ull : 5ull * toffoli_gates( ac, lines ) + all_negative( g, lines ) );
   }
 
   cost_t clifford_t_quantum_costs::operator()( const gate& g, unsigned lines ) const
   {
     unsigned ac = g.controls().size();
-    return ( ( ac < 2 ) ? 1ull : 16ull * toffoli_gates( ac, lines ) + all_negative( g, lines ) );
+    return ((ac < 2) ? 1ull : 16ull * toffoli_gates( ac, lines ) + all_negative( g, lines ) );
   }
 
   cost_t t_depth_costs::operator()( const gate& g, unsigned lines ) const
@@ -119,7 +119,7 @@ namespace cirkit
   {
     unsigned ac = g.controls().size();
     if ( ac == 0u ) return 2ull;
-    return ( ( ac < 2 ) ? 0ull : 2ull * toffoli_gates( ac, lines ) );
+    return ((ac < 2) ? 0ull : 2ull * toffoli_gates( ac, lines ) );
   }
 
   struct costs_visitor : public boost::static_visitor<cost_t>
