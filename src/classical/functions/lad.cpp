@@ -34,9 +34,9 @@
 
 #include <classical/aig.hpp>
 #include <classical/functions/aig_support.hpp>
+#include <classical/functions/simulate_aig.hpp>
 #include <classical/functions/simulation_graph.hpp>
 #include <classical/utils/aig_utils.hpp>
-#include <classical/utils/simulate_aig.hpp>
 
 using namespace boost::assign;
 using boost::format;

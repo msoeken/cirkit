@@ -17,8 +17,8 @@
 
 #include "strash.hpp"
 
+#include <classical/functions/simulate_aig.hpp>
 #include <classical/utils/aig_utils.hpp>
-#include <classical/utils/simulate_aig.hpp>
 
 namespace cirkit
 {

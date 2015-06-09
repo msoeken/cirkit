@@ -30,9 +30,9 @@
 #include <core/io/write_graph_file.hpp>
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
+#include <classical/functions/simulate_aig.hpp>
 #include <classical/functions/aig_support.hpp>
 #include <classical/utils/aig_utils.hpp>
-#include <classical/utils/simulate_aig.hpp>
 
 using namespace boost::assign;
 

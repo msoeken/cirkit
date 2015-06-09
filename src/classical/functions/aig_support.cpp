@@ -19,7 +19,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include <classical/utils/simulate_aig.hpp>
+#include <classical/functions/simulate_aig.hpp>
 
 namespace cirkit
 {

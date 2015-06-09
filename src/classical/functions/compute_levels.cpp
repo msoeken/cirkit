@@ -24,7 +24,7 @@
 
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/timer.hpp>
-#include <classical/utils/simulate_aig.hpp>
+#include <classical/functions/simulate_aig.hpp>
 
 namespace cirkit
 {
