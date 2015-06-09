@@ -23,7 +23,6 @@
 #include "../functions/flatten_circuit.hpp"
 
 #include <cmath> 
-
 namespace cirkit
 {
 
