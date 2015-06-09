@@ -124,7 +124,6 @@ namespace cirkit
 
   struct costs_visitor : public boost::static_visitor<cost_t>
   {
-
     explicit costs_visitor( const circuit& circ ) : circ( circ ) {}
 
     cost_t operator()( const costs_by_circuit_func& f ) const
