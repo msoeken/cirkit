@@ -18,7 +18,7 @@
 /**
  * @file aig_dfs.hpp
  *
- * @brief Aig DFS functions
+ * @brief AIG DFS functions
  *
  * @author Mathias Soeken
  * @since  2.0
