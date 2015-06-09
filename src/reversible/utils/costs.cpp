@@ -22,7 +22,7 @@
 #include "../target_tags.hpp"
 #include "../functions/flatten_circuit.hpp"
 
-#include <cmath.h> 
+#include <cmath> 
 namespace cirkit
 {
 
