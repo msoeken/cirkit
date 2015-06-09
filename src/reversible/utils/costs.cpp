@@ -44,7 +44,7 @@ namespace cirkit
   cost_t sk2013_quantum_costs::operator()( const gate& g, unsigned lines ) const
   {
     unsigned ac = g.controls().size();
-    unsigned nc = boost::count_if( g.controls(), []( const variable & v ) { return ! v.polarity(); } );
+    unsigned nc = boost::count_if( g.controls(), []( const variable& v ) { return ! v.polarity(); } );
 
     return 2ull * nc + 2ull * ac * ac - 2ull * ac + 1ull;
   }
@@ -73,7 +73,7 @@ namespace cirkit
 
   inline unsigned all_negative( const gate& g, unsigned lines )
   {
-    bool ng = boost::find_if( g.controls(), []( const variable & v ) { return v.polarity(); } ) == g.controls().end();
+    bool ng = boost::find_if( g.controls(), []( const variable& v ) { return v.polarity(); } ) == g.controls().end();
     if ( ng )
       return ( ( ceil( ( lines + 1 ) / 2 ) >= g.controls().size() ) ? 2 : 4 );
     return 0;
