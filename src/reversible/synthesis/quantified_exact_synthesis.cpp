@@ -87,10 +87,11 @@ std::vector<BDD> perform_gate( Cudd& manager, const std::vector<BDD>& inputs, co
   return outputs;
 }
 
-std::vector<BDD> bdd_for_function( Cudd& manager, const binary_truth_table& spec, const std::vector<BDD>& inputs )
+std::pair<std::vector<BDD>, std::vector<BDD>> bdd_for_function( Cudd& manager, const binary_truth_table& spec, const std::vector<BDD>& inputs )
 {
   unsigned n = spec.num_inputs();
   std::vector<BDD> result( n, manager.bddZero() );
+  std::vector<BDD> care( n, manager.bddZero() );
 
   for ( const auto& row : spec )
   {
@@ -98,6 +99,7 @@ std::vector<BDD> bdd_for_function( Cudd& manager, const binary_truth_table& spec
     unsigned index = 0u;
     for ( const auto& x : boost::make_iterator_range( row.first ) )
     {
+      assert( (bool)x );
       if ( (bool)x )
       {
         cube &= *x ? inputs[index] : !inputs[index];
@@ -108,23 +110,27 @@ std::vector<BDD> bdd_for_function( Cudd& manager, const binary_truth_table& spec
     index = 0u;
     for ( const auto& y : boost::make_iterator_range( row.second ) )
     {
-      if ( (bool)y && *y )
+      if ( (bool)y )
       {
-        result[index] |= cube;
+        care[index] |= cube;
+        if ( *y )
+        {
+          result[index] |= cube;
+        }
       }
       ++index;
     }
   }
 
-  return result;
+  return std::make_pair( result, care );
 }
 
-inline BDD create_result_function( Cudd& manager, const std::vector<BDD>& circ, const std::vector<BDD>& function )
+inline BDD create_result_function( Cudd& manager, const std::vector<BDD>& circ, const std::vector<BDD>& function, const std::vector<BDD>& care )
 {
-  return boost::accumulate( boost::combine( circ, function ),
+  return boost::accumulate( boost::combine( circ, function, care ),
                             manager.bddOne(),
-                            []( BDD current, const boost::tuple<BDD, BDD>& t ) {
-                              return current & ( boost::get<0>( t ).Xnor( boost::get<1>( t ) ) );
+                            []( BDD current, const boost::tuple<BDD, BDD, BDD>& t ) {
+                              return current & ( ( boost::get<0>( t ) & boost::get<2>( t ) ).Xnor( boost::get<1>( t ) ) );
                             } );
 }
 
@@ -196,7 +202,8 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
   const BDD xscube = make_cube( manager, xs );
 
   /* specification */
-  const auto function = bdd_for_function( manager, spec, xs );
+  std::vector<BDD> function, care;
+  std::tie( function, care ) = bdd_for_function( manager, spec, xs );
 
   /* find circuit */
   auto current    = xs;
@@ -210,7 +217,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
       std::cout << "[i] check for depth " << gate_count << std::endl;
     }
 
-    auto f = create_result_function( manager, current, function ).UnivAbstract( xscube );
+    auto f = create_result_function( manager, current, function, care ).UnivAbstract( xscube );
 
     if ( f != manager.bddZero() )
     {
