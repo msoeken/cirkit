@@ -2,6 +2,8 @@ include(ExternalProject)
 
 find_package( PythonInterp 2 REQUIRED )
 
+set(ext_LIB ${CMAKE_SOURCE_DIR}/ext/lib)
+
 externalProject_add(z3ep
   DOWNLOAD_DIR .
   URL "http://www.informatik.uni-bremen.de/revkit/files/z3-4.3.2-github-a7db1c9d76.tar.gz"
@@ -12,14 +14,18 @@ externalProject_add(z3ep
 )
 add_dependencies(external z3ep)
 
-link_directories(${CMAKE_SOURCE_DIR}/ext/lib)
+set(Z3_LIBRARIES
+  ${ext_LIB}/libz3.so
+)
+
+link_directories(${ext_LIB})
 
 add_cirkit_library(
   NAME cirkit_formal
   AUTO_DIRS src
   USE
     cirkit_core
-    z3
+    ${Z3_LIBRARIES}
   INCLUDE
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
