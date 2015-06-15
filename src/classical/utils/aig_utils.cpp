@@ -167,11 +167,11 @@ void aig_print_stats( const aig_graph& aig, std::ostream& os )
 
   if ( info.latch.empty() )
   {
-    os << boost::format( "[i] %20s: i/o = %7d / %7d  and = %7d" ) % name % n % info.outputs.size() % ( boost::num_vertices( aig ) - n ) << std::endl;
+    os << boost::format( "[i] %20s: i/o = %7d / %7d  and = %7d" ) % name % n % info.outputs.size() % ( boost::num_vertices( aig ) - n - 1u ) << std::endl;
   }
   else
   {
-    os << boost::format( "[i] %20s: i/l/o = %7d / %7d / %7d  and = %7d" ) % name % n % info.latch.size() % info.outputs.size() % ( boost::num_vertices( aig ) - n ) << std::endl;
+    os << boost::format( "[i] %20s: i/l/o = %7d / %7d / %7d  and = %7d" ) % name % n % info.latch.size() % info.outputs.size() % ( boost::num_vertices( aig ) - n - 1u ) << std::endl;
   }
 }
 
