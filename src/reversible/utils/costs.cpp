@@ -153,14 +153,7 @@ namespace cirkit
         }
         else
         {
-          if( circ.lines() == g.controls().size() + 1 )
-          {
-            sum += f( g, circ.lines() + 1 ) ;
-          }
-          else
-          {
-            sum += f( g, circ.lines() ) ;
-          }
+          ( circ.lines() == g.controls().size() + 1 ) ? sum += f( g, circ.lines() + 1 ) : sum += f( g, circ.lines() ) ;
         }
       }
       return sum;
