@@ -64,10 +64,10 @@ namespace cirkit
         return 4;
         break;
       case 4u:
-        return (( ceil(( lines + 1 ) / 2 ) >= controls ) ? 8 : 10 );
+        return (( ceil((float) lines / 2 ) >= controls ) ? 8 : 10 );
         break;
       default:
-        return (( ceil(( lines + 1 ) / 2 ) >= controls ) ? 4 * ( controls - 2 ) : 8 * ( controls - 3 ) );
+        return (( ceil((float) lines / 2 ) >= controls ) ? 4 * ( controls - 2 ) : 8 * ( controls - 3 ) );
     }
   }
 
@@ -75,7 +75,7 @@ namespace cirkit
   {
     bool ng = boost::find_if( g.controls(), []( const variable& v ) { return v.polarity(); } ) == g.controls().end();
     if ( ng )
-      return (( ceil(( lines + 1 ) / 2 ) >= g.controls().size() ) ? 2 : 4 );
+      return (( ceil((float) lines / 2 ) >= g.controls().size() ) ? 2 : 4 );
     return 0;
   }
 
@@ -153,7 +153,14 @@ namespace cirkit
         }
         else
         {
-          sum += f( g, circ.lines() );
+          if( circ.lines( ) == g.controls( ).size( ) + 1 )
+          {
+            sum += f( g, circ.lines( ) + 1 ) ;
+          }
+          else
+          {
+            sum += f( g, circ.lines( ) ) ;
+          }
         }
       }
       return sum;
@@ -169,9 +176,3 @@ namespace cirkit
   }
 
 }
-
-// Local Variables:
-// c-basic-offset: 2
-// eval: (c-set-offset 'substatement-open 0)
-// eval: (c-set-offset 'innamespace 0)
-// End:
