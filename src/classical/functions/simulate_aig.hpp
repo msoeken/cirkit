@@ -242,12 +242,14 @@ public:
   T and_op( const aig_node& node, const T& v1, const T& v2 ) const
   {
     auto it = assignment.find( node );
-    return ( it == assignment.end() ) ? total_simulator.and_op( node, v1, v2 ) : it->second;
-  }
-
-  bool terminate( const aig_node& node, const aig_graph& aig ) const
-  {
-    return assignment.find( node ) != assignment.end();
+    if ( it == assignment.end() )
+    {
+      return total_simulator.and_op( node, v1, v2 );
+    }
+    else
+    {
+      return it->second;
+    }
   }
 
 private:
