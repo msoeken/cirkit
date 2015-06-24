@@ -354,6 +354,67 @@ simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selecto
   return graph;
 }
 
+simulation_graph create_simulation_graph( const aig_graph& aig, const std::vector<unsigned>& types,
+                                          const properties::ptr& settings,
+                                          const properties::ptr& statistics )
+{
+  auto additional_vectors = get( settings, "additional_vectors", std::vector<boost::dynamic_bitset<>>() );
+  auto support_edges      = get( settings, "support_edges",      false );
+
+  std::vector<unsigned> partition;
+
+  const auto& info    = aig_info( aig );
+  const auto  n       = info.inputs.size();
+  const auto  m       = info.outputs.size();
+  auto        vectors = create_simulation_vectors( info.inputs.size(), types, &partition );
+
+  boost::push_back( vectors, additional_vectors );
+
+  auto        graph   = create_simulation_graph( aig, vectors, settings, statistics );
+
+  properties_timer t( statistics, "labeling_runtime" );
+
+  const auto& vertex_label = boost::get( boost::vertex_label, graph );
+  const auto& edge_label   = boost::get( boost::edge_label, graph );
+
+  for ( auto i = 0; i < n; ++i )
+  {
+    vertex_label[i] = 0u;
+  }
+  for ( auto i = 0; i < m; ++i )
+  {
+    vertex_label[n + vectors.size() + i] = 1u;
+
+    /* edges (Y -> X) */
+    if ( support_edges )
+    {
+      for ( const auto& edge : boost::make_iterator_range( boost::out_edges( n + vectors.size() + i, graph ) ) )
+      {
+        edge_label[edge] = 2u * partition.size();
+      }
+    }
+  }
+
+  /* edges ( X -> sim -> Y) */
+  auto offset = n;
+  for ( const auto& p : index( partition ) )
+  {
+    for ( auto i = 0; i < p.value; ++i )
+    {
+      vertex_label[offset + i] = 2u + p.index;
+
+      for ( const auto& edge : boost::make_iterator_range( boost::out_edges( offset + i, graph ) ) )
+      {
+        const auto is_syedge = ( boost::target( edge, graph ) > offset + i ) ? 1u : 0u;
+        edge_label[edge] = is_syedge * partition.size() + p.index;
+      }
+    }
+    offset += p.value;
+  }
+
+  return graph;
+}
+
 std::vector<simulation_signature_t::value_type> compute_simulation_signatures( const aig_graph& aig )
 {
   std::vector<simulation_signature_t::value_type> vec;
@@ -363,7 +424,7 @@ std::vector<simulation_signature_t::value_type> compute_simulation_signatures( c
 
   word_assignment_simulator::aig_name_value_map map( n );
   std::vector<unsigned> partition, offset( 6u );
-  const auto all_sim_vectors   = create_simulation_vectors( n, 63u /* all */, &partition );
+  const auto all_sim_vectors   = create_simulation_vectors( n, { 0u, 1u, 2u, 3u, 4u, 5u }, &partition );
   const auto all_sim_vectors_t = transpose( all_sim_vectors );
 
   assert( partition.size() == 6u );
