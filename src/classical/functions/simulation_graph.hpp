@@ -121,16 +121,6 @@ using simulation_graph                     = graph_t<simulation_graph_vertex_pro
 using simulation_node                      = vertex_t<simulation_graph>;
 using simulation_edge                      = edge_t<simulation_graph>;
 
-enum class simulation_pattern : unsigned
-{
-  all_hot = 0x1,
-  one_hot = 0x2,
-  two_hot = 0x4,
-  all_cold = 0x8,
-  one_cold = 0x10,
-  two_cold = 0x20
-};
-
 /**
  * This function does not assign labels
  */
@@ -139,23 +129,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
                                           const properties::ptr& statistics = properties::ptr() );
 
 /**
- * @param partition If not nullptr then the number of patterns for each selector is written into it.
- */
-std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, unsigned selector,
-                                                                std::vector<unsigned>* partition = nullptr );
-
-/**
  * @param types The values in this array determine which k-cold and k-hot vectors should
  *              be generated.  Let j be an element in that vector, then k is obtained by
  *              k := j div 2 (where div is integer division) and the type is hot if and
  *              only if j % 2 == 1.  As an example, 2h = 5 and 1c = 2.
+ * @param partition If not nullptr then the number of patterns for each selector is written into it.
  */
 std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, const std::vector<unsigned>& types,
                                                                 std::vector<unsigned>* partition = nullptr );
-
-simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selector,
-                                          const properties::ptr& settings = properties::ptr(),
-                                          const properties::ptr& statistics = properties::ptr() );
 
 simulation_graph create_simulation_graph( const aig_graph& aig, const std::vector<unsigned>& types,
                                           const properties::ptr& settings = properties::ptr(),

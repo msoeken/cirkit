@@ -219,40 +219,6 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   return g;
 }
 
-std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, unsigned selector,
-                                                                std::vector<unsigned>* partition )
-{
-  std::vector<unsigned> types;
-
-  if ( selector & static_cast<unsigned>( simulation_pattern::all_hot ) )
-  {
-    types += 0u;
-  }
-  if ( selector & static_cast<unsigned>( simulation_pattern::one_hot ) )
-  {
-    types += 3u;
-  }
-  if ( selector & static_cast<unsigned>( simulation_pattern::two_hot ) )
-  {
-    types += 5u;
-  }
-
-  if ( selector & static_cast<unsigned>( simulation_pattern::all_cold ) )
-  {
-    types += 1u;
-  }
-  if ( selector & static_cast<unsigned>( simulation_pattern::one_cold ) )
-  {
-    types += 2u;
-  }
-  if ( selector & static_cast<unsigned>( simulation_pattern::two_cold ) )
-  {
-    types += 4u;
-  }
-
-  return create_simulation_vectors( width, types, partition );
-}
-
 std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, const std::vector<unsigned>& types,
                                                                 std::vector<unsigned>* partition )
 {
@@ -291,67 +257,6 @@ std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, 
   }
 
   return sim_vectors;
-}
-
-simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selector,
-                                          const properties::ptr& settings,
-                                          const properties::ptr& statistics )
-{
-  auto additional_vectors = get( settings, "additional_vectors", std::vector<boost::dynamic_bitset<>>() );
-  auto support_edges      = get( settings, "support_edges",      false );
-
-  std::vector<unsigned> partition;
-
-  const auto& info    = aig_info( aig );
-  const auto  n       = info.inputs.size();
-  const auto  m       = info.outputs.size();
-  auto        vectors = create_simulation_vectors( info.inputs.size(), selector, &partition );
-
-  boost::push_back( vectors, additional_vectors );
-
-  auto        graph   = create_simulation_graph( aig, vectors, settings, statistics );
-
-  properties_timer t( statistics, "labeling_runtime" );
-
-  const auto& vertex_label = boost::get( boost::vertex_label, graph );
-  const auto& edge_label   = boost::get( boost::edge_label, graph );
-
-  for ( auto i = 0; i < n; ++i )
-  {
-    vertex_label[i] = 0u;
-  }
-  for ( auto i = 0; i < m; ++i )
-  {
-    vertex_label[n + vectors.size() + i] = 1u;
-
-    /* edges (Y -> X) */
-    if ( support_edges )
-    {
-      for ( const auto& edge : boost::make_iterator_range( boost::out_edges( n + vectors.size() + i, graph ) ) )
-      {
-        edge_label[edge] = 2u * partition.size();
-      }
-    }
-  }
-
-  /* edges ( X -> sim -> Y) */
-  auto offset = n;
-  for ( const auto& p : index( partition ) )
-  {
-    for ( auto i = 0; i < p.value; ++i )
-    {
-      vertex_label[offset + i] = 2u + p.index;
-
-      for ( const auto& edge : boost::make_iterator_range( boost::out_edges( offset + i, graph ) ) )
-      {
-        const auto is_syedge = ( boost::target( edge, graph ) > offset + i ) ? 1u : 0u;
-        edge_label[edge] = is_syedge * partition.size() + p.index;
-      }
-    }
-    offset += p.value;
-  }
-
-  return graph;
 }
 
 simulation_graph create_simulation_graph( const aig_graph& aig, const std::vector<unsigned>& types,
