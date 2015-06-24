@@ -23,6 +23,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -75,7 +76,7 @@ struct lad_graph
   std::vector<boost::optional<std::vector<unsigned>>> signatures;
 
   explicit lad_graph( const std::string& filename );
-  explicit lad_graph( const aig_graph& aig, const std::vector<unsigned>& types, bool support_edges, bool simulation_signatures, bool verbose = false );
+  explicit lad_graph( const aig_graph& aig, const std::vector<unsigned>& types, bool support_edges, const boost::optional<unsigned>& simulation_signatures, bool verbose = false );
 };
 
 lad_graph::lad_graph( const std::string& filename )
@@ -136,7 +137,7 @@ lad_graph::lad_graph( const std::string& filename )
   in.close();
 }
 
-lad_graph::lad_graph( const aig_graph& aig, const std::vector<unsigned>& types, bool support_edges, bool simulation_signatures, bool verbose )
+lad_graph::lad_graph( const aig_graph& aig, const std::vector<unsigned>& types, bool support_edges, const boost::optional<unsigned>& simulation_signatures, bool verbose )
 {
   /* AIG info */
   const auto& info = aig_info( aig );
@@ -251,9 +252,9 @@ lad_graph::lad_graph( const aig_graph& aig, const std::vector<unsigned>& types, 
 
   /* simulation signatures */
   signatures.resize( nb_vertices );
-  if ( simulation_signatures )
+  if ( (bool)simulation_signatures )
   {
-    const auto sigs = compute_simulation_signatures( aig );
+    const auto sigs = compute_simulation_signatures( aig, *simulation_signatures );
     for ( const auto& s : index( sigs ) )
     {
       signatures[n + vectors.size() + s.index] = s.value;
@@ -302,7 +303,7 @@ struct lad_domain
   vec_int_t global_matching_p;
   vec_int_t global_matching_t;
 
-  lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, bool simulation_signatures );
+  lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, const boost::optional<unsigned>& simulation_signatures );
 
   inline bool to_filter_empty() const
   {
@@ -393,7 +394,7 @@ inline bool is_compatible( int dir_gp, int dir_gt )
 }
 
 bool compatible_vertices( int u, int v,
-                          const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, bool simulation_signatures )
+                          const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, const boost::optional<unsigned>& simulation_signatures )
 {
   if ( !compatible_vertex_labels( gp.vertex_label[u], gt.vertex_label[v] ) )
   {
@@ -411,42 +412,45 @@ bool compatible_vertices( int u, int v,
   if ( functional_support_constraints && ( gt.support[v] != gp.support[u] ) ) return false;
   if ( !functional_support_constraints && ( gt.support[v] < gp.support[u] ) ) return false;
 
-  if ( simulation_signatures )
+  if ( (bool)simulation_signatures )
   {
-    /* order of signatures is
-       ah/0c 1h 2h
-       ac/0h 1c 2c */
+    const auto maxk = *simulation_signatures;
+
     const auto& sigp = gp.signatures[u];
     const auto& sigt = gt.signatures[v];
 
     const auto nmink = gt.num_inputs - gp.num_inputs;
 
+    /* compute binomial coeffecients */
+    std::vector<unsigned> coeffs( maxk + 1u );
+    coeffs[0u] = 1u;
+    for ( auto k = 0u; k < coeffs.size() - 1u; ++k )
+    {
+      coeffs[k + 1u] = coeffs[k] * ( nmink - k ) / ( k + 1u );
+    }
+
     if ( (bool)sigp && (bool)sigt )
     {
-      /* 0h */
-      if ( (*sigt)[1u] != (*sigp)[1u] ) { return false; }
+      for ( auto k = 0u; k < maxk + 1u; ++k )
+      {
+        /* cold */
+        auto pvalue_c = (*sigp)[k << 1u];
+        auto pvalue_h = (*sigp)[(k << 1u) + 1u];
+        for ( unsigned j = 1u; j <= k; ++j )
+        {
+          pvalue_c += (*sigp)[(k - j) << 1u] * coeffs[j];
+          pvalue_h += (*sigp)[((k - j) << 1u) + 1u] * coeffs[j];
+        }
 
-      /* 0c */
-      if ( (*sigt)[0u] != (*sigp)[0u] ) { return false; }
-
-      /* 1h */
-      if ( (*sigt)[3u] != (*sigp)[3u] + (*sigp)[1u] * nmink ) { return false; }
-
-      /* 1c */
-      if ( (*sigt)[2u] != (*sigp)[2u] + (*sigp)[0u] * nmink ) { return false; }
-
-      /* 2h */
-      if ( (*sigt)[5u] != (*sigp)[5u] + (*sigp)[3u] * nmink + (*sigp)[1u] * ( ( nmink * ( nmink - 1 ) ) / 2 ) ) { return false; }
-
-      /* 2c */
-      if ( (*sigt)[4u] != (*sigp)[4u] + (*sigp)[2u] * nmink + (*sigp)[0u] * ( ( nmink * ( nmink - 1 ) ) / 2 ) ) { return false; }
+        if ( ( (*sigt)[k << 1u] != pvalue_c ) || ( (*sigt)[(k << 1u) + 1u] != pvalue_h ) ) { return false; }
+      }
     }
   }
 
   return true;
 }
 
-lad_domain::lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, bool simulation_signatures )
+lad_domain::lad_domain( const lad_graph& gp, const lad_graph& gt, bool functional_support_constraints, const boost::optional<unsigned>& simulation_signatures )
 {
   /* create */
   global_matching_p.resize( gp.nb_vertices, -1 );
@@ -1410,7 +1414,7 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
   /* Settings */
   auto functional            = get( settings, "functional",            false );
   auto support_edges         = get( settings, "support_edges",         false );
-  auto simulation_signatures = get( settings, "simulation_signatures", false );
+  auto simulation_signatures = get( settings, "simulation_signatures", boost::optional<unsigned>() );
   auto verbose               = get( settings, "verbose",               false );
 
   /* Timer */

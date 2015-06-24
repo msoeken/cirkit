@@ -22,6 +22,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/optional.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
@@ -57,7 +58,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto support               = get( settings, "support",               false );
   const auto support_edges         = get( settings, "support_edges",         false );
   const auto vertexnames           = get( settings, "vertexnames",           false );
-  const auto simulation_signatures = get( settings, "simulation_signatures", false );
+  const auto simulation_signatures = get( settings, "simulation_signatures", boost::optional<unsigned>() );
 
   if ( support_edges && !support )
   {
@@ -169,11 +170,11 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   }
 
   /* simulation signatures */
-  if ( simulation_signatures )
+  if ( (bool)simulation_signatures )
   {
     const auto& vertex_simulation_signatures = boost::get( boost::vertex_simulation_signature, g );
 
-    const auto signatures = compute_simulation_signatures( aig );
+    const auto signatures = compute_simulation_signatures( aig, *simulation_signatures );
     for ( const auto& s : index( signatures ) )
     {
       vertex_simulation_signatures[n + sim_vectors.size() + s.index] = s.value;
