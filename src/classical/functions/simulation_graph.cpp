@@ -23,12 +23,14 @@
 #include <boost/format.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/combine.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <core/io/write_graph_file.hpp>
 #include <core/utils/bitset_utils.hpp>
+#include <core/utils/combinations.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/functions/simulate_aig.hpp>
 #include <classical/functions/aig_support.hpp>
@@ -220,66 +222,72 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, unsigned selector,
                                                                 std::vector<unsigned>* partition )
 {
-  std::vector<boost::dynamic_bitset<>> sim_vectors;
+  std::vector<unsigned> types;
 
   if ( selector & static_cast<unsigned>( simulation_pattern::all_hot ) )
   {
-    sim_vectors += ~boost::dynamic_bitset<>( width );
-    if ( partition ) *partition += 1;
+    types += 0u;
   }
   if ( selector & static_cast<unsigned>( simulation_pattern::one_hot ) )
   {
-    for ( unsigned i = 0u; i < width; ++i )
-    {
-      boost::dynamic_bitset<> b( width );
-      b.set( i );
-      sim_vectors += b;
-    }
-    if ( partition ) *partition += width;
+    types += 3u;
   }
   if ( selector & static_cast<unsigned>( simulation_pattern::two_hot ) )
   {
-    for ( unsigned i = 0u; i < width - 1u; ++i )
-    {
-      for ( unsigned j = i + 1u; j < width; ++j )
-      {
-        boost::dynamic_bitset<> b( width );
-        b.set( i );
-        b.set( j );
-        sim_vectors += b;
-      }
-    }
-    if ( partition ) *partition += ( width * (width -  1) ) / 2;
+    types += 5u;
   }
 
   if ( selector & static_cast<unsigned>( simulation_pattern::all_cold ) )
   {
-    sim_vectors += boost::dynamic_bitset<>( width );
-    if ( partition ) *partition += 1;
+    types += 1u;
   }
   if ( selector & static_cast<unsigned>( simulation_pattern::one_cold ) )
   {
-    for ( unsigned i = 0u; i < width; ++i )
-    {
-      auto b = ~boost::dynamic_bitset<>( width );
-      b.reset( i );
-      sim_vectors += b;
-    }
-    if ( partition ) *partition += width;
+    types += 2u;
   }
   if ( selector & static_cast<unsigned>( simulation_pattern::two_cold ) )
   {
-    for ( unsigned i = 0u; i < width - 1u; ++i )
+    types += 4u;
+  }
+
+  return create_simulation_vectors( width, types, partition );
+}
+
+std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, const std::vector<unsigned>& types,
+                                                                std::vector<unsigned>* partition )
+{
+  std::vector<boost::dynamic_bitset<>> sim_vectors;
+
+  std::vector<unsigned> numbers( width );
+  boost::iota( numbers, 0u );
+
+  for ( const auto& j : types )
+  {
+    const auto k   = j / 2;
+    const auto hot = ( j % 2 == 1 );
+
+    boost::unofficial::for_each_combination( numbers.begin(), numbers.begin() + k, numbers.end(),
+                                             [&]( std::vector<unsigned>::const_iterator first,
+                                                  std::vector<unsigned>::const_iterator last )
+                                             {
+                                               boost::dynamic_bitset<> b( width );
+
+                                               while ( first != last )
+                                               {
+                                                 b.set( *first );
+                                                 ++first;
+                                               }
+
+                                               if ( !hot ) { b.flip(); }
+                                               sim_vectors += b;
+
+                                               return false;
+                                             } );
+
+    if ( partition )
     {
-      for ( unsigned j = i + 1u; j < width; ++j )
-      {
-        auto b = ~boost::dynamic_bitset<>( width );
-        b.reset( i );
-        b.reset( j );
-        sim_vectors += b;
-      }
+      *partition += boost::unofficial::count_each_combination( k, width - k );
     }
-    if ( partition ) *partition += ( width * (width -  1) ) / 2;
   }
 
   return sim_vectors;

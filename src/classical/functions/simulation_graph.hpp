@@ -144,6 +144,15 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, unsigned selector,
                                                                 std::vector<unsigned>* partition = nullptr );
 
+/**
+ * @param types The values in this array determine which k-cold and k-hot vectors should
+ *              be generated.  Let j be an element in that vector, then k is obtained by
+ *              k := j div 2 (where div is integer division) and the type is hot if and
+ *              only if j % 2 == 1.  As an example, 2h = 5 and 1c = 2.
+ */
+std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, const std::vector<unsigned>& types,
+                                                                std::vector<unsigned>* partition = nullptr );
+
 simulation_graph create_simulation_graph( const aig_graph& aig, unsigned selector,
                                           const properties::ptr& settings = properties::ptr(),
                                           const properties::ptr& statistics = properties::ptr() );
