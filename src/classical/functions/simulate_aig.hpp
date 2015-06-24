@@ -228,7 +228,7 @@ public:
     auto it = assignment.find( node );
     if ( it == assignment.end() )
     {
-      std::cout << "[w] no assignment given for '" << node << "', assume defaut" << std::endl;
+      std::cout << "[w] no assignment given for '" << node << "', assume default" << std::endl;
       return default_value;
     }
     else
