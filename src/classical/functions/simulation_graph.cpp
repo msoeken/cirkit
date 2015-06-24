@@ -320,19 +320,23 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   return graph;
 }
 
-std::vector<simulation_signature_t::value_type> compute_simulation_signatures( const aig_graph& aig )
+std::vector<simulation_signature_t::value_type> compute_simulation_signatures( const aig_graph& aig, unsigned maxk )
 {
   std::vector<simulation_signature_t::value_type> vec;
 
-  const auto& info = aig_info( aig );
-  const auto  n    = info.inputs.size();
+  const auto& info      = aig_info( aig );
+  const auto  n         = info.inputs.size();
+  const auto  num_types = ( maxk + 1u ) << 1u;
+
+  std::vector<unsigned> types( num_types );
+  boost::iota( types, 0u );
 
   word_assignment_simulator::aig_name_value_map map( n );
-  std::vector<unsigned> partition, offset( 6u );
-  const auto all_sim_vectors   = create_simulation_vectors( n, { 0u, 1u, 2u, 3u, 4u, 5u }, &partition );
+  std::vector<unsigned> partition, offset( num_types );
+  const auto all_sim_vectors   = create_simulation_vectors( n, types, &partition );
   const auto all_sim_vectors_t = transpose( all_sim_vectors );
 
-  assert( partition.size() == 6u );
+  assert( partition.size() == num_types );
   offset[0] = 0;
   for ( auto i = 1u; i < partition.size(); ++i )
   {
@@ -349,11 +353,11 @@ std::vector<simulation_signature_t::value_type> compute_simulation_signatures( c
   for ( const auto& output : info.outputs )
   {
     const auto& ovalue = results.at( output.first );
-    std::array<unsigned, 6> signature;
+    std::vector<unsigned> signature( num_types );
     for ( auto i = 0u; i < partition.size(); ++i )
     {
-      signature[i] = 0;
-      auto pos = ( i == 0 ) ? ovalue.find_first() : ovalue.find_next( offset[i] - 1u );
+      signature[i] = 0u;
+      auto pos = ( i == 0u ) ? ovalue.find_first() : ovalue.find_next( offset[i] - 1u );
       while ( pos < offset[i] + partition[i] && pos != boost::dynamic_bitset<>::npos )
       {
         ++signature[i];

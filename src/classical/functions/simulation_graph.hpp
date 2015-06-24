@@ -95,7 +95,7 @@ struct simulation_graph_meta_t
   unsigned num_outputs;
 };
 
-using simulation_signature_t               = boost::optional<std::array<unsigned, 6>>;
+using simulation_signature_t               = boost::optional<std::vector<unsigned>>;
 
 /* In order to allow an O(1) lookup for edges in the graph, this
  * edge lookup table is added as a property to the simulation graph
@@ -142,7 +142,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
                                           const properties::ptr& settings = properties::ptr(),
                                           const properties::ptr& statistics = properties::ptr() );
 
-std::vector<simulation_signature_t::value_type> compute_simulation_signatures( const aig_graph& aig );
+std::vector<simulation_signature_t::value_type> compute_simulation_signatures( const aig_graph& aig, unsigned maxk = 2u );
 
 igraph_t simulation_graph_to_igraph( const simulation_graph& g );
 

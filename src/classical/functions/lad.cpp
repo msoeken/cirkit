@@ -72,7 +72,7 @@ struct lad_graph
   /* only filled when verbose */
   std::vector<std::string> vertex_names;
   unsigned num_inputs = 0u;
-  std::vector<boost::optional<std::array<unsigned, 6>>> signatures;
+  std::vector<boost::optional<std::vector<unsigned>>> signatures;
 
   explicit lad_graph( const std::string& filename );
   explicit lad_graph( const aig_graph& aig, const std::vector<unsigned>& types, bool support_edges, bool simulation_signatures, bool verbose = false );
@@ -424,22 +424,22 @@ bool compatible_vertices( int u, int v,
     if ( (bool)sigp && (bool)sigt )
     {
       /* 0h */
-      if ( (*sigt)[3u] != (*sigp)[3u] ) { return false; }
+      if ( (*sigt)[1u] != (*sigp)[1u] ) { return false; }
 
       /* 0c */
       if ( (*sigt)[0u] != (*sigp)[0u] ) { return false; }
 
       /* 1h */
-      if ( (*sigt)[1u] != (*sigp)[1u] + (*sigp)[3u] * nmink ) { return false; }
+      if ( (*sigt)[3u] != (*sigp)[3u] + (*sigp)[1u] * nmink ) { return false; }
 
       /* 1c */
-      if ( (*sigt)[4u] != (*sigp)[4u] + (*sigp)[0u] * nmink ) { return false; }
+      if ( (*sigt)[2u] != (*sigp)[2u] + (*sigp)[0u] * nmink ) { return false; }
 
       /* 2h */
-      if ( (*sigt)[2u] != (*sigp)[2u] + (*sigp)[1u] * nmink + (*sigp)[3u] * ( ( nmink * ( nmink - 1 ) ) / 2 ) ) { return false; }
+      if ( (*sigt)[5u] != (*sigp)[5u] + (*sigp)[3u] * nmink + (*sigp)[1u] * ( ( nmink * ( nmink - 1 ) ) / 2 ) ) { return false; }
 
       /* 2c */
-      if ( (*sigt)[5u] != (*sigp)[5u] + (*sigp)[4u] * nmink + (*sigp)[0u] * ( ( nmink * ( nmink - 1 ) ) / 2 ) ) { return false; }
+      if ( (*sigt)[4u] != (*sigp)[4u] + (*sigp)[2u] * nmink + (*sigp)[0u] * ( ( nmink * ( nmink - 1 ) ) / 2 ) ) { return false; }
     }
   }
 
