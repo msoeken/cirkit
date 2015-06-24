@@ -75,7 +75,7 @@ struct lad_graph
   std::vector<boost::optional<std::array<unsigned, 6>>> signatures;
 
   explicit lad_graph( const std::string& filename );
-  explicit lad_graph( const aig_graph& aig, unsigned selector, bool support_edges, bool simulation_signatures, bool verbose = false );
+  explicit lad_graph( const aig_graph& aig, const std::vector<unsigned>& types, bool support_edges, bool simulation_signatures, bool verbose = false );
 };
 
 lad_graph::lad_graph( const std::string& filename )
@@ -136,7 +136,7 @@ lad_graph::lad_graph( const std::string& filename )
   in.close();
 }
 
-lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool support_edges, bool simulation_signatures, bool verbose )
+lad_graph::lad_graph( const aig_graph& aig, const std::vector<unsigned>& types, bool support_edges, bool simulation_signatures, bool verbose )
 {
   /* AIG info */
   const auto& info = aig_info( aig );
@@ -145,7 +145,7 @@ lad_graph::lad_graph( const aig_graph& aig, unsigned selector, bool support_edge
 
   /* Simulate vectors */
   std::vector<unsigned> partition;
-  auto vectors = create_simulation_vectors( n, selector, &partition );
+  auto vectors = create_simulation_vectors( n, types, &partition );
 
   /* Read number of vertices */
   nb_vertices = n + vectors.size() + m;
@@ -1404,7 +1404,7 @@ bool directed_lad( std::vector<unsigned>& mapping, const std::string& target, co
   return start_lad( mgr, mapping, verbose );
 }
 
-bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& target, const aig_graph& pattern, unsigned selector,
+bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& target, const aig_graph& pattern, const std::vector<unsigned>& types,
                             properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() )
 {
   /* Settings */
@@ -1416,8 +1416,8 @@ bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& tar
   /* Timer */
   properties_timer t( statistics );
 
-  lad_graph gp( pattern, selector, support_edges, simulation_signatures, false /* verbose */ );
-  lad_graph gt( target, selector, support_edges, simulation_signatures, false /* verbose */ );
+  lad_graph gp( pattern, types, support_edges, simulation_signatures, false /* verbose */ );
+  lad_graph gt( target, types, support_edges, simulation_signatures, false /* verbose */ );
   lad_domain d( gp, gt, functional, simulation_signatures );
 
   if ( verbose )

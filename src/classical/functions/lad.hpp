@@ -45,7 +45,7 @@ namespace cirkit
 bool directed_lad( std::vector<unsigned>& mapping, const std::string& target, const std::string& pattern,
                    properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() );
 
-bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& target, const aig_graph& pattern, unsigned selector,
+bool directed_lad_from_aig( std::vector<unsigned>& mapping, const aig_graph& target, const aig_graph& pattern, const std::vector<unsigned>& types,
                             properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr() );
 
 }
