@@ -213,12 +213,12 @@ private:
 };
 
 template<typename T>
-class partial_node_assignment_simulator : public aig_simulator<T>
+class aig_partial_node_assignment_simulator : public aig_simulator<T>
 {
 public:
-  partial_node_assignment_simulator( const aig_simulator<T>& total_simulator,
-                                     const std::map<aig_node, T>& assignment,
-                                     const T& default_value )
+  aig_partial_node_assignment_simulator( const aig_simulator<T>& total_simulator,
+                                         const std::map<aig_node, T>& assignment,
+                                         const T& default_value )
     : total_simulator( total_simulator ),
       assignment( assignment ),
       default_value( default_value ) {}
@@ -252,6 +252,11 @@ public:
     }
   }
 
+  bool terminate( const aig_node& node, const aig_graph& aig ) const
+  {
+    return assignment.find( node ) != assignment.end();
+  }
+
 private:
   const aig_simulator<T>& total_simulator;
   const std::map<aig_node, T>& assignment;
@@ -259,13 +264,13 @@ private:
 };
 
 template<typename T>
-class lambda_simulator : public aig_simulator<T>
+class aig_lambda_simulator : public aig_simulator<T>
 {
 public:
-  lambda_simulator( const std::function<T(const aig_node&, const std::string&, unsigned, const aig_graph&)>& get_input_func,
-                    const std::function<T()>& get_constant_func,
-                    const std::function<T(const T&)>& invert_func,
-                    const std::function<T(const aig_node&, const T&, const T&)>& and_op_func )
+  aig_lambda_simulator( const std::function<T(const aig_node&, const std::string&, unsigned, const aig_graph&)>& get_input_func,
+                        const std::function<T()>& get_constant_func,
+                        const std::function<T(const T&)>& invert_func,
+                        const std::function<T(const aig_node&, const T&, const T&)>& and_op_func )
     : get_input_func( get_input_func ),
       get_constant_func( get_constant_func ),
       invert_func( invert_func ),
