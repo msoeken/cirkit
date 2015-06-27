@@ -156,6 +156,23 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
   return result;
 }
 
+template<typename Graph>
+std::vector<vertex_t<Graph>> topological_sort_ffrs( const std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>>& ffrs,
+                                                    const std::vector<vertex_t<Graph>>& topsort )
+{
+  std::vector<vertex_t<Graph>> ffrs_topsort;
+
+  for ( const auto& v : topsort )
+  {
+    if ( v != 0u && ffrs.find( v ) != ffrs.end() )
+    {
+      ffrs_topsort += v;
+    }
+  }
+
+  return std::move( ffrs_topsort );
+}
+
 }
 
 #endif
