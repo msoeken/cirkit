@@ -127,11 +127,14 @@ std::pair<std::vector<BDD>, std::vector<BDD>> bdd_for_function( Cudd& manager, c
 
 inline BDD create_result_function( Cudd& manager, const std::vector<BDD>& circ, const std::vector<BDD>& function, const std::vector<BDD>& care )
 {
-  return boost::accumulate( boost::combine( circ, function, care ),
-                            manager.bddOne(),
-                            []( BDD current, const boost::tuple<BDD, BDD, BDD>& t ) {
-                              return current & ( ( boost::get<0>( t ) & boost::get<2>( t ) ).Xnor( boost::get<1>( t ) ) );
-                            } );
+  BDD f = manager.bddOne();
+
+  for ( auto i = 0u; i < (unsigned)circ.size(); ++i )
+  {
+    f &= ( circ.at( i ) & care.at( i ) ).Xnor( function.at( i ) );
+  }
+
+  return f;
 }
 
 template<typename T>
