@@ -1393,7 +1393,7 @@ bool directed_lad( std::vector<unsigned>& mapping, const std::string& target, co
 
   lad_graph gp( pattern );
   lad_graph gt( target );
-  lad_domain d( gp, gt, false, false );
+  lad_domain d( gp, gt, false, boost::optional<unsigned>() );
 
   if ( verbose )
   {
