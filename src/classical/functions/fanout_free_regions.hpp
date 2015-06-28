@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <core/utils/graph_utils.hpp>
@@ -57,7 +58,10 @@ void compute_ffr_inputs_rec( const vertex_t<Graph>& v,
   /* primary input? */
   if ( boost::out_degree( v, g ) == 0u )
   {
-    ffr_inputs += v;
+    if ( boost::find( ffr_inputs, v ) == ffr_inputs.end() )
+    {
+      ffr_inputs += v;
+    }
   }
   /* if ffr output? */
   else if ( v != ffr_output && indegrees.at( v ) > 1u )
