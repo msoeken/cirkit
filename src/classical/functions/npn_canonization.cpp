@@ -113,7 +113,8 @@ tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vec
   /* initialize */
   auto n = tt_num_vars( t );
   phase.resize( n + 1u );
-  perm.resize( n + 1u );
+  phase.reset();
+  perm.resize( n );
   boost::iota( perm, 0u );
 
   assert( n <= 6u );
@@ -127,11 +128,16 @@ tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vec
   auto t2 = ~t; /* inversion */
   auto min = std::min( t1, t2 );
 
+  auto invo = ( min == t2 );
+
   if ( false /* verbose */ )
   {
     std::cout << "[i] swaps: " << any_join( swap_array, " " ) << std::endl
               << "[i] flips: " << any_join( flip_array, " " ) << std::endl;
   }
+
+  int best_flip = total_flips;
+  int best_swap = total_swaps;
 
   for ( int i = total_swaps - 1; i >= 0; --i )
   {
@@ -139,8 +145,12 @@ tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vec
     t1 = tt_permute( t1, pos, pos + 1 );
     t2 = tt_permute( t2, pos, pos + 1 );
     tt_shrink( t1, n ); tt_shrink( t2, n );
-    std::swap( perm[pos], perm[pos + 1] );
-    min = std::min( std::min( t1, t2 ), min );
+    if ( t1 < min || t2 < min )
+    {
+      best_swap = i;
+      min = std::min( std::min( t1, t2 ), min );
+      invo = ( min == t2 );
+    }
   }
 
   for ( int j = total_flips - 1; j >= 0; --j )
@@ -148,9 +158,13 @@ tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vec
     t1 = tt_flip( tt_permute( t1, 0u, 1u ), flip_array[j] );
     t2 = tt_flip( tt_permute( t2, 0u, 1u ), flip_array[j] );
     tt_shrink( t1, n ); tt_shrink( t2, n );
-    std::swap( perm[0], perm[1] );
-    phase.flip( flip_array[j] );
-    min = std::min( std::min( t1, t2 ), min );
+    if ( t1 < min || t2 < min )
+    {
+      best_swap = total_swaps;
+      best_flip = j;
+      min = std::min( std::min( t1, t2 ), min );
+      invo = ( min == t2 );
+    }
 
     for ( int i = total_swaps - 1; i >= 0; --i )
     {
@@ -158,13 +172,32 @@ tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vec
       t1 = tt_permute( t1, pos, pos + 1 );
       t2 = tt_permute( t2, pos, pos + 1 );
       tt_shrink( t1, n ); tt_shrink( t2, n );
-      std::swap( perm[pos], perm[pos + 1] );
-      min = std::min( std::min( t1, t2 ), min );
+      if ( t1 < min || t2 < min )
+      {
+        best_swap = i;
+        best_flip = j;
+        min = std::min( std::min( t1, t2 ), min );
+        invo = ( min == t2 );
+      }
     }
   }
 
+  for ( int i = total_swaps - 1; i >= best_swap; --i )
+  {
+    const auto pos = swap_array[i];
+    std::swap( perm[pos], perm[pos + 1] );
+  }
+
+  for ( int j = total_flips - 1; j >= best_flip; --j )
+  {
+    phase.flip( flip_array[j] );
+  }
+
   /* output inverted? */
-  phase.set( n, min == t2 );
+  if ( invo )
+  {
+    phase.flip( n );
+  }
 
   return min;
 }
@@ -176,7 +209,8 @@ tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<un
   /* initialize */
   auto n = tt_num_vars( t );
   phase.resize( n + 1u );
-  perm.resize( n + 1u );
+  phase.reset();
+  perm.resize( n );
   boost::iota( perm, 0u );
 
   tt npn = t;
@@ -220,6 +254,11 @@ tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<un
     }
   }
 
+  if ( tt_num_vars( npn ) > n )
+  {
+    tt_shrink( npn, n );
+  }
+
   return npn;
 }
 
@@ -250,6 +289,11 @@ tt tt_from_npn( const tt& npn, const boost::dynamic_bitset<>& phase, std::vector
   if ( phase.test( perm.size() ) )
   {
     t.flip();
+  }
+
+  if ( tt_num_vars( t ) > perm.size() )
+  {
+    tt_shrink( t, perm.size() );
   }
 
   return t;
