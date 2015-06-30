@@ -27,11 +27,12 @@
 #ifndef FANOUT_FREE_REGIONS_HPP
 #define FANOUT_FREE_REGIONS_HPP
 
-#include <deque>
 #include <map>
+#include <queue>
 #include <vector>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
@@ -48,9 +49,26 @@ namespace detail
 {
 
 template<typename Graph>
+struct topsort_compare_t
+{
+  explicit topsort_compare_t( const std::vector<vertex_t<Graph>>& topsortinv ) : topsortinv( topsortinv ) {}
+
+  bool operator()( const vertex_t<Graph>& v1, const vertex_t<Graph>& v2 ) const
+  {
+    return topsortinv.at( v1 ) < topsortinv.at( v2 );
+  }
+
+private:
+  const std::vector<vertex_t<Graph>>& topsortinv;
+};
+
+template<typename Graph>
+using ffr_output_queue_t = std::priority_queue<vertex_t<Graph>, std::vector<vertex_t<Graph>>, detail::topsort_compare_t<Graph>>;
+
+template<typename Graph>
 void compute_ffr_inputs_rec( const vertex_t<Graph>& v,
                              const vertex_t<Graph>& ffr_output,
-                             std::deque<vertex_t<Graph>>& ffr_outputs,
+                             ffr_output_queue_t<Graph>& ffr_outputs,
                              std::vector<vertex_t<Graph>>& ffr_inputs,
                              const std::vector<unsigned>& indegrees,
                              const Graph& g )
@@ -67,7 +85,7 @@ void compute_ffr_inputs_rec( const vertex_t<Graph>& v,
   else if ( v != ffr_output && indegrees.at( v ) > 1u )
   {
     ffr_inputs += v;
-    ffr_outputs.push_back( v );
+    ffr_outputs.push( v );
   }
   else
   {
@@ -80,7 +98,7 @@ void compute_ffr_inputs_rec( const vertex_t<Graph>& v,
 
 template<typename Graph>
 std::vector<vertex_t<Graph>> compute_ffr_inputs( const vertex_t<Graph>& output,
-                                                 std::deque<vertex_t<Graph>>& ffr_outputs,
+                                                 ffr_output_queue_t<Graph>& ffr_outputs,
                                                  const std::vector<unsigned>& indegrees,
                                                  const Graph& g )
 {
@@ -136,13 +154,19 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
     }
   }
 
+  /* topological sort */
+  std::vector<vertex_t<Graph>> topsort( boost::num_vertices( g ) ), topsortinv( boost::num_vertices( g ) );
+  boost::topological_sort( g, topsort.begin() );
+  for ( const auto& v : index( topsort ) ) { topsortinv[v.value] = v.index; }
+
   /* dequeue for keeping track of FFR outputs */
-  std::deque<vertex_t<Graph>> ffr_outputs( outputs.begin(), outputs.end() );
+  detail::topsort_compare_t<Graph> comp( topsortinv );
+  detail::ffr_output_queue_t<Graph> ffr_outputs( outputs.begin(), outputs.end(), comp );
 
   /* compute each FFR */
   while ( !ffr_outputs.empty() )
   {
-    auto ffr_output = ffr_outputs.front();
+    auto ffr_output = ffr_outputs.top();
     if ( result.find( ffr_output ) == result.end() )
     {
       auto ffr_inputs = detail::compute_ffr_inputs( ffr_output, ffr_outputs, indegrees, g );
@@ -154,7 +178,7 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
 
       result.insert( {ffr_output, ffr_inputs} );
     }
-    ffr_outputs.pop_front();
+    ffr_outputs.pop();
   }
 
   return result;
