@@ -130,6 +130,32 @@ private:
   double* runtime = nullptr;
 };
 
+class increment_timer : public boost::timer::cpu_timer
+{
+public:
+  increment_timer( double* runtime ) : runtime( runtime )
+  {
+    start();
+  };
+
+  ~increment_timer()
+  {
+    if ( !is_stopped() )
+    {
+      stop();
+      if ( runtime )
+      {
+        const double sec = 1000000000.0L;
+        boost::timer::cpu_times const elapsed_times(elapsed());
+        *runtime += ( elapsed_times.system + elapsed_times.user ) / sec;
+      }
+    }
+  }
+
+private:
+  double* runtime;
+};
+
 }
 
 #endif
