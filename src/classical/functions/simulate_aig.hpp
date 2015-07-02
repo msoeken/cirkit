@@ -309,7 +309,7 @@ private:
  * DFS visitor for actual simulation                                          *
  ******************************************************************************/
 
-using aig_node_color_map = std::map<aig_node, boost::default_color_type>;
+using aig_node_color_map = circuit_traits<aig_graph>::node_color_map;
 
 template<typename T>
 struct simulate_aig_node_visitor : public aig_dfs_visitor

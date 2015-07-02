@@ -33,9 +33,11 @@
 #include <vector>
 
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/property_map/property_map.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/graph_utils.hpp>
+#include <classical/traits.hpp>
 
 namespace cirkit
 {
@@ -129,6 +131,14 @@ unsigned aig_to_literal( const aig_graph& aig, const aig_function& f );
 unsigned aig_to_literal( const aig_graph& aig, const aig_node& node );
 
 std::ostream& operator<<( std::ostream& os, const aig_function &f );
+
+template<>
+struct circuit_traits<aig_graph>
+{
+  using node           = aig_node;
+  using edge           = aig_edge;
+  using node_color_map = std::map<aig_node, boost::default_color_type>;
+};
 
 }
 
