@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/bimap.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -66,13 +67,23 @@ template<typename Graph>
 using ffr_output_queue_t = std::priority_queue<vertex_t<Graph>, std::vector<vertex_t<Graph>>, detail::topsort_compare_t<Graph>>;
 
 template<typename Graph>
+using relabel_queue_t = std::priority_queue<vertex_t<Graph>>;
+
+template<typename Graph>
 void compute_ffr_inputs_rec( const vertex_t<Graph>& v,
                              const vertex_t<Graph>& ffr_output,
                              ffr_output_queue_t<Graph>& ffr_outputs,
                              std::vector<vertex_t<Graph>>& ffr_inputs,
                              const std::vector<unsigned>& indegrees,
+                             bool relabel, relabel_queue_t<Graph>& relabel_queue,
                              const Graph& g )
 {
+  /* relabel? */
+  if ( relabel )
+  {
+    relabel_queue.push( v );
+  }
+
   /* primary input? */
   if ( boost::out_degree( v, g ) == 0u )
   {
@@ -91,7 +102,7 @@ void compute_ffr_inputs_rec( const vertex_t<Graph>& v,
   {
     for ( const auto& adj : boost::make_iterator_range( boost::adjacent_vertices( v, g ) ) )
     {
-      compute_ffr_inputs_rec( adj, ffr_output, ffr_outputs, ffr_inputs, indegrees, g );
+      compute_ffr_inputs_rec( adj, ffr_output, ffr_outputs, ffr_inputs, indegrees, relabel, relabel_queue, g );
     }
   }
 }
@@ -100,14 +111,18 @@ template<typename Graph>
 std::vector<vertex_t<Graph>> compute_ffr_inputs( const vertex_t<Graph>& output,
                                                  ffr_output_queue_t<Graph>& ffr_outputs,
                                                  const std::vector<unsigned>& indegrees,
+                                                 bool relabel, relabel_queue_t<Graph>& relabel_queue,
                                                  const Graph& g )
 {
   std::vector<vertex_t<Graph>> ffr_inputs;
-  compute_ffr_inputs_rec( output, output, ffr_outputs, ffr_inputs, indegrees, g );
+  compute_ffr_inputs_rec( output, output, ffr_outputs, ffr_inputs, indegrees, relabel, relabel_queue, g );
   return ffr_inputs;
 }
 
 }
+
+template<typename Graph>
+using relabel_map_t = std::map<vertex_t<Graph>, boost::bimap<unsigned, vertex_t<Graph>>>;
 
 /**
  * @brief Computs fanout free regions
@@ -133,11 +148,16 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
   std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> result;
 
   /* settings */
-  const auto verbose = get( settings, "verbose", false );
-        auto outputs = get( settings, "outputs", std::vector<vertex_t<Graph>>() );
+  const auto verbose      = get( settings, "verbose",      false );
+        auto outputs      = get( settings, "outputs",      std::vector<vertex_t<Graph>>() );
+  const auto relabel      = get( settings, "relabel",      false );
+  const auto has_constant = get( settings, "has_constant", false );
 
   /* run-time */
   properties_timer t( statistics );
+
+  /* relabeling */
+  relabel_map_t<Graph> relabel_map;
 
   /* pre-compute indegrees */
   auto indegrees = precompute_in_degrees( g );
@@ -169,7 +189,14 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
     auto ffr_output = ffr_outputs.top();
     if ( result.find( ffr_output ) == result.end() )
     {
-      auto ffr_inputs = detail::compute_ffr_inputs( ffr_output, ffr_outputs, indegrees, g );
+      detail::relabel_queue_t<Graph> relabel_queue;
+
+      if ( relabel && has_constant )
+      {
+        relabel_queue.push( 0u );
+      }
+
+      auto ffr_inputs = detail::compute_ffr_inputs( ffr_output, ffr_outputs, indegrees, relabel, relabel_queue, g );
 
       if ( verbose )
       {
@@ -177,8 +204,35 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
       }
 
       result.insert( {ffr_output, ffr_inputs} );
+
+      if ( relabel )
+      {
+        typename relabel_map_t<Graph>::mapped_type bm;
+
+        auto pos  = 0u;
+        auto last = -1;
+        while ( !relabel_queue.empty() )
+        {
+          auto val = relabel_queue.top();
+
+          if ( (int)val != last )
+          {
+            bm.insert( typename relabel_map_t<Graph>::mapped_type::value_type( pos++, val ) );
+            last = val;
+          }
+
+          relabel_queue.pop();
+        }
+
+        relabel_map.insert( {ffr_output, bm} );
+      }
     }
     ffr_outputs.pop();
+  }
+
+  if ( relabel )
+  {
+    set( statistics, "relabel_map", relabel_map );
   }
 
   return result;
