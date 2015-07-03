@@ -84,7 +84,7 @@ namespace cirkit
      */
     std::string header;
 
-    std::string type_label( const gate& g ) const;
+    virtual std::string type_label( const gate& g ) const;
   };
 
   /**
