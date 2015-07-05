@@ -345,6 +345,11 @@ aig_function aig_create_nary_and( aig_graph& aig, const std::vector< aig_functio
   const auto size = v.size();
   assert( size >= 1u );
 
+  if ( size == 1u )
+  {
+    return v[0];
+  }
+
   aig_function result;
   if ( size >= 2u )
   {
@@ -369,6 +374,11 @@ aig_function aig_create_nary_or( aig_graph& aig, const std::vector< aig_function
   const auto size = v.size();
   assert( size >= 1u );
 
+  if ( size == 1u )
+  {
+    return v[0];
+  }
+
   aig_function result;
   if ( size >= 2u )
   {
@@ -392,6 +402,12 @@ aig_function aig_create_nary_xor( aig_graph& aig, const std::vector< aig_functio
 
   const auto size = v.size();
   assert( size >= 1u );
+
+  if ( size == 1u )
+  {
+    return v[0];
+  }
+
 
   aig_function result;
   if ( size >= 2u )
