@@ -56,9 +56,7 @@ const bool expr_to_bool( const z3::expr& e )
 {
   assert( e.decl().decl_kind() == Z3_OP_TRUE ||
           e.decl().decl_kind() == Z3_OP_FALSE );
-  std::ostringstream ss; ss << e;
-  assert( ss.str() == "true" || ss.str() == "false" );
-  return ( ss.str() == "true" );
+  return ( e.decl().decl_kind() == Z3_OP_TRUE );
 }
 
 const std::string expr_to_bin( const z3::expr &e )
