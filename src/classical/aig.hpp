@@ -62,6 +62,11 @@ struct aig_function
     return node == other.node && complemented == other.complemented;
   }
 
+  inline bool operator!=( const aig_function& other ) const
+  {
+    return !( this->operator==(other) );
+  }
+
   inline bool operator<( const aig_function& other ) const
   {
     return node < other.node || ( node == other.node && complemented < other.complemented );
@@ -129,6 +134,7 @@ void write_dot( const aig_graph& aig, const std::string& filename, const propert
 
 unsigned aig_to_literal( const aig_graph& aig, const aig_function& f );
 unsigned aig_to_literal( const aig_graph& aig, const aig_node& node );
+aig_function aig_to_function( const aig_graph& aig, const aig_edge& edge );
 
 std::ostream& operator<<( std::ostream& os, const aig_function &f );
 
