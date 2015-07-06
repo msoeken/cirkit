@@ -485,6 +485,11 @@ unsigned aig_to_literal( const aig_function& f )
   return 2 * f.node + (f.complemented ? 1u : 0u);
 }
 
+aig_function aig_to_function( const aig_graph& aig, const aig_edge& edge )
+{
+  return { target(edge, aig), boost::get( boost::edge_complement, aig )[ edge ] };
+}
+
 std::ostream& operator<<( std::ostream& os, const aig_function &f )
 {
   return os << aig_to_literal(f);
