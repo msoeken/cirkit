@@ -45,6 +45,7 @@ unsigned permutation_inv( const permutation_t& perm );
 int permutation_sign( const permutation_t& perm );
 std::vector<unsigned> cycles_type( const cycles_t& cycles );
 bool is_involution( const permutation_t& perm );
+bool is_simple( const permutation_t& perm );
 
 std::string permutation_to_string( const permutation_t& perm );
 std::string cycles_to_string( const cycles_t& cycles, bool print_fixpoints = false );

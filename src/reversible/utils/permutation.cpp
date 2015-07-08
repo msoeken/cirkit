@@ -129,6 +129,56 @@ bool is_involution( const permutation_t& perm )
   return boost::find_if( c, []( const std::vector<unsigned>& cycle ) { return cycle.size() > 2u; } ) == c.end();
 }
 
+inline unsigned pos( unsigned i, unsigned j, unsigned n )
+{
+  return i * n + ( i * ( i + 1 ) ) / 2 + j;
+}
+
+/* dynamic programming algorithm to check whether a permutation is
+   simple.
+
+   [M.H. Albert, M.D. Atkinson, M. Klazar, Journal of Integer Sequences 6 (2003), 03.4.4]
+*/
+bool is_simple( const permutation_t& perm )
+{
+  const unsigned n = perm.size();
+  const auto sumn  = ( n * ( n + 1 ) ) / 2;
+
+  std::vector<unsigned> m_min( sumn );
+  std::vector<unsigned> m_max( sumn );
+
+  auto p = 0u;
+  for ( auto i = 0u; i < n; ++i )
+  {
+    m_min[p] = m_max[p] = perm.at( i );
+
+    for ( auto j = ( i + 1u ); j < n; ++j )
+    {
+      m_min[p + 1u] = std::min( m_min[p], perm.at( j ) );
+      m_max[p + 1u] = std::max( m_max[p], perm.at( j ) );
+      ++p;
+    }
+
+    ++p;
+  }
+
+  p = 0u;
+  for ( auto i = 0u; i < ( n - 1u ); ++i )
+  {
+    ++p;
+    for ( auto j = ( i + 1u ); j < n; ++j )
+    {
+      if ( ( m_max[p] - m_min[p] ) == ( j - i ) && !( ( i == 0u ) && ( j == ( n - 1u ) ) ) )
+      {
+        return false;
+      }
+      ++p;
+    }
+  }
+
+  return true;
+}
+
 std::string permutation_to_string( const permutation_t& perm )
 {
   return "[" + any_join( perm, " " ) + "]";
