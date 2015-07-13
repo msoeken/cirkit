@@ -98,7 +98,7 @@ using edge_t = typename boost::graph_traits<G>::edge_descriptor;
  * @brief Precomputes ingoing edges for directed graphs
  *
  * Directed graphs have no access to their ingoing edges, but sometimes
- * a bi-directional graph is too heavey to use.  This allows to precompute
+ * a bi-directional graph is too heavy to use.  This allows to precompute
  * the ingoing edges once in O(|E|) and store them in a map.
  */
 template<class G>
