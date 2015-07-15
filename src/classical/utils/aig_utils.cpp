@@ -17,6 +17,7 @@
 
 #include "aig_utils.hpp"
 
+#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/algorithm.hpp>
@@ -24,6 +25,9 @@
 #include <regex>
 
 #include <core/utils/range_utils.hpp>
+#include <core/graph/depth.hpp>
+
+using namespace boost::assign;
 
 namespace cirkit
 {
@@ -165,13 +169,22 @@ void aig_print_stats( const aig_graph& aig, std::ostream& os )
     name = "(unnamed)";
   }
 
+  std::vector<aig_node> outputs;
+  for ( const auto& output : info.outputs )
+  {
+    outputs += output.first.node;
+  }
+
+  std::vector<unsigned> depths;
+  const auto depth = compute_depth( aig, outputs, depths );
+
   if ( info.latch.empty() )
   {
-    os << boost::format( "[i] %20s: i/o = %7d / %7d  and = %7d" ) % name % n % info.outputs.size() % ( boost::num_vertices( aig ) - n - 1u ) << std::endl;
+    os << boost::format( "[i] %20s: i/o = %7d / %7d  and = %7d  lev = %4d" ) % name % n % info.outputs.size() % ( boost::num_vertices( aig ) - n - 1u ) % depth << std::endl;
   }
   else
   {
-    os << boost::format( "[i] %20s: i/l/o = %7d / %7d / %7d  and = %7d" ) % name % n % info.latch.size() % info.outputs.size() % ( boost::num_vertices( aig ) - n - 1u ) << std::endl;
+    os << boost::format( "[i] %20s: i/l/o = %7d / %7d / %7d  and = %7d  lev = %4d" ) % name % n % info.latch.size() % info.outputs.size() % ( boost::num_vertices( aig ) - n - 1u ) % depth << std::endl;
   }
 }
 
