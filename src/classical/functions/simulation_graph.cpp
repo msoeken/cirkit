@@ -276,6 +276,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
   boost::push_back( vectors, additional_vectors );
 
+  set( statistics, "vectors", vectors );
+
   auto        graph   = create_simulation_graph( aig, vectors, settings, statistics );
 
   properties_timer t( statistics, "labeling_runtime" );
