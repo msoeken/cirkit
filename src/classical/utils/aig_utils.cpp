@@ -188,6 +188,18 @@ void aig_print_stats( const aig_graph& aig, std::ostream& os )
   }
 }
 
+std::vector<aig_function> get_children( const aig_graph& aig, const aig_node& node )
+{
+  std::vector<aig_function> children;
+
+  for ( const auto& edge : boost::make_iterator_range( boost::out_edges( node, aig ) ) )
+  {
+    children += aig_to_function( aig, edge );
+  }
+
+  return children;
+}
+
 }
 
 // Local Variables:
