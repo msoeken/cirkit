@@ -363,6 +363,38 @@ unsigned count_complement_edges( const Cudd& manager, const std::vector<BDD>& fs
   return count_complement_edges( manager.getManager(), fs_native );
 }
 
+BDD make_eq_rec( Cudd& manager, const std::vector<BDD>& vars, int pos, int k, std::map<std::pair<int, int>, BDD>& visited )
+{
+  /* terminal */
+  if ( pos == vars.size() )
+  {
+    return ( k == 0 ) ? manager.bddOne() : manager.bddZero();
+  }
+
+  /* cannot be 1 anymore */
+  if ( ( k < 0 ) || ( k > ( vars.size() - pos ) ) )
+  {
+    return manager.bddZero();
+  }
+
+  /* cached? */
+  const auto it = visited.find( {pos, k} );
+  if ( it != visited.end() ) { return it->second; }
+
+  const auto f = ( vars[pos] & make_eq_rec( manager, vars, pos + 1, k - 1, visited ) ) |
+                 ( ~vars[pos] & make_eq_rec( manager, vars, pos + 1, k, visited ) );
+
+  visited.insert( {{pos, k}, f} );
+
+  return f;
+}
+
+BDD make_eq( Cudd& manager, const std::vector<BDD>& vars, unsigned k )
+{
+  std::map<std::pair<int, int>, BDD> visited;
+  return make_eq_rec( manager, vars, 0, (int)k, visited );
+}
+
 }
 
 // Local Variables:
