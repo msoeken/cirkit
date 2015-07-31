@@ -34,6 +34,8 @@
 namespace cirkit
 {
 
+using bdd_function_t = std::pair<Cudd, std::vector<BDD>>;
+
 BDD make_cube( Cudd& manager, const std::vector<BDD>& vars );
 
 bool is_selfdual( const Cudd& manager, const BDD& f );
