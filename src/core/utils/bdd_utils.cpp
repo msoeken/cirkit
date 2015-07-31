@@ -23,6 +23,7 @@
 
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/numeric.hpp>
 
 #include <cuddInt.h>
@@ -363,7 +364,7 @@ unsigned count_complement_edges( const Cudd& manager, const std::vector<BDD>& fs
   return count_complement_edges( manager.getManager(), fs_native );
 }
 
-BDD make_eq_rec( Cudd& manager, const std::vector<BDD>& vars, int pos, int k, std::map<std::pair<int, int>, BDD>& visited )
+BDD make_eq_rec( const Cudd& manager, const std::vector<BDD>& vars, int pos, int k, std::map<std::pair<int, int>, BDD>& visited )
 {
   /* terminal */
   if ( pos == vars.size() )
@@ -389,11 +390,51 @@ BDD make_eq_rec( Cudd& manager, const std::vector<BDD>& vars, int pos, int k, st
   return f;
 }
 
-BDD make_eq( Cudd& manager, const std::vector<BDD>& vars, unsigned k )
+BDD make_eq( const Cudd& manager, const std::vector<BDD>& vars, unsigned k )
 {
   std::map<std::pair<int, int>, BDD> visited;
   return make_eq_rec( manager, vars, 0, (int)k, visited );
 }
+
+DdNode * bdd_copy_rec( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std::map<DdNode*, DdNode*>& visited, const std::vector<unsigned>& index_map )
+{
+  assert( !Cudd_IsComplement( from ) );
+
+  /* visited table */
+  const auto it = visited.find( from );
+  if ( it != visited.end() ) { return it->second; }
+
+  auto * var = Cudd_bddIthVar( mgr_to, index_map.at( from->index ) );
+
+  auto * high = Cudd_NotCond( bdd_copy_rec( mgr_from, Cudd_Regular( cuddT( from ) ), mgr_to, visited, index_map ), Cudd_IsComplement( cuddT( from ) ) );
+  auto * low  = Cudd_NotCond( bdd_copy_rec( mgr_from, Cudd_Regular( cuddE( from ) ), mgr_to, visited, index_map ), Cudd_IsComplement( cuddE( from ) ) );
+
+  /* create new node */
+  auto* node = Cudd_bddIte( mgr_to, var, high, low );
+
+  visited.insert( {from, node} );
+  return node;
+}
+
+DdNode * bdd_copy( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std::vector<unsigned>& index_map )
+{
+  if ( index_map.empty() )
+  {
+    index_map.resize( Cudd_ReadSize( mgr_from ) );
+    boost::iota( index_map, 0u );
+  }
+
+  std::map<DdNode*, DdNode*> visited = {{ Cudd_Not( DD_ONE( mgr_from ) ), Cudd_Not( DD_ONE( mgr_to ) ) },
+                                        { DD_ONE( mgr_from ), DD_ONE( mgr_to ) }};
+
+  return Cudd_NotCond( bdd_copy_rec( mgr_from, Cudd_Regular( from ), mgr_to, visited, index_map ), Cudd_IsComplement( from ) );
+}
+
+BDD bdd_copy( const Cudd& mgr_from, const BDD& from, Cudd& mgr_to, std::vector<unsigned>& index_map )
+{
+  return BDD( mgr_to, bdd_copy( mgr_from.getManager(), from.getNode(), mgr_to.getManager(), index_map ) );
+}
+
 
 }
 
