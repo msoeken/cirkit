@@ -63,9 +63,9 @@ unsigned count_complement_edges( const Cudd& manager, const std::vector<BDD>& fs
  */
 BDD make_eq( const Cudd& manager, const std::vector<BDD>& vars, unsigned k );
 
-DdNode * bdd_copy( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std::vector<unsigned>& index_map );
+std::vector<DdNode*> bdd_copy( DdManager* mgr_from, const std::vector<DdNode*>& from, DdManager* mgr_to, std::vector<unsigned>& index_map );
 
-BDD bdd_copy( const Cudd& mgr_from, const BDD& from, Cudd& mgr_to, std::vector<unsigned>& index_map );
+std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, Cudd& mgr_to, std::vector<unsigned>& index_map );
 
 }
 

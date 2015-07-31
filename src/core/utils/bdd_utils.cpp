@@ -21,12 +21,15 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <boost/assign/std/vector.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/numeric.hpp>
 
 #include <cuddInt.h>
+
+using namespace boost::assign;
 
 namespace cirkit
 {
@@ -400,6 +403,12 @@ DdNode * bdd_copy_rec( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std
 {
   assert( !Cudd_IsComplement( from ) );
 
+  if ( Cudd_IsConstant( from ) )
+  {
+    assert( from == DD_ZERO( mgr_from ) );
+    return DD_ZERO( mgr_to );
+  }
+
   /* visited table */
   const auto it = visited.find( from );
   if ( it != visited.end() ) { return it->second; }
@@ -416,7 +425,7 @@ DdNode * bdd_copy_rec( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std
   return node;
 }
 
-DdNode * bdd_copy( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std::vector<unsigned>& index_map )
+std::vector<DdNode*> bdd_copy( DdManager* mgr_from, const std::vector<DdNode*>& from, DdManager* mgr_to, std::vector<unsigned>& index_map )
 {
   if ( index_map.empty() )
   {
@@ -424,15 +433,35 @@ DdNode * bdd_copy( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std::ve
     boost::iota( index_map, 0u );
   }
 
-  std::map<DdNode*, DdNode*> visited = {{ Cudd_Not( DD_ONE( mgr_from ) ), Cudd_Not( DD_ONE( mgr_to ) ) },
-                                        { DD_ONE( mgr_from ), DD_ONE( mgr_to ) }};
+  std::map<DdNode*, DdNode*> visited;
 
-  return Cudd_NotCond( bdd_copy_rec( mgr_from, Cudd_Regular( from ), mgr_to, visited, index_map ), Cudd_IsComplement( from ) );
+  std::vector<DdNode*> ret;
+
+  for ( auto* node : from )
+  {
+    ret += Cudd_NotCond( bdd_copy_rec( mgr_from, Cudd_Regular( node ), mgr_to, visited, index_map ), Cudd_IsComplement( node ) );
+  }
+
+  return ret;
 }
 
-BDD bdd_copy( const Cudd& mgr_from, const BDD& from, Cudd& mgr_to, std::vector<unsigned>& index_map )
+std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, Cudd& mgr_to, std::vector<unsigned>& index_map )
 {
-  return BDD( mgr_to, bdd_copy( mgr_from.getManager(), from.getNode(), mgr_to.getManager(), index_map ) );
+  using namespace std::placeholders;
+  using boost::adaptors::transformed;
+
+  std::vector<DdNode*> from_native( from.size() );
+  boost::copy( from | transformed( std::bind( &BDD::getNode, _1 ) ), from_native.begin() );
+
+  auto orig = bdd_copy( mgr_from.getManager(), from_native, mgr_to.getManager(), index_map );
+  std::vector<BDD> ret;
+
+  for ( auto* node : orig )
+  {
+    ret += BDD( mgr_to, node );
+  }
+
+  return ret;
 }
 
 
