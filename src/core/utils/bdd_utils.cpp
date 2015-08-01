@@ -29,6 +29,8 @@
 
 #include <cuddInt.h>
 
+#include <core/utils/range_utils.hpp>
+
 using namespace boost::assign;
 
 namespace cirkit
@@ -464,6 +466,29 @@ std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, C
   return ret;
 }
 
+bdd_function_t compute_characteristic( const bdd_function_t& bdd, bool inputs_first )
+{
+  const auto& mgr_from = bdd.first;
+  const auto& from     = bdd.second;
+
+  Cudd mgr;
+  ntimes( mgr_from.ReadSize() + from.size(), [&]() { mgr.bddVar(); } );
+
+  std::vector<unsigned> index_map( mgr_from.ReadSize() );
+  boost::iota( index_map, inputs_first ? 0u : from.size() );
+
+  const auto fs = bdd_copy( mgr_from, from, mgr, index_map );
+
+  auto f = mgr.bddOne();
+
+  const auto offset = inputs_first ? mgr_from.ReadSize() : 0u;
+  for ( auto i = 0u; i < fs.size(); ++i )
+  {
+    f &= mgr.bddVar( offset + i ).Xnor( fs[i] );
+  }
+
+  return {mgr, {f}};
+}
 
 }
 
