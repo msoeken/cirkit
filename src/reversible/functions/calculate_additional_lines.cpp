@@ -36,25 +36,23 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-void count_output_pattern_recurse( const BDDTable& bdd, DdNode* node, const std::string& pattern, unsigned depth, std::vector<mpz_class>& counts, bool verbose )
+void count_output_pattern_recurse( DdManager* mgr, DdNode* node, unsigned num_inputs, unsigned num_outputs,
+                                   const std::string& pattern, unsigned depth, std::vector<mpz_class>& counts, bool verbose )
 {
   if ( Cudd_IsConstant( node ) ) { return; }
 
-  if ( depth == *bdd.num_real_outputs )
+  if ( depth == num_outputs )
   {
     if ( verbose )
     {
-      std::cout << pattern << " has " << Cudd_CountMinterm( bdd.cudd, node, bdd.inputs.size() - *bdd.num_real_outputs ) << std::endl;
+      std::cout << pattern << " has " << Cudd_CountMinterm( mgr, node, num_inputs ) << std::endl;
     }
-    counts += mpz_class( Cudd_CountMinterm( bdd.cudd, node, bdd.inputs.size() - *bdd.num_real_outputs ) );
+    counts += mpz_class( Cudd_CountMinterm( mgr, node, num_inputs ) );
   }
   else
   {
-    DdNode *t = cuddT( node ), *e = cuddE( node );
-    //count_output_pattern_recurse( bdd, Cudd_IsComplement( t ) ? Cudd_Not( t ) : t, depth + 1u, counts );
-    //count_output_pattern_recurse( bdd, Cudd_IsComplement( e ) ? Cudd_Not( e ) : e, depth + 1u, counts );
-    count_output_pattern_recurse( bdd, Cudd_Regular( t ), pattern + "1", depth + 1u, counts, verbose );
-    count_output_pattern_recurse( bdd, Cudd_Regular( e ), pattern + "0", depth + 1u, counts, verbose );
+    count_output_pattern_recurse( mgr, Cudd_Regular( cuddT( node ) ), num_inputs, num_outputs, pattern + "1", depth + 1u, counts, verbose );
+    count_output_pattern_recurse( mgr, Cudd_Regular( cuddE( node ) ), num_inputs, num_outputs, pattern + "0", depth + 1u, counts, verbose );
   }
 }
 
@@ -94,10 +92,11 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
     fclose( fp );
   }
 
-  count_output_pattern_recurse( bdd, add, "", 0u, counts, verbose );
-
   unsigned n = bdd.inputs.size() - *bdd.num_real_outputs;
   unsigned m = *bdd.num_real_outputs;
+
+  count_output_pattern_recurse( bdd.cudd, add, n, m, "", 0u, counts, verbose );
+
   if ( verbose )
   {
     std::cout << "total: " << boost::accumulate( counts, mpz_class( 0u ), []( mpz_class d1, mpz_class d2 ) { return d1 + d2; } ) << std::endl;
@@ -115,6 +114,30 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
     statistics->set( "num_inputs", n );
     statistics->set( "num_outputs", m );
   }
+
+  return calculate_required_lines( n, m, *boost::max_element( counts ) ) - n;
+}
+
+unsigned calculate_additional_lines( const bdd_function_t& bdd, properties::ptr settings, properties::ptr statistics )
+{
+  /* Settings */
+  const auto verbose = get( settings, "verbose", false );
+
+  /* Timer */
+  properties_timer t( statistics );
+
+  const auto cf = compute_characteristic( bdd, false );
+  const auto add = cf.second[0].Add();
+
+  std::vector<mpz_class> counts;
+  const unsigned n = bdd.first.ReadSize();
+  const unsigned m = bdd.second.size();
+
+  count_output_pattern_recurse( cf.first.getManager(), add.getNode(), n, m, "", 0u, counts, verbose );
+
+  /* statistics */
+  set( statistics, "num_inputs", n );
+  set( statistics, "num_outputs", m );
 
   return calculate_required_lines( n, m, *boost::max_element( counts ) ) - n;
 }

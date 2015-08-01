@@ -30,11 +30,16 @@
 #include <string>
 
 #include <core/properties.hpp>
+#include <core/utils/bdd_utils.hpp>
 
 namespace cirkit
 {
 
 unsigned calculate_additional_lines( const std::string& filename,
+                                     properties::ptr settings = properties::ptr(),
+                                     properties::ptr statistics = properties::ptr() );
+
+unsigned calculate_additional_lines( const bdd_function_t& bdd,
                                      properties::ptr settings = properties::ptr(),
                                      properties::ptr statistics = properties::ptr() );
 
