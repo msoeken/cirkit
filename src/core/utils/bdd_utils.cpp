@@ -407,8 +407,14 @@ DdNode * bdd_copy_rec( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std
 
   if ( Cudd_IsConstant( from ) )
   {
-    assert( from == DD_ZERO( mgr_from ) );
-    return DD_ZERO( mgr_to );
+    if ( from == DD_ONE( mgr_from ) )
+    {
+      return DD_ONE( mgr_to );
+    }
+    else
+    {
+      return Cudd_Not( DD_ONE( mgr_to ) );
+    }
   }
 
   /* visited table */
