@@ -65,7 +65,7 @@ BDD make_eq( const Cudd& manager, const std::vector<BDD>& vars, unsigned k );
 
 std::vector<DdNode*> bdd_copy( DdManager* mgr_from, const std::vector<DdNode*>& from, DdManager* mgr_to, std::vector<unsigned>& index_map );
 
-std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, Cudd& mgr_to, std::vector<unsigned>& index_map );
+std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, const Cudd& mgr_to, std::vector<unsigned>& index_map );
 
 bdd_function_t compute_characteristic( const bdd_function_t& bdd, bool inputs_first );
 

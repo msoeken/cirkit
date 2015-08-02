@@ -453,7 +453,7 @@ std::vector<DdNode*> bdd_copy( DdManager* mgr_from, const std::vector<DdNode*>& 
   return ret;
 }
 
-std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, Cudd& mgr_to, std::vector<unsigned>& index_map )
+std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, const Cudd& mgr_to, std::vector<unsigned>& index_map )
 {
   using namespace std::placeholders;
   using boost::adaptors::transformed;
