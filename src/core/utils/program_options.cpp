@@ -24,6 +24,7 @@ namespace cirkit
   {
   public:
     bool parsed = false;
+    std::string positional_option = "filename";
 
     boost::program_options::variables_map vm;
     boost::program_options::positional_options_description pod;
@@ -55,7 +56,7 @@ namespace cirkit
 
   void program_options::parse( int argc, char ** argv )
   {
-    d->pod.add( "filename", 1 );
+    d->pod.add( d->positional_option.c_str(), 1 );
 
     boost::program_options::store( boost::program_options::command_line_parser( argc, argv ).options( *this ).positional( d->pod ).run(), d->vm );
     boost::program_options::notify( d->vm );
@@ -74,6 +75,11 @@ namespace cirkit
   void program_options::clear()
   {
     d->vm.clear();
+  }
+
+  void program_options::set_positional_option( const std::string& name )
+  {
+    d->positional_option = name;
   }
 
   void program_options::init()

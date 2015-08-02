@@ -124,6 +124,8 @@ namespace cirkit
 
     void clear();
 
+    void set_positional_option( const std::string& name );
+
   protected:
     bool parsed() const;
 
