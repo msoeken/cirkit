@@ -333,10 +333,21 @@ public:
 
   void finish_aig_node( const aig_node& node, const aig_function& left, const aig_function& right, const aig_graph& aig )
   {
-    T tleft  = node_values[left.node];
-    T tright = node_values[right.node];
+    T tleft, tright;
 
-    node_values[node] = simulator.and_op( node, left.complemented ? simulator.invert( tleft ) : tleft, right.complemented ? simulator.invert( tright ) : tright );
+    const auto itleft  = node_values.find( left.node );
+    const auto itright = node_values.find( right.node );
+
+    if ( itleft != node_values.end() )
+    {
+      tleft = left.complemented ? simulator.invert( itleft->second ) : itleft->second;
+    }
+    if ( itright != node_values.end() )
+    {
+      tright = right.complemented ? simulator.invert( itright->second ) : itright->second;
+    }
+
+    node_values[node] = simulator.and_op( node, tleft, tright );
   }
 
 private:
