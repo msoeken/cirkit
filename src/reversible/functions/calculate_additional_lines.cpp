@@ -37,7 +37,9 @@ namespace cirkit
 {
 
 void count_output_pattern_recurse( DdManager* mgr, DdNode* node, unsigned num_inputs, unsigned num_outputs,
-                                   const std::string& pattern, unsigned depth, std::vector<mpz_class>& counts, bool verbose )
+                                   const std::string& pattern, unsigned depth,
+                                   std::vector<mpz_class>& counts, std::vector<std::string>& patterns,
+                                   bool verbose )
 {
   if ( Cudd_IsConstant( node ) ) { return; }
 
@@ -47,12 +49,13 @@ void count_output_pattern_recurse( DdManager* mgr, DdNode* node, unsigned num_in
     {
       std::cout << pattern << " has " << Cudd_CountMinterm( mgr, node, num_inputs ) << std::endl;
     }
+    patterns += pattern;
     counts += mpz_class( Cudd_CountMinterm( mgr, node, num_inputs ) );
   }
   else
   {
-    count_output_pattern_recurse( mgr, Cudd_Regular( cuddT( node ) ), num_inputs, num_outputs, pattern + "1", depth + 1u, counts, verbose );
-    count_output_pattern_recurse( mgr, Cudd_Regular( cuddE( node ) ), num_inputs, num_outputs, pattern + "0", depth + 1u, counts, verbose );
+    count_output_pattern_recurse( mgr, Cudd_Regular( cuddT( node ) ), num_inputs, num_outputs, pattern + "1", depth + 1u, counts, patterns, verbose );
+    count_output_pattern_recurse( mgr, Cudd_Regular( cuddE( node ) ), num_inputs, num_outputs, pattern + "0", depth + 1u, counts, patterns, verbose );
   }
 }
 
@@ -70,7 +73,8 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
   BDDTable bdd;
   read_pla_to_characteristic_bdd( bdd, filename, false, explicit_zeros );
 
-  std::vector<mpz_class> counts;
+  std::vector<mpz_class>   counts;
+  std::vector<std::string> patterns;
 
   DdNode *add = Cudd_BddToAdd( bdd.cudd, bdd.outputs.at( 0u ).second );
   Cudd_Ref( add );
@@ -95,7 +99,7 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
   unsigned n = bdd.inputs.size() - *bdd.num_real_outputs;
   unsigned m = *bdd.num_real_outputs;
 
-  count_output_pattern_recurse( bdd.cudd, add, n, m, "", 0u, counts, verbose );
+  count_output_pattern_recurse( bdd.cudd, add, n, m, "", 0u, counts, patterns, verbose );
 
   if ( verbose )
   {
@@ -109,11 +113,9 @@ unsigned calculate_additional_lines( const std::string& filename, properties::pt
   }
 
   /* Statistics */
-  if ( statistics )
-  {
-    statistics->set( "num_inputs", n );
-    statistics->set( "num_outputs", m );
-  }
+  set( statistics, "num_inputs", n );
+  set( statistics, "num_outputs", m );
+  set( statistics, "patterns", patterns );
 
   return calculate_required_lines( n, m, *boost::max_element( counts ) ) - n;
 }
@@ -130,14 +132,16 @@ unsigned calculate_additional_lines( const bdd_function_t& bdd, properties::ptr 
   const auto add = cf.second[0].Add();
 
   std::vector<mpz_class> counts;
+  std::vector<std::string> patterns;
   const unsigned n = bdd.first.ReadSize();
   const unsigned m = bdd.second.size();
 
-  count_output_pattern_recurse( cf.first.getManager(), add.getNode(), n, m, "", 0u, counts, verbose );
+  count_output_pattern_recurse( cf.first.getManager(), add.getNode(), n, m, "", 0u, counts, patterns, verbose );
 
   /* statistics */
   set( statistics, "num_inputs", n );
   set( statistics, "num_outputs", m );
+  set( statistics, "patterns", patterns );
 
   return calculate_required_lines( n, m, *boost::max_element( counts ) ) - n;
 }
