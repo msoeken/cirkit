@@ -367,6 +367,26 @@ void rcbdd::write_pla( const std::string& filename )
   fb.close();
 }
 
+void copy_meta_data( circuit& circ, const rcbdd& cf )
+{
+  circ.set_lines( cf.num_vars() );
+
+  std::vector<std::string> inputs( cf.num_vars(), cf.constant_value() ? "1" : "0" );
+  boost::copy( cf.input_labels(), inputs.end() - cf.num_inputs() );
+  circ.set_inputs( inputs );
+
+  std::vector<std::string> outputs( cf.num_vars(), "-" );
+  boost::copy( cf.output_labels(), outputs.begin() );
+  circ.set_outputs( outputs );
+
+  std::vector<constant> constants( cf.num_vars(), constant() );
+  std::fill( constants.begin(), constants.end() - cf.num_inputs(), cf.constant_value() );
+  circ.set_constants( constants );
+
+  std::vector<bool> garbage( cf.num_vars(), true );
+  std::fill( garbage.begin(), garbage.begin() + cf.num_outputs(), false );
+  circ.set_garbage( garbage );
+}
 
 }
 

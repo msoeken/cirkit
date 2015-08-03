@@ -101,6 +101,7 @@ namespace cirkit
     std::vector<BDD> _zs;
   };
 
+  void copy_meta_data( circuit& circ, const rcbdd& cf );
 }
 
 #endif
