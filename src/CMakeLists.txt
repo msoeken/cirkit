@@ -9,6 +9,7 @@ add_cirkit_library(
     ${Boost_REGEX_LIBRARIES}
     ${Boost_TIMER_LIBRARIES}
     ${Boost_SYSTEM_LIBRARIES}
+    ${Boost_FILESYSTEM_LIBRARIES}
     ${Boost_PROGRAM_OPTIONS_LIBRARIES}
     ${CUDD_LIBRARIES}
 )
