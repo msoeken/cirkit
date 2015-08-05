@@ -305,7 +305,7 @@ BDD rcbdd::create_from_circuit( const circuit& circ ) const
   return func;
 }
 
-void rcbdd::print_truth_table()
+void rcbdd::print_truth_table() const
 {
   using boost::adaptors::transformed;
 
