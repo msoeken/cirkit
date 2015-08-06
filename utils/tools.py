@@ -218,6 +218,14 @@ class package_demiurge:
     install     = [ "cp -v tool/build/src/demiurge-bin %s" ]
     makedir     = False
 
+class package_xdot:
+    description = "Interactive viewer for graphs written in Graphviz's dot language"
+    subdir      = "xdot"
+    url         = ["https://github.com/jrfonseca/xdot.py/raw/master/xdot.py"]
+    fmt         = "wget-list"
+    build       = [ "cp xdot.py xdot", "chmod +x xdot" ]
+    install     = [ "cp -v xdot %s" ]
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
