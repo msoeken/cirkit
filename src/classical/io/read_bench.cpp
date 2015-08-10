@@ -16,8 +16,13 @@
  */
 
 #include "read_bench.hpp"
+
+#include <classical/utils/aig_utils.hpp>
+
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
+
 #include <fstream>
 #include <sstream>
 #include <iterator>
@@ -161,6 +166,8 @@ void read_bench( aig_graph& aig, const std::string& filename )
 {
   std::ifstream is( filename.c_str() );
   read_bench( aig, is );
+  auto& info = aig_info( aig );
+  info.model_name = boost::filesystem::path( filename ).stem().string();
   is.close();
 }
 
