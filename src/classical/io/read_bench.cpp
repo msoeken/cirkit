@@ -42,17 +42,23 @@ struct tokens : std::ctype< char >
 
   static std::ctype_base::mask const* get_table()
   {
+    static constexpr const char SYM_COMMA  = ',';
+    static constexpr const char SYM_ASSIGN = '=';
+    static constexpr const char SYM_LPAREN = '(';
+    static constexpr const char SYM_RPAREN = ')';
+    static constexpr const char SYM_SPACE  = ' ';
+
     using cctype = std::ctype< char >;
     static const cctype::mask* const_rc = cctype::classic_table();
 
     static cctype::mask rc[ cctype::table_size ];
     std::memcpy( rc, const_rc, cctype::table_size * sizeof(cctype::mask) );
 
-    rc[','] = std::ctype_base::space;
-    rc['='] = std::ctype_base::space;
-    rc['('] = std::ctype_base::space;
-    rc[')'] = std::ctype_base::space;
-    rc[' '] = std::ctype_base::space;
+    rc[SYM_COMMA]  = std::ctype_base::space;
+    rc[SYM_ASSIGN] = std::ctype_base::space;
+    rc[SYM_LPAREN] = std::ctype_base::space;
+    rc[SYM_RPAREN] = std::ctype_base::space;
+    rc[SYM_SPACE]  = std::ctype_base::space;
     return &rc[0];
   }
 };
