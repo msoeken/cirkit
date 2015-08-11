@@ -19,6 +19,7 @@
 
 #include <fstream>
 
+#include <boost/assign/std/vector.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/format.hpp>
@@ -26,6 +27,8 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/tokenizer.hpp>
+
+using namespace boost::assign;
 
 namespace cirkit
 {
@@ -118,7 +121,14 @@ std::vector<std::string> split_with_quotes( const std::string& s )
 {
   std::vector<std::string> result;
   boost::tokenizer<boost::escaped_list_separator<char>> tok( s, boost::escaped_list_separator<char>( '\\', ' ', '\"' ) );
-  boost::push_back( result, tok );
+
+  for ( const auto& s : tok )
+  {
+    if ( !s.empty() )
+    {
+      result += s;
+    }
+  }
   return result;
 }
 
