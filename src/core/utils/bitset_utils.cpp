@@ -19,6 +19,10 @@
 
 #include <chrono>
 
+#include <boost/assign/std/vector.hpp>
+
+using namespace boost::assign;
+
 namespace cirkit
 {
 
@@ -84,6 +88,20 @@ void foreach_bit( const boost::dynamic_bitset<>& b, const std::function<void(uns
     func( pos );
     pos = b.find_next( pos );
   }
+}
+
+std::vector<unsigned> get_index_vector( const boost::dynamic_bitset<> b )
+{
+  std::vector<unsigned> v;
+
+  auto pos = b.find_first();
+  while ( pos != boost::dynamic_bitset<>::npos )
+  {
+    v += pos;
+    pos = b.find_next( pos );
+  }
+
+  return std::move( v );
 }
 
 }

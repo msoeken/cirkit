@@ -69,6 +69,8 @@ boost::dynamic_bitset<> onehot_bitset( unsigned n, unsigned pos );
 
 void foreach_bit( const boost::dynamic_bitset<>& b, const std::function<void(unsigned)>&& func );
 
+std::vector<unsigned> get_index_vector( const boost::dynamic_bitset<> b );
+
 template<class IntType>
 IntType to_multiprecision( const boost::dynamic_bitset<>& bs )
 {
