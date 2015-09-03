@@ -28,6 +28,23 @@ void ntimes( unsigned n, std::function<void()> f )
   }
 }
 
+void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, const std::function<void(const std::vector<unsigned>&)>&& func )
+{
+  while ( true )
+  {
+    /* step M2. [Visit.] */
+    func( a );
+
+    /* next iteration */
+    auto j = a.size() - 1u;
+    while ( a[j] == m[j] - 1u ) { a[j--] = 0u; }
+
+    if ( !j ) { break; }
+
+    a[j]++;
+  }
+}
+
 }
 
 // Local Variables:
