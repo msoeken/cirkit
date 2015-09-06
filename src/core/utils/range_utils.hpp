@@ -214,8 +214,10 @@ std::vector<T> get_map_values( const std::vector<std::pair<K, T>>& vp )
  *
  * Also a[0] and m[0] are reserved elements for the implementation and
  * need to be initialized with 0 and 2, respectively.
+ *
+ * If func returns true, the loop is terminated before completion.
  */
-void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, const std::function<void(const std::vector<unsigned>&)>&& func );
+void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, const std::function<bool(const std::vector<unsigned>&)>&& func );
 
 }
 

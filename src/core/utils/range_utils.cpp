@@ -28,12 +28,12 @@ void ntimes( unsigned n, std::function<void()> f )
   }
 }
 
-void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, const std::function<void(const std::vector<unsigned>&)>&& func )
+void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, const std::function<bool(const std::vector<unsigned>&)>&& func )
 {
   while ( true )
   {
     /* step M2. [Visit.] */
-    func( a );
+    if ( func( a ) ) { return; }
 
     /* next iteration */
     auto j = a.size() - 1u;
