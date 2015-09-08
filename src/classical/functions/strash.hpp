@@ -37,6 +37,11 @@ aig_graph strash( const aig_graph& aig,
                   const properties::ptr& settings = properties::ptr(),
                   const properties::ptr& statistics = properties::ptr() );
 
+void strash( const aig_graph& aig,
+             aig_graph& dest,
+             const properties::ptr& settings = properties::ptr(),
+             const properties::ptr& statistics = properties::ptr() );
+
 }
 
 #endif

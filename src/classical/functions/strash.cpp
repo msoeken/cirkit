@@ -72,26 +72,34 @@ aig_graph strash( const aig_graph& aig,
   aig_graph aig_new;
   aig_initialize( aig_new );
 
-  auto& info_new   = aig_info( aig_new );
+  strash( aig, aig_new );
+
+  return aig_new;
+}
+
+void strash( const aig_graph& aig,
+             aig_graph& aig_dest,
+             const properties::ptr& settings,
+             const properties::ptr& statistics )
+{
+  auto& info_dest  = aig_info( aig_dest );
   const auto& info = aig_info( aig );
 
   /* copy inputs */
   for ( const auto& input : info.inputs )
   {
-    aig_create_pi( aig_new, info.node_names.at( input ) );
+    aig_create_pi( aig_dest, info.node_names.at( input ) );
   }
 
   /* copy other info */
-  info_new.model_name = info.model_name;
+  info_dest.model_name = info.model_name;
 
-  auto result = simulate_aig( aig, strash_simulator( aig_new ) );
+  auto result = simulate_aig( aig, strash_simulator( aig_dest ) );
 
   for ( const auto& output : info.outputs )
   {
-    aig_create_po( aig_new, result[output.first], output.second );
+    aig_create_po( aig_dest, result[output.first], output.second );
   }
-
-  return aig_new;
 }
 
 }
