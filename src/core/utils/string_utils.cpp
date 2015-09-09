@@ -18,6 +18,7 @@
 #include "string_utils.hpp"
 
 #include <fstream>
+#include <iostream>
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -70,7 +71,7 @@ std::pair<std::string, std::string> split_string_pair( const std::string& str, c
 }
 
 
-void line_parser( const std::string& filename, const std::vector<std::pair<boost::regex, std::function<void(const boost::smatch&)>>>& matchers )
+void line_parser( const std::string& filename, const std::vector<std::pair<boost::regex, std::function<void(const boost::smatch&)>>>& matchers, bool warn_if_unmatched )
 {
   std::ifstream in( filename.c_str(), std::ifstream::in );
   std::string line;
@@ -79,12 +80,18 @@ void line_parser( const std::string& filename, const std::vector<std::pair<boost
 
   while ( getline( in, line ) )
   {
+    bool matched = false;
     for ( const auto& matcher : matchers )
     {
       if ( boost::regex_search( line, m, matcher.first ) )
       {
         matcher.second( m );
+        matched = true;
       }
+    }
+    if ( !matched && warn_if_unmatched )
+    {
+      std::cout << "[w] could not match " << line << std::endl;
     }
   }
 }
