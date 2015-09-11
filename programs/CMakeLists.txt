@@ -21,3 +21,11 @@ add_cirkit_program(
   USE
     cirkit_core
 )
+
+add_cirkit_program(
+  NAME approximate_bdd
+  SOURCES
+    classical/approximate_bdd.cpp
+  USE
+    cirkit_classical
+)
