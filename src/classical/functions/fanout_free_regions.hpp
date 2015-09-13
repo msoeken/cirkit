@@ -46,13 +46,20 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-namespace detail
-{
+/******************************************************************************
+ * Topologically sorted output list                                           *
+ ******************************************************************************/
 
 template<typename Graph>
 struct topsort_compare_t
 {
-  explicit topsort_compare_t( const std::vector<vertex_t<Graph>>& topsortinv ) : topsortinv( topsortinv ) {}
+  explicit topsort_compare_t( const Graph& g )
+    : topsortinv( num_vertices( g ) )
+  {
+    std::vector<vertex_t<Graph>> topsort( num_vertices( g ) );
+    boost::topological_sort( g, topsort.begin() );
+    for ( const auto& v : index( topsort ) ) { topsortinv[v.value] = v.index; }
+  }
 
   bool operator()( const vertex_t<Graph>& v1, const vertex_t<Graph>& v2 ) const
   {
@@ -60,14 +67,46 @@ struct topsort_compare_t
   }
 
 private:
-  const std::vector<vertex_t<Graph>>& topsortinv;
+  std::vector<vertex_t<Graph>> topsortinv;
 };
 
 template<typename Graph>
-using ffr_output_queue_t = std::priority_queue<vertex_t<Graph>, std::vector<vertex_t<Graph>>, detail::topsort_compare_t<Graph>>;
+using ffr_output_queue_t = std::priority_queue<vertex_t<Graph>, std::vector<vertex_t<Graph>>, topsort_compare_t<Graph>>;
+
+template<typename Graph>
+ffr_output_queue_t<Graph> make_output_queue( std::vector<vertex_t<Graph>>& outputs, const std::vector<unsigned>& indegrees, const Graph& g )
+{
+  /* compute outputs if not provided */
+  if ( outputs.empty() )
+  {
+    for ( const auto& v : boost::make_iterator_range( boost::vertices( g ) ) )
+    {
+      if ( !indegrees[v] )
+      {
+        outputs += v;
+      }
+    }
+  }
+
+  /* dequeue for keeping track of FFR outputs */
+  topsort_compare_t<Graph> comp( g );
+  return ffr_output_queue_t<Graph>( outputs.begin(), outputs.end(), comp );
+}
+
+/******************************************************************************
+ * Relabelling queue                                                          *
+ ******************************************************************************/
 
 template<typename Graph>
 using relabel_queue_t = std::priority_queue<vertex_t<Graph>>;
+
+template<typename Graph>
+using relabel_map_t = std::map<vertex_t<Graph>, boost::bimap<unsigned, vertex_t<Graph>>>;
+
+
+
+namespace detail
+{
 
 template<typename Graph>
 void compute_ffr_inputs_rec( const vertex_t<Graph>& v,
@@ -119,10 +158,43 @@ std::vector<vertex_t<Graph>> compute_ffr_inputs( const vertex_t<Graph>& output,
   return ffr_inputs;
 }
 
+template<typename Graph>
+std::vector<vertex_t<Graph>> compute_ffr_inputs_bfs( const vertex_t<Graph>& output,
+                                                     const std::vector<unsigned>& indegrees,
+                                                     unsigned max_inputs,
+                                                     const Graph& g )
+{
+  std::queue<vertex_t<Graph>> q;
+  q.push( output );
+
+  std::vector<vertex_t<Graph>> ffr_inputs;
+
+  while ( !q.empty() && ( q.size() + ffr_inputs.size() ) < max_inputs )
+  {
+    const auto top = q.front(); q.pop();
+
+    if ( out_degree( top, g ) == 0u || ( top != output && indegrees.at( top ) > 1u ) )
+    {
+      ffr_inputs += top;
+    }
+    else
+    {
+      for ( const auto& adj : boost::make_iterator_range( adjacent_vertices( top, g ) ) )
+      {
+        q.push( adj );
+      }
+    }
+  }
+
+  while ( !q.empty() )
+  {
+    ffr_inputs += q.front(); q.pop();
+  }
+
+  return ffr_inputs;
 }
 
-template<typename Graph>
-using relabel_map_t = std::map<vertex_t<Graph>, boost::bimap<unsigned, vertex_t<Graph>>>;
+}
 
 /**
  * @brief Computs fanout free regions
@@ -152,6 +224,7 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
         auto outputs      = get( settings, "outputs",      std::vector<vertex_t<Graph>>() );
   const auto relabel      = get( settings, "relabel",      false );
   const auto has_constant = get( settings, "has_constant", false );
+  //const auto max_inputs   = get( settings, "max_inputs",   std::numeric_limits<unsigned>::max() );
 
   /* run-time */
   properties_timer t( statistics );
@@ -162,26 +235,8 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
   /* pre-compute indegrees */
   auto indegrees = precompute_in_degrees( g );
 
-  /* compute outputs if not provided */
-  if ( outputs.empty() )
-  {
-    for ( const auto& v : boost::make_iterator_range( boost::vertices( g ) ) )
-    {
-      if ( !indegrees[v] )
-      {
-        outputs += v;
-      }
-    }
-  }
-
-  /* topological sort */
-  std::vector<vertex_t<Graph>> topsort( boost::num_vertices( g ) ), topsortinv( boost::num_vertices( g ) );
-  boost::topological_sort( g, topsort.begin() );
-  for ( const auto& v : index( topsort ) ) { topsortinv[v.value] = v.index; }
-
-  /* dequeue for keeping track of FFR outputs */
-  detail::topsort_compare_t<Graph> comp( topsortinv );
-  detail::ffr_output_queue_t<Graph> ffr_outputs( outputs.begin(), outputs.end(), comp );
+  /* output queue */
+  auto ffr_outputs = make_output_queue( outputs, indegrees, g );
 
   /* compute each FFR */
   while ( !ffr_outputs.empty() )
@@ -189,7 +244,7 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
     auto ffr_output = ffr_outputs.top();
     if ( result.find( ffr_output ) == result.end() )
     {
-      detail::relabel_queue_t<Graph> relabel_queue;
+      relabel_queue_t<Graph> relabel_queue;
 
       if ( relabel && has_constant )
       {
@@ -233,6 +288,54 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
   if ( relabel )
   {
     set( statistics, "relabel_map", relabel_map );
+  }
+
+  return result;
+}
+
+template<typename Graph>
+std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions_bfs( const Graph& g,
+                                                                                 const properties::ptr& settings = properties::ptr(),
+                                                                                 const properties::ptr& statistics = properties::ptr() )
+{
+  std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> result;
+
+  /* settings */
+  const auto verbose      = get( settings, "verbose",      false );
+        auto outputs      = get( settings, "outputs",      std::vector<vertex_t<Graph>>() );
+  const auto max_inputs   = get( settings, "max_inputs",   std::numeric_limits<unsigned>::max() );
+
+  /* run-time */
+  properties_timer t( statistics );
+
+  /* pre-compute indegrees */
+  const auto indegrees = precompute_in_degrees( g );
+
+  /* output queue */
+  auto ffr_outputs = make_output_queue( outputs, indegrees, g );
+
+  /* compute each FFR */
+  while ( !ffr_outputs.empty() )
+  {
+    const auto ffr_output = ffr_outputs.top(); ffr_outputs.pop();
+    if ( result.find( ffr_output ) != result.end() ) { continue; }
+
+    const auto ffr_inputs = detail::compute_ffr_inputs_bfs( ffr_output, indegrees, max_inputs, g );
+
+    for ( const auto& input : ffr_inputs )
+    {
+      if ( out_degree( input, g ) > 0u )
+      {
+        ffr_outputs.push( input );
+      }
+    }
+
+    if ( verbose )
+    {
+      std::cout << boost::format( "[i] found ffr region %d(%s)" ) % ffr_output % any_join( ffr_inputs, ", " ) << std::endl;
+    }
+
+    result.insert( {ffr_output, ffr_inputs} );
   }
 
   return result;
