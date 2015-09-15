@@ -80,16 +80,6 @@ boost::dynamic_bitset<> onehot_bitset( unsigned n, unsigned pos )
   return b;
 }
 
-void foreach_bit( const boost::dynamic_bitset<>& b, const std::function<void(unsigned)>&& func )
-{
-  auto pos = b.find_first();
-  while ( pos != boost::dynamic_bitset<>::npos )
-  {
-    func( pos );
-    pos = b.find_next( pos );
-  }
-}
-
 std::vector<unsigned> get_index_vector( const boost::dynamic_bitset<> b )
 {
   std::vector<unsigned> v;

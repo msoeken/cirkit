@@ -67,7 +67,16 @@ std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b )
 
 boost::dynamic_bitset<> onehot_bitset( unsigned n, unsigned pos );
 
-void foreach_bit( const boost::dynamic_bitset<>& b, const std::function<void(unsigned)>&& func );
+template<typename Fn>
+void foreach_bit( const boost::dynamic_bitset<>& b, const Fn&& func )
+{
+  auto pos = b.find_first();
+  while ( pos != boost::dynamic_bitset<>::npos )
+  {
+    func( pos );
+    pos = b.find_next( pos );
+  }
+}
 
 std::vector<unsigned> get_index_vector( const boost::dynamic_bitset<> b );
 
