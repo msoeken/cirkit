@@ -30,7 +30,6 @@ set(CUDD_LIBRARIES
   ${ext_LIB}/libcudd_epd.so
   ${ext_LIB}/libcudd_util.so
   ${ext_LIB}/libcudd_dddmp.so
-  ${ext_LIB}/libcudd_nanotrav.so
 
   PARENT_SCOPE
 )
