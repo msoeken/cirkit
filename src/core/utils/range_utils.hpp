@@ -153,7 +153,14 @@ std::string indexed_join( const C& container, const std::string& delim, unsigned
   return boost::join( v, delim );
 }
 
-void ntimes( unsigned n, std::function<void()> f );
+template<typename Fn>
+void ntimes( unsigned n, Fn&& f )
+{
+  for ( auto i = 0u; i < n; ++i )
+  {
+    f();
+  }
+}
 
 template<typename P>
 std::function<bool(const P&)> first_matches( const typename P::first_type& v )
