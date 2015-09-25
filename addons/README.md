@@ -1,4 +1,4 @@
-# RevKit 2.0 Addons
+# CirKit 2.0 Addons
 
 ## Installation
 
