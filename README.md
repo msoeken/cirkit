@@ -1,5 +1,7 @@
 # CirKit
 
+CirKit is a software library and framework for logic synthesis.
+
 ## Requirements
 
 The following software is required in order to build CirKit
