@@ -126,6 +126,8 @@ namespace cirkit
 
     void set_positional_option( const std::string& name );
 
+    const boost::program_options::variables_map& variables() const;
+
   protected:
     bool parsed() const;
 

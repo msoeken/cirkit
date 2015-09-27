@@ -82,6 +82,11 @@ namespace cirkit
     d->positional_option = name;
   }
 
+  const boost::program_options::variables_map& program_options::variables() const
+  {
+    return d->vm;
+  }
+
   void program_options::init()
   {
     add_options()( "help,h", "produce help message" );
