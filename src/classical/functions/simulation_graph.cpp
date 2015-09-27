@@ -391,6 +391,62 @@ igraph_t simulation_graph_to_igraph( const simulation_graph& g )
   return ig;
 }
 
+/******************************************************************************
+ * simulation_graph_wrapper                                                   *
+ ******************************************************************************/
+
+inline simulation_graph create_simulation_graph_wrapper( const aig_graph& aig, const std::vector<unsigned>& types,
+                                                         bool support_edges, const boost::optional<unsigned>& simulation_signatures )
+{
+  auto settings = std::make_shared<properties>();
+  settings->set( "support", true );
+  settings->set( "vertexnames", true );
+  settings->set( "support_edges", support_edges );
+  settings->set( "simulation_signatures", simulation_signatures );
+
+  return create_simulation_graph( aig, types, settings );
+}
+
+simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
+                                                    const std::vector<unsigned>& types,
+                                                    bool support_edges,
+                                                    const boost::optional<unsigned>& simulation_signatures )
+  : graph( create_simulation_graph_wrapper( g, types, support_edges, simulation_signatures ) ),
+#ifdef FAST_EDGE_ACCESS
+    vedge_label( boost::num_vertices( graph ), std::vector<int>( boost::num_vertices( graph ), 0 ) ),
+    vedge_direction( boost::num_vertices( graph ), std::vector<int>( boost::num_vertices( graph ), 0 ) )
+#else
+    vedge_label( boost::num_vertices( graph ) ),
+    vedge_direction( boost::num_vertices( graph ) )
+#endif
+{
+  vertex_label                = boost::get( boost::vertex_label, graph );
+  vertex_in_degree            = boost::get( boost::vertex_in_degree, graph );
+  vertex_out_degree           = boost::get( boost::vertex_out_degree, graph );
+  vertex_support              = boost::get( boost::vertex_support, graph );
+  vertex_name                 = boost::get( boost::vertex_name, graph );
+  vertex_simulation_signature = boost::get( boost::vertex_simulation_signature, graph );
+  medge_label                 = boost::get( boost::edge_label, graph );
+
+  /* fill labels */
+  for ( const auto& e : edges() )
+  {
+    const auto& src = boost::source( e, graph );
+    const auto& tgt = boost::target( e, graph );
+
+#ifdef FAST_EDGE_ACCESS
+    vedge_label[src][tgt] = vedge_label[tgt][src] = medge_label[e];
+    vedge_direction[src][tgt] = 1;
+    vedge_direction[tgt][src] = 2;
+#else
+    vedge_label[src].insert( {tgt, medge_label[e]} );
+    vedge_label[tgt].insert( {src, medge_label[e]} );
+    vedge_direction[src].insert( {tgt, 1} );
+    vedge_direction[tgt].insert( {src, 1} );
+#endif
+  }
+}
+
 }
 
 // Local Variables:

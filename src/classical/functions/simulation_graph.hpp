@@ -146,6 +146,89 @@ std::vector<simulation_signature_t::value_type> compute_simulation_signatures( c
 
 igraph_t simulation_graph_to_igraph( const simulation_graph& g );
 
+/******************************************************************************
+ * simulation_graph_wrapper                                                   *
+ ******************************************************************************/
+/**
+ * If FAST_EDGE_ACCESS is defined, edge directions and edge labels are stored
+ * in an adjacency matrix, which increases performance but also memory usage.
+ */
+//#define FAST_EDGE_ACCESS
+
+class simulation_graph_wrapper
+{
+public:
+  using vertex_range_t    = boost::iterator_range<boost::graph_traits<simulation_graph>::vertex_iterator>;
+  using edge_range_t      = boost::iterator_range<boost::graph_traits<simulation_graph>::edge_iterator>;
+  using adjacency_range_t = boost::iterator_range<boost::graph_traits<simulation_graph>::adjacency_iterator>;
+
+public:
+  simulation_graph_wrapper( const aig_graph& g,
+                            const std::vector<unsigned>& types,
+                            bool support_edges,
+                            const boost::optional<unsigned>& simulation_signatures );
+
+  inline const simulation_graph& sim_graph() const                       { return graph; }
+
+  inline unsigned num_inputs() const                                     { return boost::get_property( graph, boost::graph_meta ).num_inputs; }
+  inline unsigned num_vectors() const                                    { return boost::get_property( graph, boost::graph_meta ).num_vectors; }
+  inline unsigned num_outputs() const                                    { return boost::get_property( graph, boost::graph_meta ).num_outputs; }
+
+  inline unsigned size() const                                           { return boost::num_vertices( graph ); }
+  inline unsigned degree( unsigned u ) const                             { return boost::out_degree( u, graph ); }
+  inline unsigned in_degree( unsigned u ) const                          { return vertex_in_degree[u]; }
+  inline unsigned out_degree( unsigned u ) const                         { return vertex_out_degree[u]; }
+  inline unsigned support( unsigned u ) const                            { return vertex_support[u]; }
+  inline unsigned label( unsigned u ) const                              { return vertex_label[u]; }
+  inline simulation_signature_t simulation_signature( unsigned u ) const { return vertex_simulation_signature[u]; }
+  inline const std::string& name( unsigned u ) const                     { return vertex_name[u]; }
+
+  inline vertex_range_t    vertices() const             { return boost::make_iterator_range( boost::vertices( graph ) ); }
+  inline edge_range_t      edges() const                { return boost::make_iterator_range( boost::edges( graph ) ); }
+  inline adjacency_range_t adjacent( unsigned u ) const { return boost::make_iterator_range( boost::adjacent_vertices( u, graph ) ); }
+
+  inline unsigned edge_direction( unsigned u, unsigned v ) const
+  {
+#ifdef FAST_EDGE_ACCESS
+    return vedge_direction[u][v];
+#else
+    const auto it = vedge_direction[u].find( v );
+    return ( it == vedge_direction[u].end() ) ? 0u : it->second;
+#endif
+  }
+
+  inline unsigned edge_label( unsigned u, unsigned v ) const
+  {
+#ifdef FAST_EDGE_ACCESS
+    return vedge_label[u][v];
+#else
+    const auto it = vedge_label[u].find( v );
+    return ( it == vedge_label[u].end() ) ? 0u : it->second;
+#endif
+  }
+
+private:
+  simulation_graph graph;
+
+  boost::property_map<simulation_graph, boost::vertex_label_t>::type                vertex_label;
+  boost::property_map<simulation_graph, boost::vertex_in_degree_t>::type            vertex_in_degree;
+  boost::property_map<simulation_graph, boost::vertex_out_degree_t>::type           vertex_out_degree;
+  boost::property_map<simulation_graph, boost::vertex_support_t>::type              vertex_support;
+  boost::property_map<simulation_graph, boost::vertex_name_t>::type                 vertex_name;
+  boost::property_map<simulation_graph, boost::vertex_simulation_signature_t>::type vertex_simulation_signature;
+  boost::property_map<simulation_graph, boost::edge_label_t>::type                  medge_label;
+
+#ifdef FAST_EDGE_ACCESS
+  std::vector<std::vector<int>>                                                     vedge_label;
+  std::vector<std::vector<int>>                                                     vedge_direction;
+#else
+  /* there is no other way right now to efficiently handle this */
+  std::vector<std::unordered_map<unsigned, unsigned>>                               vedge_label;
+  std::vector<std::unordered_map<unsigned, unsigned>>                               vedge_direction;
+#endif
+};
+
+
 }
 
 #endif
