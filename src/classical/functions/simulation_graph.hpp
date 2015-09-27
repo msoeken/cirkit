@@ -228,6 +228,9 @@ private:
 #endif
 };
 
+bool compatible_simulation_signatures( const simulation_graph_wrapper& pg, const simulation_graph_wrapper& tg,
+                                       const simulation_node& u, const simulation_node& v,
+                                       unsigned maxk );
 
 }
 

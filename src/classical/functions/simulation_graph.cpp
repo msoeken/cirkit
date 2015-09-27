@@ -447,6 +447,43 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
   }
 }
 
+bool compatible_simulation_signatures( const simulation_graph_wrapper& pg, const simulation_graph_wrapper& tg,
+                                       const simulation_node& u, const simulation_node& v,
+                                       unsigned maxk )
+{
+  const auto& sigp = pg.simulation_signature( u );
+  const auto& sigt = tg.simulation_signature( v );
+
+  const auto nmink = tg.num_inputs() - pg.num_inputs();
+
+  /* compute binomial coeffecients */
+  std::vector<unsigned> coeffs( maxk + 1u );
+  coeffs[0u] = 1u;
+  for ( auto k = 0u; k < coeffs.size() - 1u; ++k )
+  {
+    coeffs[k + 1u] = coeffs[k] * ( nmink - k ) / ( k + 1u );
+  }
+
+  if ( (bool)sigp && (bool)sigt )
+  {
+    for ( auto k = 0u; k < maxk + 1u; ++k )
+    {
+      /* cold */
+      auto pvalue_c = (*sigp)[k << 1u];
+      auto pvalue_h = (*sigp)[(k << 1u) + 1u];
+      for ( auto j = 1u; j <= k; ++j )
+      {
+        pvalue_c += (*sigp)[(k - j) << 1u] * coeffs[j];
+        pvalue_h += (*sigp)[((k - j) << 1u) + 1u] * coeffs[j];
+      }
+
+      if ( ( (*sigt)[k << 1u] != pvalue_c ) || ( (*sigt)[(k << 1u) + 1u] != pvalue_h ) ) { return false; }
+    }
+  }
+
+  return true;
+}
+
 }
 
 // Local Variables:
