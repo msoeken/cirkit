@@ -93,6 +93,8 @@ struct simulation_graph_meta_t
   unsigned num_inputs;
   unsigned num_vectors;
   unsigned num_outputs;
+
+  std::unordered_map<aig_node, detail::simulation_graph_traits_t::vertex_descriptor> port_to_node;
 };
 
 using simulation_signature_t               = boost::optional<std::vector<unsigned>>;
@@ -182,6 +184,8 @@ public:
   inline unsigned label( unsigned u ) const                              { return vertex_label[u]; }
   inline simulation_signature_t simulation_signature( unsigned u ) const { return vertex_simulation_signature[u]; }
   inline const std::string& name( unsigned u ) const                     { return vertex_name[u]; }
+
+  inline unsigned port_to_node( const aig_node& port ) const             { return boost::get_property( graph, boost::graph_meta ).port_to_node.at( port ); }
 
   inline vertex_range_t    vertices() const             { return boost::make_iterator_range( boost::vertices( graph ) ); }
   inline edge_range_t      edges() const                { return boost::make_iterator_range( boost::edges( graph ) ); }

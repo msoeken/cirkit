@@ -146,6 +146,17 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     }
   }
 
+  /* port to node mapping */
+  for ( const auto& i : index( info.inputs ) )
+  {
+    meta.port_to_node[i.value] = i.index;
+  }
+
+  for ( const auto& o : index( info.outputs ) )
+  {
+    meta.port_to_node[o.value.first.node] = n + sim_vectors.size() + o.index;
+  }
+
   /* add vertex names */
   if ( vertexnames )
   {
