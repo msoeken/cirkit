@@ -73,27 +73,33 @@ struct aig_function
   }
 };
 
+namespace detail
+{
+using node_pair = std::pair<traits_t::vertex_descriptor, traits_t::vertex_descriptor>;
+}
+
 struct aig_graph_info
 {
-  std::string                                                   model_name;
-  detail::traits_t::vertex_descriptor                           constant;
-  bool                                                          constant_used = false;
-  bool                                                          enable_strashing = true;
-  bool                                                          enable_local_optimization = true;
-  std::map<detail::traits_t::vertex_descriptor, std::string>    node_names;
-  std::vector<std::pair<aig_function, std::string> >            outputs;
-  std::vector<detail::traits_t::vertex_descriptor>              inputs;
-  std::vector<aig_function>                                     cos;
-  std::vector<detail::traits_t::vertex_descriptor>              cis;
-  std::map<std::pair<aig_function, aig_function>, aig_function> strash;
-  std::map<aig_function, aig_function>                          latch;
+  std::string                                                    model_name;
+  detail::traits_t::vertex_descriptor                            constant;
+  bool                                                           constant_used = false;
+  bool                                                           enable_strashing = true;
+  bool                                                           enable_local_optimization = true;
+  std::map<detail::traits_t::vertex_descriptor, std::string>     node_names;
+  std::vector<std::pair<aig_function, std::string> >             outputs;
+  std::vector<detail::traits_t::vertex_descriptor>               inputs;
+  std::vector<aig_function>                                      cos;
+  std::vector<detail::traits_t::vertex_descriptor>               cis;
+  std::map<std::pair<aig_function, aig_function>, aig_function>  strash;
+  std::map<aig_function, aig_function>                           latch;
+  std::vector<detail::node_pair>                                 input_symmetries;
 };
 
 namespace detail
 {
 
 using vertex_properties_t = boost::property<boost::vertex_name_t, unsigned,
-                            boost::property<boost::vertex_annotation_t, std::map<std::string, std::string> > >;
+                            boost::property<boost::vertex_annotation_t, std::map<std::string, std::string>>>;
 using edge_properties_t = boost::property<boost::edge_complement_t, bool>;
 using graph_properties_t = boost::property<boost::graph_name_t, aig_graph_info>;
 
