@@ -62,6 +62,7 @@ public:
 
   bool operator==( Derived other ) const { return i == other.i; }
   bool operator!=( Derived other ) const { return i != other.i; }
+  bool operator<( Derived other ) const { return i < other.i; }
 
   /**
    * @brief Checks for nullness/emptiness
