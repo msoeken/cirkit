@@ -73,18 +73,3 @@ externalProject_add(aiger
   LOG_INSTALL 1
 )
 add_dependencies(external aiger)
-
-externalProject_add(igraphex
-  DOWNLOAD_DIR .
-  URL "http://igraph.org/nightly/get/c/igraph-0.7.1.tar.gz"
-  CONFIGURE_COMMAND ./configure --prefix=${CMAKE_SOURCE_DIR}/ext
-  BUILD_COMMAND make -j5
-  BUILD_IN_SOURCE 1
-  INSTALL_COMMAND make install
-  LOG_DOWNLOAD 1
-  LOG_BUILD 1
-  LOG_INSTALL 1)
-add_dependencies(external igraphex)
-
-set(IGRAPH_LIBRARIES "${ext_LIB}/libigraph.so" PARENT_SCOPE)
-

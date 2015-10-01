@@ -36,8 +36,6 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/optional.hpp>
 
-#include <igraph/igraph.h>
-
 #include <core/properties.hpp>
 #include <core/utils/graph_utils.hpp>
 #include <classical/aig.hpp>
@@ -145,8 +143,6 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
                                           const properties::ptr& statistics = properties::ptr() );
 
 std::vector<simulation_signature_t::value_type> compute_simulation_signatures( const aig_graph& aig, unsigned maxk = 2u );
-
-igraph_t simulation_graph_to_igraph( const simulation_graph& g );
 
 /******************************************************************************
  * simulation_graph_wrapper                                                   *

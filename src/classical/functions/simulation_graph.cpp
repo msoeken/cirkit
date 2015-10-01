@@ -385,23 +385,6 @@ std::vector<simulation_signature_t::value_type> compute_simulation_signatures( c
   return vec;
 }
 
-igraph_t simulation_graph_to_igraph( const simulation_graph& g )
-{
-  igraph_t ig;
-  igraph_vector_t edges;
-
-  igraph_vector_init( &edges, boost::num_edges( g ) << 1u );
-  unsigned index = 0u;
-  for ( const auto& e : boost::make_iterator_range( boost::edges( g ) ) )
-  {
-    VECTOR(edges)[index++] = boost::source( e, g );
-    VECTOR(edges)[index++] = boost::target( e, g );
-  }
-  igraph_create( &ig, &edges, boost::num_vertices( g ), 1 );
-  igraph_simplify( &ig, 1, 1, 0 );
-  return ig;
-}
-
 /******************************************************************************
  * simulation_graph_wrapper                                                   *
  ******************************************************************************/
