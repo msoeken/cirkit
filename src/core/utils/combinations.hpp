@@ -723,7 +723,6 @@ bool
 reversible_permutation<Function, Size>::operator()(BidirIter first,
                                                    BidirIter last)
 {
-    typedef typename std::iterator_traits<BidirIter>::difference_type difference_type;
     typedef rev2<bound_range<Function&, BidirIter>, BidirIter> F2;
     typedef rev3<bound_range<Function&, BidirIter>, BidirIter> F3;
     // When the range is 0 - 2, then this is just a combination of N out of N
