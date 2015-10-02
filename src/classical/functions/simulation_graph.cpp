@@ -283,7 +283,13 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto& info    = aig_info( aig );
   const auto  n       = info.inputs.size();
   const auto  m       = info.outputs.size();
-  auto        vectors = create_simulation_vectors( info.inputs.size(), types, &partition );
+
+  std::vector<boost::dynamic_bitset<>> vectors;
+
+  {
+    properties_timer t( statistics, "simulation_runtime" );
+    vectors = create_simulation_vectors( info.inputs.size(), types, &partition );
+  }
 
   boost::push_back( vectors, additional_vectors );
 
@@ -392,7 +398,7 @@ std::vector<simulation_signature_t::value_type> compute_simulation_signatures( c
 inline simulation_graph create_simulation_graph_wrapper( const aig_graph& aig, const std::vector<unsigned>& types,
                                                          bool support_edges, const boost::optional<unsigned>& simulation_signatures )
 {
-  auto settings = std::make_shared<properties>();
+  const auto settings = std::make_shared<properties>();
   settings->set( "support", true );
   settings->set( "vertexnames", true );
   settings->set( "support_edges", support_edges );
