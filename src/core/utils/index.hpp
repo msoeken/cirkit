@@ -186,8 +186,6 @@ class index_set
 public:
   using const_iterator = typename std::vector<IndexType>::const_iterator;
 
-  index_set() {}
-
   bool insert( IndexType index )
   {
     if ( positions.has( index ) )
