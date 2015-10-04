@@ -34,29 +34,6 @@ set(CUDD_LIBRARIES
   PARENT_SCOPE
 )
 
-set(puma_SRC ${CMAKE_BINARY_DIR}/ext/puma-prefix/src/puma)
-set(puma_HEADERS
-  ${puma_SRC}/include/puma.h
-  ${puma_SRC}/include/tc_time.h)
-set(puma_LIBS
-  ${puma_SRC}/lib/libpuma.so)
-
-externalProject_add(puma
-  DOWNLOAD_DIR .
-  URL "http://www.informatik.uni-bremen.de/revkit/files/puma-2.24.tar.gz"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND make puma -C bin
-  BUILD_IN_SOURCE 1
-  INSTALL_COMMAND cp ${puma_HEADERS} ${ext_INCLUDE} COMMAND cp ${puma_LIBS} ${ext_LIB}
-  LOG_DOWNLOAD 1
-  LOG_BUILD 1
-  LOG_INSTALL 1)
-add_dependencies(external puma)
-
-set(PUMA_LIBRARIES
-  ${ext_LIB}/libpuma.so
-  PARENT_SCOPE)
-
 set(aiger_SRC ${CMAKE_BINARY_DIR}/ext/aiger-prefix/src/aiger)
 set(aiger_HEADERS ${aiger_SRC}/aiger.h)
 set(aiger_LIBS ${aiger_SRC}/libaiger.so.1.0.1)
