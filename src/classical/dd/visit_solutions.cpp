@@ -31,7 +31,7 @@ namespace std
 template<>
 struct less<std::vector<boost::tribool>>
 {
-  bool operator()( const std::vector<boost::tribool>& v1, const std::vector<boost::tribool>& v2 )
+  bool operator()( const std::vector<boost::tribool>& v1, const std::vector<boost::tribool>& v2 ) const
   {
     assert( v1.size() == v2.size() );
 

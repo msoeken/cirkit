@@ -23,30 +23,28 @@ externalProject_add(cudd
 add_dependencies(external cudd)
 
 set(CUDD_LIBRARIES
-  ${ext_LIB}/libcudd_obj.so
-  ${ext_LIB}/libcudd_cudd.so
-  ${ext_LIB}/libcudd_mtr.so
-  ${ext_LIB}/libcudd_st.so
-  ${ext_LIB}/libcudd_epd.so
-  ${ext_LIB}/libcudd_util.so
-  ${ext_LIB}/libcudd_dddmp.so
+  ${ext_LIB}/libcudd_obj${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${ext_LIB}/libcudd_cudd${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${ext_LIB}/libcudd_mtr${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${ext_LIB}/libcudd_st${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${ext_LIB}/libcudd_epd${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${ext_LIB}/libcudd_util${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${ext_LIB}/libcudd_dddmp${CMAKE_SHARED_LIBRARY_SUFFIX}
 
   PARENT_SCOPE
 )
 
-set(aiger_SRC ${CMAKE_BINARY_DIR}/ext/aiger-prefix/src/aiger)
-set(aiger_HEADERS ${aiger_SRC}/aiger.h)
-set(aiger_LIBS ${aiger_SRC}/libaiger.so.1.0.1)
-
 externalProject_add(aiger
   DOWNLOAD_DIR .
   URL "http://www.informatik.uni-bremen.de/revkit/files/aiger-1.9.4.tar.gz"
-  CONFIGURE_COMMAND sed -i -e "s/CFLAGS=\"/CFLAGS=\"-fPIC /g" configure COMMAND ./configure
-  BUILD_COMMAND make COMMAND gcc -shared -Wl,-soname,libaiger.so.1 -o libaiger.so.1.0.1 aiger.o -lc
-  BUILD_IN_SOURCE 1
-  INSTALL_COMMAND cp ${aiger_HEADERS} ${ext_INCLUDE} COMMAND cp ${aiger_LIBS} ${ext_LIB} COMMAND ldconfig -n ${ext_LIB} COMMAND ln -fs ${ext_LIB}/libaiger.so.1.0.1 ${ext_LIB}/libaiger.so
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/ext
   LOG_DOWNLOAD 1
   LOG_BUILD 1
-  LOG_INSTALL 1
-)
+  LOG_INSTALL 1)
 add_dependencies(external aiger)
+
+set(AIGER_LIBRARIES
+  ${ext_LIB}/libaiger${CMAKE_SHARED_LIBRARY_SUFFIX}
+
+  PARENT_SCOPE
+)
