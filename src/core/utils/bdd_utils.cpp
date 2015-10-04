@@ -147,7 +147,7 @@ bool Extra_bddUnate( DdManager * dd, DdNode * f, std::vector<int>& ps )
   ps.resize( Cudd_ReadSize( dd ) );
   boost::fill( ps, 0 );
 
-  if ( Cudd_IsConstant( f ) ) return true;
+  if Cudd_IsConstant( f ) return true;
 
   auto fr = Cudd_Regular( f );
 
@@ -194,7 +194,7 @@ void collect_nodes( DdNode * f, std::unordered_set<DdNode*>& visited )
   visited.insert( f );
 
   /* terminate? */
-  if ( cuddIsConstant( f ) ) { return; }
+  if cuddIsConstant( f ) { return; }
 
   /* recur */
   collect_nodes( cuddT( f ), visited );
@@ -219,7 +219,7 @@ void collect_nodes_and_count( DdNode * f, std::unordered_map<DdNode*, unsigned>&
   visited.insert( {f, 1u} );
 
   /* terminate? */
-  if ( cuddIsConstant( f ) ) { return; }
+  if cuddIsConstant( f ) { return; }
 
   /* recur */
   collect_nodes_and_count( cuddT( f ), visited );
@@ -248,7 +248,7 @@ void collect_nodes_and_count_ignore_complemented( const DdNode * f, std::unorder
   visited.insert( {fr, (Cudd_IsComplement( f ) ? 0u : 1u)} );
 
   /* terminate? */
-  if ( cuddIsConstant( fr ) ) { return; }
+  if cuddIsConstant( fr ) { return; }
 
   /* recur */
   collect_nodes_and_count_ignore_complemented( cuddT( fr ), visited );
@@ -331,7 +331,7 @@ void count_complement_edges_rec( DdManager* manager, DdNode* f, unsigned& count,
     ++count;
   }
 
-  if ( Cudd_IsConstant( f ) )
+  if Cudd_IsConstant( f )
   {
     return;
   }
@@ -405,7 +405,7 @@ DdNode * bdd_copy_rec( DdManager* mgr_from, DdNode* from, DdManager* mgr_to, std
 {
   assert( !Cudd_IsComplement( from ) );
 
-  if ( Cudd_IsConstant( from ) )
+  if Cudd_IsConstant( from )
   {
     if ( from == DD_ONE( mgr_from ) )
     {
