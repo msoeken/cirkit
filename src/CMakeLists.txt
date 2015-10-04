@@ -19,5 +19,4 @@ add_cirkit_library(
   USE
     cirkit_core
     ${Boost_FILESYSTEM_LIBRARIES}
-    ${IGRAPH_LIBRARIES}
 )
