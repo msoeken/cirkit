@@ -27,12 +27,19 @@
 #ifndef TERMINAL_HPP
 #define TERMINAL_HPP
 
+#include <iostream>
 #include <string>
 
 namespace cirkit
 {
 
 void print_banner( const std::string& caption, unsigned width = 40u );
+
+class null_stream : public std::streambuf
+{
+public:
+  inline int overflow( int c ) { return c; }
+};
 
 }
 
