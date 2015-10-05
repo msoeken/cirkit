@@ -159,7 +159,7 @@ std::vector<simulation_signature_t::value_type> compute_simulation_signatures( c
  * If FAST_EDGE_ACCESS is defined, edge directions and edge labels are stored
  * in an adjacency matrix, which increases performance but also memory usage.
  */
-//#define FAST_EDGE_ACCESS
+#define FAST_EDGE_ACCESS
 
 class simulation_graph_wrapper
 {
