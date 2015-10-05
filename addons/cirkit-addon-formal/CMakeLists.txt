@@ -10,12 +10,12 @@ externalProject_add(z3ep
   CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} scripts/mk_make.py --prefix=${CMAKE_SOURCE_DIR}/ext
   BUILD_COMMAND make -C build
   BUILD_IN_SOURCE 1
-  INSTALL_COMMAND sed "/usr/d" -i build/Makefile COMMAND make install -C build
+  INSTALL_COMMAND make install -C build
 )
 add_dependencies(external z3ep)
 
 set(Z3_LIBRARIES
-  ${ext_LIB}/libz3.so
+  ${ext_LIB}/libz3${CMAKE_SHARED_LIBRARY_SUFFIX}
 )
 
 link_directories(${ext_LIB})

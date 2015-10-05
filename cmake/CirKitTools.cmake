@@ -60,7 +60,7 @@ function( add_cirkit_library )
   set_property( TARGET ${arg_NAME} PROPERTY POSITION_INDEPENDENT_CODE on )
 
   if( DEFINED arg_USE )
-    target_link_libraries( ${arg_NAME} ${arg_USE} )
+    target_link_libraries( ${arg_NAME} PUBLIC ${arg_USE} )
   endif( )
 
   if( DEFINED arg_INCLUDE )
