@@ -8,3 +8,5 @@ ext/functions
 ext/bin
 ext/share
 tmp
+
+.tags
