@@ -30,7 +30,6 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <core/io/write_graph_file.hpp>
-#include <core/utils/bitset_utils.hpp>
 #include <core/utils/combinations.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/functions/simulate_aig.hpp>
@@ -58,6 +57,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto support               = get( settings, "support",               false );
   const auto support_edges         = get( settings, "support_edges",         false );
   const auto simulation_signatures = get( settings, "simulation_signatures", boost::optional<unsigned>() );
+  const auto annotate_simvectors   = get( settings, "annotate_simvectors",   false );
 
   if ( support_edges && !support )
   {
@@ -154,6 +154,16 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   for ( const auto& o : index( info.outputs ) )
   {
     meta.port_to_node[o.value.first.node] = n + sim_vectors.size() + o.index;
+  }
+
+  /* annotate simulation vectors */
+  if ( annotate_simvectors )
+  {
+    const auto& vertex_sim_vector = boost::get( boost::vertex_simulation_vector, g );
+    for ( const auto& v : index( sim_vectors ) )
+    {
+      vertex_sim_vector[n + v.index] = v.value;
+    }
   }
 
   /* simulation signatures */
@@ -373,6 +383,7 @@ inline simulation_graph create_simulation_graph_wrapper( const aig_graph& aig, c
   settings->set( "support", true );
   settings->set( "support_edges", support_edges );
   settings->set( "simulation_signatures", simulation_signatures );
+  settings->set( "annotate_simvectors", true );
 
   return create_simulation_graph( aig, types, settings );
 }
@@ -397,6 +408,7 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
   vertex_out_degree           = boost::get( boost::vertex_out_degree, graph );
   vertex_support              = boost::get( boost::vertex_support, graph );
   vertex_simulation_signature = boost::get( boost::vertex_simulation_signature, graph );
+  vertex_sim_vectors          = boost::get( boost::vertex_simulation_vector, graph );
   medge_label                 = boost::get( boost::edge_label, graph );
 
   /* fill labels */

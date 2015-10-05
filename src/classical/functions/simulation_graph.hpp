@@ -37,6 +37,7 @@
 #include <boost/optional.hpp>
 
 #include <core/properties.hpp>
+#include <core/utils/bitset_utils.hpp>
 #include <core/utils/graph_utils.hpp>
 #include <classical/aig.hpp>
 
@@ -57,6 +58,9 @@ BOOST_INSTALL_PROPERTY(vertex, label);
 
 enum vertex_simulation_signature_t { vertex_simulation_signature };
 BOOST_INSTALL_PROPERTY(vertex, simulation_signature);
+
+enum vertex_simulation_vector_t { vertex_simulation_vector };
+BOOST_INSTALL_PROPERTY(vertex, simulation_vector);
 
 enum edge_label_t { edge_label };
 BOOST_INSTALL_PROPERTY(edge, label);
@@ -110,7 +114,8 @@ using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_de
                                              boost::property<boost::vertex_out_degree_t, unsigned,
                                              boost::property<boost::vertex_support_t, unsigned,
                                              boost::property<boost::vertex_label_t, unsigned,
-                                             boost::property<boost::vertex_simulation_signature_t, simulation_signature_t>>>>>;
+                                             boost::property<boost::vertex_simulation_signature_t, simulation_signature_t,
+                                             boost::property<boost::vertex_simulation_vector_t, boost::dynamic_bitset<>>>>>>>;
 
 using simulation_graph_edge_properties_t   = boost::property<boost::edge_label_t, unsigned>;
 
@@ -181,12 +186,9 @@ public:
   inline std::string name( unsigned u ) const
   {
     if ( u < num_inputs() ) { return info.node_names.at( info.inputs[u] ); }
-    u -= num_inputs();
+    if ( u < num_inputs() + num_vectors() ) { return to_string( vertex_sim_vectors[u] ); }
 
-    if ( u < num_vectors() ) { return "SIM"; }
-    u -= num_vectors();
-
-    return info.outputs[u].second;
+    return info.outputs[u - num_inputs() - num_vectors()].second;
   }
 
   inline unsigned port_to_node( const aig_node& port ) const             { return boost::get_property( graph, boost::graph_meta ).port_to_node.at( port ); }
@@ -225,6 +227,7 @@ private:
   boost::property_map<simulation_graph, boost::vertex_out_degree_t>::type           vertex_out_degree;
   boost::property_map<simulation_graph, boost::vertex_support_t>::type              vertex_support;
   boost::property_map<simulation_graph, boost::vertex_simulation_signature_t>::type vertex_simulation_signature;
+  boost::property_map<simulation_graph, boost::vertex_simulation_vector_t>::type    vertex_sim_vectors;
   boost::property_map<simulation_graph, boost::edge_label_t>::type                  medge_label;
 
 #ifdef FAST_EDGE_ACCESS
