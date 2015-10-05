@@ -62,6 +62,9 @@ BOOST_INSTALL_PROPERTY(vertex, simulation_signature);
 enum vertex_simulation_vector_t { vertex_simulation_vector };
 BOOST_INSTALL_PROPERTY(vertex, simulation_vector);
 
+enum vertex_simulation_result_t { vertex_simulation_result };
+BOOST_INSTALL_PROPERTY(vertex, simulation_result);
+
 enum edge_label_t { edge_label };
 BOOST_INSTALL_PROPERTY(edge, label);
 
@@ -115,7 +118,8 @@ using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_de
                                              boost::property<boost::vertex_support_t, unsigned,
                                              boost::property<boost::vertex_label_t, unsigned,
                                              boost::property<boost::vertex_simulation_signature_t, simulation_signature_t,
-                                             boost::property<boost::vertex_simulation_vector_t, boost::dynamic_bitset<>>>>>>>;
+                                             boost::property<boost::vertex_simulation_vector_t, boost::dynamic_bitset<>,
+                                             boost::property<boost::vertex_simulation_result_t, boost::dynamic_bitset<>>>>>>>>;
 
 using simulation_graph_edge_properties_t   = boost::property<boost::edge_label_t, unsigned>;
 

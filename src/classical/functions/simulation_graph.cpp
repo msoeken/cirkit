@@ -109,6 +109,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
   const auto results = simulate_aig( aig, word_assignment_simulator( map ) );
 
+  /* prepare annotation of simvectors */
+  std::vector<boost::dynamic_bitset<>> results_t;
+
+  if ( annotate_simvectors )
+  {
+    results_t.resize( sim_vectors.size(), boost::dynamic_bitset<>( m ) );
+  }
+
   /* create edges */
   for ( auto j = 0u; j < m; ++j )
   {
@@ -118,6 +126,11 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
       if ( ovalue[i] )
       {
         add_edge_func( n + i, n + sim_vectors.size() + j );
+      }
+
+      if ( annotate_simvectors )
+      {
+        results_t[i][j] = ovalue[i];
       }
     }
   }
@@ -160,9 +173,12 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   if ( annotate_simvectors )
   {
     const auto& vertex_sim_vector = boost::get( boost::vertex_simulation_vector, g );
+    const auto& vertex_sim_result = boost::get( boost::vertex_simulation_result, g );
+
     for ( const auto& v : index( sim_vectors ) )
     {
       vertex_sim_vector[n + v.index] = v.value;
+      vertex_sim_result[n + v.index] = results_t[v.index];
     }
   }
 
