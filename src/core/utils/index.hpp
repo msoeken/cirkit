@@ -32,6 +32,8 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/range/algorithm.hpp>
+
 namespace cirkit
 {
 
@@ -245,6 +247,14 @@ public:
   /* iterators */
   const_iterator begin() const { return values.begin(); }
   const_iterator end()   const { return values.end();   }
+
+  bool operator==( const index_set<IndexType>& other ) const
+  {
+    auto v1 = values;       boost::sort( v1 );
+    auto v2 = other.values; boost::sort( v2 );
+
+    return v1 == v2;
+  }
 
 private:
   std::vector<IndexType>         values;
