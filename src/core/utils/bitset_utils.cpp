@@ -94,6 +94,13 @@ std::vector<unsigned> get_index_vector( const boost::dynamic_bitset<> b )
   return std::move( v );
 }
 
+std::string to_string( const boost::dynamic_bitset<>& b )
+{
+  std::string s;
+  to_string( b, s );
+  return s;
+}
+
 }
 
 // Local Variables:
