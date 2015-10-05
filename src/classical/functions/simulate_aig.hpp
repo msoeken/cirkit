@@ -33,7 +33,6 @@
 
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/property_map/property_map.hpp>
-#include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
