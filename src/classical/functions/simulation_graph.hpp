@@ -109,9 +109,8 @@ using simulation_graph_properties_t        = boost::property<boost::graph_meta_t
 using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_degree_t, unsigned,
                                              boost::property<boost::vertex_out_degree_t, unsigned,
                                              boost::property<boost::vertex_support_t, unsigned,
-                                             boost::property<boost::vertex_name_t, std::string,
                                              boost::property<boost::vertex_label_t, unsigned,
-                                             boost::property<boost::vertex_simulation_signature_t, simulation_signature_t>>>>>>;
+                                             boost::property<boost::vertex_simulation_signature_t, simulation_signature_t>>>>>;
 
 using simulation_graph_edge_properties_t   = boost::property<boost::edge_label_t, unsigned>;
 
@@ -179,7 +178,16 @@ public:
   inline unsigned support( unsigned u ) const                            { return vertex_support[u]; }
   inline unsigned label( unsigned u ) const                              { return vertex_label[u]; }
   inline simulation_signature_t simulation_signature( unsigned u ) const { return vertex_simulation_signature[u]; }
-  inline const std::string& name( unsigned u ) const                     { return vertex_name[u]; }
+  inline std::string name( unsigned u ) const
+  {
+    if ( u < num_inputs() ) { return info.node_names.at( info.inputs[u] ); }
+    u -= num_inputs();
+
+    if ( u < num_vectors() ) { return "SIM"; }
+    u -= num_vectors();
+
+    return info.outputs[u].second;
+  }
 
   inline unsigned port_to_node( const aig_node& port ) const             { return boost::get_property( graph, boost::graph_meta ).port_to_node.at( port ); }
 
@@ -208,13 +216,14 @@ public:
   }
 
 private:
-  simulation_graph graph;
+  const aig_graph&      aig;
+  const aig_graph_info& info;
+  simulation_graph      graph;
 
   boost::property_map<simulation_graph, boost::vertex_label_t>::type                vertex_label;
   boost::property_map<simulation_graph, boost::vertex_in_degree_t>::type            vertex_in_degree;
   boost::property_map<simulation_graph, boost::vertex_out_degree_t>::type           vertex_out_degree;
   boost::property_map<simulation_graph, boost::vertex_support_t>::type              vertex_support;
-  boost::property_map<simulation_graph, boost::vertex_name_t>::type                 vertex_name;
   boost::property_map<simulation_graph, boost::vertex_simulation_signature_t>::type vertex_simulation_signature;
   boost::property_map<simulation_graph, boost::edge_label_t>::type                  medge_label;
 

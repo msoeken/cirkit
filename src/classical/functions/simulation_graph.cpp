@@ -57,7 +57,6 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto labeledname           = get( settings, "labeledname",           std::string() );
   const auto support               = get( settings, "support",               false );
   const auto support_edges         = get( settings, "support_edges",         false );
-  const auto vertexnames           = get( settings, "vertexnames",           false );
   const auto simulation_signatures = get( settings, "simulation_signatures", boost::optional<unsigned>() );
 
   if ( support_edges && !support )
@@ -157,29 +156,6 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     meta.port_to_node[o.value.first.node] = n + sim_vectors.size() + o.index;
   }
 
-  /* add vertex names */
-  if ( vertexnames )
-  {
-    const auto& vertex_names = boost::get( boost::vertex_name, g );
-
-    for ( const auto& i : index( info.inputs ) )
-    {
-      vertex_names[i.index] = info.node_names.at( i.value );
-    }
-
-    std::string bitstring;
-    for ( const auto& v : index( sim_vectors ) )
-    {
-      boost::to_string( v.value, bitstring );
-      vertex_names[n + v.index] = bitstring;
-    }
-
-    for ( const auto& o : index( info.outputs ) )
-    {
-      vertex_names[n + sim_vectors.size() + o.index] = o.value.second;
-    }
-  }
-
   /* simulation signatures */
   if ( (bool)simulation_signatures )
   {
@@ -196,14 +172,9 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   if ( !dotname.empty() )
   {
     std::ofstream os( dotname.c_str(), std::ofstream::out );
-    if ( vertexnames )
-    {
-      boost::write_graphviz( os, g, boost::make_label_writer( boost::get( boost::vertex_name, g ) ) );
-    }
-    else
-    {
-      boost::write_graphviz( os, g );
-    }
+
+    // TODO consider vertex names in a different way
+    boost::write_graphviz( os, g );
     os.close();
   }
 
@@ -400,7 +371,6 @@ inline simulation_graph create_simulation_graph_wrapper( const aig_graph& aig, c
 {
   const auto settings = std::make_shared<properties>();
   settings->set( "support", true );
-  settings->set( "vertexnames", true );
   settings->set( "support_edges", support_edges );
   settings->set( "simulation_signatures", simulation_signatures );
 
@@ -411,7 +381,9 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
                                                     const std::vector<unsigned>& types,
                                                     bool support_edges,
                                                     const boost::optional<unsigned>& simulation_signatures )
-  : graph( create_simulation_graph_wrapper( g, types, support_edges, simulation_signatures ) ),
+  : aig( g ),
+    info( aig_info( g ) ),
+    graph( create_simulation_graph_wrapper( g, types, support_edges, simulation_signatures ) ),
 #ifdef FAST_EDGE_ACCESS
     vedge_label( boost::num_vertices( graph ), std::vector<int>( boost::num_vertices( graph ), 0 ) ),
     vedge_direction( boost::num_vertices( graph ), std::vector<int>( boost::num_vertices( graph ), 0 ) )
@@ -424,7 +396,6 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
   vertex_in_degree            = boost::get( boost::vertex_in_degree, graph );
   vertex_out_degree           = boost::get( boost::vertex_out_degree, graph );
   vertex_support              = boost::get( boost::vertex_support, graph );
-  vertex_name                 = boost::get( boost::vertex_name, graph );
   vertex_simulation_signature = boost::get( boost::vertex_simulation_signature, graph );
   medge_label                 = boost::get( boost::edge_label, graph );
 
