@@ -18,7 +18,7 @@
 /**
  * @file read_aiger.hpp
  *
- * @brief Read AIG in aiger format
+ * @brief Read AIGs in ASCII AIGER format
  *
  * @author Heinz Riener
  * @since  2.0
@@ -36,9 +36,9 @@ namespace cirkit
 
 unsigned aiger_lit2var( const unsigned lit );
 
-void read_aiger( aig_graph& aig, std::ifstream& in );
+void read_aiger( aig_graph& aig, std::istream& in );
 void read_aiger( aig_graph& aig, const std::string& filename );
-void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in );
+void read_aiger( aig_graph& aig, std::string& comment, std::istream& in );
 void read_aiger( aig_graph& aig, std::string& comment, const std::string& filename );
 
 }
