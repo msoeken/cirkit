@@ -75,6 +75,11 @@ std::string make_properties_string( const string_properties_map_t& properties, c
 
 std::vector<std::string> split_with_quotes( const std::string& s );
 
+inline const std::string& empty_default( const std::string& s, const std::string& d )
+{
+  return s.empty() ? d : s;
+}
+
 }
 
 #endif
