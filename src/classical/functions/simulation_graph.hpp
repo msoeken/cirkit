@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/format.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/optional.hpp>
@@ -39,6 +40,7 @@
 #include <core/properties.hpp>
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/graph_utils.hpp>
+#include <core/utils/string_utils.hpp>
 #include <classical/aig.hpp>
 
 namespace boost
@@ -189,10 +191,11 @@ public:
   inline simulation_signature_t simulation_signature( unsigned u ) const { return vertex_simulation_signature[u]; }
   inline std::string name( unsigned u ) const
   {
-    if ( u < num_inputs() ) { return info.node_names.at( info.inputs[u] ); }
+    if ( u < num_inputs() ) { return empty_default( info.node_names.at( info.inputs[u] ), boost::str( boost::format( "i%d" ) % u ) ); }
     if ( u < num_inputs() + num_vectors() ) { return to_string( vertex_sim_vectors[u] ); }
 
-    return info.outputs[u - num_inputs() - num_vectors()].second;
+    u -= ( num_inputs() + num_vectors() );
+    return empty_default( info.outputs[u].second, boost::str( boost::format( "o%d" ) % u ) );
   }
 
   inline unsigned port_to_node( const aig_node& port ) const             { return boost::get_property( graph, boost::graph_meta ).port_to_node.at( port ); }
