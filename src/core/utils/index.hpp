@@ -62,9 +62,10 @@ public:
    */
   static const Derived null() { return Derived(); }
 
-  bool operator==( Derived other ) const { return i == other.i; }
-  bool operator!=( Derived other ) const { return i != other.i; }
-  bool operator<( Derived other ) const { return i < other.i; }
+  bool operator==( const Derived& other ) const { return i == other.i; }
+  bool operator!=( const Derived& other ) const { return i != other.i; }
+  bool operator>( const Derived& other ) const { return i > other.i; }
+  bool operator<( const Derived& other ) const { return i < other.i; }
 
   /**
    * @brief Checks for nullness/emptiness
