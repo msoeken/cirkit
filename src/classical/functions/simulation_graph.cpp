@@ -448,7 +448,7 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
   }
 }
 
-void simulation_graph_wrapper::fill_neighbor_degree_sequence( unsigned u, std::vector<unsigned>& degrees ) const
+void simulation_graph_wrapper::fill_neighbor_degree_sequence( unsigned u, boost::container::flat_multiset<unsigned>& degrees ) const
 {
   assert( degrees.empty() );
   assert( out_degree( u ) + in_degree( u ) == degree( u ) );
@@ -458,7 +458,7 @@ void simulation_graph_wrapper::fill_neighbor_degree_sequence( unsigned u, std::v
          || ( is_vector( u ) && is_output( u2 ) )
          || ( is_output( u ) && is_input( u2 ) ) )
     {
-      degrees.push_back( out_degree( u2 ) );
+      degrees.insert( out_degree( u2 ) );
     }
   }
   assert( degrees.size() == out_degree( u ) );
