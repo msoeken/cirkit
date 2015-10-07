@@ -209,7 +209,8 @@ public:
   inline simulation_node source( const simulation_edge& e ) const { return boost::source( e, graph ); }
   inline simulation_node target( const simulation_edge& e ) const { return boost::target( e, graph ); }
 
-  void fill_neighbor_degree_sequence( unsigned u, std::vector<unsigned>& degrees ) const;
+  void fill_neighbor_degree_sequence_out( unsigned u, std::vector<unsigned>& degrees ) const;
+  void fill_neighbor_degree_sequence_all( unsigned u, std::vector<unsigned>& degrees ) const;
 
   inline bool is_input( unsigned u ) const  { return label( u ) == 0u; }
   inline bool is_vector( unsigned u ) const { return label( u ) > 1u;  }
