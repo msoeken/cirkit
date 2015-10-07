@@ -31,7 +31,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <boost/container/flat_set.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/functional/hash.hpp>
@@ -210,7 +209,7 @@ public:
   inline simulation_node source( const simulation_edge& e ) const { return boost::source( e, graph ); }
   inline simulation_node target( const simulation_edge& e ) const { return boost::target( e, graph ); }
 
-  void fill_neighbor_degree_sequence( unsigned u, boost::container::flat_multiset<unsigned>& degrees ) const;
+  void fill_neighbor_degree_sequence( unsigned u, std::vector<unsigned>& degrees ) const;
 
   inline bool is_input( unsigned u ) const  { return label( u ) == 0u; }
   inline bool is_vector( unsigned u ) const { return label( u ) > 1u;  }
