@@ -27,11 +27,13 @@
 #include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/combine.hpp>
+#include <boost/range/counting_range.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <core/io/write_graph_file.hpp>
 #include <core/utils/combinations.hpp>
 #include <core/utils/range_utils.hpp>
+#include <core/utils/string_utils.hpp>
 #include <classical/functions/simulate_aig.hpp>
 #include <classical/functions/aig_support.hpp>
 #include <classical/utils/aig_utils.hpp>
@@ -444,6 +446,77 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
     vedge_direction[tgt].insert( {src, 1} );
 #endif
   }
+}
+
+void simulation_graph_wrapper::fill_neighbor_degree_sequence( unsigned u, std::vector<unsigned>& degrees ) const
+{
+  assert( degrees.empty() );
+  assert( out_degree( u ) + in_degree( u ) == degree( u ) );
+  for ( const auto& u2 : adjacent( u ) )
+  {
+    if ( ( is_input( u ) && is_vector( u2 ) )
+         || ( is_vector( u ) && is_output( u2 ) )
+         || ( is_output( u ) && is_input( u2 ) ) )
+    {
+      degrees.push_back( out_degree( u2 ) );
+    }
+  }
+  assert( degrees.size() == out_degree( u ) );
+  boost::sort( degrees );
+}
+
+struct simulation_graph_wrapper_dot_writer
+{
+public:
+  explicit simulation_graph_wrapper_dot_writer( const simulation_graph_wrapper& simgraph ) : simgraph( simgraph ) {}
+
+  void operator()( std::ostream& out, const simulation_node& v ) const
+  {
+    string_properties_map_t properties = {{"label", boost::str( boost::format( "\"%s\"" ) % simgraph.name( v ) )}};
+
+    if ( simgraph.is_input( v ) )
+    {
+      properties.insert( {"shape", "cds"} );
+    }
+    else if ( simgraph.is_output( v ) )
+    {
+      properties.insert( {"shape", "cds"} );
+      properties.insert( {"orientation", "180"} );
+    }
+    out << boost::format( "[%s]" ) % make_properties_string( properties );
+  }
+
+  void operator()( std::ostream& out, const simulation_edge& e ) const
+  {
+    if ( ( simgraph.is_input( simgraph.source( e ) ) && simgraph.is_output( simgraph.target( e ) ) ) ||
+         ( simgraph.is_output( simgraph.source( e ) ) && simgraph.is_input( simgraph.target( e ) ) ) )
+    {
+      out << boost::format( "[color=gray]" );
+    }
+  }
+
+  void operator()( std::ostream& out ) const
+  {
+    const auto n = simgraph.num_inputs();
+    const auto v = simgraph.num_vectors();
+    const auto m = simgraph.num_outputs();
+
+    out << "rankdir=LR" << std::endl
+        << "{rank=same " << any_join( boost::counting_range( 0u, n ), " " ) << " }" << std::endl
+        << "{rank=same " << any_join( boost::counting_range( n, n + v ), " " ) << " }" << std::endl
+        << "{rank=same " << any_join( boost::counting_range( n + v, n + v + m ), " " ) << " }" << std::endl;
+  }
+
+private:
+  const simulation_graph_wrapper& simgraph;
+};
+
+void simulation_graph_wrapper::write_dot( const std::string& filename ) const
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+
+  simulation_graph_wrapper_dot_writer writer( *this );
+  boost::write_graphviz( os, graph, writer, writer, writer );
 }
 
 bool compatible_simulation_signatures( const simulation_graph_wrapper& pg, const simulation_graph_wrapper& tg,

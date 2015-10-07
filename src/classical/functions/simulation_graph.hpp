@@ -169,6 +169,7 @@ public:
   using vertex_range_t    = boost::iterator_range<boost::graph_traits<simulation_graph>::vertex_iterator>;
   using edge_range_t      = boost::iterator_range<boost::graph_traits<simulation_graph>::edge_iterator>;
   using adjacency_range_t = boost::iterator_range<boost::graph_traits<simulation_graph>::adjacency_iterator>;
+  using out_edge_range_t  = boost::iterator_range<boost::graph_traits<simulation_graph>::out_edge_iterator>;
 
 public:
   simulation_graph_wrapper( const aig_graph& g,
@@ -200,9 +201,19 @@ public:
 
   inline unsigned port_to_node( const aig_node& port ) const             { return boost::get_property( graph, boost::graph_meta ).port_to_node.at( port ); }
 
-  inline vertex_range_t    vertices() const             { return boost::make_iterator_range( boost::vertices( graph ) ); }
-  inline edge_range_t      edges() const                { return boost::make_iterator_range( boost::edges( graph ) ); }
-  inline adjacency_range_t adjacent( unsigned u ) const { return boost::make_iterator_range( boost::adjacent_vertices( u, graph ) ); }
+  inline vertex_range_t    vertices() const              { return boost::make_iterator_range( boost::vertices( graph ) ); }
+  inline edge_range_t      edges() const                 { return boost::make_iterator_range( boost::edges( graph ) ); }
+  inline adjacency_range_t adjacent( unsigned u ) const  { return boost::make_iterator_range( boost::adjacent_vertices( u, graph ) ); }
+  inline out_edge_range_t  out_edges( unsigned u ) const { return boost::make_iterator_range( boost::out_edges( u, graph ) ); }
+
+  inline simulation_node source( const simulation_edge& e ) const { return boost::source( e, graph ); }
+  inline simulation_node target( const simulation_edge& e ) const { return boost::target( e, graph ); }
+
+  void fill_neighbor_degree_sequence( unsigned u, std::vector<unsigned>& degrees ) const;
+
+  inline bool is_input( unsigned u ) const  { return label( u ) == 0u; }
+  inline bool is_vector( unsigned u ) const { return label( u ) > 1u;  }
+  inline bool is_output( unsigned u ) const { return label( u ) == 1u; }
 
   inline unsigned edge_direction( unsigned u, unsigned v ) const
   {
@@ -224,7 +235,9 @@ public:
 #endif
   }
 
-private:
+  void write_dot( const std::string& filename ) const;
+
+protected:
   const aig_graph&      aig;
   const aig_graph_info& info;
   simulation_graph      graph;
