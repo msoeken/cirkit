@@ -10,3 +10,5 @@ ext/share
 tmp
 
 .tags
+.idea/
+
