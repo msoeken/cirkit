@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <stack>
 
 #include <boost/range/algorithm.hpp>
 
@@ -41,7 +42,7 @@ namespace cirkit
  * base_index                                                                 *
  ******************************************************************************/
 
-template<typename Derived>
+template<typename Tag>
 class base_index
 {
 public:
@@ -52,6 +53,8 @@ public:
    */
   base_index() : i( 0u ) {}
 
+  static base_index from_index( unsigned i ) { return base_index( i ); }
+
   /**
    * @brief Returns integer value
    */
@@ -60,12 +63,12 @@ public:
   /**
    * @brief Create empty index
    */
-  static const Derived null() { return Derived(); }
+  static const base_index null() { return base_index(); }
 
-  bool operator==( const Derived& other ) const { return i == other.i; }
-  bool operator!=( const Derived& other ) const { return i != other.i; }
-  bool operator>( const Derived& other ) const { return i > other.i; }
-  bool operator<( const Derived& other ) const { return i < other.i; }
+  bool operator==( const base_index& other ) const { return i == other.i; }
+  bool operator!=( const base_index& other ) const { return i != other.i; }
+  bool operator>( const base_index& other ) const { return i > other.i; }
+  bool operator<( const base_index& other ) const { return i < other.i; }
 
   /**
    * @brief Checks for nullness/emptiness
