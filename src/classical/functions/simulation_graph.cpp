@@ -146,7 +146,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     for ( const auto& o : index( info.outputs ) )
     {
       const auto& mask = s.at( o.value.first );
-      vertex_support[n + sim_vectors.size() + o.index] = mask.count();
+      vertex_support[n + sim_vectors.size() + o.index] = mask;
 
       if ( support_edges )
       {

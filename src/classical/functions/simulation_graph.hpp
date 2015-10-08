@@ -36,6 +36,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/optional.hpp>
+#include <boost/range/counting_range.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/bitset_utils.hpp>
@@ -117,7 +118,7 @@ using simulation_graph_properties_t        = boost::property<boost::graph_meta_t
  */
 using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_degree_t, unsigned,
                                              boost::property<boost::vertex_out_degree_t, unsigned,
-                                             boost::property<boost::vertex_support_t, unsigned,
+                                             boost::property<boost::vertex_support_t, boost::dynamic_bitset<>,
                                              boost::property<boost::vertex_label_t, unsigned,
                                              boost::property<boost::vertex_simulation_signature_t, simulation_signature_t,
                                              boost::property<boost::vertex_simulation_vector_t, boost::dynamic_bitset<>,
@@ -170,6 +171,7 @@ public:
   using edge_range_t      = boost::iterator_range<boost::graph_traits<simulation_graph>::edge_iterator>;
   using adjacency_range_t = boost::iterator_range<boost::graph_traits<simulation_graph>::adjacency_iterator>;
   using out_edge_range_t  = boost::iterator_range<boost::graph_traits<simulation_graph>::out_edge_iterator>;
+  using index_range_t     = boost::iterator_range<boost::iterators::counting_iterator<unsigned>>;
 
 public:
   simulation_graph_wrapper( const aig_graph& g,
@@ -187,9 +189,10 @@ public:
   inline unsigned degree( unsigned u ) const                             { return boost::out_degree( u, graph ); }
   inline unsigned in_degree( unsigned u ) const                          { return vertex_in_degree[u]; }
   inline unsigned out_degree( unsigned u ) const                         { return vertex_out_degree[u]; }
-  inline unsigned support( unsigned u ) const                            { return vertex_support[u]; }
+  inline boost::dynamic_bitset<> support( unsigned u ) const             { return vertex_support[u]; }
   inline unsigned label( unsigned u ) const                              { return vertex_label[u]; }
   inline simulation_signature_t simulation_signature( unsigned u ) const { return vertex_simulation_signature[u]; }
+  inline boost::dynamic_bitset<> simvector( unsigned u ) const           { return vertex_sim_vectors[u]; }
   inline std::string name( unsigned u ) const
   {
     if ( u < num_inputs() ) { return empty_default( info.node_names.at( info.inputs[u] ), boost::str( boost::format( "i%d" ) % u ) ); }
@@ -205,6 +208,10 @@ public:
   inline edge_range_t      edges() const                 { return boost::make_iterator_range( boost::edges( graph ) ); }
   inline adjacency_range_t adjacent( unsigned u ) const  { return boost::make_iterator_range( boost::adjacent_vertices( u, graph ) ); }
   inline out_edge_range_t  out_edges( unsigned u ) const { return boost::make_iterator_range( boost::out_edges( u, graph ) ); }
+
+  inline index_range_t input_indexes()  const { return boost::counting_range( 0u, num_inputs() ); }
+  inline index_range_t vector_indexes() const { return boost::counting_range( num_inputs(), num_inputs() + num_vectors() ); }
+  inline index_range_t output_indexes() const { return boost::counting_range( num_inputs() + num_vectors(), num_inputs() + num_vectors() + num_outputs() ); }
 
   inline simulation_node source( const simulation_edge& e ) const { return boost::source( e, graph ); }
   inline simulation_node target( const simulation_edge& e ) const { return boost::target( e, graph ); }
