@@ -1,5 +1,6 @@
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
+ * Copyright (C) 2015  The Regents of the University of California
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,9 +118,14 @@ class index_map
 public:
   static const ValueType null_value/* = value_traits<ValueType>::null_value*/;
 
+  bool has_index( IndexType index ) const
+  {
+    return index.index() < values.size();
+  }
+
   bool has( IndexType index ) const
   {
-    return index.index() < values.size() && values[index.index()] != null_value;
+    return has_index(index) && values[index.index()] != null_value;
   }
 
   /**
@@ -149,7 +155,7 @@ public:
 
   const ValueType& operator[]( IndexType index ) const
   {
-    assert( index.index() < values.size() );
+    assert( has_index(index) );
     return values[index.index()];
   }
 
@@ -169,7 +175,7 @@ public:
 private:
   void ensure_size( IndexType index )
   {
-    if ( index.index() >= values.size() )
+    if ( ! has_index(index) )
     {
       values.resize( index.index() + 1u, null_value );
     }
@@ -252,12 +258,27 @@ public:
   const_iterator begin() const { return values.begin(); }
   const_iterator end()   const { return values.end();   }
 
-  bool operator==( const index_set<IndexType>& other ) const
+  bool operator==( const index_set& other ) const
   {
-    auto v1 = values;       boost::sort( v1 );
-    auto v2 = other.values; boost::sort( v2 );
+    if( size() != other.size() )
+    {
+      return false;
+    }
 
-    return v1 == v2;
+    for( auto index : other )
+    {
+      if( !has(index) )
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool operator!=(const index_set& other) const
+  {
+    return ! operator==(other);
   }
 
 private:
