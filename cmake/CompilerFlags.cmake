@@ -13,7 +13,7 @@ endif()
 
 # compiler definitions
 add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE -D__extern_always_inline=inline -DDATA_PATH="${CMAKE_SOURCE_DIR}")
-
+add_definitions(-D__STDC_LIMIT_MACROS -D__STDC_FORMAT_MACROS)
 
 # clang specific compiler definitions
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
