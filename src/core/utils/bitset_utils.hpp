@@ -91,6 +91,8 @@ IntType to_multiprecision( const boost::dynamic_bitset<>& bs )
   return sum;
 }
 
+std::string to_string( const boost::dynamic_bitset<>& b );
+
 }
 
 #endif

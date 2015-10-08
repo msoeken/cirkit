@@ -63,6 +63,15 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
                     const properties::ptr& settings = properties::ptr(),
                     const properties::ptr& statistics = properties::ptr() );
 
+/**
+ * @brief Computes a smaller AIG based on output cones
+ *
+ * Version that takes output indexes instead of names.
+ */
+aig_graph aig_cone( const aig_graph& aig, const std::vector<unsigned>& index,
+                    const properties::ptr& settings = properties::ptr(),
+                    const properties::ptr& statistics = properties::ptr() );
+
 }
 
 #endif

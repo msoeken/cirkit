@@ -27,12 +27,13 @@
 #include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/combine.hpp>
+#include <boost/range/counting_range.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <core/io/write_graph_file.hpp>
-#include <core/utils/bitset_utils.hpp>
 #include <core/utils/combinations.hpp>
 #include <core/utils/range_utils.hpp>
+#include <core/utils/string_utils.hpp>
 #include <classical/functions/simulate_aig.hpp>
 #include <classical/functions/aig_support.hpp>
 #include <classical/utils/aig_utils.hpp>
@@ -57,8 +58,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto labeledname           = get( settings, "labeledname",           std::string() );
   const auto support               = get( settings, "support",               false );
   const auto support_edges         = get( settings, "support_edges",         false );
-  const auto vertexnames           = get( settings, "vertexnames",           false );
   const auto simulation_signatures = get( settings, "simulation_signatures", boost::optional<unsigned>() );
+  const auto annotate_simvectors   = get( settings, "annotate_simvectors",   false );
 
   if ( support_edges && !support )
   {
@@ -110,6 +111,14 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
   const auto results = simulate_aig( aig, word_assignment_simulator( map ) );
 
+  /* prepare annotation of simvectors */
+  std::vector<boost::dynamic_bitset<>> results_t;
+
+  if ( annotate_simvectors )
+  {
+    results_t.resize( sim_vectors.size(), boost::dynamic_bitset<>( m ) );
+  }
+
   /* create edges */
   for ( auto j = 0u; j < m; ++j )
   {
@@ -119,6 +128,11 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
       if ( ovalue[i] )
       {
         add_edge_func( n + i, n + sim_vectors.size() + j );
+      }
+
+      if ( annotate_simvectors )
+      {
+        results_t[i][j] = ovalue[i];
       }
     }
   }
@@ -132,7 +146,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     for ( const auto& o : index( info.outputs ) )
     {
       const auto& mask = s.at( o.value.first );
-      vertex_support[n + sim_vectors.size() + o.index] = mask.count();
+      vertex_support[n + sim_vectors.size() + o.index] = mask;
 
       if ( support_edges )
       {
@@ -157,26 +171,16 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     meta.port_to_node[o.value.first.node] = n + sim_vectors.size() + o.index;
   }
 
-  /* add vertex names */
-  if ( vertexnames )
+  /* annotate simulation vectors */
+  if ( annotate_simvectors )
   {
-    const auto& vertex_names = boost::get( boost::vertex_name, g );
+    const auto& vertex_sim_vector = boost::get( boost::vertex_simulation_vector, g );
+    const auto& vertex_sim_result = boost::get( boost::vertex_simulation_result, g );
 
-    for ( const auto& i : index( info.inputs ) )
-    {
-      vertex_names[i.index] = info.node_names.at( i.value );
-    }
-
-    std::string bitstring;
     for ( const auto& v : index( sim_vectors ) )
     {
-      boost::to_string( v.value, bitstring );
-      vertex_names[n + v.index] = bitstring;
-    }
-
-    for ( const auto& o : index( info.outputs ) )
-    {
-      vertex_names[n + sim_vectors.size() + o.index] = o.value.second;
+      vertex_sim_vector[n + v.index] = v.value;
+      vertex_sim_result[n + v.index] = results_t[v.index];
     }
   }
 
@@ -196,14 +200,9 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   if ( !dotname.empty() )
   {
     std::ofstream os( dotname.c_str(), std::ofstream::out );
-    if ( vertexnames )
-    {
-      boost::write_graphviz( os, g, boost::make_label_writer( boost::get( boost::vertex_name, g ) ) );
-    }
-    else
-    {
-      boost::write_graphviz( os, g );
-    }
+
+    // TODO consider vertex names in a different way
+    boost::write_graphviz( os, g );
     os.close();
   }
 
@@ -400,9 +399,9 @@ inline simulation_graph create_simulation_graph_wrapper( const aig_graph& aig, c
 {
   const auto settings = std::make_shared<properties>();
   settings->set( "support", true );
-  settings->set( "vertexnames", true );
   settings->set( "support_edges", support_edges );
   settings->set( "simulation_signatures", simulation_signatures );
+  settings->set( "annotate_simvectors", true );
 
   return create_simulation_graph( aig, types, settings );
 }
@@ -411,7 +410,9 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
                                                     const std::vector<unsigned>& types,
                                                     bool support_edges,
                                                     const boost::optional<unsigned>& simulation_signatures )
-  : graph( create_simulation_graph_wrapper( g, types, support_edges, simulation_signatures ) ),
+  : aig( g ),
+    info( aig_info( g ) ),
+    graph( create_simulation_graph_wrapper( g, types, support_edges, simulation_signatures ) ),
 #ifdef FAST_EDGE_ACCESS
     vedge_label( boost::num_vertices( graph ), std::vector<int>( boost::num_vertices( graph ), 0 ) ),
     vedge_direction( boost::num_vertices( graph ), std::vector<int>( boost::num_vertices( graph ), 0 ) )
@@ -424,8 +425,8 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
   vertex_in_degree            = boost::get( boost::vertex_in_degree, graph );
   vertex_out_degree           = boost::get( boost::vertex_out_degree, graph );
   vertex_support              = boost::get( boost::vertex_support, graph );
-  vertex_name                 = boost::get( boost::vertex_name, graph );
   vertex_simulation_signature = boost::get( boost::vertex_simulation_signature, graph );
+  vertex_sim_vectors          = boost::get( boost::vertex_simulation_vector, graph );
   medge_label                 = boost::get( boost::edge_label, graph );
 
   /* fill labels */
@@ -445,6 +446,84 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
     vedge_direction[tgt].insert( {src, 1} );
 #endif
   }
+}
+
+void simulation_graph_wrapper::fill_neighbor_degree_sequence_out( unsigned u, std::vector<unsigned>& degrees ) const
+{
+  assert( degrees.empty() );
+  assert( out_degree( u ) + in_degree( u ) == degree( u ) );
+  for ( const auto& u2 : adjacent( u ) )
+  {
+    if ( ( is_input( u ) && is_vector( u2 ) )
+         || ( is_vector( u ) && is_output( u2 ) )
+         || ( is_output( u ) && is_input( u2 ) ) )
+    {
+      degrees.push_back( out_degree( u2 ) );
+    }
+  }
+  assert( degrees.size() == out_degree( u ) );
+  boost::sort( degrees );
+}
+
+void simulation_graph_wrapper::fill_neighbor_degree_sequence_all( unsigned u, std::vector<unsigned>& degrees ) const
+{
+  degrees.resize( degree( u ) );
+  boost::transform( adjacent( u ), degrees.begin(), [&]( unsigned u2 ) { return degree( u2 ); } );
+  boost::sort( degrees );
+}
+
+struct simulation_graph_wrapper_dot_writer
+{
+public:
+  explicit simulation_graph_wrapper_dot_writer( const simulation_graph_wrapper& simgraph ) : simgraph( simgraph ) {}
+
+  void operator()( std::ostream& out, const simulation_node& v ) const
+  {
+    string_properties_map_t properties = {{"label", boost::str( boost::format( "\"%s\"" ) % simgraph.name( v ) )}};
+
+    if ( simgraph.is_input( v ) )
+    {
+      properties.insert( {"shape", "cds"} );
+    }
+    else if ( simgraph.is_output( v ) )
+    {
+      properties.insert( {"shape", "cds"} );
+      properties.insert( {"orientation", "180"} );
+    }
+    out << boost::format( "[%s]" ) % make_properties_string( properties );
+  }
+
+  void operator()( std::ostream& out, const simulation_edge& e ) const
+  {
+    if ( ( simgraph.is_input( simgraph.source( e ) ) && simgraph.is_output( simgraph.target( e ) ) ) ||
+         ( simgraph.is_output( simgraph.source( e ) ) && simgraph.is_input( simgraph.target( e ) ) ) )
+    {
+      out << boost::format( "[color=gray]" );
+    }
+  }
+
+  void operator()( std::ostream& out ) const
+  {
+    const auto n = simgraph.num_inputs();
+    const auto v = simgraph.num_vectors();
+    const auto m = simgraph.num_outputs();
+
+    out << "rankdir=LR" << std::endl
+        << "{rank=same " << any_join( boost::counting_range( 0u, n ), " " ) << " }" << std::endl
+        << "{rank=same " << any_join( boost::counting_range( n, n + v ), " " ) << " }" << std::endl
+        << "{rank=same " << any_join( boost::counting_range( n + v, n + v + m ), " " ) << " }" << std::endl;
+  }
+
+private:
+  const simulation_graph_wrapper& simgraph;
+};
+
+void simulation_graph_wrapper::write_dot( const std::string& filename ) const
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+
+  simulation_graph_wrapper_dot_writer writer( *this );
+  boost::write_graphviz( os, graph, writer, writer, writer );
 }
 
 bool compatible_simulation_signatures( const simulation_graph_wrapper& pg, const simulation_graph_wrapper& tg,

@@ -60,6 +60,18 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
                     const properties::ptr& settings,
                     const properties::ptr& statistics )
 {
+  std::vector<unsigned> indexes( names.size() );
+
+  const auto& info = aig_info( aig );
+  boost::transform( names, indexes.begin(), [&info]( const std::string& name ) { return aig_output_index( info, name ); } );
+
+  return aig_cone( aig, indexes, settings, statistics );
+}
+
+aig_graph aig_cone( const aig_graph& aig, const std::vector<unsigned>& indexes,
+                    const properties::ptr& settings,
+                    const properties::ptr& statistics )
+{
   /* settings */
   auto verbose = get( settings, "verbose", false );
 
@@ -70,12 +82,11 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
 
   /* depth first search */
   aig_partial_dfs dfs( aig );
-  for ( const auto& name : names )
+  for ( auto index : indexes )
   {
-    auto index = aig_output_index( info, name );
     if ( verbose )
     {
-      std::cout << boost::format( "[i] starting dfs for output %s at index %d" ) % name % index << std::endl;
+      std::cout << boost::format( "[i] starting dfs for output at index %d" ) % index << std::endl;
     }
     dfs.search( info.outputs[index].first.node );
   }
@@ -123,11 +134,11 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<std::string>& names,
   }
 
   /* restore POs */
-  for ( const auto& name : names )
+  for ( const auto& index : indexes )
   {
-    const auto& output = info.outputs[aig_output_index( info, name )];
+    const auto& output = info.outputs[index];
     const aig_function f = { copy_map[output.first.node], output.first.complemented };
-    new_info.outputs += std::make_pair( f, name );
+    new_info.outputs += std::make_pair( f, output.second );
   }
 
   /* restore internal IDs */

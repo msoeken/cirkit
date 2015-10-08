@@ -33,7 +33,6 @@
 
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/property_map/property_map.hpp>
-#include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
@@ -180,10 +179,13 @@ public:
     : total_simulator( total_simulator ),
       assignment( assignment )
   {
-    using boost::adaptors::filtered;
-
-    const auto& graph_info = boost::get_property( aig, boost::graph_name );
-    boost::push_back( real_inputs, graph_info.inputs | filtered( [this]( const aig_node& n ) { return this->assignment.find( n ) == this->assignment.end(); } ) );
+    for ( const auto& n : aig_info( aig ).inputs )
+    {
+      if ( assignment.find( n ) == assignment.end() )
+      {
+        real_inputs.push_back( n );
+      }
+    }
   }
 
   T get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const

@@ -22,7 +22,6 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/filesystem.hpp>
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -33,7 +32,7 @@ using namespace boost::assign;
 
 unsigned aiger_lit2var( const unsigned lit )
 {
-  return (lit - lit % 2) / 2;
+  return (lit - lit % 2u) / 2u;
 }
 
 void read_aiger( aig_graph& aig, const std::string &filename )
@@ -42,7 +41,7 @@ void read_aiger( aig_graph& aig, const std::string &filename )
   read_aiger( aig, comment, filename );
 }
 
-void read_aiger( aig_graph& aig, std::ifstream& in )
+void read_aiger( aig_graph& aig, std::istream& in )
 {
   std::string comment;
   read_aiger( aig, comment, in );
@@ -57,7 +56,7 @@ void read_aiger( aig_graph& aig, std::string& comment, const std::string &filena
   is.close();
 }
 
-void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
+void read_aiger( aig_graph& aig, std::string& comment, std::istream& in )
 {
   /* read AIGER header */
   std::string line;
@@ -100,6 +99,8 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
   if ( num_ids != num_inputs + num_latches + num_gates )
     throw "Error: broken AAG header";
 
+  auto& info = aig_info( aig );
+
   // std::cout << "aag "
   //           << num_ids << ' '
   //           << num_inputs << ' '
@@ -133,7 +134,7 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
       throw "Error: negated inputs are not permitted in definition";
 
     // std::cout << lit << '\n';
-    boost::get_property( aig, boost::graph_name ).inputs += nodes[aiger_lit2var(lit)];
+    info.inputs += nodes[aiger_lit2var(lit)];
   }
 
   /* read latches */
@@ -161,16 +162,16 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
 
     if ( node_in == 0u )
     {
-      boost::get_property( aig, boost::graph_name ).constant_used = true;
+      info.constant_used = true;
     }
 
-    aig_function in = { node_in, lit_in % 2 == 1 };
+    aig_function in = { node_in, lit_in % 2u == 1u };
 
-    boost::get_property( aig, boost::graph_name ).cis += node_out;
+    info.cis += node_out;
 
-    boost::get_property( aig, boost::graph_name ).cos += in;
+    info.cos += in;
 
-    boost::get_property( aig, boost::graph_name ).latch[in] = { node_out, false };
+    info.latch[in] = { node_out, false };
   }
 
   /* read outputs and mark them in AIG */
@@ -189,11 +190,13 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
     // std::cout << lit << '\n';
 
     const aig_function f = { nodes[aiger_lit2var(lit)], lit%2 == 1 };
-    boost::get_property( aig, boost::graph_name ).outputs +=
-      std::make_pair( f, "" );
-  }
+    info.outputs += std::make_pair( f, "" );
 
-  auto& graph_info = boost::get_property( aig, boost::graph_name );
+    if ( f.node == 0u )
+    {
+      info.constant_used = true;
+    }
+  }
 
   /* read and gates and create edges in AIG */
   for ( unsigned u = 0u; u < num_gates; ++u )
@@ -230,7 +233,7 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
 
     if ( lit_le <= 1u || lit_re <= 1u )
     {
-      graph_info.constant_used = true;
+      info.constant_used = true;
     }
   }
 
@@ -270,15 +273,15 @@ void read_aiger( aig_graph& aig, std::string& comment, std::ifstream& in )
     {
     case 'i':
       assert( id < num_inputs && "ID is not in range of inputs" );
-      graph_info.node_names[ graph_info.inputs[id] ] = name;
+      info.node_names[ info.inputs[id] ] = name;
       break;
     case 'o':
       assert( id < num_outputs && "ID is not in range of outputs" );
-      graph_info.outputs[id].second = name;
+      info.outputs[id].second = name;
       break;
     case 'l':
       assert( id < num_latches && "ID is not in range of latches" );
-      graph_info.node_names[ graph_info.cis[id] ] = name;
+      info.node_names[ info.cis[id] ] = name;
       break;
     default:
       // unreachable
