@@ -299,6 +299,171 @@ std::ostream& operator<<( std::ostream& os, const index_set<T>& set )
   return os;
 }
 
+/*
+ * @class index_backtracking_set
+ *
+ * A data structure for maintaining a set of indices that allows O(1) removal and O(1) backtracking to the previous state.
+ * It supports the following operations
+ *
+ * insert() : O(1) - insert an element at the end of the set.
+ * remove() : O(1) - remove an element from the set
+ * has() : O(1) - check if an element is in the set
+ * save_state() : O(1) - save the current state of the set
+ * restore_state() : O(1) - restore the state to its previously stored state (undoing any removals performed)
+ *
+ * insertions are only allowed before any removal, or after removals have been undone.
+ */
+
+template<typename IndexType>
+class index_backtracking_set
+{
+public:
+
+  using const_iterator = typename std::vector<IndexType>::const_iterator;
+
+  index_backtracking_set() :
+    real_size(0)
+  {
+  }
+
+  void save_state()
+  {
+    if( !state_stack.empty() && real_size==state_stack.top().size )
+    {
+      ++state_stack.top().n;
+    }
+    else
+    {
+      state_stack.push(state{real_size, 1});
+    }
+  }
+
+  void restore_state()
+  {
+    assert( !state_stack.empty() );
+
+    real_size = state_stack.top().size;
+    --state_stack.top().n;
+
+    if( state_stack.top().n == 0)
+    {
+      state_stack.pop();
+    }
+  }
+
+  bool has( IndexType index ) const
+  {
+    return positions.has( index ) && positions[index] <= size();
+  }
+
+  bool insert( IndexType index )
+  {
+    assert( state_stack.empty() );
+    assert( size() == values.size() );
+
+    if ( has(index) )
+    {
+      return true;
+    }
+
+    values.push_back( index );
+    positions.insert( index, values.size() );
+
+    ++real_size;
+
+    return false;
+  }
+
+  bool remove( IndexType index )
+  {
+    assert ( has( index ) );
+
+    unsigned pos = positions[index]-1;
+
+    std::swap(positions[index], positions[back()]);
+    std::swap(values[pos], values[size()-1]);
+
+    --real_size;
+
+    return true;
+  }
+
+  unsigned size() const
+  {
+    return real_size;
+  }
+
+  bool empty() const
+  {
+    return size()==0;
+  }
+
+  IndexType front() const
+  {
+    assert( !empty() );
+    return values.front();
+  }
+
+  IndexType back() const
+  {
+    assert( !empty() );
+    return values[size()-1];
+  }
+
+  /* iterators */
+  const_iterator begin() const { return values.begin(); }
+  const_iterator end()   const { return values.begin() + size(); }
+
+  bool operator==( const index_backtracking_set& other ) const
+  {
+    if( size() != other.size() )
+    {
+      return false;
+    }
+
+    for( auto index : other )
+    {
+      if( !has(index) )
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool operator!=(const index_backtracking_set& other) const
+  {
+    return ! operator==(other);
+  }
+
+private:
+
+  std::vector<IndexType>         values;
+  index_map<IndexType, unsigned> positions;
+
+  struct state
+  {
+      unsigned size;
+      unsigned n;
+  };
+
+  std::stack<state> state_stack;
+  unsigned real_size;
+};
+
+template<typename T>
+std::ostream& operator<<( std::ostream& os, const index_backtracking_set<T>& set )
+{
+  os << "[";
+  if ( !set.empty() )
+  {
+    std::copy( set.begin(), set.end() - 1, std::ostream_iterator<T>( os, ", " ) );
+    std::copy( set.end() - 1, set.end(), std::ostream_iterator<T>( os, "" ) );
+  }
+  os << "]";
+  return os;
+}
 }
 
 #endif
