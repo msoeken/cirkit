@@ -209,6 +209,10 @@ public:
   inline adjacency_range_t adjacent( unsigned u ) const  { return boost::make_iterator_range( boost::adjacent_vertices( u, graph ) ); }
   inline out_edge_range_t  out_edges( unsigned u ) const { return boost::make_iterator_range( boost::out_edges( u, graph ) ); }
 
+  inline unsigned input_index( unsigned u )  const { return u; }
+  inline unsigned vector_index( unsigned u ) const { return u - num_inputs(); }
+  inline unsigned output_index( unsigned u ) const { return u - ( num_inputs() + num_vectors() ); }
+
   inline index_range_t input_indexes()  const { return boost::counting_range( 0u, num_inputs() ); }
   inline index_range_t vector_indexes() const { return boost::counting_range( num_inputs(), num_inputs() + num_vectors() ); }
   inline index_range_t output_indexes() const { return boost::counting_range( num_inputs() + num_vectors(), num_inputs() + num_vectors() + num_outputs() ); }
