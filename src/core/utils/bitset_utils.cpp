@@ -91,7 +91,7 @@ std::vector<unsigned> get_index_vector( const boost::dynamic_bitset<> b )
     pos = b.find_next( pos );
   }
 
-  return std::move( v );
+  return v;
 }
 
 std::string to_string( const boost::dynamic_bitset<>& b )
