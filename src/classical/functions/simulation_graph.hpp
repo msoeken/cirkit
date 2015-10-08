@@ -171,7 +171,7 @@ public:
   using edge_range_t      = boost::iterator_range<boost::graph_traits<simulation_graph>::edge_iterator>;
   using adjacency_range_t = boost::iterator_range<boost::graph_traits<simulation_graph>::adjacency_iterator>;
   using out_edge_range_t  = boost::iterator_range<boost::graph_traits<simulation_graph>::out_edge_iterator>;
-  using index_range_t     = boost::iterator_range<boost::iterators::counting_iterator<unsigned>>;
+  using index_range_t     = boost::iterator_range<boost::counting_iterator<unsigned>>;
 
 public:
   simulation_graph_wrapper( const aig_graph& g,
