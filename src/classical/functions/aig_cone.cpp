@@ -26,6 +26,7 @@
 
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/timer.hpp>
+#include <classical/functions/strash.hpp>
 #include <classical/utils/aig_dfs.hpp>
 #include <classical/utils/aig_utils.hpp>
 
@@ -111,25 +112,38 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<unsigned>& indexes,
   new_info.constant_used = false;
 
   /* restore PIs */
-  for ( const auto& v : boost::make_iterator_range( boost::vertices( fg ) ) )
+  // for ( const auto& v : boost::make_iterator_range( boost::vertices( fg ) ) )
+  // {
+  //   if ( boost::out_degree( v, fg ) == 0u )
+  //   {
+  //     if ( v == info.constant )
+  //     {
+  //       new_info.constant = copy_map[v];
+  //       new_info.constant_used = true;
+  //       assert( new_info.constant == 0 );
+
+  //       if ( verbose ) { std::cout << "[i] constant is in cone" << std::endl; }
+  //     }
+  //     else
+  //     {
+  //       new_info.inputs += copy_map[v];
+  //       new_info.node_names[copy_map[v]] = info.node_names.at( v );
+
+  //       if ( verbose ) { std::cout << "[i] PI with name " << info.node_names.at( v ) << " is in cone" << std::endl; }
+  //     }
+  //   }
+  // }
+
+  assert( copy_map[0u] == 0u );
+  new_info.constant = 0u;
+  new_info.constant_used = info.constant_used;
+
+  for ( const auto& in : info.inputs )
   {
-    if ( boost::out_degree( v, fg ) == 0u )
+    if ( get( dfs.color(), in ) != color_t::white() )
     {
-      if ( v == info.constant )
-      {
-        new_info.constant = copy_map[v];
-        new_info.constant_used = true;
-        assert( new_info.constant == 0 );
-
-        if ( verbose ) { std::cout << "[i] constant is in cone" << std::endl; }
-      }
-      else
-      {
-        new_info.inputs += copy_map[v];
-        new_info.node_names[copy_map[v]] = info.node_names.at( v );
-
-        if ( verbose ) { std::cout << "[i] PI with name " << info.node_names.at( v ) << " is in cone" << std::endl; }
-      }
+      new_info.inputs += copy_map[in];
+      new_info.node_names[copy_map[in]] = info.node_names.at( in );
     }
   }
 
@@ -148,7 +162,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<unsigned>& indexes,
     vertex_name[v] = v << 1u;
   }
 
-  return new_aig;
+  return strash( new_aig );
 }
 
 }
