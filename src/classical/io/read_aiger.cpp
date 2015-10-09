@@ -387,6 +387,8 @@ void read_aiger_binary( aig_graph& aig, std::istream& in, bool noopt )
 
   while ( std::getline( in, line ) )
   {
+    if ( line.size() == 0u || ( line[0] != 'i' && line[0] != 'o' ) ) { continue; }
+
     const auto p = split_string_pair( line, " " );
     const auto pos = boost::lexical_cast<unsigned>( p.first.substr( 1u ) );
 
