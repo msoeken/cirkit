@@ -93,6 +93,7 @@ struct aig_graph_info
   std::map<std::pair<aig_function, aig_function>, aig_function>  strash;
   std::map<aig_function, aig_function>                           latch;
   std::vector<detail::node_pair>                                 input_symmetries;
+  std::vector<std::vector<detail::traits_t::vertex_descriptor>>  trans_words;
 };
 
 namespace detail
