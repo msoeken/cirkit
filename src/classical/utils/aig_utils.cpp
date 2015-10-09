@@ -200,6 +200,11 @@ std::vector<aig_function> get_children( const aig_graph& aig, const aig_node& no
   return children;
 }
 
+aig_function make_function( const aig_function& f, bool complemented )
+{
+  return complemented ? !f : f;
+}
+
 }
 
 // Local Variables:

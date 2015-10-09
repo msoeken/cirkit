@@ -50,6 +50,7 @@ unsigned aig_output_index( const aig_graph& aig, const std::string& name );
 unsigned aig_output_index( const aig_graph_info& info, const std::string& name );
 void aig_print_stats( const aig_graph& aig, std::ostream& os = std::cout );
 std::vector<aig_function> get_children( const aig_graph& aig, const aig_node& node );
+aig_function make_function( const aig_function& f, bool complemented );
 
 }
 
