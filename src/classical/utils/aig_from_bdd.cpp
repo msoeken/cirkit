@@ -44,7 +44,7 @@ aig_function aig_from_bdd_rec( aig_graph& aig, DdManager* dd, DdNode* node )
 
   aig_function f;
 
-  if ( Cudd_IsConstant( r ) )
+  if Cudd_IsConstant( r )
   {
     f = aig_get_constant( aig, r == DD_ONE( dd ) );
   }
