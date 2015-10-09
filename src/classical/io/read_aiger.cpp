@@ -325,7 +325,7 @@ unsigned aiger_decode( std::istream& in )
   return res;
 }
 
-void read_aiger_binary( aig_graph& aig, std::istream& in )
+void read_aiger_binary( aig_graph& aig, std::istream& in, bool noopt )
 {
   std::string line;
 
@@ -347,6 +347,11 @@ void read_aiger_binary( aig_graph& aig, std::istream& in )
   /* create AIG */
   aig_initialize( aig );
   auto& info = aig_info( aig );
+
+  if ( noopt )
+  {
+    info.enable_strashing = info.enable_local_optimization = false;
+  }
 
   /* store nodes */
   std::vector<aig_function> fs = {aig_get_constant( aig, false )};
@@ -370,6 +375,7 @@ void read_aiger_binary( aig_graph& aig, std::istream& in )
 
     const auto f = aig_create_and( aig, make_function( fs[o1 / 2u], o1 % 2u ), make_function( fs[o2 / 2u], o2 % 2u ) );
     assert( fs.size() == i );
+    assert( !noopt || f.node == i );
 
     fs.push_back( f );
   }
@@ -395,10 +401,10 @@ void read_aiger_binary( aig_graph& aig, std::istream& in )
   }
 }
 
-void read_aiger_binary( aig_graph& aig, const std::string& filename )
+void read_aiger_binary( aig_graph& aig, const std::string& filename, bool noopt )
 {
   std::ifstream in( filename.c_str(), std::ifstream::in );
-  read_aiger_binary( aig, in );
+  read_aiger_binary( aig, in, noopt );
 }
 
 }
