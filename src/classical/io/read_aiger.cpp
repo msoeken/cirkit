@@ -18,9 +18,14 @@
 #include "read_aiger.hpp"
 
 #include <classical/utils/aig_utils.hpp>
+#include <core/utils/range_utils.hpp>
+#include <core/utils/string_utils.hpp>
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/range/counting_range.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -303,6 +308,97 @@ void read_aiger( aig_graph& aig, std::string& comment, std::istream& in )
     // std::cout << line << '\n';
     comment += line + '\n';;
   }
+}
+
+unsigned aiger_decode( std::istream& in )
+{
+  auto i = 0u;
+  auto res = 0u;
+
+  while ( true )
+  {
+    auto c = in.get();
+    res |= ( ( c & 0x7F ) << ( 7 * i++ ) );
+    if ( !( c & 0x80 ) ) { break; }
+  }
+
+  return res;
+}
+
+void read_aiger_binary( aig_graph& aig, std::istream& in )
+{
+  std::string line;
+
+  /* read header */
+  std::getline( in, line );
+  if ( in.fail() ) { throw "Error: could not read input file (check path and permissions)"; }
+
+  std::vector<std::string> header;
+  split_string( header, line, " " );
+
+  if ( header.size() != 6u || header[0u] != "aig" ) { throw "Error: expect 'aig M I L O A' as header"; }
+
+  if ( header[3u] != "0" ) { throw "Error: latches are not supported yet"; }
+
+  const auto num_inputs  = boost::lexical_cast<unsigned>( header[2u] );
+  const auto num_outputs = boost::lexical_cast<unsigned>( header[4u] );
+  const auto num_ands    = boost::lexical_cast<unsigned>( header[5u] );
+
+  /* create AIG */
+  aig_initialize( aig );
+  auto& info = aig_info( aig );
+
+  /* store nodes */
+  std::vector<aig_function> fs = {aig_get_constant( aig, false )};
+
+  /* create PIs */
+  ntimes( num_inputs, [&]() { fs.push_back( aig_create_pi( aig, "" ) ); } );
+
+  /* store output addresses */
+  std::vector<unsigned> oids;
+  ntimes( num_outputs, [&]() {
+      std::getline( in, line );
+      boost::trim( line );
+      oids += boost::lexical_cast<unsigned>( line );
+    } );
+
+  for ( auto i : boost::counting_range( num_inputs + 1u, num_inputs + num_ands + 1u ) )
+  {
+    const auto g  = i << 1u;
+    const auto o1 = g - aiger_decode( in );
+    const auto o2 = o1 - aiger_decode( in );
+
+    const auto f = aig_create_and( aig, make_function( fs[o1 / 2u], o1 % 2u ), make_function( fs[o2 / 2u], o2 % 2u ) );
+    assert( fs.size() == i );
+
+    fs.push_back( f );
+  }
+
+  for ( const auto& oid : oids )
+  {
+    aig_create_po( aig, make_function( fs[oid / 2u], oid % 2u ), "" );
+  }
+
+  while ( std::getline( in, line ) )
+  {
+    const auto p = split_string_pair( line, " " );
+    const auto pos = boost::lexical_cast<unsigned>( p.first.substr( 1u ) );
+
+    if ( p.first[0] == 'i' )
+    {
+      info.node_names[info.inputs[pos]] = p.second;
+    }
+    else if ( p.first[0] == 'o' )
+    {
+      info.outputs[pos].second = p.second;
+    }
+  }
+}
+
+void read_aiger_binary( aig_graph& aig, const std::string& filename )
+{
+  std::ifstream in( filename.c_str(), std::ifstream::in );
+  read_aiger_binary( aig, in );
 }
 
 }

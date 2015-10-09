@@ -41,6 +41,9 @@ void read_aiger( aig_graph& aig, const std::string& filename );
 void read_aiger( aig_graph& aig, std::string& comment, std::istream& in );
 void read_aiger( aig_graph& aig, std::string& comment, const std::string& filename );
 
+void read_aiger_binary( aig_graph& aig, std::istream& in );
+void read_aiger_binary( aig_graph& aig, const std::string& filename );
+
 }
 
 #endif
