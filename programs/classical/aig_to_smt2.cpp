@@ -20,6 +20,7 @@
  */
 
 #include <classical/aig.hpp>
+#include <classical/utils/aig_utils.hpp>
 #include <boost/format.hpp>
 
 #include <iostream>
@@ -29,21 +30,6 @@
 
 namespace cirkit
 {
-
-bool split_name( std::string& na, unsigned& idx, const std::string& name )
-{
-  std::regex re( "([a-zA-Z0-9_]+)\\[([0-9]+)\\]" );
-  std::smatch match;
-  if ( std::regex_match(name, match, re) )
-  {
-    na = match[1].str();
-    unsigned n;
-    sscanf( match[2].str().c_str(), "%u", &n);
-    idx = n;
-    return true;
-  }
-  return false;
-}
 
 struct names_map
 {
