@@ -32,6 +32,7 @@
 #include <map>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/property_map/property_map.hpp>
 
@@ -92,6 +93,7 @@ struct aig_graph_info
   std::vector<detail::traits_t::vertex_descriptor>               cis;
   std::map<std::pair<aig_function, aig_function>, aig_function>  strash;
   std::map<aig_function, aig_function>                           latch;
+  boost::dynamic_bitset<>                                        unateness;
   std::vector<detail::node_pair>                                 input_symmetries;
   std::vector<std::vector<detail::traits_t::vertex_descriptor>>  trans_words;
 };
