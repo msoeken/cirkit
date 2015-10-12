@@ -398,7 +398,7 @@ inline simulation_graph create_simulation_graph_wrapper( const aig_graph& aig, c
                                                          bool support_edges, const boost::optional<unsigned>& simulation_signatures )
 {
   const auto settings = std::make_shared<properties>();
-  settings->set( "support", true );
+  settings->set( "support", support_edges );
   settings->set( "support_edges", support_edges );
   settings->set( "simulation_signatures", simulation_signatures );
   settings->set( "annotate_simvectors", true );
