@@ -18,6 +18,7 @@
 #include "aig_cone.hpp"
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/graph/depth_first_search.hpp>
@@ -25,6 +26,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <core/utils/graph_utils.hpp>
+#include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/functions/strash.hpp>
 #include <classical/utils/aig_dfs.hpp>
@@ -138,14 +140,17 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<unsigned>& indexes,
   new_info.constant = 0u;
   new_info.constant_used = info.constant_used;
 
-  for ( const auto& in : info.inputs )
+  boost::dynamic_bitset<> mapped_inputs( info.inputs.size() );
+  for ( const auto& in : index( info.inputs ) )
   {
-    if ( get( dfs.color(), in ) != color_t::white() )
+    if ( get( dfs.color(), in.value ) != color_t::white() )
     {
-      new_info.inputs += copy_map[in];
-      new_info.node_names[copy_map[in]] = info.node_names.at( in );
+      mapped_inputs.set( in.index );
+      new_info.inputs += copy_map[in.value];
+      new_info.node_names[copy_map[in.value]] = info.node_names.at( in.value );
     }
   }
+  set( statistics, "mapped_inputs", mapped_inputs );
 
   /* restore POs */
   for ( const auto& index : indexes )
