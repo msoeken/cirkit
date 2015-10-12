@@ -34,15 +34,16 @@ namespace cirkit
 class strash_simulator : public aig_simulator<aig_function>
 {
 public:
-  strash_simulator( aig_graph& aig_new, const std::map<unsigned, unsigned>& reorder )
+  strash_simulator( aig_graph& aig_new, unsigned offset, const std::map<unsigned, unsigned>& reorder )
     : aig_new( aig_new ),
       info( aig_info( aig_new ) ),
+      offset( offset ),
       reorder( reorder ) {}
 
   aig_function get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
   {
     const auto it = reorder.find( pos );
-    return { info.inputs.at( it == reorder.end() ? pos : it->second ), false };
+    return { info.inputs.at( offset + ( it == reorder.end() ? pos : it->second ) ), false };
   }
 
   aig_function get_constant() const
@@ -63,6 +64,7 @@ public:
 private:
   aig_graph& aig_new;
   const aig_graph_info& info;
+  unsigned offset;
   const std::map<unsigned, unsigned>& reorder;
 };
 
@@ -92,6 +94,7 @@ void strash( const aig_graph& aig,
 
   auto& info_dest  = aig_info( aig_dest );
   const auto& info = aig_info( aig );
+  const auto offset = info_dest.inputs.size();
 
   /* copy inputs */
   for ( const auto& input : info.inputs )
@@ -102,7 +105,7 @@ void strash( const aig_graph& aig,
   /* copy other info */
   info_dest.model_name = info.model_name;
 
-  auto result = simulate_aig( aig, strash_simulator( aig_dest, reorder ) );
+  auto result = simulate_aig( aig, strash_simulator( aig_dest, offset, reorder ) );
 
   for ( const auto& output : info.outputs )
   {
