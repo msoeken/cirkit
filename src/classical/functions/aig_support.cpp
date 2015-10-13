@@ -68,6 +68,49 @@ support_map_t aig_structural_support( const aig_graph& aig, properties::ptr sett
   return simulate_aig( aig, aig_structural_support_simulator( boost::get_property( aig, boost::graph_name ).inputs.size() ), settings, statistics );
 }
 
+
+boost::dynamic_bitset<> get_functional_support( const boost::dynamic_bitset<>& u, unsigned po, unsigned num_pis )
+{
+  boost::dynamic_bitset<> support( num_pis );
+
+  auto pos = ( po * num_pis ) << 1u;
+
+  for ( auto i = 0u; i < num_pis; ++i )
+  {
+    if ( !u[pos] || !u[pos + 1] )
+    {
+      support.set( i );
+    }
+    pos += 2u;
+  }
+
+  return support;
+}
+
+boost::dynamic_bitset<> get_functional_support( const boost::dynamic_bitset<>& u, unsigned po, const aig_graph_info& info )
+{
+  return get_functional_support( u, po, info.inputs.size() );
+}
+
+boost::dynamic_bitset<> get_functional_support( const boost::dynamic_bitset<>& u, unsigned po, const aig_graph& aig )
+{
+  return get_functional_support( u, po, aig_info( aig ).inputs.size() );
+}
+
+support_map_t aig_functional_support( const aig_graph& aig )
+{
+  const auto& info = aig_info( aig );
+  assert( !info.unateness.empty() );
+
+  support_map_t result;
+  for ( auto j = 0u; j < info.outputs.size(); ++j )
+  {
+    result[info.outputs[j].first] = get_functional_support( info.unateness, j, info.inputs.size() );
+  }
+
+  return result;
+}
+
 }
 
 // Local Variables:

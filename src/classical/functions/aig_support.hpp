@@ -43,6 +43,12 @@ support_map_t aig_structural_support( const aig_graph& aig,
                                       properties::ptr settings = properties::ptr(),
                                       properties::ptr statistics = properties::ptr() );
 
+boost::dynamic_bitset<> get_functional_support( const boost::dynamic_bitset<>& u, unsigned po, unsigned num_pis );
+boost::dynamic_bitset<> get_functional_support( const boost::dynamic_bitset<>& u, unsigned po, const aig_graph_info& info );
+boost::dynamic_bitset<> get_functional_support( const boost::dynamic_bitset<>& u, unsigned po, const aig_graph& aig );
+
+support_map_t aig_functional_support( const aig_graph& aig );
+
 }
 
 #endif
