@@ -96,6 +96,13 @@ void strash( const aig_graph& aig,
   const auto& info = aig_info( aig );
   const auto offset = info_dest.inputs.size();
 
+  /* copy unateness and symmetries */
+  if ( offset == 0u && reorder.empty() )
+  {
+    info_dest.unateness = info.unateness;
+    info_dest.input_symmetries = info.input_symmetries;
+  }
+
   /* copy inputs */
   for ( const auto& input : info.inputs )
   {
