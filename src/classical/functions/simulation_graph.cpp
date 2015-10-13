@@ -142,7 +142,17 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   {
     const auto& vertex_support = boost::get( boost::vertex_support, g );
 
-    const auto s = aig_structural_support( aig );
+    support_map_t s;
+
+    if ( info.unateness.empty() )
+    {
+      s = aig_structural_support( aig );
+    }
+    else
+    {
+      s = aig_functional_support( aig );
+    }
+
     for ( const auto& o : index( info.outputs ) )
     {
       const auto& mask = s.at( o.value.first );
