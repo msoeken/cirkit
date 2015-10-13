@@ -94,6 +94,9 @@ public:
         boost::timer::cpu_times const elapsed_times(elapsed());
         double total_sec = ( elapsed_times.system + elapsed_times.user ) / sec;
         statistics->set( key, total_sec );
+        statistics->set( key + "_user", elapsed_times.user / sec );
+        statistics->set( key + "_system", elapsed_times.system / sec );
+        statistics->set( key + "_wall", elapsed_times.wall / sec );
       }
     }
   }
