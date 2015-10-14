@@ -33,18 +33,3 @@ set(CUDD_LIBRARIES
 
   PARENT_SCOPE
 )
-
-externalProject_add(aiger
-  DOWNLOAD_DIR .
-  URL "http://www.informatik.uni-bremen.de/revkit/files/aiger-1.9.4.tar.gz"
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/ext
-  LOG_DOWNLOAD 1
-  LOG_BUILD 1
-  LOG_INSTALL 1)
-add_dependencies(external aiger)
-
-set(AIGER_LIBRARIES
-  ${ext_LIB}/libaiger${CMAKE_SHARED_LIBRARY_SUFFIX}
-
-  PARENT_SCOPE
-)
