@@ -96,7 +96,7 @@ void line_parser( const std::string& filename, const std::vector<std::pair<boost
   }
 }
 
-void foreach_line_in_file( const std::string& filename, const std::function<void(const std::string&)>& f )
+void foreach_line_in_file( const std::string& filename, const std::function<bool(const std::string&)>& f )
 {
   std::ifstream in( filename.c_str(), std::ifstream::in );
   std::string line;
@@ -104,7 +104,7 @@ void foreach_line_in_file( const std::string& filename, const std::function<void
   while ( getline( in, line ) )
   {
     boost::trim( line );
-    f( line );
+    if ( !f( line ) ) { break; }
   }
 }
 

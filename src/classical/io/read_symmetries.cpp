@@ -51,6 +51,8 @@ void read_symmetries( aig_graph& aig, const std::string& filename )
       auto n2 = aig_node_by_name( info, p.second );
 
       symmetries.push_back( {n1,n2} );
+
+      return true;
     } );
 }
 
