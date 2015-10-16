@@ -449,8 +449,8 @@ private:
 
   struct state
   {
-      unsigned size;
-      unsigned n;
+    unsigned size;
+    unsigned n;
   };
 
   std::stack<state> state_stack;
