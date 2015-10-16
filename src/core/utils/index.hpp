@@ -134,7 +134,7 @@ public:
    */
   bool insert( IndexType index, const ValueType& value )
   {
-    ensure_size( index );
+    reserve( index );
     const auto ret_val = has( index );
     values[index.index()] = value;
     return ret_val;
@@ -145,12 +145,17 @@ public:
    */
   bool remove( IndexType index )
   {
+    if( ! has_index( index ) )
+    {
+      return false;
+    }
+
     return insert( index, null_value );
   }
 
   ValueType& operator[]( IndexType index )
   {
-    ensure_size( index );
+    reserve( index );
     return values[index.index()];
   }
 
@@ -173,8 +178,7 @@ public:
     return os;
   }
 
-private:
-  void ensure_size( IndexType index )
+  void reserve( IndexType index )
   {
     if ( ! has_index(index) )
     {
