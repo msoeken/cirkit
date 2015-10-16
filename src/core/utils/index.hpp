@@ -471,6 +471,67 @@ std::ostream& operator<<( std::ostream& os, const index_backtracking_set<T>& set
 }
 }
 
+/*
+ * @class index_bitset
+ *
+ * A data structure for maintaining a set of indices, that only allows efficient insertion and membership testing, but not efficient iteration.
+ * It uses a bitset.
+ *
+ * insert() : O(1) - insert an element at the end of the set, return if the element was already present.
+ * remove() : O(1) - remove an element from the set
+ * has() : O(1) - check if an element is in the set
+ *
+ */
+
+template<typename IndexType>
+class index_bitset
+{
+public:
+
+  bool has( IndexType index ) const
+  {
+    return has_index( index ) && bitset[ index.index() ];
+  }
+
+  bool insert( IndexType index )
+  {
+    reserve( index );
+
+    bool prev = bitset[ index.index() ];
+
+    bitset[ index.index() ] = true;
+
+    return prev;
+  }
+
+  void remove( IndexType index )
+  {
+    if( has_index(index) )
+    {
+      bitset[ index.index() ] = false;
+    }
+  }
+
+  void reserve( IndexType index)
+  {
+    if( ! has_index(index) )
+    {
+      bitset.resize(index.index()+1, false);
+    }
+  }
+
+private:
+
+  bool has_index( IndexType index ) const
+  {
+    assert( index );
+
+    return index.index() < bitset.size();
+  }
+
+  std::vector<bool> bitset;
+};
+
 #endif
 
 // Local Variables:

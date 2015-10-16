@@ -28,70 +28,43 @@ using namespace cirkit;
 struct test_index_tag;
 using test_index = base_index<test_index_tag>;
 
+namespace
+{
+  test_index I(unsigned i)
+  {
+    return test_index::from_index(i);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(simple)
 {
-  using backtracking_set = index_backtracking_set<test_index>;
+  using bitset = index_bitset<test_index>;
 
-  backtracking_set x;
+  bitset x;
 
-  for(unsigned i=0 ; i<10; i++)
+  // insert even numbers
+  for(unsigned i=2 ; i<10; i+=2)
   {
-    BOOST_CHECK( ! x.insert(test_index::from_index(i)) );
+    BOOST_CHECK_MESSAGE(!x.insert(I(i)), "Inserting: " << i);
   }
 
-  BOOST_CHECK( x.size() == 10);
-
-  x.save_state();
-
-  BOOST_CHECK( x.remove(test_index::from_index(5) ) );
-
-  BOOST_CHECK( x.size() == 9);
-
-  x.save_state();
-
-  BOOST_CHECK( x.remove(test_index::from_index(4) ) );
-
-  BOOST_CHECK( x.size() == 8);
-
-  BOOST_CHECK( x.has(test_index::from_index(3) ) );
-  BOOST_CHECK( ! x.has(test_index::from_index(4) ) );
-  BOOST_CHECK( ! x.has(test_index::from_index(5) ) );
-
-  backtracking_set x8;
-
-  for(unsigned i=0 ; i<10; i++)
+  // make sure that an index is in the set iff it is even and below 10
+  for(unsigned i=1 ; i<20; i++)
   {
-    if( i==4 || i==5 )
-    {
-      continue;
-    }
-
-    BOOST_CHECK( ! x8.insert(test_index::from_index(i)) );
+    BOOST_CHECK_MESSAGE( x.has(I(i)) == (i%2==0 && i<10), "Checking: " << i );
   }
 
-  BOOST_CHECK( x==x8 );
+  // remove all elements above 5
+  for(unsigned i=6 ; i<10; i++)
+  {
+    x.remove( I(i) );
+  }
 
-  x.restore_state();
-
-  BOOST_CHECK( ! (x==x8) );
-
-  x8.insert( test_index::from_index(4) );
-
-  BOOST_CHECK( x==x8 );
-
-  BOOST_CHECK( x.has(test_index::from_index(3) ) );
-  BOOST_CHECK( x.has(test_index::from_index(4) ) );
-  BOOST_CHECK( ! x.has(test_index::from_index(5) ) );
-
-  BOOST_CHECK( x.size() == 9);
-
-  x.restore_state();
-
-  BOOST_CHECK( x.size() == 10);
-
-  BOOST_CHECK( x.has(test_index::from_index(3) ) );
-  BOOST_CHECK( x.has(test_index::from_index(4) ) );
-  BOOST_CHECK( x.has(test_index::from_index(5) ) );
+  // check whether the right elements are in the set
+  for(unsigned i=1 ; i<10; i++)
+  {
+    BOOST_CHECK_MESSAGE( x.has(I(i)) == (i%2==0 && i<5), "Checking: " << i << ", should be:" << (i%2==0 && i<5));
+  }
 }
 
 // Local Variables:
