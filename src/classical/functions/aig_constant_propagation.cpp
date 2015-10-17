@@ -113,6 +113,21 @@ aig_graph aig_constant_propagation( const aig_graph& aig, const std::map<std::st
   return aig_new;
 }
 
+aig_graph aig_constant_propagation( const aig_graph& aig, const std::map<unsigned, bool>& values,
+                                    const properties::ptr& settings,
+                                    const properties::ptr& statistics )
+{
+  const auto& info = aig_info( aig );
+  std::map<std::string, bool> svalues;
+
+  for ( const auto& p : values )
+  {
+    svalues.insert( {info.node_names.at( info.inputs[p.first] ), p.second} );
+  }
+
+  return aig_constant_propagation( aig, svalues, settings, statistics );
+}
+
 }
 
 // Local Variables:

@@ -45,6 +45,10 @@ aig_graph aig_constant_propagation( const aig_graph& aig, const std::map<std::st
                                     const properties::ptr& settings = properties::ptr(),
                                     const properties::ptr& statistics = properties::ptr() );
 
+aig_graph aig_constant_propagation( const aig_graph& aig, const std::map<unsigned, bool>& values,
+                                    const properties::ptr& settings = properties::ptr(),
+                                    const properties::ptr& statistics = properties::ptr() );
+
 }
 
 #endif
