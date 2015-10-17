@@ -224,7 +224,7 @@ tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<un
     /* output negation */
     if ( npn.count() > ( npn.size() >> (size_type)1 ) )
     {
-      phase.set( n );
+      phase.flip( n );
       npn.flip();
     }
 
@@ -233,7 +233,7 @@ tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<un
     {
       if ( tt_cof1( npn, i ).count() > tt_cof0( npn, i ).count() )
       {
-        phase.set( i );
+        phase.flip( i );
         npn = tt_flip( npn, i );
       }
     }
