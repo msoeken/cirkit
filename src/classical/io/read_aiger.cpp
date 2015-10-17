@@ -387,18 +387,22 @@ void read_aiger_binary( aig_graph& aig, std::istream& in, bool noopt )
 
   while ( std::getline( in, line ) )
   {
+    if ( line.size() != 0u && line[0] == 'c' ) { break; }
     if ( line.size() == 0u || ( line[0] != 'i' && line[0] != 'o' ) ) { continue; }
 
-    const auto p = split_string_pair( line, " " );
-    const auto pos = boost::lexical_cast<unsigned>( p.first.substr( 1u ) );
+    std::vector<std::string> list;
+    split_string( list, line, " " );
 
-    if ( p.first[0] == 'i' )
+    const auto pos = boost::lexical_cast<unsigned>( list[0u].substr( 1u ) );
+    std::string name = list.size() == 1u ? "unknown" : list[1u];
+
+    if ( list[0][0] == 'i' )
     {
-      info.node_names[info.inputs[pos]] = p.second;
+      info.node_names[info.inputs[pos]] = name;
     }
-    else if ( p.first[0] == 'o' )
+    else if ( list[0][0] == 'o' )
     {
-      info.outputs[pos].second = p.second;
+      info.outputs[pos].second = name;
     }
   }
 }
