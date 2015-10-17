@@ -34,16 +34,19 @@ namespace cirkit
 class strash_simulator : public aig_simulator<aig_function>
 {
 public:
-  strash_simulator( aig_graph& aig_new, unsigned offset, const std::map<unsigned, unsigned>& reorder )
+  strash_simulator( aig_graph& aig_new, unsigned offset,
+                    const std::map<unsigned, unsigned>& reorder,
+                    const boost::dynamic_bitset<>& invert )
     : aig_new( aig_new ),
       info( aig_info( aig_new ) ),
       offset( offset ),
-      reorder( reorder ) {}
+      reorder( reorder ),
+      _invert( invert ) {}
 
   aig_function get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
   {
     const auto it = reorder.find( pos );
-    return { info.inputs.at( offset + ( it == reorder.end() ? pos : it->second ) ), false };
+    return { info.inputs.at( offset + ( it == reorder.end() ? pos : it->second ) ), _invert[pos] };
   }
 
   aig_function get_constant() const
@@ -66,6 +69,7 @@ private:
   const aig_graph_info& info;
   unsigned offset;
   const std::map<unsigned, unsigned>& reorder;
+  const boost::dynamic_bitset<>& _invert;
 };
 
 /******************************************************************************
@@ -89,15 +93,17 @@ void strash( const aig_graph& aig,
              const properties::ptr& settings,
              const properties::ptr& statistics )
 {
+  const auto& info = aig_info( aig );
+
   /* settings */
   const auto reorder = get( settings, "reorder", std::map<unsigned, unsigned>() );
+  const auto invert  = get( settings, "invert",  boost::dynamic_bitset<>( info.inputs.size() ) );
 
   auto& info_dest  = aig_info( aig_dest );
-  const auto& info = aig_info( aig );
   const auto offset = info_dest.inputs.size();
 
   /* copy unateness and symmetries */
-  if ( offset == 0u && reorder.empty() )
+  if ( offset == 0u && reorder.empty() && invert.none() )
   {
     info_dest.unateness = info.unateness;
     info_dest.input_symmetries = info.input_symmetries;
@@ -112,7 +118,7 @@ void strash( const aig_graph& aig,
   /* copy other info */
   info_dest.model_name = info.model_name;
 
-  auto result = simulate_aig( aig, strash_simulator( aig_dest, offset, reorder ) );
+  auto result = simulate_aig( aig, strash_simulator( aig_dest, offset, reorder, invert ) );
 
   for ( const auto& output : info.outputs )
   {
