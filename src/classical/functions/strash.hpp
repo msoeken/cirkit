@@ -27,11 +27,37 @@
 #ifndef STRASH_HPP
 #define STRASH_HPP
 
+#include <map>
+#include <string>
+
+#include <boost/dynamic_bitset.hpp>
+
 #include <core/properties.hpp>
 #include <classical/aig.hpp>
+#include <classical/functions/simulate_aig.hpp>
 
 namespace cirkit
 {
+
+class strash_simulator : public aig_simulator<aig_function>
+{
+public:
+  strash_simulator( aig_graph& aig_new, unsigned offset,
+                    const std::map<unsigned, unsigned>& reorder,
+                    const boost::dynamic_bitset<>& invert );
+
+  aig_function get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const;
+  aig_function get_constant() const;
+  aig_function invert( const aig_function& v ) const;
+  aig_function and_op( const aig_node& node, const aig_function& v1, const aig_function& v2 ) const;
+
+private:
+  aig_graph& aig_new;
+  const aig_graph_info& info;
+  unsigned offset;
+  const std::map<unsigned, unsigned>& reorder;
+  const boost::dynamic_bitset<>& _invert;
+};
 
 aig_graph strash( const aig_graph& aig,
                   const properties::ptr& settings = properties::ptr(),

@@ -31,46 +31,35 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-class strash_simulator : public aig_simulator<aig_function>
+strash_simulator::strash_simulator( aig_graph& aig_new, unsigned offset,
+                                    const std::map<unsigned, unsigned>& reorder,
+                                    const boost::dynamic_bitset<>& invert )
+  : aig_new( aig_new ),
+    info( aig_info( aig_new ) ),
+    offset( offset ),
+    reorder( reorder ),
+    _invert( invert ) {}
+
+aig_function strash_simulator::get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
 {
-public:
-  strash_simulator( aig_graph& aig_new, unsigned offset,
-                    const std::map<unsigned, unsigned>& reorder,
-                    const boost::dynamic_bitset<>& invert )
-    : aig_new( aig_new ),
-      info( aig_info( aig_new ) ),
-      offset( offset ),
-      reorder( reorder ),
-      _invert( invert ) {}
+  const auto it = reorder.find( pos );
+  return { info.inputs.at( offset + ( it == reorder.end() ? pos : it->second ) ), _invert[pos] };
+}
 
-  aig_function get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
-  {
-    const auto it = reorder.find( pos );
-    return { info.inputs.at( offset + ( it == reorder.end() ? pos : it->second ) ), _invert[pos] };
-  }
+aig_function strash_simulator::get_constant() const
+{
+  return aig_get_constant( aig_new, false );
+}
 
-  aig_function get_constant() const
-  {
-    return aig_get_constant( aig_new, false );
-  }
+aig_function strash_simulator::invert( const aig_function& v ) const
+{
+  return !v;
+}
 
-  aig_function invert( const aig_function& v ) const
-  {
-    return !v;
-  }
-
-  aig_function and_op( const aig_node& node, const aig_function& v1, const aig_function& v2 ) const
-  {
-    return aig_create_and( aig_new, v1, v2 );
-  }
-
-private:
-  aig_graph& aig_new;
-  const aig_graph_info& info;
-  unsigned offset;
-  const std::map<unsigned, unsigned>& reorder;
-  const boost::dynamic_bitset<>& _invert;
-};
+aig_function strash_simulator::and_op( const aig_node& node, const aig_function& v1, const aig_function& v2 ) const
+{
+  return aig_create_and( aig_new, v1, v2 );
+}
 
 /******************************************************************************
  * Public functions                                                           *
@@ -96,11 +85,12 @@ void strash( const aig_graph& aig,
   const auto& info = aig_info( aig );
 
   /* settings */
-  const auto reorder = get( settings, "reorder", std::map<unsigned, unsigned>() );
-  const auto invert  = get( settings, "invert",  boost::dynamic_bitset<>( info.inputs.size() ) );
+  const auto reorder      = get( settings, "reorder",      std::map<unsigned, unsigned>() );
+  const auto invert       = get( settings, "invert",       boost::dynamic_bitset<>( info.inputs.size() ) );
+  const auto reuse_inputs = get( settings, "reuse_inputs", false );
 
   auto& info_dest  = aig_info( aig_dest );
-  const auto offset = info_dest.inputs.size();
+  const auto offset = reuse_inputs ? info_dest.inputs.size() : 0u;
 
   /* copy unateness and symmetries */
   if ( offset == 0u && reorder.empty() && invert.none() )
@@ -110,9 +100,12 @@ void strash( const aig_graph& aig,
   }
 
   /* copy inputs */
-  for ( const auto& input : info.inputs )
+  if ( !reuse_inputs )
   {
-    aig_create_pi( aig_dest, info.node_names.at( input ) );
+    for ( const auto& input : info.inputs )
+    {
+      aig_create_pi( aig_dest, info.node_names.at( input ) );
+    }
   }
 
   /* copy other info */
