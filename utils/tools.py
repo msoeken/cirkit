@@ -191,6 +191,14 @@ class package_aiger:
     build       = [ "./configure.sh", "make -j8" ]
     install     = [ "cp -v aigand aigdd aigflip aigfuzz aiginfo aigjoin aigmiter aigmove aignm aigor aigreset aigsim aigsplit aigstrip aigtoaig aigtoblif aigtocnf aigtodot aigtosmv aigunconstraint aigunroll aigvis andtoaig bliftoaig smvtoaig soltostim wrapstim %s" ]
 
+class package_iimc:
+    description = "iimc model checker for AIGs"
+    subdir      = "iimc-2.0"
+    url         = "ftp://vlsi.colorado.edu/pub/iimc/iimc-2.0.tar.gz"
+    fmt         = "tar-gz"
+    build       = [ "./configure", "make -j4" ]
+    install     = [ "cp -v iimc %s" ]
+
 class package_cbmc_i386:
     description = "C Bounded Model Checker 5.0 (32bit)"
     subdir      = "cbmc-5.0-i386"
