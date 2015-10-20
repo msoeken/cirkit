@@ -169,8 +169,8 @@ class package_yosys:
 
 class package_yices:
     description = "Yices SMT Solver"
-    subdir      = "yices-2.2.2"
-    url         = [ "http://yices.csl.sri.com/cgi-bin/yices2-newnewdownload.cgi\?file\=yices-2.2.2-src.tar.gz\&accept\=I+accept", "yices-2.2.2-src.tar.gz" ]
+    subdir      = "yices-2.4.1"
+    url         = [ "http://yices.csl.sri.com/cgi-bin/yices2-newnewdownload.cgi\?file\=yices-2.4.1-src.tar.gz\&accept\=I+Agree", "yices-2.4.1-src.tar.gz" ]
     fmt         = "tar-gz-mv"
     build       = [ "./configure --prefix=`pwd`/../../../ext", "make -j8" ]
     install     = [ "make install" ]
