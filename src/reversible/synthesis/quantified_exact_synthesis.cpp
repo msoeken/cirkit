@@ -228,7 +228,7 @@ bool quantified_exact_synthesis( circuit& circ, const binary_truth_table& spec, 
       char * str = new char[num_vars];
       f.PickOneCube( str );
       extract_solution( circ, str, gate_count, n, nbits, negative, verbose );
-      delete str;
+      delete[] str;
 
       set( statistics, "num_circuits", (unsigned)( f.CountMinterm( num_vars ) / ( 1u << n ) ) );
 
