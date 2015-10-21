@@ -351,7 +351,7 @@ struct rcbdd_synthesis_manager
         apply_gates( cf.manager().bddOne(), cf.manager().bddOne() );
       }
 
-      if ( verbose )
+      if ( false /*verbose*/ )
       {
         std::cout << "#N: " << cf.cofactor( f, _var, false, false ).CountMinterm( 2u * cf.num_vars() ) << " "
                   << "#P': " << cf.cofactor( f, _var, true, false ).CountMinterm( 2u * cf.num_vars() ) << " "
@@ -403,7 +403,7 @@ struct rcbdd_synthesis_manager
 
   void resolve_cycles_with_transpositions( const resolve_cycles_configuration_t& configuration )
   {
-    if ( verbose )
+    if ( false /*verbose*/ )
     {
       std::cout << boost::format( "[i] resolve cycles for var %d" ) % _var << std::endl;
     }
@@ -596,7 +596,7 @@ struct rcbdd_synthesis_manager
         resolve_two_cycles();
         resolve_k_cycles();
 
-        if ( verbose )
+        if ( false /*verbose*/ )
         {
           std::cout << "Target: " << _var << std::endl << " - left control function:" << std::endl;
           left_f.PrintMinterm();
@@ -638,13 +638,13 @@ struct rcbdd_synthesis_manager
         BDD oldchi = f; //make a copy of chi
         unsigned old_control_lines = total_control_lines;
         unsigned old_toffoli_gates = total_toffoli_gates;
-        if ( verbose )
+        if ( false /*verbose*/ )
         {
           std::cout << "[I] - total_toffoli_gates" << total_toffoli_gates << std::endl;
         }
         set_var(list_lines[i]);
 
-        if ( verbose )
+        if ( false /*verbose*/ )
         {
           std::cout << "[I] set_var(var): " << _var << std::endl;
         }
@@ -653,7 +653,7 @@ struct rcbdd_synthesis_manager
         resolve_two_cycles();
         resolve_k_cycles();
 
-        if (verbose)
+        if ( false /*verbose*/ )
         {
           std::cout << "Target: " << _var << std::endl << " - left control function:" << std::endl;
           left_f.PrintMinterm();
@@ -668,7 +668,7 @@ struct rcbdd_synthesis_manager
         // Determine cost and save in new_cost
         unsigned new_cost = total_toffoli_gates - old_toffoli_gates;
 
-        if ( verbose )
+        if ( false /*verbose*/ )
         {
           std::cout << "[I] h1: Lines:    " << cf.num_vars() << std::endl;
           std::cout << "[I] h1: Gates:    " << new_cost << std::endl;
@@ -679,7 +679,7 @@ struct rcbdd_synthesis_manager
         {
           best_line = list_lines[i];
           min_cost = new_cost;
-          if ( verbose )
+          if ( false /*verbose*/ )
           {
             std::cout << "[I] Min cost: " << min_cost << std::endl;
           }
@@ -702,7 +702,7 @@ struct rcbdd_synthesis_manager
 
       list_lines.erase(std::remove(list_lines.begin(),list_lines.end(),best_line));
 
-      if ( verbose )
+      if ( false /*verbose*/ )
       {
         std::cout << "[I] Best Line: " << best_line << std::endl;
       }
@@ -734,7 +734,7 @@ struct rcbdd_synthesis_manager
         {
           best_line = list_lines[i];
           min_cost = new_cost;
-          if ( verbose )
+          if ( false /*verbose*/ )
           {
             std::cout << "[I] Min cost: " << min_cost << std::endl;
           }
@@ -753,7 +753,7 @@ struct rcbdd_synthesis_manager
 
       list_lines.erase(std::remove(list_lines.begin(),list_lines.end(),best_line));
 
-      if ( verbose )
+      if ( false /*verbose*/ )
       {
         std::cout << "[I] Best Line: " << best_line << std::endl;
       }
