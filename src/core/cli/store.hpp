@@ -154,16 +154,22 @@ struct show_store_entry
   }
 };
 
-// template<typename T>
-// void show_store_entry( T& element, const std::string& dotname, unsigned levels, const properties::ptr& settings )
-// {
-//   std::cout << "[w] show is not supported for this store element" << std::endl;
-// }
-
 template<typename T>
 void print_store_entry_statistics( std::ostream& os, const T& element )
 {
   os << "UNKNOWN" << std::endl;
+}
+
+template<typename Source, typename Dest>
+bool store_can_convert()
+{
+  return false;
+}
+
+template<typename Source, typename Dest>
+Dest store_convert( const Source& src )
+{
+  assert( false );
 }
 
 /* for the use in commands */
