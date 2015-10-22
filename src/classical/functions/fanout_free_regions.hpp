@@ -175,7 +175,10 @@ std::vector<vertex_t<Graph>> compute_ffr_inputs_bfs( const vertex_t<Graph>& outp
 
     if ( out_degree( top, g ) == 0u || ( top != output && indegrees.at( top ) > 1u ) )
     {
-      ffr_inputs += top;
+      if ( boost::find( ffr_inputs, top ) == ffr_inputs.end() )
+      {
+        ffr_inputs += top;
+      }
     }
     else
     {
@@ -188,7 +191,11 @@ std::vector<vertex_t<Graph>> compute_ffr_inputs_bfs( const vertex_t<Graph>& outp
 
   while ( !q.empty() )
   {
-    ffr_inputs += q.front(); q.pop();
+    if ( boost::find( ffr_inputs, q.front() ) == ffr_inputs.end() )
+    {
+      ffr_inputs += q.front();
+    }
+    q.pop();
   }
 
   return ffr_inputs;
