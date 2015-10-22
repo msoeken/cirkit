@@ -29,6 +29,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include <core/utils/bitset_utils.hpp>
+
 namespace cirkit
 {
 
@@ -220,6 +222,18 @@ void tt_to_minbase_and_discard( tt& t, unsigned max_size = 6u, boost::dynamic_bi
 void tt_from_minbase( tt& t, const boost::dynamic_bitset<> pattern );
 
 std::string tt_to_hex( const tt& t );
+
+/**
+ * @brief Iterate through each minterm
+ */
+template<typename Fn>
+void foreach_minterm( const tt& t, Fn&& f )
+{
+  const auto n = tt_num_vars( t );
+  foreach_bit( t, [&]( unsigned pos ) {
+      f( boost::dynamic_bitset<>( n, pos ) );
+    } );
+}
 
 }
 
