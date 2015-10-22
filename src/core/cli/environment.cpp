@@ -26,6 +26,7 @@
 #include <boost/variant.hpp>
 
 #include <core/cli/command.hpp>
+#include <core/utils/range_utils.hpp>
 
 namespace cirkit
 {
@@ -56,6 +57,29 @@ public:
   void operator()( double d ) const
   {
     os << d;
+  }
+
+  void operator()( const std::vector<std::string>& v ) const
+  {
+    os << "[";
+
+    auto first = true;
+    for ( const auto& s : v )
+    {
+      if ( !first )
+      {
+        os << ", ";
+      }
+      first = false;
+
+      os << "\"" << s << "\"";
+    }
+    os << "]";
+  }
+
+  void operator()( const std::vector<int>& v ) const
+  {
+    os << "[" << any_join( v, ", " ) << "]";
   }
 
 private:
