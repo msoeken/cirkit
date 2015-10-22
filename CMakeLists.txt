@@ -11,7 +11,7 @@ file(MAKE_DIRECTORY ${ext_CIRCUITS})
 externalProject_add(revlib_functions
   DOWNLOAD_DIR .
   URL "http://revlib.org/doc/func/func.tgz"
-  CONFIGURE_COMMAND cp * ${ext_FUNCTIONS}
+  CONFIGURE_COMMAND cp -R . ${ext_FUNCTIONS}
   BUILD_IN_SOURCE 1
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
@@ -23,7 +23,7 @@ add_dependencies(external revlib_functions)
 externalProject_add(revlib_circuits
   DOWNLOAD_DIR .
   URL "http://revlib.org/doc/real/reals.tgz"
-  CONFIGURE_COMMAND cp * ${ext_CIRCUITS}
+  CONFIGURE_COMMAND cp -R . ${ext_CIRCUITS}
   BUILD_IN_SOURCE 1
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
