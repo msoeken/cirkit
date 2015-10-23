@@ -20,7 +20,9 @@
 #define BOOST_TEST_MODULE timers
 
 #include <boost/test/output_test_stream.hpp>
-#include <boost/test/unit_test.hpp>
+#define timer timer_class
+#include <boost/test/included/unit_test.hpp>
+#undef timer
 
 #include <core/utils/timer.hpp>
 

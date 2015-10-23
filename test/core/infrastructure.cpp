@@ -18,7 +18,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE infrastructure
 
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include <core/utils/benchmark_table.hpp>
 

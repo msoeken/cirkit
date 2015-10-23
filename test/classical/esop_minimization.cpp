@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE esop_minimization
 
 #include <boost/format.hpp>
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include <classical/optimization/esop_minimization.hpp>
 
