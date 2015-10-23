@@ -18,13 +18,17 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE permutation
 
-#include <boost/test/unit_test.hpp>
+#define timer timer_class
+#include <boost/test/included/unit_test.hpp>
+#undef timer
 
 #include <core/utils/bdd_utils.hpp>
+#include <core/utils/range_utils.hpp>
 
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/io/print_circuit.hpp>
+#include <reversible/synthesis/exact_synthesis.cpp>
 #include <reversible/utils/foreach_vshape.hpp>
 #include <reversible/utils/permutation.hpp>
 
@@ -68,6 +72,36 @@ BOOST_AUTO_TEST_CASE(simple)
             << "[i] - monotone:            " << monotone << std::endl
             << "[i] - unate:               " << unate << std::endl
             << "[i] - horn:                " << horn << std::endl;
+
+  permutation_t perm = {0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
+
+  std::vector<unsigned> sizes( 9u, 0u );
+
+  do
+  {
+    if ( is_simple( perm ) )
+    {
+        std::cout << "[i] simple: " << permutation_to_string( perm ) << std::endl;
+
+        binary_truth_table spec;
+
+        for ( auto i = 0u; i < 8u; ++i )
+        {
+          spec.add_entry( number_to_truth_table_cube( i, 3u ), number_to_truth_table_cube( perm.at( i ), 3u ) );
+        }
+
+        circuit circ;
+        auto es_settings = std::make_shared<properties>();
+        es_settings->set( "negative", false );
+        exact_synthesis( circ, spec, es_settings );
+
+        std::cout << "[i] " << circ.num_gates() << std::endl;
+
+        sizes[circ.num_gates()]++;
+    }
+  } while ( std::next_permutation( perm.begin(), perm.end() ) );
+
+  std::cout << "[i] sizes: " << any_join( sizes, " " ) << std::endl;
 }
 
 // Local Variables:

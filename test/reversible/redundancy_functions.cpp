@@ -22,7 +22,9 @@
 #include <list>
 
 #include <boost/format.hpp>
-#include <boost/test/unit_test.hpp>
+#define timer timer_class
+#include <boost/test/included/unit_test.hpp>
+#undef timer
 
 #include <core/utils/benchmark_table.hpp>
 #include <core/utils/timer.hpp>

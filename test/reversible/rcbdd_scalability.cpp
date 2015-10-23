@@ -23,7 +23,9 @@
 
 #include <boost/format.hpp>
 #include <boost/range/counting_range.hpp>
-#include <boost/test/unit_test.hpp>
+#define timer timer_class
+#include <boost/test/included/unit_test.hpp>
+#undef timer
 
 #include <core/properties.hpp>
 #include <core/utils/benchmark_table.hpp>

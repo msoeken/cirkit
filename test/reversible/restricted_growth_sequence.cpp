@@ -23,7 +23,9 @@
 #include <map>
 
 #include <boost/format.hpp>
-#include <boost/test/unit_test.hpp>
+#define timer timer_class
+#include <boost/test/included/unit_test.hpp>
+#undef timer
 
 #include <core/utils/benchmark_table.hpp>
 #include <core/utils/timer.hpp>
@@ -34,7 +36,7 @@ void restricted_growth_sequence( unsigned p, double& runtime )
 {
   using namespace cirkit;
 
-  reference_timer t( &runtime );
+  //reference_timer t( &runtime );
 
   unsigned i = 0u;
   std::map<std::pair<unsigned,unsigned>,unsigned> a;

@@ -18,7 +18,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE esop_synthesis
 
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include <reversible/circuit.hpp>
 #include <reversible/io/print_circuit.hpp>
