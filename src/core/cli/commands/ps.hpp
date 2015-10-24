@@ -53,6 +53,24 @@ int ps_helper( const program_options& opts, const environment::ptr& env )
   return 0;
 }
 
+template<typename S>
+int ps_log_helper( const program_options& opts, const environment::ptr& env, command::log_opt_t& ret )
+{
+  if ( ret != boost::none )
+  {
+    return 0;
+  }
+
+  constexpr auto option = store_info<S>::option;
+
+  if ( opts.is_set( option ) )
+  {
+    ret = log_store_entry_statistics<S>( env->store<S>().current() );
+  }
+
+  return 0;
+}
+
 template<class... S>
 class ps_command : public command
 {
@@ -76,6 +94,14 @@ protected:
     [](...){}( ps_helper<S>( opts, env )... );
 
     return true;
+  }
+
+public:
+  log_opt_t log() const
+  {
+    log_opt_t ret;
+    [](...){}( ps_log_helper<S>( opts, env, ret )... );
+    return ret;
   }
 };
 

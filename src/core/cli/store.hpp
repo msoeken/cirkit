@@ -28,9 +28,12 @@
 #define CLI_STORE_HPP
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/format.hpp>
+#include <boost/optional.hpp>
+#include <boost/variant.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/program_options.hpp>
@@ -158,6 +161,13 @@ template<typename T>
 void print_store_entry_statistics( std::ostream& os, const T& element )
 {
   os << "UNKNOWN" << std::endl;
+}
+
+template<typename T>
+boost::optional<std::unordered_map<std::string, boost::variant<std::string, int, double, std::vector<std::string>, std::vector<int>>>>
+log_store_entry_statistics( const T& element )
+{
+  return boost::none;
 }
 
 template<typename Source, typename Dest>
