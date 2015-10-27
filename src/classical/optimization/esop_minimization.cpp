@@ -681,7 +681,7 @@ void esop_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, 
     std::fill( var_values, var_values + Cudd_ReadSize( cudd ), VariableAbsent );
     generate_exact_psdkro( esop, cudd, f, var_values, -1, exp_cache );
 
-    delete var_values;
+    delete[] var_values;
 
     if ( verbose )
     {

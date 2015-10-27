@@ -112,7 +112,7 @@ std::vector<unsigned> bdds_to_truth_table_unsigned( const std::vector<bdd>& fs,
   std::vector<unsigned> result( tts_t.size() );
   boost::transform( tts_t, result.begin(), std::bind( &boost::dynamic_bitset<>::to_ulong, _1 ) );
 
-  return std::move( result );
+  return result;
 }
 
 std::vector<int> bdds_to_truth_table_signed( const std::vector<bdd>& fs,
@@ -129,7 +129,7 @@ std::vector<int> bdds_to_truth_table_signed( const std::vector<bdd>& fs,
   std::vector<int> result( tts_t.size() );
   boost::transform( tts_t, result.begin(), std::bind( bitset_to_signed, _1 ) );
 
-  return std::move( result );
+  return result;
 }
 
 

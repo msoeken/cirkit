@@ -103,7 +103,7 @@ std::vector<bdd> compute_diff( const std::vector<bdd>& f, const std::vector<bdd>
   assert( diff.size() == to );
   assert( diff.back().index == 0u );
 
-  return std::move( diff );
+  return diff;
 }
 
 boost::multiprecision::uint256_t get_max_value( const std::vector<bdd>& f )
