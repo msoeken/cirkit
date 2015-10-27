@@ -439,7 +439,7 @@ struct rcbdd_synthesis_manager
         p2[i] = scube[3u * i + 2u];
       }
 
-      delete scube;
+      delete[] scube;
 
       /* Create circuit for p1 and p2 */
       if ( verbose )
