@@ -12,6 +12,7 @@ add_cirkit_library(
     ${Boost_FILESYSTEM_LIBRARIES}
     ${Boost_PROGRAM_OPTIONS_LIBRARIES}
     ${CUDD_LIBRARIES}
+    ${READLINE_LIBRARY}
 )
 add_cirkit_library(
   NAME cirkit_classical

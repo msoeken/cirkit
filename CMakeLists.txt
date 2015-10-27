@@ -50,6 +50,27 @@ option(cirkit_ENABLE_PROGRAMS "build programs" on)
 option(cirkit_BUILD_SHARED "build shared libraries" on)
 set(cirkit_PACKAGES "" CACHE STRING "if non-empty, then only the packages in the semicolon-separated lists are build")
 
+# Readline
+include(CheckCXXSourceRuns)
+
+set(CMAKE_REQUIRED_LIBRARIES readline)
+check_cxx_source_runs("
+#include <stdio.h>
+#include <readline/readline.h>
+void foo() { readline(\"foo\"); }
+int main() { return 0; }
+" READLINE_WORKS)
+unset(CMAKE_REQUIRED_LIBRARIES)
+
+if( READLINE_WORKS )
+  set(USE_READLINE 1)
+  set(READLINE_LIBRARY readline)
+  add_definitions(-DUSE_READLINE=1)
+else( )
+  set(USE_READLINE 0)
+  set(READLINE_LIBRARY)
+endif( )
+
 # Libraries (include)
 include_directories(src)
 
