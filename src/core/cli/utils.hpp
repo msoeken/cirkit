@@ -52,6 +52,7 @@
 #include <core/cli/commands/show.hpp>
 #include <core/cli/commands/store.hpp>
 #include <core/utils/program_options.hpp>
+#include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 
 namespace cirkit
@@ -169,6 +170,10 @@ public:
     }
     else
     {
+#ifdef USE_READLINE
+      initialize_readline();
+#endif
+
       std::string line;
       while ( !env->quit && read_command_line( prefix, line ) )
       {
@@ -192,6 +197,54 @@ public:
 public:
   std::shared_ptr<environment> env;
 
+#ifdef USE_READLINE
+private:
+  static cli_main<S...>*   instance;
+  std::vector<std::string> command_names;
+
+  void initialize_readline()
+  {
+    instance = this;
+    command_names = get_map_keys( env->commands );
+    rl_attempted_completion_function = cli_main<S...>::readline_completion_s;
+  }
+
+  static char ** readline_completion_s( const char* text, int start, int end )
+  {
+    if ( start == 0 )
+    {
+      return rl_completion_matches( text, []( const char* text, int state ) { return instance->command_iterator( text, state ); } );
+    }
+    else
+    {
+      return nullptr;
+    }
+  }
+
+  char * command_iterator( const char * text, int state )
+  {
+    static std::vector<std::string>::const_iterator it;
+
+    if ( state == 0 )
+    {
+      it = command_names.begin();
+    }
+
+    while ( it != command_names.end() )
+    {
+      const auto& name = *it++;
+      if ( name.find( text ) != std::string::npos )
+      {
+        char * completion = new char[name.size()];
+        strcpy( completion, name.c_str() );
+        return completion;
+      }
+    }
+
+    return nullptr;
+  }
+#endif
+
 private:
   std::string                  prefix;
 
@@ -203,6 +256,9 @@ private:
 };
 
 #define ADD_COMMAND( name ) cli.env->commands.insert( {#name, std::make_shared<name##_command>( cli.env ) } );
+
+template<class... S>
+cli_main<S...>* cli_main<S...>::instance = nullptr;
 
 }
 
