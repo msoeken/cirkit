@@ -34,21 +34,9 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
-enum dsd_node_type { dsd_prime, dsd_invert };
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-                              boost::property<boost::vertex_name_t, dsd_node_type>> dsd_graph;
-typedef boost::graph_traits<dsd_graph>::vertex_descriptor                           dsd_node;
-
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
-
-inline dsd_node add_vertex( const dsd_node_type& value, dsd_graph& g )
-{
-  dsd_node n = boost::add_vertex( g );
-  boost::get( boost::vertex_name, g )[n] = value;
-  return n;
-}
 
 std::vector<unsigned> compute_swaps( unsigned n )
 {
@@ -262,6 +250,70 @@ tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<un
   return npn;
 }
 
+tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm )
+{
+  /* initialize */
+  auto n = tt_num_vars( t );
+  phase.resize( n + 1u );
+  phase.reset();
+  perm.resize( n );
+  boost::iota( perm, 0u );
+
+  tt npn = t;
+
+  auto improvement = true;
+
+  while ( improvement )
+  {
+    improvement = false;
+
+    /* input inversion */
+    for ( auto i = 0u; i < n; ++i )
+    {
+      const auto flipped = tt_flip( npn, i );
+      if ( flipped < npn )
+      {
+        npn = flipped;
+        phase.flip( i );
+        improvement = true;
+      }
+    }
+
+    /* output inversion */
+    const auto flipped = ~npn;
+    if ( flipped < npn )
+    {
+      npn = flipped;
+      phase.flip( n );
+      improvement = true;
+    }
+
+    /* permute inputs */
+    for ( auto d = 1u; d < n - 1; ++d )
+    {
+      for ( auto i = 0u; i < n - d; ++i )
+      {
+        auto j = i + d;
+
+        const auto permuted = tt_permute( npn, i, j );
+        if ( permuted < npn )
+        {
+          npn = permuted;
+          std::swap( perm[i], perm[j] );
+          improvement = true;
+        }
+      }
+    }
+  }
+
+  if ( tt_num_vars( npn ) > n )
+  {
+    tt_shrink( npn, n );
+  }
+
+  return npn;
+}
+
 tt tt_from_npn( const tt& npn, const boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm )
 {
   tt t = npn;
@@ -297,153 +349,6 @@ tt tt_from_npn( const tt& npn, const boost::dynamic_bitset<>& phase, std::vector
   }
 
   return t;
-}
-
-tt npn_canonization_with_dsd( const tt& t, boost::dynamic_bitset<>& phase )
-{
-  typedef tt::size_type size_type;
-
-  /* phase for all inputs and output */
-  unsigned n = tt_num_vars( t );
-  phase.resize( n + 1u );
-
-  /* copy truth table to result */
-  tt npn = t;
-
-  /* dsd graph */
-  dsd_graph g;
-  dsd_node node = add_vertex( dsd_prime, g );
-  dsd_node root = node;
-
-  /* if there are more 1's than 0's */
-  if ( npn.count() > ( npn.size() >> (size_type)1 ) )
-  {
-    phase.set( n );
-    npn.flip();
-
-    root = add_vertex( dsd_invert, g );
-    boost::add_edge( root, node, g );
-  }
-
-  /* count 1's in cofactors */
-  std::vector<int> cof_ones( n );
-  for ( unsigned i = 0u; i < n; ++i )
-  {
-    cof_ones[i] = tt_cof1( npn, i ).count();
-  }
-
-  bool try_again = true;
-
-  while ( try_again )
-  {
-    try_again = false;
-
-    /* decompositio from outside */
-    for ( unsigned i = 0u; i < n; ++i )
-    {
-      if ( !tt_has_var( npn, i ) ) continue;
-
-      char take_cof = 2;
-
-      if ( tt_cof0_is_const1( npn, i ) ) /* dsd: !(x!f1) */
-      {
-        take_cof = 1;
-      }
-      else if ( tt_cof0_is_const0( npn, i ) ) /* dsd: (xf1) */
-      {
-        take_cof = 1;
-      }
-      else if ( tt_cof1_is_const1( npn, i ) ) /* dsd: !(!x!f1) */
-      {
-        take_cof = 0;
-      }
-      else if ( tt_cof1_is_const0( npn, i ) ) /* dsd: (!xf1) */
-      {
-        take_cof = 0;
-      }
-      else if ( tt_cofs_opposite( npn, i ) ) /* dsd: [xf0] */
-      {
-        take_cof = 0;
-      }
-
-      if ( take_cof < 2 )
-      {
-        npn = take_cof ? tt_cof1( npn, i ) : tt_cof0( npn, i );
-
-        npn = tt_remove_var( npn, i );
-        --n;
-        try_again = true;
-      }
-    }
-
-    for ( unsigned d = 1; d < n; ++d )
-    {
-      for ( unsigned i = 0; i < n - d; ++i )
-      {
-        unsigned j = i + d;
-
-        if ( !tt_has_var( npn, i ) || !tt_has_var( npn, j ) ) continue;
-
-        char take_cof = 2;
-
-        for ( unsigned p = 0; p < 3 && take_cof == 2; ++p )
-        {
-          if ( p & 0x1 ) { tt_flip( npn, i ); }
-          if ( p & 0x2 ) { tt_flip( npn, j ); }
-
-          tt cof00 = tt_cof0( tt_cof0( npn, i ), j );
-          tt cof01 = tt_cof1( tt_cof0( npn, i ), j );
-          tt cof10 = tt_cof0( tt_cof1( npn, i ), j );
-          tt cof11 = tt_cof1( tt_cof1( npn, i ), j );
-
-          if ( cof01 == cof10 )
-          {
-            if ( cof00 == cof11 )
-            {
-              take_cof = 0;
-            }
-            else if ( cof01 == cof11 )
-            {
-              take_cof = 0;
-            }
-            else if ( cof00 == cof01 )
-            {
-              take_cof = 1;
-            }
-            else
-            {
-              take_cof = 2;
-            }
-
-            if ( take_cof < 2 )
-            {
-              tt vi = tt_nth_var( i );
-              tt_extend( vi, n );
-
-              npn = ~vi & ( take_cof ? cof11 : cof00 ) | ( vi & cof01 );
-              npn = tt_remove_var( npn, j );
-              --n;
-
-              try_again = true;
-            }
-          }
-
-          if ( take_cof == 2 )
-          {
-            if ( p & 0x1 ) { tt_flip( npn, i ); }
-            if ( p & 0x2 ) { tt_flip( npn, j ); }
-
-            if ( tt_cof1( npn, i ).count() > tt_cof1( npn, j ).count() )
-            {
-              npn = tt_permute( npn, i, j );
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return npn;
 }
 
 }

@@ -56,9 +56,9 @@ npn_command::npn_command( const environment::ptr& env )
   : command( env, "NPN classification" )
 {
   opts.add_options()
+    ( "approach",     value( &approach ),   "0: Exact\n1: Heuristic (based on number of 1s)\n2: Heuristic (based on lexicographic order)" )
     ( "enumerate,m",  value( &enumerate ),  "Computes NPN classes for all functions with given number of variables" )
     ( "truthtable,t",                       "Computes NPN class for the current truth table in the store" )
-    ( "exact,e",                            "Use exact computation" )
     ( "logname,l",    value( &logname ),    "If enumerate is set, write all classes to this file" )
     ( "store,n",                            "Copy the result to the store (only for truth tables)" )
     ;
@@ -70,13 +70,16 @@ command::rules_t npn_command::validity_rules() const
     {[&]() { return !opts.is_set( "truthtable" ) || !opts.is_set( "enumerate" ); },
         "either truth table or enumeration can be performed" },
     {[&]() { return !opts.is_set( "truthtable" ) || env->store<tt>().current_index() >= 0; },
-        "no current truth table available" }
+        "no current truth table available" },
+    {[&]() { return approach <= 2u; },
+        "approach must be value from 0 to 2" }
   };
 }
 
 bool npn_command::execute()
 {
-  const auto func = opts.is_set( "exact" ) ? npn_func_t( &exact_npn_canonization ) : npn_func_t( &npn_canonization );
+  std::vector<npn_func_t> approaches{ &exact_npn_canonization, &npn_canonization, &npn_canonization2 };
+  const auto& func = approaches[approach];
 
   if ( opts.is_set( "enumerate" ) )
   {

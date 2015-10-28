@@ -53,6 +53,7 @@ public:
   log_opt_t log() const;
 
 private:
+  unsigned                approach = 1u;
   unsigned                enumerate;
   std::string             logname;
 
