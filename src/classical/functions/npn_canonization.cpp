@@ -263,8 +263,12 @@ tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<u
 
   auto improvement = true;
 
+  //auto round = 0u;
+
   while ( improvement )
   {
+    //std::cout << "[i] round " << ++round << std::endl;
+
     improvement = false;
 
     /* input inversion */
@@ -273,6 +277,7 @@ tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<u
       const auto flipped = tt_flip( npn, i );
       if ( flipped < npn )
       {
+        //std::cout << "[i]   flip input " << i << std::endl;
         npn = flipped;
         phase.flip( i );
         improvement = true;
@@ -283,6 +288,7 @@ tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<u
     const auto flipped = ~npn;
     if ( flipped < npn )
     {
+      //std::cout << "[i]   flip output" << std::endl;
       npn = flipped;
       phase.flip( n );
       improvement = true;
@@ -298,6 +304,7 @@ tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<u
         const auto permuted = tt_permute( npn, i, j );
         if ( permuted < npn )
         {
+          //std::cout << "[i]   swap inputs " << i << " and " << j << std::endl;
           npn = permuted;
           std::swap( perm[i], perm[j] );
           improvement = true;
