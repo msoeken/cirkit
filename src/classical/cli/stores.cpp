@@ -89,6 +89,16 @@ void print_store_entry_statistics<aig_graph>( std::ostream& os, const aig_graph&
 }
 
 template<>
+command_log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
+{
+  const auto& info = aig_info( aig );
+
+  return command_log_opt_t({
+      {"inputs", static_cast<int>( info.inputs.size() )},
+      {"outputs", static_cast<int>( info.outputs.size() )}});
+}
+
+template<>
 aig_graph store_convert<tt, aig_graph>( const tt& t )
 {
   return aig_from_truth_table( t );

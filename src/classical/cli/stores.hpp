@@ -71,6 +71,9 @@ template<>
 void print_store_entry_statistics<aig_graph>( std::ostream& os, const aig_graph& aig );
 
 template<>
+command_log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig );
+
+template<>
 inline bool store_can_convert<tt, aig_graph>() { return true; }
 
 template<>
