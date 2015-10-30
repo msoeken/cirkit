@@ -214,6 +214,16 @@ namespace cirkit
      */
     void clear();
 
+    /**
+     * @brief Checks whether key exists
+     *
+     * @since 2.3
+     */
+    bool has_key( const key_type& k ) const
+    {
+      return map.find( k ) != map.end();
+    }
+
   private:
     storage_type      map;
   };
