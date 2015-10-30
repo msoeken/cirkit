@@ -32,6 +32,8 @@
 
 #include <cudd.h>
 
+#include <core/utils/bdd_utils.hpp>
+
 namespace cirkit
 {
 
@@ -106,6 +108,7 @@ namespace internal
 
   void dd_from_bdd( dd& graph, const std::vector<DdNode*>& nodes );
   void dd_from_bdd( dd& graph, const std::string& filename, const dd_from_bdd_settings& settings = dd_from_bdd_settings() );
+  void dd_from_bdd( dd& graph, bdd_function_t& bdds, const dd_from_bdd_settings& settings = dd_from_bdd_settings() );
 
   void dd_synthesis( circuit& circ, const dd& graph );
 

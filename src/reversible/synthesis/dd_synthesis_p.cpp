@@ -27,6 +27,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/assign/std/vector.hpp>
+#include <boost/format.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/optional.hpp>
 #include <boost/range/adaptor/map.hpp>
@@ -475,6 +476,52 @@ namespace internal
     boost::push_back( get_property( graph, boost::graph_name ).labels, bdd.outputs | map_keys );
 
     get_property( graph, boost::graph_name ).ninputs = bdd.inputs.size();
+
+    dd_from_bdd( graph, nodes );
+  }
+
+  void dd_from_bdd( dd& graph, bdd_function_t& bdds, const dd_from_bdd_settings& settings )
+  {
+    bdds.first.ReduceHeap( (Cudd_ReorderingType)settings.reordering, 0 );
+
+    if ( settings.node_count )
+    {
+      *settings.node_count = bdds.first.ReadNodeCount();
+    }
+
+    std::vector<DdNode*> nodes;
+    nodes.reserve( bdds.second.size() );
+    std::vector<ADD>     adds;
+
+    if ( settings.complemented_edges )
+    {
+      for ( const auto& f : bdds.second )
+      {
+        nodes.push_back( f.getNode() );
+      }
+    }
+    else
+    {
+      for ( const auto& f : bdds.second )
+      {
+        adds.push_back( f.Add() );
+        nodes.push_back( adds.back().getNode() );
+      }
+    }
+
+    /* I/O */
+    auto& info = get_property( graph, boost::graph_name );
+    for ( auto i = 0u; i < bdds.first.ReadSize(); ++i )
+    {
+      info.labels.push_back( boost::str( boost::format( "i%d" ) % i ) );
+    }
+
+    for ( auto i = 0u; i < bdds.second.size(); ++i )
+    {
+      info.labels.push_back( boost::str( boost::format( "o%d" ) % i ) );
+    }
+
+    info.ninputs = bdds.first.ReadSize();
 
     dd_from_bdd( graph, nodes );
   }
