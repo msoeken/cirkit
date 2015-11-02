@@ -34,6 +34,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/graph/filtered_graph.hpp>
+#include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
 
 using namespace boost::assign;
@@ -248,6 +249,21 @@ std::vector<vertex_t<Graph>> add_vertices( Graph& g, unsigned n )
   std::vector<vertex_t<Graph>> nodes( n );
   boost::generate( nodes, [&]() { return boost::add_vertex( g ); } );
   return nodes;
+}
+
+template<class Graph, class Fn>
+void foreach_topological( const Graph& g, Fn&& f )
+{
+  std::vector<vertex_t<Graph>> topo( num_vertices( g ) );
+  boost::topological_sort( g, topo.begin() );
+
+  for ( const auto& n : topo )
+  {
+    if ( !f( n ) )
+    {
+      break;
+    }
+  }
 }
 
 }
