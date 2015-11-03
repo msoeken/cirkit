@@ -72,6 +72,11 @@ struct aig_function
   {
     return node < other.node || ( node == other.node && complemented < other.complemented );
   }
+
+  inline aig_function operator^( bool value ) const
+  {
+    return {node, complemented != value };
+  }
 };
 
 namespace detail
