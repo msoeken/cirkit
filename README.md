@@ -29,12 +29,12 @@ After extracting or cloning CirKit perform the following steps
     cd build
     cmake ..
     make external
-    make
+    make cirkit
 
 ## Executing CirKit Programs
 
 Executables can be found in the directory `build/programs`. From the build
-directory call e.g. `programs/bdd_info`
+directory call e.g. `programs/cirkit`
 
 ## Build CirKit Addons
 
