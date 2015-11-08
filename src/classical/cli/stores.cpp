@@ -21,6 +21,7 @@
 
 #include <boost/format.hpp>
 
+#include <core/graph/depth.hpp>
 #include <core/utils/range_utils.hpp>
 
 #include <classical/functions/aig_from_truth_table.hpp>
@@ -93,9 +94,20 @@ command_log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
 {
   const auto& info = aig_info( aig );
 
+  std::vector<aig_node> outputs;
+  for ( const auto& output : info.outputs )
+  {
+    outputs += output.first.node;
+  }
+
+  std::vector<unsigned> depths;
+  const auto depth = compute_depth( aig, outputs, depths );
+
   return command_log_opt_t({
       {"inputs", static_cast<int>( info.inputs.size() )},
-      {"outputs", static_cast<int>( info.outputs.size() )}});
+      {"outputs", static_cast<int>( info.outputs.size() )},
+      {"size", static_cast<int>( boost::num_vertices( aig ) - info.inputs.size() - 1u )},
+      {"depth", static_cast<int>( depth )}});
 }
 
 template<>

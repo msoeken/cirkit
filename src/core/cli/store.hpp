@@ -163,7 +163,7 @@ void print_store_entry_statistics( std::ostream& os, const T& element )
   os << "UNKNOWN" << std::endl;
 }
 
-using command_log_opt_t = boost::optional<std::unordered_map<std::string, boost::variant<std::string, int, double, std::vector<std::string>, std::vector<int>>>>;
+using command_log_opt_t = boost::optional<std::unordered_map<std::string, boost::variant<std::string, int, double, bool, std::vector<std::string>, std::vector<int>>>>;
 
 template<typename T>
 command_log_opt_t log_store_entry_statistics( const T& element )

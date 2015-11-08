@@ -59,6 +59,11 @@ public:
     os << d;
   }
 
+  void operator()( bool b ) const
+  {
+    os << ( b ? "true" : "false" );
+  }
+
   void operator()( const std::vector<std::string>& v ) const
   {
     os << "[";

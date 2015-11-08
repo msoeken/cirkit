@@ -49,7 +49,7 @@ public:
   using rule_t  = std::pair<std::function<bool()>, std::string>;
   using rules_t = std::vector<rule_t>;
 
-  using log_var_t = boost::variant<std::string, int, double, std::vector<std::string>, std::vector<int>>;
+  using log_var_t = boost::variant<std::string, int, double, bool, std::vector<std::string>, std::vector<int>>;
   using log_map_t = std::unordered_map<std::string, log_var_t>;
   using log_opt_t = boost::optional<log_map_t>;
 
