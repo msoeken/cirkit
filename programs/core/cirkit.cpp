@@ -35,6 +35,7 @@
 
 #include <classical/cli/commands/aig.hpp>
 #include <classical/cli/commands/bool_complex.hpp>
+#include <classical/cli/commands/comb_approx.hpp>
 #include <classical/cli/commands/cone.hpp>
 #include <classical/cli/commands/dsop.hpp>
 #include <classical/cli/commands/feather.hpp>
@@ -75,6 +76,7 @@ int main( int argc, char ** argv )
   /* classical */
   cli.env->commands.insert( {"aig", std::make_shared<aig_command<STORE_TYPES>>( cli.env ) } );
   ADD_COMMAND( bool_complex );
+  ADD_COMMAND( comb_approx );
   ADD_COMMAND( cone );
   ADD_COMMAND( dsop );
   ADD_COMMAND( feather );
