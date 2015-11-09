@@ -19,6 +19,8 @@
 
 #include <cstdlib>
 
+#include <core/utils/system_utils.hpp>
+
 namespace cirkit
 {
 
@@ -72,7 +74,16 @@ bool execute_line( const environment::ptr& env, const std::string& line, const s
   /* escape to shell */
   if ( line[0] == '!' )
   {
-    system( line.substr( 1u ).c_str() );
+    const auto now = std::chrono::system_clock::now();
+    const auto result = execute_and_return_tee( line.substr( 1u ) );
+
+    if ( env->log )
+    {
+      command::log_map_t log;
+      log["output"] = result.second;
+      env->log_command( command::log_opt_t( log ), line, now );
+    }
+
     return true;
   }
 

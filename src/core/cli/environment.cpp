@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <iostream>
 #include <locale>
+#include <sstream>
 
 #include <boost/format.hpp>
 #include <boost/variant.hpp>
@@ -39,6 +40,29 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
+std::string json_escape( const std::string& s )
+{
+  std::stringstream ss;
+
+  for ( size_t i = 0; i < s.length(); ++i )
+  {
+    if ( s[i] == '\\' || s[i] == '"' )
+    {
+      ss << "\\" << s[i];
+    }
+    else if ( unsigned( s[i] ) < '\x20' )
+    {
+      ss << "\\u" << std::setfill( '0' ) << std::setw( 4 ) << std::hex << unsigned( s[i] );
+    }
+    else
+    {
+      ss << s[i];
+    }
+  }
+
+  return ss.str();
+}
+
 class log_var_visitor : public boost::static_visitor<void>
 {
 public:
@@ -46,7 +70,7 @@ public:
 
   void operator()( const std::string& s ) const
   {
-    os << "\"" << s << "\"";
+    os << "\"" << json_escape( s ) << "\"";
   }
 
   void operator()( int i ) const
@@ -77,7 +101,7 @@ public:
       }
       first = false;
 
-      os << "\"" << s << "\"";
+      os << "\"" << json_escape( s ) << "\"";
     }
     os << "]";
   }
@@ -103,6 +127,11 @@ void environment::start_logging( const std::string& filename )
 
 void environment::log_command( const std::shared_ptr<command>& cmd, const std::string& cmdstring, const std::chrono::system_clock::time_point& start )
 {
+  log_command( cmd->log(), cmdstring, start );
+}
+
+void environment::log_command( const command_log_opt_t& cmdlog, const std::string& cmdstring, const std::chrono::system_clock::time_point& start )
+{
   using boost::format;
 
   if ( !log_first_command )
@@ -119,9 +148,8 @@ void environment::log_command( const std::shared_ptr<command>& cmd, const std::s
   std::strftime( timestr, sizeof( timestr ), "%F %T", std::localtime( &start_c ) );
   logger << format( "{\n"
                     "  \"command\": \"%s\",\n"
-                    "  \"time\": \"%s\"" ) % cmdstring % timestr;
+                    "  \"time\": \"%s\"" ) % json_escape( cmdstring ) % timestr;
 
-  const auto cmdlog = cmd->log();
   if ( cmdlog != boost::none )
   {
     log_var_visitor vis( logger );

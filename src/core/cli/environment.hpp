@@ -70,6 +70,7 @@ public:
 public: /* logging */
   void start_logging( const std::string& filename );
   void log_command( const std::shared_ptr<command>& cmd, const std::string& cmdstring, const std::chrono::system_clock::time_point& start );
+  void log_command( const command_log_opt_t& cmdlog, const std::string& cmdstring, const std::chrono::system_clock::time_point& start );
   void stop_logging();
 
 public:
