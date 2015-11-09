@@ -33,8 +33,9 @@
 namespace cirkit
 {
 
-using result_t = std::pair< int, std::vector<std::string> >;
+using result_t = std::pair<int, std::vector<std::string>>;
 result_t execute_and_return( const std::string& cmd );
+result_t execute_and_return_tee( const std::string& cmd );
 
 }
 

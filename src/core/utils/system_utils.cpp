@@ -33,12 +33,12 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-result_t execute_and_return( const std::string& cmd )
+result_t execute_and_return( const std::string& cmd, const std::string& pattern )
 {
   std::vector<std::string> result;
 
   const std::string filename = ( boost::format( "/tmp/er-%s.log" ) % getpid() ).str();
-  auto sresult = system( boost::str( boost::format( "( %s ) > %s" ) % cmd % filename ).c_str() );
+  auto sresult = system( boost::str( boost::format( pattern ) % cmd % filename ).c_str() );
   std::ifstream is( filename.c_str(), std::ifstream::in );
   std::string line;
   while ( getline( is, line ) )
@@ -49,6 +49,16 @@ result_t execute_and_return( const std::string& cmd )
   is.close();
 
   return { WEXITSTATUS( sresult ), result };
+}
+
+result_t execute_and_return( const std::string& cmd )
+{
+  return execute_and_return( cmd, "( %s ) > %s" );
+}
+
+result_t execute_and_return_tee( const std::string& cmd )
+{
+  return execute_and_return( cmd, "( %s ) | tee %s" );
 }
 
 }
