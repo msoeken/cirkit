@@ -32,7 +32,7 @@ externalProject_add(revlib_circuits
   LOG_INSTALL 1)
 add_dependencies(external revlib_circuits)
 
-set(puma_SRC ${CMAKE_BINARY_DIR}/ext/puma-prefix/src/puma)
+set(puma_SRC ${CMAKE_BINARY_DIR}/addons/cirkit-addon-reversible/puma-prefix/src/puma)
 set(puma_HEADERS
   ${puma_SRC}/include/puma.h
   ${puma_SRC}/include/tc_time.h)

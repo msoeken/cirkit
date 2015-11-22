@@ -69,7 +69,7 @@ namespace cirkit
 
     // NOTE check for helper line?
     // has target in controls?
-    auto container = factor | transformed( []( variable v ) { return v.line(); } );
+    auto container = factor | transformed( +[]( variable v ) { return v.line(); } );
     if ( boost::find( container, base[index].targets().front() ) != boost::end( container ) )
     {
       return index;

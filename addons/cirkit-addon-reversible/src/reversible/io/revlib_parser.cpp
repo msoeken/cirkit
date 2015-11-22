@@ -101,34 +101,167 @@ map_access_functor<Map> make_map_access_functor( Map& map )
 
 bool parse_string_list( const std::string& line, std::vector<std::string>& params )
 {
-  namespace ascii = boost::spirit::ascii;
-  namespace qi = boost::spirit::qi;
+  enum class parse_state { none, quoted, unquoted } state = parse_state::none;
+  std::string item;
 
-  std::string::const_iterator it = line.begin();
-  bool r = qi::parse( it, line.end(),
-                      *(
-                        (   qi::lexeme['"' >> +( qi::char_ - '"' ) >> '"'] // string with quotes
-                          | +( qi::char_ - ' ' ) )                         // without quotes
-                        >> -qi::lit( ' ' )
-                       ), params );
+  for ( auto c : line )
+  {
+    switch ( state )
+    {
+    case parse_state::none:
+      switch ( c )
+      {
+      case ' ':
+        break;
+      case '"':
+        state = parse_state::quoted;
+        break;
+      default:
+        state = parse_state::unquoted;
+        item += c;
+        break;
+      }
+      break;
 
-  return ( r && it == line.end() );
+    case parse_state::quoted:
+      switch ( c )
+      {
+      case '"':
+        state = parse_state::none;
+        params.push_back( item );
+        item.clear();
+        break;
+      default:
+        item += c;
+        break;
+      }
+      break;
+
+    case parse_state::unquoted:
+      switch ( c )
+      {
+      case ' ':
+        state = parse_state::none;
+        params.push_back( item );
+        item.clear();
+        break;
+      default:
+        item += c;
+        break;
+      }
+      break;
+    }
+  }
+
+  if ( state == parse_state::unquoted )
+  {
+    params.push_back( item );
+  }
+
+  return true;
 }
 
-bool parse_annotations( const std::string& line, std::vector<boost::fusion::vector<std::string, std::string> >& annotations )
+bool parse_annotations( const std::string& line, std::vector<std::pair<std::string, std::string> >& annotations )
 {
-  namespace ascii = boost::spirit::ascii;
-  namespace qi = boost::spirit::qi;
+  enum class parse_state { none, key, assign, quoted, unquoted } state = parse_state::none;
+  std::string key, value;
 
-  std::string::const_iterator it = line.begin();
-  bool r = qi::parse( it, line.end(),
-                      *( qi::lexeme[+( ascii::alnum | '-' )] >> '=' >>
-                        (   qi::lexeme['"' >> +( qi::char_ - '"' ) >> '"'] // string with quotes
-                          | +( qi::char_ - ' ' ) )                         // without quotes
-                         >> *qi::lit( ' ' )
-                       ), annotations );
+  for ( auto c : line )
+  {
+    switch ( state )
+    {
+    case parse_state::none:
+      switch ( c )
+      {
+      case ' ':
+        break;
+      case '=':
+        assert( false );
+        break;
+      case '"':
+        assert( false );
+        break;
+      default:
+        state = parse_state::key;
+        key += c;
+        break;
+      }
+      break;
 
-  return ( r && it == line.end() );
+    case parse_state::key:
+      switch ( c )
+      {
+      case '=':
+        state = parse_state::assign;
+        break;
+      case ' ':
+        assert( false );
+        break;
+      case '"':
+        assert( false );
+        break;
+      default:
+        key += c;
+        break;
+      }
+      break;
+
+    case parse_state::assign:
+      switch ( c )
+      {
+      case ' ':
+        assert( false );
+        break;
+      case '=':
+        assert( false );
+        break;
+      case '"':
+        state = parse_state::quoted;
+        break;
+      default:
+        state = parse_state::unquoted;
+        value += c;
+        break;
+      }
+
+    case parse_state::quoted:
+      switch ( c )
+      {
+      case '"':
+        state = parse_state::none;
+        annotations.push_back( {key, value} );
+        key.clear();
+        value.clear();
+        break;
+      default:
+        value += c;
+        break;
+      }
+      break;
+
+    case parse_state::unquoted:
+      switch ( c )
+      {
+      case ' ':
+        state = parse_state::none;
+        annotations.push_back( {key, value} );
+        key.clear();
+        value.clear();
+        break;
+      default:
+        value += c;
+        break;
+      }
+      break;
+    }
+  }
+
+  if ( state == parse_state::unquoted )
+  {
+    annotations.push_back( {key, value} );
+  }
+
+  return true;
 }
 
 bool is_number( const std::string& str )
@@ -184,13 +317,13 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
       if ( !comment.empty() && comment.at( 0u ) == '@' )
       {
         std::string sannotations( comment.begin() + 1u, comment.end() );
-        std::vector<boost::fusion::vector<std::string, std::string> > annotations;
+        std::vector<std::pair<std::string, std::string> > annotations;
         boost::algorithm::trim( sannotations );
         parse_annotations( sannotations, annotations );
 
         for ( const auto& pair : annotations )
         {
-          reader.add_annotation( boost::fusion::at_c<0>( pair ), boost::fusion::at_c<1>( pair ) );
+          reader.add_annotation( pair.first, pair.second );
         }
       }
       else
@@ -511,14 +644,12 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
       }
       else
       {
-        using boost::adaptors::transformed;
-
         // gate
         std::vector<variable> line_indices;
-        boost::push_back( line_indices, params | transformed( [&variable_indices]( const std::string& s ) {
-                    bool polarity = s[0] != '-';
-                    return make_var( variable_indices.top()[polarity ? s : s.substr( 1u )], polarity );
-                } ) );
+        boost::transform( params, std::back_inserter( line_indices ), [&variable_indices]( const std::string& s ) {
+            bool polarity = s[0] != '-';
+            return make_var( variable_indices.top()[polarity ? s : s.substr( 1u )], polarity );
+          } );
 
         boost::any gate_type;
 

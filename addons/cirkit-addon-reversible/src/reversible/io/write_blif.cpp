@@ -306,7 +306,7 @@ namespace cirkit
       // input signature
       std::string input_signature =
         boost::join( g.targets() | transformed( make_random_access( signals ) ), " " ) + " " +
-        boost::join( g.controls() | transformed( []( variable v ) { return v.line(); } ) | transformed( make_random_access( signals ) ), " " );
+        boost::join( g.controls() | transformed( +[]( variable v ) { return v.line(); } ) | transformed( make_random_access( signals ) ), " " );
 
       for ( const auto& target : g.targets() )
       {

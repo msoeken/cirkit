@@ -24,6 +24,7 @@ include(cmake/CompilerFlags.cmake)
 include(cmake/ListDir.cmake)
 include(cmake/AddExtLibrary.cmake)
 include(cmake/CirKitTools.cmake)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/")
 
 include(CTest)
 
@@ -39,8 +40,9 @@ set( MAIN_Boost_LIBRARIES
   thread
 )
 find_package(Boost REQUIRED COMPONENTS ${MAIN_Boost_LIBRARIES} )
+find_package(GMP REQUIRED)
 
-include_directories(${Boost_INCLUDE_DIR} ext/include)
+include_directories(${Boost_INCLUDE_DIR} ${GMP_INCLUDE_DIR} ext/include)
 add_subdirectory(ext)
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs )

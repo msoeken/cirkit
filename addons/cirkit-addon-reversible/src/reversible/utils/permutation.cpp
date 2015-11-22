@@ -117,8 +117,8 @@ int permutation_sign( const permutation_t& perm )
 
 std::vector<unsigned> cycles_type( const cycles_t& cycles )
 {
-  std::vector<unsigned> type;
-  boost::push_back( type, cycles | transformed( []( const permutation_t& cycle ) { return cycle.size(); } ) );
+  std::vector<unsigned> type( cycles.size() );
+  boost::transform( cycles, type.begin(), []( const permutation_t& cycle ) { return cycle.size(); } );
   boost::sort( type );
   return type;
 }
