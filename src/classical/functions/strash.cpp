@@ -90,7 +90,7 @@ void strash( const aig_graph& aig,
   const auto reuse_inputs = get( settings, "reuse_inputs", false );
 
   auto& info_dest  = aig_info( aig_dest );
-  const auto offset = reuse_inputs ? info_dest.inputs.size() : 0u;
+  const auto offset = !reuse_inputs ? info_dest.inputs.size() : 0u;
 
   /* copy unateness and symmetries */
   if ( offset == 0u && reorder.empty() && invert.none() )
