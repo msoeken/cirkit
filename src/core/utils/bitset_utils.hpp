@@ -62,6 +62,7 @@ boost::dynamic_bitset<> random_bitset( unsigned n, URNG& g )
 }
 
 boost::dynamic_bitset<> random_bitset( unsigned n );
+boost::dynamic_bitset<> sub_bitset( const boost::dynamic_bitset<>& b, unsigned from, unsigned to );
 
 std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b );
 

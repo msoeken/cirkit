@@ -58,6 +58,16 @@ boost::dynamic_bitset<> random_bitset( unsigned n )
   return random_bitset( n, generator );
 }
 
+boost::dynamic_bitset<> sub_bitset( const boost::dynamic_bitset<>& b, unsigned from, unsigned to )
+{
+  boost::dynamic_bitset<> bs( to - from );
+  for ( auto i = from; i < to; ++i )
+  {
+    bs[i - from] = b[i];
+  }
+  return bs;
+}
+
 std::ostream& print_as_set( std::ostream& os, const boost::dynamic_bitset<>& b )
 {
   auto pos = b.find_first();
