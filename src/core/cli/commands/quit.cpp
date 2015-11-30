@@ -17,6 +17,10 @@
 
 #include "quit.hpp"
 
+#include <sys/utsname.h>
+
+#include <thread>
+
 namespace cirkit
 {
 
@@ -38,6 +42,20 @@ bool quit_command::execute()
 {
   env->quit = true;
   return true;
+}
+
+command::log_opt_t quit_command::log() const
+{
+  utsname u;
+  uname( &u );
+  return log_opt_t({
+      {"sysname", std::string( u.sysname )},
+      {"nodename", std::string( u.nodename )},
+      {"release", std::string( u.release )},
+      {"version", std::string( u.version )},
+      {"machine", std::string( u.machine )},
+      {"supported_threads", static_cast<int>( std::thread::hardware_concurrency() )}
+    });
 }
 
 }
