@@ -26,6 +26,7 @@
 #include <boost/range/algorithm_ext/iota.hpp>
 
 #include <core/utils/range_utils.hpp>
+#include <core/utils/timer.hpp>
 
 namespace cirkit
 {
@@ -96,8 +97,10 @@ std::vector<unsigned> compute_flips( unsigned n )
  * Public functions                                                           *
  ******************************************************************************/
 
-tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm )
+tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm, const properties::ptr& settings, const properties::ptr& statistics )
 {
+  properties_timer tim( statistics );
+
   /* initialize */
   auto n = tt_num_vars( t );
   phase.resize( n + 1u );
@@ -190,8 +193,10 @@ tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vec
   return min;
 }
 
-tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm )
+tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm, const properties::ptr& settings, const properties::ptr& statistics )
 {
+  properties_timer tim( statistics );
+
   typedef tt::size_type size_type;
 
   /* initialize */
@@ -250,8 +255,10 @@ tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<un
   return npn;
 }
 
-tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm )
+tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm, const properties::ptr& settings, const properties::ptr& statistics )
 {
+  properties_timer tim( statistics );
+
   /* initialize */
   auto n = tt_num_vars( t );
   phase.resize( n + 1u );

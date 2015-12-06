@@ -29,14 +29,27 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include <core/properties.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
 {
 
-tt exact_npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
-tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
-tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
+tt exact_npn_canonization(
+    const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm,
+    const properties::ptr& settings = properties::ptr(),
+    const properties::ptr& statistics = properties::ptr() );
+
+tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase,
+                     std::vector<unsigned>& perm,
+                     const properties::ptr& settings = properties::ptr(),
+                     const properties::ptr& statistics = properties::ptr() );
+
+tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase,
+                      std::vector<unsigned>& perm,
+                      const properties::ptr& settings = properties::ptr(),
+                      const properties::ptr& statistics = properties::ptr() );
+
 tt tt_from_npn( const tt& npn, const boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
 
 }

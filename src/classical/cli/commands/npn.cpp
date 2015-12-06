@@ -42,7 +42,7 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
-using npn_func_t = std::function<tt(const tt&, boost::dynamic_bitset<>&, std::vector<unsigned>&)>;
+using npn_func_t = std::function<tt(const tt&, boost::dynamic_bitset<>&, std::vector<unsigned>&, const properties::ptr&, const properties::ptr&)>;
 
 /******************************************************************************
  * Private functions                                                          *
@@ -99,7 +99,7 @@ bool npn_command::execute()
         phase.clear();
         perm.clear();
 
-        const auto key = func( bs, phase, perm ).to_ulong();
+        const auto key = func( bs, phase, perm, properties::ptr(), properties::ptr() ).to_ulong();
         auto it = classes.find( key );
         if ( it == classes.end() )
         {
@@ -131,8 +131,9 @@ bool npn_command::execute()
   {
     auto& tts = env->store<tt>();
 
-    npn = func( tts.current(), phase, perm );
+    npn = func( tts.current(), phase, perm, properties::ptr(), statistics );
 
+    std::cout << boost::format( "[i] run-time: %.f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
     std::cout << "[i] NPN class for " << tts.current() << " is " << npn << std::endl;
     std::cout << "[i] - phase: " << phase << " perm: " << any_join( perm, " " ) << std::endl;
 
@@ -150,7 +151,12 @@ command::log_opt_t npn_command::log() const
 {
   if ( opts.is_set( "truthtable" ) )
   {
-    return log_opt_t( {{"phase", to_string( phase )}, {"perm", any_join( perm, " " )}, {"npn", to_string( npn )}} );
+    return log_opt_t({
+        {"runtime", statistics->get<double>( "runtime" )},
+        {"phase", to_string( phase )},
+        {"perm", any_join( perm, " " )},
+        {"npn", to_string( npn )}
+      });
   }
   else
   {
