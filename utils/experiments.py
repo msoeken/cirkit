@@ -51,6 +51,9 @@ class log_table:
 
         return str
 
+    def sort( self, func ):
+        self.slices.sort( key = func )
+
     def set_default( self, column, value ):
         self.defaults[column] = value
 
@@ -64,7 +67,7 @@ class log_table:
             elif self.headers[cid] in self.defaults:
                 data = self.defaults[self.headers[cid]]
             else:
-                raise "Error"
+                raise NameError( "Error for %s\nSlice: %s" % ( str( column ), slice ) )
             if len( column ) == 3:
                 data = column[2]( data )
             return " %12s |" % data
