@@ -72,6 +72,10 @@ class log_table:
                 data = column[2]( data )
             return " %12s |" % data
 
+    # other utilities
+    def sum( self, row, key ):
+        return sum( slice[row][key] for slice in self.slices )
+
     # formatter
     @staticmethod
     def basename( value ):
