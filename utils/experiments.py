@@ -76,6 +76,9 @@ class log_table:
     def sum( self, row, key ):
         return sum( slice[row][key] for slice in self.slices )
 
+    def unique_count( self, row, key ):
+        return len( set( slice[row][key] for slice in self.slices ) )
+
     # formatter
     @staticmethod
     def basename( value ):
