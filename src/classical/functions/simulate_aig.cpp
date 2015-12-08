@@ -21,6 +21,32 @@ namespace cirkit
 {
 
 /******************************************************************************
+ * Pattern simulation (single pattern)                                        *
+ ******************************************************************************/
+
+pattern_simulator::pattern_simulator( const boost::dynamic_bitset<>& pattern ) : pattern( pattern ) {}
+
+bool pattern_simulator::get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
+{
+  return pattern[pos];
+}
+
+bool pattern_simulator::get_constant() const
+{
+  return false;
+}
+
+bool pattern_simulator::invert( const bool& v ) const
+{
+  return !v;
+}
+
+bool pattern_simulator::and_op( const aig_node& node, const bool& v1, const bool& v2 ) const
+{
+  return v1 && v2;
+}
+
+/******************************************************************************
  * Boolean simulation                                                         *
  ******************************************************************************/
 

@@ -79,6 +79,20 @@ public:
  * Several simulator implementations                                          *
  ******************************************************************************/
 
+class pattern_simulator : public aig_simulator<bool>
+{
+public:
+  pattern_simulator( const boost::dynamic_bitset<>& pattern );
+
+  bool get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const;
+  bool get_constant() const;
+  bool invert( const bool& v ) const;
+  bool and_op( const aig_node& node, const bool& v1, const bool& v2 ) const;
+
+private:
+  boost::dynamic_bitset<> pattern;
+};
+
 class simple_assignment_simulator : public aig_simulator<bool>
 {
 public:
