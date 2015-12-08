@@ -33,8 +33,8 @@ After extracting or cloning CirKit perform the following steps
 
 ## Executing CirKit Programs
 
-Executables can be found in the directory `build/programs`. From the build
-directory call e.g. `programs/cirkit`
+Executables can be found in the directory `build/programs`. Check the [Wiki](http://github.com/msoeken/cirkit/wiki)
+for more details.
 
 ## Build CirKit Addons
 
