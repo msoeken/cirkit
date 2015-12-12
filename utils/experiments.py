@@ -19,6 +19,7 @@
 
 import json
 import os
+import re
 
 class log_table:
     def __init__( self, filename, commands_per_entry, offset = 0 ):
@@ -26,6 +27,7 @@ class log_table:
         self.headers = []
         self.columns = []
         self.defaults = {}
+        self.column_size = 12
 
         if offset > 0:
             data = data[offset:]
@@ -84,4 +86,8 @@ class log_table:
     def basename( value ):
         filename = value.split()[-1]
         return os.path.splitext( os.path.basename( filename ) )[0]
+
+    @staticmethod
+    def re_search( expr ):
+        return lambda x : re.search( expr, x ).group( 1 )
 
