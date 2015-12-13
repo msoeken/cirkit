@@ -28,6 +28,7 @@
 #define HASH_UTILS_HPP
 
 #include <functional>
+#include <vector>
 
 namespace cirkit
 {
@@ -92,6 +93,20 @@ struct hash<std::pair<T1, T2>>
     std::size_t seed = 0;
     hash_combine( seed, p.first );
     hash_combine( seed, p.second );
+    return seed;
+  }
+};
+
+template<typename T>
+struct hash<std::vector<T>>
+{
+  std::size_t operator()( std::vector<T> const& c ) const
+  {
+    std::size_t seed = 0;
+    for ( const auto& v : c )
+    {
+      hash_combine( seed, v );
+    }
     return seed;
   }
 };
