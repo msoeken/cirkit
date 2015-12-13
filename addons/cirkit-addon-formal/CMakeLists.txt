@@ -20,7 +20,7 @@ set(Z3_LIBRARIES
   )
 
 # minisat
-set(minisat_SRC ${CMAKE_BINARY_DIR}/addons/cirkit-addon-experimental/minisat-prefix/src/minisat)
+set(minisat_SRC ${CMAKE_BINARY_DIR}/addons/cirkit-addon-formal/minisat-prefix/src/minisat)
 set(minisat_utils_HEADERS
   ${minisat_SRC}/utils/System.h
   ${minisat_SRC}/utils/ParseUtils.h
