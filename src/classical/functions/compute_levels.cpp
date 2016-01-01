@@ -38,7 +38,7 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-class compute_levels_simulator : public aig_simulator<unsigned>
+class aig_compute_levels_simulator : public aig_simulator<unsigned>
 {
 public:
   unsigned get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
@@ -77,7 +77,7 @@ std::map<aig_node, unsigned> compute_levels( const aig_graph& aig, const propert
   auto sa_settings = std::make_shared<properties>();
   auto sa_statistics = std::make_shared<properties>();
 
-  auto output_levels = simulate_aig( aig, compute_levels_simulator(), sa_settings, sa_statistics );
+  auto output_levels = simulate_aig( aig, aig_compute_levels_simulator(), sa_settings, sa_statistics );
 
   auto max_level = 0u;
   for ( const auto& ol : output_levels )
