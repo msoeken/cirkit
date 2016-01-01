@@ -29,6 +29,7 @@
 #ifndef BITSET_UTILS_HPP
 #define BITSET_UTILS_HPP
 
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <vector>
