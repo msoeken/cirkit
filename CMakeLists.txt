@@ -16,7 +16,7 @@
 #
 # Authors of Build system: Finn Haedicke, Stefan Frehse, Heinz Riener, Mathias Soeken
 
-project("CirKit" CXX)
+project("CirKit" C CXX)
 cmake_minimum_required(VERSION 3.0)
 
 include(cmake/CCache.cmake)
