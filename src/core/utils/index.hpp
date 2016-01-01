@@ -1,5 +1,6 @@
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
+ * Copyright (C) 2015-2016  EPFL
  * Copyright (C) 2015  The Regents of the University of California
  *
  * This program is free software: you can redistribute it and/or modify
