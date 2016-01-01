@@ -81,6 +81,7 @@ bool execute_line( const environment::ptr& env, const std::string& line, const s
     if ( env->log )
     {
       command::log_map_t log;
+      log["status"] = result.first;
       log["output"] = result.second;
       env->log_command( command::log_opt_t( log ), line, now );
     }
