@@ -44,6 +44,11 @@ inline command::rule_t file_exists( const std::string& filename, const std::stri
   return { [&]() { return boost::filesystem::exists( filename ); }, argname + " does not exist" };
 }
 
+inline command::rule_t file_exists_if_set( const program_options& opts, const std::string& filename, const std::string& argname )
+{
+  return { [&]() { return !opts.is_set( argname ) || boost::filesystem::exists( filename ); }, argname + " does not exist" };
+}
+
 inline command::rule_t has_addon( const std::string& addon_name )
 {
   return { []() { return false; }, addon_name + " is not enabled" };
