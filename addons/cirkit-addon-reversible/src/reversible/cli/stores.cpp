@@ -20,6 +20,7 @@
 #include <boost/format.hpp>
 
 #include <reversible/functions/circuit_to_aig.hpp>
+#include <reversible/io/create_image.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/io/print_statistics.hpp>
 
@@ -75,6 +76,21 @@ template<>
 std::string store_entry_to_string<binary_truth_table>( const binary_truth_table& spec )
 {
   return ( boost::format( "%d inputs, %d outputs" ) % spec.num_inputs() % spec.num_outputs() ).str();
+}
+
+show_store_entry<circuit>::show_store_entry( program_options& opts )
+{
+}
+
+bool show_store_entry<circuit>::operator()( circuit& circ,
+                                            const std::string& dotname,
+                                            const program_options& opts,
+                                            const properties::ptr& settings )
+{
+  create_tikz_settings ct_settings;
+  create_image( dotname, circ, ct_settings );
+
+  return false; /* don't open dot viewer */
 }
 
 template<>
