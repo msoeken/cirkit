@@ -96,7 +96,7 @@ bool exs_command::execute()
 
   if ( mode == 0u && result )
   {
-    std::cout << "[i] number of solutions: " << statistics->get<unsigned>( "num_circuits" ) << std::endl;
+    //std::cout << "[i] number of solutions: " << statistics->get<unsigned>( "num_circuits" ) << std::endl;
   }
 
   std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
@@ -120,8 +120,8 @@ bool exs_command::execute()
 command::log_opt_t exs_command::log() const
 {
   return log_opt_t({
-      { "runtime", statistics->get<double>( "runtime" ) },
-      { "num_circuits", static_cast<int>( statistics->get<unsigned>( "num_circuits" ) ) }
+      { "runtime", statistics->get<double>( "runtime" ) }//,
+      //{ "num_circuits", static_cast<int>( statistics->get<unsigned>( "num_circuits" ) ) }
     });
 }
 
