@@ -33,14 +33,26 @@ using namespace boost::program_options;
  * Private functions                                                          *
  ******************************************************************************/
 
+std::string make_caption( const std::string& caption, const std::string& publications )
+{
+  std::string c = caption;
+
+  if ( !publications.empty() )
+  {
+    c += "\n\nBased on the following publication(s):\n" + publications;
+  }
+
+  return c;
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
 
-command::command( const environment::ptr& env, const std::string& caption )
+command::command( const environment::ptr& env, const std::string& caption, const std::string& publications )
   : env( env ),
     scaption( caption ),
-    opts( caption )
+    opts( make_caption( caption, publications ) )
 {
 }
 

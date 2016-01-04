@@ -54,7 +54,7 @@ public:
   using log_map_t = std::unordered_map<std::string, log_var_t>;
   using log_opt_t = boost::optional<log_map_t>;
 
-  command( const environment::ptr& env, const std::string& caption );
+  command( const environment::ptr& env, const std::string& caption, const std::string& publications = std::string() );
 
   const std::string& caption() const;
   bool run( const std::vector<std::string>& args );
