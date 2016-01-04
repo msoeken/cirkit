@@ -51,3 +51,18 @@ add_cirkit_program(
     cirkit_reversible
     pthread
 )
+
+add_cirkit_program(
+  NAME revkit
+  SOURCES
+    reversible/revkit.cpp
+  USE
+    cirkit_reversible
+    cirkit_classical
+    ${READLINE_LIBRARY}
+)
+
+if( enable_cirkit-addon-experimental )
+  target_link_libraries( revkit cirkit_experimental_reversible )
+  target_compile_definitions( revkit PUBLIC USE_EXPERIMENTAL_REVERSIBLE_COMMANDS )
+endif()
