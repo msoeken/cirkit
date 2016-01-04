@@ -462,7 +462,7 @@ bool exact_synthesis(circuit& circ, const binary_truth_table& spec,
   {
     if ( verbose )
     {
-      std::cout << "[I] check for depth " << gate_count << std::endl;
+      std::cout << "[i] check for depth " << gate_count << std::endl;
     }
     result = synth_len(circ, spec, settings, gate_constraints, eval,
         gate_count);
