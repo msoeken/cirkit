@@ -47,6 +47,7 @@
 #include <reversible/cli/commands/spec.hpp>
 #include <reversible/cli/commands/write_real.hpp>
 #include <reversible/cli/commands/write_spec.hpp>
+#include <reversible/cli/commands/write_pla.hpp>
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
 #include <reversible/cli/commands/commands.hpp>
@@ -71,6 +72,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( write_aiger );
   ADD_COMMAND( write_real );
   ADD_COMMAND( write_spec );
+  ADD_COMMAND( write_pla );
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
   EXPERIMENTAL_REVERSIBLE_COMMANDS
