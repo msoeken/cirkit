@@ -5,7 +5,6 @@ set(reversible_programs
   circuit_to_truth_table
   dd_synthesis
   embed_pla
-  exact_synthesis
   example1
   example2
   example3
