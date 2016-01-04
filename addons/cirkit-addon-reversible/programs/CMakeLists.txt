@@ -12,7 +12,6 @@ set(reversible_programs
   example4
   is_identity
   negative_controls_to_positive
-  permutation_to_pla
   pidd_debugging
   random_reversible_circuit
   rcbdd_synthesis
