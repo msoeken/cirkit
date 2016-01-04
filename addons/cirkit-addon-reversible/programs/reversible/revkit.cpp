@@ -39,6 +39,7 @@
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
 #include <reversible/cli/stores.hpp>
+#include <reversible/cli/commands/exs.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
 #include <reversible/cli/commands/rcbdd.hpp>
@@ -62,6 +63,7 @@ int main( int argc, char ** argv )
   cli.env->commands.insert( {"aig", std::make_shared<aig_command<circuit, binary_truth_table, bdd_function_t, rcbdd, aig_graph>>( cli.env ) } );
   ADD_COMMAND( bdd );
   ADD_COMMAND( dbs );
+  ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
   ADD_COMMAND( rcbdd );
   ADD_COMMAND( read_aiger );
