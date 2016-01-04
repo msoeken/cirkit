@@ -93,7 +93,7 @@ show_store_entry<rcbdd>::show_store_entry( program_options& opts )
 {
 }
 
-void show_store_entry<rcbdd>::operator()( rcbdd& bdd,
+bool show_store_entry<rcbdd>::operator()( rcbdd& bdd,
                                           const std::string& dotname,
                                           const program_options& opts,
                                           const properties::ptr& settings )
@@ -112,6 +112,8 @@ void show_store_entry<rcbdd>::operator()( rcbdd& bdd,
   }
 
   fclose( fd );
+
+  return true;
 }
 
 template<>

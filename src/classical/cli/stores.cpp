@@ -62,7 +62,7 @@ show_store_entry<aig_graph>::show_store_entry( program_options& opts )
   opts.add( aig_options );
 }
 
-void show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const program_options& opts, const properties::ptr& settings )
+bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const program_options& opts, const properties::ptr& settings )
 {
   const auto levels = opts.variables()["levels"].as<unsigned>();
   if ( levels > 0u )
@@ -82,6 +82,8 @@ void show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string&
   }
 
   write_dot( aig, dotname, settings );
+
+  return true;
 }
 
 template<>

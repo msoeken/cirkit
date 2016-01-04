@@ -152,9 +152,10 @@ struct show_store_entry
 {
   show_store_entry( program_options& opts ) {}
 
-  void operator()( T& element, const std::string& dotname, const program_options& opts, const properties::ptr& settings )
+  bool operator()( T& element, const std::string& dotname, const program_options& opts, const properties::ptr& settings )
   {
     std::cout << "[w] show is not supported for this store element" << std::endl;
+    return false; /* don't open the dot file */
   }
 };
 

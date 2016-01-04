@@ -110,7 +110,7 @@ struct show_store_entry<rcbdd>
 {
   show_store_entry( program_options& opts );
 
-  void operator()( rcbdd& bdd, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
+  bool operator()( rcbdd& bdd, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
 };
 
 template<>

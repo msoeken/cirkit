@@ -55,13 +55,13 @@ int init_show_commands( program_options& opts, std::map<std::string, boost::any>
 }
 
 template<typename S>
-int show_helper( const program_options& opts, const environment::ptr& env, std::map<std::string, boost::any>& show_commands, const std::string& dotname, const properties::ptr& settings )
+int show_helper( bool& result, const program_options& opts, const environment::ptr& env, std::map<std::string, boost::any>& show_commands, const std::string& dotname, const properties::ptr& settings )
 {
   constexpr auto option = store_info<S>::option;
 
   if ( opts.is_set( option ) )
   {
-    boost::any_cast<show_store_entry<S>>( show_commands[option] )( env->store<S>().current(), dotname, opts, settings );
+    result = boost::any_cast<show_store_entry<S>>( show_commands[option] )( env->store<S>().current(), dotname, opts, settings );
   }
   return 0;
 }
@@ -93,9 +93,10 @@ protected:
       dotname = ( boost::format( dotname ) % rand() ).str();
     }
 
-    [](...){}( show_helper<S>( opts, env, show_commands, dotname, settings )... );
+    auto result = false;
+    [](...){}( show_helper<S>( result, opts, env, show_commands, dotname, settings )... );
 
-    if ( !opts.is_set( "silent" ) )
+    if ( !opts.is_set( "silent" ) && result )
     {
       system( boost::str( boost::format( dotcmd ) % dotname ).c_str() );
     }

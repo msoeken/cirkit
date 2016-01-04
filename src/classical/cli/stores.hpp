@@ -65,7 +65,7 @@ struct show_store_entry<aig_graph>
 {
   show_store_entry( program_options& opts );
 
-  void operator()( aig_graph& aig, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
+  bool operator()( aig_graph& aig, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
 };
 
 template<>
