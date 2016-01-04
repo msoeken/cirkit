@@ -40,7 +40,7 @@ void parse_string_list( const std::string& s, std::vector<unsigned>& list )
 
   std::vector<std::string> slist;
   boost::split( slist, s, boost::is_any_of( " " ) );
-  boost::push_back( list, slist | transformed( []( const std::string& s ) { return boost::lexical_cast<unsigned>( s ); } ) );
+  boost::push_back( list, slist | transformed( +[]( const std::string& s ) { return boost::lexical_cast<unsigned>( s ); } ) );
 }
 
 void permutation_to_truth_table( const std::vector<unsigned>& list, binary_truth_table& spec )
