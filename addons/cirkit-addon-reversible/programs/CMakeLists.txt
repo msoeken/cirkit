@@ -46,7 +46,7 @@ endif()
 add_cirkit_program(
   NAME calculate_required_lines
   SOURCES
-    reversible/calculate_required_lines
+    reversible/calculate_required_lines.cpp
   USE
     cirkit_reversible
     pthread
