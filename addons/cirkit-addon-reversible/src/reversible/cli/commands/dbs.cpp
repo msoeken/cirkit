@@ -17,9 +17,21 @@
 
 #include "dbs.hpp"
 
+#include <sstream>
+#include <vector>
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/format.hpp>
+#include <boost/range/algorithm.hpp>
+
 #include <core/cli/rules.hpp>
 #include <core/cli/store.hpp>
 #include <core/utils/program_options.hpp>
+#include <core/utils/string_utils.hpp>
 #include <classical/optimization/esop_minimization.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
 #include <reversible/circuit.hpp>
@@ -28,6 +40,8 @@
 #include <reversible/cli/stores.hpp>
 #include <reversible/synthesis/rcbdd_synthesis.hpp>
 #include <reversible/synthesis/young_subgroup_synthesis.hpp>
+
+using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -40,18 +54,42 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
+std::tuple<int, int, double> compute_stats( const std::vector<int>& sizes )
+{
+  using namespace boost::accumulators;
+
+  accumulator_set<double, stats<tag::mean, tag::min, tag::max>> acc;
+  acc = boost::for_each( sizes, acc );
+
+  return std::make_tuple( min( acc ), max( acc ), mean( acc ) );
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
 
 dbs_command::dbs_command( const environment::ptr& env )
-  : command( env, "Decomposition based synthesis" )
+  : command( env, "Decomposition based synthesis", "[A. De Vos, Y. Van Rentergem, Adv. Math. Commun. 2 (2008), 183-200]\n[M. Soeken, L. Tague, G.W. Dueck, R. Drechsler, J. of Symb. Comp. 73 (2016), 1-26]" )
 {
   opts.add_options()
     ( "symbolic,s",                                            "Use symbolic variant (works on RCBDDs)" )
     ( "esop_minimizer", value_with_default( &esop_minimizer ), "ESOP minizer (0: built-in, 1: exorcism); only with symbolic approach" )
     ( "new,n",                                                 "Add a new entry to the store; if not set, the current entry is overriden" )
     ;
+
+  options_description tt_options( "Options for the truth table variant" );
+  tt_options.add_options()
+    ( "ordering",       value( &ordering ),                    "Complete variable ordering (space separated, only for truth table variant)" )
+    ;
+
+  options_description symb_options( "Options for the symbolic variant" );
+  symb_options.add_options()
+    ( "mode",           value_with_default( &mode ),           "Mode (0: default, 1: swap, 2: hamming)" )
+    ;
+
+  opts.add( tt_options );
+  opts.add( symb_options );
+
   be_verbose();
 }
 
@@ -85,10 +123,19 @@ bool dbs_command::execute()
 
   if ( opts.is_set( "symbolic" ) )
   {
+    settings->set( "mode", mode );
+
     rcbdd_synthesis( circ, rcbdds.current(), settings, statistics );
   }
   else
   {
+    if ( !ordering.empty() )
+    {
+      std::vector<unsigned> vuordering;
+      parse_string_list( vuordering, ordering );
+      settings->set( "ordering", vuordering );
+    }
+
     young_subgroup_synthesis( circ, specs.current(), settings, statistics );
   }
 
@@ -97,6 +144,29 @@ bool dbs_command::execute()
   std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
 
   return true;
+}
+
+command::log_opt_t dbs_command::log() const
+{
+  log_map_t map = {
+    { "runtime", statistics->get<double>( "runtime" ) }
+  };
+
+  if ( opts.is_set( "symbolic" ) )
+  {
+    const std::vector<int>& node_count = statistics->get<std::vector<int>>( "node_count" );
+    auto stats = compute_stats( node_count );
+    map["node_count"] = node_count;
+    map["min_size"] = std::get<0>( stats );
+    map["max_size"] = std::get<1>( stats );
+    map["mean_size"] = std::get<2>( stats );
+
+    std::stringstream ss;
+    ss << statistics->get<unsigned long long>( "access" );
+    map["access"] = ss.str();
+  }
+
+  return log_opt_t( map );
 }
 
 }

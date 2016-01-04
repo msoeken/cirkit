@@ -41,8 +41,13 @@ protected:
   rules_t validity_rules() const;
   bool execute();
 
+public:
+  log_opt_t log() const;
+
 private:
-  unsigned            esop_minimizer = 0u;
+  unsigned    esop_minimizer = 0u;
+  std::string ordering;
+  unsigned    mode = 0u;
 };
 
 }

@@ -13,12 +13,10 @@ set(reversible_programs
   negative_controls_to_positive
   pidd_debugging
   random_reversible_circuit
-  rcbdd_synthesis
   reed_muller_synthesis
   transform_circuit
   transformation_based_synthesis
-  window_optimization
-  young_subgroup_synthesis)
+  window_optimization)
 
 foreach(program ${reversible_programs})
   add_cirkit_program(
