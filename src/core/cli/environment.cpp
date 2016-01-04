@@ -79,6 +79,11 @@ public:
     os << i;
   }
 
+  void operator()( unsigned i ) const
+  {
+    os << i;
+  }
+
   void operator()( double d ) const
   {
     os << d;
@@ -108,6 +113,11 @@ public:
   }
 
   void operator()( const std::vector<int>& v ) const
+  {
+    os << "[" << any_join( v, ", " ) << "]";
+  }
+
+  void operator()( const std::vector<unsigned>& v ) const
   {
     os << "[" << any_join( v, ", " ) << "]";
   }
