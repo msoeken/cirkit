@@ -17,13 +17,20 @@
 
 #include "spec.hpp"
 
+#include <cmath>
+#include <vector>
+
 #include <core/cli/rules.hpp>
 #include <core/cli/store.hpp>
+#include <core/utils/string_utils.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>
+#include <reversible/functions/permutation_to_truth_table.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
+
+using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -44,27 +51,32 @@ spec_command::spec_command( const environment::ptr& env )
   : command( env, "Specification functions" )
 {
   opts.add_options()
-    ( "circuit,c", "Read from current circuit" )
-    ( "new,n",     "Add a new entry to the store; if not set, the current entry is overriden" )
+    ( "circuit,c",                            "Read from current circuit" )
+    ( "permutation,p", value( &permutation ), "Create spec from permutation (starts with 0, space separated)" )
+    ( "new,n",                                "Add a new entry to the store; if not set, the current entry is overriden" )
     ;
 }
 
 command::rules_t spec_command::validity_rules() const
 {
-  return { { [&]() { return !opts.is_set( "circuit" ) || env->store<circuit>().current_index() >= 0; }, "no circuit in store" } };
+  return {
+    { [&]() { return opts.is_set( "circuit" ) != opts.is_set( "permutation" ); }, "either circuit or permutation must be set" },
+    { [&]() { return !opts.is_set( "circuit" ) || env->store<circuit>().current_index() >= 0; }, "no circuit in store" }
+  };
 }
 
 bool spec_command::execute()
 {
+  auto& specs = env->store<binary_truth_table>();
+
+  if ( specs.empty() || opts.is_set( "new" ) )
+  {
+    specs.extend();
+  }
+
   if ( opts.is_set( "circuit" ) )
   {
-    auto& specs    = env->store<binary_truth_table>();
     auto& circuits = env->store<circuit>();
-
-    if ( specs.empty() || opts.is_set( "new" ) )
-    {
-      specs.extend();
-    }
 
     const auto& circ = circuits.current();
 
@@ -73,6 +85,14 @@ bool spec_command::execute()
 
     specs.current() = spec;
   }
+  else if ( opts.is_set( "permutation" ) )
+  {
+    std::vector<unsigned> perm;
+    parse_string_list( perm, permutation );
+
+    specs.current() =  permutation_to_truth_table( perm );
+  }
+
   return true;
 }
 

@@ -1,5 +1,6 @@
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
+ * Copyright (C) 2015-2016  EPFL
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,34 +17,25 @@
  */
 
 /**
- * @file spec.hpp
+ * @file permutation_to_truth_table.hpp
  *
- * @brief Specification functions
+ * @brief Creates a truth table from a permutation
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_SPEC_COMMAND_HPP
-#define CLI_SPEC_COMMAND_HPP
+#ifndef PERMUTATION_TO_TRUTH_TABLE_HPP
+#define PERMUTATION_TO_TRUTH_TABLE_HPP
 
-#include <core/cli/command.hpp>
+#include <vector>
+
+#include <reversible/truth_table.hpp>
 
 namespace cirkit
 {
 
-class spec_command : public command
-{
-public:
-  spec_command( const environment::ptr& env );
-
-protected:
-  rules_t validity_rules() const;
-  bool execute();
-
-private:
-  std::string permutation;
-};
+binary_truth_table permutation_to_truth_table( const std::vector<unsigned>& list );
 
 }
 
