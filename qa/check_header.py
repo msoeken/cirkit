@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import fnmatch
 import os
 from termcolor import colored
 
 header_cirkit = """/* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
+ * Copyright (C) 2015-2016  EPFL
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +35,7 @@ total = 0
 header = header_cirkit
 lines = header.count( "\n" )
 
-for name in get_source_files( "formal", "mini", "reversible", "experimental", "verific", "yosys" ):
+for name in get_source_files( "formal", "reversible", "experimental" ):
     file_header = ''.join( open( name, "r" ).readlines()[0:lines] )
     if file_header != header:
         count += 1
