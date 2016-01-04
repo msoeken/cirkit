@@ -57,13 +57,24 @@ circuit circuit_from_string( const std::string& description, const std::string& 
     split_string( lines, g, " " );
 
     assert( lines.size() > 1u );
-    assert( lines[0][0] = 't' );
+    assert( lines[0][0] == 't' || lines[0][0] == 'f' );
     assert( boost::lexical_cast<unsigned>( lines[0].substr( 1u ) ) == lines.size() - 1u );
 
     auto& _gate = circ.append_gate();
-    _gate.set_type( toffoli_tag() );
 
-    for ( auto i = 1u; i < lines.size() - 1u; ++i )
+    auto num_targets = 1u;
+    switch ( lines[0][0] )
+    {
+    case 't':
+      _gate.set_type( toffoli_tag() );
+      break;
+    case 'f':
+      num_targets = 2u;
+      _gate.set_type( fredkin_tag() );
+      break;
+    }
+
+    for ( auto i = 1u; i < lines.size() - num_targets; ++i )
     {
       char c;
       bool p;
@@ -87,13 +98,16 @@ circuit circuit_from_string( const std::string& description, const std::string& 
       _gate.add_control( make_var( c - 'a', p ) );
     }
 
-    const auto c = lines.back()[0];
+    for ( auto i = lines.size() - num_targets; i < lines.size(); ++i )
+    {
+      assert( lines[i].size() == 1u );
 
-    assert( lines.back().size() == 1u );
-    assert( c >= 'a' && c <= 'z' );
+      const auto c = lines[i][0];
+      assert( c >= 'a' && c <= 'z' );
 
-    max = std::max( c - 'a', max );
-    _gate.add_target( c - 'a' );
+      max = std::max( c - 'a', max );
+      _gate.add_target( c - 'a' );
+    }
   }
 
   circ.set_lines( max + 1u );

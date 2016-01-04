@@ -41,7 +41,7 @@ namespace cirkit
  * are a, b, c, d, ... and the number of lines is automatically
  * adjusted to the largest variable name.
  * Gates are separated by ; on default.
- * So far, only Toffoli gates are supported.
+ * So far, only Toffoli and Fredkin gates are supported.
  */
 
 circuit circuit_from_string( const std::string& description, const std::string& sep = ";" );
