@@ -120,9 +120,3 @@ bool pidd_debugging( const circuit& circ, const binary_truth_table& spec,
 // eval: (c-set-offset 'substatement-open 0)
 // eval: (c-set-offset 'innamespace 0)
 // End:
-
-
-
-
-
-

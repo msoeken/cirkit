@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import fnmatch
 import os
 from termcolor import colored
@@ -13,7 +13,7 @@ footer = """// Local Variables:
 lines = footer.count( "\n" )
 
 count = 0; total = 0
-for _dir in [".", "addons/cirkit-addon-formal", "addons/cirkit-addon-mini", "addons/cirkit-addon-revlib", "addons/cirkit-addon-experimental", "addons/cirkit-addon-verific", "addons/cirkit-addon-yosys"]:
+for _dir in [".", "addons/cirkit-addon-formal", "addons/cirkit-addon-reversible", "addons/cirkit-addon-experimental"]:
     for top in ["src", "programs", "test"]:
         for root, dirnames, filenames in os.walk( "{0}/{1}".format( _dir, top ) ):
             for filename in fnmatch.filter( filenames, "*.?pp" ):

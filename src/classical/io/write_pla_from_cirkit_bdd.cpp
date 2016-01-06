@@ -30,11 +30,11 @@
 namespace cirkit
 {
 
-void write_pla_from_cirkit_bdd (const std::vector<bdd> &fvec, 
-				const std::vector<std::string> &input_labels, 
-				const std::vector<std::string> &output_labels, 
+void write_pla_from_cirkit_bdd (const std::vector<bdd> &fvec,
+				const std::vector<std::string> &input_labels,
+				const std::vector<std::string> &output_labels,
 				std::ostream &os) {
-  
+
   os << ".i "<< input_labels.size() << std::endl;
   os << ".o "<< output_labels.size() << std::endl;
   os << ".ilb";
@@ -51,11 +51,10 @@ void write_pla_from_cirkit_bdd (const std::vector<bdd> &fvec,
 }
 
 
-void write_pla_from_cirkit_bdd (const bdd &f, 
-				const std::vector<std::string> &input_labels, 
-				const std::vector<std::string> &output_labels, 
+void write_pla_from_cirkit_bdd (const bdd &f,
+				const std::vector<std::string> &input_labels,
+				const std::vector<std::string> &output_labels,
 				std::ostream &os) {
-  
   os << ".i "<< input_labels.size() << std::endl;
   os << ".o "<< output_labels.size() << std::endl;
   os << ".ilb";
@@ -79,6 +78,3 @@ void write_pla_from_cirkit_bdd (const bdd &f,
 // eval: (c-set-offset 'substatement-open 0)
 // eval: (c-set-offset 'innamespace 0)
 // End:
-
-
-

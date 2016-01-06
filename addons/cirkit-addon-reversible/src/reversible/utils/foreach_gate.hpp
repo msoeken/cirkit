@@ -46,13 +46,3 @@ void foreach_gate( unsigned num_lines, bool with_negated, const std::function<vo
 // eval: (c-set-offset 'substatement-open 0)
 // eval: (c-set-offset 'innamespace 0)
 // End:
-
-
-
-
-
-
-
-
-
-
