@@ -41,7 +41,7 @@ set(puma_LIBS
 
 externalProject_add(puma
   DOWNLOAD_DIR .
-  URL "http://www.informatik.uni-bremen.de/revkit/files/puma-2.24.tar.gz"
+  URL "http://msoeken.github.io/tools/puma-2.24.tar.gz"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND make puma -C bin
   BUILD_IN_SOURCE 1

@@ -15,7 +15,7 @@ add_custom_target(
 
 externalProject_add(cudd
   DOWNLOAD_DIR .
-  URL "http://www.informatik.uni-bremen.de/revkit/files/cudd-2.5.0-cirkit.tar.gz"
+  URL "http://msoeken.github.io/tools/cudd-2.5.0-cirkit.tar.gz"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/ext
   LOG_DOWNLOAD 1
   LOG_BUILD 1

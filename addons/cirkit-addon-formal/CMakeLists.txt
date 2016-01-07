@@ -7,7 +7,7 @@ set(ext_LIB ${CMAKE_SOURCE_DIR}/ext/lib)
 
 externalProject_add(z3ep
   DOWNLOAD_DIR .
-  URL "http://www.informatik.uni-bremen.de/revkit/files/z3-4.3.2-github-a7db1c9d76.tar.gz"
+  URL "http://msoeken.github.io/tools/z3-4.3.2-github-a7db1c9d76.tar.gz"
   CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} scripts/mk_make.py --prefix=${CMAKE_SOURCE_DIR}/ext
   BUILD_COMMAND make -C build
   BUILD_IN_SOURCE 1
@@ -41,7 +41,7 @@ set(minisat_core_HEADERS
   ${minisat_SRC}/core/Dimacs.h)
 externalProject_add( minisat
   DOWNLOAD_DIR .
-  URL "http://www.informatik.uni-bremen.de/revkit/files/minisat-2.2.0-clang.tar.gz"
+  URL "http://msoeken.github.io/tools/minisat-2.2.0-clang.tar.gz"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND make -C core libr MROOT=${minisat_SRC} COPTIMIZE=-fPIC\ -O3
   BUILD_IN_SOURCE 1
