@@ -1,0 +1,22 @@
+2,3c2,3
+< CONFIG := clang
+< # CONFIG := gcc
+---
+> #CONFIG := clang
+> CONFIG := gcc
+9,10c9,10
+< ENABLE_TCL := 1
+< ENABLE_ABC := 1
+---
+> ENABLE_TCL := 0
+> ENABLE_ABC := 0
+15c15
+< ENABLE_LIBYOSYS := 0
+---
+> ENABLE_LIBYOSYS := 1
+21c21
+< PREFIX ?= /usr/local
+---
+> PREFIX ?= final
+385a386
+> 	$(INSTALL_SUDO) mkdir -p $(DESTDIR)$(PREFIX)/lib
