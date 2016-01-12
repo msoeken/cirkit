@@ -21,19 +21,22 @@ import json
 import os
 import re
 
+def chunked( filename, commands_per_entry, offset = 0 ):
+    data = json.load( open( filename, 'r' ) )
+    if offset > 0:
+        data = data[offset:]
+
+    num_slices = int( ( len( data ) - 1 ) / commands_per_entry )
+    return [data[i * commands_per_entry:(i * commands_per_entry) + commands_per_entry] for i in range( num_slices )]
+
 class log_table:
     def __init__( self, filename, commands_per_entry, offset = 0 ):
-        data = json.load( open( filename, 'r' ) )
         self.headers = []
         self.columns = []
         self.defaults = {}
         self.column_size = 12
 
-        if offset > 0:
-            data = data[offset:]
-
-        num_slices = int( ( len( data ) - 1 ) / commands_per_entry )
-        self.slices = [data[i * commands_per_entry:(i * commands_per_entry) + commands_per_entry] for i in range( num_slices )]
+        self.slices = chunked( filename, commands_per_entry, offset )
 
     def __setitem__( self, key, value ):
         self.headers.append( key )
