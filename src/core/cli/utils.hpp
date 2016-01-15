@@ -178,12 +178,10 @@ public:
       std::string line;
       while ( !env->quit && read_command_line( prefix, line ) )
       {
-        if ( execute_line( env, line, env->commands ) )
-        {
+        execute_line( env, line, env->commands );
 #ifdef USE_READLINE
-          add_history( line.c_str() );
+        add_history( line.c_str() );
 #endif
-        }
       }
     }
 
