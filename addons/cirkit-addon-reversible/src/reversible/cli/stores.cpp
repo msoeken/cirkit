@@ -121,11 +121,11 @@ bool show_store_entry<rcbdd>::operator()( rcbdd& bdd,
 
   if ( opts.is_set( "add" ) )
   {
-    bdd.manager().DumpDot( {bdd.chi().Add()}, 0, 0, fd );
+    bdd.manager().DumpDot( std::vector<ADD>{bdd.chi().Add()}, 0, 0, fd );
   }
   else
   {
-    bdd.manager().DumpDot( {bdd.chi()}, 0, 0, fd );
+    bdd.manager().DumpDot( std::vector<BDD>{bdd.chi()}, 0, 0, fd );
   }
 
   fclose( fd );
