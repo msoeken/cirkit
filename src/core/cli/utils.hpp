@@ -256,8 +256,10 @@ private:
 
 #define ADD_COMMAND( name ) cli.env->commands.insert( {#name, std::make_shared<name##_command>( cli.env ) } );
 
+#ifdef USE_READLINE
 template<class... S>
 cli_main<S...>* cli_main<S...>::instance = nullptr;
+#endif
 
 }
 
