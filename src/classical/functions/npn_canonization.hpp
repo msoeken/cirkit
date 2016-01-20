@@ -46,10 +46,15 @@ tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase,
                      const properties::ptr& settings = properties::ptr(),
                      const properties::ptr& statistics = properties::ptr() );
 
-tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase,
-                      std::vector<unsigned>& perm,
-                      const properties::ptr& settings = properties::ptr(),
-                      const properties::ptr& statistics = properties::ptr() );
+tt npn_canonization_flip_swap( const tt& t, boost::dynamic_bitset<>& phase,
+                               std::vector<unsigned>& perm,
+                               const properties::ptr& settings = properties::ptr(),
+                               const properties::ptr& statistics = properties::ptr() );
+
+tt npn_canonization_sifting( const tt& t, boost::dynamic_bitset<>& phase,
+                             std::vector<unsigned>& perm,
+                             const properties::ptr& settings = properties::ptr(),
+                             const properties::ptr& statistics = properties::ptr() );
 
 tt tt_from_npn( const tt& npn, const boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
 

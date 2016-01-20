@@ -94,6 +94,70 @@ std::vector<unsigned> compute_flips( unsigned n )
   return flip_array;
 }
 
+void npn_canonization_sifting_loop( tt& npn, unsigned n, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm )
+{
+  auto improvement = true;
+  auto forward = true;
+
+  //auto round = 0u;
+
+  while ( improvement )
+  {
+    //std::cout << "[i] round " << ++round << std::endl;
+
+    improvement = false;
+
+    for ( int i = forward ? 0 : n - 2; forward ? i < ( n - 1 ) : i >= 0; forward ? ++i : --i )
+    {
+      auto local_improvement = false;
+      for ( auto k = 1u; k < 8u; ++k )
+      {
+        if ( k % 4u == 0u )
+        {
+          const auto next_t = tt_permute( npn, i, i + 1 );
+          if ( next_t < npn )
+          {
+            npn = next_t;
+            std::swap( perm[i], perm[i + 1] );
+            local_improvement = true;
+          }
+        }
+        else if ( k % 2u == 0u )
+        {
+          const auto next_t = tt_flip( npn, i + 1 );
+          if ( next_t < npn )
+          {
+            npn = next_t;
+            phase.flip( i + 1 );
+            local_improvement = true;
+          }
+        }
+        else
+        {
+          const auto next_t = tt_flip( npn, i );
+          if ( next_t < npn )
+          {
+            npn = next_t;
+            phase.flip( i );
+            local_improvement = true;
+          }
+        }
+      }
+
+      if ( local_improvement )
+      {
+        improvement = true;
+      }
+      else
+      {
+        std::swap( perm[i], perm[i + 1] );
+      }
+    }
+
+    forward = !forward;
+  }
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -256,7 +320,7 @@ tt npn_canonization( const tt& t, boost::dynamic_bitset<>& phase, std::vector<un
   return npn;
 }
 
-tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm, const properties::ptr& settings, const properties::ptr& statistics )
+tt npn_canonization_flip_swap( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm, const properties::ptr& settings, const properties::ptr& statistics )
 {
   properties_timer tim( statistics );
 
@@ -319,6 +383,52 @@ tt npn_canonization2( const tt& t, boost::dynamic_bitset<>& phase, std::vector<u
         }
       }
     }
+  }
+
+  if ( tt_num_vars( npn ) > n )
+  {
+    tt_shrink( npn, n );
+  }
+
+  return npn;
+}
+
+tt npn_canonization_sifting( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm, const properties::ptr& settings, const properties::ptr& statistics )
+{
+  properties_timer tim( statistics );
+
+  /* initialize */
+  auto n = tt_num_vars( t );
+  phase.resize( n + 1u );
+  phase.reset();
+  perm.resize( n );
+  boost::iota( perm, 0u );
+
+  tt npn = t;
+
+  if ( n < 2u )
+  {
+    return npn;
+  }
+
+  npn_canonization_sifting_loop( npn, n, phase, perm );
+
+  const auto best_perm = perm;
+  const auto best_phase = phase;
+  const auto best_npn = npn;
+
+  npn = ~t;
+  phase.reset();
+  phase.flip( n );
+  boost::iota( perm, 0u );
+
+  npn_canonization_sifting_loop( npn, n, phase, perm );
+
+  if ( best_npn < npn )
+  {
+    perm = best_perm;
+    phase = best_phase;
+    npn = best_npn;
   }
 
   if ( tt_num_vars( npn ) > n )

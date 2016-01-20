@@ -57,7 +57,7 @@ npn_command::npn_command( const environment::ptr& env )
   : command( env, "NPN classification" )
 {
   opts.add_options()
-    ( "approach",     value( &approach ),   "0: Exact\n1: Heuristic (based on number of 1s)\n2: Heuristic (based on lexicographic order)" )
+    ( "approach",     value( &approach ),   "0: Exact\n1: Heuristic (based on number of 1s)\n2: Heuristic (flip-swap)\n3: Heuristic (sifting)" )
     ( "enumerate,m",  value( &enumerate ),  "Computes NPN classes for all functions with given number of variables" )
     ( "truthtable,t",                       "Computes NPN class for the current truth table in the store" )
     ( "logname,l",    value( &logname ),    "If enumerate is set, write all classes to this file" )
@@ -72,14 +72,14 @@ command::rules_t npn_command::validity_rules() const
         "either truth table or enumeration can be performed" },
     {[&]() { return !opts.is_set( "truthtable" ) || env->store<tt>().current_index() >= 0; },
         "no current truth table available" },
-    {[&]() { return approach <= 2u; },
-        "approach must be value from 0 to 2" }
+    {[&]() { return approach <= 3u; },
+        "approach must be value from 0 to 3" }
   };
 }
 
 bool npn_command::execute()
 {
-  std::vector<npn_func_t> approaches{ &exact_npn_canonization, &npn_canonization, &npn_canonization2 };
+  std::vector<npn_func_t> approaches{ &exact_npn_canonization, &npn_canonization, &npn_canonization_flip_swap, &npn_canonization_sifting };
   const auto& func = approaches[approach];
 
   if ( opts.is_set( "enumerate" ) )
