@@ -25,6 +25,7 @@
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/functions/circuit_from_string.hpp>
+#include <reversible/functions/clear_circuit.hpp>
 #include <reversible/io/read_realization.hpp>
 
 using namespace boost::program_options;
@@ -71,6 +72,7 @@ bool read_real_command::execute()
     circuits.extend();
   }
 
+  clear_circuit( circuits.current() );
   if ( opts.is_set( "filename" ) )
   {
     read_realization( circuits.current(), filename );
