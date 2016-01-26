@@ -98,8 +98,16 @@ bool show_store_entry<bdd_function_t>::operator()( bdd_function_t& bdd,
 template<>
 void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd )
 {
+  std::vector<double> minterms;
+
+  for ( const auto& f : bdd.second )
+  {
+    minterms.push_back( f.CountMinterm( bdd.first.ReadSize() ) );
+  }
+
   os << "[i] no. of variables: " << bdd.first.ReadSize() << std::endl
      << "[i] no. of nodes:     " << bdd.first.ReadKeys() << std::endl
+     << "[i] no. of minterms:  " << any_join( minterms, " " ) << std::endl
      << "[i] level sizes:      " << any_join( level_sizes( bdd.first, bdd.second ), " " ) << std::endl
      << "[i] maximum fanout:   " << maximum_fanout( bdd.first, bdd.second ) << std::endl
      << "[i] complement edges: " << count_complement_edges( bdd.first, bdd.second ) << std::endl;
