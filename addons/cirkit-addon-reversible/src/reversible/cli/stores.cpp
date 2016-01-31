@@ -81,6 +81,13 @@ std::string store_entry_to_string<binary_truth_table>( const binary_truth_table&
 
 show_store_entry<circuit>::show_store_entry( program_options& opts )
 {
+  boost::program_options::options_description circuit_options( "Circuit options" );
+
+  circuit_options.add_options()
+    ( "standalone", "Surround Tikz code with LaTeX template to compile" )
+    ;
+
+  opts.add( circuit_options );
 }
 
 bool show_store_entry<circuit>::operator()( circuit& circ,
@@ -89,7 +96,21 @@ bool show_store_entry<circuit>::operator()( circuit& circ,
                                             const properties::ptr& settings )
 {
   create_tikz_settings ct_settings;
-  create_image( dotname, circ, ct_settings );
+
+  std::ofstream os( dotname.c_str() );
+
+  if ( opts.is_set( "standalone" ) )
+  {
+    os << "\\documentclass{standalone}" << std::endl
+       << "\\usepackage{tikz}" << std::endl << std::endl
+       << "\\begin{document}" << std::endl;
+  }
+  create_image( os, circ, ct_settings );
+
+  if ( opts.is_set( "standalone" ) )
+  {
+    os << "\\end{document}" << std::endl;
+  }
 
   return false; /* don't open dot viewer */
 }
