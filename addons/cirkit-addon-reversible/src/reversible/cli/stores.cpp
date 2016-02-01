@@ -85,6 +85,7 @@ show_store_entry<circuit>::show_store_entry( program_options& opts )
 
   circuit_options.add_options()
     ( "standalone", "Surround Tikz code with LaTeX template to compile" )
+    ( "hideio",     "Don't print I/O" )
     ;
 
   opts.add( circuit_options );
@@ -96,6 +97,8 @@ bool show_store_entry<circuit>::operator()( circuit& circ,
                                             const properties::ptr& settings )
 {
   create_tikz_settings ct_settings;
+
+  ct_settings.draw_io = !opts.is_set( "hideio" );
 
   std::ofstream os( dotname.c_str() );
 

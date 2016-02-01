@@ -275,6 +275,15 @@ namespace cirkit
     float target_radius;
 
     /**
+     * @brief Controls whether I/O is printed
+     *
+     * Default value is \b true
+     *
+     * @since 2.3
+     */
+    bool draw_io = true;
+
+    /**
      * @brief Text written before the circuit is printed
      *
      * Default value is empty

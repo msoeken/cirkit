@@ -210,14 +210,14 @@ namespace cirkit
 
   void create_image( std::ostream& os, const circuit& circ, create_image_settings& settings )
   {
-    if ( circ.num_gates() == 0 || circ.lines() == 0 )
+    if ( circ.lines() == 0 )
     {
       return;
     }
 
     unsigned peres_count = std::count_if( circ.begin(), circ.end(), [](const gate& g) { return is_peres( g ); } );
 
-    settings.width = settings.elem_width * ( 2 + circ.num_gates() + peres_count );
+    settings.width = settings.elem_width * ( 2 + std::max( circ.num_gates(), 1u ) + peres_count );
     settings.height = settings.elem_height * circ.lines();
 
     settings.draw_begin( os );
@@ -232,8 +232,12 @@ namespace cirkit
     for ( unsigned i = 0; i < circ.lines(); ++i )
     {
       settings.draw_line( os, x1, x2, settings.height - y );
-      settings.draw_input( os, x1, settings.height - y, ( circ.inputs().size() > i ? circ.inputs().at( i ) : "" ), (bool)circ.constants().at( i ) );
-      settings.draw_output( os, x2, settings.height - y, ( circ.outputs().size() > i ? circ.outputs().at( i ) : "" ), circ.garbage().at( i ) );
+
+      if ( settings.draw_io )
+      {
+        settings.draw_input( os, x1, settings.height - y, ( circ.inputs().size() > i ? circ.inputs().at( i ) : "" ), (bool)circ.constants().at( i ) );
+        settings.draw_output( os, x2, settings.height - y, ( circ.outputs().size() > i ? circ.outputs().at( i ) : "" ), circ.garbage().at( i ) );
+      }
 
       y += settings.elem_height;
     }
