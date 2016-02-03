@@ -306,7 +306,14 @@ unsigned maximum_fanout( DdManager* manager, const std::vector<DdNode*>& fs )
   visited.erase( DD_ONE( manager ) );
   visited.erase( Cudd_Not( DD_ONE( manager ) ) );
 
-  return *boost::max_element( visited | map_values );
+  if ( visited.empty() )
+  {
+    return 0u;
+  }
+  else
+  {
+    return *boost::max_element( visited | map_values );
+  }
 }
 
 unsigned maximum_fanout( const Cudd& manager, const std::vector<BDD>& fs )
