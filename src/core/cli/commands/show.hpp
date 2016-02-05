@@ -43,25 +43,39 @@ using namespace boost::program_options;
 namespace cirkit
 {
 
+using show_commands_t = std::map<std::string, boost::any>;
+
 template<typename S>
-int init_show_commands( program_options& opts, std::map<std::string, boost::any>& show_commands )
+int init_show_commands( program_options& opts, show_commands_t& show_commands )
 {
   constexpr auto option   = store_info<S>::option;
   constexpr auto mnemonic = store_info<S>::mnemonic;
 
-  show_commands[option] = show_store_entry<S>( opts );
+  show_commands[option] = std::make_shared<show_store_entry<S>>( opts );
 
   return 0;
 }
 
 template<typename S>
-int show_helper( bool& result, const program_options& opts, const environment::ptr& env, std::map<std::string, boost::any>& show_commands, const std::string& dotname, const properties::ptr& settings )
+int show_helper( bool& result, const program_options& opts, const environment::ptr& env, show_commands_t& show_commands, const std::string& dotname, const properties::ptr& settings )
 {
   constexpr auto option = store_info<S>::option;
 
   if ( opts.is_set( option ) )
   {
-    result = boost::any_cast<show_store_entry<S>>( show_commands[option] )( env->store<S>().current(), dotname, opts, settings );
+    result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands[option] )->operator()( env->store<S>().current(), dotname, opts, settings );
+  }
+  return 0;
+}
+
+template<typename S>
+int show_log_helper( command::log_opt_t& result, const program_options& opts, const show_commands_t& show_commands )
+{
+  constexpr auto option = store_info<S>::option;
+
+  if ( opts.is_set( option ) )
+  {
+    result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands.at( option ) )->log();
   }
   return 0;
 }
@@ -104,11 +118,20 @@ protected:
     return true;
   }
 
+public:
+  log_opt_t log() const
+  {
+    log_opt_t result;
+    [](...){}( show_log_helper<S>( result, opts, show_commands )... );
+
+    return result;
+  }
+
 protected:
   std::string dotname = "/tmp/test-%s.dot";
   std::string dotcmd  = "xdg-open \"%s\" &";
 
-  std::map<std::string, boost::any> show_commands;
+  show_commands_t show_commands;
 };
 
 /*

@@ -147,6 +147,8 @@ void print_store_entry( std::ostream& os, const T& element )
   os << "UNKNOWN" << std::endl;
 }
 
+using command_log_opt_t = boost::optional<std::unordered_map<std::string, boost::variant<std::string, int, unsigned, double, bool, std::vector<std::string>, std::vector<int>, std::vector<unsigned>>>>;
+
 template<typename T>
 struct show_store_entry
 {
@@ -157,6 +159,11 @@ struct show_store_entry
     std::cout << "[w] show is not supported for this store element" << std::endl;
     return false; /* don't open the dot file */
   }
+
+  command_log_opt_t log() const
+  {
+    return boost::none;
+  }
 };
 
 template<typename T>
@@ -164,8 +171,6 @@ void print_store_entry_statistics( std::ostream& os, const T& element )
 {
   os << "UNKNOWN" << std::endl;
 }
-
-using command_log_opt_t = boost::optional<std::unordered_map<std::string, boost::variant<std::string, int, unsigned, double, bool, std::vector<std::string>, std::vector<int>, std::vector<unsigned>>>>;
 
 template<typename T>
 command_log_opt_t log_store_entry_statistics( const T& element )

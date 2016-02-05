@@ -118,6 +118,11 @@ bool show_store_entry<circuit>::operator()( circuit& circ,
   return false; /* don't open dot viewer */
 }
 
+command_log_opt_t show_store_entry<circuit>::log() const
+{
+  return boost::none;
+}
+
 template<>
 void print_store_entry<binary_truth_table>( std::ostream& os, const binary_truth_table& spec )
 {
@@ -155,6 +160,11 @@ bool show_store_entry<rcbdd>::operator()( rcbdd& bdd,
   fclose( fd );
 
   return true;
+}
+
+command_log_opt_t show_store_entry<rcbdd>::log() const
+{
+  return boost::none;
 }
 
 template<>

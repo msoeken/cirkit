@@ -95,6 +95,11 @@ bool show_store_entry<bdd_function_t>::operator()( bdd_function_t& bdd,
   return true;
 }
 
+command_log_opt_t show_store_entry<bdd_function_t>::log() const
+{
+  return boost::none;
+}
+
 template<>
 void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd )
 {

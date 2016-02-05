@@ -55,6 +55,16 @@ template<>
 std::string store_entry_to_string<circuit>( const circuit& circ );
 
 template<>
+struct show_store_entry<circuit>
+{
+  show_store_entry( program_options& opts );
+
+  bool operator()( circuit& circ, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
+
+  command_log_opt_t log() const;
+};
+
+template<>
 void print_store_entry<circuit>( std::ostream& os, const circuit& circ );
 
 template<>
@@ -87,14 +97,6 @@ template<>
 std::string store_entry_to_string<binary_truth_table>( const binary_truth_table& spec );
 
 template<>
-struct show_store_entry<circuit>
-{
-  show_store_entry( program_options& opts );
-
-  bool operator()( circuit& circ, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
-};
-
-template<>
 void print_store_entry<binary_truth_table>( std::ostream& os, const binary_truth_table& spec );
 
 /******************************************************************************
@@ -120,6 +122,8 @@ struct show_store_entry<rcbdd>
   show_store_entry( program_options& opts );
 
   bool operator()( rcbdd& bdd, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
+
+  command_log_opt_t log() const;
 };
 
 template<>

@@ -86,6 +86,11 @@ bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string&
   return true;
 }
 
+command_log_opt_t show_store_entry<aig_graph>::log() const
+{
+  return boost::none;
+}
+
 template<>
 void print_store_entry_statistics<aig_graph>( std::ostream& os, const aig_graph& aig )
 {
