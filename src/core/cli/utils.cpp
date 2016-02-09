@@ -40,7 +40,7 @@ namespace cirkit
 bool read_command_line( const std::string& prefix, std::string& line )
 {
 #ifdef USE_READLINE
-  auto * cline = readline( boost::str( boost::format( "%s> " ) % prefix ).c_str() );
+  auto * cline = readline( prefix.c_str() );
 
   /* something went wrong? */
   if ( !cline )

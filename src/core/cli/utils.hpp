@@ -97,6 +97,7 @@ public:
       ( "command,c", value( &command ), "Process semicolon-separated list of commands" )
       ( "file,f",    value( &file ),    "Process file with new-line seperated list of commands" )
       ( "echo,e",                       "Echos the command if read from command line or file" )
+      ( "counter,n",                    "Show a counter in the prefix" )
       ( "log,l",     value( &logname ), "Logs the execution and stores many statistical information" )
       ;
   }
@@ -133,7 +134,7 @@ public:
           batch_string += ( line + "; " );
           if ( line == "quit" )
           {
-            if ( opts.is_set( "echo" ) ) { std::cout << prefix << "> " << "abc -c \"" + batch_string << "\"" << std::endl; }
+            if ( opts.is_set( "echo" ) ) { std::cout << get_prefix() << "abc -c \"" + batch_string << "\"" << std::endl; }
             std::cout << "abc" << ' ' << abc_opts << ' ' << batch_string << '\n';
             execute_line( env, ( boost::format("abc %s-c \"%s\"") % abc_opts % batch_string ).str(), env->commands );
             batch_string.clear();
@@ -149,7 +150,7 @@ public:
           }
           else
           {
-            if ( opts.is_set( "echo" ) ) { std::cout << prefix << "> " << line << std::endl; }
+            if ( opts.is_set( "echo" ) ) { std::cout << get_prefix() << line << std::endl; }
             if ( !execute_line( env, line, env->commands ) )
             {
               return 1;
@@ -163,7 +164,7 @@ public:
     else if ( opts.is_set( "file" ) )
     {
       foreach_line_in_file( file, [&]( const std::string& line ) {
-          if ( opts.is_set( "echo" ) ) { std::cout << prefix << "> " << line << std::endl; }
+          if ( opts.is_set( "echo" ) ) { std::cout << get_prefix() << line << std::endl; }
           execute_line( env, line, env->commands );
 
           return !env->quit;
@@ -176,7 +177,7 @@ public:
 #endif
 
       std::string line;
-      while ( !env->quit && read_command_line( prefix, line ) )
+      while ( !env->quit && read_command_line( get_prefix(), line ) )
       {
         execute_line( env, line, env->commands );
 #ifdef USE_READLINE
@@ -195,6 +196,19 @@ public:
 
 public:
   std::shared_ptr<environment> env;
+
+private:
+  std::string get_prefix()
+  {
+    if ( opts.is_set( "counter" ) )
+    {
+      return prefix + boost::str( boost::format( " %d> " ) % counter++ );
+    }
+    else
+    {
+      return prefix + "> ";
+    }
+  }
 
 #ifdef USE_READLINE
 private:
@@ -252,6 +266,8 @@ private:
   std::string                  command;
   std::string                  file;
   std::string                  logname;
+
+  unsigned                     counter = 1u;
 };
 
 #define ADD_COMMAND( name ) cli.env->commands.insert( {#name, std::make_shared<name##_command>( cli.env ) } );
