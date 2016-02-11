@@ -122,6 +122,29 @@ public:
     os << "[" << any_join( v, ", " ) << "]";
   }
 
+  void operator()( const std::vector<std::vector<int>>& v ) const
+  {
+    os << "[";
+
+    bool first = true;
+
+    for ( const auto& element : v )
+    {
+      if ( !first )
+      {
+        os << ", ";
+      }
+      else
+      {
+        first = false;
+      }
+
+      operator()( element );
+    }
+
+    os << "]";
+  }
+
 private:
   std::ostream& os;
 };

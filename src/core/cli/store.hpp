@@ -147,7 +147,7 @@ void print_store_entry( std::ostream& os, const T& element )
   os << "UNKNOWN" << std::endl;
 }
 
-using command_log_opt_t = boost::optional<std::unordered_map<std::string, boost::variant<std::string, int, unsigned, double, bool, std::vector<std::string>, std::vector<int>, std::vector<unsigned>>>>;
+using command_log_opt_t = boost::optional<std::unordered_map<std::string, boost::variant<std::string, int, unsigned, double, bool, std::vector<std::string>, std::vector<int>, std::vector<unsigned>, std::vector<std::vector<int>>>>>;
 
 template<typename T>
 struct show_store_entry
