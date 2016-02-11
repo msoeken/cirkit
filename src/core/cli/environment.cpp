@@ -94,35 +94,8 @@ public:
     os << ( b ? "true" : "false" );
   }
 
-  void operator()( const std::vector<std::string>& v ) const
-  {
-    os << "[";
-
-    auto first = true;
-    for ( const auto& s : v )
-    {
-      if ( !first )
-      {
-        os << ", ";
-      }
-      first = false;
-
-      os << "\"" << json_escape( s ) << "\"";
-    }
-    os << "]";
-  }
-
-  void operator()( const std::vector<int>& v ) const
-  {
-    os << "[" << any_join( v, ", " ) << "]";
-  }
-
-  void operator()( const std::vector<unsigned>& v ) const
-  {
-    os << "[" << any_join( v, ", " ) << "]";
-  }
-
-  void operator()( const std::vector<std::vector<int>>& v ) const
+  template<typename T>
+  void operator()( const std::vector<T>& v ) const
   {
     os << "[";
 
