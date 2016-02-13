@@ -12,7 +12,6 @@ set(reversible_programs
   is_identity
   negative_controls_to_positive
   pidd_debugging
-  random_reversible_circuit
   reed_muller_synthesis
   transform_circuit
   transformation_based_synthesis
