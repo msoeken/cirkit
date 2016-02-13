@@ -48,6 +48,14 @@ z3::expr operator<<( const z3::expr& a, const z3::expr& b )
   return z3::to_expr( a.ctx(), r );
 }
 
+z3::expr logic_xor( const z3::expr& a, const z3::expr& b )
+{
+  check_context( a, b );
+  assert( a.is_bool() && b.is_bool() );
+  Z3_ast r = Z3_mk_xor( a.ctx(), a, b );
+  return z3::to_expr( a.ctx(), r );
+}
+
 boost::dynamic_bitset<> to_bitset( const z3::expr& a )
 {
   return boost::dynamic_bitset<>( expr_to_bin( a ) );

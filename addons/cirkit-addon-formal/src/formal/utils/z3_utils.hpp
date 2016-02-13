@@ -38,6 +38,7 @@ namespace cirkit
 
 void check_error( const z3::context& ctx );
 z3::expr operator<<(const z3::expr& a, const z3::expr& b);
+z3::expr logic_xor( const z3::expr& a, const z3::expr& b );
 boost::dynamic_bitset<> to_bitset( const z3::expr& a );
 const bool expr_to_bool( const z3::expr& e );
 const std::string expr_to_bin( const z3::expr &e );
