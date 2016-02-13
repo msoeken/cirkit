@@ -29,6 +29,7 @@
 #define COMPUTE_LEVELS_HPP
 
 #include <map>
+#include <vector>
 
 #include <core/properties.hpp>
 #include <classical/aig.hpp>
@@ -36,9 +37,21 @@
 namespace cirkit
 {
 
+/**
+ * @brief Maps each aig_node to a level
+ */
 std::map<aig_node, unsigned> compute_levels( const aig_graph& aig,
                                              const properties::ptr& settings = properties::ptr(),
                                              const properties::ptr& statistics = properties::ptr() );
+
+/**
+ * @brief Maps each level to a vector of aig_nodes
+ *
+ * Internally calls compute_levels
+ */
+std::vector<std::vector<aig_node>> levelize_nodes( const aig_graph& aig,
+                                                   const properties::ptr& settings = properties::ptr(),
+                                                   const properties::ptr& statistics = properties::ptr() );
 
 }
 
