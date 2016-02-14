@@ -1,3 +1,16 @@
+# demo.cs
+# -------
+#
+# Shows several usage demos of RevKit. This file
+# can be executed with
+#
+# ./build/programs/revkit -ef addons/cirkit-addon-reversible/demo.cs
+#
+# You can call each command with the help option -h
+# to get more information about the usage
+
+
+
 #----------------------------------#
 # Transformation based synthesis   #
 #----------------------------------#
@@ -12,7 +25,7 @@ spec -p "0 1 2 4 3 5 6 7"
 print -s
 tbs
 print -c
-store --clear -s -c
+store --clear -sc
 
 
 #------------------------------------------#
@@ -32,9 +45,29 @@ embed -b
 tbs -b
 print -c
 ps -c
-store -b -r -c
-store --clear -b -r -c
+store -brc
+store --clear -brc
 
+
+#--------------------------------#
+# Circuit based synthesis        #
+#--------------------------------#
+# 1. Create AIG file from string #
+# 2. Read AIG                    #
+# 3. Show AIG statistics         #
+# 4. Synthesize circuit from AIG #
+# 5. Show circuit statistics     #
+# 6. Clear AIG and circuit       #
+# 7. Delete AIG file             #
+#--------------------------------#
+
+!echo "aag 11 5 0 2 6\n2\n4\n8\n10\n18\n17\n23\n6 2 4\n12 4 10\n14 8 13\n16 7 15\n20 13 18\n22 15 21\ni0 G1\ni1 G3\ni2 G2\ni3 G4\ni4 G5\no0 G16\no1 G17" > c17.aag
+read_aiger c17.aag
+ps -a
+cbs
+ps -c
+store --clear -ac
+!rm c17.aag
 
 #--------------------------------------#
 # Create random circuit                #
@@ -54,4 +87,4 @@ spec -c
 exs --mode 1 --new
 print -c
 ps -c
-store --clear -s -c
+store --clear -sc
