@@ -43,7 +43,7 @@ namespace cirkit
  ******************************************************************************/
 
 cbs_command::cbs_command( const environment::ptr& env )
-  : command( env, "Circuit based synthesis" ),
+  : command( env, "Circuit based synthesis", "[M. Soeken, A. Chattopadhyay: Unlocking Efficiency and Scalability of Reversible Logic Synthesis using Conventional Logic Synthesis, in: DAC 53 (2016)]" ),
     aigs( env->store<aig_graph>() ),
     circuits( env->store<circuit>() )
 {
