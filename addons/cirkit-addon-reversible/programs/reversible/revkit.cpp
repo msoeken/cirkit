@@ -41,6 +41,7 @@
 #include <reversible/truth_table.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/cli/commands/adding_lines.hpp>
+#include <reversible/cli/commands/cbs.hpp>
 #include <reversible/cli/commands/embed.hpp>
 #include <reversible/cli/commands/exs.hpp>
 #include <reversible/cli/commands/dbs.hpp>
@@ -69,6 +70,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( adding_lines );
   cli.env->commands.insert( {"aig", std::make_shared<aig_command<circuit, binary_truth_table, bdd_function_t, rcbdd, aig_graph>>( cli.env ) } );
   ADD_COMMAND( bdd );
+  ADD_COMMAND( cbs );
   ADD_COMMAND( dbs );
   ADD_COMMAND( embed );
   ADD_COMMAND( exs );
