@@ -87,7 +87,7 @@ int Cudd_bddPickOneCubeForRCBDD( DdManager * ddm, DdNode * node, char * repr)
       }
       else
       {
-        dir = (char) ((Cudd_Random() & 0x2000) >> 13);
+        dir = (char) ((Cudd_Random( ddm ) & 0x2000) >> 13);
         repr[N->index] = dir;
         node = dir ? T : E;
       }

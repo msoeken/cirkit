@@ -13,23 +13,39 @@ add_custom_target(
   COMMENT "Build external dependencies"
 )
 
+set( cudd_SRC ${CMAKE_BINARY_DIR}/ext/cudd-prefix/src/cudd)
+set( cudd_INCLUDE_FILES
+  ${cudd_SRC}/config.h
+  ${cudd_SRC}/cudd/cudd.h
+  ${cudd_SRC}/cudd/cuddInt.h
+  ${cudd_SRC}/cplusplus/cuddObj.hh
+  ${cudd_SRC}/epd/epd.h
+  ${cudd_SRC}/epd/epdInt.h
+  ${cudd_SRC}/mtr/mtr.h
+  ${cudd_SRC}/mtr/mtrInt.h
+  ${cudd_SRC}/st/st.h
+  ${cudd_SRC}/util/cstringstream.h
+  ${cudd_SRC}/util/util.h
+)
+set( cudd_LIBRARY_FILES
+  ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.0${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${cudd_SRC}/cudd/.libs/libcudd${CMAKE_SHARED_LIBRARY_SUFFIX}
+)
+
 externalProject_add(cudd
   DOWNLOAD_DIR .
-  URL "http://msoeken.github.io/tools/cudd-2.5.0-cirkit.tar.gz"
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/ext
+  URL "http://msoeken.github.io/tools/cudd-3.0.0.tar.gz"
+  CONFIGURE_COMMAND ./configure --enable-obj --enable-shared --enable-dddmp
+  BUILD_COMMAND make
+  INSTALL_COMMAND cp ${cudd_INCLUDE_FILES} ${ext_INCLUDE} COMMAND cp ${cudd_LIBRARY_FILES} ${ext_LIB}
+  BUILD_IN_SOURCE 1
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
 add_dependencies(external cudd)
 
 set(CUDD_LIBRARIES
-  ${ext_LIB}/libcudd_obj${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${ext_LIB}/libcudd_cudd${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${ext_LIB}/libcudd_mtr${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${ext_LIB}/libcudd_st${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${ext_LIB}/libcudd_epd${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${ext_LIB}/libcudd_util${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${ext_LIB}/libcudd_dddmp${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${ext_LIB}/libcudd${CMAKE_SHARED_LIBRARY_SUFFIX}
 
   PARENT_SCOPE
 )

@@ -42,7 +42,7 @@ void count_output_pattern_recurse( DdManager* mgr, DdNode* node, unsigned num_in
                                    std::vector<mpz_class>& counts, std::vector<std::string>& patterns,
                                    bool verbose )
 {
-  if Cudd_IsConstant( node ) { return; }
+  if ( Cudd_IsConstant( node ) ) { return; }
 
   if ( depth == num_outputs )
   {
