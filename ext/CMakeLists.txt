@@ -41,11 +41,17 @@ else()
   )
 endif()
 
+include(ProcessorCount)
+ProcessorCount(ProcCount)
+if( ProcCount EQUAL 0 )
+  set( ProcCount 1 )
+endif()
+
 externalProject_add(cudd
   DOWNLOAD_DIR .
   URL "http://msoeken.github.io/tools/cudd-3.0.0.tar.gz"
   CONFIGURE_COMMAND ./configure --enable-obj --enable-shared --enable-dddmp
-  BUILD_COMMAND make
+  BUILD_COMMAND make -j${ProcCount}
   INSTALL_COMMAND cp ${cudd_INCLUDE_FILES} ${ext_INCLUDE} COMMAND cp -L ${cudd_LIBRARY_FILES} ${ext_LIB}
   BUILD_IN_SOURCE 1
   LOG_DOWNLOAD 1
