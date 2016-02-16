@@ -293,7 +293,7 @@ tt tt_flip( const tt& t, unsigned i )
   tt_extend( vi, n );
 
   auto tc = t;
-  if ( n < tt_store::i().width ) { tt_extend( tc, tt_store::i().width ); }
+  if ( n < tt_store::i().width ) { tt_shrink( vi, n ); }
 
   return ((tc << (1 << i)) & vi) | ((tc & vi) >> (1 << i));
 }
