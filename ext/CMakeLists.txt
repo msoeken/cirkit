@@ -26,10 +26,20 @@ set( cudd_INCLUDE_FILES
   ${cudd_SRC}/st/st.h
   ${cudd_SRC}/util/cstringstream.h
   ${cudd_SRC}/util/util.h
-)
-set( cudd_LIBRARY_FILES
-  ${cudd_SRC}/cudd/.libs/libcudd${CMAKE_SHARED_LIBRARY_SUFFIX}
-)
+  )
+
+if(APPLE)
+  set( cudd_LIBRARY_FILES
+    ${cudd_SRC}/cudd/.libs/libcudd.dylib
+    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.0.dylib
+  )
+else()
+  set( cudd_LIBRARY_FILES
+    ${cudd_SRC}/cudd/.libs/libcudd.so
+    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.so.0
+    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.so.0.0.0
+  )
+endif()
 
 externalProject_add(cudd
   DOWNLOAD_DIR .
