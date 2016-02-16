@@ -131,7 +131,7 @@ std::vector<std::vector<aig_node>> levelize_nodes( const aig_graph& aig,
   const auto l = compute_levels( aig, settings, int_s );
   const auto max_level = int_s->get<unsigned>( "max_level" );
 
-  std::vector<std::vector<aig_node>> result( max_level, std::vector<aig_node>() );
+  std::vector<std::vector<aig_node>> result( max_level + 1u, std::vector<aig_node>() );
 
   for ( const auto& p : l )
   {
