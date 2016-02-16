@@ -28,6 +28,7 @@
 #ifndef CLI_STORE_HPP
 #define CLI_STORE_HPP
 
+#include <cstring>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -196,9 +197,19 @@ int add_option_helper( program_options& opts )
 {
   constexpr auto option   = store_info<S>::option;
   constexpr auto mnemonic = store_info<S>::mnemonic;
-  opts.add_options()
-    ( ( boost::format( "%s,%s" ) % option % mnemonic ).str().c_str(), store_info<S>::name_plural )
-    ;
+
+  if ( strlen( mnemonic ) == 1u )
+  {
+    opts.add_options()
+      ( ( boost::format( "%s,%s" ) % option % mnemonic ).str().c_str(), store_info<S>::name_plural )
+      ;
+  }
+  else
+  {
+    opts.add_options()
+      ( ( boost::format( "%s" ) % option ).str().c_str(), store_info<S>::name_plural )
+      ;
+  }
   return 0;
 }
 

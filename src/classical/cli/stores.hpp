@@ -91,7 +91,7 @@ struct store_info<counterexample_t>
 {
   static constexpr const char* key         = "cex";
   static constexpr const char* option      = "counterexample";
-  static constexpr const char* mnemonic    = "x";
+  static constexpr const char* mnemonic    = "";
   static constexpr const char* name        = "counterexample";
   static constexpr const char* name_plural = "counterexamples";
 };
