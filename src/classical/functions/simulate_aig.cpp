@@ -254,6 +254,30 @@ BDD bdd_simulator::and_op( const aig_node& node, const BDD& v1, const BDD& v2 ) 
   return v1 & v2;
 }
 
+/******************************************************************************
+ * depth simulation                                                           *
+ ******************************************************************************/
+
+unsigned depth_simulator::get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
+{
+  return 0u;
+}
+
+unsigned depth_simulator::get_constant() const
+{
+  return 0u;
+}
+
+unsigned depth_simulator::invert( const unsigned& v ) const
+{
+  return v;
+}
+
+unsigned depth_simulator::and_op( const aig_node& node, const unsigned& v1, const unsigned& v2 ) const
+{
+  return std::max( v1, v2 ) + 1u;
+}
+
 }
 
 // Local Variables:

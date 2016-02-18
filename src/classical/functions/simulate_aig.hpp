@@ -184,6 +184,15 @@ protected:
   Cudd mgr;
 };
 
+class depth_simulator : public aig_simulator<unsigned>
+{
+public:
+  unsigned get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const;
+  unsigned get_constant() const;
+  unsigned invert( const unsigned& v ) const;
+  unsigned and_op( const aig_node& node, const unsigned& v1, const unsigned& v2 ) const;
+};
+
 template<typename T>
 class partial_simulator : public aig_simulator<T>
 {
