@@ -94,7 +94,7 @@ boost::iterator_range<paged_memory::iterator> paged_aig_cuts::cuts( aig_node nod
   return data.sets( node );
 }
 
-tt paged_aig_cuts::simulate( aig_node node, const paged_aig_cuts::cut& c )
+tt paged_aig_cuts::simulate( aig_node node, const paged_aig_cuts::cut& c ) const
 {
   std::map<aig_node, tt> inputs;
   auto i = 0u;
@@ -109,10 +109,9 @@ tt paged_aig_cuts::simulate( aig_node node, const paged_aig_cuts::cut& c )
   return simulate_aig_node( _aig, node, sim );
 }
 
-unsigned paged_aig_cuts::depth( aig_node node, const paged_aig_cuts::cut& c )
+unsigned paged_aig_cuts::depth( aig_node node, const paged_aig_cuts::cut& c ) const
 {
   std::map<aig_node, unsigned> inputs;
-  auto i = 0u;
   for ( const auto& child : c )
   {
     inputs[child] = 0u;

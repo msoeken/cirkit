@@ -55,8 +55,8 @@ public:
   unsigned count( aig_node node ) const;
   boost::iterator_range<paged_memory::iterator> cuts( aig_node node ) const;
 
-  tt simulate( aig_node node, const cut& c );
-  unsigned depth( aig_node node, const cut& c );
+  tt simulate( aig_node node, const cut& c ) const;
+  unsigned depth( aig_node node, const cut& c ) const;
 
 private:
   void enumerate();
