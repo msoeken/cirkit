@@ -45,7 +45,7 @@ template<>
 struct store_info<circuit>
 {
   static constexpr const char* key         = "circuits";
-  static constexpr const char* option      = "circuits";
+  static constexpr const char* option      = "circuit";
   static constexpr const char* mnemonic    = "c";
   static constexpr const char* name        = "circuit";
   static constexpr const char* name_plural = "circuits";
@@ -87,7 +87,7 @@ template<>
 struct store_info<binary_truth_table>
 {
   static constexpr const char* key         = "spec";
-  static constexpr const char* option      = "specs";
+  static constexpr const char* option      = "spec";
   static constexpr const char* mnemonic    = "s";
   static constexpr const char* name        = "specification";
   static constexpr const char* name_plural = "specifications";
@@ -107,7 +107,7 @@ template<>
 struct store_info<rcbdd>
 {
   static constexpr const char* key         = "rcbdds";
-  static constexpr const char* option      = "rcbdds";
+  static constexpr const char* option      = "rcbdd";
   static constexpr const char* mnemonic    = "r";
   static constexpr const char* name        = "RCBDD";
   static constexpr const char* name_plural = "RCBDDs";

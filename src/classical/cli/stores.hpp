@@ -107,7 +107,7 @@ template<>
 struct store_info<simple_fanout_graph_t>
 {
   static constexpr const char* key         = "nls";
-  static constexpr const char* option      = "netlists";
+  static constexpr const char* option      = "netlist";
   static constexpr const char* mnemonic    = "n";
   static constexpr const char* name        = "netlist";
   static constexpr const char* name_plural = "netlists";
@@ -124,7 +124,7 @@ template<>
 struct store_info<std::vector<aig_node>>
 {
   static constexpr const char* key         = "gates";
-  static constexpr const char* option      = "gates";
+  static constexpr const char* option      = "gate";
   static constexpr const char* mnemonic    = "g";
   static constexpr const char* name        = "gate";
   static constexpr const char* name_plural = "gates";
@@ -144,7 +144,7 @@ template<>
 struct store_info<tt>
 {
   static constexpr const char* key         = "tts";
-  static constexpr const char* option      = "tts";
+  static constexpr const char* option      = "tt";
   static constexpr const char* mnemonic    = "t";
   static constexpr const char* name        = "truth table";
   static constexpr const char* name_plural = "truth tables";

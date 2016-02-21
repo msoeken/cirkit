@@ -45,7 +45,7 @@ template<>
 struct store_info<bdd_function_t>
 {
   static constexpr const char* key         = "bdds";
-  static constexpr const char* option      = "bdds";
+  static constexpr const char* option      = "bdd";
   static constexpr const char* mnemonic    = "b";
   static constexpr const char* name        = "BDD";
   static constexpr const char* name_plural = "BDDs";
