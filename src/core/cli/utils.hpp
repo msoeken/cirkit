@@ -45,6 +45,7 @@
 #include <core/cli/command.hpp>
 #include <core/cli/environment.hpp>
 #include <core/cli/store.hpp>
+#include <core/cli/commands/convert.hpp>
 #include <core/cli/commands/current.hpp>
 #include <core/cli/commands/help.hpp>
 #include <core/cli/commands/print.hpp>
@@ -85,6 +86,7 @@ public:
 
     [](...){}( add_store_helper<S>( env )... );
 
+    env->commands.insert( {"convert", std::make_shared<convert_command<S...>>( env )} );
     env->commands.insert( {"current", std::make_shared<current_command<S...>>( env )} );
     env->commands.insert( {"help",    std::make_shared<help_command>( env )} );
     env->commands.insert( {"quit",    std::make_shared<quit_command>( env )} );

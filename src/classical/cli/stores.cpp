@@ -27,6 +27,7 @@
 
 #include <classical/functions/aig_from_truth_table.hpp>
 #include <classical/functions/compute_levels.hpp>
+#include <classical/functions/simulate_aig.hpp>
 
 namespace cirkit
 {
@@ -122,6 +123,23 @@ template<>
 aig_graph store_convert<tt, aig_graph>( const tt& t )
 {
   return aig_from_truth_table( t );
+}
+
+template<>
+bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
+{
+  Cudd mgr;
+  bdd_simulator simulator( mgr );
+  auto values = simulate_aig( aig, simulator );
+
+  std::vector<BDD> bdds;
+
+  for ( const auto& o : aig_info( aig ).outputs )
+  {
+    bdds.push_back( values[o.first] );
+  }
+
+  return {mgr, bdds};
 }
 
 template<>

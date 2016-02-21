@@ -33,6 +33,7 @@
 
 #include <core/properties.hpp>
 #include <core/cli/store.hpp>
+#include <core/utils/bdd_utils.hpp>
 
 #include <classical/aig.hpp>
 #include <classical/netlist_graphs.hpp>
@@ -81,6 +82,12 @@ inline bool store_can_convert<tt, aig_graph>() { return true; }
 
 template<>
 aig_graph store_convert<tt, aig_graph>( const tt& t );
+
+template<>
+inline bool store_can_convert<aig_graph, bdd_function_t>() { return true; }
+
+template<>
+bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig );
 
 /******************************************************************************
  * counterexample_t                                                           *
