@@ -21,7 +21,7 @@ In *arch* the packages can be installed with
 
     sudo pacman -S base-devel git g++ cmake boost boost-libs gmp libxml2
 
-## Build CirKit
+## Build and Run CirKit
 
 After extracting or cloning CirKit perform the following steps
 
@@ -31,10 +31,25 @@ After extracting or cloning CirKit perform the following steps
     make external
     make cirkit
 
-## Executing CirKit Programs
+CirKit can be executed with
 
-Executables can be found in the directory `build/programs`. Check the [Wiki](http://github.com/msoeken/cirkit/wiki)
-for more details.
+    build/programs/cirkit
+
+Check the [Wiki](http://github.com/msoeken/cirkit/wiki) for more details.
+
+## Build and Run RevKit
+
+After extracting or cloning CirKit perform the following steps
+
+    mkdir build
+    cd build
+    cmake -Denable_cirkit-addon-reversible=ON -Denable_cirkit-addon-formal=ON ..
+    make external
+    make revkit
+
+RevKit can be executed with
+
+    build/programs/revkit
 
 ## Build CirKit Addons
 
