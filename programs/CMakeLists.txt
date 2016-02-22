@@ -38,6 +38,7 @@ add_cirkit_program(
   USE
     cirkit_core
     cirkit_classical
+    cirkit_abc
 )
 
 if( enable_cirkit-addon-formal )

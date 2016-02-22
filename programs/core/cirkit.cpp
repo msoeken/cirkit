@@ -53,6 +53,9 @@
 #include <classical/cli/commands/tt.hpp>
 #include <classical/cli/commands/write_aiger.hpp>
 
+#include <abc/cli/commands/abc.hpp>
+#include <abc/cli/commands/cec.hpp>
+
 #define STORE_TYPES aig_graph, counterexample_t, simple_fanout_graph_t, std::vector<aig_node>, tt, bdd_function_t
 
 #ifdef USE_FORMAL_COMMANDS
@@ -79,8 +82,10 @@ int main( int argc, char ** argv )
   ADD_COMMAND( testbdd );
 
   /* classical */
+  ADD_COMMAND( abc );
   cli.env->commands.insert( {"aig", std::make_shared<aig_command<STORE_TYPES>>( cli.env ) } );
   ADD_COMMAND( bool_complex );
+  ADD_COMMAND( cec );
   ADD_COMMAND( comb_approx );
   ADD_COMMAND( cone );
   ADD_COMMAND( dsop );
