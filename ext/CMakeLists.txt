@@ -64,3 +64,27 @@ set(CUDD_LIBRARIES
 
   PARENT_SCOPE
 )
+
+# abc
+set(abc_SRC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc)
+externalProject_add(abc
+  DOWNLOAD_DIR .
+  URL "http://msoeken.github.io/tools/alanmi-abc-4128aecc95d3.zip"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND make -j${ProcCount} ABC_USE_NO_CUDD=1 ABC_USE_PIC=1 ABC_USE_NO_READLINE=1 ABC_USE_NAMESPACE=abc OPTFLAGS=-O3 libabc.a
+  BUILD_IN_SOURCE 1
+  INSTALL_COMMAND rsync --include "*.h" --filter "hide,! */" -avm ${abc_SRC}/src/ ${ext_INCLUDE}/abc COMMAND cp ${abc_SRC}/libabc.a ${ext_LIB}/libabc.a
+  LOG_DOWNLOAD 1
+  LOG_BUILD 1
+  LOG_INSTALL 1)
+add_dependencies(external abc)
+
+find_library(DL_LIBRARY dl)
+set(abc_LIBRARIES
+  ${ext_LIB}/libabc.a
+  ${DL_LIBRARY}
+  pthread
+  ${READLINE_LIBRARY}
+
+  PARENT_SCOPE
+)

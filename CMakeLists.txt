@@ -73,6 +73,9 @@ else( )
   set(READLINE_LIBRARY)
 endif( )
 
+# ABC
+add_definitions(-DABC_NAMESPACE=abc)
+
 # Libraries (include)
 include_directories(src)
 
