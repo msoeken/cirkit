@@ -68,6 +68,7 @@ add_cirkit_library(
   AUTO_DIRS src
   USE
     cirkit_core
+    cirkit_abc
     ${Z3_LIBRARIES}
     ${MINISAT_LIBRARIES}
   INCLUDE

@@ -55,12 +55,16 @@
 
 #define STORE_TYPES aig_graph, counterexample_t, simple_fanout_graph_t, std::vector<aig_node>, tt, bdd_function_t
 
+#ifdef USE_FORMAL_COMMANDS
+#include <formal/cli/commands/commands.hpp>
+#endif
+
 #ifdef USE_EXPERIMENTAL_CLASSICAL_COMMANDS
 #include <classical/cli/commands/commands.hpp>
 #endif
 
 #ifdef USE_EXPERIMENTAL_FORMAL_COMMANDS
-#include <formal/cli/commands/commands.hpp>
+#include <formal/cli/commands/experimental_commands.hpp>
 #endif
 
 using namespace cirkit;
@@ -93,6 +97,10 @@ int main( int argc, char ** argv )
   ADD_COMMAND( support );
   ADD_COMMAND( tt );
   ADD_COMMAND( write_aiger );
+
+#ifdef USE_FORMAL_COMMANDS
+  FORMAL_COMMANDS
+#endif
 
 #ifdef USE_EXPERIMENTAL_CLASSICAL_COMMANDS
   EXPERIMENTAL_CLASSICAL_COMMANDS
