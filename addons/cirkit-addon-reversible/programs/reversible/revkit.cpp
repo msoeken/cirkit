@@ -46,6 +46,7 @@
 #include <reversible/cli/commands/exs.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
+#include <reversible/cli/commands/qbs.hpp>
 #include <reversible/cli/commands/random_circuit.hpp>
 #include <reversible/cli/commands/rcbdd.hpp>
 #include <reversible/cli/commands/read_real.hpp>
@@ -75,6 +76,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( embed );
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
+  ADD_COMMAND( qbs );
   ADD_COMMAND( random_circuit );
   ADD_COMMAND( rcbdd );
   ADD_COMMAND( read_aiger );
