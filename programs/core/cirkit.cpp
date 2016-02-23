@@ -34,7 +34,6 @@
 #include <core/cli/commands/testbdd.hpp>
 #include <core/utils/bdd_utils.hpp>
 
-#include <classical/cli/commands/aig.hpp>
 #include <classical/cli/commands/bool_complex.hpp>
 #include <classical/cli/commands/comb_approx.hpp>
 #include <classical/cli/commands/cone.hpp>
@@ -83,7 +82,6 @@ int main( int argc, char ** argv )
 
   /* classical */
   ADD_COMMAND( abc );
-  cli.env->commands.insert( {"aig", std::make_shared<aig_command<STORE_TYPES>>( cli.env ) } );
   ADD_COMMAND( bool_complex );
   ADD_COMMAND( cec );
   ADD_COMMAND( comb_approx );

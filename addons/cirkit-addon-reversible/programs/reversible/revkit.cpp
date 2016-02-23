@@ -33,7 +33,6 @@
 #include <core/utils/bdd_utils.hpp>
 #include <classical/aig.hpp>
 #include <classical/cli/stores.hpp>
-#include <classical/cli/commands/aig.hpp>
 #include <classical/cli/commands/read_aiger.hpp>
 #include <classical/cli/commands/write_aiger.hpp>
 #include <reversible/circuit.hpp>
@@ -69,7 +68,6 @@ int main( int argc, char ** argv )
   cli_main<circuit, binary_truth_table, bdd_function_t, rcbdd, aig_graph> cli( "revkit" );
 
   ADD_COMMAND( adding_lines );
-  cli.env->commands.insert( {"aig", std::make_shared<aig_command<circuit, binary_truth_table, bdd_function_t, rcbdd, aig_graph>>( cli.env ) } );
   ADD_COMMAND( bdd );
   ADD_COMMAND( cbs );
   ADD_COMMAND( dbs );
