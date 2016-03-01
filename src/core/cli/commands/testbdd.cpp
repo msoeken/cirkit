@@ -23,6 +23,7 @@
 
 #include <boost/range/algorithm.hpp>
 
+#include <core/cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <core/utils/program_options.hpp>
 #include <core/utils/timer.hpp>
@@ -49,6 +50,7 @@ testbdd_command::testbdd_command( const environment::ptr& env ) : command( env, 
   opts.add_options()
     ( "num_vars,n",    value_with_default( &num_vars ), "Number of variables" )
     ( "cardinality,c", value( &cardinality ),           "Create cardinality constraint" )
+    ( "up",                                             "Performs up operation" )
     ;
   be_verbose();
 }
@@ -70,6 +72,16 @@ bool testbdd_command::execute()
     {
       f.PrintMinterm();
     }
+  }
+
+  if ( opts.is_set( "up" ) )
+  {
+    auto& bdds = env->store<bdd_function_t>();
+
+    auto bdd = bdds.current();
+    auto f = bdd_up( bdd.first, bdd.second.front() );
+    std::cout << "m: " << is_monotone( bdd.first, bdd.second.front() ) << " " << is_monotone( bdd.first, f ) << std::endl;
+    bdds.current().second.front() = f;
   }
 
   return true;

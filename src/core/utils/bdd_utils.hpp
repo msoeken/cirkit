@@ -70,6 +70,13 @@ std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, c
 
 bdd_function_t compute_characteristic( const bdd_function_t& bdd, bool inputs_first );
 
+/******************************************************************************
+ * new BDD operations                                                         *
+ ******************************************************************************/
+
+DdNode* bdd_up( DdManager* manager, DdNode* f );
+BDD bdd_up( Cudd& manager, const BDD& f );
+
 }
 
 #endif

@@ -504,6 +504,113 @@ bdd_function_t compute_characteristic( const bdd_function_t& bdd, bool inputs_fi
   return {mgr, {f}};
 }
 
+/******************************************************************************
+ * new BDD operations                                                         *
+ ******************************************************************************/
+
+DdNode* bdd_up_rec( DdManager* manager, DdNode* f )
+{
+  /* terminal case */
+  if ( Cudd_IsConstant( f ) ) { return f; }
+
+  const auto* F = Cudd_Regular( f );
+
+  if ( F->ref != 1 )
+  {
+    auto* r = cuddCacheLookup1( manager, bdd_up_rec, f );
+    if ( r )
+    {
+      return r;
+    }
+  }
+
+  const auto top = manager->perm[F->index];
+
+  auto* fl = Cudd_NotCond( cuddE( F ), Cudd_IsComplement( f ) );
+  auto* fh = Cudd_NotCond( cuddT( F ), Cudd_IsComplement( f ) );
+  auto* t1 = Cudd_bddOr( manager, fl, fh );
+  if ( !t1 )
+  {
+    return nullptr;
+  }
+  cuddRef( t1 );
+
+  auto* rh = bdd_up_rec( manager, t1 );
+  if ( !rh )
+  {
+    Cudd_IterDerefBdd( manager, t1 );
+    return nullptr;
+  }
+  cuddRef( rh );
+
+  auto* rl = bdd_up_rec( manager, fl );
+  if ( !rl )
+  {
+    Cudd_IterDerefBdd( manager, t1 );
+    Cudd_IterDerefBdd( manager, rh );
+  }
+  cuddRef( rl );
+
+  DdNode* r;
+  if ( rl == rh )
+  {
+    r = rh;
+  }
+  else
+  {
+    if ( Cudd_IsComplement( rh ) )
+    {
+      r = cuddUniqueInter( manager, (int)top, Cudd_Not( rh ), Cudd_Not( rl ) );
+      if ( !r )
+      {
+        Cudd_IterDerefBdd( manager, t1 );
+        Cudd_IterDerefBdd( manager, rh );
+        Cudd_IterDerefBdd( manager, rl );
+        return nullptr;
+      }
+      r = Cudd_Not( r );
+    }
+    else
+    {
+      r = cuddUniqueInter( manager, (int)top, rh, rl );
+      if ( !r )
+      {
+        Cudd_IterDerefBdd( manager, t1 );
+        Cudd_IterDerefBdd( manager, rh );
+        Cudd_IterDerefBdd( manager, rl );
+        return nullptr;
+      }
+    }
+  }
+  cuddDeref( t1 );
+  cuddDeref( rh );
+  cuddDeref( rl );
+  if ( F->ref != 1 )
+  {
+    cuddCacheInsert1( manager, bdd_up, f, r );
+  }
+  return r;
+}
+
+DdNode* bdd_up( DdManager *manager, DdNode *f )
+{
+  DdNode *res;
+
+  do
+  {
+    manager->reordered = 0;
+    res = bdd_up_rec( manager, f );
+  }
+  while ( manager->reordered == 1 );
+  return res;
+}
+
+BDD bdd_up( Cudd& manager, const BDD& f )
+{
+  auto* r = bdd_up( f.manager(), f.getNode() );
+  return BDD( manager, r );
+}
+
 }
 
 // Local Variables:
