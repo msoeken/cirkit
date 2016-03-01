@@ -64,6 +64,28 @@ namespace cirkit
  * count:
  *   | 0 | 1 |
  *   | 3 | 2 |
+ *
+ * We allow to store k additional values for each set.  This element is stored
+ * directly after the size of the set.
+ *
+ * Example:
+ *
+ * Assume k = 1 and we want to store
+ *
+ *   [ {A => {0, 2, 3}, B => {1, 3}, C => {2}},
+ *     {D => {0, 2}, E => {3, 0, 1}} ]
+ *
+ * data:
+ *   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 |
+ *   | 3 | A | 0 | 2 | 3 | 2 | B | 1 | 3 | 1 |  C |  2 |  2 |  D |  0 |  2 |  3 |  E |  3 |  0 |  1 |
+ *
+ * offset:
+ *   | 0 |  1 |
+ *   | 0 | 12 |
+ *
+ * count:
+ *   | 0 | 1 |
+ *   | 3 | 2 |
  */
 
 class paged_memory
@@ -77,17 +99,19 @@ public:
     using value_type = unsigned;
 
     /* constructor */
-    set( unsigned address, const std::vector<unsigned>& data );
+    set( unsigned address, const std::vector<unsigned>& data, unsigned additional );
 
     /* methods */
     std::size_t                     size() const;
     iterator                        begin() const;
     iterator                        end() const;
     boost::iterator_range<iterator> range() const;
+    value_type                      extra( unsigned i ) const;
 
   private:
     unsigned address;
     const std::vector<unsigned>& data;
+    unsigned additional;
   };
 
   class iterator
@@ -101,7 +125,7 @@ public:
     using pointer           = const set*;
 
     /* constructor */
-    iterator( unsigned index, unsigned address, const std::vector<unsigned>& data );
+    iterator( unsigned index, unsigned address, const std::vector<unsigned>& data, unsigned additional );
 
     /* operators */
     reference operator*() const;
@@ -114,10 +138,11 @@ public:
     unsigned index;
     unsigned address;
     const std::vector<unsigned>& data;
+    unsigned additional;
   };
 
   /* constructor */
-  explicit paged_memory( unsigned n );
+  explicit paged_memory( unsigned n, unsigned k = 0u );
 
   /* methods */
   unsigned                        count( unsigned index ) const;
@@ -126,18 +151,19 @@ public:
 
   /* the following methods assume that nothing has been added to the index yet,
      i.e., it will update the offset */
-  void                            assign_empty( unsigned index );
-  void                            assign_singleton( unsigned index, unsigned value );
+  void                            assign_empty( unsigned index, const std::vector<unsigned>& extra = std::vector<unsigned>() );
+  void                            assign_singleton( unsigned index, unsigned value, const std::vector<unsigned>& extra = std::vector<unsigned>() );
 
   /* the append_* methods do not update the offset, therefore append_begin() has to be
      called once before any append_* method is called */
   void                            append_begin( unsigned index );
-  void                            append_singleton( unsigned index, unsigned value );
-  void                            append_set( unsigned index, const std::vector<unsigned>& values );
+  void                            append_singleton( unsigned index, unsigned value, const std::vector<unsigned>& extra = std::vector<unsigned>() );
+  void                            append_set( unsigned index, const std::vector<unsigned>& values, const std::vector<unsigned>& extra = std::vector<unsigned>() );
 
   unsigned                        memory() const;
 
 private:
+  unsigned              _additional;
   std::vector<unsigned> _data;
   std::vector<unsigned> _offset;
   std::vector<unsigned> _count;

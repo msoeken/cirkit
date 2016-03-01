@@ -31,9 +31,10 @@ namespace cirkit
  * paged_memory::set                                                          *
  ******************************************************************************/
 
-paged_memory::set::set( unsigned address, const std::vector<unsigned>& data )
+paged_memory::set::set( unsigned address, const std::vector<unsigned>& data, unsigned additional )
   : address( address ),
-    data( data )
+    data( data ),
+    additional( additional )
 {
 }
 
@@ -44,12 +45,12 @@ std::size_t paged_memory::set::size() const
 
 paged_memory::set::iterator paged_memory::set::begin() const
 {
-  return data.begin() + address + 1;
+  return data.begin() + address + 1 + additional;
 }
 
 paged_memory::set::iterator paged_memory::set::end() const
 {
-  return data.begin() + address + 1 + size();
+  return data.begin() + address + 1 + additional + size();
 }
 
 boost::iterator_range<paged_memory::set::iterator> paged_memory::set::range() const
@@ -57,25 +58,31 @@ boost::iterator_range<paged_memory::set::iterator> paged_memory::set::range() co
   return boost::make_iterator_range( begin(), end() );
 }
 
+paged_memory::set::value_type paged_memory::set::extra( unsigned i ) const
+{
+  return data[address + 1 + i];
+}
+
 /******************************************************************************
  * paged_memory::iterator                                                     *
  ******************************************************************************/
 
-paged_memory::iterator::iterator( unsigned index, unsigned address, const std::vector<unsigned>& data )
+paged_memory::iterator::iterator( unsigned index, unsigned address, const std::vector<unsigned>& data, unsigned additional )
   : index( index ),
     address( address ),
-    data( data )
+    data( data ),
+    additional( additional )
 {
 }
 
 paged_memory::iterator::reference paged_memory::iterator::operator*() const
 {
-  return set( address, data );
+  return set( address, data, additional );
 }
 
 paged_memory::iterator& paged_memory::iterator::operator++()
 {
-  address += data[address] + 1u;
+  address += data[address] + 1u + additional;
   ++index;
   return *this;
 }
@@ -101,8 +108,9 @@ bool paged_memory::iterator::operator!=( iterator const& it ) const
  * paged_memory                                                               *
  ******************************************************************************/
 
-paged_memory::paged_memory( unsigned n )
-  : _offset( n ),
+paged_memory::paged_memory( unsigned n, unsigned k )
+  : _additional( k ),
+    _offset( n ),
     _count( n, 0u )
 {
   _data.reserve( n << 1u );
@@ -120,8 +128,8 @@ unsigned paged_memory::memory() const
 
 boost::iterator_range<paged_memory::iterator> paged_memory::sets( unsigned index ) const
 {
-  return boost::make_iterator_range( iterator( 0u, _offset[index], _data ),
-                                     iterator( _count[index], 0, _data ) );
+  return boost::make_iterator_range( iterator( 0u, _offset[index], _data, _additional ),
+                                     iterator( _count[index], 0, _data, _additional ) );
 }
 
 unsigned paged_memory::sets_count() const
@@ -129,18 +137,21 @@ unsigned paged_memory::sets_count() const
   return boost::accumulate( _count, 0u );
 }
 
-void paged_memory::assign_empty( unsigned index )
+void paged_memory::assign_empty( unsigned index, const std::vector<unsigned>& extra )
 {
   _offset[index] = _data.size();
   _count[index] = 1u;
   _data += 0u;
+  boost::push_back( _data, extra );
 }
 
-void paged_memory::assign_singleton( unsigned index, unsigned value )
+void paged_memory::assign_singleton( unsigned index, unsigned value, const std::vector<unsigned>& extra )
 {
   _offset[index] = _data.size();
   _count[index] = 1u;
-  _data += 1u,value;
+  _data += 1u;
+  boost::push_back( _data, extra );
+  _data += value;
 }
 
 void paged_memory::append_begin( unsigned index )
@@ -148,16 +159,19 @@ void paged_memory::append_begin( unsigned index )
   _offset[index] = _data.size();
 }
 
-void paged_memory::append_singleton( unsigned index, unsigned value )
+void paged_memory::append_singleton( unsigned index, unsigned value, const std::vector<unsigned>& extra )
 {
   _count[index]++;
-  _data += 1u,value;
+  _data += 1u;
+  boost::push_back( _data, extra );
+  _data += value;
 }
 
-void paged_memory::append_set( unsigned index, const std::vector<unsigned>& values )
+void paged_memory::append_set( unsigned index, const std::vector<unsigned>& values, const std::vector<unsigned>& extra )
 {
   _count[index]++;
   _data += values.size();
+  boost::push_back( _data, extra );
   boost::push_back( _data, values );
 }
 
