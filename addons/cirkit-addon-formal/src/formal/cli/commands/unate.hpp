@@ -17,23 +17,39 @@
  */
 
 /**
- * @file commands.hpp
+ * @file unate.hpp
  *
- * @brief Formal commands
+ * @brief Checks function for unateness
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_FORMAL_COMMANDS_HPP
-#define CLI_FORMAL_COMMANDS_HPP
+#ifndef CLI_UNATE_COMMAND_HPP
+#define CLI_UNATE_COMMAND_HPP
 
-#include <formal/cli/commands/satnpn.hpp>
-#include <formal/cli/commands/unate.hpp>
+#include <classical/cli/aig_command.hpp>
 
-#define FORMAL_COMMANDS    \
-    ADD_COMMAND( satnpn ); \
-    ADD_COMMAND( unate );
+namespace cirkit
+{
+
+class unate_command : public aig_base_command
+{
+public:
+  unate_command( const environment::ptr& env );
+
+protected:
+  bool execute();
+
+public:
+  log_opt_t log() const;
+
+private:
+  unsigned    approach = 4u;
+  std::string matrixname;
+};
+
+}
 
 #endif
 
