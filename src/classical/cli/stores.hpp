@@ -39,6 +39,7 @@
 #include <classical/netlist_graphs.hpp>
 #include <classical/utils/aig_utils.hpp>
 #include <classical/utils/counterexample.hpp>
+#include <classical/utils/expression_parser.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
@@ -132,7 +133,7 @@ struct store_info<std::vector<aig_node>>
 {
   static constexpr const char* key         = "gates";
   static constexpr const char* option      = "gate";
-  static constexpr const char* mnemonic    = "g";
+  static constexpr const char* mnemonic    = "";
   static constexpr const char* name        = "gate";
   static constexpr const char* name_plural = "gates";
 };
@@ -162,6 +163,32 @@ std::string store_entry_to_string<tt>( const tt& t );
 
 template<>
 void print_store_entry<tt>( std::ostream& os, const tt& t );
+
+/******************************************************************************
+ * expression_t::ptr                                                          *
+ ******************************************************************************/
+
+template<>
+struct store_info<expression_t::ptr>
+{
+  static constexpr const char* key         = "exprs";
+  static constexpr const char* option      = "expr";
+  static constexpr const char* mnemonic    = "e";
+  static constexpr const char* name        = "expression";
+  static constexpr const char* name_plural = "expressions";
+};
+
+template<>
+std::string store_entry_to_string<expression_t::ptr>( const expression_t::ptr& expr );
+
+template<>
+void print_store_entry<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );
+
+template<>
+inline bool store_can_convert<expression_t::ptr, tt>() { return true; }
+
+template<>
+tt store_convert<expression_t::ptr, tt>( const expression_t::ptr& expr );
 
 }
 

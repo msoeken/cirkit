@@ -28,6 +28,7 @@
 #ifndef EXPRESSION_PARSER_HPP
 #define EXPRESSION_PARSER_HPP
 
+#include <cassert>
 #include <deque>
 #include <iostream>
 #include <memory>
@@ -48,6 +49,75 @@ struct expression_t
 
 expression_t::ptr parse_expression( const std::string& expression );
 std::ostream& operator<<( std::ostream& os, const expression_t::ptr& expr );
+
+/******************************************************************************
+ * Evaluate expressions                                                       *
+ ******************************************************************************/
+
+template<typename T>
+class expression_evaluator
+{
+public:
+  virtual T on_const( bool value ) const = 0;
+  virtual T on_var( unsigned index ) const = 0;
+  virtual T on_inv( const T& value ) const = 0;
+  virtual T on_and( const T& value1, const T& value2 ) const = 0;
+  virtual T on_or( const T& value1, const T& value2 ) const = 0;
+  virtual T on_maj( const T& value1, const T& value2, const T& value3 ) const = 0;
+  virtual T on_xor( const T& value1, const T& value2 ) const = 0;
+};
+
+template<typename T>
+T evaluate_expression( const expression_t::ptr& expr, const expression_evaluator<T>& eval )
+{
+  switch ( expr->type )
+  {
+  case expression_t::_const:
+    return eval.on_const( expr->value == 1 );
+
+  case expression_t::_var:
+    return eval.on_var( expr->value );
+
+  case expression_t::_inv:
+    return eval.on_inv( evaluate_expression( expr->children.front(), eval ) );
+
+  case expression_t::_and:
+    {
+      auto it = expr->children.begin();
+      T value1 = evaluate_expression( *it++, eval );
+      T value2 = evaluate_expression( *it,   eval );
+      return eval.on_and( value1, value2 );
+    }
+
+  case expression_t::_or:
+    {
+      auto it = expr->children.begin();
+      T value1 = evaluate_expression( *it++, eval );
+      T value2 = evaluate_expression( *it,   eval );
+      return eval.on_or( value1, value2 );
+    }
+
+  case expression_t::_maj:
+    {
+      auto it = expr->children.begin();
+      T value1 = evaluate_expression( *it++, eval );
+      T value2 = evaluate_expression( *it++, eval );
+      T value3 = evaluate_expression( *it,   eval );
+      return eval.on_maj( value1, value2, value3 );
+    }
+
+  case expression_t::_xor:
+    {
+      auto it = expr->children.begin();
+      T value1 = evaluate_expression( *it++, eval );
+      T value2 = evaluate_expression( *it,   eval );
+      return eval.on_xor( value1, value2 );
+    }
+
+  default:
+    assert( false );
+  }
+}
 
 }
 

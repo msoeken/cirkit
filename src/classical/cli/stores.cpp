@@ -182,6 +182,26 @@ void print_store_entry<tt>( std::ostream& os, const tt& t )
   os << t << std::endl;
 }
 
+template<>
+std::string store_entry_to_string<expression_t::ptr>( const expression_t::ptr& expr )
+{
+  std::stringstream s;
+  s << expr;
+  return s.str();
+}
+
+template<>
+void print_store_entry<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr )
+{
+  os << expr << std::endl;
+}
+
+template<>
+tt store_convert<expression_t::ptr, tt>( const expression_t::ptr& expr )
+{
+  return tt_from_expression( expr );
+}
+
 }
 
 // Local Variables:

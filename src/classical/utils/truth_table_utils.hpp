@@ -31,6 +31,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include <core/utils/bitset_utils.hpp>
+#include <classical/utils/expression_parser.hpp>
 
 namespace cirkit
 {
@@ -235,6 +236,23 @@ void foreach_minterm( const tt& t, Fn&& f )
       f( boost::dynamic_bitset<>( n, pos ) );
     } );
 }
+
+/**
+ * @brief Creates a truth table from an expression
+ */
+class tt_expression_evaluator : public expression_evaluator<std::pair<tt, unsigned>>
+{
+public:
+  std::pair<tt, unsigned> on_const( bool value ) const;
+  std::pair<tt, unsigned> on_var( unsigned index ) const;
+  std::pair<tt, unsigned> on_inv( const std::pair<tt, unsigned>& value ) const;
+  std::pair<tt, unsigned> on_and( const std::pair<tt, unsigned>& value1, const std::pair<tt, unsigned>& value2 ) const;
+  std::pair<tt, unsigned> on_or( const std::pair<tt, unsigned>& value1, const std::pair<tt, unsigned>& value2 ) const;
+  std::pair<tt, unsigned> on_maj( const std::pair<tt, unsigned>& value1, const std::pair<tt, unsigned>& value2, const std::pair<tt, unsigned>& value3 ) const;
+  std::pair<tt, unsigned> on_xor( const std::pair<tt, unsigned>& value1, const std::pair<tt, unsigned>& value2 ) const;
+};
+
+tt tt_from_expression( const expression_t::ptr& expr );
 
 }
 

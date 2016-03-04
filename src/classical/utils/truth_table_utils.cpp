@@ -380,6 +380,67 @@ std::string tt_to_hex( const tt& t )
   return result;
 }
 
+/******************************************************************************
+ * truth table from expression                                                *
+ ******************************************************************************/
+
+std::pair<tt, unsigned> tt_expression_evaluator::on_const( bool value ) const
+{
+  return {value ? tt_const1() : tt_const0(), 0u};
+}
+
+std::pair<tt, unsigned> tt_expression_evaluator::on_var( unsigned index ) const
+{
+  return {tt_nth_var( index ), index + 1u};
+}
+
+std::pair<tt, unsigned> tt_expression_evaluator::on_inv( const std::pair<tt, unsigned>& value ) const
+{
+  return {~( value.first ), value.second};
+}
+
+std::pair<tt, unsigned> tt_expression_evaluator::on_and( const std::pair<tt, unsigned>& value1, const std::pair<tt, unsigned>& value2 ) const
+{
+  auto _v1 = value1.first;
+  auto _v2 = value2.first;
+  tt_align( _v1, _v2 );
+  return {_v1 & _v2, std::max( value1.second, value2.second )};
+}
+
+std::pair<tt, unsigned> tt_expression_evaluator::on_or( const std::pair<tt, unsigned>& value1, const std::pair<tt, unsigned>& value2 ) const
+{
+  auto _v1 = value1.first;
+  auto _v2 = value2.first;
+  tt_align( _v1, _v2 );
+  return {_v1 | _v2, std::max( value1.second, value2.second )};
+}
+
+std::pair<tt, unsigned> tt_expression_evaluator::on_maj( const std::pair<tt, unsigned>& value1, const std::pair<tt, unsigned>& value2, const std::pair<tt, unsigned>& value3 ) const
+{
+  auto _v1 = value1.first;
+  auto _v2 = value2.first;
+  auto _v3 = value3.first;
+  tt_align( _v1, _v2 );
+  tt_align( _v2, _v3 );
+  return {( _v1 & _v2 ) | ( _v1 & _v3 ) | ( _v2 & _v3 ), std::max( value1.second, std::max( value2.second, value3.second ) )};
+}
+
+std::pair<tt, unsigned> tt_expression_evaluator::on_xor( const std::pair<tt, unsigned>& value1, const std::pair<tt, unsigned>& value2 ) const
+{
+  auto _v1 = value1.first;
+  auto _v2 = value2.first;
+  tt_align( _v1, _v2 );
+  return {_v1 ^ _v2, std::max( value1.second, value2.second )};
+}
+
+tt tt_from_expression( const expression_t::ptr& expr )
+{
+  const auto v = evaluate_expression( expr, tt_expression_evaluator() );
+  auto t = v.first;
+  tt_shrink( t, v.second );
+  return t;
+}
+
 }
 
 // Local Variables:
