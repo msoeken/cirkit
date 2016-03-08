@@ -56,7 +56,7 @@
 #include <abc/cli/commands/abc.hpp>
 #include <abc/cli/commands/cec.hpp>
 
-#define STORE_TYPES aig_graph, counterexample_t, simple_fanout_graph_t, std::vector<aig_node>, tt, bdd_function_t, expression_t::ptr
+#define STORE_TYPES aig_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t
 
 #ifdef USE_FORMAL_COMMANDS
 #include <formal/cli/commands/commands.hpp>
