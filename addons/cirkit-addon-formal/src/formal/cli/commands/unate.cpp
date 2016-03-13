@@ -170,8 +170,11 @@ command::log_opt_t unate_command::log() const
   }
   else
   {
-    return log_opt_t( {{"runtime", statistics->get<double>( "runtime" )},
-                       {"runtime_wall", statistics->get<double>( "runtime_wall" )}} );
+    return log_opt_t({
+        {"approach", approach},
+        {"runtime", statistics->get<double>( "runtime" )},
+        {"runtime_wall", statistics->get<double>( "runtime_wall" )}
+      });
   }
 }
 
