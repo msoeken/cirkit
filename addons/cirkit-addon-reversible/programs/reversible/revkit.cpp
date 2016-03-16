@@ -50,6 +50,7 @@
 #include <reversible/cli/commands/rcbdd.hpp>
 #include <reversible/cli/commands/read_real.hpp>
 #include <reversible/cli/commands/read_spec.hpp>
+#include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
 #include <reversible/cli/commands/spec.hpp>
 #include <reversible/cli/commands/tbs.hpp>
@@ -81,6 +82,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( read_pla );
   ADD_COMMAND( read_real );
   ADD_COMMAND( read_spec );
+  ADD_COMMAND( rec );
   ADD_COMMAND( required_lines );
   ADD_COMMAND( spec );
   ADD_COMMAND( tbs );
