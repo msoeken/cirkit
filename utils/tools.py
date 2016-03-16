@@ -234,6 +234,14 @@ class package_xdot:
     build       = [ "cp xdot.py xdot", "chmod +x xdot" ]
     install     = [ "cp -v xdot %s" ]
 
+class package_cryptominisat:
+    description = "An advanced SAT Solver"
+    subdir      = "cryptominisat"
+    url         = "https://github.com/msoos/cryptominisat"
+    fmt         = "git"
+    build       = [ "mkdir build", "cd build; cmake ..; make -j5 cryptominisat4" ]
+    install     = [ "cp -v build/cryptominisat4 %s" ]
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
