@@ -34,11 +34,17 @@
 #include <boost/graph/properties.hpp>
 
 #include <core/utils/graph_utils.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 
 namespace boost
 {
-  enum vertex_gate_type_t { vertex_gate_type };
-  BOOST_INSTALL_PROPERTY(vertex, gate_type);
+
+enum vertex_gate_type_t { vertex_gate_type };
+BOOST_INSTALL_PROPERTY(vertex, gate_type);
+
+enum vertex_lut_t { vertex_lut };
+BOOST_INSTALL_PROPERTY(vertex, lut);
+
 }
 
 namespace cirkit
@@ -54,6 +60,7 @@ using boost::vecS;
 using boost::vertex_color_t;
 using boost::vertex_gate_type_t;
 using boost::vertex_name_t;
+using boost::vertex_lut_t;
 
 enum class gate_type_t { pi, po, gnd, fanout, inv, buf, _and, _or, nand, nor, _xor, xnor, mux, fadd, internal, pwr, dff, dffrs };
 
@@ -70,6 +77,16 @@ using simple_fanout_vertex_t = vertex_t<simple_fanout_graph_t>;
 using simple_fanout_edge_t   = edge_t<simple_fanout_graph_t>;
 
 void write_simple_fanout_graph( std::ostream& os, const simple_fanout_graph_t& g );
+
+/******************************************************************************
+ * LUT graph                                                                  *
+ ******************************************************************************/
+
+using lut_graph_vertex_properties_t = property<vertex_lut_t, std::pair<unsigned, unsigned long>,
+                                      property<vertex_gate_type_t, gate_type_t>>;
+using lut_graph_t  = digraph_t<lut_graph_vertex_properties_t>;
+using lut_vertex_t = vertex_t<lut_graph_t>;
+using lut_edge_t   = edge_t<lut_graph_t>;
 
 }
 
