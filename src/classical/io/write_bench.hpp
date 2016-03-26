@@ -32,6 +32,7 @@
 #include <string>
 
 #include <classical/aig.hpp>
+#include <classical/netlist_graphs.hpp>
 
 namespace cirkit
 {
@@ -45,6 +46,9 @@ struct write_bench_settings
 
 void write_bench( const aig_graph& aig, std::ostream& os, const write_bench_settings& settings = write_bench_settings() );
 void write_bench( const aig_graph& aig, const std::string& filename, const write_bench_settings& settings = write_bench_settings() );
+
+void write_bench( const lut_graph_t& lut, std::ostream& os, const write_bench_settings& settings = write_bench_settings() );
+void write_bench( const lut_graph_t& lut, const std::string& filename, const write_bench_settings& settings = write_bench_settings() );
 
 }
 

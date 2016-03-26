@@ -18,14 +18,20 @@
 
 #include "read_bench.hpp"
 
+#include <core/utils/range_utils.hpp>
+#include <core/utils/string_utils.hpp>
 #include <classical/utils/aig_utils.hpp>
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
 
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include <iterator>
 
 namespace cirkit
@@ -176,6 +182,73 @@ void read_bench( aig_graph& aig, const std::string& filename )
   auto& info = aig_info( aig );
   info.model_name = boost::filesystem::path( filename ).stem().string();
   is.close();
+}
+
+void read_bench( lut_graph_t& lut, const std::string& filename )
+{
+  std::vector<std::string> inputs, outputs;
+  std::vector<std::tuple<std::string, unsigned, std::vector<std::string>>> gates;
+
+  line_parser( filename, {
+      {boost::regex( "^INPUT\\((.*)\\)$" ), [&inputs]( const boost::smatch& m ) {
+          inputs.push_back( std::string( m[1] ) );
+        }},
+      {boost::regex( "^OUTPUT\\((.*)\\)$" ), [&outputs]( const boost::smatch& m ) {
+          outputs.push_back( std::string( m[1] ) );
+        }},
+      {boost::regex( "^(.*) = LUT (.*) \\( (.*) \\)$" ), [&gates]( const boost::smatch& m ) {
+          unsigned value;
+          std::stringstream converter( m[2] );
+          converter >> std::hex >> value;
+
+          std::vector<std::string> arguments;
+          split_string( arguments, m[3], ", " );
+
+          std::string name( m[1] );
+          boost::trim( name );
+          gates.push_back( std::make_tuple( name, value, arguments ) );
+        }},
+      {boost::regex( "^#" ), []( const boost::smatch& m ) {}}
+    }, true );
+
+  std::map<std::string, lut_vertex_t> gate_to_node;
+
+  auto types = boost::get( boost::vertex_gate_type, lut );
+  auto luts  = boost::get( boost::vertex_lut, lut );
+  auto names = boost::get( boost::vertex_name, lut );
+
+  for ( const auto& input : inputs )
+  {
+    auto v = add_vertex( lut );
+    names[v] = input;
+    types[v] = gate_type_t::pi;
+    gate_to_node[input] = v;
+  }
+
+  for ( const auto& gate : gates )
+  {
+    auto v = add_vertex( lut );
+
+    types[v] = gate_type_t::internal;
+    luts[v] = std::make_pair( std::get<2>( gate ).size(), std::get<1>( gate ) );
+
+    for ( const auto& arg : std::get<2>( gate ) )
+    {
+      add_edge( v, gate_to_node[arg], lut );
+    }
+
+    gate_to_node[std::get<0>( gate )] = v;
+  }
+
+  for ( const auto& output : outputs )
+  {
+    auto v = add_vertex( lut );
+
+    add_edge( v, gate_to_node[output], lut );
+
+    types[v] = gate_type_t::po;
+    names[v] = output;
+  }
 }
 
 }

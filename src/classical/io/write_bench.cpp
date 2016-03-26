@@ -19,11 +19,14 @@
 #include "write_bench.hpp"
 
 #include <fstream>
+#include <sstream>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/format.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <classical/io/io_utils_p.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
 {
@@ -87,6 +90,61 @@ void write_bench( const aig_graph& aig, const std::string& filename, const write
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
   write_bench( aig, os, settings );
+  os.close();
+}
+
+void write_bench( const lut_graph_t& lut, std::ostream& os, const write_bench_settings& settings )
+{
+  std::stringstream output, wire;
+
+  auto types = boost::get( boost::vertex_gate_type, lut );
+  auto names = boost::get( boost::vertex_name, lut );
+  auto luts = boost::get( boost::vertex_lut, lut );
+
+  for ( const auto& v : boost::make_iterator_range( vertices( lut ) ) )
+  {
+    switch ( types[v] )
+    {
+    case gate_type_t::pi:
+      if ( !settings.write_input_declarations ) { continue; }
+      os << boost::format( "INPUT(%s%s)" ) % settings.prefix % names[v] << std::endl;
+      break;
+    case gate_type_t::po:
+      {
+        if ( settings.write_output_declarations )
+        {
+          output << boost::format( "OUTPUT(%s%s)" ) % settings.prefix % names[v] << std::endl;
+        }
+        auto w = *( adjacent_vertices( v, lut ).first );
+        auto argument = settings.prefix + ( types[w] == gate_type_t::pi ? names[w] : boost::str( boost::format( "n%d" ) % w ) );
+        wire << boost::format( "%s%s = LUT 0x2 ( %s )" ) % settings.prefix % names[v] % argument << std::endl;
+      } break;
+    case gate_type_t::internal:
+      {
+        const auto& func = luts[v];
+        tt t( 1 << func.first, func.second );
+
+        std::vector<std::string> arguments;
+        for ( auto w : boost::make_iterator_range( adjacent_vertices( v, lut ) ) )
+        {
+          arguments.push_back( settings.prefix + ( types[w] == gate_type_t::pi ? names[w] : boost::str( boost::format( "n%d" ) % w ) ) );
+        }
+
+        wire << boost::format( "%sn%d = LUT 0x%x ( %s )" ) % settings.prefix % v % tt_to_hex( t ) % boost::join( arguments, ", " ) << std::endl;
+      } break;
+
+    default:
+      break;
+    }
+  }
+
+  os << output.str() << wire.str();
+}
+
+void write_bench( const lut_graph_t& lut, const std::string& filename, const write_bench_settings& settings )
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+  write_bench( lut, os, settings );
   os.close();
 }
 

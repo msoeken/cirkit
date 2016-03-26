@@ -22,6 +22,8 @@
  * @brief Read bench circuit into an AIG
  *
  * @author Heinz Riener
+ * @author Mathias Soeken
+ *
  * @since  2.0
  */
 
@@ -29,6 +31,7 @@
 #define READ_BENCH_HPP
 
 #include <classical/aig.hpp>
+#include <classical/netlist_graphs.hpp>
 
 #include <iostream>
 #include <string>
@@ -38,6 +41,8 @@ namespace cirkit
 
 void read_bench( aig_graph& aig, std::ifstream& is );
 void read_bench( aig_graph& aig, const std::string& filename );
+
+void read_bench( lut_graph_t& aig, const std::string& filename );
 
 }
 
