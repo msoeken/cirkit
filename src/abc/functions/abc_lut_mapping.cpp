@@ -27,6 +27,11 @@
 
 #include <map/if/if.h>
 
+namespace abc
+{
+Hop_Obj_t * Abc_ObjHopFromGia( Hop_Man_t * pHopMan, Gia_Man_t * p, int GiaId, Vec_Ptr_t * vCopies );
+}
+
 namespace cirkit
 {
 
@@ -49,6 +54,89 @@ abc::Gia_Man_t* aig_mapping( const aig_graph& aig, unsigned k )
   abc::Gia_ManStop( abc_aig );
 
   return abc_lut;
+}
+
+void map_lut_nodes_with_gia( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, std::unordered_map<int, lut_vertex_t>& lutid_to_node )
+{
+  int i;
+
+  auto tts = boost::get( boost::vertex_lut, lut );
+  auto types = boost::get( boost::vertex_gate_type, lut );
+
+  abc::Gia_ObjComputeTruthTableStart( abc_lut, k );
+  Gia_ManForEachLut( abc_lut, i )
+  {
+    const auto size = abc::Gia_ObjLutSize( abc_lut, i );
+
+    abc::Vec_Int_t leaves;
+    leaves.nCap = leaves.nSize = size;
+    leaves.pArray = abc::Gia_ObjLutFanins( abc_lut, i );
+
+    //abc::Vec_IntSelectSort( abc::Vec_IntArray( &leaves ), abc::Vec_IntSize( &leaves ) );
+    const auto obj = abc::Gia_ManObj( abc_lut, i );
+    const auto* pt = abc::Gia_ObjComputeTruthTableCut( abc_lut, obj, &leaves );
+    //abc::Vec_IntReverseOrder( &leaves );
+
+    auto v = add_vertex( lut );
+    tts[v] = std::make_pair( size, pt[0] );
+    types[v] = gate_type_t::internal;
+
+    for ( auto j = 0; j < size; ++j )
+    {
+      const auto it = lutid_to_node.find( leaves.pArray[j] );
+      assert( it != lutid_to_node.end() );
+
+      add_edge( v, it->second, lut );
+    }
+
+    lutid_to_node.insert( std::make_pair( i, v ) );
+  }
+  abc::Gia_ObjComputeTruthTableStop( abc_lut );
+}
+
+void map_lut_nodes_with_hop( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, std::unordered_map<int, lut_vertex_t>& lutid_to_node )
+{
+  int i;
+
+  auto tts = boost::get( boost::vertex_lut, lut );
+  auto types = boost::get( boost::vertex_gate_type, lut );
+
+  auto* hop = abc::Hop_ManStart();
+
+  abc::Vec_Ptr_t* reflect = abc::Vec_PtrStart( abc::Gia_ManObjNum( abc_lut ) );
+  abc::Vec_Int_t* memory  = abc::Vec_IntAlloc( 10000 );
+
+  Gia_ManForEachLut( abc_lut, i )
+  {
+    const auto size = abc::Gia_ObjLutSize( abc_lut, i );
+
+    auto* hop_obj = abc::Abc_ObjHopFromGia( hop, abc_lut, i, reflect );
+    auto* truth   = abc::Hop_ManConvertAigToTruth( hop, abc::Hop_Regular( hop_obj ), size, memory, 0 );
+    if ( abc::Hop_IsComplement( hop_obj ) )
+    {
+      abc::Extra_TruthNot( truth, truth, size );
+    }
+
+    auto v = add_vertex( lut );
+    tts[v] = std::make_pair( size, truth[0] );
+    types[v] = gate_type_t::internal;
+
+    auto* fanin = abc::Gia_ObjLutFanins( abc_lut, i );
+    for ( auto j = 0; j < size; ++j )
+    {
+      const auto it = lutid_to_node.find( fanin[j] );
+      assert( it != lutid_to_node.end() );
+
+      add_edge( v, it->second, lut );
+    }
+
+    lutid_to_node.insert( std::make_pair( i, v ) );
+  }
+
+  abc::Vec_IntFree( memory );
+  abc::Vec_PtrFree( reflect );
+
+  abc::Hop_ManStop( hop );
 }
 
 /******************************************************************************
@@ -77,8 +165,9 @@ lut_graph_t abc_lut_mapping( const aig_graph& aig, unsigned k,
   /* Setup LUT graph with primary inputs */
   lut_graph_t lut;
   std::unordered_map<int, lut_vertex_t> lutid_to_node;
-  auto tts = boost::get( boost::vertex_lut, lut );
+  auto names = boost::get( boost::vertex_name, lut );
   auto types = boost::get( boost::vertex_gate_type, lut );
+  auto tts = boost::get( boost::vertex_lut, lut );
 
   int i, id;
   Gia_ManForEachCiId( abc_lut, id, i )
@@ -86,46 +175,29 @@ lut_graph_t abc_lut_mapping( const aig_graph& aig, unsigned k,
     auto v = add_vertex( lut );
     lutid_to_node.insert( {id, v} );
     types[v] = gate_type_t::pi;
+    names[v] = std::string( (char*)abc::Vec_PtrGetEntry( abc_lut->vNamesIn, i ) );
   }
 
-  abc::Gia_ObjComputeTruthTableStart( abc_lut, k );
-  Gia_ManForEachLut( abc_lut, i )
-  {
-    const auto size = abc::Gia_ObjLutSize( abc_lut, i );
-
-    abc::Vec_Int_t leaves;
-    leaves.nCap = leaves.nSize = size;
-    leaves.pArray = abc::Gia_ObjLutFanins( abc_lut, i );
-
-    const auto* pt = abc::Gia_ObjComputeTruthTableCut( abc_lut, abc::Gia_ManObj( abc_lut, i ), &leaves );
-
-    auto v = add_vertex( lut );
-    tts[v] = std::make_pair( size, pt[0] );
-    types[v] = gate_type_t::internal;
-
-    for ( auto j = 0; j < size; ++j )
-    {
-      const auto it = lutid_to_node.find( leaves.pArray[j] );
-      assert( it != lutid_to_node.end() );
-
-      add_edge( v, it->second, lut );
-    }
-
-    lutid_to_node.insert( std::make_pair( i, v ) );
-  }
+  map_lut_nodes_with_gia( lut, abc_lut, k, lutid_to_node );
 
   Gia_ManForEachCoDriverId( abc_lut, id, i )
   {
     auto v = add_vertex( lut );
     types[v] = gate_type_t::po;
+    names[v] = std::string( (char*)abc::Vec_PtrGetEntry( abc_lut->vNamesOut, i ) );
 
     const auto it = lutid_to_node.find( id );
     assert( it != lutid_to_node.end() );
 
     add_edge( v, it->second, lut );
+
+    /* output inverted */
+    if ( abc::Gia_ObjFaninC0( abc::Gia_ManCo( abc_lut, i ) ) == 1 )
+    {
+      tts[it->second].second = ~tts[it->second].second;
+    }
   }
 
-  abc::Gia_ObjComputeTruthTableStop( abc_lut );
   abc::Gia_ManStop( abc_lut );
 
   return lut;
