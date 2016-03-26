@@ -22,6 +22,7 @@
 
 #include <boost/graph/topological_sort.hpp>
 
+#include <core/utils/range_utils.hpp>
 #include <classical/utils/aig_utils.hpp>
 
 namespace cirkit
@@ -56,10 +57,14 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   node_to_obj[0] = 0;
 
   /* inputs */
-  for ( const auto& input : info.inputs )
+  assert( !gia->vNamesIn );
+  gia->vNamesIn = abc::Vec_PtrStart( info.inputs.size() );
+  for ( const auto& input : index( info.inputs ) )
   {
     const int obj = abc::Gia_ManAppendCi( gia );
-    node_to_obj[input] = abc::Abc_Lit2Var( obj );
+    node_to_obj[input.value] = abc::Abc_Lit2Var( obj );
+    const auto name = info.node_names.at( input.value );
+    abc::Vec_PtrSetEntry( gia->vNamesIn, input.index, strcpy( (char*)malloc( sizeof( char ) * ( name.size() + 1u ) ), name.c_str() ) );
   }
 
   /* latches */
@@ -85,9 +90,13 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   }
 
   /* outputs */
-  for ( const auto& output : info.outputs )
+  assert( !gia->vNamesOut );
+  gia->vNamesOut = abc::Vec_PtrStart( info.outputs.size() );
+  for ( const auto& output : index( info.outputs ) )
   {
-    abc::Gia_ManAppendCo( gia, abc::Abc_Var2Lit( node_to_obj[output.first.node], output.first.complemented ) );
+    abc::Gia_ManAppendCo( gia, abc::Abc_Var2Lit( node_to_obj[output.value.first.node], output.value.first.complemented ) );
+    const auto name = output.value.second;
+    abc::Vec_PtrSetEntry( gia->vNamesOut, output.index, strcpy( (char*)malloc( sizeof( char ) * ( name.size() + 1u ) ), name.c_str() ) );
   }
 
   return gia;
