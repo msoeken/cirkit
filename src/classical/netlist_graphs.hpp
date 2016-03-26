@@ -82,8 +82,9 @@ void write_simple_fanout_graph( std::ostream& os, const simple_fanout_graph_t& g
  * LUT graph                                                                  *
  ******************************************************************************/
 
-using lut_graph_vertex_properties_t = property<vertex_lut_t, std::pair<unsigned, unsigned long>,
-                                      property<vertex_gate_type_t, gate_type_t>>;
+using lut_graph_vertex_properties_t = property<vertex_name_t, std::string,
+                                      property<vertex_lut_t, std::pair<unsigned, unsigned long>,
+                                      property<vertex_gate_type_t, gate_type_t>>>;
 using lut_graph_t  = digraph_t<lut_graph_vertex_properties_t>;
 using lut_vertex_t = vertex_t<lut_graph_t>;
 using lut_edge_t   = edge_t<lut_graph_t>;
