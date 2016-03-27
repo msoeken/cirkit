@@ -182,6 +182,12 @@ template<>
 std::string store_entry_to_string<expression_t::ptr>( const expression_t::ptr& expr );
 
 template<>
+void print_store_entry_statistics<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );
+
+template<>
+command_log_opt_t log_store_entry_statistics<expression_t::ptr>( const expression_t::ptr& expr );
+
+template<>
 void print_store_entry<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );
 
 template<>

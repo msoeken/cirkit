@@ -49,6 +49,7 @@ struct expression_t
 
 expression_t::ptr parse_expression( const std::string& expression );
 std::ostream& operator<<( std::ostream& os, const expression_t::ptr& expr );
+std::string expression_to_string( const expression_t::ptr& expr );
 
 /******************************************************************************
  * Evaluate expressions                                                       *

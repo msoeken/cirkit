@@ -19,6 +19,7 @@
 #include "expression_parser.hpp"
 
 #include <cassert>
+#include <sstream>
 #include <stack>
 
 namespace cirkit
@@ -210,6 +211,13 @@ std::ostream& operator<<( std::ostream& os, const expression_t::ptr& expr )
   }
 
   return os;
+}
+
+std::string expression_to_string( const expression_t::ptr& expr )
+{
+  std::stringstream s;
+  s << expr;
+  return s.str();
 }
 
 }
