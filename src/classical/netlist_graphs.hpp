@@ -62,7 +62,7 @@ using boost::vertex_gate_type_t;
 using boost::vertex_name_t;
 using boost::vertex_lut_t;
 
-enum class gate_type_t { pi, po, gnd, fanout, inv, buf, _and, _or, nand, nor, _xor, xnor, mux, fadd, internal, pwr, dff, dffrs };
+enum class gate_type_t { pi, po, gnd, vdd, fanout, inv, buf, _and, _or, nand, nor, _xor, xnor, mux, fadd, internal, pwr, dff, dffrs };
 
 /******************************************************************************
  * Simple fan-out graph                                                       *

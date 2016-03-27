@@ -27,6 +27,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/regex.hpp>
 
 #include <fstream>
@@ -208,6 +209,18 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
           boost::trim( name );
           gates.push_back( std::make_tuple( name, value, arguments ) );
         }},
+      {boost::regex( "^(.*) = gnd" ), [&gates]( const boost::smatch& m ) {
+          std::string name( m[1] );
+          boost::trim( name );
+
+          gates.push_back( std::make_tuple( name, 0, std::vector<std::string>() ) );
+        }},
+      {boost::regex( "^(.*) = vdd" ), [&gates]( const boost::smatch& m ) {
+          std::string name( m[1] );
+          boost::trim( name );
+
+          gates.push_back( std::make_tuple( name, 1, std::vector<std::string>() ) );
+        }},
       {boost::regex( "^#" ), []( const boost::smatch& m ) {}}
     }, true );
 
@@ -216,6 +229,11 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
   auto types = boost::get( boost::vertex_gate_type, lut );
   auto luts  = boost::get( boost::vertex_lut, lut );
   auto names = boost::get( boost::vertex_name, lut );
+
+  auto v_gnd = add_vertex( lut );
+  types[v_gnd] = gate_type_t::gnd;
+  auto v_vdd = add_vertex( lut );
+  types[v_vdd] = gate_type_t::vdd;
 
   for ( const auto& input : inputs )
   {
@@ -227,17 +245,24 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
   for ( const auto& gate : gates )
   {
-    auto v = add_vertex( lut );
-
-    types[v] = gate_type_t::internal;
-    luts[v] = std::make_pair( std::get<2>( gate ).size(), std::get<1>( gate ) );
-
-    for ( const auto& arg : std::get<2>( gate ) )
+    if ( std::get<2>( gate ).empty() )
     {
-      add_edge( v, gate_to_node[arg], lut );
+      gate_to_node[std::get<0>( gate )] = std::get<1>( gate ) ? v_vdd : v_gnd;
     }
+    else
+    {
+      auto v = add_vertex( lut );
 
-    gate_to_node[std::get<0>( gate )] = v;
+      types[v] = gate_type_t::internal;
+      luts[v] = std::make_pair( std::get<2>( gate ).size(), std::get<1>( gate ) );
+
+      for ( const auto& arg : std::get<2>( gate ) )
+      {
+        add_edge( v, gate_to_node[arg], lut );
+      }
+
+      gate_to_node[std::get<0>( gate )] = v;
+    }
   }
 
   for ( const auto& output : outputs )
