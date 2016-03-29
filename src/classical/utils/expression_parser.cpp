@@ -220,6 +220,66 @@ std::string expression_to_string( const expression_t::ptr& expr )
   return s.str();
 }
 
+class expression_shape_evaluator : public expression_evaluator<std::string>
+{
+public:
+  expression_shape_evaluator( bool with_inverters )
+    : with_inverters( with_inverters )
+  {
+  }
+
+  std::string on_const( bool value ) const
+  {
+    if ( with_inverters )
+    {
+      return value ? "1" : "0";
+    }
+    else
+    {
+      return "C";
+    }
+  }
+
+  std::string on_var( unsigned index ) const
+  {
+    return "I";
+  }
+
+  std::string on_inv( const std::string& value ) const
+  {
+    return ( with_inverters ? "!" : "" ) + value;
+  }
+
+  std::string on_and( const std::string& value1, const std::string& value2 ) const
+  {
+    return "(" + value1 + value2 + ")";
+  }
+
+  std::string on_or( const std::string& value1, const std::string& value2 ) const
+  {
+    return "{" + value1 + value2 + "}";
+  }
+
+  std::string on_maj( const std::string& value1, const std::string& value2, const std::string& value3 ) const
+  {
+    return "<" + value1 + value2 + value3 + ">";
+  }
+
+  std::string on_xor( const std::string& value1, const std::string& value2 ) const
+  {
+    return "[" + value1 + value2 + "]";
+  }
+
+private:
+  bool with_inverters;
+};
+
+std::string expression_to_shape( const expression_t::ptr& expr, bool with_inverters )
+{
+  return evaluate_expression( expr, expression_shape_evaluator( with_inverters ) );
+
+}
+
 }
 
 // Local Variables:
