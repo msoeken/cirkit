@@ -191,6 +191,23 @@ Dest store_convert( const Source& src )
   assert( false );
 }
 
+/* I/O */
+struct write_io_aiger_tag_t {};
+struct write_io_bench_tag_t {};
+struct write_io_verilog_tag_t {};
+
+template<typename T, typename Tag>
+bool store_can_write_io_type()
+{
+  return false;
+}
+
+template<typename T, typename Tag>
+void store_write_io_type( const T& element, const std::string& filename )
+{
+  assert( false );
+}
+
 /* for the use in commands */
 template<typename S>
 int add_option_helper( program_options& opts )
