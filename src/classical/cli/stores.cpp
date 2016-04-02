@@ -28,20 +28,13 @@
 #include <classical/functions/aig_from_truth_table.hpp>
 #include <classical/functions/compute_levels.hpp>
 #include <classical/functions/simulate_aig.hpp>
+#include <classical/io/write_verilog.hpp>
 
 namespace cirkit
 {
 
 /******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
+ * aig_graph                                                                  *
  ******************************************************************************/
 
 template<>
@@ -143,6 +136,16 @@ bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
 }
 
 template<>
+void store_write_io_type<aig_graph, write_io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
+{
+  write_verilog( aig, filename );
+}
+
+/******************************************************************************
+ * counterexample_t                                                           *
+ ******************************************************************************/
+
+template<>
 std::string store_entry_to_string<counterexample_t>( const counterexample_t& cex )
 {
   std::stringstream os;
@@ -150,11 +153,19 @@ std::string store_entry_to_string<counterexample_t>( const counterexample_t& cex
   return os.str();
 }
 
+/******************************************************************************
+ * simple_fanout_graph_t                                                      *
+ ******************************************************************************/
+
 template<>
 std::string store_entry_to_string<simple_fanout_graph_t>( const simple_fanout_graph_t& nl )
 {
   return "";
 }
+
+/******************************************************************************
+ * std::vector<aig_node>                                                      *
+ ******************************************************************************/
 
 template<>
 std::string store_entry_to_string<std::vector<aig_node>>( const std::vector<aig_node>& g )
@@ -167,6 +178,10 @@ void print_store_entry<std::vector<aig_node>>( std::ostream& os, const std::vect
 {
   os << boost::format( "{ %s }" ) % any_join( g, ", " ) << std::endl;
 }
+
+/******************************************************************************
+ * tt                                                                         *
+ ******************************************************************************/
 
 template<>
 std::string store_entry_to_string<tt>( const tt& t )
@@ -181,6 +196,10 @@ void print_store_entry<tt>( std::ostream& os, const tt& t )
 {
   os << t << std::endl;
 }
+
+/******************************************************************************
+ * expression_t::ptr                                                          *
+ ******************************************************************************/
 
 template<>
 std::string store_entry_to_string<expression_t::ptr>( const expression_t::ptr& expr )

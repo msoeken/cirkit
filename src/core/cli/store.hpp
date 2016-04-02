@@ -197,13 +197,13 @@ struct write_io_bench_tag_t {};
 struct write_io_verilog_tag_t {};
 
 template<typename T, typename Tag>
-bool store_can_write_io_type()
+bool store_can_write_io_type( program_options& opts )
 {
   return false;
 }
 
 template<typename T, typename Tag>
-void store_write_io_type( const T& element, const std::string& filename )
+void store_write_io_type( const T& element, const std::string& filename, program_options& opts, const properties::ptr& settings )
 {
   assert( false );
 }

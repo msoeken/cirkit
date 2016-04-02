@@ -53,6 +53,7 @@
 #include <core/cli/commands/quit.hpp>
 #include <core/cli/commands/show.hpp>
 #include <core/cli/commands/store.hpp>
+#include <core/cli/commands/write_io.hpp>
 #include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
@@ -94,6 +95,8 @@ public:
     env->commands.insert( {"store",   std::make_shared<store_command<S...>>( env )} );
     env->commands.insert( {"print",   std::make_shared<print_command<S...>>( env )} );
     env->commands.insert( {"ps",      std::make_shared<ps_command<S...>>( env )} );
+
+    env->commands.insert( {"write_verilog", std::make_shared<write_io_command<write_io_verilog_tag_t, S...>>( env, "Verilog" )} );
 
     opts.add_options()
       ( "command,c", value( &command ), "Process semicolon-separated list of commands" )
