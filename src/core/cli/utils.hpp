@@ -35,6 +35,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #ifdef USE_READLINE
@@ -105,6 +106,8 @@ public:
       ( "counter,n",                    "Show a counter in the prefix" )
       ( "log,l",     value( &logname ), "Logs the execution and stores many statistical information" )
       ;
+
+    read_aliases();
   }
 
   int run( int argc, char ** argv )
@@ -156,7 +159,7 @@ public:
           else
           {
             if ( opts.is_set( "echo" ) ) { std::cout << get_prefix() << line << std::endl; }
-            if ( !execute_line( env, line, env->commands ) )
+            if ( !execute_line( env, preprocess_alias( line ), env->commands ) )
             {
               return 1;
             }
@@ -170,7 +173,7 @@ public:
     {
       foreach_line_in_file( file, [&]( const std::string& line ) {
           if ( opts.is_set( "echo" ) ) { std::cout << get_prefix() << line << std::endl; }
-          execute_line( env, line, env->commands );
+          execute_line( env, preprocess_alias( line ), env->commands );
 
           return !env->quit;
         } );
@@ -184,7 +187,7 @@ public:
       std::string line;
       while ( !env->quit && read_command_line( get_prefix(), line ) )
       {
-        execute_line( env, line, env->commands );
+        execute_line( env, preprocess_alias( line ), env->commands );
 #ifdef USE_READLINE
         add_history( line.c_str() );
 #endif
@@ -212,6 +215,40 @@ private:
     else
     {
       return prefix + "> ";
+    }
+  }
+
+  void read_aliases()
+  {
+    if ( auto* path = std::getenv( "CIRKIT_HOME" ) )
+    {
+      std::string alias_path = boost::str( boost::format( "%s/alias" ) % path );
+      if ( !boost::filesystem::exists( alias_path ) ) { return; }
+
+      foreach_line_in_file( alias_path, [this]( const std::string& line ) {
+          if ( line.empty() || line[0] == '#' ) { return true; }
+
+          auto p = split_string_pair( line, "=" );
+          boost::trim( p.first );
+          boost::trim( p.second );
+
+          aliases.insert( p );
+
+          return true;
+        } );
+    }
+  }
+
+  std::string preprocess_alias( const std::string& line )
+  {
+    const auto it = aliases.find( line );
+    if ( it != aliases.end() )
+    {
+      return it->second;
+    }
+    else
+    {
+      return line;
     }
   }
 
@@ -264,15 +301,17 @@ private:
 #endif
 
 private:
-  std::string                  prefix;
+  std::string                        prefix;
 
-  program_options              opts;
+  program_options                    opts;
 
-  std::string                  command;
-  std::string                  file;
-  std::string                  logname;
+  std::string                        command;
+  std::string                        file;
+  std::string                        logname;
 
-  unsigned                     counter = 1u;
+  unsigned                           counter = 1u;
+
+  std::map<std::string, std::string> aliases;
 };
 
 #define ADD_COMMAND( name ) cli.env->commands.insert( {#name, std::make_shared<name##_command>( cli.env ) } );

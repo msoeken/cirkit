@@ -69,6 +69,17 @@ bool read_command_line( const std::string& prefix, std::string& line )
 
 bool execute_line( const environment::ptr& env, const std::string& line, const std::map<std::string, std::shared_ptr<command>>& commands )
 {
+  if ( line.find( ';' ) != std::string::npos )
+  {
+    auto result = true;
+    foreach_string( line, ";", [&result, &env, &commands]( const std::string& cline ) {
+        auto cline_copy = cline;
+        boost::trim( cline_copy );
+        result = result && execute_line( env, cline_copy, commands );
+      } );
+    return result;
+  }
+
   /* ignore comments and empty lines */
   if ( line.empty() || line[0] == '#' ) { return false; }
 
