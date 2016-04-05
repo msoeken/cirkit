@@ -30,7 +30,11 @@
 
 #include <string>
 
+#include <boost/program_options.hpp>
+
 #include <core/cli/command.hpp>
+
+using namespace boost::program_options;
 
 namespace cirkit
 {
