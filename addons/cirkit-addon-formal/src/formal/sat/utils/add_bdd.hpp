@@ -61,8 +61,8 @@ int add_bdd_rec( S& solver, DdManager* mgr, DdNode* f, int n, int sid, int& free
   if ( Cudd_IsComplement( t ) ) { tid = -tid; }
   if ( Cudd_IsComplement( e ) ) { eid = -eid; }
 
-  const auto xid = sid + f->index;
-  const auto fid = free++;
+  const int xid = sid + f->index;
+  const int fid = free++;
 
   if ( tid == sid + n )
   {
