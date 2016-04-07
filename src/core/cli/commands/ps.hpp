@@ -45,10 +45,18 @@ template<typename S>
 int ps_helper( const program_options& opts, const environment::ptr& env )
 {
   constexpr auto option = store_info<S>::option;
+  constexpr auto name   = store_info<S>::name;
 
   if ( opts.is_set( option ) )
   {
-    print_store_entry_statistics<S>( std::cout, env->store<S>().current() );
+    if ( env->store<S>().current_index() == -1 )
+    {
+      std::cout << "[w] no " << name << " in store" << std::endl;
+    }
+    else
+    {
+      print_store_entry_statistics<S>( std::cout, env->store<S>().current() );
+    }
   }
 
   return 0;

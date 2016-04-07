@@ -18,9 +18,12 @@
 
 #include "stores.hpp"
 
+#include <fstream>
 #include <sstream>
 
 #include <boost/format.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include <core/graph/depth.hpp>
 #include <core/utils/range_utils.hpp>
@@ -139,6 +142,17 @@ template<>
 void store_write_io_type<aig_graph, write_io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
 {
   write_verilog( aig, filename );
+}
+
+template<>
+void store_write_io_type<aig_graph, write_io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+
+  for ( const auto& e : boost::make_iterator_range( edges( aig ) ) )
+  {
+    os << source( e, aig ) << " " << target( e, aig ) << std::endl;
+  }
 }
 
 /******************************************************************************

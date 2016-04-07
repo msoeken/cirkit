@@ -195,6 +195,7 @@ Dest store_convert( const Source& src )
 struct write_io_aiger_tag_t {};
 struct write_io_bench_tag_t {};
 struct write_io_verilog_tag_t {};
+struct write_io_edgelist_tag_t {};
 
 template<typename T, typename Tag>
 bool store_can_write_io_type( program_options& opts )

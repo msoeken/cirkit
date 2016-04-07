@@ -97,6 +97,7 @@ public:
     env->commands.insert( {"print",   std::make_shared<print_command<S...>>( env )} );
     env->commands.insert( {"ps",      std::make_shared<ps_command<S...>>( env )} );
 
+    env->commands.insert( {"write_edgelist", std::make_shared<write_io_command<write_io_edgelist_tag_t, S...>>( env, "Edge list" )} );
     env->commands.insert( {"write_verilog", std::make_shared<write_io_command<write_io_verilog_tag_t, S...>>( env, "Verilog" )} );
 
     opts.add_options()
