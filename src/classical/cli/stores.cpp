@@ -139,13 +139,13 @@ bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
 }
 
 template<>
-void store_write_io_type<aig_graph, write_io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
+void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
 {
   write_verilog( aig, filename );
 }
 
 template<>
-void store_write_io_type<aig_graph, write_io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
+void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
 

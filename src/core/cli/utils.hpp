@@ -52,6 +52,7 @@
 #include <core/cli/commands/print.hpp>
 #include <core/cli/commands/ps.hpp>
 #include <core/cli/commands/quit.hpp>
+#include <core/cli/commands/read_io.hpp>
 #include <core/cli/commands/show.hpp>
 #include <core/cli/commands/store.hpp>
 #include <core/cli/commands/write_io.hpp>
@@ -88,6 +89,16 @@ public:
 
     [](...){}( add_store_helper<S>( env )... );
 
+    /* These are some generic commands that work on all store entries.
+     *
+     * For most of the commands there are some functions that need to be
+     * implemented for the specific store entry types, e.g., for convert
+     * one needs to implement store_can_convert and store_convert. Most
+     * of the commands have default implementations, some of them throw
+     * assertions in the default implementations.
+     *
+     * see store.hpp for more details
+     */
     env->commands.insert( {"convert", std::make_shared<convert_command<S...>>( env )} );
     env->commands.insert( {"current", std::make_shared<current_command<S...>>( env )} );
     env->commands.insert( {"help",    std::make_shared<help_command>( env )} );
@@ -97,8 +108,9 @@ public:
     env->commands.insert( {"print",   std::make_shared<print_command<S...>>( env )} );
     env->commands.insert( {"ps",      std::make_shared<ps_command<S...>>( env )} );
 
-    env->commands.insert( {"write_edgelist", std::make_shared<write_io_command<write_io_edgelist_tag_t, S...>>( env, "Edge list" )} );
-    env->commands.insert( {"write_verilog", std::make_shared<write_io_command<write_io_verilog_tag_t, S...>>( env, "Verilog" )} );
+    env->commands.insert( {"read_verilog", std::make_shared<read_io_command<io_verilog_tag_t, S...>>( env, "Verilog" )} );
+    env->commands.insert( {"write_edgelist", std::make_shared<write_io_command<io_edgelist_tag_t, S...>>( env, "Edge list" )} );
+    env->commands.insert( {"write_verilog", std::make_shared<write_io_command<io_verilog_tag_t, S...>>( env, "Verilog" )} );
 
     opts.add_options()
       ( "command,c", value( &command ), "Process semicolon-separated list of commands" )

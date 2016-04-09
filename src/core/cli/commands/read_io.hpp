@@ -17,16 +17,16 @@
  */
 
 /**
- * @file write_io.hpp
+ * @file read_io.hpp
  *
- * @brief Generic command for writing I/O
+ * @brief Generic command for reading I/O
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_WRITE_IO_COMMAND_HPP
-#define CLI_WRITE_IO_COMMAND_HPP
+#ifndef CLI_READ_IO_COMMAND_HPP
+#define CLI_READ_IO_COMMAND_HPP
 
 #include <string>
 
@@ -40,9 +40,9 @@ namespace cirkit
 {
 
 template<typename Tag, typename S>
-int add_write_io_option_helper( program_options& opts )
+int add_read_io_option_helper( program_options& opts )
 {
-  if ( store_can_write_io_type<S, Tag>( opts ) )
+  if ( store_can_read_io_type<S, Tag>( opts ) )
   {
     add_option_helper<S>( opts );
   }
@@ -51,36 +51,35 @@ int add_write_io_option_helper( program_options& opts )
 }
 
 template<typename Tag, typename S>
-int write_io_helper( program_options& opts, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
+int read_io_helper( program_options& opts, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
 
   if ( opts.is_set( option ) )
   {
-    if ( env->store<S>().current_index() == -1 )
+    if ( opts.is_set( "new" ) || env->store<S>().empty() )
     {
-      std::cout << "[w] no " << name << " selected in store" << std::endl;
+      env->store<S>().extend();
     }
-    else
-    {
-      store_write_io_type<S, Tag>( env->store<S>().current(), filename, opts, settings );
-    }
+
+    env->store<S>().current() = store_read_io_type<S, Tag>( filename, opts, settings );
   }
   return 0;
 }
 
 template<class Tag, class... S>
-class write_io_command : public command
+class read_io_command : public command
 {
 public:
-  write_io_command( const environment::ptr& env, const std::string& name )
-    : command( env, boost::str( boost::format( "Write %s file" ) % name ) )
+  read_io_command( const environment::ptr& env, const std::string& name )
+    : command( env, boost::str( boost::format( "Read %s file" ) % name ) )
   {
-    [](...){}( add_write_io_option_helper<Tag, S>( opts )... );
+    [](...){}( add_read_io_option_helper<Tag, S>( opts )... );
 
     opts.add_options()
       ( "filename", value( &filename ), "filename" )
+      ( "new,n",                        "create new store entry" )
       ;
 
     be_verbose();
@@ -91,7 +90,7 @@ protected:
   {
     auto settings = make_settings();
 
-    [](...){}( write_io_helper<Tag, S>( opts, env, filename, settings )... );
+    [](...){}( read_io_helper<Tag, S>( opts, env, filename, settings )... );
 
     return true;
   }

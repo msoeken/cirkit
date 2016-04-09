@@ -192,10 +192,10 @@ Dest store_convert( const Source& src )
 }
 
 /* I/O */
-struct write_io_aiger_tag_t {};
-struct write_io_bench_tag_t {};
-struct write_io_verilog_tag_t {};
-struct write_io_edgelist_tag_t {};
+struct io_aiger_tag_t {};
+struct io_bench_tag_t {};
+struct io_verilog_tag_t {};
+struct io_edgelist_tag_t {};
 
 template<typename T, typename Tag>
 bool store_can_write_io_type( program_options& opts )
@@ -205,6 +205,18 @@ bool store_can_write_io_type( program_options& opts )
 
 template<typename T, typename Tag>
 void store_write_io_type( const T& element, const std::string& filename, program_options& opts, const properties::ptr& settings )
+{
+  assert( false );
+}
+
+template<typename T, typename Tag>
+bool store_can_read_io_type( program_options& opts )
+{
+  return false;
+}
+
+template<typename T, typename Tag>
+T store_read_io_type( const std::string& filename, program_options& opts, const properties::ptr& settings )
 {
   assert( false );
 }

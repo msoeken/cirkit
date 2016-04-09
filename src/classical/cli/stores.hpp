@@ -91,16 +91,16 @@ template<>
 bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig );
 
 template<>
-inline bool store_can_write_io_type<aig_graph, write_io_verilog_tag_t>( program_options& opts ) { return true; }
+inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( program_options& opts ) { return true; }
 
 template<>
-void store_write_io_type<aig_graph, write_io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings );
+void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings );
 
 template<>
-inline bool store_can_write_io_type<aig_graph, write_io_edgelist_tag_t>( program_options& opts ) { return true; }
+inline bool store_can_write_io_type<aig_graph, io_edgelist_tag_t>( program_options& opts ) { return true; }
 
 template<>
-void store_write_io_type<aig_graph, write_io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings );
+void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings );
 
 /******************************************************************************
  * counterexample_t                                                           *
