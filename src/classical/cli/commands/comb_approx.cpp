@@ -84,7 +84,7 @@ bool comb_approx_command::execute()
   using boost::format;
 
   auto& aigs = env->store<aig_graph>();
-  auto& bdds = env->store<bdd_function_t>();
+  // auto& bdds = env->store<bdd_function_t>();
 
   bdd_manager_ptr  manager;
   std::vector<bdd> fs;
