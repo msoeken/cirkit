@@ -69,7 +69,7 @@ bool read_command_line( const std::string& prefix, std::string& line )
 
 bool execute_line( const environment::ptr& env, const std::string& line, const std::map<std::string, std::shared_ptr<command>>& commands )
 {
-  if ( line.find( ';' ) != std::string::npos )
+  if ( !line.empty() && line[0] != '!' && line.find( ';' ) != std::string::npos )
   {
     auto result = true;
     foreach_string( line, ";", [&result, &env, &commands]( const std::string& cline ) {
