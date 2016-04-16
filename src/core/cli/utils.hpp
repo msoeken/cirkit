@@ -37,6 +37,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/regex.hpp>
 
 #ifdef USE_READLINE
 #include <readline/readline.h>
@@ -252,17 +253,38 @@ private:
     }
   }
 
+  // std::string preprocess_alias( const std::string& line )
+  // {
+  //   const auto it = aliases.find( line );
+  //   if ( it != aliases.end() )
+  //   {
+  //     return it->second;
+  //   }
+  //   else
+  //   {
+  //     return line;
+  //   }
+  // }
+
   std::string preprocess_alias( const std::string& line )
   {
-    const auto it = aliases.find( line );
-    if ( it != aliases.end() )
+    boost::smatch m;
+
+    for ( const auto& p : aliases )
     {
-      return it->second;
+      if ( boost::regex_match( line, m, boost::regex( p.first ) ) )
+      {
+        auto fmt = boost::format( p.second );
+
+        for ( auto i = 1u; i < m.size(); ++i )
+        {
+          fmt = fmt % std::string( m[i] );
+        }
+        return fmt.str();
+      }
     }
-    else
-    {
-      return line;
-    }
+
+    return line;
   }
 
 #ifdef USE_READLINE
