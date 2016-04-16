@@ -47,6 +47,7 @@ tt_command::tt_command( const environment::ptr& env )
   : command( env, "Truth table manipulation" ),
     tts( env->store<tt>() )
 {
+  opts.set_positional_option( "load" );
   opts.add_options()
     ( "load,l",    value( &load ),    "Load a truth table into the store" )
     ( "planame,p", value( &planame ), "Write truth table to PLA" )
