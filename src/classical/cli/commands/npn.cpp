@@ -134,7 +134,7 @@ bool npn_command::execute()
 
     npn = func( tts.current(), phase, perm, properties::ptr(), statistics );
 
-    std::cout << boost::format( "[i] run-time: %.f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+    std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
     std::cout << "[i] NPN class for " << tts.current() << " is " << npn << std::endl;
     std::cout << "[i] - phase: " << phase << " perm: " << any_join( perm, " " ) << std::endl;
 
