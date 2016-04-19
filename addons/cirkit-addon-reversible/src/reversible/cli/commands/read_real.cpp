@@ -50,7 +50,7 @@ read_real_command::read_real_command( const environment::ptr& env )
 {
   opts.add_options()
     ( "filename", value( &filename ), "Filename for the *.real file" )
-    ( "string,s", value( &string ),   "Read from string (e.g. t3 a b c; t2 a b; t1 a; f3 a b c)" )
+    ( "string,s", value( &string ),   "Read from string (e.g. t3 a b c, t2 a b, t1 a, f3 a b c)" )
     ( "new,n",                        "Add a new entry to the store; if not set, the current entry is overriden" )
     ;
 }
