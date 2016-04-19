@@ -64,9 +64,13 @@
 
 using namespace cirkit;
 
+#define STORES circuit, binary_truth_table, bdd_function_t, rcbdd, aig_graph
+
 int main( int argc, char ** argv )
 {
-  cli_main<circuit, binary_truth_table, bdd_function_t, rcbdd, aig_graph> cli( "revkit" );
+  cli_main<STORES> cli( "revkit" );
+
+  cli.env->commands.insert( {"write_quipper", std::make_shared<write_io_command<io_quipper_tag_t, STORES>>( cli.env, "Quipper" )} );
 
   ADD_COMMAND( adding_lines );
   ADD_COMMAND( bdd );

@@ -24,6 +24,7 @@
 #include <reversible/io/create_image.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/io/print_statistics.hpp>
+#include <reversible/io/write_quipper.hpp>
 
 namespace cirkit
 {
@@ -121,6 +122,12 @@ bool show_store_entry<circuit>::operator()( circuit& circ,
 command_log_opt_t show_store_entry<circuit>::log() const
 {
   return boost::none;
+}
+
+template<>
+void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings )
+{
+  write_quipper( circ, filename );
 }
 
 template<>
