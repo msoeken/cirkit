@@ -277,7 +277,66 @@ private:
 std::string expression_to_shape( const expression_t::ptr& expr, bool with_inverters )
 {
   return evaluate_expression( expr, expression_shape_evaluator( with_inverters ) );
+}
 
+class expression_bdd_evaluator : public expression_evaluator<BDD>
+{
+public:
+  expression_bdd_evaluator( Cudd& manager )
+    : manager( manager )
+  {
+  }
+
+  BDD on_const( bool value ) const
+  {
+    return value ? manager.bddOne() : manager.bddZero();
+  }
+
+  BDD on_var( unsigned index ) const
+  {
+    if ( manager.ReadSize() < index )
+    {
+      for ( auto i = manager.ReadSize(); i <= index; ++i )
+      {
+        manager.bddVar();
+      }
+    }
+
+    return manager.bddVar( index );
+  }
+
+  BDD on_inv( const BDD& value ) const
+  {
+    return !value;
+  }
+
+  BDD on_and( const BDD& value1, const BDD& value2 ) const
+  {
+    return value1 & value2;
+  }
+
+  BDD on_or( const BDD& value1, const BDD& value2 ) const
+  {
+    return value1 | value2;
+  }
+
+  BDD on_maj( const BDD& value1, const BDD& value2, const BDD& value3 ) const
+  {
+    return ( value1 & value2) | ( value1 & value3 ) | ( value2 & value3 );
+  }
+
+  BDD on_xor( const BDD& value1, const BDD& value2 ) const
+  {
+    return value1 ^ value2;
+  }
+
+private:
+  Cudd& manager;
+};
+
+bdd_function_t bdd_from_expression( Cudd& manager, const expression_t::ptr& expr )
+{
+  return {manager, {evaluate_expression( expr, expression_bdd_evaluator( manager ) )}};
 }
 
 }

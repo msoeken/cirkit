@@ -208,6 +208,12 @@ inline bool store_can_convert<expression_t::ptr, tt>() { return true; }
 template<>
 tt store_convert<expression_t::ptr, tt>( const expression_t::ptr& expr );
 
+template<>
+inline bool store_can_convert<expression_t::ptr, bdd_function_t>() { return true; }
+
+template<>
+bdd_function_t store_convert<expression_t::ptr, bdd_function_t>( const expression_t::ptr& expr );
+
 }
 
 #endif

@@ -34,6 +34,8 @@
 #include <memory>
 #include <string>
 
+#include <core/utils/bdd_utils.hpp>
+
 namespace cirkit
 {
 
@@ -120,6 +122,8 @@ T evaluate_expression( const expression_t::ptr& expr, const expression_evaluator
     assert( false );
   }
 }
+
+bdd_function_t bdd_from_expression( Cudd& manager, const expression_t::ptr& expr );
 
 }
 

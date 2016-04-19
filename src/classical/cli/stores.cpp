@@ -250,6 +250,13 @@ tt store_convert<expression_t::ptr, tt>( const expression_t::ptr& expr )
   return tt_from_expression( expr );
 }
 
+template<>
+bdd_function_t store_convert<expression_t::ptr, bdd_function_t>( const expression_t::ptr& expr )
+{
+  Cudd manager;
+  return bdd_from_expression( manager, expr );
+}
+
 }
 
 // Local Variables:
