@@ -127,7 +127,7 @@ void write_quipper( const circuit& circ, std::ostream& os )
   /* output */
   os << boost::format( "  return (%s)" ) % outputs << std::endl << std::endl
      << "main =" << std::endl
-     << "  print_simple Preview revkit_circuit" << std::endl;
+     << "  print_simple ASCII revkit_circuit" << std::endl;
 }
 
 /******************************************************************************

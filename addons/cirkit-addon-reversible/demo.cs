@@ -88,3 +88,23 @@ exs --mode 1 --new
 print -c
 ps -c
 store --clear -sc
+
+#-----------------------------------------------------#
+# Create circuit from expression and write to Quipper #
+#-----------------------------------------------------#
+# 1. Create expression for MAJ                        #
+# 2. Convert expression to BDD                        #
+# 3. Embed BDD into RCBDD                             #
+# 4. Synthesize RCBDD symbolically                    #
+# 5. Print circuit                                    #
+# 6. Write circuit to Quipper code                    #
+# 7. Clear everything in store                        #
+#-----------------------------------------------------#
+
+expr <abc>
+convert --expr_to_bdd
+embed -b
+tbs -s
+print -c
+write_quipper -c /dev/stdout
+store --clear -ebrc
