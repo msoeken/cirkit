@@ -44,6 +44,7 @@
 #include <reversible/cli/commands/adding_lines.hpp>
 #include <reversible/cli/commands/cbs.hpp>
 #include <reversible/cli/commands/embed.hpp>
+#include <reversible/cli/commands/enumerate.hpp>
 #include <reversible/cli/commands/exs.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
@@ -80,6 +81,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( cbs );
   ADD_COMMAND( dbs );
   ADD_COMMAND( embed );
+  ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
