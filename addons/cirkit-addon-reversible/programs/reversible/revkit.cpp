@@ -33,8 +33,10 @@
 #include <core/utils/bdd_utils.hpp>
 #include <classical/aig.hpp>
 #include <classical/cli/stores.hpp>
+#include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/read_aiger.hpp>
 #include <classical/cli/commands/write_aiger.hpp>
+#include <classical/utils/expression_parser.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -64,7 +66,7 @@
 
 using namespace cirkit;
 
-#define STORES circuit, binary_truth_table, bdd_function_t, rcbdd, aig_graph
+#define STORES circuit, binary_truth_table, expression_t::ptr, bdd_function_t, rcbdd, aig_graph
 
 int main( int argc, char ** argv )
 {
@@ -78,6 +80,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( cbs );
   ADD_COMMAND( dbs );
   ADD_COMMAND( embed );
+  ADD_COMMAND( expr );
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
   ADD_COMMAND( qbs );
