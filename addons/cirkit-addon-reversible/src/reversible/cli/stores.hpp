@@ -38,6 +38,7 @@ namespace cirkit
 {
 
 struct io_quipper_tag_t {};
+struct io_tikz_tag_t {};
 
 /******************************************************************************
  * circuit                                                                    *
@@ -57,16 +58,6 @@ template<>
 std::string store_entry_to_string<circuit>( const circuit& circ );
 
 template<>
-struct show_store_entry<circuit>
-{
-  show_store_entry( program_options& opts );
-
-  bool operator()( circuit& circ, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
-
-  command_log_opt_t log() const;
-};
-
-template<>
 void print_store_entry<circuit>( std::ostream& os, const circuit& circ );
 
 template<>
@@ -82,13 +73,16 @@ template<>
 aig_graph store_convert<circuit, aig_graph>( const circuit& circ );
 
 template<>
-inline bool store_can_write_io_type<circuit, io_quipper_tag_t>( program_options& opts )
-{
-  return true;
-}
+inline bool store_can_write_io_type<circuit, io_quipper_tag_t>( program_options& opts ) { return true; }
 
 template<>
 void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings );
+
+template<>
+bool store_can_write_io_type<circuit, io_tikz_tag_t>( program_options& opts );
+
+template<>
+void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings );
 
 /******************************************************************************
  * binary_truth_table                                                         *

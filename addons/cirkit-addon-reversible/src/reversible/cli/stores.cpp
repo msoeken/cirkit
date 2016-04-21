@@ -80,7 +80,14 @@ std::string store_entry_to_string<binary_truth_table>( const binary_truth_table&
   return ( boost::format( "%d inputs, %d outputs" ) % spec.num_inputs() % spec.num_outputs() ).str();
 }
 
-show_store_entry<circuit>::show_store_entry( program_options& opts )
+template<>
+void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings )
+{
+  write_quipper( circ, filename );
+}
+
+template<>
+bool store_can_write_io_type<circuit, io_tikz_tag_t>( program_options& opts )
 {
   boost::program_options::options_description circuit_options( "Circuit options" );
 
@@ -90,18 +97,18 @@ show_store_entry<circuit>::show_store_entry( program_options& opts )
     ;
 
   opts.add( circuit_options );
+
+  return true;
 }
 
-bool show_store_entry<circuit>::operator()( circuit& circ,
-                                            const std::string& dotname,
-                                            const program_options& opts,
-                                            const properties::ptr& settings )
+template<>
+void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings )
 {
   create_tikz_settings ct_settings;
 
   ct_settings.draw_io = !opts.is_set( "hideio" );
 
-  std::ofstream os( dotname.c_str() );
+  std::ofstream os( filename.c_str() );
 
   if ( opts.is_set( "standalone" ) )
   {
@@ -115,19 +122,6 @@ bool show_store_entry<circuit>::operator()( circuit& circ,
   {
     os << "\\end{document}" << std::endl;
   }
-
-  return false; /* don't open dot viewer */
-}
-
-command_log_opt_t show_store_entry<circuit>::log() const
-{
-  return boost::none;
-}
-
-template<>
-void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings )
-{
-  write_quipper( circ, filename );
 }
 
 template<>
