@@ -183,6 +183,25 @@ namespace cirkit
    */
   std::ostream& operator<<( std::ostream& os, const circuit& circ );
 
+  /**
+   * @brief Writes to a circuit format used by IQC
+   */
+  void print_circuit_iqc( std::ostream& os, const circuit& circ );
+
+  /**
+   * @brief I/O wrapper
+   *
+   * Let's you write something like
+   *
+   * std::cout << format_iqc( circ ) << std::endl;
+   */
+  struct format_iqc
+  {
+    explicit format_iqc( const circuit& circ );
+    const circuit& circ;
+  };
+  std::ostream& operator<<( std::ostream& os, const format_iqc& fmt );
+
 }
 
 #endif /* PRINT_CIRCUIT_HPP */

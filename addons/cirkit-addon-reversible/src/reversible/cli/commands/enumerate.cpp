@@ -94,48 +94,9 @@ bool enumerate_command::execute()
       circuit circ;
       transformation_based_synthesis( circ, spec );
 
-      /* create string */
-      std::vector<std::string> circ_str;
-
-      for ( const auto& g : circ )
-      {
-        std::string gate_str( n + 1, ' ' );
-
-        const auto t = g.targets().front();
-        gate_str[t] = 'X';
-
-        for ( const auto& c : g.controls() )
-        {
-          gate_str[c.line()] = '1' + t;
-        }
-
-        circ_str.push_back( gate_str );
-      }
-
       /* print circuit */
-      std::cout << "STG-4-" << bs << std::endl;
-      for ( auto l = 0u; l < n + 1; ++l )
-      {
-        for ( auto g = 0u; g < circ_str.size(); ++g )
-        {
-          const auto chr = circ_str[g][l];
-          if ( chr == ' ' )
-          {
-            std::cout << " I   ";
-          }
-          else if ( chr == 'X' )
-          {
-            std::cout << " X   ";
-          }
-          else
-          {
-            std::cout << boost::format( "C(%c) " ) % chr;
-          }
-        }
-        std::cout << std::endl;
-      }
-
-      std::cout << std::endl;
+      std::cout << "STG-4-" << bs << std::endl
+                << format_iqc( circ ) << std::endl;
 
       inc( bs );
     } while ( bs.any() );

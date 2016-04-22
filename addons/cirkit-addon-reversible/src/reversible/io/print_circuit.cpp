@@ -18,6 +18,8 @@
 
 #include "print_circuit.hpp"
 
+#include <vector>
+
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/format.hpp>
 #include <boost/iterator/counting_iterator.hpp>
@@ -171,6 +173,59 @@ namespace cirkit
   {
     print_circuit_settings settings( os );
     print_circuit( circ, settings );
+    return os;
+  }
+
+  void print_circuit_iqc( std::ostream& os, const circuit& circ )
+  {
+    const auto n = circ.lines();
+
+    /* create string */
+    std::vector<std::string> circ_str;
+
+    for ( const auto& g : circ )
+    {
+      std::string gate_str( n, ' ' );
+
+      const auto t = g.targets().front();
+      gate_str[t] = 'X';
+
+      for ( const auto& c : g.controls() )
+      {
+        gate_str[c.line()] = '1' + t;
+      }
+
+      circ_str.push_back( gate_str );
+    }
+
+    for ( auto l = 0u; l < n; ++l )
+    {
+      for ( auto g = 0u; g < circ_str.size(); ++g )
+      {
+        const auto chr = circ_str[g][l];
+        if ( chr == ' ' )
+        {
+          os << " I   ";
+        }
+        else if ( chr == 'X' )
+        {
+          os << " X   ";
+        }
+        else
+        {
+          os << boost::format( "C(%c) " ) % chr;
+        }
+      }
+      os << std::endl;
+    }
+  }
+
+  format_iqc::format_iqc( const circuit& circ )
+    : circ( circ ) {}
+
+  std::ostream& operator<<( std::ostream& os, const format_iqc& fmt )
+  {
+    print_circuit_iqc( os, fmt.circ );
     return os;
   }
 
