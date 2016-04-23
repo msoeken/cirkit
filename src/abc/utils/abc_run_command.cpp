@@ -49,7 +49,7 @@ aig_graph abc_run_command_generic( const aig_graph *aig, const std::string& comm
   }
 
   /*** run command ***/
-  auto status = abc::Cmd_CommandExecute( abc, commands.c_str() );
+  abc::Cmd_CommandExecute( abc, commands.c_str() );
 
   /*** read gia back to circuit ***/
   abc::Gia_Man_t *result_gia = abc::Abc_FrameGetGia( abc );
@@ -95,7 +95,7 @@ boost::optional< boost::dynamic_bitset<> > abc_run_command_get_counterexample( c
   }
 
   /*** run command ***/
-  auto status = abc::Cmd_CommandExecute( abc, commands.c_str() );
+  abc::Cmd_CommandExecute( abc, commands.c_str() );
 
   boost::dynamic_bitset<> result;
   abc::Gia_Man_t *result_gia = abc::Abc_FrameGetGia( abc );

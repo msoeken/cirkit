@@ -38,7 +38,6 @@ inline int Gia_ManAppendAnd2_Simplified( abc::Gia_Man_t * p, int iLit0, int iLit
 abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
 {
   const auto& info = aig_info( aig );
-  const auto& complement_map = boost::get( boost::edge_complement, aig );
 
   const unsigned _num_inputs = info.inputs.size();
   const unsigned _num_outputs = info.outputs.size();
