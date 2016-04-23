@@ -27,6 +27,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <core/functor.hpp>
+#include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
 
 #include <reversible/truth_table.hpp>
@@ -169,6 +170,16 @@ namespace cirkit
     {
       set_error_message ( statistics, error_msg );
       return false;
+    }
+
+    // empty I/O
+    if ( spec.inputs().empty() )
+    {
+      spec.set_inputs( create_name_list( "x%d", spec.num_inputs(), 1u ) );
+    }
+    if ( spec.outputs().empty() )
+    {
+      spec.set_outputs( create_name_list( "y%d", spec.num_outputs(), 1u ) );
     }
 
     // check for inputs and outputs
