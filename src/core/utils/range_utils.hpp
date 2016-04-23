@@ -227,6 +227,13 @@ std::vector<T> get_map_values( const std::vector<std::pair<K, T>>& vp )
  */
 void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, const std::function<bool(const std::vector<unsigned>&)>&& func );
 
+/*
+ * Creates name lists, e.g., x1, x2, x3, ...
+ *
+ * pattern must contain exactly one occurrance of %d
+ */
+std::vector<std::string> create_name_list( const std::string& pattern, unsigned length, unsigned start = 0u );
+
 }
 
 #endif

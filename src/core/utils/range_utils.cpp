@@ -18,6 +18,8 @@
 
 #include "range_utils.hpp"
 
+#include <boost/format.hpp>
+
 namespace cirkit
 {
 
@@ -36,6 +38,18 @@ void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, cons
 
     a[j]++;
   }
+}
+
+std::vector<std::string> create_name_list( const std::string& pattern, unsigned length, unsigned start )
+{
+  std::vector<std::string> names( length );
+
+  for ( auto i = 0; i < length; ++i )
+  {
+    names[i] = boost::str( boost::format( pattern ) % ( i + start ) );
+  }
+
+  return names;
 }
 
 }
