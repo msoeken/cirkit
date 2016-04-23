@@ -24,6 +24,7 @@
 #include <core/utils/bitset_utils.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>
+#include <reversible/cli/stores.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/synthesis/transformation_based_synthesis.hpp>
 
@@ -47,6 +48,7 @@ enumerate_command::enumerate_command( const environment::ptr& env )
 {
   opts.add_options()
     ( "four_stg_pqcs", "Enumerate all four variable single-target gates for pQCS" )
+    ( "from_store_pqcs", "Creates circuits for pQCS for all truth tables in the store" )
     ;
 }
 
@@ -100,6 +102,21 @@ bool enumerate_command::execute()
 
       inc( bs );
     } while ( bs.any() );
+  }
+
+  if ( opts.is_set( "from_store_pqcs" ) )
+  {
+    const auto& specs = env->store<binary_truth_table>();
+
+    for ( auto i = 0u; i < specs.size(); ++i )
+    {
+      circuit circ;
+      transformation_based_synthesis( circ, specs[i] );
+
+      /* print circuit */
+      std::cout << "SPEC-" << i << std::endl
+                << format_iqc( circ ) << std::endl;
+    }
   }
 
   return true;
