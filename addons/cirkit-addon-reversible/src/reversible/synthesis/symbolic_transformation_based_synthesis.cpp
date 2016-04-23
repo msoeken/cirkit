@@ -43,6 +43,7 @@
 #include <formal/sat/utils/add_bdd.hpp>
 
 #include <reversible/functions/add_gates.hpp>
+#include <reversible/functions/copy_metadata.hpp>
 #include <reversible/io/print_circuit.hpp>
 
 /* statistics logger */
@@ -98,6 +99,155 @@ void assign_sets( const char * cube, unsigned j, std::vector<unsigned>& i10, std
     y1 += j;
     if ( cx == 0 ) { i01 += j; }
   }
+}
+
+template<typename Solver>
+unsigned synthesize_with_sat( Solver& solver, circuit& circ, unsigned n, std::vector<int>& xs, std::vector<int>& ys, int one_literal, int& sid, bool all_assumptions, bool verbose )
+{
+  auto assignment_count = 0u;
+
+  if ( verbose )
+  {
+    std::cout << "[i] initial number of clauses: " << solver.solver->nClauses() << std::endl;
+  }
+
+  //cf.print_truth_table();
+  //simulate( solver, xs, ys );
+
+  /* for incremental solving */
+  int assume_weight, assume_diff;
+
+  solver_result_t result;
+  solver_execution_statistics sstats;
+
+  SL( const double sec = 1000000000.0L; )
+  SL( std::ofstream log( "/tmp/stbs_sat.log", std::ofstream::out ); )
+  SL( auto prevtime = t.elapsed().wall; )
+  SL( log << boost::format( "0 0.00 %d" ) % solver.solver->nClauses() << std::endl; )
+
+  std::vector<int> assume_weights;
+  std::vector<int> assume_diffs;
+
+  /* for each hamming weight */
+  for ( auto k = 0u; k <= n; ++k )
+  {
+    if ( verbose )
+    {
+      std::cout << "[i] i = " << k << std::endl;
+    }
+
+    assume_weight = sid++;
+    solver.blocking_vars.push_back( assume_weight );
+    sid = equals_sinz( solver, xs, k, sid );
+    solver.blocking_vars.clear();
+
+    if ( all_assumptions )
+    {
+      if ( !assume_weights.empty() ) { assume_weights.back() *= -1; }
+      assume_weights.push_back( -assume_weight );
+    }
+
+    auto count = 0u;
+
+    while ( true )
+    {
+      assume_diff = difference_clauses_plaisted_greenbaum( solver, xs, ys, sid );
+      sid = assume_diff + 1;
+
+      if ( all_assumptions )
+      {
+        if ( !assume_diffs.empty() ) { assume_diffs.back() *= -1; }
+        assume_diffs.push_back( -assume_diff );
+
+        std::vector<int> assumptions( assume_weights.size() + assume_diffs.size() );
+        boost::copy( assume_weights, assumptions.begin() );
+        boost::copy( assume_diffs, assumptions.begin() + assume_weights.size() );
+        result = solve( solver, sstats, assumptions );
+      }
+      else
+      {
+        result = solve( solver, sstats, {-assume_weight, -assume_diff} );
+      }
+
+      if ( result == boost::none ) { break; }
+      ++count;
+
+      std::vector<unsigned> i10, i01, x1, y1;
+
+      for ( auto i = 0u; i < n; ++i )
+      {
+        const auto cx = result->first[xs[i] - 1];
+        const auto cy = result->first[ys[i] - 1];
+
+        if ( cx == 1 )
+        {
+          x1 += i;
+          if ( cy == 0 ) { i10 += i; }
+        }
+
+        if ( cy == 1 )
+        {
+          y1 += i;
+          if ( cx == 0 ) { i01 += i; }
+        }
+      }
+
+      /*std::cout << "x1 = " << any_join( x1, ", " ) << std::endl
+                << "y1 = " << any_join( y1, ", " ) << std::endl
+                << "i10 = " << any_join( i10, ", " ) << std::endl
+                << "i01 = " << any_join( i01, ", " ) << std::endl;*/
+
+      /* add gate constraints */
+      if ( !i10.empty() )
+      {
+        auto controls = get_controls( solver, y1, ys, one_literal, sid );
+
+        for ( auto target : i10 )
+        {
+          auto newx = sid++;
+          logic_xor( solver, ys[target], controls, newx );
+          ys[target] = newx;
+        }
+      }
+
+      if ( !i01.empty() )
+      {
+        auto controls = get_controls( solver, x1, ys, one_literal, sid );
+
+        for ( auto target : i01 )
+        {
+          auto newx = sid++;
+          logic_xor( solver, ys[target], controls, newx );
+          ys[target] = newx;
+        }
+      }
+
+      //simulate( solver, xs, ys );
+
+      /* add gates to circuit */
+      for ( const auto& k : i10 )
+      {
+        prepend_toffoli( circ, y1, k );
+      }
+      for ( const auto& k : i01 )
+      {
+        prepend_toffoli( circ, x1, k );
+      }
+
+      SL( const auto wall = t.elapsed().wall; )
+      SL( log << boost::format( "%d %.2f %d" ) % ( assignment_count + count ) % ( ( wall - prevtime ) / sec ) % solver.solver->nClauses() << std::endl; )
+      SL( prevtime = wall; )
+    }
+
+    if ( verbose )
+    {
+      std::cout << "[i] #adjusted assignments: " << count << std::endl;
+    }
+
+    assignment_count += count;
+  }
+
+  return assignment_count;
 }
 
 /******************************************************************************
@@ -252,6 +402,23 @@ int get_controls( S& solver, const std::vector<unsigned>& controls, const std::v
 }
 
 template<typename S>
+int get_controls_neg( S& solver, const gate::control_container& controls, const std::vector<int>& lines, int one_literal, int& sid )
+{
+  if ( controls.empty() ) { return one_literal; }
+  if ( controls.size() == 1u ) { return controls.front().polarity() ? lines[controls.front().line()] : -lines[controls.front().line()]; }
+  else {
+    std::vector<int> xsc( controls.size() );
+    for ( auto i = 0u; i < controls.size(); ++i )
+    {
+      xsc[i] = controls[i].polarity() ? lines[controls[i].line()] : -lines[controls[i].line()];
+    }
+
+    logic_and( solver, xsc, sid++ );
+    return sid - 1;
+  }
+}
+
+template<typename S>
 void simulate( S& solver, const std::vector<int>& xs, const std::vector<int>& ys, const boost::optional<int>& diff = boost::none )
 {
   boost::dynamic_bitset<> b( xs.size() );
@@ -314,7 +481,6 @@ bool symbolic_transformation_based_synthesis_sat( circuit& circ, const rcbdd& cf
   copy_meta_data( circ, cf );
 
   auto f = cf.chi();
-  auto assignment_count = 0u;
 
   auto solver = make_solver<minisat_solver>();
 
@@ -372,147 +538,89 @@ bool symbolic_transformation_based_synthesis_sat( circuit& circ, const rcbdd& cf
     one_literal = 1 + 3 * xs.size();
   }
 
-  if ( verbose )
+  auto assignment_count = synthesize_with_sat( solver, circ, n, xs, ys, one_literal, sid, all_assumptions, verbose );
+  set( statistics, "assignment_count", assignment_count );
+
+  return true;
+}
+
+bool symbolic_transformation_based_synthesis_sat( circuit& dest, const circuit& src,
+                                                  const properties::ptr& settings,
+                                                  const properties::ptr& statistics )
+{
+  /* settings */
+  const auto verbose         = get( settings, "verbose",         false );
+  const auto cnf_from_aig    = get( settings, "cnf_from_aig",    false );
+  const auto all_assumptions = get( settings, "all_assumptions", false );
+
+  /* timer */
+  properties_timer t( statistics );
+
+  /* number of lines */
+  const auto lines = src.lines();
+  auto n = lines, n2 = lines;
+
+  for ( const auto& c : src.constants() )
   {
-    std::cout << "[i] initial number of clauses: " << solver.solver->nClauses() << std::endl;
+    if ( (bool)c )
+    {
+      --n;
+    }
+  }
+  for ( const auto& g : src.garbage() )
+  {
+    if ( g )
+    {
+      --n2;
+    }
+  }
+  assert( n == n2 );
+
+  /* copy meta data */
+  copy_metadata( src, dest );
+
+  auto solver = make_solver<minisat_solver>();
+
+  auto sid = 1;
+  std::vector<int> xs, ys, current( lines );
+
+  int one_literal = sid++;
+  add_clause( solver )( {one_literal} );
+
+  for ( auto i = 0u; i < lines; ++i )
+  {
+    auto c = src.constants()[i];
+    if ( (bool)c )
+    {
+      current[i] = *c ? one_literal : -one_literal;
+    }
+    else
+    {
+      xs.push_back( sid++ );
+      current[i] = xs.back();
+    }
   }
 
-  //cf.print_truth_table();
-  //simulate( solver, xs, ys );
-
-  /* for incremental solving */
-  int assume_weight, assume_diff;
-
-  solver_result_t result;
-  solver_execution_statistics sstats;
-
-  SL( const double sec = 1000000000.0L; )
-  SL( std::ofstream log( "/tmp/stbs_sat.log", std::ofstream::out ); )
-  SL( auto prevtime = t.elapsed().wall; )
-  SL( log << boost::format( "0 0.00 %d" ) % solver.solver->nClauses() << std::endl; )
-
-  std::vector<int> assume_weights;
-  std::vector<int> assume_diffs;
-
-  /* for each hamming weight */
-  for ( auto k = 0u; k <= n; ++k )
+  for ( const auto& g : src )
   {
-    if ( verbose )
-    {
-      std::cout << "[i] i = " << k << std::endl;
-    }
+    auto controls = get_controls_neg( solver, g.controls(), current, one_literal, sid );
+    assert( g.targets().size() == 1u );
 
-    assume_weight = sid++;
-    solver.blocking_vars.push_back( assume_weight );
-    sid = equals_sinz( solver, xs, k, sid );
-    solver.blocking_vars.clear();
-
-    if ( all_assumptions )
-    {
-      if ( !assume_weights.empty() ) { assume_weights.back() *= -1; }
-      assume_weights.push_back( -assume_weight );
-    }
-
-    auto count = 0u;
-
-    while ( true )
-    {
-      assume_diff = difference_clauses_plaisted_greenbaum( solver, xs, ys, sid );
-      sid = assume_diff + 1;
-
-      if ( all_assumptions )
-      {
-        if ( !assume_diffs.empty() ) { assume_diffs.back() *= -1; }
-        assume_diffs.push_back( -assume_diff );
-
-        std::vector<int> assumptions( assume_weights.size() + assume_diffs.size() );
-        boost::copy( assume_weights, assumptions.begin() );
-        boost::copy( assume_diffs, assumptions.begin() + assume_weights.size() );
-        result = solve( solver, sstats, assumptions );
-      }
-      else
-      {
-        result = solve( solver, sstats, {-assume_weight, -assume_diff} );
-      }
-
-      if ( result == boost::none ) { break; }
-      ++count;
-
-      std::vector<unsigned> i10, i01, x1, y1;
-
-      for ( auto i = 0u; i < n; ++i )
-      {
-        const auto cx = result->first[xs[i] - 1];
-        const auto cy = result->first[ys[i] - 1];
-
-        if ( cx == 1 )
-        {
-          x1 += i;
-          if ( cy == 0 ) { i10 += i; }
-        }
-
-        if ( cy == 1 )
-        {
-          y1 += i;
-          if ( cx == 0 ) { i01 += i; }
-        }
-      }
-
-      /*std::cout << "x1 = " << any_join( x1, ", " ) << std::endl
-                << "y1 = " << any_join( y1, ", " ) << std::endl
-                << "i10 = " << any_join( i10, ", " ) << std::endl
-                << "i01 = " << any_join( i01, ", " ) << std::endl;*/
-
-      /* add gate constraints */
-      if ( !i10.empty() )
-      {
-        auto controls = get_controls( solver, y1, ys, one_literal, sid );
-
-        for ( auto target : i10 )
-        {
-          auto newx = sid++;
-          logic_xor( solver, ys[target], controls, newx );
-          ys[target] = newx;
-        }
-      }
-
-      if ( !i01.empty() )
-      {
-        auto controls = get_controls( solver, x1, ys, one_literal, sid );
-
-        for ( auto target : i01 )
-        {
-          auto newx = sid++;
-          logic_xor( solver, ys[target], controls, newx );
-          ys[target] = newx;
-        }
-      }
-
-      //simulate( solver, xs, ys );
-
-      /* add gates to circuit */
-      for ( const auto& k : i10 )
-      {
-        prepend_toffoli( circ, y1, k );
-      }
-      for ( const auto& k : i01 )
-      {
-        prepend_toffoli( circ, x1, k );
-      }
-
-      SL( const auto wall = t.elapsed().wall; )
-      SL( log << boost::format( "%d %.2f %d" ) % ( assignment_count + count ) % ( ( wall - prevtime ) / sec ) % solver.solver->nClauses() << std::endl; )
-      SL( prevtime = wall; )
-    }
-
-    if ( verbose )
-    {
-      std::cout << "[i] #adjusted assignments: " << count << std::endl;
-    }
-
-    assignment_count += count;
+    auto target = g.targets().front();
+    auto newl = sid++;
+    logic_xor( solver, current[target], controls, newl );
+    current[target] = newl;
   }
 
+  for ( auto i = 0u; i < lines; ++i )
+  {
+    if ( !src.garbage()[i] )
+    {
+      ys.push_back( current[i] );
+    }
+  }
+
+  auto assignment_count = synthesize_with_sat( solver, dest, n, xs, ys, one_literal, sid, all_assumptions, verbose );
   set( statistics, "assignment_count", assignment_count );
 
   return true;

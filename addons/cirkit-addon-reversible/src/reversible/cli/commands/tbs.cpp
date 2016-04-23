@@ -49,6 +49,7 @@ tbs_command::tbs_command( const environment::ptr& env )
   opts.add_options()
     ( "bdd,b",        "Use symbolic BDD-based variant (works on RCBDDs)" )
     ( "sat,s",        "Use symbolic SAT-based variant (works on RCBDDs)" )
+    ( "circuit,c",    "Use circuit as input (works for symbolic SAT-based variant)" )
     ( "cnf_from_aig", "Create initial CNF from AIG instead of BDD (works for symbolic SAT-based variant)" )
     ( "all_assumptions", "Use all assumptions for the SAT call (works for symbolic SAT-based variant)" )
     ( "new,n",        "Add a new entry to the store; if not set, the current entry is overriden" )
@@ -59,7 +60,8 @@ tbs_command::tbs_command( const environment::ptr& env )
 command::rules_t tbs_command::validity_rules() const
 {
   return {
-    { [&]() { return ( !this->is_set( "bdd" ) && !this->is_set( "sat" ) ) || env->store<rcbdd>().current_index() >= 0u; }, "symbolic methods require RCBDD in store" },
+    { [&]() { return !this->is_set( "bdd" ) || env->store<rcbdd>().current_index() >= 0u; }, "symbolid BDD method requires RCBDD in store" },
+    { [&]() { return !this->is_set( "sat" ) || env->store<rcbdd>().current_index() >= 0u || env->store<circuit>().current_index() >= 0u; }, "symbolid SAT method requires RCBDDor circuit in store" },
     { [&]() { return this->is_set( "bdd" ) || this->is_set( "sat" ) || env->store<binary_truth_table>().current_index() >= 0u; }, "no truth table in store" },
     { [&]() { return static_cast<int>( this->is_set( "bdd" ) ) + static_cast<int>( this->is_set( "sat" ) ) <= 1u; }, "options bdd and sat cannot be set at the same time" }
   };
@@ -74,11 +76,6 @@ bool tbs_command::execute()
   auto settings = make_settings();
   auto statistics = std::make_shared<properties>();
 
-  if ( circuits.empty() || opts.is_set( "new" ) )
-  {
-    circuits.extend();
-  }
-
   circuit circ;
 
   if ( opts.is_set( "bdd" ) )
@@ -90,12 +87,24 @@ bool tbs_command::execute()
   {
     settings->set( "cnf_from_aig", opts.is_set( "cnf_from_aig" ) );
     settings->set( "all_assumptions", opts.is_set( "all_assumptions" ) );
-    symbolic_transformation_based_synthesis_sat( circ, rcbdds.current(), settings, statistics );
+    if ( opts.is_set( "circuit" ) )
+    {
+      symbolic_transformation_based_synthesis_sat( circ, circuits.current(), settings, statistics );
+    }
+    else
+    {
+      symbolic_transformation_based_synthesis_sat( circ, rcbdds.current(), settings, statistics );
+    }
     std::cout << boost::format( "[i] adjusted assignments: %d" ) % statistics->get<unsigned>( "assignment_count" ) << std::endl;
   }
   else
   {
     transformation_based_synthesis( circ, specs.current(), settings, statistics );
+  }
+
+  if ( circuits.empty() || opts.is_set( "new" ) )
+  {
+    circuits.extend();
   }
 
   circuits.current() = circ;
