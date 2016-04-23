@@ -94,6 +94,13 @@ std::vector<unsigned> compute_flips( unsigned n )
   return flip_array;
 }
 
+inline void bitset_swap( boost::dynamic_bitset<>& bs, unsigned i, unsigned j )
+{
+  auto t = bs[i];
+  bs[i] = bs[j];
+  bs[j] = t;
+}
+
 void npn_canonization_sifting_loop( tt& npn, unsigned n, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm )
 {
   auto improvement = true;
@@ -379,6 +386,7 @@ tt npn_canonization_flip_swap( const tt& t, boost::dynamic_bitset<>& phase, std:
           //std::cout << "[i]   swap inputs " << i << " and " << j << std::endl;
           npn = permuted;
           std::swap( perm[i], perm[j] );
+          bitset_swap( phase, i, j );
           improvement = true;
         }
       }
