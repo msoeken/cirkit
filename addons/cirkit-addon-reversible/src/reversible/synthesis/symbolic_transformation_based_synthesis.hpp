@@ -29,6 +29,7 @@
 #define SYMBOLIC_TRANSFORMATION_BASED_SYNTHESIS_HPP
 
 #include <core/properties.hpp>
+#include <classical/aig.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 
@@ -44,6 +45,10 @@ bool symbolic_transformation_based_synthesis_sat( circuit& circ, const rcbdd& cf
                                                   const properties::ptr& statistics = properties::ptr() );
 
 bool symbolic_transformation_based_synthesis_sat( circuit& dest, const circuit& src,
+                                                  const properties::ptr& settings = properties::ptr(),
+                                                  const properties::ptr& statistics = properties::ptr() );
+
+bool symbolic_transformation_based_synthesis_sat( circuit& dest, const aig_graph& src,
                                                   const properties::ptr& settings = properties::ptr(),
                                                   const properties::ptr& statistics = properties::ptr() );
 

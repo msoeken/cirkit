@@ -40,6 +40,7 @@
 #include <formal/sat/operations/cardinality.hpp>
 #include <formal/sat/operations/logic.hpp>
 #include <formal/sat/utils/add_aig.hpp>
+#include <formal/sat/utils/add_aig_with_gia.hpp>
 #include <formal/sat/utils/add_bdd.hpp>
 
 #include <reversible/functions/add_gates.hpp>
@@ -550,7 +551,6 @@ bool symbolic_transformation_based_synthesis_sat( circuit& dest, const circuit& 
 {
   /* settings */
   const auto verbose         = get( settings, "verbose",         false );
-  const auto cnf_from_aig    = get( settings, "cnf_from_aig",    false );
   const auto all_assumptions = get( settings, "all_assumptions", false );
 
   /* timer */
@@ -619,6 +619,41 @@ bool symbolic_transformation_based_synthesis_sat( circuit& dest, const circuit& 
       ys.push_back( current[i] );
     }
   }
+
+  auto assignment_count = synthesize_with_sat( solver, dest, n, xs, ys, one_literal, sid, all_assumptions, verbose );
+  set( statistics, "assignment_count", assignment_count );
+
+  return true;
+}
+
+bool symbolic_transformation_based_synthesis_sat( circuit& dest, const aig_graph& src,
+                                                  const properties::ptr& settings,
+                                                  const properties::ptr& statistics )
+{
+  /* settings */
+  const auto verbose         = get( settings, "verbose",         false );
+  const auto all_assumptions = get( settings, "all_assumptions", false );
+
+  /* timer */
+  properties_timer t( statistics );
+
+  /* copy meta data */
+  //copy_metadata( src, dest );
+
+  auto solver = make_solver<minisat_solver>();
+
+  /* create instance */
+  std::vector<int> xs, ys;
+  int sid = 1;
+  sid = add_aig_with_gia( solver, src, sid, xs, ys );
+
+  int one_literal = sid++;
+  add_clause( solver )( {one_literal} );
+
+  assert( xs.size() == ys.size() );
+  auto n = xs.size();
+
+  dest.set_lines( n );
 
   auto assignment_count = synthesize_with_sat( solver, dest, n, xs, ys, one_literal, sid, all_assumptions, verbose );
   set( statistics, "assignment_count", assignment_count );

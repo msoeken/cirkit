@@ -21,6 +21,8 @@
 #include <core/cli/rules.hpp>
 #include <core/cli/store.hpp>
 #include <core/utils/program_options.hpp>
+#include <classical/aig.hpp>
+#include <classical/cli/stores.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -50,6 +52,7 @@ tbs_command::tbs_command( const environment::ptr& env )
     ( "bdd,b",        "Use symbolic BDD-based variant (works on RCBDDs)" )
     ( "sat,s",        "Use symbolic SAT-based variant (works on RCBDDs)" )
     ( "circuit,c",    "Use circuit as input (works for symbolic SAT-based variant)" )
+    ( "aig,a",        "Use AIG as input (works for symbolic SAT-based variant)" )
     ( "cnf_from_aig", "Create initial CNF from AIG instead of BDD (works for symbolic SAT-based variant)" )
     ( "all_assumptions", "Use all assumptions for the SAT call (works for symbolic SAT-based variant)" )
     ( "new,n",        "Add a new entry to the store; if not set, the current entry is overriden" )
@@ -61,7 +64,7 @@ command::rules_t tbs_command::validity_rules() const
 {
   return {
     { [&]() { return !this->is_set( "bdd" ) || env->store<rcbdd>().current_index() >= 0u; }, "symbolid BDD method requires RCBDD in store" },
-    { [&]() { return !this->is_set( "sat" ) || env->store<rcbdd>().current_index() >= 0u || env->store<circuit>().current_index() >= 0u; }, "symbolid SAT method requires RCBDDor circuit in store" },
+    { [&]() { return !this->is_set( "sat" ) || env->store<rcbdd>().current_index() >= 0u || env->store<circuit>().current_index() >= 0u || env->store<aig_graph>().current_index() >= 0u; }, "symbolid SAT method requires RCBDDor circuit in store" },
     { [&]() { return this->is_set( "bdd" ) || this->is_set( "sat" ) || env->store<binary_truth_table>().current_index() >= 0u; }, "no truth table in store" },
     { [&]() { return static_cast<int>( this->is_set( "bdd" ) ) + static_cast<int>( this->is_set( "sat" ) ) <= 1u; }, "options bdd and sat cannot be set at the same time" }
   };
@@ -90,6 +93,11 @@ bool tbs_command::execute()
     if ( opts.is_set( "circuit" ) )
     {
       symbolic_transformation_based_synthesis_sat( circ, circuits.current(), settings, statistics );
+    }
+    else if ( opts.is_set( "aig" ) )
+    {
+      const auto& aigs = env->store<aig_graph>();
+      symbolic_transformation_based_synthesis_sat( circ, aigs.current(), settings, statistics );
     }
     else
     {
