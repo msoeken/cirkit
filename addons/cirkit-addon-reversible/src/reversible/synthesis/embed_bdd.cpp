@@ -125,6 +125,8 @@ bool embed_bdd( rcbdd& cf, const bdd_function_t& bdd,
   cf.create_variables( r );
   cf.set_num_inputs( n );
   cf.set_num_outputs( m );
+  cf.set_input_labels( create_name_list( "x%d", n, 1u ) );
+  cf.set_output_labels( create_name_list( "y%d", m, 1u ) );
 
   /* copy bdd to cf */
   std::vector<unsigned> index_map( n );
