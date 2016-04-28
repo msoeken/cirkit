@@ -27,6 +27,25 @@
 namespace cirkit
 {
 
+  bool has_fully_controlled_gate( const circuit& circ )
+  {
+    const auto n = circ.lines();
+    for ( const auto& g : circ )
+    {
+      if ( g.controls().size() + g.targets().size() == n )
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  unsigned number_of_qubits( const circuit& circ )
+  {
+    const auto n = circ.lines();
+    return has_fully_controlled_gate( circ ) ? n + 1 : n;
+  }
+
   void print_statistics( std::ostream& os, const circuit& circ, double runtime, const print_statistics_settings& settings )
   {
     std::string runtime_string;
@@ -47,6 +66,7 @@ namespace cirkit
       % costs( circ, costs_by_gate_func( t_depth_costs() ) )
       % costs( circ, costs_by_gate_func( t_costs() ) )
       % costs( circ, costs_by_gate_func( h_costs() ) )
+      % number_of_qubits( circ )
       % costs( circ, costs_by_gate_func( transistor_costs() ) )
       % costs( circ, costs_by_gate_func( sk2013_quantum_costs() ) );
   }

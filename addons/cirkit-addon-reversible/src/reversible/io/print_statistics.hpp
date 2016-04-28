@@ -52,12 +52,13 @@ namespace cirkit
      *  - \b \%5$d as placeholder for T-depth.
      *  - \b \%6$d as placeholder for T-count.
      *  - \b \%7$d as placeholder for H-count.
-     *  - \b \%8$d as placeholder for number of transistor costs.
-     *  - \b \%9$d as placeholder for number of SK2013 quantum costs.
+     *  - \b \%8$d as placeholder for number of qubits (#lines (+1 if there is a gate with #lines - 1 control lines))
+     *  - \b \%9$d as placeholder for number of transistor costs.
+     *  - \b \%10$d as placeholder for number of SK2013 quantum costs.
      *
      * @since  1.0
      */
-    std::string main_template = "%1$sLines:        %2$d\nGates:        %3$d\nNCV QCosts:   %4$d\nT-depth:      %5$d\nT-count:      %6$d\nH-count:      %7$d\nTransistor:   %8$d\nSK2013 costs: %9$d\n";
+    std::string main_template = "%1$sLines:        %2$d\nGates:        %3$d\nNCV QCosts:   %4$d\nT-depth:      %5$d\nT-count:      %6$d\nH-count:      %7$d\nQubits:       %8$d\nTransistor:   %9$d\nSK2013 costs: %10$d\n";
 
 
     /**
