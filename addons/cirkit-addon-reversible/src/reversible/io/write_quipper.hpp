@@ -36,6 +36,7 @@ namespace cirkit
 {
 
 void write_quipper( const circuit& circ, const std::string& filename );
+void write_quipper_ascii( const circuit& circ, const std::string& filename );
 
 }
 

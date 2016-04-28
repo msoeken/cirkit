@@ -73,7 +73,7 @@ template<>
 aig_graph store_convert<circuit, aig_graph>( const circuit& circ );
 
 template<>
-inline bool store_can_write_io_type<circuit, io_quipper_tag_t>( program_options& opts ) { return true; }
+bool store_can_write_io_type<circuit, io_quipper_tag_t>( program_options& opts );
 
 template<>
 void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings );

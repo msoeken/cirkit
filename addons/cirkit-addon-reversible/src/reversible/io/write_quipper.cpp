@@ -130,6 +130,78 @@ void write_quipper( const circuit& circ, std::ostream& os )
      << "  print_simple ASCII revkit_circuit" << std::endl;
 }
 
+void write_quipper_ascii( const circuit& circ, std::ostream& os )
+{
+  std::string              inputs;
+  std::string              constants;
+  std::string              outputs;
+
+  // auto pi_ctr = 0u;
+  // auto c_ctr  = 0u;
+
+  /* prepare */
+  for ( auto i = 0u; i < circ.lines(); ++i )
+  {
+    if ( (bool)circ.constants()[i] )
+    {
+      constants += boost::str( boost::format( "QInit%d(%d)\n" ) % ( *circ.constants()[i] ? 1 : 0 ) % i );
+    }
+    else
+    {
+      if ( !inputs.empty() )
+      {
+        inputs += ", ";
+      }
+      inputs += boost::str( boost::format( "%d:Qbit" ) % i );
+    }
+
+    if ( !circ.garbage()[i] )
+    {
+      if ( !outputs.empty() )
+      {
+        outputs += ", ";
+      }
+      outputs += boost::str( boost::format( "%d:Qbit" ) % i );
+    }
+  }
+
+  /* header */
+  os << "# This output has been generated using RevKit" << std::endl
+     << "# ===========================================" << std::endl << std::endl
+     << "Inputs: " << inputs << std::endl
+     << constants;
+
+  /* gates */
+  for ( const auto& g : circ )
+  {
+    assert( is_toffoli( g ) );
+
+    std::string controls;
+
+    os << boost::format( "QGate[\"not\"](%d)" ) % g.targets().front();
+
+    if ( !g.controls().empty() )
+    {
+      os << " with controls=[";
+
+      for ( const auto& c : index( g.controls() ) )
+      {
+        if ( c.index > 0u )
+        {
+          os << ",";
+        }
+        os << boost::format( "%c%d" ) % ( c.value.polarity() ? '+' : '-' ) % c.value.line();
+      }
+
+      os << "]";
+    }
+    os << std::endl;
+  }
+
+  /* output */
+  os << "Outputs: " << outputs << std::endl;
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -138,6 +210,12 @@ void write_quipper( const circuit& circ, const std::string& filename )
 {
   std::ofstream os( filename.c_str(), std::ostream::out );
   write_quipper( circ, os );
+}
+
+void write_quipper_ascii( const circuit& circ, const std::string& filename )
+{
+  std::ofstream os( filename.c_str(), std::ostream::out );
+  write_quipper_ascii( circ, os );
 }
 
 }

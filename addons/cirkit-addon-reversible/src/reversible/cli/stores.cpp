@@ -81,9 +81,26 @@ std::string store_entry_to_string<binary_truth_table>( const binary_truth_table&
 }
 
 template<>
+bool store_can_write_io_type<circuit, io_quipper_tag_t>( program_options& opts )
+{
+  opts.add_options()
+    ( "ascii,a", "Write ASCII instead of Haskell program" )
+    ;
+
+  return true;
+}
+
+template<>
 void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings )
 {
-  write_quipper( circ, filename );
+  if ( opts.is_set( "ascii" ) )
+  {
+    write_quipper_ascii( circ, filename );
+  }
+  else
+  {
+    write_quipper( circ, filename );
+  }
 }
 
 template<>
