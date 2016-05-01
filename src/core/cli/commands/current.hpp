@@ -38,23 +38,6 @@ using namespace boost::program_options;
 namespace cirkit
 {
 
-template<typename T>
-bool exactly_one_true_helper( std::initializer_list<T> list )
-{
-  auto current = false;
-
-  for ( auto i : list )
-  {
-    if ( i )
-    {
-      if ( current ) { return false; }
-      current = true;
-    }
-  }
-
-  return current;
-}
-
 template<typename S>
 int set_current_index_helper( const command& cmd, const environment::ptr& env, unsigned index )
 {

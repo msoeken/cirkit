@@ -268,6 +268,23 @@ bool any_true_helper( std::initializer_list<T> list )
   return false;
 }
 
+template<typename T>
+bool exactly_one_true_helper( std::initializer_list<T> list )
+{
+  auto current = false;
+
+  for ( auto i : list )
+  {
+    if ( i )
+    {
+      if ( current ) { return false; }
+      current = true;
+    }
+  }
+
+  return current;
+}
+
 }
 
 #endif
