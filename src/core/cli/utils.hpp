@@ -267,7 +267,7 @@ private:
       std::string alias_path = boost::str( boost::format( "%s/alias" ) % path );
       if ( !boost::filesystem::exists( alias_path ) ) { return; }
 
-      process_file( alias_path, vm.count( "echo" ) );
+      process_file( alias_path, false );
     }
   }
 
