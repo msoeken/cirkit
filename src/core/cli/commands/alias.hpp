@@ -38,9 +38,9 @@ class alias_command : public command
 public:
   alias_command( const environment::ptr& env );
 
+protected:
   rules_t validity_rules() const;
 
-protected:
   bool execute();
 
 private:
