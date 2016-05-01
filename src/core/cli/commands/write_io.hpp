@@ -88,6 +88,15 @@ public:
   }
 
 protected:
+  rules_t validity_rules() const
+  {
+    rules_t rules;
+
+    rules.push_back( {[this]() { return exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
+
+    return rules;
+  }
+
   bool execute()
   {
     auto settings = make_settings();
