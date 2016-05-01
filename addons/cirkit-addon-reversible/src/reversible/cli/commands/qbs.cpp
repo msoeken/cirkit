@@ -21,6 +21,7 @@
 #include <boost/format.hpp>
 
 #include <core/cli/rules.hpp>
+#include <core/utils/program_options.hpp>
 #include <classical/optimization/esop_minimization.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
 #include <reversible/circuit.hpp>
@@ -63,7 +64,7 @@ bool qbs_command::execute()
   const auto& rcbdds = env->store<rcbdd>();
   auto& circuits = env->store<circuit>();
 
-  if ( circuits.empty() || opts.is_set( "new" ) )
+  if ( circuits.empty() || is_set( "new" ) )
   {
     circuits.extend();
   }

@@ -46,6 +46,7 @@ namespace cirkit
 esopbs_command::esopbs_command( const environment::ptr& env )
   : command( env, "ESOP based synthesis" )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "Filename to the ESOP file" )
     ( "mct",                          "No negative controls" )
@@ -63,13 +64,13 @@ bool esopbs_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
-  if ( circuits.empty() || opts.is_set( "new" ) )
+  if ( circuits.empty() || is_set( "new" ) )
   {
     circuits.extend();
   }
 
   auto settings = make_settings();
-  settings->set( "negative_control_lines", !opts.is_set( "mct" ) );
+  settings->set( "negative_control_lines", !is_set( "mct" ) );
   esop_synthesis( circuits.current(), filename, settings, statistics );
 
   std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;

@@ -29,15 +29,18 @@
 #define CLI_CONVERT_COMMAND_HPP
 
 #include <boost/format.hpp>
+#include <boost/program_options.hpp>
 
 #include <core/cli/command.hpp>
 #include <core/cli/store.hpp>
+
+namespace po = boost::program_options;
 
 namespace cirkit
 {
 
 template<typename D, typename S>
-int add_combination_helper_inner( program_options& opts )
+int add_combination_helper_inner( po::options_description& opts )
 {
   if ( store_can_convert<S, D>() )
   {
@@ -56,21 +59,21 @@ int add_combination_helper_inner( program_options& opts )
 };
 
 template<typename D, class... S>
-int add_combination_helper( program_options& opts )
+int add_combination_helper( po::options_description& opts )
 {
   [](...){}( add_combination_helper_inner<D, S>( opts )... );
   return 0;
 };
 
 template<typename D, class S>
-int convert_helper_inner( const environment::ptr& env, const program_options& opts )
+int convert_helper_inner( const environment::ptr& env, const command& cmd )
 {
   if ( store_can_convert<S, D>() )
   {
     constexpr auto source_option = store_info<S>::option;
     constexpr auto dest_option   = store_info<D>::option;
 
-    if ( opts.is_set( ( boost::format( "%s_to_%s" ) % source_option % dest_option ).str().c_str() ) )
+    if ( cmd.is_set( ( boost::format( "%s_to_%s" ) % source_option % dest_option ).str().c_str() ) )
     {
       constexpr auto source_name = store_info<S>::name;
       const auto& source_store = env->store<S>();
@@ -90,9 +93,9 @@ int convert_helper_inner( const environment::ptr& env, const program_options& op
 }
 
 template<typename D, class... S>
-int convert_helper( const environment::ptr& env, const program_options& opts )
+int convert_helper( const environment::ptr& env, const command& cmd )
 {
-  [](...){}( convert_helper_inner<D, S>( env, opts )... );
+  [](...){}( convert_helper_inner<D, S>( env, cmd )... );
   return 0;
 }
 
@@ -109,7 +112,7 @@ public:
 protected:
   bool execute()
   {
-    [](...){}( convert_helper<S, S...>( env, opts )... );
+    [](...){}( convert_helper<S, S...>( env, *this )... );
     return true;
   }
 };

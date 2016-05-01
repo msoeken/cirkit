@@ -54,7 +54,7 @@ enumerate_command::enumerate_command( const environment::ptr& env )
 
 bool enumerate_command::execute()
 {
-  if ( opts.is_set( "four_stg_pqcs" ) )
+  if ( is_set( "four_stg_pqcs" ) )
   {
     const auto n = 3u; /* number of lines - 1 */
 
@@ -104,7 +104,7 @@ bool enumerate_command::execute()
     } while ( bs.any() );
   }
 
-  if ( opts.is_set( "from_store_pqcs" ) )
+  if ( is_set( "from_store_pqcs" ) )
   {
     const auto& specs = env->store<binary_truth_table>();
 

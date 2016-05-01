@@ -56,11 +56,11 @@ bool exactly_one_true_helper( std::initializer_list<T> list )
 }
 
 template<typename S>
-int set_current_index_helper( const program_options& opts, const environment::ptr& env, unsigned index )
+int set_current_index_helper( const command& cmd, const environment::ptr& env, unsigned index )
 {
   constexpr auto option = store_info<S>::option;
 
-  if ( opts.is_set( option ) && index < env->store<S>().size() )
+  if ( cmd.is_set( option ) && index < env->store<S>().size() )
   {
     env->store<S>().set_current_index( index );
   }
@@ -74,7 +74,7 @@ public:
   current_command( const environment::ptr& env )
     : command( env, "Switches current data structure" )
   {
-    opts.set_positional_option( "index" );
+    add_positional_option( "index" );
     opts.add_options()
       ( "index,i", value( &index ), "New index" )
       ;
@@ -87,14 +87,14 @@ protected:
   {
     rules_t rules;
 
-    rules.push_back( {[&]() { return exactly_one_true_helper( { opts.is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
+    rules.push_back( {[this]() { return exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
 
     return rules;
   }
 
   bool execute()
   {
-    [](...){}( set_current_index_helper<S>( opts, env, index )... );
+    [](...){}( set_current_index_helper<S>( *this, env, index )... );
 
     return true;
   }

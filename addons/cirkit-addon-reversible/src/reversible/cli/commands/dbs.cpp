@@ -111,7 +111,7 @@ bool dbs_command::execute()
   auto settings = make_settings();
   auto statistics = std::make_shared<properties>();
 
-  if ( circuits.empty() || opts.is_set( "new" ) )
+  if ( circuits.empty() || is_set( "new" ) )
   {
     circuits.extend();
   }
@@ -122,7 +122,7 @@ bool dbs_command::execute()
   esopmin_settings->set( "verbose", is_verbose() );
   settings->set( "esopmin", esop_minimizer ? dd_based_exorcism_minimization_func( esopmin_settings ) : dd_based_esop_minimization_func( esopmin_settings ) );
 
-  if ( opts.is_set( "symbolic" ) )
+  if ( is_set( "symbolic" ) )
   {
     settings->set( "mode", mode );
 
@@ -153,7 +153,7 @@ command::log_opt_t dbs_command::log() const
     { "runtime", statistics->get<double>( "runtime" ) }
   };
 
-  if ( opts.is_set( "symbolic" ) )
+  if ( is_set( "symbolic" ) )
   {
     const std::vector<int>& node_count = statistics->get<std::vector<int>>( "node_count" );
     auto stats = compute_stats( node_count );

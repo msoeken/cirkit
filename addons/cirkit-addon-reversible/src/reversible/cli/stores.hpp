@@ -73,16 +73,16 @@ template<>
 aig_graph store_convert<circuit, aig_graph>( const circuit& circ );
 
 template<>
-bool store_can_write_io_type<circuit, io_quipper_tag_t>( program_options& opts );
+bool store_can_write_io_type<circuit, io_quipper_tag_t>( const cli_options& opts );
 
 template<>
-void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings );
+void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts, const properties::ptr& settings );
 
 template<>
-bool store_can_write_io_type<circuit, io_tikz_tag_t>( program_options& opts );
+bool store_can_write_io_type<circuit, io_tikz_tag_t>( const cli_options& opts );
 
 template<>
-void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings );
+void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts, const properties::ptr& settings );
 
 /******************************************************************************
  * binary_truth_table                                                         *
@@ -124,9 +124,9 @@ std::string store_entry_to_string<rcbdd>( const rcbdd& bdd );
 template<>
 struct show_store_entry<rcbdd>
 {
-  show_store_entry( program_options& opts );
+  show_store_entry( const cli_options& cmd );
 
-  bool operator()( rcbdd& bdd, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
+  bool operator()( rcbdd& bdd, const std::string& dotname, const cli_options& cmd, const properties::ptr& settings );
 
   command_log_opt_t log() const;
 };

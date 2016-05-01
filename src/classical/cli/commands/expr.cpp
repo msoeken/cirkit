@@ -43,7 +43,7 @@ namespace cirkit
 expr_command::expr_command( const environment::ptr& env )
   : command( env, "Load expressions" )
 {
-  opts.set_positional_option( "load" );
+  add_positional_option( "load" );
   opts.add_options()
     ( "load,l", value( &load ), "expression to load" )
     ( "new,n",                  "create new store entry" )
@@ -54,7 +54,7 @@ bool expr_command::execute()
 {
   auto& exprs = env->store<expression_t::ptr>();
 
-  if ( exprs.empty() || opts.is_set( "new" ) )
+  if ( exprs.empty() || is_set( "new" ) )
   {
     exprs.extend();
   }

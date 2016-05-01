@@ -48,6 +48,7 @@ read_aiger_command::read_aiger_command( const environment::ptr& env )
   : command( env, "Reads an AIG from file (in AIGER format)" ),
     aigs( env->store<aig_graph>() )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "AIGER filename" )
     ( "new,n",                        "Add a new entry to the store; if not set, the current entry is overriden" )
@@ -67,7 +68,7 @@ bool read_aiger_command::execute()
   {
     std::cout << "[i] read from " << filename << std::endl;
   }
-  if ( aigs.empty() || opts.is_set( "new" ))
+  if ( aigs.empty() || is_set( "new" ))
   {
     aigs.extend();
   }
@@ -84,7 +85,7 @@ bool read_aiger_command::execute()
     }
     else
     {
-      read_aiger_binary( aigs.current(), filename, opts.is_set( "nostrash" ) );
+      read_aiger_binary( aigs.current(), filename, is_set( "nostrash" ) );
     }
   }
   catch ( const char *e )

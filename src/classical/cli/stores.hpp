@@ -65,9 +65,9 @@ std::string store_entry_to_string<aig_graph>( const aig_graph& aig );
 template<>
 struct show_store_entry<aig_graph>
 {
-  show_store_entry( program_options& opts );
+  show_store_entry( const cli_options& opts );
 
-  bool operator()( aig_graph& aig, const std::string& dotname, const program_options& opts, const properties::ptr& settings );
+  bool operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts, const properties::ptr& settings );
 
   command_log_opt_t log() const;
 };
@@ -91,16 +91,16 @@ template<>
 bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig );
 
 template<>
-inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( program_options& opts ) { return true; }
+inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( const cli_options& opts ) { return true; }
 
 template<>
-void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings );
+void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts, const properties::ptr& settings );
 
 template<>
-inline bool store_can_write_io_type<aig_graph, io_edgelist_tag_t>( program_options& opts ) { return true; }
+inline bool store_can_write_io_type<aig_graph, io_edgelist_tag_t>( const cli_options& opts ) { return true; }
 
 template<>
-void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings );
+void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts, const properties::ptr& settings );
 
 /******************************************************************************
  * counterexample_t                                                           *

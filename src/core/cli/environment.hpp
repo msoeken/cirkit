@@ -82,6 +82,8 @@ public:
   bool                                            log_first_command = true;
   std::ofstream                                   logger;
 
+  std::map<std::string, std::string>              aliases;
+
   bool                                            quit = false;
 };
 

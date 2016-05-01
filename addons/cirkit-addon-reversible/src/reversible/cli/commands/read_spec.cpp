@@ -46,6 +46,7 @@ namespace cirkit
 read_spec_command::read_spec_command( const environment::ptr& env )
   : command( env, "Read specification" )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "Filename for the *.spec file" )
     ( "new,n",                        "Add a new entry to the store; if not set, the current entry is overriden" )
@@ -63,7 +64,7 @@ bool read_spec_command::execute()
 {
   auto& specs = env->store<binary_truth_table>();
 
-  if ( specs.empty() || opts.is_set( "new" ) )
+  if ( specs.empty() || is_set( "new" ) )
   {
     specs.extend();
   }

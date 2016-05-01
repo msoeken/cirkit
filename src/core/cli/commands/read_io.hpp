@@ -40,30 +40,30 @@ namespace cirkit
 {
 
 template<typename Tag, typename S>
-int add_read_io_option_helper( program_options& opts )
+int add_read_io_option_helper( command& cmd )
 {
-  if ( store_can_read_io_type<S, Tag>( opts ) )
+  if ( store_can_read_io_type<S, Tag>( cmd.get_options() ) )
   {
-    add_option_helper<S>( opts );
+    add_option_helper<S>( cmd.get_options().opts );
   }
 
   return 0;
 }
 
 template<typename Tag, typename S>
-int read_io_helper( program_options& opts, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
+int read_io_helper( command& cmd, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
-    if ( opts.is_set( "new" ) || env->store<S>().empty() )
+    if ( cmd.is_set( "new" ) || env->store<S>().empty() )
     {
       env->store<S>().extend();
     }
 
-    env->store<S>().current() = store_read_io_type<S, Tag>( filename, opts, settings );
+    env->store<S>().current() = store_read_io_type<S, Tag>( filename, cmd.get_options(), settings );
   }
   return 0;
 }
@@ -75,8 +75,9 @@ public:
   read_io_command( const environment::ptr& env, const std::string& name )
     : command( env, boost::str( boost::format( "Read %s file" ) % name ) )
   {
-    [](...){}( add_read_io_option_helper<Tag, S>( opts )... );
+    [](...){}( add_read_io_option_helper<Tag, S>( *this )... );
 
+    add_positional_option( "filename" );
     opts.add_options()
       ( "filename", value( &filename ), "filename" )
       ( "new,n",                        "create new store entry" )
@@ -90,7 +91,7 @@ protected:
   {
     auto settings = make_settings();
 
-    [](...){}( read_io_helper<Tag, S>( opts, env, filename, settings )... );
+    [](...){}( read_io_helper<Tag, S>( *this, env, filename, settings )... );
 
     return true;
   }

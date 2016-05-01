@@ -49,17 +49,17 @@ rcbdd_command::rcbdd_command( const environment::ptr& env )
 
 command::rules_t rcbdd_command::validity_rules() const
 {
-  return { { [&]() { return !opts.is_set( "circuit" ) || env->store<circuit>().current_index() >= 0; }, "no circuit in store" } };
+  return { { [this]() { return !is_set( "circuit" ) || env->store<circuit>().current_index() >= 0; }, "no circuit in store" } };
 }
 
 bool rcbdd_command::execute()
 {
-  if ( opts.is_set( "circuit" ) )
+  if ( is_set( "circuit" ) )
   {
     auto& rcbdds   = env->store<rcbdd>();
     auto& circuits = env->store<circuit>();
 
-    if ( rcbdds.empty() || opts.is_set( "new" ) )
+    if ( rcbdds.empty() || is_set( "new" ) )
     {
       rcbdds.extend();
     }

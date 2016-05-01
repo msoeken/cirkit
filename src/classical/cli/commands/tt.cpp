@@ -47,7 +47,7 @@ tt_command::tt_command( const environment::ptr& env )
   : command( env, "Truth table manipulation" ),
     tts( env->store<tt>() )
 {
-  opts.set_positional_option( "load" );
+  add_positional_option( "load" );
   opts.add_options()
     ( "load,l",    value( &load ),    "Load a truth table into the store" )
     ( "planame,p", value( &planame ), "Write truth table to PLA" )
@@ -58,21 +58,21 @@ tt_command::tt_command( const environment::ptr& env )
 command::rules_t tt_command::validity_rules() const
 {
   return {
-    { [&]() { return opts.is_set( "load" ) || tts.current_index() >= 0; }, "no current truth table available" },
-    { [&]() { return static_cast<int>( opts.is_set( "load" ) ) +
-                     static_cast<int>( opts.is_set( "planame" ) ) +
-                     static_cast<int>( opts.is_set( "extend" ) ) == 1; }, "only one option at a time" }
+    { [this]() { return is_set( "load" ) || tts.current_index() >= 0; }, "no current truth table available" },
+    { [this]() { return static_cast<int>( is_set( "load" ) ) +
+                        static_cast<int>( is_set( "planame" ) ) +
+                        static_cast<int>( is_set( "extend" ) ) == 1; }, "only one option at a time" }
   };
 }
 
 bool tt_command::execute()
 {
-  if ( opts.is_set( "load" ) )
+  if ( is_set( "load" ) )
   {
     tts.extend();
     tts.current() = boost::dynamic_bitset<>( load );
   }
-  else if ( opts.is_set( "planame" ) )
+  else if ( is_set( "planame" ) )
   {
     std::ofstream out( planame.c_str(), std::ofstream::out );
 
@@ -94,7 +94,7 @@ bool tt_command::execute()
 
     out << ".e" << std::endl;
   }
-  else if ( opts.is_set( "extend" ) )
+  else if ( is_set( "extend" ) )
   {
     tt_extend( tts.current(), extend );
   }
@@ -104,7 +104,7 @@ bool tt_command::execute()
 
 command::log_opt_t tt_command::log() const
 {
-  if ( opts.is_set( "load" ) )
+  if ( is_set( "load" ) )
   {
     return log_opt_t( {{"tt", to_string( tts.current() )}} );
   }

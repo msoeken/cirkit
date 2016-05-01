@@ -59,21 +59,21 @@ bool_complex_command::bool_complex_command( const environment::ptr& env )
 
 bool bool_complex_command::execute()
 {
-  if ( opts.is_set( "lengths" ) )
+  if ( is_set( "lengths" ) )
   {
     compute( true );
   }
-  if ( opts.is_set( "depths" ) )
+  if ( is_set( "depths" ) )
   {
     compute( false );
   }
-  if ( opts.is_set( "lengths_maj" ) )
+  if ( is_set( "lengths_maj" ) )
   {
-    compute_maj( true, opts.is_set( "npn" ) );
+    compute_maj( true, is_set( "npn" ) );
   }
-  if ( opts.is_set( "depths_maj" ) )
+  if ( is_set( "depths_maj" ) )
   {
-    compute_maj( false, opts.is_set( "npn" ) );
+    compute_maj( false, is_set( "npn" ) );
   }
 
   return true;

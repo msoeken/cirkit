@@ -21,6 +21,7 @@
 #include <boost/format.hpp>
 
 #include <core/cli/rules.hpp>
+#include <core/utils/program_options.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>
 #include <reversible/cli/stores.hpp>
@@ -69,16 +70,16 @@ bool exs_command::execute()
   auto& circuits = env->store<circuit>();
   auto& specs    = env->store<binary_truth_table>();
 
-  if ( circuits.empty() || opts.is_set( "new" ) )
+  if ( circuits.empty() || is_set( "new" ) )
   {
     circuits.extend();
   }
 
   auto settings = make_settings();
   settings->set( "max_depth",     max_depth );
-  settings->set( "negative",      opts.is_set( "negative" ) );
-  settings->set( "multiple",      opts.is_set( "multiple" ) );
-  settings->set( "all_solutions", opts.is_set( "all_solutions" ) );
+  settings->set( "negative",      is_set( "negative" ) );
+  settings->set( "multiple",      is_set( "multiple" ) );
+  settings->set( "all_solutions", is_set( "all_solutions" ) );
 
   circuit circ;
   auto result = false;
@@ -101,7 +102,7 @@ bool exs_command::execute()
 
   std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
 
-  if ( mode == 0u && result && opts.is_set( "all_solutions" ) )
+  if ( mode == 0u && result && is_set( "all_solutions" ) )
   {
     auto current_index = circuits.current_index();
 

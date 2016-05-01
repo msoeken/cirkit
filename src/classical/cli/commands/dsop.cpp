@@ -45,6 +45,7 @@ namespace cirkit
 
 dsop_command::dsop_command( const environment::ptr& env ) : command( env, "Computes disjoint SOP" )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename,i", value( &filename ),              "PLA filename for SOP (input)" )
     ( "outname,o",  value( &outname ),               "PLA filename for DSOP (output)" )

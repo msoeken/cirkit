@@ -25,6 +25,7 @@
 
 #include <core/cli/rules.hpp>
 #include <core/utils/bitset_utils.hpp>
+#include <core/utils/program_options.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/gate.hpp>
 #include <reversible/target_tags.hpp>
@@ -84,23 +85,23 @@ random_circuit_command::random_circuit_command( const environment::ptr& env )
 command::rules_t random_circuit_command::validity_rules() const
 {
   return {
-    {[&]() { return !opts.is_set( "insert_gate" ) || env->store<circuit>().current_index() >= 0; }, "no circuit available"}
+    {[this]() { return !is_set( "insert_gate" ) || env->store<circuit>().current_index() >= 0; }, "no circuit available"}
   };
 }
 
 bool random_circuit_command::execute()
 {
-  if ( !opts.is_set( "seed" ) )
+  if ( !is_set( "seed" ) )
   {
     seed = std::chrono::system_clock::now().time_since_epoch().count();
   }
 
-  auto negative = opts.is_set( "negative" );
+  auto negative = is_set( "negative" );
   std::default_random_engine generator( seed );
 
   auto& circuits = env->store<circuit>();
 
-  if ( opts.is_set( "insert_gate" ) )
+  if ( is_set( "insert_gate" ) )
   {
     std::uniform_int_distribution<unsigned> dist( 0u, gates - 1u );
     create_random_gate( circuits.current().insert_gate( dist( generator ) ), lines, negative, generator );
@@ -113,7 +114,7 @@ bool random_circuit_command::execute()
       create_random_gate( circ.append_gate(), lines, negative, generator );
     }
 
-    if ( circuits.empty() || opts.is_set( "new" ) )
+    if ( circuits.empty() || is_set( "new" ) )
     {
       circuits.extend();
     }
@@ -128,8 +129,8 @@ command::log_opt_t random_circuit_command::log() const
   return log_opt_t({
       {"lines", lines},
       {"gates", gates},
-      {"negative", opts.is_set( "negative" )},
-      {"insert_gate", opts.is_set( "insert_gate" )},
+      {"negative", is_set( "negative" )},
+      {"insert_gate", is_set( "insert_gate" )},
       {"seed", seed}
     });
 }

@@ -74,7 +74,7 @@ bool cec_command::execute()
 
   if ( cex_result )
   {
-    if ( cex.empty() || opts.is_set( "new" ) )
+    if ( cex.empty() || is_set( "new" ) )
     {
       cex.extend();
     }

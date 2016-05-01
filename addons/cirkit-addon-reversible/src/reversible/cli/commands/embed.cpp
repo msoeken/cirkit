@@ -66,7 +66,7 @@ bool embed_command::execute()
   const auto settings = make_settings();
   const auto statistics = std::make_shared<properties>();
 
-  if ( opts.is_set( "only_lines" ) )
+  if ( is_set( "only_lines" ) )
   {
     auto lines = calculate_additional_lines( bdds.current(), settings, statistics );
 
@@ -74,7 +74,7 @@ bool embed_command::execute()
   }
   else
   {
-    if ( rcbdds.empty() || opts.is_set( "new" ) )
+    if ( rcbdds.empty() || is_set( "new" ) )
     {
       rcbdds.extend();
     }

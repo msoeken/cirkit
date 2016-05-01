@@ -36,11 +36,11 @@ namespace cirkit
 {
 
 template<typename S>
-int print_helper( const program_options& opts, const environment::ptr& env )
+int print_helper( const command& cmd, const environment::ptr& env )
 {
   constexpr auto option = store_info<S>::option;
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
     print_store_entry<S>( std::cout, env->store<S>().current() );
   }
@@ -60,13 +60,13 @@ protected:
   rules_t validity_rules() const
   {
     return {
-      {[&]() { return exactly_one_true_helper( { opts.is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" }
+      {[this]() { return exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" }
     };
   }
 
   bool execute()
   {
-    [](...){}( print_helper<S>( opts, env )... );
+    [](...){}( print_helper<S>( *this, env )... );
 
     return true;
   }

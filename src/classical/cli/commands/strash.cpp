@@ -44,7 +44,7 @@ strash_command::strash_command( const environment::ptr& env ) : aig_base_command
 
 bool strash_command::execute()
 {
-  if ( opts.is_set( "new" ) )
+  if ( is_set( "new" ) )
   {
     const auto current = aig();
     store.extend();

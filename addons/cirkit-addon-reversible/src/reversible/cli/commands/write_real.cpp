@@ -44,6 +44,7 @@ namespace cirkit
 write_real_command::write_real_command( const environment::ptr& env )
   : command( env, "Write realization" )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "Filename for the *.real file" )
     ;
@@ -52,7 +53,7 @@ write_real_command::write_real_command( const environment::ptr& env )
 command::rules_t write_real_command::validity_rules() const
 {
   return {
-    { [&]() { return opts.is_set( "filename" ); }, "no filename given" },
+    { [this]() { return is_set( "filename" ); }, "no filename given" },
     has_store_element<circuit>( env )
   };
 }

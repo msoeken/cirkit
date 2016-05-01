@@ -24,6 +24,7 @@
 #include <core/cli/store.hpp>
 #include <core/cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>
+#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/aig.hpp>
 #include <classical/approximate/bdd_level_approximation.hpp>
@@ -71,11 +72,11 @@ comb_approx_command::comb_approx_command( const environment::ptr& env )
 command::rules_t comb_approx_command::validity_rules() const
 {
   return {
-    {[&]() { return static_cast<int>( opts.is_set( "bdd" ) ) + static_cast<int>( opts.is_set( "aig" ) ) == 1; }, "either BDD or AIG needs to be chosen" },
-    {[&]() { return !opts.is_set( "bdd" ) || env->store<bdd_function_t>().current_index() >= 0; }, "no BDD in store" },
-    {[&]() { return !opts.is_set( "aig" ) || env->store<aig_graph>().current_index() >= 0; }, "no AIG in store" },
-    {[&]() { return mode <= 5u; }, "mode needs to be at most 5" },
-    {[&]() { return maximum_method <= 1u; }, "maximum method needs to be at most 1" }
+    {[this]() { return static_cast<int>( is_set( "bdd" ) ) + static_cast<int>( is_set( "aig" ) ) == 1; }, "either BDD or AIG needs to be chosen" },
+    {[this]() { return !is_set( "bdd" ) || env->store<bdd_function_t>().current_index() >= 0; }, "no BDD in store" },
+    {[this]() { return !is_set( "aig" ) || env->store<aig_graph>().current_index() >= 0; }, "no AIG in store" },
+    {[this]() { return mode <= 5u; }, "mode needs to be at most 5" },
+    {[this]() { return maximum_method <= 1u; }, "maximum method needs to be at most 1" }
   };
 }
 
@@ -90,7 +91,7 @@ bool comb_approx_command::execute()
   std::vector<bdd> fs;
 
   /* read from AIG or BDD */
-  if ( opts.is_set( "aig" ) )
+  if ( is_set( "aig" ) )
   {
     cirkit_bdd_simulator sim( aigs.current(), 24u );
     auto map = simulate_aig( aigs.current(), sim );
@@ -101,7 +102,7 @@ bool comb_approx_command::execute()
       fs += m.second;
     }
   }
-  else if ( opts.is_set( "bdd" ) )
+  else if ( is_set( "bdd" ) )
   {
     std::cerr << "[e] not implemented yet, use approximate_bdd program" << std::endl;
     return true;
@@ -111,7 +112,7 @@ bool comb_approx_command::execute()
     assert( false );
   }
 
-  if ( opts.is_set( "verbose" ) )
+  if ( is_set( "verbose" ) )
   {
     std::cout << "[i] num_inputs:  " << manager->num_vars() << std::endl
               << "[i] num_outputs: " << fs.size() << std::endl;
@@ -129,7 +130,7 @@ bool comb_approx_command::execute()
   auto fshat = ( mode == 5u ) ? fs : bdd_level_approximation( fs, (bdd_level_approximation_mode)mode, level, settings, statistics );
 
   /* print? */
-  if ( opts.is_set( "print" ) )
+  if ( is_set( "print" ) )
   {
     std::cout << "[i] Original function:" << std::endl;
     print_paths( fs );
@@ -139,7 +140,7 @@ bool comb_approx_command::execute()
 
   /* truth table? */
   auto metric_settings = std::make_shared<properties>();
-  if ( opts.is_set( "truthtable" ) )
+  if ( is_set( "truthtable" ) )
   {
     std::cout << "[i] Original function:" << std::endl;
     for ( const auto& f : fs )
@@ -156,7 +157,7 @@ bool comb_approx_command::execute()
   }
 
   /* write */
-  if ( opts.is_set( "aig" ) )
+  if ( is_set( "aig" ) )
   {
     const auto& info = aig_info( aigs.current() );
 
@@ -169,13 +170,13 @@ bool comb_approx_command::execute()
       aig_create_po( aig, func.value, info.outputs[func.index].second );
     }
 
-    if ( aigs.empty() || opts.is_set( "new" ) )
+    if ( aigs.empty() || is_set( "new" ) )
     {
       aigs.extend();
     }
     aigs.current() = aig;
   }
-  else if ( opts.is_set( "bdd" ) )
+  else if ( is_set( "bdd" ) )
   {
     assert( false );
   }

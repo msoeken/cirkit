@@ -65,7 +65,7 @@ command::rules_t cbs_command::validity_rules() const
 
 bool cbs_command::execute()
 {
-  if ( circuits.empty() || opts.is_set( "new" ) )
+  if ( circuits.empty() || is_set( "new" ) )
   {
     circuits.extend();
   }
@@ -75,13 +75,13 @@ bool cbs_command::execute()
   settings->set( "var_threshold", threshold );
   settings->set( "embedding", embedding );
   settings->set( "synthesis", synthesis );
-  settings->set( "store_intermediate", opts.is_set( "store_intermediate" ) );
+  settings->set( "store_intermediate", is_set( "store_intermediate" ) );
 
   cut_based_synthesis( circuits.current(), aigs.current(), settings, statistics );
 
   std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
 
-  if ( opts.is_set( "store_intermediate" ) )
+  if ( is_set( "store_intermediate" ) )
   {
     auto& bdds   = env->store<bdd_function_t>();
     auto& rcbdds = env->store<rcbdd>();

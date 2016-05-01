@@ -81,20 +81,20 @@ bool tbs_command::execute()
 
   circuit circ;
 
-  if ( opts.is_set( "bdd" ) )
+  if ( is_set( "bdd" ) )
   {
     symbolic_transformation_based_synthesis( circ, rcbdds.current(), settings, statistics );
     std::cout << boost::format( "[i] adjusted assignments: %d" ) % statistics->get<unsigned>( "assignment_count" ) << std::endl;
   }
-  else if ( opts.is_set( "sat" ) )
+  else if ( is_set( "sat" ) )
   {
-    settings->set( "cnf_from_aig", opts.is_set( "cnf_from_aig" ) );
-    settings->set( "all_assumptions", opts.is_set( "all_assumptions" ) );
-    if ( opts.is_set( "circuit" ) )
+    settings->set( "cnf_from_aig", is_set( "cnf_from_aig" ) );
+    settings->set( "all_assumptions", is_set( "all_assumptions" ) );
+    if ( is_set( "circuit" ) )
     {
       symbolic_transformation_based_synthesis_sat( circ, circuits.current(), settings, statistics );
     }
-    else if ( opts.is_set( "aig" ) )
+    else if ( is_set( "aig" ) )
     {
       const auto& aigs = env->store<aig_graph>();
       symbolic_transformation_based_synthesis_sat( circ, aigs.current(), settings, statistics );
@@ -110,7 +110,7 @@ bool tbs_command::execute()
     transformation_based_synthesis( circ, specs.current(), settings, statistics );
   }
 
-  if ( circuits.empty() || opts.is_set( "new" ) )
+  if ( circuits.empty() || is_set( "new" ) )
   {
     circuits.extend();
   }

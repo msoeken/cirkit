@@ -42,6 +42,7 @@ namespace cirkit
 
 write_aiger_command::write_aiger_command( const environment::ptr& env ) : aig_base_command( env, "Writes AIG to file (in AIGER format)" )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "AIGER filename" )
     ;

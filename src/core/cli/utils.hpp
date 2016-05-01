@@ -34,9 +34,11 @@
 #include <string>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 
 #ifdef USE_READLINE
@@ -57,9 +59,9 @@
 #include <core/cli/commands/show.hpp>
 #include <core/cli/commands/store.hpp>
 #include <core/cli/commands/write_io.hpp>
-#include <core/utils/program_options.hpp>
-#include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
+
+namespace po = boost::program_options;
 
 namespace cirkit
 {
@@ -86,8 +88,6 @@ public:
     : env( std::make_shared<environment>() ),
       prefix( prefix )
   {
-    using namespace boost::program_options;
-
     [](...){}( add_store_helper<S>( env )... );
 
     /* These are some generic commands that work on all store entries.
@@ -109,16 +109,13 @@ public:
     env->commands.insert( {"print",   std::make_shared<print_command<S...>>( env )} );
     env->commands.insert( {"ps",      std::make_shared<ps_command<S...>>( env )} );
 
-    env->commands.insert( {"read_verilog", std::make_shared<read_io_command<io_verilog_tag_t, S...>>( env, "Verilog" )} );
-    env->commands.insert( {"write_edgelist", std::make_shared<write_io_command<io_edgelist_tag_t, S...>>( env, "Edge list" )} );
-    env->commands.insert( {"write_verilog", std::make_shared<write_io_command<io_verilog_tag_t, S...>>( env, "Verilog" )} );
-
     opts.add_options()
-      ( "command,c", value( &command ), "Process semicolon-separated list of commands" )
-      ( "file,f",    value( &file ),    "Process file with new-line seperated list of commands" )
-      ( "echo,e",                       "Echos the command if read from command line or file" )
-      ( "counter,n",                    "Show a counter in the prefix" )
-      ( "log,l",     value( &logname ), "Logs the execution and stores many statistical information" )
+      ( "command,c", po::value( &command ), "process semicolon-separated list of commands" )
+      ( "file,f",    po::value( &file ),    "process file with new-line seperated list of commands" )
+      ( "echo,e",                           "echos the command if read from command line or file" )
+      ( "counter,n",                        "show a counter in the prefix" )
+      ( "log,l",     po::value( &logname ), "logs the execution and stores many statistical information" )
+      ( "help,h",                           "produce help message" )
       ;
 
     read_aliases();
@@ -126,21 +123,22 @@ public:
 
   int run( int argc, char ** argv )
   {
-    opts.parse( argc, argv );
+    po::store( po::command_line_parser( argc, argv ).options( opts ).run(), vm );
+    po::notify( vm );
 
-    if ( !opts.good() || ( opts.is_set( "command" ) && opts.is_set( "file" ) ) )
+    if ( vm.count( "help" ) || ( vm.count( "command" ) && vm.count( "file" ) ) )
     {
       std::cout << opts << std::endl;
       return 1;
     }
 
-    if ( opts.is_set( "log" ) )
+    if ( vm.count( "log" ) )
     {
       env->log = true;
       env->start_logging( logname );
     }
 
-    if ( opts.is_set( "command" ) )
+    if ( vm.count( "command" ) )
     {
       std::vector<std::string> split;
       boost::algorithm::split( split, command, boost::is_any_of( ";" ), boost::algorithm::token_compress_on );
@@ -156,7 +154,7 @@ public:
           batch_string += ( line + "; " );
           if ( line == "quit" )
           {
-            if ( opts.is_set( "echo" ) ) { std::cout << get_prefix() << "abc -c \"" + batch_string << "\"" << std::endl; }
+            if ( vm.count( "echo" ) ) { std::cout << get_prefix() << "abc -c \"" + batch_string << "\"" << std::endl; }
             std::cout << "abc" << ' ' << abc_opts << ' ' << batch_string << '\n';
             execute_line( env, ( boost::format("abc %s-c \"%s\"") % abc_opts % batch_string ).str(), env->commands );
             batch_string.clear();
@@ -172,7 +170,7 @@ public:
           }
           else
           {
-            if ( opts.is_set( "echo" ) ) { std::cout << get_prefix() << line << std::endl; }
+            if ( vm.count( "echo" ) ) { std::cout << get_prefix() << line << std::endl; }
             if ( !execute_line( env, preprocess_alias( line ), env->commands ) )
             {
               return 1;
@@ -183,14 +181,9 @@ public:
         if ( env->quit ) { break; }
       }
     }
-    else if ( opts.is_set( "file" ) )
+    else if ( vm.count( "file" ) )
     {
-      foreach_line_in_file( file, [&]( const std::string& line ) {
-          if ( opts.is_set( "echo" ) ) { std::cout << get_prefix() << line << std::endl; }
-          execute_line( env, preprocess_alias( line ), env->commands );
-
-          return !env->quit;
-        } );
+      process_file( file, vm.count( "echo" ) );
     }
     else
     {
@@ -220,9 +213,42 @@ public:
   std::shared_ptr<environment> env;
 
 private:
+  /**
+   * @param filename filename with commands
+   * @param echo     true, if command should be echoed before execution
+   *
+   * @return true, if program should exit after this call
+   */
+  bool process_file( const std::string& filename, bool echo )
+  {
+    std::ifstream in( filename.c_str(), std::ifstream::in );
+    std::string line;
+
+    while ( getline( in, line ) )
+    {
+      boost::trim( line );
+
+      if ( echo )
+      {
+        std::cout << get_prefix() << line << std::endl;
+      }
+
+      execute_line( env, preprocess_alias( line ), env->commands );
+
+      if ( env->quit )
+      {
+        /* quit */
+        return true;
+      }
+    }
+
+    /* do not quit */
+    return false;
+  }
+
   std::string get_prefix()
   {
-    if ( opts.is_set( "counter" ) )
+    if ( vm.count( "counter" ) )
     {
       return prefix + boost::str( boost::format( " %d> " ) % counter++ );
     }
@@ -239,38 +265,29 @@ private:
       std::string alias_path = boost::str( boost::format( "%s/alias" ) % path );
       if ( !boost::filesystem::exists( alias_path ) ) { return; }
 
-      foreach_line_in_file( alias_path, [this]( const std::string& line ) {
-          if ( line.empty() || line[0] == '#' ) { return true; }
+      std::ifstream in( alias_path.c_str(), std::ifstream::in );
+      std::string line;
 
-          auto p = split_string_pair( line, "=" );
-          boost::trim( p.first );
-          boost::trim( p.second );
+      while ( getline( in, line ) )
+      {
+        boost::trim( line );
 
-          aliases.insert( p );
+        if ( line.empty() || line[0] == '#' ) continue;
 
-          return true;
-        } );
+        auto p = split_string_pair( line, "=" );
+        boost::trim( p.first );
+        boost::trim( p.second );
+
+        env->aliases.insert( p );
+      }
     }
   }
-
-  // std::string preprocess_alias( const std::string& line )
-  // {
-  //   const auto it = aliases.find( line );
-  //   if ( it != aliases.end() )
-  //   {
-  //     return it->second;
-  //   }
-  //   else
-  //   {
-  //     return line;
-  //   }
-  // }
 
   std::string preprocess_alias( const std::string& line )
   {
     boost::smatch m;
 
-    for ( const auto& p : aliases )
+    for ( const auto& p : env->aliases )
     {
       if ( boost::regex_match( line, m, boost::regex( p.first ) ) )
       {
@@ -336,17 +353,16 @@ private:
 #endif
 
 private:
-  std::string                        prefix;
+  std::string             prefix;
 
-  program_options                    opts;
+  po::options_description opts;
+  po::variables_map       vm;
 
-  std::string                        command;
-  std::string                        file;
-  std::string                        logname;
+  std::string             command;
+  std::string             file;
+  std::string             logname;
 
-  unsigned                           counter = 1u;
-
-  std::map<std::string, std::string> aliases;
+  unsigned                counter = 1u;
 };
 
 #define ADD_COMMAND( name ) cli.env->commands.insert( {#name, std::make_shared<name##_command>( cli.env ) } );

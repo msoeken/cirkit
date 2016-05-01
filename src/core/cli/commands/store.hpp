@@ -43,14 +43,14 @@ namespace cirkit
 {
 
 template<typename S>
-int show_helper( const program_options& opts, const environment::ptr& env )
+int show_helper( const command& cmd, const environment::ptr& env )
 {
   constexpr auto option      = store_info<S>::option;
   constexpr auto name_plural = store_info<S>::name_plural;
 
   const auto& store = env->store<S>();
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
     if ( store.empty() )
     {
@@ -71,11 +71,11 @@ int show_helper( const program_options& opts, const environment::ptr& env )
 }
 
 template<typename S>
-int clear_helper( const program_options& opts, const environment::ptr& env )
+int clear_helper( const command& cmd, const environment::ptr& env )
 {
   constexpr auto option = store_info<S>::option;
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
     env->store<S>().clear();
   }
@@ -101,20 +101,20 @@ protected:
   rules_t validity_rules() const
   {
     return {
-      {[&]() { return static_cast<unsigned>( opts.is_set( "show" ) ) + static_cast<unsigned>( opts.is_set( "clear" ) ) <= 1u; }, "only one operation can be specified" },
-      {[&]() { return any_true_helper( { opts.is_set( store_info<S>::option )... } ); }, "no store has been specified" }
+      {[this]() { return static_cast<unsigned>( is_set( "show" ) ) + static_cast<unsigned>( is_set( "clear" ) ) <= 1u; }, "only one operation can be specified" },
+      {[this]() { return any_true_helper( { is_set( store_info<S>::option )... } ); }, "no store has been specified" }
     };
   }
 
   bool execute()
   {
-    if ( opts.is_set( "show" ) || !opts.is_set( "clear" ) )
+    if ( is_set( "show" ) || !is_set( "clear" ) )
     {
-      [](...){}( show_helper<S>( opts, env )... );
+      [](...){}( show_helper<S>( *this, env )... );
     }
-    else if ( opts.is_set( "clear" ) )
+    else if ( is_set( "clear" ) )
     {
-      [](...){}( clear_helper<S>( opts, env )... );
+      [](...){}( clear_helper<S>( *this, env )... );
     }
 
     return true;

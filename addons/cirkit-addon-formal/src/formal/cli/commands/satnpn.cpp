@@ -21,6 +21,7 @@
 #include <boost/format.hpp>
 
 #include <core/utils/bitset_utils.hpp>
+#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <formal/functions/aig_npn_canonization.hpp>
 
@@ -57,13 +58,13 @@ bool satnpn_command::execute()
 {
   const auto aig_current = aig();
 
-  if ( opts.is_set( "new" ) )
+  if ( is_set( "new" ) )
   {
     env->store<aig_graph>().extend();
   }
 
   const auto settings = make_settings();
-  settings->set( "progress", opts.is_set( "progress" ) );
+  settings->set( "progress", is_set( "progress" ) );
   settings->set( "miter", miter );
   settings->set( "encoding", encoding );
   settings->set( "heuristic", heuristic );

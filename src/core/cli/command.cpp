@@ -54,6 +54,9 @@ command::command( const environment::ptr& env, const std::string& caption, const
     scaption( caption ),
     opts( make_caption( caption, publications ) )
 {
+  opts.add_options()
+    ( "help,h", "produce help message" )
+    ;
 }
 
 const std::string& command::caption() const
@@ -65,11 +68,12 @@ bool command::run( const std::vector<std::string>& args )
 {
   std::vector<char*> argv( args.size() );
   boost::transform( args, argv.begin(), []( const std::string& s ) { return const_cast<char*>( s.c_str() ); } );
-  opts.clear();
+  vm.clear();
 
   try
   {
-    opts.parse( args.size(), &argv[0] );
+    po::store( po::command_line_parser( args.size(), &argv[0] ).options( opts ).positional( pod ).run(), vm );
+    po::notify( vm );
   }
   catch ( error& e )
   {
@@ -77,7 +81,7 @@ bool command::run( const std::vector<std::string>& args )
     return false;
   }
 
-  if ( !opts.good() )
+  if ( vm.count( "help" ) )
   {
     std::cout << opts << std::endl;
     return false;
@@ -94,6 +98,16 @@ bool command::run( const std::vector<std::string>& args )
 
   statistics.reset( new properties() );
   return execute();
+}
+
+cli_options command::get_options()
+{
+  return cli_options( opts, vm, pod );
+}
+
+void command::add_positional_option( const std::string& option )
+{
+  pod.add( option.c_str(), 1 );
 }
 
 properties::ptr command::make_settings() const

@@ -81,7 +81,7 @@ bool simgraph_command::execute()
 
   auto settings = make_settings();
   settings->set( "simulation_signatures", signatures ? boost::optional<unsigned>( signatures ) : boost::optional<unsigned>() );
-  if ( opts.is_set( "dotname" ) )
+  if ( is_set( "dotname" ) )
   {
     settings->set( "dotname", dotname );
   }
@@ -94,7 +94,7 @@ bool simgraph_command::execute()
             << format( "[i] - vertices:               %d" ) % boost::num_vertices( graph ) << std::endl
             << format( "[i] - edges:                  %d" ) % boost::num_edges( graph ) << std::endl;
 
-  if ( opts.is_set( "signatures" ) && signatures )
+  if ( is_set( "signatures" ) && signatures )
   {
     const auto& _info = info();
     const auto& meta  = boost::get_property( graph, boost::graph_meta );
@@ -108,7 +108,7 @@ bool simgraph_command::execute()
     }
   }
 
-  if ( opts.is_set( "patternname" ) )
+  if ( is_set( "patternname" ) )
   {
     write_pattern_file();
   }

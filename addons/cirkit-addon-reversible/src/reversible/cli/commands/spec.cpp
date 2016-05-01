@@ -61,8 +61,8 @@ spec_command::spec_command( const environment::ptr& env )
 command::rules_t spec_command::validity_rules() const
 {
   return {
-    { [&]() { return opts.is_set( "circuit" ) != opts.is_set( "permutation" ); }, "either circuit or permutation must be set" },
-    { [&]() { return !opts.is_set( "circuit" ) || env->store<circuit>().current_index() >= 0; }, "no circuit in store" }
+    { [this]() { return is_set( "circuit" ) != is_set( "permutation" ); }, "either circuit or permutation must be set" },
+    { [this]() { return !is_set( "circuit" ) || env->store<circuit>().current_index() >= 0; }, "no circuit in store" }
   };
 }
 
@@ -70,12 +70,12 @@ bool spec_command::execute()
 {
   auto& specs = env->store<binary_truth_table>();
 
-  if ( specs.empty() || opts.is_set( "new" ) )
+  if ( specs.empty() || is_set( "new" ) )
   {
     specs.extend();
   }
 
-  if ( opts.is_set( "circuit" ) )
+  if ( is_set( "circuit" ) )
   {
     auto& circuits = env->store<circuit>();
 
@@ -86,7 +86,7 @@ bool spec_command::execute()
 
     specs.current() = spec;
   }
-  else if ( opts.is_set( "permutation" ) )
+  else if ( is_set( "permutation" ) )
   {
     std::vector<unsigned> perm;
     parse_string_list( perm, permutation );

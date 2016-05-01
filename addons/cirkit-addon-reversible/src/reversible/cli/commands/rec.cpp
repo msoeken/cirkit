@@ -20,6 +20,7 @@
 
 #include <iostream>
 
+#include <core/utils/program_options.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/verification/xorsat_equivalence_check.hpp>
 

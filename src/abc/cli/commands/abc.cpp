@@ -73,7 +73,7 @@ bool abc_command::execute()
     return false;
   }
 
-  if ( !aigs.empty() && !opts.is_set( "empty" ) )
+  if ( !aigs.empty() && !is_set( "empty" ) )
   {
     const auto& aig = aigs.current();
     abc::Gia_Man_t *gia = cirkit_to_gia( aig );
@@ -116,14 +116,14 @@ bool abc_command::execute()
   else
   {
     /*** batch mode ***/
-    auto status = abc::Cmd_CommandExecute( frame, commands.c_str() );
+    abc::Cmd_CommandExecute( frame, commands.c_str() );
   }
 
   /*** read gia back to circuit ***/
   abc::Gia_Man_t *result_gia = abc::Abc_FrameGetGia( frame );
   if ( result_gia )
   {
-    if ( aigs.empty() || opts.is_set( "new" ) )
+    if ( aigs.empty() || is_set( "new" ) )
     {
       aigs.extend();
     }

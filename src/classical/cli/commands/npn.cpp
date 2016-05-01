@@ -68,9 +68,9 @@ npn_command::npn_command( const environment::ptr& env )
 command::rules_t npn_command::validity_rules() const
 {
   return {
-    {[&]() { return !opts.is_set( "truthtable" ) || !opts.is_set( "enumerate" ); },
+    {[&]() { return !is_set( "truthtable" ) || !is_set( "enumerate" ); },
         "either truth table or enumeration can be performed" },
-    {[&]() { return !opts.is_set( "truthtable" ) || env->store<tt>().current_index() >= 0; },
+    {[&]() { return !is_set( "truthtable" ) || env->store<tt>().current_index() >= 0; },
         "no current truth table available" },
     {[&]() { return approach <= 3u; },
         "approach must be value from 0 to 3" }
@@ -82,7 +82,7 @@ bool npn_command::execute()
   std::vector<npn_func_t> approaches{ &exact_npn_canonization, &npn_canonization, &npn_canonization_flip_swap, &npn_canonization_sifting };
   const auto& func = approaches[approach];
 
-  if ( opts.is_set( "enumerate" ) )
+  if ( is_set( "enumerate" ) )
   {
     double runtime;
     std::unordered_map<unsigned, unsigned> classes;
@@ -117,7 +117,7 @@ bool npn_command::execute()
 
     std::cout << format( "[i] found %d classes in %.2f secs" ) % classes.size() % runtime << std::endl;
 
-    if ( opts.is_set( "logname" ) )
+    if ( is_set( "logname" ) )
     {
       std::ofstream out( logname.c_str(), std::ofstream::out );
       for ( const auto& value : classes )
@@ -128,7 +128,7 @@ bool npn_command::execute()
     }
   }
 
-  if ( opts.is_set( "truthtable" ) )
+  if ( is_set( "truthtable" ) )
   {
     auto& tts = env->store<tt>();
 
@@ -138,7 +138,7 @@ bool npn_command::execute()
     std::cout << "[i] NPN class for " << tts.current() << " is " << npn << std::endl;
     std::cout << "[i] - phase: " << phase << " perm: " << any_join( perm, " " ) << std::endl;
 
-    if ( opts.is_set( "store" ) )
+    if ( is_set( "store" ) )
     {
       tts.extend();
       tts.current() = npn;
@@ -150,7 +150,7 @@ bool npn_command::execute()
 
 command::log_opt_t npn_command::log() const
 {
-  if ( opts.is_set( "truthtable" ) )
+  if ( is_set( "truthtable" ) )
   {
     return log_opt_t({
         {"runtime", statistics->get<double>( "runtime" )},

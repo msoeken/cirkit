@@ -48,7 +48,7 @@ std::string store_entry_to_string<aig_graph>( const aig_graph& aig )
   return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
 }
 
-show_store_entry<aig_graph>::show_store_entry( program_options& opts )
+show_store_entry<aig_graph>::show_store_entry( const cli_options& opts )
 {
   boost::program_options::options_description aig_options( "AIG options" );
 
@@ -56,12 +56,12 @@ show_store_entry<aig_graph>::show_store_entry( program_options& opts )
     ( "levels", boost::program_options::value<unsigned>()->default_value( 0u ), "Compute and annotate levels for dot\n0: don't compute\n1: push to inputs\n2: push to outputs" )
     ;
 
-  opts.add( aig_options );
+  opts.opts.add( aig_options );
 }
 
-bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const program_options& opts, const properties::ptr& settings )
+bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts, const properties::ptr& settings )
 {
-  const auto levels = opts.variables()["levels"].as<unsigned>();
+  const auto levels = opts.vm["levels"].as<unsigned>();
   if ( levels > 0u )
   {
     auto cl_settings = std::make_shared<properties>();
@@ -139,13 +139,13 @@ bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
 }
 
 template<>
-void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
+void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
 {
   write_verilog( aig, filename );
 }
 
 template<>
-void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, program_options& opts, const properties::ptr& settings )
+void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
 

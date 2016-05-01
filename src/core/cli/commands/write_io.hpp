@@ -40,23 +40,23 @@ namespace cirkit
 {
 
 template<typename Tag, typename S>
-int add_write_io_option_helper( program_options& opts )
+int add_write_io_option_helper( command& cmd )
 {
-  if ( store_can_write_io_type<S, Tag>( opts ) )
+  if ( store_can_write_io_type<S, Tag>( cmd.get_options() ) )
   {
-    add_option_helper<S>( opts );
+    add_option_helper<S>( cmd.get_options().opts );
   }
 
   return 0;
 }
 
 template<typename Tag, typename S>
-int write_io_helper( program_options& opts, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
+int write_io_helper( command& cmd, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
     if ( env->store<S>().current_index() == -1 )
     {
@@ -64,7 +64,7 @@ int write_io_helper( program_options& opts, const environment::ptr& env, const s
     }
     else
     {
-      store_write_io_type<S, Tag>( env->store<S>().current(), filename, opts, settings );
+      store_write_io_type<S, Tag>( env->store<S>().current(), filename, cmd.get_options(), settings );
     }
   }
   return 0;
@@ -77,8 +77,9 @@ public:
   write_io_command( const environment::ptr& env, const std::string& name )
     : command( env, boost::str( boost::format( "Write %s file" ) % name ) )
   {
-    [](...){}( add_write_io_option_helper<Tag, S>( opts )... );
+    [](...){}( add_write_io_option_helper<Tag, S>( *this )... );
 
+    add_positional_option( "filename" );
     opts.add_options()
       ( "filename", value( &filename ), "filename" )
       ;
@@ -91,7 +92,7 @@ protected:
   {
     auto settings = make_settings();
 
-    [](...){}( write_io_helper<Tag, S>( opts, env, filename, settings )... );
+    [](...){}( write_io_helper<Tag, S>( *this, env, filename, settings )... );
 
     return true;
   }

@@ -46,7 +46,7 @@ namespace cirkit
 using show_commands_t = std::map<std::string, boost::any>;
 
 template<typename S>
-int init_show_commands( program_options& opts, show_commands_t& show_commands )
+int init_show_commands( cli_options opts, show_commands_t& show_commands )
 {
   constexpr auto option   = store_info<S>::option;
   constexpr auto mnemonic = store_info<S>::mnemonic;
@@ -57,23 +57,23 @@ int init_show_commands( program_options& opts, show_commands_t& show_commands )
 }
 
 template<typename S>
-int show_helper( bool& result, const program_options& opts, const environment::ptr& env, show_commands_t& show_commands, const std::string& dotname, const properties::ptr& settings )
+int show_helper( bool& result, command& cmd, const environment::ptr& env, show_commands_t& show_commands, const std::string& dotname, const properties::ptr& settings )
 {
   constexpr auto option = store_info<S>::option;
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
-    result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands[option] )->operator()( env->store<S>().current(), dotname, opts, settings );
+    result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands[option] )->operator()( env->store<S>().current(), dotname, cmd.get_options(), settings );
   }
   return 0;
 }
 
 template<typename S>
-int show_log_helper( command::log_opt_t& result, const program_options& opts, const show_commands_t& show_commands )
+int show_log_helper( command::log_opt_t& result, const command& cmd, const show_commands_t& show_commands )
 {
   constexpr auto option = store_info<S>::option;
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
     result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands.at( option ) )->log();
   }
@@ -93,7 +93,7 @@ public:
       /*( "expr,e",                                  "Show as string expression (only for MIGs)" )*/
       ;
     [](...){}( add_option_helper<S>( opts )... );
-    [](...){}( init_show_commands<S>( opts, show_commands )... );
+    [](...){}( init_show_commands<S>( get_options(), show_commands )... );
     be_verbose();
   }
 
@@ -108,9 +108,9 @@ protected:
     }
 
     auto result = false;
-    [](...){}( show_helper<S>( result, opts, env, show_commands, dotname, settings )... );
+    [](...){}( show_helper<S>( result, *this, env, show_commands, dotname, settings )... );
 
-    if ( !opts.is_set( "silent" ) && result )
+    if ( !is_set( "silent" ) && result )
     {
       system( boost::str( boost::format( dotcmd ) % dotname ).c_str() );
     }
@@ -122,7 +122,7 @@ public:
   log_opt_t log() const
   {
     log_opt_t result;
-    [](...){}( show_log_helper<S>( result, opts, show_commands )... );
+    [](...){}( show_log_helper<S>( result, *this, show_commands )... );
 
     return result;
   }

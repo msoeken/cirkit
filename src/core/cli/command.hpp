@@ -35,11 +35,13 @@
 #include <vector>
 
 #include <boost/optional.hpp>
+#include <boost/program_options.hpp>
 #include <boost/variant.hpp>
 
 #include <core/properties.hpp>
 #include <core/cli/environment.hpp>
-#include <core/utils/program_options.hpp>
+
+namespace po = boost::program_options;
 
 namespace cirkit
 {
@@ -59,7 +61,7 @@ public:
   const std::string& caption() const;
   bool run( const std::vector<std::string>& args );
 
-  inline bool is_set( const std::string& opt ) const { return opts.is_set( opt ); }
+  inline bool is_set( const std::string& opt ) const { return vm.count( opt ); }
 
 protected:
   virtual rules_t validity_rules() const { return {}; }
@@ -67,11 +69,15 @@ protected:
 
 public:
   virtual log_opt_t log() const { return boost::none; }
+  cli_options get_options();
 
 protected:
   /* pre-defined options */
   inline void be_verbose() { opts.add_options()( "verbose,v", "Be verbose" ); }
-  inline bool is_verbose() const { return opts.is_set( "verbose" ); }
+  inline bool is_verbose() const { return is_set( "verbose" ); }
+
+  /* positional arguments */
+  void add_positional_option( const std::string& option );
 
   /* get settings with often-used pre-defined options */
   properties::ptr make_settings() const;
@@ -80,8 +86,10 @@ public:
   std::shared_ptr<environment> env;
 
 protected:
-  std::string     scaption;
-  program_options opts;
+  std::string                        scaption;
+  po::options_description            opts;
+  po::variables_map                  vm;
+  po::positional_options_description pod;
 
   properties::ptr statistics;
 };

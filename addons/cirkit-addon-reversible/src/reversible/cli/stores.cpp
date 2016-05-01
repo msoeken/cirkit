@@ -81,9 +81,9 @@ std::string store_entry_to_string<binary_truth_table>( const binary_truth_table&
 }
 
 template<>
-bool store_can_write_io_type<circuit, io_quipper_tag_t>( program_options& opts )
+bool store_can_write_io_type<circuit, io_quipper_tag_t>( const cli_options& opts )
 {
-  opts.add_options()
+  opts.opts.add_options()
     ( "ascii,a", "Write ASCII instead of Haskell program" )
     ;
 
@@ -91,9 +91,9 @@ bool store_can_write_io_type<circuit, io_quipper_tag_t>( program_options& opts )
 }
 
 template<>
-void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings )
+void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
 {
-  if ( opts.is_set( "ascii" ) )
+  if ( opts.vm.count( "ascii" ) )
   {
     write_quipper_ascii( circ, filename );
   }
@@ -104,7 +104,7 @@ void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const 
 }
 
 template<>
-bool store_can_write_io_type<circuit, io_tikz_tag_t>( program_options& opts )
+bool store_can_write_io_type<circuit, io_tikz_tag_t>( const cli_options& opts )
 {
   boost::program_options::options_description circuit_options( "Circuit options" );
 
@@ -113,21 +113,21 @@ bool store_can_write_io_type<circuit, io_tikz_tag_t>( program_options& opts )
     ( "hideio",     "Don't print I/O" )
     ;
 
-  opts.add( circuit_options );
+  opts.opts.add( circuit_options );
 
   return true;
 }
 
 template<>
-void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, program_options& opts, const properties::ptr& settings )
+void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
 {
   create_tikz_settings ct_settings;
 
-  ct_settings.draw_io = !opts.is_set( "hideio" );
+  ct_settings.draw_io = opts.vm.count( "hideio" ) == 0;
 
   std::ofstream os( filename.c_str() );
 
-  if ( opts.is_set( "standalone" ) )
+  if ( opts.vm.count( "standalone" ) )
   {
     os << "\\documentclass{standalone}" << std::endl
        << "\\usepackage{tikz}" << std::endl << std::endl
@@ -135,7 +135,7 @@ void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std
   }
   create_image( os, circ, ct_settings );
 
-  if ( opts.is_set( "standalone" ) )
+  if ( opts.vm.count( "standalone" ) )
   {
     os << "\\end{document}" << std::endl;
   }
@@ -153,20 +153,20 @@ std::string store_entry_to_string<rcbdd>( const rcbdd& bdd )
   return ( boost::format( "%d variables, %d nodes" ) % bdd.num_vars() % bdd.chi().nodeCount() ).str();
 }
 
-show_store_entry<rcbdd>::show_store_entry( program_options& opts )
+show_store_entry<rcbdd>::show_store_entry( const cli_options& opts )
 {
 }
 
 bool show_store_entry<rcbdd>::operator()( rcbdd& bdd,
                                           const std::string& dotname,
-                                          const program_options& opts,
+                                          const cli_options& opts,
                                           const properties::ptr& settings )
 {
   using namespace std::placeholders;
 
   auto * fd = fopen( dotname.c_str(), "w" );
 
-  if ( opts.is_set( "add" ) )
+  if ( opts.vm.count( "add" ) )
   {
     bdd.manager().DumpDot( std::vector<ADD>{bdd.chi().Add()}, 0, 0, fd );
   }

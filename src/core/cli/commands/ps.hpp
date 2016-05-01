@@ -42,12 +42,12 @@ namespace cirkit
 {
 
 template<typename S>
-int ps_helper( const program_options& opts, const environment::ptr& env )
+int ps_helper( const command& cmd, const environment::ptr& env )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
     if ( env->store<S>().current_index() == -1 )
     {
@@ -63,7 +63,7 @@ int ps_helper( const program_options& opts, const environment::ptr& env )
 }
 
 template<typename S>
-int ps_log_helper( const program_options& opts, const environment::ptr& env, command::log_opt_t& ret )
+int ps_log_helper( const command& cmd, const environment::ptr& env, command::log_opt_t& ret )
 {
   if ( ret != boost::none )
   {
@@ -72,7 +72,7 @@ int ps_log_helper( const program_options& opts, const environment::ptr& env, com
 
   constexpr auto option = store_info<S>::option;
 
-  if ( opts.is_set( option ) )
+  if ( cmd.is_set( option ) )
   {
     ret = log_store_entry_statistics<S>( env->store<S>().current() );
   }
@@ -94,13 +94,13 @@ protected:
   rules_t validity_rules() const
   {
     return {
-      {[&]() { return any_true_helper( { opts.is_set( store_info<S>::option )... } ); }, "no store has been specified" }
+      {[this]() { return any_true_helper( { is_set( store_info<S>::option )... } ); }, "no store has been specified" }
     };
   }
 
   bool execute()
   {
-    [](...){}( ps_helper<S>( opts, env )... );
+    [](...){}( ps_helper<S>( *this, env )... );
 
     return true;
   }
@@ -109,7 +109,7 @@ public:
   log_opt_t log() const
   {
     log_opt_t ret;
-    [](...){}( ps_log_helper<S>( opts, env, ret )... );
+    [](...){}( ps_log_helper<S>( *this, env, ret )... );
     return ret;
   }
 };

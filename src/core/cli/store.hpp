@@ -35,13 +35,27 @@
 
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
+#include <boost/program_options.hpp>
 #include <boost/variant.hpp>
 
 #include <core/properties.hpp>
-#include <core/utils/program_options.hpp>
+
+namespace po = boost::program_options;
 
 namespace cirkit
 {
+
+struct cli_options
+{
+  cli_options( po::options_description& opts, po::variables_map& vm, po::positional_options_description& pod )
+    : opts( opts ), vm( vm ), pod( pod )
+  {
+  }
+
+  po::options_description&            opts;
+  po::variables_map&                  vm;
+  po::positional_options_description& pod;
+};
 
 template<class T>
 class cli_store
@@ -153,9 +167,9 @@ using command_log_opt_t = boost::optional<std::unordered_map<std::string, boost:
 template<typename T>
 struct show_store_entry
 {
-  show_store_entry( program_options& opts ) {}
+  show_store_entry( const cli_options& opts ) {}
 
-  bool operator()( T& element, const std::string& dotname, const program_options& opts, const properties::ptr& settings )
+  bool operator()( T& element, const std::string& dotname, const cli_options& opts, const properties::ptr& settings )
   {
     std::cout << "[w] show is not supported for this store element" << std::endl;
     return false; /* don't open the dot file */
@@ -198,32 +212,32 @@ struct io_verilog_tag_t {};
 struct io_edgelist_tag_t {};
 
 template<typename T, typename Tag>
-bool store_can_write_io_type( program_options& opts )
+bool store_can_write_io_type( const cli_options& opts )
 {
   return false;
 }
 
 template<typename T, typename Tag>
-void store_write_io_type( const T& element, const std::string& filename, program_options& opts, const properties::ptr& settings )
+void store_write_io_type( const T& element, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
 {
   assert( false );
 }
 
 template<typename T, typename Tag>
-bool store_can_read_io_type( program_options& opts )
+bool store_can_read_io_type( const cli_options& opts )
 {
   return false;
 }
 
 template<typename T, typename Tag>
-T store_read_io_type( const std::string& filename, program_options& opts, const properties::ptr& settings )
+T store_read_io_type( const std::string& filename, const cli_options& opts, const properties::ptr& settings )
 {
   assert( false );
 }
 
 /* for the use in commands */
 template<typename S>
-int add_option_helper( program_options& opts )
+int add_option_helper( po::options_description& opts )
 {
   constexpr auto option   = store_info<S>::option;
   constexpr auto mnemonic = store_info<S>::mnemonic;

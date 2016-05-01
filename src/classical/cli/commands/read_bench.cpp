@@ -62,7 +62,7 @@ bool read_bench_command::execute()
   {
     std::cout << "[i] read from " << filename << std::endl;
   }
-  if ( aigs.empty() || opts.is_set( "new" ))
+  if ( aigs.empty() || is_set( "new" ))
   {
     aigs.extend();
   }

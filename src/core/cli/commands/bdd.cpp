@@ -57,11 +57,11 @@ command::rules_t bdd_command::validity_rules() const
 
 bool bdd_command::execute()
 {
-  if ( opts.is_set( "characteristic" ) )
+  if ( is_set( "characteristic" ) )
   {
     auto bdd = bdds.current();
 
-    if ( opts.is_set( "new" ) )
+    if ( is_set( "new" ) )
     {
       bdds.extend();
     }

@@ -96,6 +96,7 @@ read_pla_command::read_pla_command( const environment::ptr& env )
   : command( env, "Reads PLA into BDD" ),
     bdds( env->store<bdd_function_t>() )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "PLA filename" )
     ( "new,n",                        "Add a new entry to the store; if not set, the current entry is overriden" )
@@ -114,7 +115,7 @@ bool read_pla_command::execute()
   read_pla_to_cudd_processor p( manager );
   pla_parser( filename, p );
 
-  if ( bdds.empty() || opts.is_set( "new" ))
+  if ( bdds.empty() || is_set( "new" ))
   {
     bdds.extend();
   }

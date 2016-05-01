@@ -57,7 +57,7 @@ testbdd_command::testbdd_command( const environment::ptr& env ) : command( env, 
 
 bool testbdd_command::execute()
 {
-  if ( opts.is_set( "cardinality" ) )
+  if ( is_set( "cardinality" ) )
   {
     print_timer t( "[i] run-time: %w secs\n", true );
 
@@ -74,7 +74,7 @@ bool testbdd_command::execute()
     }
   }
 
-  if ( opts.is_set( "up" ) )
+  if ( is_set( "up" ) )
   {
     auto& bdds = env->store<bdd_function_t>();
 

@@ -52,8 +52,8 @@ bool output_noise_command::execute()
 {
   auto settings = make_settings();
   settings->set( "num_levels", levels );
-  settings->set( "keep_outputs", opts.is_set( "keep" ) );
-  if ( opts.is_set( "seed" ) )
+  settings->set( "keep_outputs", is_set( "keep" ) );
+  if ( is_set( "seed" ) )
   {
     settings->set( "seed", seed );
   }

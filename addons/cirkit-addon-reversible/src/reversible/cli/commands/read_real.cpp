@@ -48,6 +48,7 @@ namespace cirkit
 read_real_command::read_real_command( const environment::ptr& env )
   : command( env, "Read realization" )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "Filename for the *.real file" )
     ( "string,s", value( &string ),   "Read from string (e.g. t3 a b c, t2 a b, t1 a, f3 a b c)" )
@@ -58,8 +59,8 @@ read_real_command::read_real_command( const environment::ptr& env )
 command::rules_t read_real_command::validity_rules() const
 {
   return {
-    { [this]() { return this->opts.is_set( "filename" ) != this->opts.is_set( "string" ); }, "either filename or string must be set" },
-    file_exists_if_set( opts, filename, "filename" )
+    { [this]() { return is_set( "filename" ) != is_set( "string" ); }, "either filename or string must be set" },
+    file_exists_if_set( *this, filename, "filename" )
   };
 }
 
@@ -67,13 +68,13 @@ bool read_real_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
-  if ( circuits.empty() || opts.is_set( "new" ) )
+  if ( circuits.empty() || is_set( "new" ) )
   {
     circuits.extend();
   }
 
   clear_circuit( circuits.current() );
-  if ( opts.is_set( "filename" ) )
+  if ( is_set( "filename" ) )
   {
     read_realization( circuits.current(), filename );
   }

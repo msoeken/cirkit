@@ -21,6 +21,7 @@
 #include <boost/format.hpp>
 
 #include <core/cli/rules.hpp>
+#include <core/utils/program_options.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/optimization/adding_lines.hpp>
 
@@ -62,7 +63,7 @@ bool adding_lines_command::execute()
   settings->set( "additional_lines", additional_lines );
   adding_lines( opt, circuits.current(), settings, statistics );
 
-  if ( opts.is_set( "new" ) )
+  if ( is_set( "new" ) )
   {
     circuits.extend();
   }

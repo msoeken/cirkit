@@ -23,6 +23,7 @@
 
 #include <boost/format.hpp>
 
+#include <core/utils/program_options.hpp>
 #include <formal/verification/unate.hpp>
 
 using namespace boost::program_options;
@@ -93,10 +94,10 @@ unate_command::unate_command( const environment::ptr& env )
 bool unate_command::execute()
 {
   const auto settings = make_settings();
-  settings->set( "progress", opts.is_set( "progress" ) );
-  settings->set( "skiplist", opts.is_set( "skiplist" ) );
+  settings->set( "progress", is_set( "progress" ) );
+  settings->set( "skiplist", is_set( "skiplist" ) );
 
-  if ( opts.is_set( "print" ) )
+  if ( is_set( "print" ) )
   {
     if ( info().unateness.empty() )
     {
@@ -132,7 +133,7 @@ bool unate_command::execute()
 
   info().unateness = u;
 
-  if ( opts.is_set( "matrix" ) )
+  if ( is_set( "matrix" ) )
   {
     std::streambuf * buf;
     std::ofstream of;
@@ -164,7 +165,7 @@ bool unate_command::execute()
 
 command::log_opt_t unate_command::log() const
 {
-  if ( opts.is_set( "print" ) )
+  if ( is_set( "print" ) )
   {
     return boost::none;
   }

@@ -46,6 +46,7 @@ namespace cirkit
 read_sym_command::read_sym_command( const environment::ptr& env )
   : aig_base_command( env, "Read input symmetries" )
 {
+  add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "Input symmetries filename" )
     ;
