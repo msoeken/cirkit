@@ -1,4 +1,4 @@
-e2t = convert --expr_to_tt
-e2b = convert --expr_to_bdd
-exprsim ([^\s]+) = expr %1%; convert --expr_to_tt; print -t
-(\w+) > (\w+) = convert --%1%_to_%2%
+alias e2t "convert --expr_to_tt"
+alias e2b "convert --expr_to_bdd"
+alias "exprsim ([^\\s]+)" "expr %1%; convert --expr_to_tt; print -t"
+alias "(\\w+) > (\\w+)" "convert --%1%_to_%2%"

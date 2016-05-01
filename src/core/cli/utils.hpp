@@ -49,6 +49,7 @@
 #include <core/cli/command.hpp>
 #include <core/cli/environment.hpp>
 #include <core/cli/store.hpp>
+#include <core/cli/commands/alias.hpp>
 #include <core/cli/commands/convert.hpp>
 #include <core/cli/commands/current.hpp>
 #include <core/cli/commands/help.hpp>
@@ -100,6 +101,7 @@ public:
      *
      * see store.hpp for more details
      */
+    env->commands.insert( {"alias",   std::make_shared<alias_command>( env )} );
     env->commands.insert( {"convert", std::make_shared<convert_command<S...>>( env )} );
     env->commands.insert( {"current", std::make_shared<current_command<S...>>( env )} );
     env->commands.insert( {"help",    std::make_shared<help_command>( env )} );
@@ -117,8 +119,6 @@ public:
       ( "log,l",     po::value( &logname ), "logs the execution and stores many statistical information" )
       ( "help,h",                           "produce help message" )
       ;
-
-    read_aliases();
   }
 
   int run( int argc, char ** argv )
@@ -131,6 +131,8 @@ public:
       std::cout << opts << std::endl;
       return 1;
     }
+
+    read_aliases();
 
     if ( vm.count( "log" ) )
     {
@@ -265,21 +267,7 @@ private:
       std::string alias_path = boost::str( boost::format( "%s/alias" ) % path );
       if ( !boost::filesystem::exists( alias_path ) ) { return; }
 
-      std::ifstream in( alias_path.c_str(), std::ifstream::in );
-      std::string line;
-
-      while ( getline( in, line ) )
-      {
-        boost::trim( line );
-
-        if ( line.empty() || line[0] == '#' ) continue;
-
-        auto p = split_string_pair( line, "=" );
-        boost::trim( p.first );
-        boost::trim( p.second );
-
-        env->aliases.insert( p );
-      }
+      process_file( alias_path, vm.count( "echo" ) );
     }
   }
 

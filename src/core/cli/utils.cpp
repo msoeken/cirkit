@@ -20,6 +20,8 @@
 
 #include <cstdlib>
 
+#include <boost/tokenizer.hpp>
+
 #include <core/utils/system_utils.hpp>
 
 namespace cirkit
@@ -67,17 +69,93 @@ bool read_command_line( const std::string& prefix, std::string& line )
 #endif // USE_READLINE
 }
 
+std::vector<std::string> split_commands( const std::string& commands )
+{
+  std::vector<std::string> result;
+  std::string current;
+
+  enum _state { normal, quote, escape };
+
+  _state s = normal;
+
+  for ( auto c : commands )
+  {
+    switch ( s )
+    {
+    case normal:
+      switch ( c )
+      {
+      case '"':
+        current += c;
+        s = quote;
+        break;
+
+      case ';':
+        boost::trim( current );
+        result.push_back( current );
+        current.clear();
+        break;
+
+      default:
+        current += c;
+        break;
+      }
+      break;
+
+    case quote:
+      switch ( c )
+      {
+      case '"':
+        current += c;
+        s = normal;
+        break;
+
+      case '\\':
+        current += c;
+        s = escape;
+        break;
+
+      default:
+        current += c;
+        break;
+      };
+      break;
+
+    case escape:
+      current += c;
+      s = quote;
+      break;
+    }
+  }
+
+  boost::trim( current );
+  if ( !current.empty() )
+  {
+    result.push_back( current );
+  }
+
+  return result;
+}
+
 bool execute_line( const environment::ptr& env, const std::string& line, const std::map<std::string, std::shared_ptr<command>>& commands )
 {
+  /* split commands if line contains a semi-colon */
   if ( !line.empty() && line[0] != '!' && line.find( ';' ) != std::string::npos )
   {
     auto result = true;
-    foreach_string( line, ";", [&result, &env, &commands]( const std::string& cline ) {
-        auto cline_copy = cline;
-        boost::trim( cline_copy );
-        result = result && execute_line( env, cline_copy, commands );
-      } );
-    return result;
+    boost::tokenizer<boost::escaped_list_separator<char>> tok( line, boost::escaped_list_separator<char>( '\\', ';', '\"' ) );
+
+    const auto lines = split_commands( line );
+
+    if ( lines.size() > 1u )
+    {
+      for ( const auto& cline : lines )
+      {
+        result = result && execute_line( env, cline, commands );
+      }
+
+      return result;
+    }
   }
 
   /* ignore comments and empty lines */
