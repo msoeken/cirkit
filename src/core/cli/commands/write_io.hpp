@@ -40,10 +40,14 @@ namespace cirkit
 {
 
 template<typename Tag, typename S>
-int add_write_io_option_helper( command& cmd )
+int add_write_io_option_helper( command& cmd, unsigned& option_count, std::string& default_option )
 {
   if ( store_can_write_io_type<S, Tag>( cmd.get_options() ) )
   {
+    constexpr auto option = store_info<S>::option;
+
+    option_count++;
+    default_option = option;
     add_option_helper<S>( cmd.get_options().opts );
   }
 
@@ -51,12 +55,12 @@ int add_write_io_option_helper( command& cmd )
 }
 
 template<typename Tag, typename S>
-int write_io_helper( command& cmd, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
+int write_io_helper( command& cmd, const std::string& default_option, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
 
-  if ( cmd.is_set( option ) )
+  if ( cmd.is_set( option ) || option == default_option )
   {
     if ( env->store<S>().current_index() == -1 )
     {
@@ -77,7 +81,11 @@ public:
   write_io_command( const environment::ptr& env, const std::string& name )
     : command( env, boost::str( boost::format( "Write %s file" ) % name ) )
   {
-    [](...){}( add_write_io_option_helper<Tag, S>( *this )... );
+    [](...){}( add_write_io_option_helper<Tag, S>( *this, option_count, default_option )... );
+    if ( option_count != 1u )
+    {
+      default_option.clear();
+    }
 
     add_positional_option( "filename" );
     opts.add_options()
@@ -92,7 +100,7 @@ protected:
   {
     rules_t rules;
 
-    rules.push_back( {[this]() { return exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
+    rules.push_back( {[this]() { return option_count == 1 || exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
 
     return rules;
   }
@@ -101,13 +109,15 @@ protected:
   {
     auto settings = make_settings();
 
-    [](...){}( write_io_helper<Tag, S>( *this, env, filename, settings )... );
+    [](...){}( write_io_helper<Tag, S>( *this, default_option, env, filename, settings )... );
 
     return true;
   }
 
 private:
   std::string filename;
+  unsigned    option_count = 0u;
+  std::string default_option;
 };
 
 }
