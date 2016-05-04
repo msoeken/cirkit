@@ -52,16 +52,18 @@ tt_command::tt_command( const environment::ptr& env )
     ( "load,l",    value( &load ),    "Load a truth table into the store" )
     ( "planame,p", value( &planame ), "Write truth table to PLA" )
     ( "extend,e",  value( &extend ),  "Extend to bits" )
+    ( "random,r",  value( &random ),  "Create random truth table for number of variables" )
     ;
 }
 
 command::rules_t tt_command::validity_rules() const
 {
   return {
-    { [this]() { return is_set( "load" ) || tts.current_index() >= 0; }, "no current truth table available" },
+    { [this]() { return is_set( "load" ) || is_set( "random" ) || tts.current_index() >= 0; }, "no current truth table available" },
     { [this]() { return static_cast<int>( is_set( "load" ) ) +
                         static_cast<int>( is_set( "planame" ) ) +
-                        static_cast<int>( is_set( "extend" ) ) == 1; }, "only one option at a time" }
+                        static_cast<int>( is_set( "extend" ) ) +
+                        static_cast<int>( is_set( "random" ) ) == 1; }, "only one option at a time" }
   };
 }
 
@@ -97,6 +99,11 @@ bool tt_command::execute()
   else if ( is_set( "extend" ) )
   {
     tt_extend( tts.current(), extend );
+  }
+  else if ( is_set( "random" ) )
+  {
+    tts.extend();
+    tts.current() = random_bitset( 1u << random );
   }
 
   return true;

@@ -53,6 +53,7 @@ private:
   std::string    load;
   std::string    planame;
   unsigned       extend;
+  unsigned       random;
   cli_store<tt>& tts;
 
 };
