@@ -18,27 +18,30 @@
 
 #include "stores.hpp"
 
+#include <vector>
+
 #include <boost/format.hpp>
 
+#include <core/utils/string_utils.hpp>
+#include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/circuit_to_aig.hpp>
+#include <reversible/functions/circuit_to_truth_table.hpp>
+#include <reversible/functions/permutation_to_truth_table.hpp>
 #include <reversible/io/create_image.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/io/print_statistics.hpp>
+#include <reversible/io/read_realization.hpp>
+#include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_quipper.hpp>
+#include <reversible/io/write_realization.hpp>
+#include <reversible/io/write_specification.hpp>
+#include <reversible/simulation/simple_simulation.hpp>
 
 namespace cirkit
 {
 
 /******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
+ * circuit                                                                    *
  ******************************************************************************/
 
 template<>
@@ -75,12 +78,6 @@ aig_graph store_convert<circuit, aig_graph>( const circuit& circ )
 }
 
 template<>
-std::string store_entry_to_string<binary_truth_table>( const binary_truth_table& spec )
-{
-  return ( boost::format( "%d inputs, %d outputs" ) % spec.num_inputs() % spec.num_outputs() ).str();
-}
-
-template<>
 bool store_can_write_io_type<circuit, io_quipper_tag_t>( const cli_options& opts )
 {
   opts.opts.add_options()
@@ -101,6 +98,36 @@ void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const 
   {
     write_quipper( circ, filename );
   }
+}
+
+template<>
+bool store_can_read_io_type<circuit, io_real_tag_t>( const cli_options& opts )
+{
+  opts.opts.add_options()
+    ( "string,s", boost::program_options::value<std::string>(), "read from string (e.g. t3 a b c, t2 a b, t1 a, f3 a b c)" )
+    ;
+  return true;
+}
+
+template<>
+circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename, const cli_options& opts )
+{
+  if ( opts.vm.count( "string" ) )
+  {
+    return circuit_from_string( opts.vm["string"].as<std::string>() );
+  }
+  else
+  {
+    circuit circ;
+    read_realization( circ, filename );
+    return circ;
+  }
+}
+
+template<>
+void store_write_io_type<circuit, io_real_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts )
+{
+  write_realization( circ, filename );
 }
 
 template<>
@@ -141,11 +168,66 @@ void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std
   }
 }
 
+/******************************************************************************
+ * binary_truth_table                                                         *
+ ******************************************************************************/
+
+template<>
+std::string store_entry_to_string<binary_truth_table>( const binary_truth_table& spec )
+{
+  return ( boost::format( "%d inputs, %d outputs" ) % spec.num_inputs() % spec.num_outputs() ).str();
+}
+
 template<>
 void print_store_entry<binary_truth_table>( std::ostream& os, const binary_truth_table& spec )
 {
   os << spec << std::endl;
 }
+
+template<>
+binary_truth_table store_convert<circuit, binary_truth_table>( const circuit& circ )
+{
+  binary_truth_table spec;
+  circuit_to_truth_table( circ, spec, simple_simulation_func() );
+  return spec;
+}
+
+template<>
+bool store_can_read_io_type<binary_truth_table, io_spec_tag_t>( const cli_options& opts )
+{
+  opts.opts.add_options()
+    ( "permutation,p", boost::program_options::value<std::string>(), "create spec from permutation (starts with 0, space separated)" )
+    ;
+  return true;
+}
+
+template<>
+binary_truth_table store_read_io_type<binary_truth_table, io_spec_tag_t>( const std::string& filename, const cli_options& opts )
+{
+  if ( opts.vm.count( "permutation" ) )
+  {
+    std::vector<unsigned> perm;
+    parse_string_list( perm, opts.vm["permutation"].as<std::string>() );
+
+    return permutation_to_truth_table( perm );
+  }
+  else
+  {
+    binary_truth_table spec;
+    read_specification( spec, filename );
+    return spec;
+  }
+}
+
+template<>
+void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const cli_options& opts )
+{
+  write_specification( spec, filename );
+}
+
+/******************************************************************************
+ * rcbdd                                                                      *
+ ******************************************************************************/
 
 template<>
 std::string store_entry_to_string<rcbdd>( const rcbdd& bdd )

@@ -51,14 +51,9 @@
 #include <reversible/cli/commands/hdbs.hpp>
 #include <reversible/cli/commands/qbs.hpp>
 #include <reversible/cli/commands/random_circuit.hpp>
-#include <reversible/cli/commands/read_real.hpp>
-#include <reversible/cli/commands/read_spec.hpp>
 #include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
-#include <reversible/cli/commands/spec.hpp>
 #include <reversible/cli/commands/tbs.hpp>
-#include <reversible/cli/commands/write_real.hpp>
-#include <reversible/cli/commands/write_spec.hpp>
 #include <reversible/cli/commands/write_pla.hpp>
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
@@ -73,8 +68,12 @@ int main( int argc, char ** argv )
 {
   cli_main<STORES> cli( "revkit" );
 
+  cli.env->commands.insert( {"read_real",     std::make_shared<read_io_command<io_real_tag_t,     STORES>>( cli.env, "realization" )} );
+  cli.env->commands.insert( {"read_spec",     std::make_shared<read_io_command<io_spec_tag_t,     STORES>>( cli.env, "specification" )} );
   cli.env->commands.insert( {"write_quipper", std::make_shared<write_io_command<io_quipper_tag_t, STORES>>( cli.env, "Quipper" )} );
-  cli.env->commands.insert( {"write_tikz", std::make_shared<write_io_command<io_tikz_tag_t, STORES>>( cli.env, "TikZ" )} );
+  cli.env->commands.insert( {"write_real",    std::make_shared<write_io_command<io_real_tag_t,    STORES>>( cli.env, "realization" )} );
+  cli.env->commands.insert( {"write_spec",    std::make_shared<write_io_command<io_spec_tag_t,    STORES>>( cli.env, "specification" )} );
+  cli.env->commands.insert( {"write_tikz",    std::make_shared<write_io_command<io_tikz_tag_t,    STORES>>( cli.env, "TikZ" )} );
 
   ADD_COMMAND( adding_lines );
   ADD_COMMAND( bdd );
@@ -90,15 +89,10 @@ int main( int argc, char ** argv )
   ADD_COMMAND( random_circuit );
   ADD_COMMAND( read_aiger );
   ADD_COMMAND( read_pla );
-  ADD_COMMAND( read_real );
-  ADD_COMMAND( read_spec );
   ADD_COMMAND( rec );
   ADD_COMMAND( required_lines );
-  ADD_COMMAND( spec );
   ADD_COMMAND( tbs );
   ADD_COMMAND( write_aiger );
-  ADD_COMMAND( write_real );
-  ADD_COMMAND( write_spec );
   ADD_COMMAND( write_pla );
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS

@@ -21,7 +21,7 @@
 # 5. Clear truth table and circuit #
 #----------------------------------#
 
-spec -p "0 1 2 4 3 5 6 7"
+read_spec -p "0 1 2 4 3 5 6 7"
 print -s
 tbs
 print -c
@@ -83,7 +83,7 @@ store --clear -ac
 
 random_circuit --seed 2999860053
 print -c
-spec -c
+circuit > spec
 exs --mode 1 --new
 print -c
 ps -c
@@ -98,7 +98,8 @@ store --clear -sc
 # 4. Synthesize RCBDD symbolically                    #
 # 5. Print circuit                                    #
 # 6. Write circuit to Quipper code                    #
-# 7. Clear everything in store                        #
+# 7. Write circuit to Quipper ASCII output            #
+# 8. Clear everything in store                        #
 #-----------------------------------------------------#
 
 expr <abc>
@@ -106,5 +107,6 @@ convert --expr_to_bdd
 embed -b
 tbs -s
 print -c
-write_quipper -c /dev/stdout
+write_quipper /dev/stdout
+write_quipper -a /dev/stdout
 store --clear -ebrc

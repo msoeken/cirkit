@@ -37,6 +37,8 @@
 namespace cirkit
 {
 
+struct io_real_tag_t {};
+struct io_spec_tag_t {};
 struct io_quipper_tag_t {};
 struct io_tikz_tag_t {};
 
@@ -79,6 +81,18 @@ template<>
 void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts );
 
 template<>
+bool store_can_read_io_type<circuit, io_real_tag_t>( const cli_options& opts );
+
+template<>
+circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename, const cli_options& opts );
+
+template<>
+inline bool store_can_write_io_type<circuit, io_real_tag_t>( const cli_options& opts ) { return true; }
+
+template<>
+void store_write_io_type<circuit, io_real_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts );
+
+template<>
 bool store_can_write_io_type<circuit, io_tikz_tag_t>( const cli_options& opts );
 
 template<>
@@ -103,6 +117,24 @@ std::string store_entry_to_string<binary_truth_table>( const binary_truth_table&
 
 template<>
 void print_store_entry<binary_truth_table>( std::ostream& os, const binary_truth_table& spec );
+
+template<>
+inline bool store_can_convert<circuit, binary_truth_table>() { return true; }
+
+template<>
+binary_truth_table store_convert<circuit, binary_truth_table>( const circuit& circ );
+
+template<>
+bool store_can_read_io_type<binary_truth_table, io_spec_tag_t>( const cli_options& opts );
+
+template<>
+binary_truth_table store_read_io_type<binary_truth_table, io_spec_tag_t>( const std::string& filename, const cli_options& opts );
+
+template<>
+inline bool store_can_write_io_type<binary_truth_table, io_spec_tag_t>( const cli_options& opts ) { return true; }
+
+template<>
+void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const cli_options& opts );
 
 /******************************************************************************
  * rcbdd                                                                      *
