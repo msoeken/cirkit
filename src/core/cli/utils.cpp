@@ -18,11 +18,15 @@
 
 #include "utils.hpp"
 
+#include <cstdio>
 #include <cstdlib>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include <boost/tokenizer.hpp>
-
-#include <core/utils/system_utils.hpp>
 
 namespace cirkit
 {
@@ -34,40 +38,6 @@ namespace cirkit
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
-bool read_command_line( const std::string& prefix, std::string& line )
-{
-#ifdef USE_READLINE
-  auto * cline = readline( prefix.c_str() );
-
-  /* something went wrong? */
-  if ( !cline )
-  {
-    return false;
-  }
-
-  line = cline;
-  boost::trim( line );
-  free( cline );
-
-  return true;
-
-#else // USE_READLINE
-
-  std::cout << prefix << "> ";
-  std::flush(std::cout);
-  if( !getline( std::cin, line ) ) {
-    return false;
-  }
-
-  boost::trim( line );
-  return true;
-#endif // USE_READLINE
-}
 
 std::vector<std::string> split_commands( const std::string& commands )
 {
@@ -137,6 +107,62 @@ std::vector<std::string> split_commands( const std::string& commands )
   return result;
 }
 
+// from http://stackoverflow.com/questions/478898/how-to-execute-a-command-and-get-output-of-command-within-c-using-posix
+std::pair<int, std::string> execute_program( const std::string& cmd )
+{
+  char buffer[128];
+  std::string result;
+  int exit_status;
+
+  std::shared_ptr<FILE> pipe( popen( cmd.c_str(), "r" ), [&exit_status]( FILE* fp ) { auto status = pclose( fp ); exit_status = WEXITSTATUS( status ); } );
+  if ( !pipe )
+  {
+    throw std::runtime_error( "[e] popen() failed" );
+  }
+  while ( !feof( pipe.get() ) )
+  {
+    if ( fgets( buffer, 128, pipe.get() ) != NULL )
+    {
+      result += buffer;
+    }
+  }
+  return {exit_status, result};
+}
+
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
+
+bool read_command_line( const std::string& prefix, std::string& line )
+{
+#ifdef USE_READLINE
+  auto * cline = readline( prefix.c_str() );
+
+  /* something went wrong? */
+  if ( !cline )
+  {
+    return false;
+  }
+
+  line = cline;
+  boost::trim( line );
+  free( cline );
+
+  return true;
+
+#else // USE_READLINE
+
+  std::cout << prefix << "> ";
+  std::flush(std::cout);
+  if( !getline( std::cin, line ) ) {
+    return false;
+  }
+
+  boost::trim( line );
+  return true;
+#endif // USE_READLINE
+}
+
 bool execute_line( const environment::ptr& env, const std::string& line, const std::map<std::string, std::shared_ptr<command>>& commands )
 {
   /* split commands if line contains a semi-colon */
@@ -165,7 +191,7 @@ bool execute_line( const environment::ptr& env, const std::string& line, const s
   if ( line[0] == '!' )
   {
     const auto now = std::chrono::system_clock::now();
-    const auto result = execute_and_return_tee( line.substr( 1u ) );
+    const auto result = execute_program( line.substr( 1u ) );
 
     if ( env->log )
     {
@@ -178,7 +204,16 @@ bool execute_line( const environment::ptr& env, const std::string& line, const s
     return true;
   }
 
-  auto vline = split_with_quotes( line );
+  std::vector<std::string> vline;
+  boost::tokenizer<boost::escaped_list_separator<char>> tok( line, boost::escaped_list_separator<char>( '\\', ' ', '\"' ) );
+
+  for ( const auto& s : tok )
+  {
+    if ( !s.empty() )
+    {
+      vline.push_back( s );
+    }
+  }
 
   const auto it = commands.find( vline.front() );
   if ( it != commands.end() )

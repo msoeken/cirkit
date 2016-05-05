@@ -60,7 +60,6 @@
 #include <core/cli/commands/show.hpp>
 #include <core/cli/commands/store.hpp>
 #include <core/cli/commands/write_io.hpp>
-#include <core/utils/string_utils.hpp>
 
 namespace po = boost::program_options;
 
