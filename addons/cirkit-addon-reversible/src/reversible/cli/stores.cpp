@@ -190,6 +190,17 @@ void print_store_entry<rcbdd>( std::ostream& os, const rcbdd& bdd )
   bdd.print_truth_table();
 }
 
+template<>
+rcbdd store_convert<circuit, rcbdd>( const circuit& circ )
+{
+  rcbdd cf;
+  cf.initialize_manager();
+  cf.create_variables( circ.lines() );
+  cf.set_chi( cf.create_from_circuit( circ ) );
+
+  return cf;
+}
+
 }
 
 // Local Variables:

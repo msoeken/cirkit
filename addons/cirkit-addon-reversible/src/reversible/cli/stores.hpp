@@ -134,6 +134,12 @@ struct show_store_entry<rcbdd>
 template<>
 void print_store_entry<rcbdd>( std::ostream& os, const rcbdd& bdd );
 
+template<>
+inline bool store_can_convert<circuit, rcbdd>() { return true; }
+
+template<>
+rcbdd store_convert<circuit, rcbdd>( const circuit& circ );
+
 }
 
 #endif
