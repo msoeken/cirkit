@@ -43,13 +43,32 @@ public:
 
 protected:
   /* pre-defined options */
-  inline void be_verbose() { opts.add_options()( "verbose,v", "Be verbose" ); }
+  inline void be_verbose() { opts.add_options()( "verbose,v", "be verbose" ); }
   inline bool is_verbose() const { return is_set( "verbose" ); }
+
+  inline void add_new_option( bool with_short = true )
+  {
+    auto option = std::string( "new" );
+    if ( with_short )
+    {
+      option += ",n";
+    }
+    opts.add_options()( option.c_str(), "create new store entry" );
+  }
+
+  template<typename Store>
+  inline void extend_if_new( Store& store )
+  {
+    if ( store.empty() || is_set( "new" ) )
+    {
+      store.extend();
+    }
+  }
 
   /* get settings with often-used pre-defined options */
   properties::ptr make_settings() const;
 
-  void print_runtime() const;
+  void print_runtime( const std::string& key = "runtime", const std::string& label = std::string() ) const;
 
 protected:
   properties::ptr statistics;

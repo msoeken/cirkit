@@ -46,7 +46,7 @@ cirkit_command::cirkit_command( const environment::ptr& env, const std::string& 
 bool cirkit_command::run( const std::vector<std::string>& args )
 {
   statistics.reset( new properties() );
-  command::run( args );
+  return command::run( args );
 }
 
 properties::ptr cirkit_command::make_settings() const
@@ -59,9 +59,16 @@ properties::ptr cirkit_command::make_settings() const
   return settings;
 }
 
-void cirkit_command::print_runtime() const
+void cirkit_command::print_runtime( const std::string& key, const std::string& label ) const
 {
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  if ( label.empty() )
+  {
+    std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( key ) << std::endl;
+  }
+  else
+  {
+    std::cout << boost::format( "[i] run-time (%s): %.2f secs" ) % label % statistics->get<double>( key ) << std::endl;
+  }
 }
 
 }
