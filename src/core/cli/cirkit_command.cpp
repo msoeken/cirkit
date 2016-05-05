@@ -16,14 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "adding_lines.hpp"
+#include "cirkit_command.hpp"
+
+#include <iostream>
+#include <memory>
 
 #include <boost/format.hpp>
-
-#include <core/cli/rules.hpp>
-#include <core/utils/program_options.hpp>
-#include <reversible/cli/stores.hpp>
-#include <reversible/optimization/adding_lines.hpp>
 
 namespace cirkit
 {
@@ -40,47 +38,30 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-adding_lines_command::adding_lines_command( const environment::ptr& env )
-  : cirkit_command( env, "Adding lines optimization" )
+cirkit_command::cirkit_command( const environment::ptr& env, const std::string& caption, const std::string& publications )
+  : command( env, caption, publications )
 {
-  opts.add_options()
-    ( "additional_lines", value_with_default( &additional_lines ), "Number of additional lines" )
-    ( "new,n",                                                     "Add new circuit to store" )
-    ;
 }
 
-command::rules_t adding_lines_command::validity_rules() const
+bool cirkit_command::run( const std::vector<std::string>& args )
 {
-  return {has_store_element<circuit>( env )};
+  statistics.reset( new properties() );
+  command::run( args );
 }
 
-bool adding_lines_command::execute()
+properties::ptr cirkit_command::make_settings() const
 {
-  auto& circuits = env->store<circuit>();
-
-  circuit opt;
-  auto settings = make_settings();
-  settings->set( "additional_lines", additional_lines );
-  adding_lines( opt, circuits.current(), settings, statistics );
-
-  if ( is_set( "new" ) )
+  auto settings = std::make_shared<properties>();
+  if ( opts.find_nothrow( "verbose", false ) )
   {
-    circuits.extend();
+    settings->set( "verbose", is_verbose() );
   }
-
-  circuits.current() = opt;
-
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
+  return settings;
 }
 
-command::log_opt_t adding_lines_command::log() const
+void cirkit_command::print_runtime() const
 {
-  return log_opt_t({
-      {"runtime", statistics->get<double>( "runtime" )},
-      {"additional_lines", additional_lines}
-    });
+  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
 }
 
 }

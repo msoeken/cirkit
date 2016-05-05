@@ -28,12 +28,12 @@
 #ifndef RANDOM_CIRCUIT_HPP
 #define RANDOM_CIRCUIT_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class random_circuit_command : public command
+class random_circuit_command : public cirkit_command
 {
 public:
   random_circuit_command( const environment::ptr& env );

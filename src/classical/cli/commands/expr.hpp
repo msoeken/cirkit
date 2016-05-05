@@ -28,12 +28,12 @@
 #ifndef CLI_EXPR_COMMAND_HPP
 #define CLI_EXPR_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class expr_command : public command
+class expr_command : public cirkit_command
 {
 public:
   expr_command( const environment::ptr& env );

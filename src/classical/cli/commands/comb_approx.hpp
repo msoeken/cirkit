@@ -28,12 +28,12 @@
 #ifndef CLI_COMB_APPROX_COMMAND_HPP
 #define CLI_COMB_APPROX_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class comb_approx_command : public command
+class comb_approx_command : public cirkit_command
 {
 public:
   comb_approx_command( const environment::ptr& env );

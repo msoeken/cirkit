@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/environment.hpp>
 #include <core/cli/store.hpp>
 #include <classical/aig.hpp>
@@ -38,7 +38,7 @@
 namespace cirkit
 {
 
-class abc_command : public command
+class abc_command : public cirkit_command
 {
 public:
   abc_command( const environment::ptr& env );

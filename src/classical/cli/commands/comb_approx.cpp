@@ -54,7 +54,7 @@ namespace cirkit
  ******************************************************************************/
 
 comb_approx_command::comb_approx_command( const environment::ptr& env )
-  : command( env, "Approximate combinational circuits" )
+  : cirkit_command( env, "Approximate combinational circuits" )
 {
   opts.add_options()
     ( "bdd,b",          "Read and write from BDD" )

@@ -28,12 +28,12 @@
 #ifndef CLI_HDBS_COMMAND_HPP
 #define CLI_HDBS_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class hdbs_command : public command
+class hdbs_command : public cirkit_command
 {
 public:
   hdbs_command( const environment::ptr& env );

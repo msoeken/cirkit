@@ -51,7 +51,7 @@ int add_read_io_option_helper( command& cmd )
 }
 
 template<typename Tag, typename S>
-int read_io_helper( command& cmd, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
+int read_io_helper( command& cmd, const environment::ptr& env, const std::string& filename )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
@@ -63,7 +63,7 @@ int read_io_helper( command& cmd, const environment::ptr& env, const std::string
       env->store<S>().extend();
     }
 
-    env->store<S>().current() = store_read_io_type<S, Tag>( filename, cmd.get_options(), settings );
+    env->store<S>().current() = store_read_io_type<S, Tag>( filename, cmd.get_options() );
   }
   return 0;
 }
@@ -82,16 +82,12 @@ public:
       ( "filename", value( &filename ), "filename" )
       ( "new,n",                        "create new store entry" )
       ;
-
-    be_verbose();
   }
 
 protected:
   bool execute()
   {
-    auto settings = make_settings();
-
-    [](...){}( read_io_helper<Tag, S>( *this, env, filename, settings )... );
+    [](...){}( read_io_helper<Tag, S>( *this, env, filename )... );
 
     return true;
   }

@@ -28,7 +28,7 @@
 #ifndef CLI_AIG_BASE_COMMAND_HPP
 #define CLI_AIG_BASE_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/environment.hpp>
 #include <core/cli/rules.hpp>
 #include <core/cli/store.hpp>
@@ -40,11 +40,11 @@
 namespace cirkit
 {
 
-class aig_base_command : public command
+class aig_base_command : public cirkit_command
 {
 public:
   aig_base_command( const environment::ptr& env, const std::string& caption )
-    : command( env, caption ),
+    : cirkit_command( env, caption ),
       store( env->store<aig_graph>() )
   {
   }

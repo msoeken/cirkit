@@ -30,12 +30,12 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class esopbs_command : public command
+class esopbs_command : public cirkit_command
 {
 public:
   esopbs_command( const environment::ptr& env );

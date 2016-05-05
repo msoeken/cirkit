@@ -44,7 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 embed_command::embed_command( const environment::ptr& env )
-  : command( env, "Embedding" ),
+  : cirkit_command( env, "Embedding" ),
     bdds( env->store<bdd_function_t>() ),
     rcbdds( env->store<rcbdd>() )
 {

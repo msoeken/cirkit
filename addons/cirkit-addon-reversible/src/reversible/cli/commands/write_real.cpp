@@ -42,7 +42,7 @@ namespace cirkit
  ******************************************************************************/
 
 write_real_command::write_real_command( const environment::ptr& env )
-  : command( env, "Write realization" )
+  : cirkit_command( env, "Write realization" )
 {
   add_positional_option( "filename" );
   opts.add_options()

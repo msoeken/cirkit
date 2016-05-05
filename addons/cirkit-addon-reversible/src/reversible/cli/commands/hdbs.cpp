@@ -45,7 +45,7 @@ namespace cirkit
  ******************************************************************************/
 
 hdbs_command::hdbs_command( const environment::ptr& env )
-  : command( env, "Hierarhical DD-based synthesis." )
+  : cirkit_command( env, "Hierarhical DD-based synthesis." )
 {
   opts.add_options()
     ( "new,n", "Add new circuit to store" )

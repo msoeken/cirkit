@@ -28,12 +28,12 @@
 #ifndef CLI_DBS_COMMAND_HPP
 #define CLI_DBS_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class dbs_command : public command
+class dbs_command : public cirkit_command
 {
 public:
   dbs_command( const environment::ptr& env );

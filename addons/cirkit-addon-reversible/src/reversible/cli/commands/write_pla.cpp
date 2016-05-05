@@ -41,7 +41,7 @@ namespace cirkit
  ******************************************************************************/
 
 write_pla_command::write_pla_command( const environment::ptr& env )
-  : command( env, "Writes truth table to PLA" )
+  : cirkit_command( env, "Writes truth table to PLA" )
 {
   add_positional_option( "filename" );
   opts.add_options()

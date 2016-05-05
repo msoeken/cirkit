@@ -54,7 +54,7 @@ using npn_func_t = std::function<tt(const tt&, boost::dynamic_bitset<>&, std::ve
  ******************************************************************************/
 
 npn_command::npn_command( const environment::ptr& env )
-  : command( env, "NPN classification" )
+  : cirkit_command( env, "NPN classification" )
 {
   opts.add_options()
     ( "approach",     value( &approach ),   "0: Exact\n1: Heuristic (based on number of 1s)\n2: Heuristic (flip-swap)\n3: Heuristic (sifting)" )

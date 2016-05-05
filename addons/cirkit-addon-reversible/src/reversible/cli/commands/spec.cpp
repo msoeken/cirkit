@@ -49,7 +49,7 @@ namespace cirkit
  ******************************************************************************/
 
 spec_command::spec_command( const environment::ptr& env )
-  : command( env, "Specification functions" )
+  : cirkit_command( env, "Specification functions" )
 {
   opts.add_options()
     ( "circuit,c",                            "Read from current circuit" )

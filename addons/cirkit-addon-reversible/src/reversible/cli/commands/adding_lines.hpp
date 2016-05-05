@@ -28,12 +28,12 @@
 #ifndef CLI_ADDING_LINES_COMMAND_HPP
 #define CLI_ADDING_LINES_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class adding_lines_command : public command
+class adding_lines_command : public cirkit_command
 {
 public:
   adding_lines_command( const environment::ptr& env );

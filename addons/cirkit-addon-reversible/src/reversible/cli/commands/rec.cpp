@@ -40,7 +40,7 @@ namespace cirkit
  ******************************************************************************/
 
 rec_command::rec_command( const environment::ptr& env )
-  : command( env, "Equivalence checking for reversible circuits", "[L.G. Amaru, P.-E. Gaillardon, R. Wille, and G. De Micheli, DATE 2016]" )
+  : cirkit_command( env, "Equivalence checking for reversible circuits", "[L.G. Amaru, P.-E. Gaillardon, R. Wille, and G. De Micheli, DATE 2016]" )
 {
   opts.add_options()
     ( "id1", value_with_default( &id1 ), "ID of first circuit" )

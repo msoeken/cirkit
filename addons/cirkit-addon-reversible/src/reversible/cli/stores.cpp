@@ -91,7 +91,7 @@ bool store_can_write_io_type<circuit, io_quipper_tag_t>( const cli_options& opts
 }
 
 template<>
-void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
+void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts )
 {
   if ( opts.vm.count( "ascii" ) )
   {
@@ -119,7 +119,7 @@ bool store_can_write_io_type<circuit, io_tikz_tag_t>( const cli_options& opts )
 }
 
 template<>
-void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
+void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts )
 {
   create_tikz_settings ct_settings;
 
@@ -159,8 +159,7 @@ show_store_entry<rcbdd>::show_store_entry( const cli_options& opts )
 
 bool show_store_entry<rcbdd>::operator()( rcbdd& bdd,
                                           const std::string& dotname,
-                                          const cli_options& opts,
-                                          const properties::ptr& settings )
+                                          const cli_options& opts )
 {
   using namespace std::placeholders;
 

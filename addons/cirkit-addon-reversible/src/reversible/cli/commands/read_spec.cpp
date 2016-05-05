@@ -44,7 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 read_spec_command::read_spec_command( const environment::ptr& env )
-  : command( env, "Read specification" )
+  : cirkit_command( env, "Read specification" )
 {
   add_positional_option( "filename" );
   opts.add_options()

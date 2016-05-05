@@ -30,14 +30,14 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/store.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
 {
 
-class tt_command : public command
+class tt_command : public cirkit_command
 {
   public:
   tt_command( const environment::ptr& env );

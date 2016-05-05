@@ -44,7 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 esopbs_command::esopbs_command( const environment::ptr& env )
-  : command( env, "ESOP based synthesis" )
+  : cirkit_command( env, "ESOP based synthesis" )
 {
   add_positional_option( "filename" );
   opts.add_options()

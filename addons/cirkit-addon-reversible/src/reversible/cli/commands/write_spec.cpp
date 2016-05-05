@@ -42,7 +42,7 @@ namespace cirkit
  ******************************************************************************/
 
 write_spec_command::write_spec_command( const environment::ptr& env )
-  : command( env, "Write specification" )
+  : cirkit_command( env, "Write specification" )
 {
   add_positional_option( "filename" );
   opts.add_options()

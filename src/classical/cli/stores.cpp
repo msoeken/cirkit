@@ -59,13 +59,15 @@ show_store_entry<aig_graph>::show_store_entry( const cli_options& opts )
   opts.opts.add( aig_options );
 }
 
-bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts, const properties::ptr& settings )
+bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts )
 {
+  auto settings = std::make_shared<properties>();
+  settings->set( "verbose", opts.vm.count( "verbose" ) == 1u );
   const auto levels = opts.vm["levels"].as<unsigned>();
   if ( levels > 0u )
   {
     auto cl_settings = std::make_shared<properties>();
-    cl_settings->set( "verbose", settings->get<bool>( "verbose" ) );
+    cl_settings->set( "verbose", opts.vm.count( "verbose" ) == 1u );
     cl_settings->set( "push_to_outputs", levels == 2u );
     auto annotation = get( boost::vertex_annotation, aig );
 
@@ -139,13 +141,13 @@ bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
 }
 
 template<>
-void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
+void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts )
 {
   write_verilog( aig, filename );
 }
 
 template<>
-void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
+void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
 

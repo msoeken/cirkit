@@ -29,6 +29,7 @@
 #define CLI_STORE_HPP
 
 #include <cstring>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -37,8 +38,6 @@
 #include <boost/optional.hpp>
 #include <boost/program_options.hpp>
 #include <boost/variant.hpp>
-
-#include <core/properties.hpp>
 
 namespace po = boost::program_options;
 
@@ -169,7 +168,7 @@ struct show_store_entry
 {
   show_store_entry( const cli_options& opts ) {}
 
-  bool operator()( T& element, const std::string& dotname, const cli_options& opts, const properties::ptr& settings )
+  bool operator()( T& element, const std::string& dotname, const cli_options& opts )
   {
     std::cout << "[w] show is not supported for this store element" << std::endl;
     return false; /* don't open the dot file */
@@ -218,7 +217,7 @@ bool store_can_write_io_type( const cli_options& opts )
 }
 
 template<typename T, typename Tag>
-void store_write_io_type( const T& element, const std::string& filename, const cli_options& opts, const properties::ptr& settings )
+void store_write_io_type( const T& element, const std::string& filename, const cli_options& opts )
 {
   assert( false );
 }
@@ -230,7 +229,7 @@ bool store_can_read_io_type( const cli_options& opts )
 }
 
 template<typename T, typename Tag>
-T store_read_io_type( const std::string& filename, const cli_options& opts, const properties::ptr& settings )
+T store_read_io_type( const std::string& filename, const cli_options& opts )
 {
   assert( false );
 }

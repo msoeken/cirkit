@@ -38,7 +38,7 @@ namespace cirkit
  ******************************************************************************/
 
 rcbdd_command::rcbdd_command( const environment::ptr& env )
-  : command( env, "RCBDD functions" )
+  : cirkit_command( env, "RCBDD functions" )
 {
   opts.add_options()
     ( "circuit,c", "Read from current circuit" )

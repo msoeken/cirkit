@@ -57,13 +57,13 @@ int init_show_commands( cli_options opts, show_commands_t& show_commands )
 }
 
 template<typename S>
-int show_helper( bool& result, command& cmd, const environment::ptr& env, show_commands_t& show_commands, const std::string& dotname, const properties::ptr& settings )
+int show_helper( bool& result, command& cmd, const environment::ptr& env, show_commands_t& show_commands, const std::string& dotname )
 {
   constexpr auto option = store_info<S>::option;
 
   if ( cmd.is_set( option ) )
   {
-    result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands[option] )->operator()( env->store<S>().current(), dotname, cmd.get_options(), settings );
+    result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands[option] )->operator()( env->store<S>().current(), dotname, cmd.get_options() );
   }
   return 0;
 }
@@ -94,21 +94,18 @@ public:
       ;
     [](...){}( add_option_helper<S>( opts )... );
     [](...){}( init_show_commands<S>( get_options(), show_commands )... );
-    be_verbose();
   }
 
 protected:
   bool execute()
   {
-    auto settings = make_settings();
-
     if ( dotname == "/tmp/test-%s.dot" )
     {
       dotname = ( boost::format( dotname ) % rand() ).str();
     }
 
     auto result = false;
-    [](...){}( show_helper<S>( result, *this, env, show_commands, dotname, settings )... );
+    [](...){}( show_helper<S>( result, *this, env, show_commands, dotname )... );
 
     if ( !is_set( "silent" ) && result )
     {

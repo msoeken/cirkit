@@ -30,12 +30,12 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class write_pla_command : public command
+class write_pla_command : public cirkit_command
 {
 public:
   write_pla_command( const environment::ptr& env );

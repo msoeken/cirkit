@@ -29,7 +29,6 @@
 #define CLI_COMMAND_HPP
 
 #include <functional>
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -38,7 +37,6 @@
 #include <boost/program_options.hpp>
 #include <boost/variant.hpp>
 
-#include <core/properties.hpp>
 #include <core/cli/environment.hpp>
 
 namespace po = boost::program_options;
@@ -59,7 +57,7 @@ public:
   command( const environment::ptr& env, const std::string& caption, const std::string& publications = std::string() );
 
   const std::string& caption() const;
-  bool run( const std::vector<std::string>& args );
+  virtual bool run( const std::vector<std::string>& args );
 
   inline bool is_set( const std::string& opt ) const { return vm.count( opt ); }
 
@@ -72,15 +70,8 @@ public:
   cli_options get_options();
 
 protected:
-  /* pre-defined options */
-  inline void be_verbose() { opts.add_options()( "verbose,v", "Be verbose" ); }
-  inline bool is_verbose() const { return is_set( "verbose" ); }
-
   /* positional arguments */
   void add_positional_option( const std::string& option );
-
-  /* get settings with often-used pre-defined options */
-  properties::ptr make_settings() const;
 
 public:
   std::shared_ptr<environment> env;
@@ -90,8 +81,6 @@ protected:
   po::options_description            opts;
   po::variables_map                  vm;
   po::positional_options_description pod;
-
-  properties::ptr statistics;
 };
 
 }

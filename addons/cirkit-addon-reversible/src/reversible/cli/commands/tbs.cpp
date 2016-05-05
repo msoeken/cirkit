@@ -46,7 +46,7 @@ namespace cirkit
  ******************************************************************************/
 
 tbs_command::tbs_command( const environment::ptr& env )
-  : command( env, "Transformation based synthesis" )
+  : cirkit_command( env, "Transformation based synthesis" )
 {
   opts.add_options()
     ( "bdd,b",        "Use symbolic BDD-based variant (works on RCBDDs)" )

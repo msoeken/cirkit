@@ -41,7 +41,7 @@ namespace cirkit
  ******************************************************************************/
 
 bdd_command::bdd_command( const environment::ptr& env )
-  : command( env, "BDD manipulation" ),
+  : cirkit_command( env, "BDD manipulation" ),
     bdds( env->store<bdd_function_t>() )
 {
   opts.add_options()

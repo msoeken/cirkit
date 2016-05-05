@@ -44,7 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 tt_command::tt_command( const environment::ptr& env )
-  : command( env, "Truth table manipulation" ),
+  : cirkit_command( env, "Truth table manipulation" ),
     tts( env->store<tt>() )
 {
   add_positional_option( "load" );

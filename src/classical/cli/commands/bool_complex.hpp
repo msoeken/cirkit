@@ -28,12 +28,12 @@
 #ifndef CLI_BOOL_COMPLEX_COMMAND_HPP
 #define CLI_BOOL_COMPLEX_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class bool_complex_command : public command
+class bool_complex_command : public cirkit_command
 {
 public:
   bool_complex_command( const environment::ptr& env );

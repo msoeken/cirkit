@@ -30,13 +30,13 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/environment.hpp>
 
 namespace cirkit
 {
 
-class dsop_command : public command
+class dsop_command : public cirkit_command
 {
 public:
   dsop_command( const environment::ptr& env );

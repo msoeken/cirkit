@@ -28,14 +28,14 @@
 #ifndef CLI_BDD_COMMAND_HPP
 #define CLI_BDD_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/store.hpp>
 #include <core/utils/bdd_utils.hpp>
 
 namespace cirkit
 {
 
-class bdd_command : public command
+class bdd_command : public cirkit_command
 {
 public:
   bdd_command( const environment::ptr& env );

@@ -43,7 +43,7 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-dsop_command::dsop_command( const environment::ptr& env ) : command( env, "Computes disjoint SOP" )
+dsop_command::dsop_command( const environment::ptr& env ) : cirkit_command( env, "Computes disjoint SOP" )
 {
   add_positional_option( "filename" );
   opts.add_options()

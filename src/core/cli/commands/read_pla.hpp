@@ -30,13 +30,13 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/utils/bdd_utils.hpp>
 
 namespace cirkit
 {
 
-class read_pla_command : public command
+class read_pla_command : public cirkit_command
 {
 public:
   read_pla_command( const environment::ptr& env );

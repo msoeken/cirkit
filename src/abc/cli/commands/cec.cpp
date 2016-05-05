@@ -42,7 +42,7 @@ namespace cirkit
  ******************************************************************************/
 
 cec_command::cec_command( const environment::ptr& env )
-  : command( env, "Combinatorial equivalence checking of two aigs" ),
+  : cirkit_command( env, "Combinatorial equivalence checking of two aigs" ),
     aigs( env->store<aig_graph>() ),
     cex( env->store<counterexample_t>() )
 {

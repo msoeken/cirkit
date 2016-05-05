@@ -31,7 +31,7 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/environment.hpp>
 #include <core/cli/store.hpp>
 #include <classical/aig.hpp>
@@ -39,7 +39,7 @@
 namespace cirkit
 {
 
-class read_aiger_command : public command
+class read_aiger_command : public cirkit_command
 {
 public:
   read_aiger_command( const environment::ptr& env );

@@ -28,12 +28,12 @@
 #ifndef CLI_REQUIRED_LINES_COMMAND_HPP
 #define CLI_REQUIRED_LINES_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class required_lines_command : public command
+class required_lines_command : public cirkit_command
 {
 public:
   required_lines_command( const environment::ptr& env );

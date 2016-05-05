@@ -28,13 +28,13 @@
 #ifndef CLI_TESTBDD_COMMAND_HPP
 #define CLI_TESTBDD_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/environment.hpp>
 
 namespace cirkit
 {
 
-class testbdd_command : public command
+class testbdd_command : public cirkit_command
 {
 public:
   testbdd_command( const environment::ptr& env );

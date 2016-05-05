@@ -70,7 +70,7 @@ void create_random_gate( gate& g, unsigned lines, bool negative, std::default_ra
  ******************************************************************************/
 
 random_circuit_command::random_circuit_command( const environment::ptr& env )
-  : command( env, "Creates a random reversible circuit" )
+  : cirkit_command( env, "Creates a random reversible circuit" )
 {
   opts.add_options()
     ( "lines",         value_with_default( &lines ), "Number of lines" )

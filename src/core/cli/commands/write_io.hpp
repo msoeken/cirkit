@@ -55,7 +55,7 @@ int add_write_io_option_helper( command& cmd, unsigned& option_count, std::strin
 }
 
 template<typename Tag, typename S>
-int write_io_helper( command& cmd, const std::string& default_option, const environment::ptr& env, const std::string& filename, const properties::ptr& settings )
+int write_io_helper( command& cmd, const std::string& default_option, const environment::ptr& env, const std::string& filename )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
@@ -68,7 +68,7 @@ int write_io_helper( command& cmd, const std::string& default_option, const envi
     }
     else
     {
-      store_write_io_type<S, Tag>( env->store<S>().current(), filename, cmd.get_options(), settings );
+      store_write_io_type<S, Tag>( env->store<S>().current(), filename, cmd.get_options() );
     }
   }
   return 0;
@@ -91,8 +91,6 @@ public:
     opts.add_options()
       ( "filename", value( &filename ), "filename" )
       ;
-
-    be_verbose();
   }
 
 protected:
@@ -107,9 +105,7 @@ protected:
 
   bool execute()
   {
-    auto settings = make_settings();
-
-    [](...){}( write_io_helper<Tag, S>( *this, default_option, env, filename, settings )... );
+    [](...){}( write_io_helper<Tag, S>( *this, default_option, env, filename )... );
 
     return true;
   }

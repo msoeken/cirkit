@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/environment.hpp>
 #include <core/cli/store.hpp>
 #include <classical/aig.hpp>
@@ -38,7 +38,7 @@
 namespace cirkit
 {
 
-class read_bench_command : public command
+class read_bench_command : public cirkit_command
 {
 public:
   read_bench_command( const environment::ptr& env );

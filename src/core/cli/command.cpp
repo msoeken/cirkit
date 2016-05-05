@@ -96,7 +96,6 @@ bool command::run( const std::vector<std::string>& args )
     }
   }
 
-  statistics.reset( new properties() );
   return execute();
 }
 
@@ -108,16 +107,6 @@ cli_options command::get_options()
 void command::add_positional_option( const std::string& option )
 {
   pod.add( option.c_str(), 1 );
-}
-
-properties::ptr command::make_settings() const
-{
-  auto settings = std::make_shared<properties>();
-  if ( opts.find_nothrow( "verbose", false ) )
-  {
-    settings->set( "verbose", is_verbose() );
-  }
-  return settings;
 }
 
 }

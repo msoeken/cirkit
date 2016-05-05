@@ -28,12 +28,12 @@
 #ifndef CLI_QBS_COMMAND_HPP
 #define CLI_QBS_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class qbs_command : public command
+class qbs_command : public cirkit_command
 {
 public:
   qbs_command( const environment::ptr& env );

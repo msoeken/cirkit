@@ -62,7 +62,7 @@ struct show_store_entry<bdd_function_t>
 {
   show_store_entry( cli_options& opts );
 
-  bool operator()( bdd_function_t& bdd, const std::string& dotname, const cli_options& opts, const properties::ptr& settings );
+  bool operator()( bdd_function_t& bdd, const std::string& dotname, const cli_options& opts );
 
   command_log_opt_t log() const;
 };

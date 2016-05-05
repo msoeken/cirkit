@@ -28,12 +28,12 @@
 #ifndef CLI_TBS_COMMAND_HPP
 #define CLI_TBS_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class tbs_command : public command
+class tbs_command : public cirkit_command
 {
 public:
   tbs_command( const environment::ptr& env );

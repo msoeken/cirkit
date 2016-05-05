@@ -46,7 +46,7 @@ namespace cirkit
  ******************************************************************************/
 
 read_real_command::read_real_command( const environment::ptr& env )
-  : command( env, "Read realization" )
+  : cirkit_command( env, "Read realization" )
 {
   add_positional_option( "filename" );
   opts.add_options()

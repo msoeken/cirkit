@@ -44,7 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 exs_command::exs_command( const environment::ptr& env )
-  : command( env, "Exact synthesis" )
+  : cirkit_command( env, "Exact synthesis" )
 {
   opts.add_options()
     ( "mode",                value_with_default( &mode ),      "Mode (0: BDD, 1: SAT)" )

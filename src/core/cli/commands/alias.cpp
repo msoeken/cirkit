@@ -38,7 +38,7 @@ namespace cirkit
  ******************************************************************************/
 
 alias_command::alias_command( const environment::ptr& env )
-  : command( env, "Create command aliases" )
+  : cirkit_command( env, "Create command aliases" )
 {
   add_positional_option( "alias" );
   add_positional_option( "expansion" );

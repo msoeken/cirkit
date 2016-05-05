@@ -45,7 +45,7 @@ namespace cirkit
  ******************************************************************************/
 
 bool_complex_command::bool_complex_command( const environment::ptr& env )
-  : command( env, "Computes complexities of Boolean functions" )
+  : cirkit_command( env, "Computes complexities of Boolean functions" )
 {
   opts.add_options()
     ( "numvars,n", value_with_default( &numvars ), "Number of variables (n <= 4)" )

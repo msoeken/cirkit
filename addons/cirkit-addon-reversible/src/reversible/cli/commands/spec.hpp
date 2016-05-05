@@ -28,12 +28,12 @@
 #ifndef CLI_SPEC_COMMAND_HPP
 #define CLI_SPEC_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class spec_command : public command
+class spec_command : public cirkit_command
 {
 public:
   spec_command( const environment::ptr& env );

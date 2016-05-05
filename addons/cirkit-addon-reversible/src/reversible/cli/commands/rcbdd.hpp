@@ -28,12 +28,12 @@
 #ifndef CLI_RCBDD_COMMAND_HPP
 #define CLI_RCBDD_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class rcbdd_command : public command
+class rcbdd_command : public cirkit_command
 {
 public:
   rcbdd_command( const environment::ptr& env );

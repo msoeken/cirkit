@@ -29,12 +29,12 @@
 #ifndef CLI_EXS_COMMAND_HPP
 #define CLI_EXS_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class exs_command : public command
+class exs_command : public cirkit_command
 {
 public:
   exs_command( const environment::ptr& env );

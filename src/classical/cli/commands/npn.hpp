@@ -33,7 +33,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/environment.hpp>
 #include <core/cli/store.hpp>
 #include <classical/utils/truth_table_utils.hpp>
@@ -41,7 +41,7 @@
 namespace cirkit
 {
 
-class npn_command : public command
+class npn_command : public cirkit_command
 {
 public:
   npn_command( const environment::ptr& env );

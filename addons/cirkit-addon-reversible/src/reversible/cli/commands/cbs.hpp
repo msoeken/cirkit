@@ -28,7 +28,7 @@
 #ifndef CLI_CBS_COMMAND_HPP
 #define CLI_CBS_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/store.hpp>
 #include <classical/aig.hpp>
 #include <reversible/circuit.hpp>
@@ -36,7 +36,7 @@
 namespace cirkit
 {
 
-class cbs_command : public command
+class cbs_command : public cirkit_command
 {
 public:
   cbs_command( const environment::ptr& env );

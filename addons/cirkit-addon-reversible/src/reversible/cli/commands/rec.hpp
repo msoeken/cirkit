@@ -28,12 +28,12 @@
 #ifndef REC_HPP
 #define REC_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class rec_command : public command
+class rec_command : public cirkit_command
 {
 public:
   rec_command( const environment::ptr& env );

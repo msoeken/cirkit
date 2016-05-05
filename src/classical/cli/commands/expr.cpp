@@ -41,7 +41,7 @@ namespace cirkit
  ******************************************************************************/
 
 expr_command::expr_command( const environment::ptr& env )
-  : command( env, "Load expressions" )
+  : cirkit_command( env, "Load expressions" )
 {
   add_positional_option( "load" );
   opts.add_options()

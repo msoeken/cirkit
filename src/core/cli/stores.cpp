@@ -72,8 +72,7 @@ show_store_entry<bdd_function_t>::show_store_entry( cli_options& opts )
 
 bool show_store_entry<bdd_function_t>::operator()( bdd_function_t& bdd,
                                                    const std::string& dotname,
-                                                   const cli_options& opts,
-                                                   const properties::ptr& settings )
+                                                   const cli_options& opts )
 {
   using namespace std::placeholders;
 

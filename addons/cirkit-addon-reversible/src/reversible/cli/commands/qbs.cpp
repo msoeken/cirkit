@@ -45,7 +45,7 @@ namespace cirkit
  ******************************************************************************/
 
 qbs_command::qbs_command( const environment::ptr& env )
-  : command( env, "QMDD based synthesis" )
+  : cirkit_command( env, "QMDD based synthesis" )
 {
   be_verbose();
   opts.add_options()

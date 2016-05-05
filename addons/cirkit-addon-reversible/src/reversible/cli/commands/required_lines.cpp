@@ -38,7 +38,7 @@ namespace cirkit
  ******************************************************************************/
 
 required_lines_command::required_lines_command( const environment::ptr& env )
-  : command( env, "Calculates number of required lines" )
+  : cirkit_command( env, "Calculates number of required lines" )
 {
   be_verbose();
 }

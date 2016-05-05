@@ -70,7 +70,7 @@ std::tuple<int, int, double> compute_stats( const std::vector<int>& sizes )
  ******************************************************************************/
 
 dbs_command::dbs_command( const environment::ptr& env )
-  : command( env, "Decomposition based synthesis", "[A. De Vos, Y. Van Rentergem, Adv. Math. Commun. 2 (2008), 183-200]\n[M. Soeken, L. Tague, G.W. Dueck, R. Drechsler, J. of Symb. Comp. 73 (2016), 1-26]" )
+  : cirkit_command( env, "Decomposition based synthesis", "[A. De Vos, Y. Van Rentergem, Adv. Math. Commun. 2 (2008), 183-200]\n[M. Soeken, L. Tague, G.W. Dueck, R. Drechsler, J. of Symb. Comp. 73 (2016), 1-26]" )
 {
   opts.add_options()
     ( "symbolic,s",                                            "Use symbolic variant (works on RCBDDs)" )

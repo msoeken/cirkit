@@ -45,7 +45,7 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-testbdd_command::testbdd_command( const environment::ptr& env ) : command( env, "Tests some BDD routines" )
+testbdd_command::testbdd_command( const environment::ptr& env ) : cirkit_command( env, "Tests some BDD routines" )
 {
   opts.add_options()
     ( "num_vars,n",    value_with_default( &num_vars ), "Number of variables" )

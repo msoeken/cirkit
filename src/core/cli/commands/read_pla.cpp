@@ -93,7 +93,7 @@ public:
  ******************************************************************************/
 
 read_pla_command::read_pla_command( const environment::ptr& env )
-  : command( env, "Reads PLA into BDD" ),
+  : cirkit_command( env, "Reads PLA into BDD" ),
     bdds( env->store<bdd_function_t>() )
 {
   add_positional_option( "filename" );

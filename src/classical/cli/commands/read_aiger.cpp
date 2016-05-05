@@ -45,7 +45,7 @@ namespace cirkit
  ******************************************************************************/
 
 read_aiger_command::read_aiger_command( const environment::ptr& env )
-  : command( env, "Reads an AIG from file (in AIGER format)" ),
+  : cirkit_command( env, "Reads an AIG from file (in AIGER format)" ),
     aigs( env->store<aig_graph>() )
 {
   add_positional_option( "filename" );

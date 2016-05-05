@@ -41,7 +41,7 @@ namespace cirkit
  ******************************************************************************/
 
 read_bench_command::read_bench_command( const environment::ptr& env )
-  : command( env, "Reads an AIG from BENCH" ),
+  : cirkit_command( env, "Reads an AIG from BENCH" ),
     aigs( env->store<aig_graph>() )
 {
   opts.add_options()

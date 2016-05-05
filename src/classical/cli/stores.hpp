@@ -31,7 +31,6 @@
 #include <string>
 #include <vector>
 
-#include <core/properties.hpp>
 #include <core/cli/store.hpp>
 #include <core/utils/bdd_utils.hpp>
 
@@ -67,7 +66,7 @@ struct show_store_entry<aig_graph>
 {
   show_store_entry( const cli_options& opts );
 
-  bool operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts, const properties::ptr& settings );
+  bool operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts );
 
   command_log_opt_t log() const;
 };
@@ -94,13 +93,13 @@ template<>
 inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( const cli_options& opts ) { return true; }
 
 template<>
-void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts, const properties::ptr& settings );
+void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts );
 
 template<>
 inline bool store_can_write_io_type<aig_graph, io_edgelist_tag_t>( const cli_options& opts ) { return true; }
 
 template<>
-void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts, const properties::ptr& settings );
+void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts );
 
 /******************************************************************************
  * counterexample_t                                                           *

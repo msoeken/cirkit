@@ -28,12 +28,12 @@
 #ifndef CLI_ENUMERATE_COMMAND_HPP
 #define CLI_ENUMERATE_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class enumerate_command : public command
+class enumerate_command : public cirkit_command
 {
 public:
   enumerate_command( const environment::ptr& env );

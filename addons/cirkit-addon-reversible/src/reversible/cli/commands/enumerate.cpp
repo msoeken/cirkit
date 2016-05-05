@@ -44,7 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 enumerate_command::enumerate_command( const environment::ptr& env )
-  : command( env, "Different enumeration routines" )
+  : cirkit_command( env, "Different enumeration routines" )
 {
   opts.add_options()
     ( "four_stg_pqcs", "Enumerate all four variable single-target gates for pQCS" )

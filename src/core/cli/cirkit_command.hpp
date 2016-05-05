@@ -17,35 +17,42 @@
  */
 
 /**
- * @file write_spec.hpp
+ * @file cirkit_command.hpp
  *
- * @brief Write realization
+ * @brief CirKit command
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_WRITE_SPEC_COMMAND_HPP
-#define CLI_WRITE_SPEC_COMMAND_HPP
+#ifndef CIRKIT_COMMAND_HPP
+#define CIRKIT_COMMAND_HPP
 
-#include <string>
-
-#include <core/cli/cirkit_command.hpp>
+#include <core/properties.hpp>
+#include <core/cli/command.hpp>
 
 namespace cirkit
 {
 
-class write_spec_command : public cirkit_command
+class cirkit_command : public command
 {
 public:
-  write_spec_command( const environment::ptr& env );
+  cirkit_command( const environment::ptr& env, const std::string& caption, const std::string& publications = std::string() );
+
+  virtual bool run( const std::vector<std::string>& args );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  /* pre-defined options */
+  inline void be_verbose() { opts.add_options()( "verbose,v", "Be verbose" ); }
+  inline bool is_verbose() const { return is_set( "verbose" ); }
 
-private:
-  std::string filename;
+  /* get settings with often-used pre-defined options */
+  properties::ptr make_settings() const;
+
+  void print_runtime() const;
+
+protected:
+  properties::ptr statistics;
 };
 
 }

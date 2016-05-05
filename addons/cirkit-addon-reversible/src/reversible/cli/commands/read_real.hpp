@@ -30,12 +30,12 @@
 
 #include <string>
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class read_real_command : public command
+class read_real_command : public cirkit_command
 {
 public:
   read_real_command( const environment::ptr& env );

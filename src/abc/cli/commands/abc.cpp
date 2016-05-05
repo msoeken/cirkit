@@ -44,7 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 abc_command::abc_command( const environment::ptr& env )
-  : command( env, "Runs abc shell with the current aig" ),
+  : cirkit_command( env, "Runs abc shell with the current aig" ),
     aigs( env->store<aig_graph>() )
 {
   opts.add_options()

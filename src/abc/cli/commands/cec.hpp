@@ -28,7 +28,7 @@
 #ifndef CLI_CEC_COMMAND_HPP
 #define CLI_CEC_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/environment.hpp>
 #include <core/cli/store.hpp>
 
@@ -38,7 +38,7 @@
 namespace cirkit
 {
 
-class cec_command : public command
+class cec_command : public cirkit_command
 {
 public:
   cec_command( const environment::ptr& env );

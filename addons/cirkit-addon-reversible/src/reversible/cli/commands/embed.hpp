@@ -28,7 +28,7 @@
 #ifndef CLI_EMBED_COMMAND_HPP
 #define CLI_EMBED_COMMAND_HPP
 
-#include <core/cli/command.hpp>
+#include <core/cli/cirkit_command.hpp>
 #include <core/cli/store.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <reversible/rcbdd.hpp>
@@ -36,7 +36,7 @@
 namespace cirkit
 {
 
-class embed_command : public command
+class embed_command : public cirkit_command
 {
 public:
   embed_command( const environment::ptr& env );
