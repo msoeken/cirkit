@@ -20,7 +20,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/program_options.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/optimization/adding_lines.hpp>

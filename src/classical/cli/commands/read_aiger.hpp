@@ -32,8 +32,6 @@
 #include <string>
 
 #include <core/cli/cirkit_command.hpp>
-#include <core/cli/environment.hpp>
-#include <core/cli/store.hpp>
 #include <classical/aig.hpp>
 
 namespace cirkit
@@ -50,7 +48,6 @@ protected:
 
 protected:
   std::string filename;
-  cli_store<aig_graph>& aigs;
 };
 
 }

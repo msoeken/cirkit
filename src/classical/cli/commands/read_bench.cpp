@@ -18,7 +18,8 @@
 
 #include "read_bench.hpp"
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/program_options.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/io/read_bench.hpp>
@@ -41,13 +42,12 @@ namespace cirkit
  ******************************************************************************/
 
 read_bench_command::read_bench_command( const environment::ptr& env )
-  : cirkit_command( env, "Reads an AIG from BENCH" ),
-    aigs( env->store<aig_graph>() )
+  : cirkit_command( env, "Reads an AIG from BENCH" )
 {
   opts.add_options()
     ( "filename", value( &filename ), "BENCH filename" )
-    ( "new,n",                        "Add a new entry to the store; if not set, the current entry is overriden" )
     ;
+  add_new_option();
   be_verbose();
 }
 
@@ -58,6 +58,8 @@ command::rules_t read_bench_command::validity_rules() const
 
 bool read_bench_command::execute()
 {
+  auto& aigs = env->store<aig_graph>();
+
   if ( is_verbose() )
   {
     std::cout << "[i] read from " << filename << std::endl;

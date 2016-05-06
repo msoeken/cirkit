@@ -44,8 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 abc_command::abc_command( const environment::ptr& env )
-  : cirkit_command( env, "Runs abc shell with the current aig" ),
-    aigs( env->store<aig_graph>() )
+  : cirkit_command( env, "Runs abc shell with the current aig" )
 {
   opts.add_options()
     ( "command,c", value_with_default( &commands ), "Process semicolon-separated list of commands" )
@@ -56,6 +55,8 @@ abc_command::abc_command( const environment::ptr& env )
 
 bool abc_command::execute()
 {
+  auto& aigs = env->store<aig_graph>();
+
   if ( warn_once )
   {
     std::cout << "[w] ATTENTION" << std::endl

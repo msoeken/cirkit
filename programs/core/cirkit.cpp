@@ -23,12 +23,9 @@
 
 #include <memory>
 
-#include <core/cli/command.hpp>
-#include <core/cli/environment.hpp>
-#include <core/cli/rules.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/utils.hpp>
+
 #include <core/cli/stores.hpp>
-#include <core/cli/utils.hpp>
 #include <core/cli/commands/bdd.hpp>
 #include <core/cli/commands/read_pla.hpp>
 #include <core/cli/commands/testbdd.hpp>

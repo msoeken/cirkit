@@ -27,7 +27,7 @@
 #include <boost/format.hpp>
 #include <boost/variant.hpp>
 
-#include <core/cli/command.hpp>
+#include <lscli/command.hpp>
 
 namespace cirkit
 {

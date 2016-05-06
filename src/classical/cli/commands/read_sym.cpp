@@ -20,7 +20,8 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/io/read_symmetries.hpp>

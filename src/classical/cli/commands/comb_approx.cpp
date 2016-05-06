@@ -20,8 +20,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/cli/rules.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <core/utils/program_options.hpp>

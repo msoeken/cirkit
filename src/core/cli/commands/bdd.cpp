@@ -20,7 +20,8 @@
 
 #include <vector>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/cli/stores.hpp>
 
 using namespace boost::program_options;
@@ -41,8 +42,7 @@ namespace cirkit
  ******************************************************************************/
 
 bdd_command::bdd_command( const environment::ptr& env )
-  : cirkit_command( env, "BDD manipulation" ),
-    bdds( env->store<bdd_function_t>() )
+  : cirkit_command( env, "BDD manipulation" )
 {
   opts.add_options()
     ( "characteristic,c", value( &characteristic ), "Compute characteristic function (x: inputs first, y: outputs first)" )
@@ -57,6 +57,8 @@ command::rules_t bdd_command::validity_rules() const
 
 bool bdd_command::execute()
 {
+  auto& bdds = env->store<bdd_function_t>();
+
   if ( is_set( "characteristic" ) )
   {
     auto bdd = bdds.current();

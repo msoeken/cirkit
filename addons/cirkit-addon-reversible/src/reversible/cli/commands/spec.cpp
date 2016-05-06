@@ -21,8 +21,8 @@
 #include <cmath>
 #include <vector>
 
-#include <core/cli/rules.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/string_utils.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>

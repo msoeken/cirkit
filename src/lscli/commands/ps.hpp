@@ -33,10 +33,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/cli/command.hpp>
-#include <core/cli/store.hpp>
-#include <core/utils/program_options.hpp>
-#include <core/utils/range_utils.hpp>
+#include <lscli/command.hpp>
+#include <lscli/store.hpp>
 
 namespace cirkit
 {

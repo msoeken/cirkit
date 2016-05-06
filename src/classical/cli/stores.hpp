@@ -31,7 +31,8 @@
 #include <string>
 #include <vector>
 
-#include <core/cli/store.hpp>
+#include <lscli/store.hpp>
+
 #include <core/utils/bdd_utils.hpp>
 
 #include <classical/aig.hpp>

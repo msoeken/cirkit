@@ -28,11 +28,10 @@
 #ifndef CLI_AIG_BASE_COMMAND_HPP
 #define CLI_AIG_BASE_COMMAND_HPP
 
-#include <core/cli/cirkit_command.hpp>
-#include <core/cli/environment.hpp>
-#include <core/cli/rules.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/rules.hpp>
+#include <lscli/store.hpp>
 
+#include <core/cli/cirkit_command.hpp>
 #include <classical/aig.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/utils/aig_utils.hpp>

@@ -29,7 +29,6 @@
 #define CLI_EMBED_COMMAND_HPP
 
 #include <core/cli/cirkit_command.hpp>
-#include <core/cli/store.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <reversible/rcbdd.hpp>
 
@@ -44,10 +43,6 @@ public:
 protected:
   rules_t validity_rules() const;
   bool execute();
-
-private:
-  cli_store<bdd_function_t>& bdds;
-  cli_store<rcbdd>&          rcbdds;
 };
 
 }

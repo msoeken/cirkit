@@ -31,7 +31,6 @@
 #include <string>
 
 #include <core/cli/cirkit_command.hpp>
-#include <core/cli/store.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
@@ -54,8 +53,6 @@ private:
   std::string    planame;
   unsigned       extend;
   unsigned       random;
-  cli_store<tt>& tts;
-
 };
 
 }

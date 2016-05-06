@@ -20,8 +20,9 @@
 
 #include <boost/format.hpp>
 
+#include <lscli/rules.hpp>
+
 #include <core/properties.hpp>
-#include <core/cli/rules.hpp>
 #include <core/cli/stores.hpp>
 
 #include <reversible/cli/stores.hpp>
@@ -44,9 +45,7 @@ namespace cirkit
  ******************************************************************************/
 
 embed_command::embed_command( const environment::ptr& env )
-  : cirkit_command( env, "Embedding" ),
-    bdds( env->store<bdd_function_t>() ),
-    rcbdds( env->store<rcbdd>() )
+  : cirkit_command( env, "Embedding" )
 {
   opts.add_options()
     ( "bdd,b",      "Embed from BDDs" )
@@ -63,6 +62,9 @@ command::rules_t embed_command::validity_rules() const
 
 bool embed_command::execute()
 {
+  const auto& bdds = env->store<bdd_function_t>();
+  auto& rcbdds = env->store<rcbdd>();
+
   const auto settings = make_settings();
   const auto statistics = std::make_shared<properties>();
 

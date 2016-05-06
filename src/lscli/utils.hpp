@@ -46,20 +46,20 @@
 #include <readline/history.h>
 #endif
 
-#include <core/cli/command.hpp>
-#include <core/cli/environment.hpp>
-#include <core/cli/store.hpp>
-#include <core/cli/commands/alias.hpp>
-#include <core/cli/commands/convert.hpp>
-#include <core/cli/commands/current.hpp>
-#include <core/cli/commands/help.hpp>
-#include <core/cli/commands/print.hpp>
-#include <core/cli/commands/ps.hpp>
-#include <core/cli/commands/quit.hpp>
-#include <core/cli/commands/read_io.hpp>
-#include <core/cli/commands/show.hpp>
-#include <core/cli/commands/store.hpp>
-#include <core/cli/commands/write_io.hpp>
+#include <lscli/command.hpp>
+#include <lscli/environment.hpp>
+#include <lscli/store.hpp>
+#include <lscli/commands/alias.hpp>
+#include <lscli/commands/convert.hpp>
+#include <lscli/commands/current.hpp>
+#include <lscli/commands/help.hpp>
+#include <lscli/commands/print.hpp>
+#include <lscli/commands/ps.hpp>
+#include <lscli/commands/quit.hpp>
+#include <lscli/commands/read_io.hpp>
+#include <lscli/commands/show.hpp>
+#include <lscli/commands/store.hpp>
+#include <lscli/commands/write_io.hpp>
 
 namespace po = boost::program_options;
 
@@ -299,7 +299,11 @@ private:
   void initialize_readline()
   {
     instance = this;
-    command_names = get_map_keys( env->commands );
+
+    for ( const auto& p : env->commands )
+    {
+      command_names.push_back( p.first );
+    }
     rl_attempted_completion_function = cli_main<S...>::readline_completion_s;
   }
 

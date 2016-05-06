@@ -18,8 +18,8 @@
 
 #include "tbs.hpp"
 
-#include <core/cli/rules.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/program_options.hpp>
 #include <classical/aig.hpp>
 #include <classical/cli/stores.hpp>

@@ -29,8 +29,6 @@
 #define CLI_CEC_COMMAND_HPP
 
 #include <core/cli/cirkit_command.hpp>
-#include <core/cli/environment.hpp>
-#include <core/cli/store.hpp>
 
 #include <classical/aig.hpp>
 #include <classical/utils/counterexample.hpp>
@@ -50,8 +48,6 @@ protected:
 private:
   unsigned circ1 = 0u;
   unsigned circ2 = 1u;
-  cli_store<aig_graph>& aigs;
-  cli_store<counterexample_t>& cex;
 };
 
 }

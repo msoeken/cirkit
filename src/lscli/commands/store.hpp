@@ -33,11 +33,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/cli/command.hpp>
-#include <core/cli/store.hpp>
-#include <core/utils/bdd_utils.hpp>
-#include <core/utils/program_options.hpp>
-#include <core/utils/range_utils.hpp>
+#include <lscli/command.hpp>
+#include <lscli/store.hpp>
 
 namespace cirkit
 {
@@ -59,10 +56,12 @@ int show_helper( const command& cmd, const environment::ptr& env )
     else
     {
       std::cout << boost::format( "[i] %s in store:" ) % name_plural << std::endl;
-      for ( const auto& element : index( store.data() ) )
+      auto index = 0u;
+      for ( const auto& element : store.data() )
       {
-        std::cout << boost::format( "  %c %2d: " ) % ( store.current_index() == element.index ? '*' : ' ' ) % element.index;
-        std::cout << store_entry_to_string<S>( element.value ) << std::endl;
+        std::cout << boost::format( "  %c %2d: " ) % ( store.current_index() == index ? '*' : ' ' ) % index;
+        std::cout << store_entry_to_string<S>( element ) << std::endl;
+        ++index;
       }
     }
   }

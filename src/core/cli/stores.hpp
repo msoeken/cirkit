@@ -30,8 +30,9 @@
 
 #include <string>
 
+#include <lscli/store.hpp>
+
 #include <core/properties.hpp>
-#include <core/cli/store.hpp>
 #include <core/utils/bdd_utils.hpp>
 
 namespace cirkit

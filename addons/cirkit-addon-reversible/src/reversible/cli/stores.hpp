@@ -28,7 +28,8 @@
 #ifndef STORES_HPP
 #define STORES_HPP
 
-#include <core/cli/store.hpp>
+#include <lscli/store.hpp>
+
 #include <classical/aig.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>

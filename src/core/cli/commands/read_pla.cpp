@@ -20,7 +20,8 @@
 
 #include <cuddObj.hh>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/cli/stores.hpp>
 #include <core/io/pla_parser.hpp>
 #include <core/io/pla_processor.hpp>

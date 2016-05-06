@@ -42,28 +42,29 @@ namespace cirkit
  ******************************************************************************/
 
 cec_command::cec_command( const environment::ptr& env )
-  : cirkit_command( env, "Combinatorial equivalence checking of two aigs" ),
-    aigs( env->store<aig_graph>() ),
-    cex( env->store<counterexample_t>() )
+  : cirkit_command( env, "Combinatorial equivalence checking of two aigs" )
 {
   opts.add_options()
     ( "circuit1",  value_with_default( &circ1 ),  "Store-ID of circuit1" )
     ( "circuit2",  value_with_default( &circ2 ),  "Store-ID of circuit2" )
-    ( "new,n",                                    "Write counterexample into new store element" )
     ;
+  add_new_option();
   be_verbose();
 }
 
 command::rules_t cec_command::validity_rules() const
 {
   return {
-    {[&]() { return circ1 < aigs.size(); }, "store-ID of circuit1 is invalid" },
-    {[&]() { return circ2 < aigs.size(); }, "store-ID of circuit2 is invalid" }
+    {[&]() { return circ1 < env->store<aig_graph>().size(); }, "store-ID of circuit1 is invalid" },
+    {[&]() { return circ2 < env->store<aig_graph>().size(); }, "store-ID of circuit2 is invalid" }
   };
 }
 
 bool cec_command::execute()
 {
+  auto& aigs = env->store<aig_graph>();
+  auto& cex  = env->store<counterexample_t>();
+
   const auto& aig_circ1 = aigs[circ1];
   const auto& aig_circ2 = aigs[circ2];
 

@@ -17,33 +17,30 @@
  */
 
 /**
- * @file quit.hpp
+ * @file help.hpp
  *
- * @brief Quits the program
+ * @brief Shows help
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_QUIT_COMMAND_HPP
-#define CLI_QUIT_COMMAND_HPP
+#ifndef CLI_HELP_COMMAND_HPP
+#define CLI_HELP_COMMAND_HPP
 
-#include <core/cli/command.hpp>
-#include <core/cli/environment.hpp>
+#include <lscli/command.hpp>
+#include <lscli/environment.hpp>
 
 namespace cirkit
 {
 
-class quit_command : public command
+class help_command : public command
 {
 public:
-  quit_command( const environment::ptr& env );
+  help_command( const environment::ptr& env );
 
 protected:
   bool execute();
-
-public:
-  log_opt_t log() const;
 };
 
 }

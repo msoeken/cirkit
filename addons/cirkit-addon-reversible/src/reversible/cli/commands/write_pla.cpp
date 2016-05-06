@@ -18,7 +18,8 @@
 
 #include "write_pla.hpp"
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <reversible/truth_table.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/io/write_pla.hpp>

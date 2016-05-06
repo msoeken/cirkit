@@ -31,8 +31,8 @@
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
-#include <core/cli/command.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/command.hpp>
+#include <lscli/store.hpp>
 
 namespace po = boost::program_options;
 

@@ -18,7 +18,8 @@
 
 #include "required_lines.hpp"
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/cli/stores.hpp>
 #include <reversible/functions/calculate_additional_lines.hpp>
 

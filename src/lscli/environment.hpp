@@ -36,7 +36,7 @@
 
 #include <boost/any.hpp>
 
-#include <core/cli/store.hpp>
+#include <lscli/store.hpp>
 
 namespace cirkit
 {

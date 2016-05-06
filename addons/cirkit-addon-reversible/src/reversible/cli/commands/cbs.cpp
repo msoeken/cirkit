@@ -20,7 +20,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/cli/stores.hpp>
 #include <core/utils/program_options.hpp>
 #include <classical/cli/stores.hpp>
@@ -43,18 +44,16 @@ namespace cirkit
  ******************************************************************************/
 
 cbs_command::cbs_command( const environment::ptr& env )
-  : cirkit_command( env, "Circuit based synthesis", "[M. Soeken, A. Chattopadhyay: Unlocking Efficiency and Scalability of Reversible Logic Synthesis using Conventional Logic Synthesis, in: DAC 53 (2016)]" ),
-    aigs( env->store<aig_graph>() ),
-    circuits( env->store<circuit>() )
+  : cirkit_command( env, "Circuit based synthesis", "[M. Soeken, A. Chattopadhyay: Unlocking Efficiency and Scalability of Reversible Logic Synthesis using Conventional Logic Synthesis, in: DAC 53 (2016)]" )
 {
   opts.add_options()
     ( "threshold,t",        value_with_default( &threshold ), "Threshold for size of FFRs" )
     ( "embedding",          value_with_default( &embedding ), "0u: BDD-based, 1u: PLA-based" )
     ( "synthesis",          value_with_default( &synthesis ), "0u: TBS (BDD), 1u: TBS (SAT), 2u: DBS" )
-    ( "new,n",                                                "Add a new entry to the store; if not set, the current entry is overriden" )
     ( "store_intermediate",                                   "Stores all intermediate results (BDDs, RCBDDs, and circuits) in store\n"
                                                               "Should only be used for debugging purposes on small functions" )
     ;
+  add_new_option();
   be_verbose();
 }
 
@@ -65,10 +64,10 @@ command::rules_t cbs_command::validity_rules() const
 
 bool cbs_command::execute()
 {
-  if ( circuits.empty() || is_set( "new" ) )
-  {
-    circuits.extend();
-  }
+  const auto& aigs = env->store<aig_graph>();
+  auto& circuits = env->store<circuit>();
+
+  extend_if_new( circuits );
 
   auto settings = make_settings();
 

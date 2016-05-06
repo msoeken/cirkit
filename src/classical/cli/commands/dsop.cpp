@@ -20,8 +20,9 @@
 
 #include <boost/format.hpp>
 
+#include <lscli/rules.hpp>
+
 #include <core/properties.hpp>
-#include <core/cli/rules.hpp>
 #include <core/utils/program_options.hpp>
 #include <classical/optimization/compact_dsop.hpp>
 

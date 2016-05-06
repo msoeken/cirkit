@@ -31,7 +31,6 @@
 #include <string>
 
 #include <core/cli/cirkit_command.hpp>
-#include <core/cli/environment.hpp>
 
 namespace cirkit
 {

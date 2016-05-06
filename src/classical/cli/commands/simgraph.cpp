@@ -25,7 +25,8 @@
 #include <boost/optional.hpp>
 #include <boost/range/algorithm.hpp>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>

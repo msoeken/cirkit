@@ -17,22 +17,22 @@
  */
 
 /**
- * @file read_io.hpp
+ * @file write_io.hpp
  *
- * @brief Generic command for reading I/O
+ * @brief Generic command for writing I/O
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_READ_IO_COMMAND_HPP
-#define CLI_READ_IO_COMMAND_HPP
+#ifndef CLI_WRITE_IO_COMMAND_HPP
+#define CLI_WRITE_IO_COMMAND_HPP
 
 #include <string>
 
 #include <boost/program_options.hpp>
 
-#include <core/cli/command.hpp>
+#include <lscli/command.hpp>
 
 using namespace boost::program_options;
 
@@ -40,9 +40,9 @@ namespace cirkit
 {
 
 template<typename Tag, typename S>
-int add_read_io_option_helper( command& cmd, unsigned& option_count, std::string& default_option )
+int add_write_io_option_helper( command& cmd, unsigned& option_count, std::string& default_option )
 {
-  if ( store_can_read_io_type<S, Tag>( cmd.get_options() ) )
+  if ( store_can_write_io_type<S, Tag>( cmd.get_options() ) )
   {
     constexpr auto option = store_info<S>::option;
 
@@ -55,31 +55,33 @@ int add_read_io_option_helper( command& cmd, unsigned& option_count, std::string
 }
 
 template<typename Tag, typename S>
-int read_io_helper( command& cmd, const std::string& default_option, const environment::ptr& env, const std::string& filename )
+int write_io_helper( command& cmd, const std::string& default_option, const environment::ptr& env, const std::string& filename )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
 
   if ( cmd.is_set( option ) || option == default_option )
   {
-    if ( cmd.is_set( "new" ) || env->store<S>().empty() )
+    if ( env->store<S>().current_index() == -1 )
     {
-      env->store<S>().extend();
+      std::cout << "[w] no " << name << " selected in store" << std::endl;
     }
-
-    env->store<S>().current() = store_read_io_type<S, Tag>( filename, cmd.get_options() );
+    else
+    {
+      store_write_io_type<S, Tag>( env->store<S>().current(), filename, cmd.get_options() );
+    }
   }
   return 0;
 }
 
 template<class Tag, class... S>
-class read_io_command : public command
+class write_io_command : public command
 {
 public:
-  read_io_command( const environment::ptr& env, const std::string& name )
-    : command( env, boost::str( boost::format( "Read %s file" ) % name ) )
+  write_io_command( const environment::ptr& env, const std::string& name )
+    : command( env, boost::str( boost::format( "Write %s file" ) % name ) )
   {
-    [](...){}( add_read_io_option_helper<Tag, S>( *this, option_count, default_option )... );
+    [](...){}( add_write_io_option_helper<Tag, S>( *this, option_count, default_option )... );
     if ( option_count != 1u )
     {
       default_option.clear();
@@ -88,7 +90,6 @@ public:
     add_positional_option( "filename" );
     opts.add_options()
       ( "filename", value( &filename ), "filename" )
-      ( "new,n",                        "create new store entry" )
       ;
   }
 
@@ -104,7 +105,7 @@ protected:
 
   bool execute()
   {
-    [](...){}( read_io_helper<Tag, S>( *this, default_option, env, filename )... );
+    [](...){}( write_io_helper<Tag, S>( *this, default_option, env, filename )... );
 
     return true;
   }

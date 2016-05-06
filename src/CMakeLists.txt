@@ -4,6 +4,7 @@ add_definitions(-Wall)
 add_cirkit_library(
   NAME cirkit_core
   AUTO_DIRS core
+  AUTI DIRS lscli
   USE
     ${Boost_REGEX_LIBRARIES}
     ${Boost_TIMER_LIBRARIES}

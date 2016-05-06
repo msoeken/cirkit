@@ -20,7 +20,8 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/program_options.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/io/read_aiger.hpp>
@@ -45,15 +46,14 @@ namespace cirkit
  ******************************************************************************/
 
 read_aiger_command::read_aiger_command( const environment::ptr& env )
-  : cirkit_command( env, "Reads an AIG from file (in AIGER format)" ),
-    aigs( env->store<aig_graph>() )
+  : cirkit_command( env, "Reads an AIG from file (in AIGER format)" )
 {
   add_positional_option( "filename" );
   opts.add_options()
     ( "filename", value( &filename ), "AIGER filename" )
-    ( "new,n",                        "Add a new entry to the store; if not set, the current entry is overriden" )
     ( "nostrash",                     "Do not strash the AIG when reading (only for binary AIGs)" )
     ;
+  add_new_option();
   be_verbose();
 }
 
@@ -64,6 +64,7 @@ command::rules_t read_aiger_command::validity_rules() const
 
 bool read_aiger_command::execute()
 {
+  auto& aigs = env->store<aig_graph>();
   if ( is_verbose() )
   {
     std::cout << "[i] read from " << filename << std::endl;

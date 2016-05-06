@@ -28,8 +28,9 @@
 #ifndef CIRKIT_COMMAND_HPP
 #define CIRKIT_COMMAND_HPP
 
+#include <lscli/command.hpp>
+
 #include <core/properties.hpp>
-#include <core/cli/command.hpp>
 
 namespace cirkit
 {

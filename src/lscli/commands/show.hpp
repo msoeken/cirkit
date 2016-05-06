@@ -31,9 +31,9 @@
 #include <cstdlib>
 #include <string>
 
-#include <core/cli/command.hpp>
-#include <core/cli/environment.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/command.hpp>
+#include <lscli/environment.hpp>
+#include <lscli/store.hpp>
 
 #include <boost/any.hpp>
 #include <boost/format.hpp>
@@ -87,10 +87,9 @@ public:
   show_command( const environment::ptr& env ) : command( env, "Shows current data structure in DOT viewer" )
   {
     opts.add_options()
-      ( "dotname", value_with_default( &dotname ), "Filename for the DOT file" )
-      ( "dotcmd",  value_with_default( &dotcmd ),  "Command to show DOT file" )
-      ( "silent,s",                                "Don't show the DOT file, i.e., just save it" )
-      /*( "expr,e",                                  "Show as string expression (only for MIGs)" )*/
+      ( "dotname",  value( &dotname )->default_value( dotname ), "Filename for the DOT file" )
+      ( "dotcmd",   value( &dotcmd )->default_value( dotcmd ),   "Command to show DOT file" )
+      ( "silent,s",                                              "Don't show the DOT file, i.e., just save it" )
       ;
     [](...){}( add_option_helper<S>( opts )... );
     [](...){}( init_show_commands<S>( get_options(), show_commands )... );

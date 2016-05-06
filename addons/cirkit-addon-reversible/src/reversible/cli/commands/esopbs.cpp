@@ -21,7 +21,8 @@
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/synthesis/esop_synthesis.hpp>

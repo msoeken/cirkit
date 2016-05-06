@@ -20,9 +20,9 @@
 
 #include <boost/format.hpp>
 
+#include <lscli/rules.hpp>
+
 #include <core/utils/bdd_utils.hpp>
-#include <core/cli/rules.hpp>
-#include <core/cli/store.hpp>
 #include <core/cli/stores.hpp>
 #include <core/utils/timer.hpp>
 #include <reversible/circuit.hpp>

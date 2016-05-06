@@ -20,7 +20,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/cli/rules.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/program_options.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>

@@ -44,8 +44,7 @@ namespace cirkit
  ******************************************************************************/
 
 tt_command::tt_command( const environment::ptr& env )
-  : cirkit_command( env, "Truth table manipulation" ),
-    tts( env->store<tt>() )
+  : cirkit_command( env, "Truth table manipulation" )
 {
   add_positional_option( "load" );
   opts.add_options()
@@ -59,7 +58,7 @@ tt_command::tt_command( const environment::ptr& env )
 command::rules_t tt_command::validity_rules() const
 {
   return {
-    { [this]() { return is_set( "load" ) || is_set( "random" ) || tts.current_index() >= 0; }, "no current truth table available" },
+    { [this]() { return is_set( "load" ) || is_set( "random" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },
     { [this]() { return static_cast<int>( is_set( "load" ) ) +
                         static_cast<int>( is_set( "planame" ) ) +
                         static_cast<int>( is_set( "extend" ) ) +
@@ -69,6 +68,8 @@ command::rules_t tt_command::validity_rules() const
 
 bool tt_command::execute()
 {
+  auto& tts = env->store<tt>();
+
   if ( is_set( "load" ) )
   {
     tts.extend();
@@ -111,9 +112,9 @@ bool tt_command::execute()
 
 command::log_opt_t tt_command::log() const
 {
-  if ( is_set( "load" ) )
+  if ( is_set( "load" ) || is_set( "random" ) )
   {
-    return log_opt_t( {{"tt", to_string( tts.current() )}} );
+    return log_opt_t( {{"tt", to_string( env->store<tt>().current() )}} );
   }
   else
   {

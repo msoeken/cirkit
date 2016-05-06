@@ -29,7 +29,6 @@
 #define CLI_BDD_COMMAND_HPP
 
 #include <core/cli/cirkit_command.hpp>
-#include <core/cli/store.hpp>
 #include <core/utils/bdd_utils.hpp>
 
 namespace cirkit
@@ -45,8 +44,7 @@ protected:
   bool execute();
 
 private:
-  std::string                characteristic;
-  cli_store<bdd_function_t>& bdds;
+  std::string characteristic;
 };
 
 }

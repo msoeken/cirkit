@@ -29,8 +29,8 @@
 #include <boost/format.hpp>
 #include <boost/range/algorithm.hpp>
 
-#include <core/cli/rules.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/rules.hpp>
+
 #include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/optimization/esop_minimization.hpp>

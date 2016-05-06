@@ -29,7 +29,6 @@
 #define CLI_CBS_COMMAND_HPP
 
 #include <core/cli/cirkit_command.hpp>
-#include <core/cli/store.hpp>
 #include <classical/aig.hpp>
 #include <reversible/circuit.hpp>
 
@@ -52,9 +51,6 @@ private:
   unsigned              threshold = 20u;
   unsigned              embedding = 0u;
   unsigned              synthesis = 0u;
-
-  cli_store<aig_graph>& aigs;
-  cli_store<circuit>&   circuits;
 };
 
 }

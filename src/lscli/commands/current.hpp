@@ -17,59 +17,72 @@
  */
 
 /**
- * @file print.hpp
+ * @file current.hpp
  *
- * @brief Prints current data structure
+ * @brief Switches current data structure
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_PRINT_COMMAND_HPP
-#define CLI_PRINT_COMMAND_HPP
+#ifndef CLI_CURRENT_COMMAND_HPP
+#define CLI_CURRENT_COMMAND_HPP
 
-#include <core/cli/command.hpp>
-#include <core/cli/environment.hpp>
-#include <core/cli/store.hpp>
+#include <lscli/command.hpp>
+#include <lscli/environment.hpp>
+#include <lscli/store.hpp>
+
+using namespace boost::program_options;
 
 namespace cirkit
 {
 
 template<typename S>
-int print_helper( const command& cmd, const environment::ptr& env )
+int set_current_index_helper( const command& cmd, const environment::ptr& env, unsigned index )
 {
   constexpr auto option = store_info<S>::option;
 
-  if ( cmd.is_set( option ) )
+  if ( cmd.is_set( option ) && index < env->store<S>().size() )
   {
-    print_store_entry<S>( std::cout, env->store<S>().current() );
+    env->store<S>().set_current_index( index );
   }
   return 0;
 }
 
 template<class... S>
-class print_command : public command
+class current_command : public command
 {
 public:
-  print_command( const environment::ptr& env ) : command( env, "Prints current data structure" )
+  current_command( const environment::ptr& env )
+    : command( env, "Switches current data structure" )
   {
+    add_positional_option( "index" );
+    opts.add_options()
+      ( "index,i", value( &index ), "New index" )
+      ;
+
     [](...){}( add_option_helper<S>( opts )... );
   }
 
 protected:
   rules_t validity_rules() const
   {
-    return {
-      {[this]() { return exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" }
-    };
+    rules_t rules;
+
+    rules.push_back( {[this]() { return exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
+
+    return rules;
   }
 
   bool execute()
   {
-    [](...){}( print_helper<S>( *this, env )... );
+    [](...){}( set_current_index_helper<S>( *this, env, index )... );
 
     return true;
   }
+
+private:
+  unsigned index;
 };
 
 }

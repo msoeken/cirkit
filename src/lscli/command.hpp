@@ -37,7 +37,7 @@
 #include <boost/program_options.hpp>
 #include <boost/variant.hpp>
 
-#include <core/cli/environment.hpp>
+#include <lscli/environment.hpp>
 
 namespace po = boost::program_options;
 
