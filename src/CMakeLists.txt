@@ -2,9 +2,19 @@
 add_definitions(-Wall)
 
 add_cirkit_library(
+  NAME lscli
+  AUTO_DIRS lscli
+  USE
+    ${Boost_REGEX_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARIES}
+    ${Boost_FILESYSTEM_LIBRARIES}
+    ${Boost_PROGRAM_OPTIONS_LIBRARIES}
+    ${READLINE_LIBRARY}
+)
+
+add_cirkit_library(
   NAME cirkit_core
   AUTO_DIRS core
-  AUTI DIRS lscli
   USE
     ${Boost_REGEX_LIBRARIES}
     ${Boost_TIMER_LIBRARIES}
@@ -12,7 +22,7 @@ add_cirkit_library(
     ${Boost_FILESYSTEM_LIBRARIES}
     ${Boost_PROGRAM_OPTIONS_LIBRARIES}
     ${CUDD_LIBRARIES}
-    ${READLINE_LIBRARY}
+    lscli
 )
 
 add_cirkit_library(

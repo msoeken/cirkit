@@ -28,12 +28,12 @@
 #ifndef CLI_ALIAS_COMMAND_HPP
 #define CLI_ALIAS_COMMAND_HPP
 
-#include <core/cli/cirkit_command.hpp>
+#include <lscli/command.hpp>
 
 namespace cirkit
 {
 
-class alias_command : public cirkit_command
+class alias_command : public command
 {
 public:
   alias_command( const environment::ptr& env );
