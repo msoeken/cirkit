@@ -37,6 +37,16 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
+std::string format_control( const variable& v )
+{
+  return boost::str( boost::format( "%sl%d" ) % ( v.polarity() ? "" : "-" ) % v.line() );
+}
+
+std::string format_target( unsigned t, const std::string& prefix = std::string() )
+{
+  return boost::str( boost::format( boost::format( "%sl%d" ) % prefix % t ) );
+}
+
 void write_qpic( const circuit& circ, std::ostream& os )
 {
   for ( auto i = 0u; i < circ.lines(); ++i )
@@ -46,18 +56,37 @@ void write_qpic( const circuit& circ, std::ostream& os )
 
   for ( const auto& g : circ )
   {
-    assert( is_toffoli( g ) );
-
     std::vector<std::string> items;
 
-    for ( const auto& c : g.controls() )
+    if ( is_toffoli( g ) )
     {
-      items.push_back( boost::str( boost::format( "%sl%d" ) % ( c.polarity() ? "" : "-" ) % c.line() ) );
-    }
+      for ( const auto& c : g.controls() )
+      {
+        items.push_back( format_control( c ) );
+      }
 
-    for ( const auto& t : g.targets() )
+      for ( const auto& t : g.targets() )
+      {
+        items.push_back( format_target( t, "+" ) );
+      }
+    }
+    else if ( is_fredkin( g ) )
     {
-      items.push_back( boost::str( boost::format( "+l%d" ) % t ) );
+      assert( g.targets().size() == 2u );
+
+      for ( const auto& t : g.targets() )
+      {
+        items.push_back( format_target( t ) );
+      }
+      items.push_back( "SWAP" );
+      for ( const auto& c : g.controls() )
+      {
+        items.push_back( format_control( c ) );
+      }
+    }
+    else
+    {
+      assert( false );
     }
 
     os << boost::join( items, " " ) << std::endl;
