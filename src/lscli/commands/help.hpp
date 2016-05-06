@@ -28,6 +28,10 @@
 #ifndef CLI_HELP_COMMAND_HPP
 #define CLI_HELP_COMMAND_HPP
 
+#include <iostream>
+
+#include <boost/format.hpp>
+
 #include <lscli/command.hpp>
 #include <lscli/environment.hpp>
 
@@ -37,10 +41,20 @@ namespace cirkit
 class help_command : public command
 {
 public:
-  help_command( const environment::ptr& env );
+  help_command( const environment::ptr& env )  : command( env, "Shows help" ) {}
 
 protected:
-  bool execute();
+  bool execute()
+  {
+    std::cout << "[i] Available commands:" << std::endl;
+
+    for ( const auto& p : env->commands )
+    {
+      std::cout << boost::format( "    * %-20s : %s" ) % p.first % p.second->caption() << std::endl;
+    }
+
+    return true;
+  }
 };
 
 }

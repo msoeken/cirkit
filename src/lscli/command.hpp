@@ -35,6 +35,7 @@
 
 #include <boost/optional.hpp>
 #include <boost/program_options.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/variant.hpp>
 
 #include <lscli/environment.hpp>
@@ -43,6 +44,23 @@ namespace po = boost::program_options;
 
 namespace cirkit
 {
+
+namespace detail
+{
+
+inline std::string make_caption( const std::string& caption, const std::string& publications )
+{
+  std::string c = caption;
+
+  if ( !publications.empty() )
+  {
+    c += "\n\nBased on the following publication(s):\n" + publications;
+  }
+
+  return c;
+}
+
+}
 
 class command
 {
@@ -54,10 +72,52 @@ public:
   using log_map_t = std::unordered_map<std::string, log_var_t>;
   using log_opt_t = boost::optional<log_map_t>;
 
-  command( const environment::ptr& env, const std::string& caption, const std::string& publications = std::string() );
+  command( const environment::ptr& env, const std::string& caption, const std::string& publications = std::string() )
+    : env( env ),
+      scaption( caption ),
+      opts( detail::make_caption( caption, publications ) )
+  {
+    opts.add_options()
+      ( "help,h", "produce help message" )
+      ;
+  }
 
-  const std::string& caption() const;
-  virtual bool run( const std::vector<std::string>& args );
+  inline const std::string& caption() const { return scaption; }
+
+  virtual bool run( const std::vector<std::string>& args )
+  {
+    std::vector<char*> argv( args.size() );
+    boost::transform( args, argv.begin(), []( const std::string& s ) { return const_cast<char*>( s.c_str() ); } );
+    vm.clear();
+
+    try
+    {
+      po::store( po::command_line_parser( args.size(), &argv[0] ).options( opts ).positional( pod ).run(), vm );
+      po::notify( vm );
+    }
+    catch ( po::error& e )
+    {
+      std::cerr << "[e] " << e.what() << std::endl;
+      return false;
+    }
+
+    if ( vm.count( "help" ) )
+    {
+      std::cout << opts << std::endl;
+      return false;
+    }
+
+    for ( const auto& p : validity_rules() )
+    {
+      if ( !p.first() )
+      {
+        std::cerr << "[e] " << p.second << std::endl;
+        return false;
+      }
+    }
+
+    return execute();
+  }
 
   inline bool is_set( const std::string& opt ) const { return vm.count( opt ); }
 
@@ -67,11 +127,17 @@ protected:
 
 public:
   virtual log_opt_t log() const { return boost::none; }
-  cli_options get_options();
+  cli_options get_options()
+  {
+    return cli_options( opts, vm, pod );
+  }
 
 protected:
   /* positional arguments */
-  void add_positional_option( const std::string& option );
+  void add_positional_option( const std::string& option )
+  {
+    pod.add( option.c_str(), 1 );
+  }
 
 public:
   std::shared_ptr<environment> env;

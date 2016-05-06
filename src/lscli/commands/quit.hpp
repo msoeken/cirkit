@@ -28,6 +28,10 @@
 #ifndef CLI_QUIT_COMMAND_HPP
 #define CLI_QUIT_COMMAND_HPP
 
+#include <sys/utsname.h>
+
+#include <thread>
+
 #include <lscli/command.hpp>
 #include <lscli/environment.hpp>
 
@@ -37,13 +41,30 @@ namespace cirkit
 class quit_command : public command
 {
 public:
-  quit_command( const environment::ptr& env );
+  quit_command( const environment::ptr& env )
+    : command( env, "Quits the program" ) {}
 
 protected:
-  bool execute();
+  bool execute()
+  {
+    env->quit = true;
+    return true;
+  }
 
 public:
-  log_opt_t log() const;
+  log_opt_t log() const
+  {
+    utsname u;
+    uname( &u );
+    return log_opt_t({
+        {"sysname", std::string( u.sysname )},
+        {"nodename", std::string( u.nodename )},
+        {"release", std::string( u.release )},
+        {"version", std::string( u.version )},
+        {"machine", std::string( u.machine )},
+        {"supported_threads", static_cast<int>( std::thread::hardware_concurrency() )}
+      });
+  }
 };
 
 }
