@@ -32,6 +32,7 @@
 #include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/read_specification.hpp>
+#include <reversible/io/write_qpic.hpp>
 #include <reversible/io/write_quipper.hpp>
 #include <reversible/io/write_realization.hpp>
 #include <reversible/io/write_specification.hpp>
@@ -75,6 +76,12 @@ template<>
 aig_graph store_convert<circuit, aig_graph>( const circuit& circ )
 {
   return circuit_to_aig( circ );
+}
+
+template<>
+void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts )
+{
+  write_qpic( circ, filename );
 }
 
 template<>

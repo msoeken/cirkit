@@ -42,6 +42,7 @@ struct io_real_tag_t {};
 struct io_spec_tag_t {};
 struct io_quipper_tag_t {};
 struct io_tikz_tag_t {};
+struct io_qpic_tag_t {};
 
 /******************************************************************************
  * circuit                                                                    *
@@ -74,6 +75,12 @@ inline bool store_can_convert<circuit, aig_graph>() { return true; }
 
 template<>
 aig_graph store_convert<circuit, aig_graph>( const circuit& circ );
+
+template<>
+inline bool store_can_write_io_type<circuit, io_qpic_tag_t>( const cli_options& opts ) { return true; }
+
+template<>
+void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts );
 
 template<>
 bool store_can_write_io_type<circuit, io_quipper_tag_t>( const cli_options& opts );
