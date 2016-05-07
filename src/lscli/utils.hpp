@@ -47,7 +47,6 @@
 #endif
 
 #include <lscli/command.hpp>
-#include <lscli/environment.hpp>
 #include <lscli/store.hpp>
 #include <lscli/commands/alias.hpp>
 #include <lscli/commands/convert.hpp>
@@ -100,15 +99,15 @@ public:
      *
      * see store.hpp for more details
      */
-    env->commands.insert( {"alias",   std::make_shared<alias_command>( env )} );
-    env->commands.insert( {"convert", std::make_shared<convert_command<S...>>( env )} );
-    env->commands.insert( {"current", std::make_shared<current_command<S...>>( env )} );
-    env->commands.insert( {"help",    std::make_shared<help_command>( env )} );
-    env->commands.insert( {"quit",    std::make_shared<quit_command>( env )} );
-    env->commands.insert( {"show",    std::make_shared<show_command<S...>>( env )} );
-    env->commands.insert( {"store",   std::make_shared<store_command<S...>>( env )} );
-    env->commands.insert( {"print",   std::make_shared<print_command<S...>>( env )} );
-    env->commands.insert( {"ps",      std::make_shared<ps_command<S...>>( env )} );
+    insert_command( "alias",   std::make_shared<alias_command>( env ) );
+    insert_command( "convert", std::make_shared<convert_command<S...>>( env ) );
+    insert_command( "current", std::make_shared<current_command<S...>>( env ) );
+    insert_command( "help",    std::make_shared<help_command>( env ) );
+    insert_command( "quit",    std::make_shared<quit_command>( env ) );
+    insert_command( "show",    std::make_shared<show_command<S...>>( env ) );
+    insert_command( "store",   std::make_shared<store_command<S...>>( env ) );
+    insert_command( "print",   std::make_shared<print_command<S...>>( env ) );
+    insert_command( "ps",      std::make_shared<ps_command<S...>>( env ) );
 
     opts.add_options()
       ( "command,c", po::value( &command ), "process semicolon-separated list of commands" )
@@ -118,6 +117,17 @@ public:
       ( "log,l",     po::value( &logname ), "logs the execution and stores many statistical information" )
       ( "help,h",                           "produce help message" )
       ;
+  }
+
+  void set_category( const std::string& _category )
+  {
+    category = _category;
+  }
+
+  void insert_command( const std::string& name, const std::shared_ptr<command>& cmd )
+  {
+    env->categories[category].push_back( name );
+    env->commands[name] = cmd;
   }
 
   int run( int argc, char ** argv )
@@ -349,6 +359,7 @@ private:
   po::options_description opts;
   po::variables_map       vm;
 
+  std::string             category;
   std::string             command;
   std::string             file;
   std::string             logname;
@@ -356,7 +367,7 @@ private:
   unsigned                counter = 1u;
 };
 
-#define ADD_COMMAND( name ) cli.env->commands.insert( {#name, std::make_shared<name##_command>( cli.env ) } );
+#define ADD_COMMAND( name ) cli.insert_command( #name, std::make_shared<name##_command>( cli.env ) );
 
 #ifdef USE_READLINE
 template<class... S>

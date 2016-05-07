@@ -29,7 +29,6 @@
 #define CLI_PRINT_COMMAND_HPP
 
 #include <lscli/command.hpp>
-#include <lscli/environment.hpp>
 #include <lscli/store.hpp>
 
 namespace cirkit

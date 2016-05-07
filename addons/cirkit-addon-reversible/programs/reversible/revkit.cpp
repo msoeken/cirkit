@@ -65,13 +65,13 @@ int main( int argc, char ** argv )
 {
   cli_main<STORES> cli( "revkit" );
 
-  cli.env->commands.insert( {"read_real",     std::make_shared<read_io_command<io_real_tag_t,     STORES>>( cli.env, "realization" )} );
-  cli.env->commands.insert( {"read_spec",     std::make_shared<read_io_command<io_spec_tag_t,     STORES>>( cli.env, "specification" )} );
-  cli.env->commands.insert( {"write_qpic",    std::make_shared<write_io_command<io_qpic_tag_t,    STORES>>( cli.env, "qpic" )} );
-  cli.env->commands.insert( {"write_quipper", std::make_shared<write_io_command<io_quipper_tag_t, STORES>>( cli.env, "Quipper" )} );
-  cli.env->commands.insert( {"write_real",    std::make_shared<write_io_command<io_real_tag_t,    STORES>>( cli.env, "realization" )} );
-  cli.env->commands.insert( {"write_spec",    std::make_shared<write_io_command<io_spec_tag_t,    STORES>>( cli.env, "specification" )} );
-  cli.env->commands.insert( {"write_tikz",    std::make_shared<write_io_command<io_tikz_tag_t,    STORES>>( cli.env, "TikZ" )} );
+  cli.insert_command( "read_real",     std::make_shared<read_io_command<io_real_tag_t,     STORES>>( cli.env, "realization" ) );
+  cli.insert_command( "read_spec",     std::make_shared<read_io_command<io_spec_tag_t,     STORES>>( cli.env, "specification" ) );
+  cli.insert_command( "write_qpic",    std::make_shared<write_io_command<io_qpic_tag_t,    STORES>>( cli.env, "qpic" ) );
+  cli.insert_command( "write_quipper", std::make_shared<write_io_command<io_quipper_tag_t, STORES>>( cli.env, "Quipper" ) );
+  cli.insert_command( "write_real",    std::make_shared<write_io_command<io_real_tag_t,    STORES>>( cli.env, "realization" ) );
+  cli.insert_command( "write_spec",    std::make_shared<write_io_command<io_spec_tag_t,    STORES>>( cli.env, "specification" ) );
+  cli.insert_command( "write_tikz",    std::make_shared<write_io_command<io_tikz_tag_t,    STORES>>( cli.env, "TikZ" ) );
 
   ADD_COMMAND( adding_lines );
   ADD_COMMAND( bdd );

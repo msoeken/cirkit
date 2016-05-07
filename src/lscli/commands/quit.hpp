@@ -33,7 +33,6 @@
 #include <thread>
 
 #include <lscli/command.hpp>
-#include <lscli/environment.hpp>
 
 namespace cirkit
 {
