@@ -21,6 +21,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -31,6 +33,9 @@
 #include <classical/functions/aig_from_truth_table.hpp>
 #include <classical/functions/compute_levels.hpp>
 #include <classical/functions/simulate_aig.hpp>
+#include <classical/io/read_aiger.hpp>
+#include <classical/io/read_symmetries.hpp>
+#include <classical/io/read_unateness.hpp>
 #include <classical/io/write_verilog.hpp>
 
 namespace cirkit
@@ -138,6 +143,58 @@ bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
   }
 
   return {mgr, bdds};
+}
+
+template<>
+bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( const cli_options& opts )
+{
+  opts.opts.add_options()
+    ( "nostrash", "do not strash the AIG when reading (in binary AIGER format)" )
+    ;
+  return true;
+}
+
+template<>
+aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const cli_options& opts )
+{
+  aig_graph aig;
+
+  try
+  {
+    if ( boost::ends_with( filename, "aag" ) )
+    {
+      read_aiger( aig, filename );
+    }
+    else
+    {
+      read_aiger_binary( aig, filename, opts.vm.count( "nostrash" ) == 1u );
+    }
+  }
+  catch ( const char *e )
+  {
+    std::cerr << e << std::endl;
+    assert( false );
+  }
+
+  /* auto-find symmetry file */
+  const auto symname = filename.substr( 0, filename.size() - 3 ) + "sym";
+  if ( boost::filesystem::exists( symname ) )
+  {
+    /* read symmetries */
+    std::cout << "[i] found and read symmetries file" << std::endl;
+    read_symmetries( aig, symname );
+  }
+
+  /* auto-find unateness file */
+  const auto depname = filename.substr( 0, filename.size() - 3 ) + "dep";
+  if ( boost::filesystem::exists( depname ) )
+  {
+    /* read unateness */
+    std::cout << "[i] found and read unateness dependency file" << std::endl;
+    read_unateness( aig, depname );
+  }
+
+  return aig;
 }
 
 template<>

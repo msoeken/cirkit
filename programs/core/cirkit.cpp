@@ -40,7 +40,6 @@
 #include <classical/cli/commands/npn.hpp>
 #include <classical/cli/commands/output_noise.hpp>
 #include <classical/cli/commands/propagate.hpp>
-#include <classical/cli/commands/read_aiger.hpp>
 #include <classical/cli/commands/read_bench.hpp>
 #include <classical/cli/commands/read_sym.hpp>
 #include <classical/cli/commands/rename.hpp>
@@ -73,9 +72,10 @@ int main( int argc, char ** argv )
 {
   cli_main<STORE_TYPES> cli( "cirkit" );
 
-  cli.insert_command( "read_verilog", std::make_shared<read_io_command<io_verilog_tag_t, STORE_TYPES>>( cli.env, "Verilog" ) );
+  cli.insert_command( "read_aiger",     std::make_shared<read_io_command<io_aiger_tag_t,     STORE_TYPES>>( cli.env, "Aiger" ) );
+  cli.insert_command( "read_verilog",   std::make_shared<read_io_command<io_verilog_tag_t,   STORE_TYPES>>( cli.env, "Verilog" ) );
   cli.insert_command( "write_edgelist", std::make_shared<write_io_command<io_edgelist_tag_t, STORE_TYPES>>( cli.env, "Edge list" ) );
-  cli.insert_command( "write_verilog", std::make_shared<write_io_command<io_verilog_tag_t, STORE_TYPES>>( cli.env, "Verilog" ) );
+  cli.insert_command( "write_verilog",  std::make_shared<write_io_command<io_verilog_tag_t,  STORE_TYPES>>( cli.env, "Verilog" ) );
 
   /* core */
   ADD_COMMAND( bdd );
@@ -94,7 +94,6 @@ int main( int argc, char ** argv )
   ADD_COMMAND( npn );
   ADD_COMMAND( output_noise );
   ADD_COMMAND( propagate );
-  ADD_COMMAND( read_aiger );
   ADD_COMMAND( read_bench );
   ADD_COMMAND( read_sym );
   ADD_COMMAND( rename );

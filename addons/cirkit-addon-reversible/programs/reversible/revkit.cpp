@@ -31,7 +31,6 @@
 #include <classical/aig.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/cli/commands/expr.hpp>
-#include <classical/cli/commands/read_aiger.hpp>
 #include <classical/cli/commands/write_aiger.hpp>
 #include <classical/utils/expression_parser.hpp>
 #include <reversible/circuit.hpp>
@@ -65,6 +64,7 @@ int main( int argc, char ** argv )
 {
   cli_main<STORES> cli( "revkit" );
 
+  cli.insert_command( "read_aiger",    std::make_shared<read_io_command<io_aiger_tag_t,    STORES>>( cli.env, "Aiger" ) );
   cli.insert_command( "read_real",     std::make_shared<read_io_command<io_real_tag_t,     STORES>>( cli.env, "realization" ) );
   cli.insert_command( "read_spec",     std::make_shared<read_io_command<io_spec_tag_t,     STORES>>( cli.env, "specification" ) );
   cli.insert_command( "write_qpic",    std::make_shared<write_io_command<io_qpic_tag_t,    STORES>>( cli.env, "qpic" ) );
@@ -85,7 +85,6 @@ int main( int argc, char ** argv )
   ADD_COMMAND( hdbs );
   ADD_COMMAND( qbs );
   ADD_COMMAND( random_circuit );
-  ADD_COMMAND( read_aiger );
   ADD_COMMAND( read_pla );
   ADD_COMMAND( rec );
   ADD_COMMAND( required_lines );

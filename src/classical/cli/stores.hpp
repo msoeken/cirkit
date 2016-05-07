@@ -45,6 +45,11 @@
 namespace cirkit
 {
 
+struct io_aiger_tag_t {};
+struct io_bench_tag_t {};
+struct io_verilog_tag_t {};
+struct io_edgelist_tag_t {};
+
 /******************************************************************************
  * aig_graph                                                                  *
  ******************************************************************************/
@@ -89,6 +94,12 @@ inline bool store_can_convert<aig_graph, bdd_function_t>() { return true; }
 
 template<>
 bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig );
+
+template<>
+bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( const cli_options& opts );
+
+template<>
+aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const cli_options& opts );
 
 template<>
 inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( const cli_options& opts ) { return true; }

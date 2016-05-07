@@ -204,12 +204,6 @@ Dest store_convert( const Source& src )
   assert( false );
 }
 
-/* I/O */
-struct io_aiger_tag_t {};
-struct io_bench_tag_t {};
-struct io_verilog_tag_t {};
-struct io_edgelist_tag_t {};
-
 template<typename T, typename Tag>
 bool store_can_write_io_type( const cli_options& opts )
 {
