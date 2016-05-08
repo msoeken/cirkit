@@ -130,6 +130,18 @@ public:
     env->commands[name] = cmd;
   }
 
+  template<typename Tag>
+  void insert_read_command( const std::string& name, const std::string& label )
+  {
+    insert_command( name, std::make_shared<read_io_command<Tag, S...>>( env, label ) );
+  }
+
+  template<typename Tag>
+  void insert_write_command( const std::string& name, const std::string& label )
+  {
+    insert_command( name, std::make_shared<write_io_command<Tag, S...>>( env, label ) );
+  }
+
   int run( int argc, char ** argv )
   {
     po::store( po::command_line_parser( argc, argv ).options( opts ).run(), vm );
@@ -367,7 +379,12 @@ private:
   unsigned                counter = 1u;
 };
 
+#define CIRKIT_S(x) #x
+#define CIRKIT_SX(x) CIRKIT_S(x)
+
 #define ADD_COMMAND( name ) cli.insert_command( #name, std::make_shared<name##_command>( cli.env ) );
+#define ADD_READ_COMMAND( name, label ) cli.insert_read_command<io_##name##_tag_t>( "read_" CIRKIT_SX(name), label );
+#define ADD_WRITE_COMMAND( name, label ) cli.insert_write_command<io_##name##_tag_t>( "write_" CIRKIT_SX(name), label );
 
 #ifdef USE_READLINE
 template<class... S>

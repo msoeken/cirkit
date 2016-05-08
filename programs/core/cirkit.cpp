@@ -72,10 +72,10 @@ int main( int argc, char ** argv )
 {
   cli_main<STORE_TYPES> cli( "cirkit" );
 
-  cli.insert_command( "read_aiger",     std::make_shared<read_io_command<io_aiger_tag_t,     STORE_TYPES>>( cli.env, "Aiger" ) );
-  cli.insert_command( "read_verilog",   std::make_shared<read_io_command<io_verilog_tag_t,   STORE_TYPES>>( cli.env, "Verilog" ) );
-  cli.insert_command( "write_edgelist", std::make_shared<write_io_command<io_edgelist_tag_t, STORE_TYPES>>( cli.env, "Edge list" ) );
-  cli.insert_command( "write_verilog",  std::make_shared<write_io_command<io_verilog_tag_t,  STORE_TYPES>>( cli.env, "Verilog" ) );
+  ADD_READ_COMMAND( aiger, "Aiger" );
+  ADD_READ_COMMAND( verilog, "Verilog" );
+  ADD_WRITE_COMMAND( edgelist, "Edge list" );
+  ADD_WRITE_COMMAND( verilog, "Verilog" );
 
   /* core */
   ADD_COMMAND( bdd );

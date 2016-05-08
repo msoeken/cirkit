@@ -64,14 +64,14 @@ int main( int argc, char ** argv )
 {
   cli_main<STORES> cli( "revkit" );
 
-  cli.insert_command( "read_aiger",    std::make_shared<read_io_command<io_aiger_tag_t,    STORES>>( cli.env, "Aiger" ) );
-  cli.insert_command( "read_real",     std::make_shared<read_io_command<io_real_tag_t,     STORES>>( cli.env, "realization" ) );
-  cli.insert_command( "read_spec",     std::make_shared<read_io_command<io_spec_tag_t,     STORES>>( cli.env, "specification" ) );
-  cli.insert_command( "write_qpic",    std::make_shared<write_io_command<io_qpic_tag_t,    STORES>>( cli.env, "qpic" ) );
-  cli.insert_command( "write_quipper", std::make_shared<write_io_command<io_quipper_tag_t, STORES>>( cli.env, "Quipper" ) );
-  cli.insert_command( "write_real",    std::make_shared<write_io_command<io_real_tag_t,    STORES>>( cli.env, "realization" ) );
-  cli.insert_command( "write_spec",    std::make_shared<write_io_command<io_spec_tag_t,    STORES>>( cli.env, "specification" ) );
-  cli.insert_command( "write_tikz",    std::make_shared<write_io_command<io_tikz_tag_t,    STORES>>( cli.env, "TikZ" ) );
+  ADD_READ_COMMAND( aiger, "Aiger" );
+  ADD_READ_COMMAND( real, "realization" );
+  ADD_READ_COMMAND( spec, "specification" );
+  ADD_WRITE_COMMAND( qpic, "qpic" );
+  ADD_WRITE_COMMAND( quipper, "Quipper" );
+  ADD_WRITE_COMMAND( real, "realization" );
+  ADD_WRITE_COMMAND( spec, "specification" );
+  ADD_WRITE_COMMAND( tikz, "TikZ" );
 
   ADD_COMMAND( adding_lines );
   ADD_COMMAND( bdd );
