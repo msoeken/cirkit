@@ -38,8 +38,6 @@
 namespace cirkit
 {
 
-enum class unate_kind { binate, unate_pos, unate_neg, independent };
-
 /**
  * The return value contains all the information for each output/input pair
  * ordered first by outputs, then by inputs, each pair takes 2 bits in the bitset:
@@ -68,10 +66,6 @@ boost::dynamic_bitset<> unateness_split_inputs_parallel( const aig_graph& aig,
 boost::dynamic_bitset<> unateness( const aig_graph& aig,
                                    const properties::ptr& settings = properties::ptr(),
                                    const properties::ptr& statistics = properties::ptr() );
-
-unate_kind get_unateness_kind( const boost::dynamic_bitset<>& u, unsigned po, unsigned pi, unsigned num_pis );
-unate_kind get_unateness_kind( const boost::dynamic_bitset<>& u, unsigned po, unsigned pi, const aig_graph_info& info );
-unate_kind get_unateness_kind( const boost::dynamic_bitset<>& u, unsigned po, unsigned pi, const aig_graph& aig );
 
 }
 

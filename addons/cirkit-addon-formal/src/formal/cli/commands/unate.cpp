@@ -24,6 +24,7 @@
 #include <boost/format.hpp>
 
 #include <core/utils/program_options.hpp>
+#include <classical/utils/unateness.hpp>
 #include <formal/verification/unate.hpp>
 
 using namespace boost::program_options;

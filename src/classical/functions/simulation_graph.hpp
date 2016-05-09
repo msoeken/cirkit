@@ -44,6 +44,7 @@
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/aig.hpp>
+#include <classical/utils/unateness.hpp>
 
 namespace boost
 {
@@ -71,6 +72,9 @@ BOOST_INSTALL_PROPERTY(vertex, simulation_result);
 
 enum edge_label_t { edge_label };
 BOOST_INSTALL_PROPERTY(edge, label);
+
+enum edge_kind_t { edge_kind };
+BOOST_INSTALL_PROPERTY(edge, kind);
 
 }
 
@@ -125,7 +129,8 @@ using simulation_graph_vertex_properties_t = boost::property<boost::vertex_in_de
                                              boost::property<boost::vertex_simulation_vector_t, boost::dynamic_bitset<>,
                                              boost::property<boost::vertex_simulation_result_t, boost::dynamic_bitset<>>>>>>>>;
 
-using simulation_graph_edge_properties_t   = boost::property<boost::edge_label_t, unsigned>;
+using simulation_graph_edge_properties_t   = boost::property<boost::edge_label_t, unsigned,
+                                             boost::property<boost::edge_kind_t, unate_kind>>;
 
 using simulation_graph                     = graph_t<simulation_graph_vertex_properties_t,
                                                      simulation_graph_edge_properties_t,
@@ -224,6 +229,8 @@ public:
   void fill_neighbor_degree_sequence_out( unsigned u, std::vector<unsigned>& degrees ) const;
   void fill_neighbor_degree_sequence_all( unsigned u, std::vector<unsigned>& degrees ) const;
 
+  void add_edge_kinds();
+
   inline bool is_input( unsigned u ) const  { return label( u ) == 0u; }
   inline bool is_vector( unsigned u ) const { return label( u ) > 1u;  }
   inline bool is_output( unsigned u ) const { return label( u ) == 1u; }
@@ -246,6 +253,12 @@ public:
     const auto it = vedge_label[u].find( v );
     return ( it == vedge_label[u].end() ) ? 0u : it->second;
 #endif
+  }
+
+  inline unate_kind edge_kind( unsigned u, unsigned v ) const
+  {
+    const auto it = vedge_kind[u].find( v );
+    return it->second;
   }
 
   void write_dot( const std::string& filename ) const;
@@ -271,6 +284,7 @@ protected:
   std::vector<std::unordered_map<unsigned, unsigned>>                               vedge_label;
   std::vector<std::unordered_map<unsigned, unsigned>>                               vedge_direction;
 #endif
+  std::vector<std::unordered_map<unsigned, unate_kind>>                             vedge_kind;
 };
 
 bool compatible_simulation_signatures( const simulation_graph_wrapper& pg, const simulation_graph_wrapper& tg,

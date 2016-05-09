@@ -651,23 +651,6 @@ reset_assumptions:
   return result;
 }
 
-unate_kind get_unateness_kind( const boost::dynamic_bitset<>& u, unsigned po, unsigned pi, unsigned num_pis )
-{
-  const auto pos = po * ( num_pis << 1u ) + ( pi << 1u );
-
-  return u[pos] ? ( u[pos + 1u] ? unate_kind::independent : unate_kind::unate_neg ) : ( u[pos + 1u] ? unate_kind::unate_pos : unate_kind::binate );
-}
-
-unate_kind get_unateness_kind( const boost::dynamic_bitset<>& u, unsigned po, unsigned pi, const aig_graph_info& info )
-{
-  return get_unateness_kind( u, po, pi, info.inputs.size() );
-}
-
-unate_kind get_unateness_kind( const boost::dynamic_bitset<>& u, unsigned po, unsigned pi, const aig_graph& aig )
-{
-  return get_unateness_kind( u, po, pi, aig_info( aig ) );
-}
-
 }
 
 // Local Variables:

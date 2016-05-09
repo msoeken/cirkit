@@ -92,6 +92,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     edge_lookup.insert( std::make_pair( std::make_pair( to, from ), e ) );
     vertex_in_degree[to]++;
     vertex_out_degree[from]++;
+    return e;
   };
 
   /* edges from inputs to simulation vectors */
@@ -142,8 +143,10 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   if ( support )
   {
     const auto& vertex_support = boost::get( boost::vertex_support, g );
+    const auto& edge_kind      = boost::get( boost::edge_kind, g );
 
     support_map_t s;
+    boost::dynamic_bitset<> unate;
 
     if ( info.unateness.empty() )
     {
@@ -152,6 +155,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     else
     {
       s = aig_functional_support( aig );
+      unate = info.unateness;
     }
 
     for ( const auto& o : index( info.outputs ) )
@@ -164,7 +168,13 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
         auto it_bit = mask.find_first();
         while ( it_bit != boost::dynamic_bitset<>::npos )
         {
-          add_edge_func( n + sim_vectors.size() + o.index, it_bit );
+          const auto e = add_edge_func( n + sim_vectors.size() + o.index, it_bit );
+
+          if ( !unate.empty() )
+          {
+            edge_kind[e] = get_unateness_kind( unate, o.index, it_bit, n );
+          }
+
           it_bit = mask.find_next( it_bit );
         }
       }
@@ -481,6 +491,21 @@ void simulation_graph_wrapper::fill_neighbor_degree_sequence_all( unsigned u, st
   degrees.resize( degree( u ) );
   boost::transform( adjacent( u ), degrees.begin(), [&]( unsigned u2 ) { return degree( u2 ); } );
   boost::sort( degrees );
+}
+
+void simulation_graph_wrapper::add_edge_kinds()
+{
+  vedge_kind.resize( num_outputs() );
+
+  const auto& edge_kind = boost::get( boost::edge_kind, graph );
+
+  for ( const auto& out : output_indexes() )
+  {
+    for ( const auto& e : out_edges( out ) )
+    {
+      vedge_kind[output_index( out )][input_index( boost::target( e, graph ) )] = edge_kind[e];
+    }
+  }
 }
 
 struct simulation_graph_wrapper_dot_writer
