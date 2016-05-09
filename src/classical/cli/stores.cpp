@@ -90,7 +90,7 @@ bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string&
   return true;
 }
 
-command_log_opt_t show_store_entry<aig_graph>::log() const
+command::log_opt_t show_store_entry<aig_graph>::log() const
 {
   return boost::none;
 }
@@ -102,7 +102,7 @@ void print_store_entry_statistics<aig_graph>( std::ostream& os, const aig_graph&
 }
 
 template<>
-command_log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
+command::log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
 {
   const auto& info = aig_info( aig );
 
@@ -115,7 +115,7 @@ command_log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
   std::vector<unsigned> depths;
   const auto depth = compute_depth( aig, outputs, depths );
 
-  return command_log_opt_t({
+  return command::log_opt_t({
       {"inputs", static_cast<int>( info.inputs.size() )},
       {"outputs", static_cast<int>( info.outputs.size() )},
       {"size", static_cast<int>( boost::num_vertices( aig ) - info.inputs.size() - 1u )},
@@ -149,6 +149,8 @@ template<>
 bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( const cli_options& opts )
 {
   opts.opts.add_options()
+    ( "nosym",    "do not read symmetry file if existing" )
+    ( "nounate",  "do not read unateness file if existing" )
     ( "nostrash", "do not strash the AIG when reading (in binary AIGER format)" )
     ;
   return true;
@@ -178,7 +180,7 @@ aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& file
 
   /* auto-find symmetry file */
   const auto symname = filename.substr( 0, filename.size() - 3 ) + "sym";
-  if ( boost::filesystem::exists( symname ) )
+  if ( opts.vm.count( "nosym" ) == 0 && boost::filesystem::exists( symname ) )
   {
     /* read symmetries */
     std::cout << "[i] found and read symmetries file" << std::endl;
@@ -187,7 +189,7 @@ aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& file
 
   /* auto-find unateness file */
   const auto depname = filename.substr( 0, filename.size() - 3 ) + "dep";
-  if ( boost::filesystem::exists( depname ) )
+  if ( opts.vm.count( "nounate" ) == 0 && boost::filesystem::exists( depname ) )
   {
     /* read unateness */
     std::cout << "[i] found and read unateness dependency file" << std::endl;
@@ -289,9 +291,9 @@ void print_store_entry_statistics<expression_t::ptr>( std::ostream& os, const ex
 }
 
 template<>
-command_log_opt_t log_store_entry_statistics<expression_t::ptr>( const expression_t::ptr& expr )
+command::log_opt_t log_store_entry_statistics<expression_t::ptr>( const expression_t::ptr& expr )
 {
-  return command_log_opt_t({
+  return command::log_opt_t({
       {"expression", expression_to_string( expr )}
     });
 }

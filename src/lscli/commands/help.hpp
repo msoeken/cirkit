@@ -28,6 +28,7 @@
 #ifndef CLI_HELP_COMMAND_HPP
 #define CLI_HELP_COMMAND_HPP
 
+#include <algorithm>
 #include <iostream>
 
 #include <boost/format.hpp>
@@ -40,16 +41,46 @@ namespace cirkit
 class help_command : public command
 {
 public:
-  help_command( const environment::ptr& env )  : command( env, "Shows help" ) {}
+  help_command( const environment::ptr& env )  : command( env, "Shows help" )
+  {
+    opts.add_options()
+      ( "detailed,d", "Show command descriptions" )
+      ;
+  }
 
 protected:
   bool execute()
   {
-    std::cout << "[i] Available commands:" << std::endl;
-
-    for ( const auto& p : env->commands )
+    for ( auto& p : env->categories )
     {
-      std::cout << boost::format( "    * %-20s : %s" ) % p.first % p.second->caption() << std::endl;
+      std::cout << p.first << " commands:" << std::endl;
+
+      std::sort( p.second.begin(), p.second.end() );
+
+      if ( is_set( "detailed" ) )
+      {
+        for ( const auto& name : p.second )
+        {
+          std::cout << boost::format( " %-17s : %s" ) % name % env->commands[name]->caption() << std::endl;
+        }
+        std::cout << std::endl;
+      }
+      else
+      {
+        auto counter = 0;
+        std::cout << " ";
+
+        for ( const auto& name : p.second )
+        {
+          if ( counter > 0 && ( counter % 4 == 0 ) )
+          {
+            std::cout << std::endl << " ";
+          }
+          std::cout << boost::format( "%-17s" ) % name;
+          ++counter;
+        }
+        std::cout << std::endl << std::endl;
+      }
     }
 
     return true;

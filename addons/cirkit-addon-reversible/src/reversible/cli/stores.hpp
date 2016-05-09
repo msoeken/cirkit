@@ -28,7 +28,7 @@
 #ifndef STORES_HPP
 #define STORES_HPP
 
-#include <lscli/store.hpp>
+#include <lscli/command.hpp>
 
 #include <classical/aig.hpp>
 #include <reversible/circuit.hpp>
@@ -68,7 +68,7 @@ template<>
 void print_store_entry_statistics<circuit>( std::ostream& os, const circuit& circ );
 
 template<>
-command_log_opt_t log_store_entry_statistics<circuit>( const circuit& circ );
+command::log_opt_t log_store_entry_statistics<circuit>( const circuit& circ );
 
 template<>
 inline bool store_can_convert<circuit, aig_graph>() { return true; }
@@ -168,7 +168,7 @@ struct show_store_entry<rcbdd>
 
   bool operator()( rcbdd& bdd, const std::string& dotname, const cli_options& cmd );
 
-  command_log_opt_t log() const;
+  command::log_opt_t log() const;
 };
 
 template<>

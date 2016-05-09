@@ -64,9 +64,9 @@ void print_store_entry_statistics<circuit>( std::ostream& os, const circuit& cir
 }
 
 template<>
-command_log_opt_t log_store_entry_statistics<circuit>( const circuit& circ )
+command::log_opt_t log_store_entry_statistics<circuit>( const circuit& circ )
 {
-  return command_log_opt_t({
+  return command::log_opt_t({
       {"gates", static_cast<int>( circ.num_gates() )},
       {"lines", static_cast<int>( circ.lines() )}
     });
@@ -268,7 +268,7 @@ bool show_store_entry<rcbdd>::operator()( rcbdd& bdd,
   return true;
 }
 
-command_log_opt_t show_store_entry<rcbdd>::log() const
+command::log_opt_t show_store_entry<rcbdd>::log() const
 {
   return boost::none;
 }

@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-#include <lscli/store.hpp>
+#include <lscli/command.hpp>
 
 #include <core/utils/bdd_utils.hpp>
 
@@ -74,14 +74,14 @@ struct show_store_entry<aig_graph>
 
   bool operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts );
 
-  command_log_opt_t log() const;
+  command::log_opt_t log() const;
 };
 
 template<>
 void print_store_entry_statistics<aig_graph>( std::ostream& os, const aig_graph& aig );
 
 template<>
-command_log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig );
+command::log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig );
 
 template<>
 inline bool store_can_convert<tt, aig_graph>() { return true; }
@@ -208,7 +208,7 @@ template<>
 void print_store_entry_statistics<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );
 
 template<>
-command_log_opt_t log_store_entry_statistics<expression_t::ptr>( const expression_t::ptr& expr );
+command::log_opt_t log_store_entry_statistics<expression_t::ptr>( const expression_t::ptr& expr );
 
 template<>
 void print_store_entry<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );

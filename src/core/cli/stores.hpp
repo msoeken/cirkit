@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include <lscli/store.hpp>
+#include <lscli/command.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/bdd_utils.hpp>
@@ -65,7 +65,7 @@ struct show_store_entry<bdd_function_t>
 
   bool operator()( bdd_function_t& bdd, const std::string& dotname, const cli_options& opts );
 
-  command_log_opt_t log() const;
+  command::log_opt_t log() const;
 };
 
 template<>

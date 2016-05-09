@@ -34,7 +34,6 @@
 #include <boost/format.hpp>
 
 #include <lscli/command.hpp>
-#include <lscli/store.hpp>
 
 namespace cirkit
 {

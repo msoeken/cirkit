@@ -64,6 +64,8 @@ int main( int argc, char ** argv )
 {
   cli_main<STORES> cli( "revkit" );
 
+  cli.set_category ("I/O" );
+
   ADD_READ_COMMAND( aiger, "Aiger" );
   ADD_READ_COMMAND( real, "realization" );
   ADD_READ_COMMAND( spec, "specification" );
@@ -73,24 +75,36 @@ int main( int argc, char ** argv )
   ADD_WRITE_COMMAND( spec, "specification" );
   ADD_WRITE_COMMAND( tikz, "TikZ" );
 
-  ADD_COMMAND( adding_lines );
-  ADD_COMMAND( bdd );
+  ADD_COMMAND( read_pla );
+  ADD_COMMAND( write_aiger );
+  ADD_COMMAND( write_pla );
+
+  cli.set_category ("Embedding" );
+
+  ADD_COMMAND( embed );
+  ADD_COMMAND( required_lines );
+
+  cli.set_category( "Synthesis" );
+
   ADD_COMMAND( cbs );
   ADD_COMMAND( dbs );
-  ADD_COMMAND( embed );
-  ADD_COMMAND( enumerate );
   ADD_COMMAND( esopbs );
-  ADD_COMMAND( expr );
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
   ADD_COMMAND( qbs );
-  ADD_COMMAND( random_circuit );
-  ADD_COMMAND( read_pla );
-  ADD_COMMAND( rec );
-  ADD_COMMAND( required_lines );
   ADD_COMMAND( tbs );
-  ADD_COMMAND( write_aiger );
-  ADD_COMMAND( write_pla );
+
+  cli.set_category( "Verification" );
+
+  ADD_COMMAND( rec );
+
+  cli.set_category( "Various" );
+
+  ADD_COMMAND( adding_lines );
+  ADD_COMMAND( bdd );
+  ADD_COMMAND( enumerate );
+  ADD_COMMAND( expr );
+  ADD_COMMAND( random_circuit );
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
   EXPERIMENTAL_REVERSIBLE_COMMANDS

@@ -31,8 +31,10 @@
 #include <formal/cli/commands/satnpn.hpp>
 #include <formal/cli/commands/unate.hpp>
 
-#define FORMAL_COMMANDS    \
-    ADD_COMMAND( satnpn ); \
+#define FORMAL_COMMANDS                        \
+    cli.set_category( "Reverse engineering" ); \
+    ADD_COMMAND( satnpn );                     \
+    cli.set_category( "Verification" );        \
     ADD_COMMAND( unate );
 
 #endif

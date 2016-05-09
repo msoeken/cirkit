@@ -72,36 +72,48 @@ int main( int argc, char ** argv )
 {
   cli_main<STORE_TYPES> cli( "cirkit" );
 
+  cli.set_category( "I/O" );
+
   ADD_READ_COMMAND( aiger, "Aiger" );
   ADD_READ_COMMAND( verilog, "Verilog" );
   ADD_WRITE_COMMAND( edgelist, "Edge list" );
   ADD_WRITE_COMMAND( verilog, "Verilog" );
-
-  /* core */
-  ADD_COMMAND( bdd );
   ADD_COMMAND( read_pla );
-  ADD_COMMAND( testbdd );
-
-  /* classical */
-  ADD_COMMAND( abc );
-  ADD_COMMAND( bool_complex );
-  ADD_COMMAND( cec );
-  ADD_COMMAND( comb_approx );
-  ADD_COMMAND( cone );
-  ADD_COMMAND( dsop );
-  ADD_COMMAND( expr );
-  ADD_COMMAND( feather );
-  ADD_COMMAND( npn );
-  ADD_COMMAND( output_noise );
-  ADD_COMMAND( propagate );
   ADD_COMMAND( read_bench );
   ADD_COMMAND( read_sym );
-  ADD_COMMAND( rename );
-  ADD_COMMAND( simgraph );
-  ADD_COMMAND( strash );
-  ADD_COMMAND( support );
-  ADD_COMMAND( tt );
   ADD_COMMAND( write_aiger );
+
+  cli.set_category( "Approximation" );
+  ADD_COMMAND( comb_approx );
+
+  cli.set_category( "Experimental" );
+  ADD_COMMAND( testbdd );
+
+  cli.set_category( "Rewriting" );
+  ADD_COMMAND( cone );
+  ADD_COMMAND( feather );
+  ADD_COMMAND( propagate );
+  ADD_COMMAND( rename );
+  ADD_COMMAND( strash );
+
+  cli.set_category( "Verification" );
+  ADD_COMMAND( cec );
+  ADD_COMMAND( support );
+
+  cli.set_category( "Truth table" );
+  ADD_COMMAND( bool_complex );
+  ADD_COMMAND( npn );
+  ADD_COMMAND( tt );
+
+  cli.set_category( "Reverse engineering" );
+  ADD_COMMAND( simgraph );
+
+  cli.set_category( "Various" );
+  ADD_COMMAND( bdd );
+  ADD_COMMAND( abc );
+  ADD_COMMAND( dsop );
+  ADD_COMMAND( expr );
+  ADD_COMMAND( output_noise );
 
 #ifdef USE_FORMAL_COMMANDS
   FORMAL_COMMANDS

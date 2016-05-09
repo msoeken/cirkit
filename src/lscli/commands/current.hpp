@@ -29,7 +29,6 @@
 #define CLI_CURRENT_COMMAND_HPP
 
 #include <lscli/command.hpp>
-#include <lscli/store.hpp>
 
 using namespace boost::program_options;
 

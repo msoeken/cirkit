@@ -32,7 +32,6 @@
 #include <string>
 
 #include <lscli/command.hpp>
-#include <lscli/store.hpp>
 
 #include <boost/any.hpp>
 #include <boost/format.hpp>

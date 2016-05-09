@@ -47,7 +47,6 @@
 #endif
 
 #include <lscli/command.hpp>
-#include <lscli/store.hpp>
 #include <lscli/commands/alias.hpp>
 #include <lscli/commands/convert.hpp>
 #include <lscli/commands/current.hpp>
@@ -99,6 +98,7 @@ public:
      *
      * see store.hpp for more details
      */
+    set_category( "General" );
     insert_command( "alias",   std::make_shared<alias_command>( env ) );
     insert_command( "convert", std::make_shared<convert_command<S...>>( env ) );
     insert_command( "current", std::make_shared<current_command<S...>>( env ) );

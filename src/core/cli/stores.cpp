@@ -94,7 +94,7 @@ bool show_store_entry<bdd_function_t>::operator()( bdd_function_t& bdd,
   return true;
 }
 
-command_log_opt_t show_store_entry<bdd_function_t>::log() const
+command::log_opt_t show_store_entry<bdd_function_t>::log() const
 {
   return boost::none;
 }

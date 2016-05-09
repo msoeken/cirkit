@@ -29,7 +29,6 @@
 #define CLI_AIG_BASE_COMMAND_HPP
 
 #include <lscli/rules.hpp>
-#include <lscli/store.hpp>
 
 #include <core/cli/cirkit_command.hpp>
 #include <classical/aig.hpp>
