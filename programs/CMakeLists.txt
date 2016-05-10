@@ -30,6 +30,17 @@ add_cirkit_program(
     cirkit_classical
 )
 
+add_cirkit_program(
+  NAME abc_cli
+  SOURCES
+    core/abc_cli.cpp
+  USE
+    ${abc_LIBRARIES}
+    lscli
+  INCLUDE
+    PUBLIC ${CMAKE_SOURCE_DIR}/ext/include/abc
+)
+
 # cirkit
 add_cirkit_program(
   NAME cirkit
