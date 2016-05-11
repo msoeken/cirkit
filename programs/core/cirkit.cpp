@@ -23,7 +23,7 @@
 
 #include <memory>
 
-#include <lscli/utils.hpp>
+#include <lscli/lscli.hpp>
 
 #include <core/cli/stores.hpp>
 #include <core/cli/commands/bdd.hpp>
