@@ -412,6 +412,8 @@ void read_aiger_binary( aig_graph& aig, const std::string& filename, bool noopt 
 {
   std::ifstream in( filename.c_str(), std::ifstream::in );
   read_aiger_binary( aig, in, noopt );
+
+  aig_info( aig ).model_name = boost::filesystem::path( filename ).stem().string();
 }
 
 }
