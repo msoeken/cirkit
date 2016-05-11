@@ -28,10 +28,15 @@
 #ifndef CLI_UTILS_HPP
 #define CLI_UTILS_HPP
 
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <string>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -40,6 +45,7 @@
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 #ifdef USE_READLINE
 #include <readline/readline.h>
@@ -64,8 +70,130 @@ namespace po = boost::program_options;
 namespace cirkit
 {
 
-bool read_command_line( const std::string& prefix, std::string& line );
-bool execute_line( const environment::ptr& env, const std::string& line, const std::map<std::string, std::shared_ptr<command>>& commands );
+namespace detail
+{
+
+std::vector<std::string> split_commands( const std::string& commands )
+{
+  std::vector<std::string> result;
+  std::string current;
+
+  enum _state { normal, quote, escape };
+
+  _state s = normal;
+
+  for ( auto c : commands )
+  {
+    switch ( s )
+    {
+    case normal:
+      switch ( c )
+      {
+      case '"':
+        current += c;
+        s = quote;
+        break;
+
+      case ';':
+        boost::trim( current );
+        result.push_back( current );
+        current.clear();
+        break;
+
+      default:
+        current += c;
+        break;
+      }
+      break;
+
+    case quote:
+      switch ( c )
+      {
+      case '"':
+        current += c;
+        s = normal;
+        break;
+
+      case '\\':
+        current += c;
+        s = escape;
+        break;
+
+      default:
+        current += c;
+        break;
+      };
+      break;
+
+    case escape:
+      current += c;
+      s = quote;
+      break;
+    }
+  }
+
+  boost::trim( current );
+  if ( !current.empty() )
+  {
+    result.push_back( current );
+  }
+
+  return result;
+}
+
+// from http://stackoverflow.com/questions/478898/how-to-execute-a-command-and-get-output-of-command-within-c-using-posix
+std::pair<int, std::string> execute_program( const std::string& cmd )
+{
+  char buffer[128];
+  std::string result;
+  int exit_status;
+
+  std::shared_ptr<FILE> pipe( popen( cmd.c_str(), "r" ), [&exit_status]( FILE* fp ) { auto status = pclose( fp ); exit_status = WEXITSTATUS( status ); } );
+  if ( !pipe )
+  {
+    throw std::runtime_error( "[e] popen() failed" );
+  }
+  while ( !feof( pipe.get() ) )
+  {
+    if ( fgets( buffer, 128, pipe.get() ) != NULL )
+    {
+      result += buffer;
+    }
+  }
+  return {exit_status, result};
+}
+
+bool read_command_line( const std::string& prefix, std::string& line )
+{
+#ifdef USE_READLINE
+  auto * cline = readline( prefix.c_str() );
+
+  /* something went wrong? */
+  if ( !cline )
+  {
+    return false;
+  }
+
+  line = cline;
+  boost::trim( line );
+  free( cline );
+
+  return true;
+
+#else // USE_READLINE
+
+  std::cout << prefix << "> ";
+  std::flush(std::cout);
+  if( !getline( std::cin, line ) ) {
+    return false;
+  }
+
+  boost::trim( line );
+  return true;
+#endif // USE_READLINE
+}
+
+}
 
 template<typename S>
 int add_store_helper( const environment::ptr& env )
@@ -179,7 +307,7 @@ public:
           {
             if ( vm.count( "echo" ) ) { std::cout << get_prefix() << "abc -c \"" + batch_string << "\"" << std::endl; }
             std::cout << "abc" << ' ' << abc_opts << ' ' << batch_string << '\n';
-            execute_line( env, ( boost::format("abc %s-c \"%s\"") % abc_opts % batch_string ).str(), env->commands );
+            execute_line( ( boost::format("abc %s-c \"%s\"") % abc_opts % batch_string ).str() );
             batch_string.clear();
             collect_commands = false;
           }
@@ -194,7 +322,7 @@ public:
           else
           {
             if ( vm.count( "echo" ) ) { std::cout << get_prefix() << line << std::endl; }
-            if ( !execute_line( env, preprocess_alias( line ), env->commands ) )
+            if ( !execute_line( preprocess_alias( line ) ) )
             {
               return 1;
             }
@@ -215,9 +343,9 @@ public:
 #endif
 
       std::string line;
-      while ( !env->quit && read_command_line( get_prefix(), line ) )
+      while ( !env->quit && detail::read_command_line( get_prefix(), line ) )
       {
-        execute_line( env, preprocess_alias( line ), env->commands );
+        execute_line( preprocess_alias( line ) );
 #ifdef USE_READLINE
         add_history( line.c_str() );
 #endif
@@ -236,6 +364,78 @@ public:
   std::shared_ptr<environment> env;
 
 private:
+  bool execute_line( const std::string& line )
+  {
+    /* split commands if line contains a semi-colon */
+    if ( !line.empty() && line[0] != '!' && line.find( ';' ) != std::string::npos )
+    {
+      auto result = true;
+      boost::tokenizer<boost::escaped_list_separator<char>> tok( line, boost::escaped_list_separator<char>( '\\', ';', '\"' ) );
+
+      const auto lines = detail::split_commands( line );
+
+      if ( lines.size() > 1u )
+      {
+        for ( const auto& cline : lines )
+        {
+          result = result && execute_line( preprocess_alias( cline ) );
+        }
+
+        return result;
+      }
+    }
+
+    /* ignore comments and empty lines */
+    if ( line.empty() || line[0] == '#' ) { return false; }
+
+    /* escape to shell */
+    if ( line[0] == '!' )
+    {
+      const auto now = std::chrono::system_clock::now();
+      const auto result = detail::execute_program( line.substr( 1u ) );
+
+      if ( env->log )
+      {
+        command::log_map_t log;
+        log["status"] = result.first;
+        log["output"] = result.second;
+        env->log_command( command::log_opt_t( log ), line, now );
+      }
+
+      return true;
+    }
+
+    std::vector<std::string> vline;
+    boost::tokenizer<boost::escaped_list_separator<char>> tok( line, boost::escaped_list_separator<char>( '\\', ' ', '\"' ) );
+
+    for ( const auto& s : tok )
+    {
+      if ( !s.empty() )
+      {
+        vline.push_back( s );
+      }
+    }
+
+    const auto it = env->commands.find( vline.front() );
+    if ( it != env->commands.end() )
+    {
+      const auto now = std::chrono::system_clock::now();
+      const auto result = it->second->run( vline );
+
+      if ( result && env->log )
+      {
+        env->log_command( it->second, line, now );
+      }
+
+      return result;
+    }
+    else
+    {
+      std::cout << "unknown command: " << vline.front() << std::endl;
+      return false;
+    }
+  }
+
   /**
    * @param filename filename with commands
    * @param echo     true, if command should be echoed before execution
@@ -256,7 +456,7 @@ private:
         std::cout << get_prefix() << line << std::endl;
       }
 
-      execute_line( env, preprocess_alias( line ), env->commands );
+      execute_line( preprocess_alias( line ) );
 
       if ( env->quit )
       {
