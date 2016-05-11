@@ -28,16 +28,36 @@
 #ifndef CLI_READ_IO_COMMAND_HPP
 #define CLI_READ_IO_COMMAND_HPP
 
+#include <wordexp.h>
 #include <string>
 
 #include <boost/program_options.hpp>
 
 #include <lscli/command.hpp>
+#include <lscli/rules.hpp>
 
 using namespace boost::program_options;
 
 namespace cirkit
 {
+
+std::string process_filename( const std::string& filename )
+{
+  std::string result;
+
+  wordexp_t p;
+  wordexp( filename.c_str(), &p, 0 );
+
+  for ( auto i = 0; i < p.we_wordc; ++i )
+  {
+    if ( !result.empty() ) { result += " "; }
+    result += std::string( p.we_wordv[i] );
+  }
+
+  wordfree( &p );
+
+  return result;
+}
 
 template<typename Tag, typename S>
 int add_read_io_option_helper( command& cmd, unsigned& option_count, std::string& default_option )
@@ -98,13 +118,14 @@ protected:
     rules_t rules;
 
     rules.push_back( {[this]() { return option_count == 1 || exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
+    rules.push_back( file_exists( process_filename( filename ), "filename" ) );
 
     return rules;
   }
 
   bool execute()
   {
-    [](...){}( read_io_helper<Tag, S>( *this, default_option, env, filename )... );
+    [](...){}( read_io_helper<Tag, S>( *this, default_option, env, process_filename( filename ) )... );
 
     return true;
   }
