@@ -77,34 +77,34 @@ template<>
 aig_graph store_convert<circuit, aig_graph>( const circuit& circ );
 
 template<>
-inline bool store_can_write_io_type<circuit, io_qpic_tag_t>( const cli_options& opts ) { return true; }
+inline bool store_can_write_io_type<circuit, io_qpic_tag_t>( command& cmd ) { return true; }
 
 template<>
-void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts );
+void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
 
 template<>
-bool store_can_write_io_type<circuit, io_quipper_tag_t>( const cli_options& opts );
+bool store_can_write_io_type<circuit, io_quipper_tag_t>( command& cmd );
 
 template<>
-void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts );
+void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
 
 template<>
-bool store_can_read_io_type<circuit, io_real_tag_t>( const cli_options& opts );
+bool store_can_read_io_type<circuit, io_real_tag_t>( command& cmd );
 
 template<>
-circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename, const cli_options& opts );
+circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename, const command& cmd );
 
 template<>
-inline bool store_can_write_io_type<circuit, io_real_tag_t>( const cli_options& opts ) { return true; }
+inline bool store_can_write_io_type<circuit, io_real_tag_t>( command& cmd ) { return true; }
 
 template<>
-void store_write_io_type<circuit, io_real_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts );
+void store_write_io_type<circuit, io_real_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
 
 template<>
-bool store_can_write_io_type<circuit, io_tikz_tag_t>( const cli_options& opts );
+bool store_can_write_io_type<circuit, io_tikz_tag_t>( command& cmd );
 
 template<>
-void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts );
+void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
 
 /******************************************************************************
  * binary_truth_table                                                         *
@@ -133,16 +133,16 @@ template<>
 binary_truth_table store_convert<circuit, binary_truth_table>( const circuit& circ );
 
 template<>
-bool store_can_read_io_type<binary_truth_table, io_spec_tag_t>( const cli_options& opts );
+bool store_can_read_io_type<binary_truth_table, io_spec_tag_t>( command& cmd );
 
 template<>
-binary_truth_table store_read_io_type<binary_truth_table, io_spec_tag_t>( const std::string& filename, const cli_options& opts );
+binary_truth_table store_read_io_type<binary_truth_table, io_spec_tag_t>( const std::string& filename, const command& cmd );
 
 template<>
-inline bool store_can_write_io_type<binary_truth_table, io_spec_tag_t>( const cli_options& opts ) { return true; }
+inline bool store_can_write_io_type<binary_truth_table, io_spec_tag_t>( command& cmd ) { return true; }
 
 template<>
-void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const cli_options& opts );
+void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const command& cmd );
 
 /******************************************************************************
  * rcbdd                                                                      *
@@ -164,9 +164,9 @@ std::string store_entry_to_string<rcbdd>( const rcbdd& bdd );
 template<>
 struct show_store_entry<rcbdd>
 {
-  show_store_entry( const cli_options& cmd );
+  show_store_entry( const command& cmd );
 
-  bool operator()( rcbdd& bdd, const std::string& dotname, const cli_options& cmd );
+  bool operator()( rcbdd& bdd, const std::string& dotname, const command& cmd );
 
   command::log_opt_t log() const;
 };

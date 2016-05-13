@@ -70,9 +70,9 @@ std::string store_entry_to_string<aig_graph>( const aig_graph& aig );
 template<>
 struct show_store_entry<aig_graph>
 {
-  show_store_entry( const cli_options& opts );
+  show_store_entry( command& cmd );
 
-  bool operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts );
+  bool operator()( aig_graph& aig, const std::string& dotname, const command& cmd );
 
   command::log_opt_t log() const;
 };
@@ -96,22 +96,22 @@ template<>
 bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig );
 
 template<>
-bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( const cli_options& opts );
+bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( command& cmd );
 
 template<>
-aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const cli_options& opts );
+aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const command& cmd );
 
 template<>
-inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( const cli_options& opts ) { return true; }
+inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( command& cmd ) { return true; }
 
 template<>
-void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts );
+void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd );
 
 template<>
-inline bool store_can_write_io_type<aig_graph, io_edgelist_tag_t>( const cli_options& opts ) { return true; }
+inline bool store_can_write_io_type<aig_graph, io_edgelist_tag_t>( command& cmd ) { return true; }
 
 template<>
-void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts );
+void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd );
 
 /******************************************************************************
  * counterexample_t                                                           *

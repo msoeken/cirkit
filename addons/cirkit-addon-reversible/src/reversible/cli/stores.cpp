@@ -79,15 +79,15 @@ aig_graph store_convert<circuit, aig_graph>( const circuit& circ )
 }
 
 template<>
-void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts )
+void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   write_qpic( circ, filename );
 }
 
 template<>
-bool store_can_write_io_type<circuit, io_quipper_tag_t>( const cli_options& opts )
+bool store_can_write_io_type<circuit, io_quipper_tag_t>( command& cmd )
 {
-  opts.opts.add_options()
+  cmd.opts.add_options()
     ( "ascii,a", "Write ASCII instead of Haskell program" )
     ;
 
@@ -95,9 +95,9 @@ bool store_can_write_io_type<circuit, io_quipper_tag_t>( const cli_options& opts
 }
 
 template<>
-void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts )
+void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
-  if ( opts.vm.count( "ascii" ) )
+  if ( cmd.is_set( "ascii" ) )
   {
     write_quipper_ascii( circ, filename );
   }
@@ -108,20 +108,20 @@ void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const 
 }
 
 template<>
-bool store_can_read_io_type<circuit, io_real_tag_t>( const cli_options& opts )
+bool store_can_read_io_type<circuit, io_real_tag_t>( command& cmd )
 {
-  opts.opts.add_options()
+  cmd.opts.add_options()
     ( "string,s", boost::program_options::value<std::string>(), "read from string (e.g. t3 a b c, t2 a b, t1 a, f3 a b c)" )
     ;
   return true;
 }
 
 template<>
-circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename, const cli_options& opts )
+circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename, const command& cmd )
 {
-  if ( opts.vm.count( "string" ) )
+  if ( cmd.is_set( "string" ) )
   {
-    return circuit_from_string( opts.vm["string"].as<std::string>() );
+    return circuit_from_string( cmd.vm["string"].as<std::string>() );
   }
   else
   {
@@ -132,13 +132,13 @@ circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename,
 }
 
 template<>
-void store_write_io_type<circuit, io_real_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts )
+void store_write_io_type<circuit, io_real_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   write_realization( circ, filename );
 }
 
 template<>
-bool store_can_write_io_type<circuit, io_tikz_tag_t>( const cli_options& opts )
+bool store_can_write_io_type<circuit, io_tikz_tag_t>( command& cmd )
 {
   boost::program_options::options_description circuit_options( "Circuit options" );
 
@@ -147,21 +147,21 @@ bool store_can_write_io_type<circuit, io_tikz_tag_t>( const cli_options& opts )
     ( "hideio",     "Don't print I/O" )
     ;
 
-  opts.opts.add( circuit_options );
+  cmd.opts.add( circuit_options );
 
   return true;
 }
 
 template<>
-void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const cli_options& opts )
+void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   create_tikz_settings ct_settings;
 
-  ct_settings.draw_io = opts.vm.count( "hideio" ) == 0;
+  ct_settings.draw_io = !cmd.is_set( "hideio" );
 
   std::ofstream os( filename.c_str() );
 
-  if ( opts.vm.count( "standalone" ) )
+  if ( cmd.is_set( "standalone" ) )
   {
     os << "\\documentclass{standalone}" << std::endl
        << "\\usepackage{tikz}" << std::endl << std::endl
@@ -169,7 +169,7 @@ void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std
   }
   create_image( os, circ, ct_settings );
 
-  if ( opts.vm.count( "standalone" ) )
+  if ( cmd.is_set( "standalone" ) )
   {
     os << "\\end{document}" << std::endl;
   }
@@ -200,21 +200,21 @@ binary_truth_table store_convert<circuit, binary_truth_table>( const circuit& ci
 }
 
 template<>
-bool store_can_read_io_type<binary_truth_table, io_spec_tag_t>( const cli_options& opts )
+bool store_can_read_io_type<binary_truth_table, io_spec_tag_t>( command& cmd )
 {
-  opts.opts.add_options()
+  cmd.opts.add_options()
     ( "permutation,p", boost::program_options::value<std::string>(), "create spec from permutation (starts with 0, space separated)" )
     ;
   return true;
 }
 
 template<>
-binary_truth_table store_read_io_type<binary_truth_table, io_spec_tag_t>( const std::string& filename, const cli_options& opts )
+binary_truth_table store_read_io_type<binary_truth_table, io_spec_tag_t>( const std::string& filename, const command& cmd )
 {
-  if ( opts.vm.count( "permutation" ) )
+  if ( cmd.is_set( "permutation" ) )
   {
     std::vector<unsigned> perm;
-    parse_string_list( perm, opts.vm["permutation"].as<std::string>() );
+    parse_string_list( perm, cmd.vm["permutation"].as<std::string>() );
 
     return permutation_to_truth_table( perm );
   }
@@ -227,7 +227,7 @@ binary_truth_table store_read_io_type<binary_truth_table, io_spec_tag_t>( const 
 }
 
 template<>
-void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const cli_options& opts )
+void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const command& cmd )
 {
   write_specification( spec, filename );
 }
@@ -242,19 +242,19 @@ std::string store_entry_to_string<rcbdd>( const rcbdd& bdd )
   return ( boost::format( "%d variables, %d nodes" ) % bdd.num_vars() % bdd.chi().nodeCount() ).str();
 }
 
-show_store_entry<rcbdd>::show_store_entry( const cli_options& opts )
+show_store_entry<rcbdd>::show_store_entry( const command& cmd )
 {
 }
 
 bool show_store_entry<rcbdd>::operator()( rcbdd& bdd,
                                           const std::string& dotname,
-                                          const cli_options& opts )
+                                          const command& cmd )
 {
   using namespace std::placeholders;
 
   auto * fd = fopen( dotname.c_str(), "w" );
 
-  if ( opts.vm.count( "add" ) )
+  if ( cmd.is_set( "add" ) )
   {
     bdd.manager().DumpDot( std::vector<ADD>{bdd.chi().Add()}, 0, 0, fd );
   }

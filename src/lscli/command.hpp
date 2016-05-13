@@ -162,18 +162,6 @@ using log_opt_t = boost::optional<log_map_t>;
  * cli_store                                                                  *
  ******************************************************************************/
 
-struct cli_options
-{
-  cli_options( po::options_description& opts, po::variables_map& vm, po::positional_options_description& pod )
-    : opts( opts ), vm( vm ), pod( pod )
-  {
-  }
-
-  po::options_description&            opts;
-  po::variables_map&                  vm;
-  po::positional_options_description& pod;
-};
-
 template<class T>
 class cli_store
 {
@@ -427,10 +415,6 @@ protected:
 
 public:
   virtual log_opt_t log() const { return boost::none; }
-  cli_options get_options()
-  {
-    return cli_options( opts, vm, pod );
-  }
 
 protected:
   /* positional arguments */
@@ -444,6 +428,8 @@ public:
 
 protected:
   std::string                        scaption;
+
+public:
   po::options_description            opts;
   po::variables_map                  vm;
   po::positional_options_description pod;
@@ -473,9 +459,9 @@ void print_store_entry( std::ostream& os, const T& element )
 template<typename T>
 struct show_store_entry
 {
-  show_store_entry( const cli_options& opts ) {}
+  show_store_entry( command& cmd ) {}
 
-  bool operator()( T& element, const std::string& dotname, const cli_options& opts )
+  bool operator()( T& element, const std::string& dotname, const command& cmd )
   {
     std::cout << "[w] show is not supported for this store element" << std::endl;
     return false; /* don't open the dot file */
@@ -512,25 +498,25 @@ Dest store_convert( const Source& src )
 }
 
 template<typename T, typename Tag>
-bool store_can_write_io_type( const cli_options& opts )
+bool store_can_write_io_type( command& cmd )
 {
   return false;
 }
 
 template<typename T, typename Tag>
-void store_write_io_type( const T& element, const std::string& filename, const cli_options& opts )
+void store_write_io_type( const T& element, const std::string& filename, const command& cmd )
 {
   assert( false );
 }
 
 template<typename T, typename Tag>
-bool store_can_read_io_type( const cli_options& opts )
+bool store_can_read_io_type( command& cmd )
 {
   return false;
 }
 
 template<typename T, typename Tag>
-T store_read_io_type( const std::string& filename, const cli_options& opts )
+T store_read_io_type( const std::string& filename, const command& cmd )
 {
   assert( false );
 }

@@ -53,7 +53,7 @@ std::string store_entry_to_string<aig_graph>( const aig_graph& aig )
   return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
 }
 
-show_store_entry<aig_graph>::show_store_entry( const cli_options& opts )
+show_store_entry<aig_graph>::show_store_entry( command& cmd )
 {
   boost::program_options::options_description aig_options( "AIG options" );
 
@@ -61,18 +61,18 @@ show_store_entry<aig_graph>::show_store_entry( const cli_options& opts )
     ( "levels", boost::program_options::value<unsigned>()->default_value( 0u ), "Compute and annotate levels for dot\n0: don't compute\n1: push to inputs\n2: push to outputs" )
     ;
 
-  opts.opts.add( aig_options );
+  cmd.opts.add( aig_options );
 }
 
-bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const cli_options& opts )
+bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const command& cmd )
 {
   auto settings = std::make_shared<properties>();
-  settings->set( "verbose", opts.vm.count( "verbose" ) == 1u );
-  const auto levels = opts.vm["levels"].as<unsigned>();
+  settings->set( "verbose", cmd.is_set( "verbose" ) );
+  const auto levels = cmd.vm["levels"].as<unsigned>();
   if ( levels > 0u )
   {
     auto cl_settings = std::make_shared<properties>();
-    cl_settings->set( "verbose", opts.vm.count( "verbose" ) == 1u );
+    cl_settings->set( "verbose", cmd.is_set( "verbose" ) );
     cl_settings->set( "push_to_outputs", levels == 2u );
     auto annotation = get( boost::vertex_annotation, aig );
 
@@ -146,9 +146,9 @@ bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
 }
 
 template<>
-bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( const cli_options& opts )
+bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( command& cmd )
 {
-  opts.opts.add_options()
+  cmd.opts.add_options()
     ( "nosym",    "do not read symmetry file if existing" )
     ( "nounate",  "do not read unateness file if existing" )
     ( "nostrash", "do not strash the AIG when reading (in binary AIGER format)" )
@@ -157,7 +157,7 @@ bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( const cli_options& opts 
 }
 
 template<>
-aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const cli_options& opts )
+aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const command& cmd )
 {
   aig_graph aig;
 
@@ -169,7 +169,7 @@ aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& file
     }
     else
     {
-      read_aiger_binary( aig, filename, opts.vm.count( "nostrash" ) == 1u );
+      read_aiger_binary( aig, filename, cmd.is_set( "nostrash" ) );
     }
   }
   catch ( const char *e )
@@ -180,7 +180,7 @@ aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& file
 
   /* auto-find symmetry file */
   const auto symname = filename.substr( 0, filename.size() - 3 ) + "sym";
-  if ( opts.vm.count( "nosym" ) == 0 && boost::filesystem::exists( symname ) )
+  if ( !cmd.is_set( "nosym" ) && boost::filesystem::exists( symname ) )
   {
     /* read symmetries */
     std::cout << "[i] found and read symmetries file" << std::endl;
@@ -189,7 +189,7 @@ aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& file
 
   /* auto-find unateness file */
   const auto depname = filename.substr( 0, filename.size() - 3 ) + "dep";
-  if ( opts.vm.count( "nounate" ) == 0 && boost::filesystem::exists( depname ) )
+  if ( !cmd.is_set( "nounate" ) && boost::filesystem::exists( depname ) )
   {
     /* read unateness */
     std::cout << "[i] found and read unateness dependency file" << std::endl;
@@ -200,13 +200,13 @@ aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& file
 }
 
 template<>
-void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts )
+void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
 {
   write_verilog( aig, filename );
 }
 
 template<>
-void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const cli_options& opts )
+void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
 

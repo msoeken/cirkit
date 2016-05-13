@@ -68,25 +68,25 @@ inline void print_store_entry_statistics<abc::Gia_Man_t*>( std::ostream& os, abc
 }
 
 template<>
-inline bool store_can_read_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( const cli_options& opts )
+inline bool store_can_read_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( command& cmd )
 {
   return true;
 }
 
 template<>
-inline abc::Gia_Man_t* store_read_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( const std::string& filename, const cli_options& opts )
+inline abc::Gia_Man_t* store_read_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( const std::string& filename, const command& cmd )
 {
   return abc::Gia_AigerRead( (char*)filename.c_str(), 0, 0 );
 }
 
 template<>
-inline bool store_can_write_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( const cli_options& opts )
+inline bool store_can_write_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( command& cmd )
 {
   return true;
 }
 
 template<>
-inline void store_write_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( abc::Gia_Man_t* const& aig, const std::string& filename, const cli_options& opts )
+inline void store_write_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( abc::Gia_Man_t* const& aig, const std::string& filename, const command& cmd )
 {
   abc::Gia_AigerWrite( aig, (char*)filename.c_str(), 1, 0 );
 }

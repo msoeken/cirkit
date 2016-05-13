@@ -61,9 +61,9 @@ void print_store_entry<bdd_function_t>( std::ostream& os, const bdd_function_t& 
 template<>
 struct show_store_entry<bdd_function_t>
 {
-  show_store_entry( cli_options& opts );
+  show_store_entry( command& cmd );
 
-  bool operator()( bdd_function_t& bdd, const std::string& dotname, const cli_options& opts );
+  bool operator()( bdd_function_t& bdd, const std::string& dotname, const command& cmd );
 
   command::log_opt_t log() const;
 };

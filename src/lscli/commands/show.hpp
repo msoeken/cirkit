@@ -44,12 +44,12 @@ namespace cirkit
 using show_commands_t = std::map<std::string, boost::any>;
 
 template<typename S>
-int init_show_commands( cli_options opts, show_commands_t& show_commands )
+int init_show_commands( command& cmd, show_commands_t& show_commands )
 {
   constexpr auto option   = store_info<S>::option;
   constexpr auto mnemonic = store_info<S>::mnemonic;
 
-  show_commands[option] = std::make_shared<show_store_entry<S>>( opts );
+  show_commands[option] = std::make_shared<show_store_entry<S>>( cmd );
 
   return 0;
 }
@@ -61,7 +61,7 @@ int show_helper( bool& result, command& cmd, const environment::ptr& env, show_c
 
   if ( cmd.is_set( option ) )
   {
-    result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands[option] )->operator()( env->store<S>().current(), dotname, cmd.get_options() );
+    result = boost::any_cast<std::shared_ptr<show_store_entry<S>>>( show_commands[option] )->operator()( env->store<S>().current(), dotname, cmd );
   }
   return 0;
 }
@@ -90,7 +90,7 @@ public:
       ( "silent,s",                                              "Don't show the DOT file, i.e., just save it" )
       ;
     [](...){}( add_option_helper<S>( opts )... );
-    [](...){}( init_show_commands<S>( get_options(), show_commands )... );
+    [](...){}( init_show_commands<S>( *this, show_commands )... );
   }
 
 protected:

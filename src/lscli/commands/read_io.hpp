@@ -62,13 +62,13 @@ std::string process_filename( const std::string& filename )
 template<typename Tag, typename S>
 int add_read_io_option_helper( command& cmd, unsigned& option_count, std::string& default_option )
 {
-  if ( store_can_read_io_type<S, Tag>( cmd.get_options() ) )
+  if ( store_can_read_io_type<S, Tag>( cmd ) )
   {
     constexpr auto option = store_info<S>::option;
 
     option_count++;
     default_option = option;
-    add_option_helper<S>( cmd.get_options().opts );
+    add_option_helper<S>( cmd.opts );
   }
 
   return 0;
@@ -87,7 +87,7 @@ int read_io_helper( command& cmd, const std::string& default_option, const envir
       env->store<S>().extend();
     }
 
-    env->store<S>().current() = store_read_io_type<S, Tag>( filename, cmd.get_options() );
+    env->store<S>().current() = store_read_io_type<S, Tag>( filename, cmd );
   }
   return 0;
 }

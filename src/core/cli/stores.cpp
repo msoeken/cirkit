@@ -59,7 +59,7 @@ void print_store_entry<bdd_function_t>( std::ostream& os, const bdd_function_t& 
   }
 }
 
-show_store_entry<bdd_function_t>::show_store_entry( cli_options& opts )
+show_store_entry<bdd_function_t>::show_store_entry( command& cmd )
 {
   boost::program_options::options_description bdd_options( "BDD options" );
 
@@ -67,18 +67,18 @@ show_store_entry<bdd_function_t>::show_store_entry( cli_options& opts )
     ( "add", "Convert BDD to ADD to have no complemented edges" )
     ;
 
-  opts.opts.add( bdd_options );
+  cmd.opts.add( bdd_options );
 }
 
 bool show_store_entry<bdd_function_t>::operator()( bdd_function_t& bdd,
                                                    const std::string& dotname,
-                                                   const cli_options& opts )
+                                                   const command& cmd )
 {
   using namespace std::placeholders;
 
   auto * fd = fopen( dotname.c_str(), "w" );
 
-  if ( opts.vm.count( "add" ) )
+  if ( cmd.is_set( "add" ) )
   {
     std::vector<ADD> adds( bdd.second.size() );
     boost::transform( bdd.second, adds.begin(), std::bind( &BDD::Add, _1 ) );

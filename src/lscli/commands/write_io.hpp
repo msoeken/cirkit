@@ -42,13 +42,13 @@ namespace cirkit
 template<typename Tag, typename S>
 int add_write_io_option_helper( command& cmd, unsigned& option_count, std::string& default_option )
 {
-  if ( store_can_write_io_type<S, Tag>( cmd.get_options() ) )
+  if ( store_can_write_io_type<S, Tag>( cmd ) )
   {
     constexpr auto option = store_info<S>::option;
 
     option_count++;
     default_option = option;
-    add_option_helper<S>( cmd.get_options().opts );
+    add_option_helper<S>( cmd.opts );
   }
 
   return 0;
@@ -68,7 +68,7 @@ int write_io_helper( command& cmd, const std::string& default_option, const envi
     }
     else
     {
-      store_write_io_type<S, Tag>( env->store<S>().current(), filename, cmd.get_options() );
+      store_write_io_type<S, Tag>( env->store<S>().current(), filename, cmd );
     }
   }
   return 0;
