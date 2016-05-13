@@ -44,47 +44,54 @@ namespace cirkit
 template<>
 struct store_info<abc::Gia_Man_t*>
 {
-  static constexpr const char* key         = "aigs";
-  static constexpr const char* option      = "aig";
-  static constexpr const char* mnemonic    = "a";
-  static constexpr const char* name        = "AIG";
-  static constexpr const char* name_plural = "AIGs";
+  static constexpr const char* key         = "aigs";  /* internal key, must be unique for each store */
+  static constexpr const char* option      = "aig";   /* long flag for general commands, e.g., `store --aig` */
+  static constexpr const char* mnemonic    = "a";     /* short flag for general commands, e.g., `store -a` */
+  static constexpr const char* name        = "AIG";   /* singular name for option descriptions */
+  static constexpr const char* name_plural = "AIGs";  /* plural name for option descriptions */
 };
 
+/* I/O tag to implement `read_aiger` and `write_aiger` */
 struct io_aiger_tag_t {};
 
+/* return some short text for each AIG in `store -a` */
 template<>
 inline std::string store_entry_to_string<abc::Gia_Man_t*>( abc::Gia_Man_t* const& aig )
 {
-  return boost::str( boost::format( "%s i/o = %d/%d" ) % Gia_ManName( aig ) % Gia_ManPiNum( aig ) % Gia_ManPoNum( aig ) );
+  return boost::str( boost::format( "%s i/o = %d/%d" ) % abc::Gia_ManName( aig ) % abc::Gia_ManPiNum( aig ) % abc::Gia_ManPoNum( aig ) );
 }
 
+/* print statistics on `ps -a` */
 template<>
 inline void print_store_entry_statistics<abc::Gia_Man_t*>( std::ostream& os, abc::Gia_Man_t* const& aig )
 {
   abc::Gps_Par_t Pars;
   memset( &Pars, 0, sizeof(abc::Gps_Par_t) );
-  Gia_ManPrintStats( aig, &Pars );
+  abc::Gia_ManPrintStats( aig, &Pars );
 }
 
+/* enable `read_aiger` for AIGs */
 template<>
 inline bool store_can_read_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( command& cmd )
 {
   return true;
 }
 
+/* implement `read_aiger` for AIGs */
 template<>
 inline abc::Gia_Man_t* store_read_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( const std::string& filename, const command& cmd )
 {
   return abc::Gia_AigerRead( (char*)filename.c_str(), 0, 0 );
 }
 
+/* enable `write_aiger` for AIGs */
 template<>
 inline bool store_can_write_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( command& cmd )
 {
   return true;
 }
 
+/* implement `write_aiger` for AIGs */
 template<>
 inline void store_write_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( abc::Gia_Man_t* const& aig, const std::string& filename, const command& cmd )
 {
@@ -123,6 +130,10 @@ private:
 };
 
 }
+
+/******************************************************************************
+ * main program                                                               *
+ ******************************************************************************/
 
 int main( int argc, char ** argv )
 {
