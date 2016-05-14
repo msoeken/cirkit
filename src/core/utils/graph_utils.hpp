@@ -115,6 +115,20 @@ inline std::map<vertex_t<G>, std::vector<edge_t<G>>> precompute_ingoing_edges( c
 }
 
 /**
+ * @brief Precomputes ingoing vertices for directed graphs
+ */
+template<class G>
+inline std::vector<std::vector<vertex_t<G>>> precompute_ingoing_vertices( const G& g )
+{
+  std::vector<std::vector<vertex_t<G>>> v( boost::num_vertices( g ) );
+  for ( const auto& e : boost::make_iterator_range( boost::edges( g ) ) )
+  {
+    v[boost::target( e, g )].push_back( boost::source( e, g ) );
+  }
+  return v;
+}
+
+/**
  * @brief Precomputes in-degrees for directed graphs
  *
  * @see precompute_ingoing_edges
