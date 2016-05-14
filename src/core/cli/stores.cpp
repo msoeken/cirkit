@@ -25,6 +25,7 @@
 #include <boost/format.hpp>
 #include <boost/range/algorithm.hpp>
 
+#include <core/io/read_pla.hpp>
 #include <core/utils/range_utils.hpp>
 
 namespace cirkit
@@ -125,6 +126,12 @@ void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_f
   }
 
   bdd.first.info();
+}
+
+template<>
+bdd_function_t store_read_io_type<bdd_function_t, io_pla_tag_t>( const std::string& filename, const command& cmd )
+{
+  return read_pla( filename );
 }
 
 }

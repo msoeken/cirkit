@@ -26,7 +26,6 @@
 
 #include <core/cli/stores.hpp>
 #include <core/cli/commands/bdd.hpp>
-#include <core/cli/commands/read_pla.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <classical/aig.hpp>
 #include <classical/cli/stores.hpp>
@@ -67,6 +66,8 @@ int main( int argc, char ** argv )
   cli.set_category ("I/O" );
 
   ADD_READ_COMMAND( aiger, "Aiger" );
+  ADD_READ_COMMAND( bench, "Bench" );
+  ADD_READ_COMMAND( pla, "PLA" );
   ADD_READ_COMMAND( real, "realization" );
   ADD_READ_COMMAND( spec, "specification" );
   ADD_WRITE_COMMAND( qpic, "qpic" );
@@ -75,7 +76,6 @@ int main( int argc, char ** argv )
   ADD_WRITE_COMMAND( spec, "specification" );
   ADD_WRITE_COMMAND( tikz, "TikZ" );
 
-  ADD_COMMAND( read_pla );
   ADD_COMMAND( write_aiger );
   ADD_COMMAND( write_pla );
 

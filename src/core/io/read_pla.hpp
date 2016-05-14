@@ -17,37 +17,25 @@
  */
 
 /**
- * @file read_bench.hpp
+ * @file read_pla.hpp
  *
- * @brief Reads an AIG from BENCH
+ * @brief Read PLA into bdd_function_t
  *
- * @author Heinz Riener
+ * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_READ_BENCH_COMMAND_HPP
-#define CLI_READ_BENCH_COMMAND_HPP
+#ifndef READ_PLA_HPP
+#define READ_PLA_HPP
 
 #include <string>
 
-#include <core/cli/cirkit_command.hpp>
-#include <classical/aig.hpp>
+#include <core/utils/bdd_utils.hpp>
 
 namespace cirkit
 {
 
-class read_bench_command : public cirkit_command
-{
-public:
-  read_bench_command( const environment::ptr& env );
-
-protected:
-  rules_t validity_rules() const;
-  bool execute();
-
-protected:
-  std::string filename;
-};
+bdd_function_t read_pla( const std::string& filename );
 
 }
 

@@ -16,15 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "read_bench.hpp"
+#include "read_pla.hpp"
 
-#include <lscli/rules.hpp>
+#include <vector>
 
-#include <core/utils/program_options.hpp>
-#include <classical/cli/stores.hpp>
-#include <classical/io/read_bench.hpp>
+#include <cuddObj.hh>
+#include <cuddInt.h>
 
-using namespace boost::program_options;
+#include <core/io/pla_parser.hpp>
+#include <core/io/pla_processor.hpp>
+#include <core/utils/range_utils.hpp>
 
 namespace cirkit
 {
@@ -32,6 +33,52 @@ namespace cirkit
 /******************************************************************************
  * Types                                                                      *
  ******************************************************************************/
+
+class read_pla_to_cudd_processor : public pla_processor
+{
+public:
+  read_pla_to_cudd_processor( Cudd& manager ) : manager( manager ) {}
+
+  void on_num_inputs( unsigned num_inputs )
+  {
+    ntimes( num_inputs, [&]() { manager.bddVar(); } );
+  }
+
+  void on_num_outputs( unsigned num_outputs )
+  {
+    functions.resize( num_outputs, manager.bddZero() );
+  }
+
+  void on_cube( const std::string& in, const std::string& out )
+  {
+    auto cube = manager.bddOne();
+
+    for ( auto c : index( in ) )
+    {
+      switch ( c.value )
+      {
+      case '0':
+        cube &= !manager.bddVar( c.index );
+        break;
+      case '1':
+        cube &= manager.bddVar( c.index );
+        break;
+      }
+    }
+
+    for ( auto c : index( out ) )
+    {
+      if ( c.value == '1' )
+      {
+        functions[c.index] |= cube;
+      }
+    }
+  }
+
+public:
+  Cudd&            manager;
+  std::vector<BDD> functions;
+};
 
 /******************************************************************************
  * Private functions                                                          *
@@ -41,41 +88,14 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-read_bench_command::read_bench_command( const environment::ptr& env )
-  : cirkit_command( env, "Reads an AIG from BENCH" )
+bdd_function_t read_pla( const std::string& filename )
 {
-  opts.add_options()
-    ( "filename", value( &filename ), "BENCH filename" )
-    ;
-  add_new_option();
-  be_verbose();
-}
+  Cudd manager;
 
-command::rules_t read_bench_command::validity_rules() const
-{
-  return { file_exists(filename, "filename") };
-}
+  read_pla_to_cudd_processor p( manager );
+  pla_parser( filename, p );
 
-bool read_bench_command::execute()
-{
-  auto& aigs = env->store<aig_graph>();
-
-  if ( is_verbose() )
-  {
-    std::cout << "[i] read from " << filename << std::endl;
-  }
-  if ( aigs.empty() || is_set( "new" ))
-  {
-    aigs.extend();
-  }
-  else
-  {
-    aigs.current() = aig_graph();
-  }
-
-  read_bench( aigs.current(), filename );
-
-  return true;
+  return {manager, p.functions};
 }
 
 }

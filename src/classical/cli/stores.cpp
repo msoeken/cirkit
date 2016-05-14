@@ -34,6 +34,7 @@
 #include <classical/functions/compute_levels.hpp>
 #include <classical/functions/simulate_aig.hpp>
 #include <classical/io/read_aiger.hpp>
+#include <classical/io/read_bench.hpp>
 #include <classical/io/read_symmetries.hpp>
 #include <classical/io/read_unateness.hpp>
 #include <classical/io/write_verilog.hpp>
@@ -196,6 +197,14 @@ aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& file
     read_unateness( aig, depname );
   }
 
+  return aig;
+}
+
+template<>
+aig_graph store_read_io_type<aig_graph, io_bench_tag_t>( const std::string& filename, const command& cmd )
+{
+  aig_graph aig;
+  read_bench( aig, filename );
   return aig;
 }
 

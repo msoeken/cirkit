@@ -38,6 +38,8 @@
 namespace cirkit
 {
 
+struct io_pla_tag_t {};
+
 /******************************************************************************
  * bdd_function_t                                                             *
  ******************************************************************************/
@@ -70,6 +72,12 @@ struct show_store_entry<bdd_function_t>
 
 template<>
 void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd );
+
+template<>
+inline bool store_can_read_io_type<bdd_function_t, io_pla_tag_t>( command& cmd ) { return true; }
+
+template<>
+bdd_function_t store_read_io_type<bdd_function_t, io_pla_tag_t>( const std::string& filename, const command& cmd );
 
 }
 

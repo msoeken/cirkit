@@ -102,6 +102,12 @@ template<>
 aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const command& cmd );
 
 template<>
+inline bool store_can_read_io_type<aig_graph, io_bench_tag_t>( command& cmd ) { return true; }
+
+template<>
+aig_graph store_read_io_type<aig_graph, io_bench_tag_t>( const std::string& filename, const command& cmd );
+
+template<>
 inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( command& cmd ) { return true; }
 
 template<>

@@ -27,7 +27,6 @@
 
 #include <core/cli/stores.hpp>
 #include <core/cli/commands/bdd.hpp>
-#include <core/cli/commands/read_pla.hpp>
 #include <core/cli/commands/testbdd.hpp>
 #include <core/utils/bdd_utils.hpp>
 
@@ -40,7 +39,6 @@
 #include <classical/cli/commands/npn.hpp>
 #include <classical/cli/commands/output_noise.hpp>
 #include <classical/cli/commands/propagate.hpp>
-#include <classical/cli/commands/read_bench.hpp>
 #include <classical/cli/commands/read_sym.hpp>
 #include <classical/cli/commands/rename.hpp>
 #include <classical/cli/commands/simgraph.hpp>
@@ -75,11 +73,11 @@ int main( int argc, char ** argv )
   cli.set_category( "I/O" );
 
   ADD_READ_COMMAND( aiger, "Aiger" );
+  ADD_READ_COMMAND( bench, "Bench" );
+  ADD_READ_COMMAND( pla, "PLA" );
   ADD_READ_COMMAND( verilog, "Verilog" );
   ADD_WRITE_COMMAND( edgelist, "Edge list" );
   ADD_WRITE_COMMAND( verilog, "Verilog" );
-  ADD_COMMAND( read_pla );
-  ADD_COMMAND( read_bench );
   ADD_COMMAND( read_sym );
   ADD_COMMAND( write_aiger );
 
