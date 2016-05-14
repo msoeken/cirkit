@@ -45,7 +45,6 @@
 #include <classical/cli/commands/strash.hpp>
 #include <classical/cli/commands/support.hpp>
 #include <classical/cli/commands/tt.hpp>
-#include <classical/cli/commands/write_aiger.hpp>
 
 #include <abc/cli/commands/abc.hpp>
 #include <abc/cli/commands/cec.hpp>
@@ -76,10 +75,10 @@ int main( int argc, char ** argv )
   ADD_READ_COMMAND( bench, "Bench" );
   ADD_READ_COMMAND( pla, "PLA" );
   ADD_READ_COMMAND( verilog, "Verilog" );
+  ADD_WRITE_COMMAND( aiger, "Aiger" );
   ADD_WRITE_COMMAND( edgelist, "Edge list" );
   ADD_WRITE_COMMAND( verilog, "Verilog" );
   ADD_COMMAND( read_sym );
-  ADD_COMMAND( write_aiger );
 
   cli.set_category( "Approximation" );
   ADD_COMMAND( comb_approx );

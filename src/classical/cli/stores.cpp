@@ -37,6 +37,7 @@
 #include <classical/io/read_bench.hpp>
 #include <classical/io/read_symmetries.hpp>
 #include <classical/io/read_unateness.hpp>
+#include <classical/io/write_aiger.hpp>
 #include <classical/io/write_verilog.hpp>
 
 namespace cirkit
@@ -206,6 +207,12 @@ aig_graph store_read_io_type<aig_graph, io_bench_tag_t>( const std::string& file
   aig_graph aig;
   read_bench( aig, filename );
   return aig;
+}
+
+template<>
+void store_write_io_type<aig_graph, io_aiger_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
+{
+  write_aiger( aig, filename );
 }
 
 template<>

@@ -32,6 +32,7 @@
 #include <reversible/io/print_statistics.hpp>
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/read_specification.hpp>
+#include <reversible/io/write_pla.hpp>
 #include <reversible/io/write_qpic.hpp>
 #include <reversible/io/write_quipper.hpp>
 #include <reversible/io/write_realization.hpp>
@@ -230,6 +231,12 @@ template<>
 void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const command& cmd )
 {
   write_specification( spec, filename );
+}
+
+template<>
+void store_write_io_type<binary_truth_table, io_pla_tag_t>( const binary_truth_table& spec, const std::string& filename, const command& cmd )
+{
+  write_pla( spec, filename );
 }
 
 /******************************************************************************

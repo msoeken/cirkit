@@ -30,6 +30,7 @@
 
 #include <lscli/command.hpp>
 
+#include <core/cli/stores.hpp>
 #include <classical/aig.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
@@ -143,6 +144,12 @@ inline bool store_can_write_io_type<binary_truth_table, io_spec_tag_t>( command&
 
 template<>
 void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const command& cmd );
+
+template<>
+inline bool store_can_write_io_type<binary_truth_table, io_pla_tag_t>( command& cmd ) { return true; }
+
+template<>
+void store_write_io_type<binary_truth_table, io_pla_tag_t>( const binary_truth_table& spec, const std::string& filename, const command& cmd );
 
 /******************************************************************************
  * rcbdd                                                                      *

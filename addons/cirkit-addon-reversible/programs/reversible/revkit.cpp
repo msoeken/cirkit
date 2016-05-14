@@ -30,7 +30,6 @@
 #include <classical/aig.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/cli/commands/expr.hpp>
-#include <classical/cli/commands/write_aiger.hpp>
 #include <classical/utils/expression_parser.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
@@ -49,7 +48,6 @@
 #include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
 #include <reversible/cli/commands/tbs.hpp>
-#include <reversible/cli/commands/write_pla.hpp>
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
 #include <reversible/cli/commands/commands.hpp>
@@ -70,14 +68,12 @@ int main( int argc, char ** argv )
   ADD_READ_COMMAND( pla, "PLA" );
   ADD_READ_COMMAND( real, "realization" );
   ADD_READ_COMMAND( spec, "specification" );
+  ADD_WRITE_COMMAND( pla, "PLA" );
   ADD_WRITE_COMMAND( qpic, "qpic" );
   ADD_WRITE_COMMAND( quipper, "Quipper" );
   ADD_WRITE_COMMAND( real, "realization" );
   ADD_WRITE_COMMAND( spec, "specification" );
   ADD_WRITE_COMMAND( tikz, "TikZ" );
-
-  ADD_COMMAND( write_aiger );
-  ADD_COMMAND( write_pla );
 
   cli.set_category ("Embedding" );
 
