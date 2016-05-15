@@ -118,7 +118,7 @@ protected:
     rules_t rules;
 
     rules.push_back( {[this]() { return option_count == 1 || exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
-    rules.push_back( file_exists( process_filename( filename ), "filename" ) );
+    rules.push_back( file_exists_if_set( *this, process_filename( filename ), "filename" ) );
 
     return rules;
   }
