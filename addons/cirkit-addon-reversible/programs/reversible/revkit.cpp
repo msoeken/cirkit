@@ -47,6 +47,7 @@
 #include <reversible/cli/commands/random_circuit.hpp>
 #include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
+#include <reversible/cli/commands/rms.hpp>
 #include <reversible/cli/commands/tbs.hpp>
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
@@ -88,6 +89,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
   ADD_COMMAND( qbs );
+  ADD_COMMAND( rms );
   ADD_COMMAND( tbs );
 
   cli.set_category( "Verification" );
