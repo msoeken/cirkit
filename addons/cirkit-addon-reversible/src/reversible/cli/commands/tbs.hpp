@@ -41,6 +41,9 @@ public:
 protected:
   rules_t validity_rules() const;
   bool execute();
+
+private:
+  bool bidirectional = true;
 };
 
 }

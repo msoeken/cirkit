@@ -48,16 +48,33 @@ namespace cirkit
 tbs_command::tbs_command( const environment::ptr& env )
   : cirkit_command( env, "Transformation based synthesis" )
 {
-  opts.add_options()
-    ( "bdd,b",        "Use symbolic BDD-based variant (works on RCBDDs)" )
-    ( "sat,s",        "Use symbolic SAT-based variant (works on RCBDDs)" )
-    ( "circuit,c",    "Use circuit as input (works for symbolic SAT-based variant)" )
-    ( "aig,a",        "Use AIG as input (works for symbolic SAT-based variant)" )
-    ( "cnf_from_aig", "Create initial CNF from AIG instead of BDD (works for symbolic SAT-based variant)" )
-    ( "all_assumptions", "Use all assumptions for the SAT call (works for symbolic SAT-based variant)" )
-    ( "new,n",        "Add a new entry to the store; if not set, the current entry is overriden" )
-    ;
+  add_new_option();
   be_verbose();
+
+  boost::program_options::options_description tt_opts( "Explicit truth table based" );
+  tt_opts.add_options()
+    ( "bidirectional",    value_with_default( &bidirectional ), "bidirectional synthesis" )
+    ( "fredkin,f",                                              "use Fredkin gates" )
+    ( "fredkin_lookback",                                       "optimized Fredkin gate insertation (only with `fredkin' enabled)" )
+    ;
+
+  boost::program_options::options_description bdd_opts( "Symbolic BDD based" );
+  bdd_opts.add_options()
+    ( "bdd,b", "use symbolic BDD-based variant (works on RCBDDs)" )
+    ;
+
+  boost::program_options::options_description sat_opts( "Symbolic SAT based" );
+  sat_opts.add_options()
+    ( "sat,s",           "use symbolic SAT-based variant (works on RCBDDS (default), circuits (-c), and AIGs (-a))" )
+    ( "circuit,c",       "use circuit as input" )
+    ( "aig,a",           "use AIG as input" )
+    ( "cnf_from_aig",    "create initial CNF from AIG instead of BDD (if input is RCBDD)" )
+    ( "all_assumptions", "use all assumptions for the SAT call" )
+    ;
+
+  opts.add( tt_opts );
+  opts.add( bdd_opts );
+  opts.add( sat_opts );
 }
 
 command::rules_t tbs_command::validity_rules() const
@@ -77,7 +94,6 @@ bool tbs_command::execute()
   auto& specs    = env->store<binary_truth_table>();
 
   auto settings = make_settings();
-  auto statistics = std::make_shared<properties>();
 
   circuit circ;
 
@@ -107,17 +123,17 @@ bool tbs_command::execute()
   }
   else
   {
+    settings->set( "bidirectional",    bidirectional );
+    settings->set( "fredkin",          is_set( "fredkin" ) );
+    settings->set( "fredkin_lookback", is_set( "fredkin_lookback" ) );
     transformation_based_synthesis( circ, specs.current(), settings, statistics );
   }
 
-  if ( circuits.empty() || is_set( "new" ) )
-  {
-    circuits.extend();
-  }
+  extend_if_new( circuits );
 
   circuits.current() = circ;
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
 
   return true;
 }
