@@ -25,6 +25,7 @@
 #include <core/utils/program_options.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/optimization/adding_lines.hpp>
+#include <reversible/utils/costs.hpp>
 
 namespace cirkit
 {
@@ -45,9 +46,10 @@ adding_lines_command::adding_lines_command( const environment::ptr& env )
   : cirkit_command( env, "Adding lines optimization" )
 {
   opts.add_options()
-    ( "additional_lines", value_with_default( &additional_lines ), "Number of additional lines" )
-    ( "new,n",                                                     "Add new circuit to store" )
+    ( "additional_lines,a", value_with_default( &additional_lines ), "number of additional lines" )
+    ( "cost_function,c",    value_with_default( &costs ),            "cost function:\n0: Clifford+T costs\n1: T-depth\n2: T-count\n3: H-count\n4: Transistor costs\n5: NCV costs" )
     ;
+  add_new_option();
 }
 
 command::rules_t adding_lines_command::validity_rules() const
@@ -61,17 +63,22 @@ bool adding_lines_command::execute()
 
   circuit opt;
   auto settings = make_settings();
+
+  std::vector<costs_by_gate_func> cfs = {costs_by_gate_func( clifford_t_quantum_costs() ),
+                                         costs_by_gate_func( t_depth_costs() ),
+                                         costs_by_gate_func( t_costs() ),
+                                         costs_by_gate_func( h_costs() ),
+                                         costs_by_gate_func( transistor_costs() ),
+                                         costs_by_gate_func( ncv_quantum_costs() )};
   settings->set( "additional_lines", additional_lines );
+  settings->set( "cost_function", cost_function( cfs[costs] ) );
   adding_lines( opt, circuits.current(), settings, statistics );
 
-  if ( is_set( "new" ) )
-  {
-    circuits.extend();
-  }
+  extend_if_new( circuits );
 
   circuits.current() = opt;
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
 
   return true;
 }

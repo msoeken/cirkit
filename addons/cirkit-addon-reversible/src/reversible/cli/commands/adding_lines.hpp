@@ -47,6 +47,7 @@ public:
 
 private:
   unsigned additional_lines = 1u;
+  unsigned costs            = 0u;
 };
 
 }

@@ -93,6 +93,10 @@ int main( int argc, char ** argv )
   ADD_COMMAND( rms );
   ADD_COMMAND( tbs );
 
+  cli.set_category( "Optimization" );
+
+  ADD_COMMAND( adding_lines );
+
   cli.set_category( "Verification" );
 
   ADD_COMMAND( rec );
@@ -100,7 +104,6 @@ int main( int argc, char ** argv )
   cli.set_category( "Various" );
 
   ADD_COMMAND( abc );
-  ADD_COMMAND( adding_lines );
   ADD_COMMAND( bdd );
   ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
