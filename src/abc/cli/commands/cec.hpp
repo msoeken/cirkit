@@ -45,6 +45,9 @@ protected:
   rules_t validity_rules() const;
   bool execute();
 
+public:
+  log_opt_t log() const;
+
 private:
   unsigned circ1 = 0u;
   unsigned circ2 = 1u;

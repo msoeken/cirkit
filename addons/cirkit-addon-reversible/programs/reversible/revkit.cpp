@@ -32,6 +32,7 @@
 #include <classical/cli/commands/expr.hpp>
 #include <classical/utils/expression_parser.hpp>
 #include <abc/cli/commands/abc.hpp>
+#include <abc/cli/commands/cec.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -99,6 +100,7 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Verification" );
 
+  ADD_COMMAND( cec );
   ADD_COMMAND( rec );
 
   cli.set_category( "Various" );

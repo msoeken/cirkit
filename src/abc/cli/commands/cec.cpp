@@ -45,10 +45,14 @@ cec_command::cec_command( const environment::ptr& env )
   : cirkit_command( env, "Combinatorial equivalence checking of two aigs" )
 {
   opts.add_options()
-    ( "circuit1",  value_with_default( &circ1 ),  "Store-ID of circuit1" )
-    ( "circuit2",  value_with_default( &circ2 ),  "Store-ID of circuit2" )
+    ( "circuit1",  value_with_default( &circ1 ),  "store-ID of circuit1" )
+    ( "circuit2",  value_with_default( &circ2 ),  "store-ID of circuit2" )
     ;
-  add_new_option();
+
+  if ( env->has_store<counterexample_t>() )
+  {
+    add_new_option();
+  }
   be_verbose();
 }
 
@@ -63,30 +67,34 @@ command::rules_t cec_command::validity_rules() const
 bool cec_command::execute()
 {
   auto& aigs = env->store<aig_graph>();
-  auto& cex  = env->store<counterexample_t>();
 
   const auto& aig_circ1 = aigs[circ1];
   const auto& aig_circ2 = aigs[circ2];
 
   auto settings = make_settings();
-  auto statistics = std::make_shared<properties>();
-  boost::optional< counterexample_t > cex_result = abc_cec( aig_circ1, aig_circ2, settings, statistics );
-  std::cout << boost::format( "[i] cec run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  boost::optional<counterexample_t> cex_result = abc_cec( aig_circ1, aig_circ2, settings, statistics );
+  print_runtime();
 
-  if ( cex_result )
+  if ( (bool)cex_result )
   {
-    if ( cex.empty() || is_set( "new" ) )
+    if ( env->has_store<counterexample_t>() )
     {
-      cex.extend();
+      auto& cex = env->store<counterexample_t>();
+      extend_if_new( cex );
+      cex.current() = *cex_result;
     }
-    cex.current() = *cex_result;
-    std::cout << "[i] counterexample: " << *cex << std::endl;
+    std::cout << "[i] counterexample: " << *cex_result << std::endl;
   }
   else
   {
     std::cout << "[i] functionally equivalent: no counterexample" << std::endl;
   }
   return true;
+}
+
+command::log_opt_t cec_command::log() const
+{
+  return log_opt_t({{"runtime", statistics->get<double>( "runtime" )}});
 }
 
 }
