@@ -422,6 +422,7 @@ std::pair<tt, unsigned> tt_expression_evaluator::on_maj( const std::pair<tt, uns
   auto _v3 = value3.first;
   tt_align( _v1, _v2 );
   tt_align( _v2, _v3 );
+  tt_align( _v1, _v3 );
   return {( _v1 & _v2 ) | ( _v1 & _v3 ) | ( _v2 & _v3 ), std::max( value1.second, std::max( value2.second, value3.second ) )};
 }
 
