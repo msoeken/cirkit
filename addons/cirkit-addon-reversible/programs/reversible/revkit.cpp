@@ -45,12 +45,14 @@
 #include <reversible/cli/commands/exs.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
+#include <reversible/cli/commands/pos.hpp>
 #include <reversible/cli/commands/qbs.hpp>
 #include <reversible/cli/commands/random_circuit.hpp>
 #include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
 #include <reversible/cli/commands/rms.hpp>
 #include <reversible/cli/commands/tbs.hpp>
+#include <reversible/cli/commands/tof.hpp>
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
 #include <reversible/cli/commands/commands.hpp>
@@ -97,6 +99,11 @@ int main( int argc, char ** argv )
   cli.set_category( "Optimization" );
 
   ADD_COMMAND( adding_lines );
+
+  cli.set_category( "Rewriting" );
+
+  ADD_COMMAND( pos );
+  ADD_COMMAND( tof );
 
   cli.set_category( "Verification" );
 
