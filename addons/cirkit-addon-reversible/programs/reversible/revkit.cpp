@@ -31,6 +31,7 @@
 #include <classical/cli/stores.hpp>
 #include <classical/cli/commands/expr.hpp>
 #include <classical/utils/expression_parser.hpp>
+#include <abc/cli/commands/abc.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -98,6 +99,7 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Various" );
 
+  ADD_COMMAND( abc );
   ADD_COMMAND( adding_lines );
   ADD_COMMAND( bdd );
   ADD_COMMAND( enumerate );
