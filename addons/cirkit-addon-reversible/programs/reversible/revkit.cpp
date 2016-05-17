@@ -45,6 +45,7 @@
 #include <reversible/cli/commands/exs.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
+#include <reversible/cli/commands/nct.hpp>
 #include <reversible/cli/commands/pos.hpp>
 #include <reversible/cli/commands/qbs.hpp>
 #include <reversible/cli/commands/random_circuit.hpp>
@@ -100,8 +101,9 @@ int main( int argc, char ** argv )
 
   ADD_COMMAND( adding_lines );
 
-  cli.set_category( "Rewriting" );
+  cli.set_category( "Mapping and rewriting" );
 
+  ADD_COMMAND( nct );
   ADD_COMMAND( pos );
   ADD_COMMAND( tof );
 

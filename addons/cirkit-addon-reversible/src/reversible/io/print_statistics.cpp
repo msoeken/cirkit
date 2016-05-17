@@ -22,23 +22,11 @@
 
 #include <boost/format.hpp>
 
-#include "../utils/costs.hpp"
+#include <reversible/utils/circuit_utils.hpp>
+#include <reversible/utils/costs.hpp>
 
 namespace cirkit
 {
-
-  bool has_fully_controlled_gate( const circuit& circ )
-  {
-    const auto n = circ.lines();
-    for ( const auto& g : circ )
-    {
-      if ( g.controls().size() + g.targets().size() == n )
-      {
-        return true;
-      }
-    }
-    return false;
-  }
 
   unsigned number_of_qubits( const circuit& circ )
   {
