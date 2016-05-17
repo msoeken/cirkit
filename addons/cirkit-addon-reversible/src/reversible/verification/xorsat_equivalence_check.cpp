@@ -139,6 +139,12 @@ bool xorsat_equivalence_check( const circuit& circ1, const circuit& circ2,
   /* timing */
   properties_timer t( statistics );
 
+  if ( circ1.lines() != circ2.lines() )
+  {
+    std::cout << "[e] circuits do not have the same number of lines" << std::endl;
+    return false;
+  }
+
   const auto id_circ = create_identity_miter( circ1, circ2 );
 
   write_to_dimacs( id_circ, tmpname );
