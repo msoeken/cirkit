@@ -394,6 +394,13 @@ private:
       const auto now = std::chrono::system_clock::now();
       const auto result = detail::execute_program( line.substr( 1u ) );
 
+      std::cout << result.second;
+
+      if ( !result.second.empty() && result.second.back() != '\n' )
+      {
+        std::cout << '%' << std::endl;
+      }
+
       if ( env->log )
       {
         command::log_map_t log;
