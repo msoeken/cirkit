@@ -94,6 +94,9 @@ public:
   class set
   {
   public:
+    friend class paged_memory;
+
+  public:
     /* interface */
     using iterator   = std::vector<unsigned>::const_iterator;
     using value_type = unsigned;
@@ -148,6 +151,7 @@ public:
   unsigned                        count( unsigned index ) const;
   boost::iterator_range<iterator> sets( unsigned index ) const;
   unsigned                        sets_count() const;
+  unsigned                        index( const set& s ) const;
 
   /* the following methods assume that nothing has been added to the index yet,
      i.e., it will update the offset */

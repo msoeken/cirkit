@@ -19,6 +19,7 @@
 #include "paged_memory.hpp"
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/numeric.hpp>
 
@@ -135,6 +136,11 @@ boost::iterator_range<paged_memory::iterator> paged_memory::sets( unsigned index
 unsigned paged_memory::sets_count() const
 {
   return boost::accumulate( _count, 0u );
+}
+
+unsigned paged_memory::index( const set& s ) const
+{
+  return *boost::lower_bound( _offset, s.address );
 }
 
 void paged_memory::assign_empty( unsigned index, const std::vector<unsigned>& extra )
