@@ -40,6 +40,7 @@ tt tt_isop( const tt& on, const tt& ondc, std::vector<int>& cover );
 
 /* based on ABC's Abc_Tt6Cnf */
 std::vector<int> tt_cnf( const tt& f );
+void tt_cnf( const tt& f, std::vector<int>& cover );
 
 }
 

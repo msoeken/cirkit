@@ -98,21 +98,26 @@ tt tt_isop( const tt& on, const tt& ondc, std::vector<int>& cover )
 std::vector<int> tt_cnf( const tt& f )
 {
   std::vector<int> cover;
+  tt_cnf( f, cover );
+  return cover;
+}
+
+void tt_cnf( const tt& f, std::vector<int>& cover )
+{
   const auto n = tt_num_vars( f );
 
-  tt_isop( f, f, cover );
   auto cs = cover.size();
-  for ( auto c = 0u; c < cs; ++c )
+  tt_isop( f, f, cover );
+  for ( auto c = cs; c < cover.size(); ++c )
   {
     cover[c] |= 1u << ( n << 1u );
   }
+  cs = cover.size();
   tt_isop( ~f, ~f, cover );
   for ( auto c = cs; c < cover.size(); ++c )
   {
     cover[c] |= 1u << ( ( n << 1u ) + 1u );
   }
-
-  return cover;
 }
 
 }
