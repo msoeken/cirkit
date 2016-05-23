@@ -83,7 +83,7 @@ tt npn_manager::compute( const tt& tt, boost::dynamic_bitset<>& phase, std::vect
   return npn;
 }
 
-void npn_manager::print_statistics( std::ostream& os )
+void npn_manager::print_statistics( std::ostream& os ) const
 {
   os << boost::format( "[i] NPN manager: size = %d   cache hits = %d   cache misses = %d   run-time = %.2f secs" ) % table.size() % cache_hit % cache_miss % runtime << std::endl;
 }

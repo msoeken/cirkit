@@ -44,7 +44,7 @@ public:
   npn_manager( unsigned num_vars, unsigned hash_table_size = 4096 );
 
   tt compute( const tt& tt, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
-  void print_statistics( std::ostream& os );
+  void print_statistics( std::ostream& os = std::cout ) const;
 
 private:
   struct table_entry_t
