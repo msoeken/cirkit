@@ -102,7 +102,7 @@ public:
     using value_type = unsigned;
 
     /* constructor */
-    set( unsigned address, const std::vector<unsigned>& data, unsigned additional );
+    set( unsigned address, std::vector<unsigned>& data, unsigned additional );
 
     /* methods */
     std::size_t                     size() const;
@@ -110,10 +110,11 @@ public:
     iterator                        end() const;
     boost::iterator_range<iterator> range() const;
     value_type                      extra( unsigned i ) const;
+    void                            set_extra( unsigned i, value_type v );
 
   private:
     unsigned address;
-    const std::vector<unsigned>& data;
+    std::vector<unsigned>& data;
     unsigned additional;
   };
 
@@ -128,7 +129,7 @@ public:
     using pointer           = const set*;
 
     /* constructor */
-    iterator( unsigned index, unsigned address, const std::vector<unsigned>& data, unsigned additional );
+    iterator( unsigned index, unsigned address, std::vector<unsigned>& data, unsigned additional );
 
     /* operators */
     reference operator*() const;
@@ -140,7 +141,7 @@ public:
   private:
     unsigned index;
     unsigned address;
-    const std::vector<unsigned>& data;
+    std::vector<unsigned>& data;
     unsigned additional;
   };
 
@@ -149,7 +150,7 @@ public:
 
   /* methods */
   unsigned                        count( unsigned index ) const;
-  boost::iterator_range<iterator> sets( unsigned index ) const;
+  boost::iterator_range<iterator> sets( unsigned index );
   unsigned                        sets_count() const;
   unsigned                        index( const set& s ) const;
 

@@ -53,7 +53,7 @@ public:
 
   unsigned memory() const;
   unsigned count( aig_node node ) const;
-  boost::iterator_range<paged_memory::iterator> cuts( aig_node node ) const;
+  boost::iterator_range<paged_memory::iterator> cuts( aig_node node );
 
   tt simulate( aig_node node, const cut& c ) const;
   unsigned depth( aig_node node, const cut& c ) const;
@@ -61,7 +61,7 @@ public:
 private:
   void enumerate();
   void enumerate_node_with_bitsets( aig_node n, aig_node n1, aig_node n2 );
-  std::vector<std::pair<boost::dynamic_bitset<>, unsigned>> enumerate_local_cuts( aig_node n1, aig_node n2, unsigned max_cut_size ) const;
+  std::vector<std::pair<boost::dynamic_bitset<>, unsigned>> enumerate_local_cuts( aig_node n1, aig_node n2, unsigned max_cut_size );
 
   void enumerate_parallel();
 

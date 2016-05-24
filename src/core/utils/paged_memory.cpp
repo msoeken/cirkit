@@ -32,7 +32,7 @@ namespace cirkit
  * paged_memory::set                                                          *
  ******************************************************************************/
 
-paged_memory::set::set( unsigned address, const std::vector<unsigned>& data, unsigned additional )
+paged_memory::set::set( unsigned address, std::vector<unsigned>& data, unsigned additional )
   : address( address ),
     data( data ),
     additional( additional )
@@ -64,11 +64,16 @@ paged_memory::set::value_type paged_memory::set::extra( unsigned i ) const
   return data[address + 1 + i];
 }
 
+void paged_memory::set::set_extra( unsigned i, value_type v )
+{
+  data[address + 1 + i] = v;
+}
+
 /******************************************************************************
  * paged_memory::iterator                                                     *
  ******************************************************************************/
 
-paged_memory::iterator::iterator( unsigned index, unsigned address, const std::vector<unsigned>& data, unsigned additional )
+paged_memory::iterator::iterator( unsigned index, unsigned address, std::vector<unsigned>& data, unsigned additional )
   : index( index ),
     address( address ),
     data( data ),
@@ -127,7 +132,7 @@ unsigned paged_memory::memory() const
   return sizeof( unsigned ) * ( _data.size() + _offset.size() + _count.size() + 2u ) + sizeof( double );
 }
 
-boost::iterator_range<paged_memory::iterator> paged_memory::sets( unsigned index ) const
+boost::iterator_range<paged_memory::iterator> paged_memory::sets( unsigned index )
 {
   return boost::make_iterator_range( iterator( 0u, _offset[index], _data, _additional ),
                                      iterator( _count[index], 0, _data, _additional ) );

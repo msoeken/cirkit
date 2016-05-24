@@ -89,7 +89,7 @@ unsigned paged_aig_cuts::count( aig_node node ) const
   return data.count( node );
 }
 
-boost::iterator_range<paged_memory::iterator> paged_aig_cuts::cuts( aig_node node ) const
+boost::iterator_range<paged_memory::iterator> paged_aig_cuts::cuts( aig_node node )
 {
   return data.sets( node );
 }
@@ -198,7 +198,7 @@ void paged_aig_cuts::enumerate_parallel()
   parallel_process( _aig, on_input, on_and );
 }
 
-std::vector<std::pair<boost::dynamic_bitset<>, unsigned>> paged_aig_cuts::enumerate_local_cuts( aig_node n1, aig_node n2, unsigned max_cut_size ) const
+std::vector<std::pair<boost::dynamic_bitset<>, unsigned>> paged_aig_cuts::enumerate_local_cuts( aig_node n1, aig_node n2, unsigned max_cut_size )
 {
   std::vector<std::pair<boost::dynamic_bitset<>, unsigned>> local_cuts;
 
