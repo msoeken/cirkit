@@ -33,7 +33,7 @@ namespace cirkit
  ******************************************************************************/
 
 paged_memory::set::set( unsigned address, std::vector<unsigned>& data, unsigned additional )
-  : address( address ),
+  : _address( address ),
     data( data ),
     additional( additional )
 {
@@ -41,17 +41,17 @@ paged_memory::set::set( unsigned address, std::vector<unsigned>& data, unsigned 
 
 std::size_t paged_memory::set::size() const
 {
-  return data[address];
+  return data[_address];
 }
 
 paged_memory::set::iterator paged_memory::set::begin() const
 {
-  return data.begin() + address + 1 + additional;
+  return data.begin() + _address + 1 + additional;
 }
 
 paged_memory::set::iterator paged_memory::set::end() const
 {
-  return data.begin() + address + 1 + additional + size();
+  return data.begin() + _address + 1 + additional + size();
 }
 
 boost::iterator_range<paged_memory::set::iterator> paged_memory::set::range() const
@@ -61,12 +61,17 @@ boost::iterator_range<paged_memory::set::iterator> paged_memory::set::range() co
 
 paged_memory::set::value_type paged_memory::set::extra( unsigned i ) const
 {
-  return data[address + 1 + i];
+  return data[_address + 1 + i];
 }
 
 void paged_memory::set::set_extra( unsigned i, value_type v )
 {
-  data[address + 1 + i] = v;
+  data[_address + 1 + i] = v;
+}
+
+unsigned paged_memory::set::address() const
+{
+  return _address;
 }
 
 /******************************************************************************
@@ -145,7 +150,17 @@ unsigned paged_memory::sets_count() const
 
 unsigned paged_memory::index( const set& s ) const
 {
-  return *boost::lower_bound( _offset, s.address );
+  return std::distance( _offset.begin(), boost::lower_bound( _offset, s._address ) );
+}
+
+paged_memory::set paged_memory::from_address( unsigned address )
+{
+  return set( address, _data, _additional );
+}
+
+paged_memory::set paged_memory::from_index( unsigned index )
+{
+  return set( _offset[index], _data, _additional );
 }
 
 void paged_memory::assign_empty( unsigned index, const std::vector<unsigned>& extra )

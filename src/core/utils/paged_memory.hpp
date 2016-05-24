@@ -111,9 +111,10 @@ public:
     boost::iterator_range<iterator> range() const;
     value_type                      extra( unsigned i ) const;
     void                            set_extra( unsigned i, value_type v );
+    unsigned                        address() const;
 
   private:
-    unsigned address;
+    unsigned _address;
     std::vector<unsigned>& data;
     unsigned additional;
   };
@@ -153,6 +154,8 @@ public:
   boost::iterator_range<iterator> sets( unsigned index );
   unsigned                        sets_count() const;
   unsigned                        index( const set& s ) const;
+  set                             from_address( unsigned address );
+  set                             from_index( unsigned index );
 
   /* the following methods assume that nothing has been added to the index yet,
      i.e., it will update the offset */
