@@ -77,6 +77,11 @@ cnf_manager::vertex_range_t cnf_manager::compute( const tt& func, unsigned* lite
     hash[key] = std::make_tuple( begin, end, count );
   }
 
+  if ( literal_count )
+  {
+    *literal_count = count;
+  }
+
   return boost::make_iterator_range( covers.begin() + begin, covers.begin() + end );
 }
 
