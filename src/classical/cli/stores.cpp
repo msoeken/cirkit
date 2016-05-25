@@ -31,6 +31,7 @@
 #include <core/utils/range_utils.hpp>
 
 #include <classical/functions/aig_from_truth_table.hpp>
+#include <classical/functions/aig_to_mig.hpp>
 #include <classical/functions/compute_levels.hpp>
 #include <classical/functions/simulate_aig.hpp>
 #include <classical/io/read_aiger.hpp>
@@ -39,6 +40,10 @@
 #include <classical/io/read_unateness.hpp>
 #include <classical/io/write_aiger.hpp>
 #include <classical/io/write_verilog.hpp>
+#include <classical/mig/mig_to_aig.hpp>
+#include <classical/mig/mig_from_string.hpp>
+#include <classical/mig/mig_utils.hpp>
+#include <classical/mig/mig_verilog.hpp>
 
 namespace cirkit
 {
@@ -230,6 +235,104 @@ void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, co
   {
     os << source( e, aig ) << " " << target( e, aig ) << std::endl;
   }
+}
+
+/******************************************************************************
+ * mig_graph                                                                  *
+ ******************************************************************************/
+
+template<>
+aig_graph store_convert<mig_graph, aig_graph>( const mig_graph& mig )
+{
+  return mig_to_aig( mig );
+}
+
+template<>
+mig_graph store_convert<aig_graph, mig_graph>( const aig_graph& aig )
+{
+  return aig_to_mig( aig );
+}
+
+template<>
+std::string store_entry_to_string<mig_graph>( const mig_graph& mig )
+{
+  const auto& info = mig_info( mig );
+  const auto& name = info.model_name;
+  return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
+}
+
+show_store_entry<mig_graph>::show_store_entry( command& cmd )
+{
+}
+
+bool show_store_entry<mig_graph>::operator()( mig_graph& mig, const std::string& dotname, const command& cmd )
+{
+  write_dot( mig, dotname );
+
+  return true;
+}
+
+command::log_opt_t show_store_entry<mig_graph>::log() const
+{
+  return boost::none;
+}
+
+template<>
+void print_store_entry_statistics<mig_graph>( std::ostream& os, const mig_graph& mig )
+{
+  mig_print_stats( mig, os );
+}
+
+template<>
+command::log_opt_t log_store_entry_statistics<mig_graph>( const mig_graph& mig )
+{
+  const auto& info = mig_info( mig );
+
+  std::vector<mig_node> outputs;
+  for ( const auto& output : info.outputs )
+  {
+    outputs += output.first.node;
+  }
+
+  std::vector<unsigned> depths;
+  const auto depth = compute_depth( mig, outputs, depths );
+
+  return command::log_opt_t({
+      {"inputs", static_cast<int>( info.inputs.size() )},
+      {"outputs", static_cast<int>( info.outputs.size() )},
+      {"size", static_cast<int>( boost::num_vertices( mig ) - info.inputs.size() - 1u )},
+      {"depth", depth},
+      {"complemented_edges", number_of_complemented_edges( mig )},
+      {"inverters", number_of_inverters( mig )}
+    });
+}
+
+template<>
+expression_t::ptr store_convert<mig_graph, expression_t::ptr>( const mig_graph& mig )
+{
+  return mig_to_expression( mig, mig_info( mig ).outputs.front().first );
+}
+
+template<>
+mig_graph store_convert<expression_t::ptr, mig_graph>( const expression_t::ptr& expr )
+{
+  mig_graph mig;
+  mig_initialize( mig );
+  std::vector<mig_function> pis;
+  mig_create_po( mig, mig_from_expression( mig, pis, expr ), "f" );
+  return mig;
+}
+
+template<>
+void store_write_io_type<mig_graph, io_verilog_tag_t>( const mig_graph& mig, const std::string& filename, const command& cmd )
+{
+  write_verilog( mig, filename );
+}
+
+template<>
+mig_graph store_read_io_type<mig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
+{
+  return read_mighty_verilog( filename );
 }
 
 /******************************************************************************

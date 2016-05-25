@@ -36,6 +36,7 @@
 #include <core/utils/bdd_utils.hpp>
 
 #include <classical/aig.hpp>
+#include <classical/mig/mig.hpp>
 #include <classical/netlist_graphs.hpp>
 #include <classical/utils/aig_utils.hpp>
 #include <classical/utils/counterexample.hpp>
@@ -124,6 +125,78 @@ inline bool store_can_write_io_type<aig_graph, io_edgelist_tag_t>( command& cmd 
 
 template<>
 void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd );
+
+/******************************************************************************
+ * mig_graph                                                                  *
+ ******************************************************************************/
+
+template<>
+struct store_info<mig_graph>
+{
+  static constexpr const char* key         = "migs";
+  static constexpr const char* option      = "mig";
+  static constexpr const char* mnemonic    = "m";
+  static constexpr const char* name        = "MIG";
+  static constexpr const char* name_plural = "MIGs";
+};
+
+template<>
+std::string store_entry_to_string<mig_graph>( const mig_graph& mig );
+
+template<>
+struct show_store_entry<mig_graph>
+{
+  show_store_entry( command& cmd );
+
+  bool operator()( mig_graph& mig, const std::string& dotname, const command& cmd );
+
+  command::log_opt_t log() const;
+
+private:
+  std::vector<std::string> expressions;
+};
+
+template<>
+void print_store_entry_statistics<mig_graph>( std::ostream& os, const mig_graph& mig );
+
+template<>
+command::log_opt_t log_store_entry_statistics<mig_graph>( const mig_graph& mig );
+
+template<>
+inline bool store_can_convert<mig_graph, aig_graph>() { return true; }
+
+template<>
+aig_graph store_convert<mig_graph, aig_graph>( const mig_graph& mig );
+
+template<>
+inline bool store_can_convert<aig_graph, mig_graph>() { return true; }
+
+template<>
+mig_graph store_convert<aig_graph, mig_graph>( const aig_graph& mig );
+
+template<>
+inline bool store_can_convert<mig_graph, expression_t::ptr>() { return true; }
+
+template<>
+expression_t::ptr store_convert<mig_graph, expression_t::ptr>( const mig_graph& mig );
+
+template<>
+inline bool store_can_convert<expression_t::ptr, mig_graph>() { return true; }
+
+template<>
+mig_graph store_convert<expression_t::ptr, mig_graph>( const expression_t::ptr& expr );
+
+template<>
+inline bool store_can_write_io_type<mig_graph, io_verilog_tag_t>( command& cmd ) { return true; }
+
+template<>
+void store_write_io_type<mig_graph, io_verilog_tag_t>( const mig_graph& mig, const std::string& filename, const command& cmd );
+
+template<>
+inline bool store_can_read_io_type<mig_graph, io_verilog_tag_t>( command& cmd ) { return true; }
+
+template<>
+mig_graph store_read_io_type<mig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd );
 
 /******************************************************************************
  * counterexample_t                                                           *
