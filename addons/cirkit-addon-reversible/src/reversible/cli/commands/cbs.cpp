@@ -47,11 +47,11 @@ cbs_command::cbs_command( const environment::ptr& env )
   : cirkit_command( env, "Circuit based synthesis", "[M. Soeken, A. Chattopadhyay: Unlocking Efficiency and Scalability of Reversible Logic Synthesis using Conventional Logic Synthesis, in: DAC 53 (2016)]" )
 {
   opts.add_options()
-    ( "threshold,t",        value_with_default( &threshold ), "Threshold for size of FFRs" )
+    ( "threshold,t",        value_with_default( &threshold ), "threshold for size of FFRs" )
     ( "embedding",          value_with_default( &embedding ), "0u: BDD-based, 1u: PLA-based" )
     ( "synthesis",          value_with_default( &synthesis ), "0u: TBS (BDD), 1u: TBS (SAT), 2u: DBS" )
-    ( "store_intermediate",                                   "Stores all intermediate results (BDDs, RCBDDs, and circuits) in store\n"
-                                                              "Should only be used for debugging purposes on small functions" )
+    ( "store_intermediate",                                   "stores all intermediate results (BDDs, RCBDDs, and circuits) in store\n"
+                                                              "should only be used for debugging purposes on small functions" )
     ;
   add_new_option();
   be_verbose();
@@ -67,8 +67,6 @@ bool cbs_command::execute()
   const auto& aigs = env->store<aig_graph>();
   auto& circuits = env->store<circuit>();
 
-  extend_if_new( circuits );
-
   auto settings = make_settings();
 
   settings->set( "var_threshold", threshold );
@@ -76,9 +74,13 @@ bool cbs_command::execute()
   settings->set( "synthesis", synthesis );
   settings->set( "store_intermediate", is_set( "store_intermediate" ) );
 
-  cut_based_synthesis( circuits.current(), aigs.current(), settings, statistics );
+  circuit circ;
+  cut_based_synthesis( circ, aigs.current(), settings, statistics );
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  extend_if_new( circuits );
+  circuits.current() = circ;
+
+  print_runtime();
 
   if ( is_set( "store_intermediate" ) )
   {
