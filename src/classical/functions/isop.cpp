@@ -40,7 +40,7 @@ tt tt_isop( const tt& on, const tt& ondc, std::vector<int>& cover )
 
   /* terminal cases */
   if ( on.none() ) { return on; }
-  if ( ondc.all() )
+  if ( ( ~ondc ).none() )
   {
     cover.push_back( 0 );
     return ondc;
