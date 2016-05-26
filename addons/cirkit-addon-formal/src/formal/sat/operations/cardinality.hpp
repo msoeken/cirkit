@@ -30,12 +30,17 @@
 #ifndef CARDINALITY_HPP
 #define CARDINALITY_HPP
 
+#include <numeric>
+
 #include <boost/assign/std/vector.hpp>
 #include <boost/range.hpp>
 #include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
+#include <core/utils/range_utils.hpp>
 #include <formal/sat/sat_solver.hpp>
+#include <formal/sat/operations/logic.hpp>
 
 using namespace boost::assign;
 
@@ -148,6 +153,228 @@ unsigned equals_sinz( S& solver, const clause_t& x, unsigned r, int sid )
 
   sid = less_or_equal_sinz( solver, x, r, sid, 1 );
   return greater_or_equal_sinz( solver, x, r, sid, -1 );
+}
+
+/******************************************************************************
+ * Pairwise cardinality networks                                              *
+ ******************************************************************************/
+
+// Based on [M. Codish and M. Zazon-Ivry, LPAR, 2016, 154-172] and https://bitbucket.org/alanmi/abc/src/f78c2854aa5948fea93533c3934fb0f6a2c3c785/src/aig/gia/giaSatMap.c?at=default&fileviewer=file-view-default
+
+// namespace detail
+// {
+
+// template<class S>
+// void sat_add_half_sorter( S& solver, int a, int b, int y, int z )
+// {
+//   add_clause( solver )( {a, -y} );
+//   add_clause( solver )( {a, -z} );
+//   add_clause( solver )( {b, -y, -z} );
+//   // add_clause( solver )( {-a, y} );
+//   // add_clause( solver )( {-a, z} );
+//   // add_clause( solver )( {-b, y, z} );
+// }
+
+// template<class S>
+// void sat_pairwise_cardinality_network_add_sorter( S& solver, std::vector<int>& vvars, int i, int k, int *pnvars )
+// {
+//   const auto ivar1 = (*pnvars)++;
+//   const auto ivar2 = (*pnvars)++;
+
+//   sat_add_half_sorter( solver, ivar1, ivar2, vvars[i], vvars[k] );
+//   vvars[i] = ivar1;
+//   vvars[k] = ivar2;
+// }
+
+// template<class S>
+// void sat_pairwise_cardinality_network_add_constraint_merge( S& solver, std::vector<int>& vvars, int lo, int hi, int r, int *pnvars )
+// {
+//   const auto step = r * 2;
+//   if ( step >= hi - lo ) return;
+
+//   sat_pairwise_cardinality_network_add_constraint_merge( solver, vvars, lo, hi - r, step, pnvars );
+//   sat_pairwise_cardinality_network_add_constraint_merge( solver, vvars, lo + r, hi, step, pnvars );
+//   for ( auto i = lo + r; i < hi - r; i += step )
+//   {
+//     sat_pairwise_cardinality_network_add_sorter( solver, vvars, i, i + r, pnvars );
+//   }
+// }
+
+// template<class S>
+// void sat_pairwise_cardinality_network_add_constraint_range( S& solver, std::vector<int>& vvars, int lo, int hi, int *pnvars )
+// {
+//   if ( hi - lo < 1 ) return;
+
+//   const auto mid = lo + ( hi - lo ) / 2;
+//   for ( auto i = lo; i <= mid; ++i )
+//   {
+//     sat_pairwise_cardinality_network_add_sorter( solver, vvars, i, i + ( hi - lo + 1 ) / 2, pnvars );
+//   }
+//   sat_pairwise_cardinality_network_add_constraint_range( solver, vvars, lo, mid, pnvars );
+//   sat_pairwise_cardinality_network_add_constraint_range( solver, vvars, mid + 1, hi, pnvars );
+//   sat_pairwise_cardinality_network_add_constraint_merge( solver, vvars, lo, hi, 1, pnvars );
+// }
+
+// template<class S>
+// int sat_pairwise_cardinality_network_add_constraint_pairwise( S& solver, std::vector<int>& vvars )
+// {
+//   int nvars = vvars.size();
+//   sat_pairwise_cardinality_network_add_constraint_range( solver, vvars, 0, nvars - 1, &nvars );
+//   return nvars;
+// }
+
+// }
+
+// template<class S>
+// int sat_pairwise_cardinality_network2( S& solver, unsigned log_n, int sid, std::vector<int>* ovars = nullptr )
+// {
+//   auto nvars = 1u << log_n;
+//   const auto nvars_alloc = nvars + 2u * (nvars * log_n * ( log_n - 1 ) / 4 + nvars - 1);
+
+//   std::vector<int> vvars( nvars );
+//   boost::iota( vvars, sid );
+
+//   std::cout << "[i] original vvars: " << any_join( vvars, " " ) << std::endl;
+
+//   const auto nvars_real = detail::sat_pairwise_cardinality_network_add_constraint_pairwise( solver, vvars );
+//   assert( nvars_real == nvars_alloc );
+
+//   if ( ovars )
+//   {
+//     *ovars = vvars;
+//   }
+
+//   return sid + nvars_alloc;
+// }
+
+/******************************************************************************
+ * PW implementation based on paper                                           *
+ ******************************************************************************/
+
+namespace detail
+{
+
+template<class S>
+void sat_pairwise_comparator( S& solver, int a, int b, int c, int d)
+{
+  //logic_or( solver, a, b, c );
+  //logic_and( solver, a, b, d );
+
+  add_clause( solver )( {c, -a} );
+  add_clause( solver )( {c, -b} );
+  add_clause( solver )( {d, -a, -b} );
+}
+
+template<class S>
+void sat_pairwise_split( S& solver, const std::vector<int>& as, const std::vector<int>& bs, const std::vector<int>& cs )
+{
+  assert( bs.size() == cs.size() );
+  assert( bs.size() << 1u == as.size() );
+
+  for ( auto i = 0u; i < bs.size(); ++i )
+  {
+    sat_pairwise_comparator( solver, as[2 * i], as[2 * i + 1], bs[i], cs[i] );
+  }
+}
+
+template<class S>
+int sat_pairwise_merge( S& solver, const std::vector<int>& as, const std::vector<int>& bs, const std::vector<int>& cs, int sid )
+{
+  const auto n = as.size();
+
+  if ( n == 1u )
+  {
+    equals( solver, as[0], cs[0] );
+    equals( solver, bs[0], cs[1] );
+    return sid;
+  }
+
+  /* fill ds and es */
+  std::vector<int> ds( n ), es( n );
+
+  ds[0u] = cs[0];
+  for ( auto i = 1; i < n; ++i ) { ds[i] = sid++; }
+
+  for ( auto i = 0; i < n - 1; ++i ) { es[i] = sid++; }
+  es[n - 1] = cs[2 * n - 1];
+
+  /* fill a0, b0, a1, b1 */
+  std::vector<int> a0( n / 2 ), b0( n / 2 ), a1( n / 2 ), b1( n / 2 );
+  for ( auto i = 0; i < n / 2; ++i )
+  {
+    a0[i] = as[2 * i];
+    a1[i] = as[2 * i + 1];
+    b0[i] = bs[2 * i];
+    b1[i] = bs[2 * i + 1];
+  }
+
+  sid = sat_pairwise_merge( solver, a0, b0, ds, sid );
+  sid = sat_pairwise_merge( solver, a1, b1, es, sid );
+
+  for ( auto i = 0; i < n - 1; ++i )
+  {
+    sat_pairwise_comparator( solver, es[i], ds[i + 1], cs[2 * i + 1], cs[2 * i + 2] );
+  }
+
+  /* sort outputs */
+  for ( auto i = 0; i < cs.size() - 1; ++i )
+  {
+    add_clause( solver )( {cs[i], -cs[i + 1]} );
+  }
+
+  return sid;
+}
+
+template<class S>
+int sat_pairwise_sort( S& solver, const std::vector<int>& as, const std::vector<int>& ds, int sid )
+{
+  const auto n = as.size();
+
+  if ( n == 1u )
+  {
+    equals( solver, as[0], ds[0] );
+    return sid;
+  }
+
+  std::vector<int> bs( n / 2 ), cs( n / 2 ), bbs( n / 2), ccs( n / 2 );
+
+  boost::iota( bs, sid ); sid += n / 2;
+  boost::iota( cs, sid ); sid += n / 2;
+  boost::iota( bbs, sid ); sid += n / 2;
+  boost::iota( ccs, sid ); sid += n / 2;
+
+  sat_pairwise_split( solver, as, bs, cs );
+  sid = sat_pairwise_sort( solver, bs, bbs, sid );
+  sid = sat_pairwise_sort( solver, cs, ccs, sid );
+  return sat_pairwise_merge( solver, bbs, ccs, ds, sid );
+}
+
+}
+
+template<class S>
+int sat_pairwise_cardinality_network( S& solver, const std::vector<int>& ivars, int sid, std::vector<int>* ovars = nullptr )
+{
+  std::vector<int> ds( ivars.size() );
+  boost::iota( ds, sid );
+  sid += ivars.size();
+
+  if ( ovars )
+  {
+    *ovars = ds;
+  }
+
+  return detail::sat_pairwise_sort( solver, ivars, ds, sid );
+}
+
+template<class S>
+int sat_pairwise_cardinality_network( S& solver, unsigned log_n, int sid, std::vector<int>* ovars = nullptr )
+{
+  const auto n = 1 << log_n;
+  std::vector<int> as( n );
+
+  boost::iota( as, sid ); sid += n;
+
+  return sat_pairwise_cardinality_network( solver, as, sid, ovars );
 }
 
 }
