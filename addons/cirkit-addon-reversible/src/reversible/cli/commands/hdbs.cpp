@@ -24,6 +24,7 @@
 
 #include <core/utils/bdd_utils.hpp>
 #include <core/cli/stores.hpp>
+#include <core/utils/program_options.hpp>
 #include <core/utils/timer.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>
@@ -45,11 +46,13 @@ namespace cirkit
  ******************************************************************************/
 
 hdbs_command::hdbs_command( const environment::ptr& env )
-  : cirkit_command( env, "Hierarhical DD-based synthesis." )
+  : cirkit_command( env, "Hierarchical DD-based synthesis" )
 {
   opts.add_options()
-    ( "new,n", "Add new circuit to store" )
+    ( "complemented_edges", value_with_default( &complemented_edges ), "use complemented edges in BDD" )
+    ( "reordering",         value_with_default( &reordering ),         "reordering:\n0: CUDD_REORDER_SAME\n1: CUDD_REORDER_NONE\n2: CUDD_REORDER_RANDOM\n3: CUDD_REORDER_RANDOM_PIVOT\n4: CUDD_REORDER_SIFT\n5: CUDD_REORDER_SIFT_CONVERGE\n6: CUDD_REORDER_SYMM_SIFT\n7: CUDD_REORDER_SYMM_SIFT_CONV\n8: CUDD_REORDER_WINDOW2\n9: CUDD_REORDER_WINDOW3\n10: CUDD_REORDER_WINDOW4\n11: CUDD_REORDER_WINDOW2_CONV\n12: CUDD_REORDER_WINDOW3_CONV\n13: CUDD_REORDER_WINDOW4_CONV\n14: CUDD_REORDER_GROUP_SIFT\n15: CUDD_REORDER_GROUP_SIFT_CONV\n16: CUDD_REORDER_ANNEALING\n17: CUDD_REORDER_GENETIC\n18: CUDD_REORDER_LINEAR\n19: CUDD_REORDER_LINEAR_CONVERGE\n20: CUDD_REORDER_LAZY_SIFT\n21: CUDD_REORDER_EXACT" )
     ;
+  add_new_option();
 }
 
 command::rules_t hdbs_command::valididity_rules() const
@@ -68,19 +71,16 @@ bool hdbs_command::execute()
     using namespace internal;
     dd graph;
     dd_from_bdd_settings settings;
-    settings.complemented_edges = true;
-    settings.reordering = 4;
+    settings.complemented_edges = complemented_edges;
+    settings.reordering = reordering;
     dd_from_bdd( graph, bdd, settings );
     dd_synthesis( circ, graph );
   }
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
 
   auto& circuits = env->store<circuit>();
-  if ( circuits.empty() || is_set( "new" ) )
-  {
-    circuits.extend();
-  }
+  extend_if_new( circuits );
   circuits.current() = circ;
 
   return true;

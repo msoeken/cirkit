@@ -44,6 +44,10 @@ protected:
 
 public:
   log_opt_t log() const;
+
+private:
+  bool     complemented_edges = true;
+  unsigned reordering         = 4u;
 };
 
 }
