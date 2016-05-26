@@ -51,6 +51,7 @@
 #include <reversible/cli/commands/random_circuit.hpp>
 #include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
+#include <reversible/cli/commands/revsimp.hpp>
 #include <reversible/cli/commands/rms.hpp>
 #include <reversible/cli/commands/tbs.hpp>
 #include <reversible/cli/commands/tof.hpp>
@@ -100,6 +101,7 @@ int main( int argc, char ** argv )
   cli.set_category( "Optimization" );
 
   ADD_COMMAND( adding_lines );
+  ADD_COMMAND( revsimp );
 
   cli.set_category( "Mapping and rewriting" );
 
