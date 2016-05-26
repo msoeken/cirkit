@@ -35,7 +35,7 @@ CirKit can be executed with
 
     build/programs/cirkit
 
-Check the [Wiki](http://github.com/msoeken/cirkit/wiki) for more details.
+Check the [documentation](http://msoeken.github.io/cirkit_doc.html) for more details.
 
 ## Build and Run RevKit
 
@@ -50,6 +50,8 @@ After extracting or cloning CirKit perform the following steps
 RevKit can be executed with
 
     build/programs/revkit
+    
+Check the [documentation](http://msoeken.github.io/cirkit_doc.html) for more details.
 
 ## Build CirKit Addons
 
