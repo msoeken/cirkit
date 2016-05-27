@@ -38,6 +38,7 @@
 #include <classical/io/read_bench.hpp>
 #include <classical/io/read_symmetries.hpp>
 #include <classical/io/read_unateness.hpp>
+#include <classical/io/read_verilog.hpp>
 #include <classical/io/write_aiger.hpp>
 #include <classical/io/write_verilog.hpp>
 #include <classical/mig/mig_to_aig.hpp>
@@ -218,6 +219,12 @@ template<>
 void store_write_io_type<aig_graph, io_aiger_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
 {
   write_aiger( aig, filename );
+}
+
+template<>
+aig_graph store_read_io_type<aig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
+{
+  return read_verilog_with_abc( filename );
 }
 
 template<>
