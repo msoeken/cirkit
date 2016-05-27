@@ -49,13 +49,7 @@ add_cirkit_program(
   USE
     cirkit_core
     cirkit_classical
-    cirkit_abc
 )
-
-if( enable_cirkit-addon-formal )
-  target_link_libraries( cirkit cirkit_formal )
-  target_compile_definitions( cirkit PUBLIC USE_FORMAL_COMMANDS )
-endif()
 
 if( enable_cirkit-addon-experimental )
   target_link_libraries( cirkit cirkit_experimental_core cirkit_experimental_classical )

@@ -31,15 +31,8 @@ add_cirkit_library(
   USE
     cirkit_core
     ${Boost_FILESYSTEM_LIBRARIES}
-)
-
-add_cirkit_library(
-  NAME cirkit_abc
-  AUTO_DIRS abc
-  USE
-    cirkit_core
-    cirkit_classical
     ${abc_LIBRARIES}
+    ${MINISAT_LIBRARIES}
   INCLUDE
     PUBLIC ${CMAKE_SOURCE_DIR}/ext/include/abc
 )

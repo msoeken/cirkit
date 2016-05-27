@@ -50,7 +50,6 @@ add_cirkit_program(
   USE
     cirkit_reversible
     cirkit_classical
-    cirkit_abc
     ${READLINE_LIBRARY}
 )
 

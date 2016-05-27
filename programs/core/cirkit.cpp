@@ -30,7 +30,9 @@
 #include <core/cli/commands/testbdd.hpp>
 #include <core/utils/bdd_utils.hpp>
 
+#include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/bool_complex.hpp>
+#include <classical/cli/commands/cec.hpp>
 #include <classical/cli/commands/comb_approx.hpp>
 #include <classical/cli/commands/cone.hpp>
 #include <classical/cli/commands/dsop.hpp>
@@ -41,19 +43,14 @@
 #include <classical/cli/commands/propagate.hpp>
 #include <classical/cli/commands/read_sym.hpp>
 #include <classical/cli/commands/rename.hpp>
+#include <classical/cli/commands/satnpn.hpp>
 #include <classical/cli/commands/simgraph.hpp>
 #include <classical/cli/commands/strash.hpp>
 #include <classical/cli/commands/support.hpp>
 #include <classical/cli/commands/tt.hpp>
-
-#include <abc/cli/commands/abc.hpp>
-#include <abc/cli/commands/cec.hpp>
+#include <classical/cli/commands/unate.hpp>
 
 #define STORE_TYPES aig_graph, mig_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t
-
-#ifdef USE_FORMAL_COMMANDS
-#include <formal/cli/commands/commands.hpp>
-#endif
 
 #ifdef USE_EXPERIMENTAL_CLASSICAL_COMMANDS
 #include <classical/cli/commands/commands.hpp>
@@ -96,6 +93,7 @@ int main( int argc, char ** argv )
   cli.set_category( "Verification" );
   ADD_COMMAND( cec );
   ADD_COMMAND( support );
+  ADD_COMMAND( unate );
 
   cli.set_category( "Truth table" );
   ADD_COMMAND( bool_complex );
@@ -103,6 +101,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( tt );
 
   cli.set_category( "Reverse engineering" );
+  ADD_COMMAND( satnpn );
   ADD_COMMAND( simgraph );
 
   cli.set_category( "Various" );

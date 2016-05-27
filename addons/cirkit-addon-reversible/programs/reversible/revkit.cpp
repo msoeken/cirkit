@@ -30,9 +30,9 @@
 #include <classical/aig.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/cli/commands/expr.hpp>
+#include <classical/cli/commands/abc.hpp>
+#include <classical/cli/commands/cec.hpp>
 #include <classical/utils/expression_parser.hpp>
-#include <abc/cli/commands/abc.hpp>
-#include <abc/cli/commands/cec.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>

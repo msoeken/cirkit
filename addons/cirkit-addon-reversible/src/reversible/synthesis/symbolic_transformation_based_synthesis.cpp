@@ -35,13 +35,13 @@
 #include <classical/io/write_aiger.hpp>
 #include <classical/utils/aig_from_bdd.hpp>
 
-#include <formal/sat/sat_solver.hpp>
-#include <formal/sat/minisat.hpp>
-#include <formal/sat/operations/cardinality.hpp>
-#include <formal/sat/operations/logic.hpp>
-#include <formal/sat/utils/add_aig.hpp>
-#include <formal/sat/utils/add_aig_with_gia.hpp>
-#include <formal/sat/utils/add_bdd.hpp>
+#include <classical/sat/sat_solver.hpp>
+#include <classical/sat/minisat.hpp>
+#include <classical/sat/operations/cardinality.hpp>
+#include <classical/sat/operations/logic.hpp>
+#include <classical/sat/utils/add_aig.hpp>
+#include <classical/sat/utils/add_aig_with_gia.hpp>
+#include <classical/sat/utils/add_bdd.hpp>
 
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/copy_metadata.hpp>
