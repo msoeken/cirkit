@@ -452,6 +452,13 @@ private:
   bool process_file( const std::string& filename, bool echo )
   {
     std::ifstream in( filename.c_str(), std::ifstream::in );
+
+    if ( !in.good() )
+    {
+      std::cout << "[e] file " << filename << " not found" << std::endl;
+      return true;
+    }
+
     std::string line;
 
     while ( getline( in, line ) )
