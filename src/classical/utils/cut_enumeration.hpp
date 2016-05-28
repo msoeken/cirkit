@@ -189,8 +189,8 @@ public:
   structural_cut_enumeration_simulator( const T& circ, unsigned k, bool include_constant, const boost::dynamic_bitset<>& cut_boundary )
     : circ( circ ),
       n( boost::num_vertices( circ ) ),
-      k( k ),
       include_constant( include_constant ),
+      k( k ),
       cut_boundary( cut_boundary )
   {
   }
