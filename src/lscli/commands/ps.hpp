@@ -71,7 +71,14 @@ int ps_log_helper( const command& cmd, const environment::ptr& env, command::log
 
   if ( cmd.is_set( option ) )
   {
-    ret = log_store_entry_statistics<S>( env->store<S>().current() );
+    if ( env->store<S>().current_index() == -1 )
+    {
+      ret = boost::none;
+    }
+    else
+    {
+      ret = log_store_entry_statistics<S>( env->store<S>().current() );
+    }
   }
 
   return 0;
