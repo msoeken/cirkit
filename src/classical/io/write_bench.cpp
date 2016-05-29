@@ -115,8 +115,9 @@ void write_bench( const lut_graph_t& lut, std::ostream& os, const write_bench_se
         {
           output << boost::format( "OUTPUT(%s%s)" ) % settings.prefix % names[v] << std::endl;
         }
-        auto w = *( adjacent_vertices( v, lut ).first );
-        auto argument = settings.prefix + ( types[w] == gate_type_t::pi ? names[w] : boost::str( boost::format( "n%d" ) % w ) );
+        const auto w = *( adjacent_vertices( v, lut ).first );
+        const auto is_input = types[w] == gate_type_t::pi || types[w] == gate_type_t::gnd || types[w] == gate_type_t::vdd;
+        const auto argument = settings.prefix + ( is_input ? names[w] : boost::str( boost::format( "n%d" ) % w ) );
         wire << boost::format( "%s%s = LUT 0x2 ( %s )" ) % settings.prefix % names[v] % argument << std::endl;
       } break;
     case gate_type_t::internal:
@@ -127,7 +128,8 @@ void write_bench( const lut_graph_t& lut, std::ostream& os, const write_bench_se
         std::vector<std::string> arguments;
         for ( auto w : boost::make_iterator_range( adjacent_vertices( v, lut ) ) )
         {
-          arguments.push_back( settings.prefix + ( types[w] == gate_type_t::pi ? names[w] : boost::str( boost::format( "n%d" ) % w ) ) );
+          const auto is_input = types[w] == gate_type_t::pi || types[w] == gate_type_t::gnd || types[w] == gate_type_t::vdd;
+          arguments.push_back( settings.prefix + ( is_input ? names[w] : boost::str( boost::format( "n%d" ) % w ) ) );
         }
 
         wire << boost::format( "%sn%d = LUT 0x%x ( %s )" ) % settings.prefix % v % tt_to_hex( t ) % boost::join( arguments, ", " ) << std::endl;
