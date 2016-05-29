@@ -48,21 +48,23 @@ tt_command::tt_command( const environment::ptr& env )
 {
   add_positional_option( "load" );
   opts.add_options()
-    ( "load,l",    value( &load ),    "Load a truth table into the store" )
-    ( "planame,p", value( &planame ), "Write truth table to PLA" )
-    ( "extend,e",  value( &extend ),  "Extend to bits" )
-    ( "random,r",  value( &random ),  "Create random truth table for number of variables" )
+    ( "load,l",    value( &load ),    "load a truth table into the store" )
+    ( "planame,p", value( &planame ), "write truth table to PLA" )
+    ( "extend,e",  value( &extend ),  "extend to bits" )
+    ( "random,r",  value( &random ),  "create random truth table for number of variables" )
+    ( "hwb",       value( &hwb ),     "create hwb function for number of bits" )
     ;
 }
 
 command::rules_t tt_command::validity_rules() const
 {
   return {
-    { [this]() { return is_set( "load" ) || is_set( "random" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },
+    { [this]() { return is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },
     { [this]() { return static_cast<int>( is_set( "load" ) ) +
                         static_cast<int>( is_set( "planame" ) ) +
                         static_cast<int>( is_set( "extend" ) ) +
-                        static_cast<int>( is_set( "random" ) ) == 1; }, "only one option at a time" }
+                        static_cast<int>( is_set( "random" ) ) +
+                        static_cast<int>( is_set( "hwb" ) ) == 1; }, "only one option at a time" }
   };
 }
 
@@ -105,6 +107,20 @@ bool tt_command::execute()
   {
     tts.extend();
     tts.current() = random_bitset( 1u << random );
+  }
+  else if ( is_set( "hwb" ) )
+  {
+    tt h( 1u << hwb );
+    boost::dynamic_bitset<> it( hwb, 1 );
+
+    do
+    {
+      h[it.to_ulong()] = it[it.count() - 1u];
+      inc( it );
+    } while ( it.any() );
+
+    tts.extend();
+    tts.current() = h;
   }
 
   return true;

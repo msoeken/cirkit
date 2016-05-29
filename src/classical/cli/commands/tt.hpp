@@ -53,6 +53,7 @@ private:
   std::string    planame;
   unsigned       extend;
   unsigned       random;
+  unsigned       hwb;
 };
 
 }
