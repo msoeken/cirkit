@@ -1,19 +1,24 @@
-/* CirKit: A circuit toolkit
+/* alice: A C++ EDA command line interface API
  * Copyright (C) 2009-2015  University of Bremen
  * Copyright (C) 2015-2016  EPFL
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 /**
@@ -25,8 +30,7 @@
  * @since  2.3
  */
 
-#ifndef CLI_UTILS_HPP
-#define CLI_UTILS_HPP
+#pragma once
 
 #include <cstdio>
 #include <cstdlib>
@@ -67,7 +71,7 @@
 
 namespace po = boost::program_options;
 
-namespace cirkit
+namespace alice
 {
 
 namespace detail
@@ -593,12 +597,12 @@ private:
   unsigned                counter = 1u;
 };
 
-#define CIRKIT_S(x) #x
-#define CIRKIT_SX(x) CIRKIT_S(x)
+#define ALICE_S(x) #x
+#define ALICE_SX(x) ALICE_S(x)
 
 #define ADD_COMMAND( name ) cli.insert_command( #name, std::make_shared<name##_command>( cli.env ) );
-#define ADD_READ_COMMAND( name, label ) cli.insert_read_command<io_##name##_tag_t>( "read_" CIRKIT_SX(name), label );
-#define ADD_WRITE_COMMAND( name, label ) cli.insert_write_command<io_##name##_tag_t>( "write_" CIRKIT_SX(name), label );
+#define ADD_READ_COMMAND( name, label ) cli.insert_read_command<io_##name##_tag_t>( "read_" ALICE_SX(name), label );
+#define ADD_WRITE_COMMAND( name, label ) cli.insert_write_command<io_##name##_tag_t>( "write_" ALICE_SX(name), label );
 
 #ifdef USE_READLINE
 template<class... S>
@@ -606,8 +610,6 @@ cli_main<S...>* cli_main<S...>::instance = nullptr;
 #endif
 
 }
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2

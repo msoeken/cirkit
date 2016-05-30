@@ -1,19 +1,24 @@
-/* CirKit: A circuit toolkit
+/* alice: A C++ EDA command line interface API
  * Copyright (C) 2009-2015  University of Bremen
  * Copyright (C) 2015-2016  EPFL
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 /**
@@ -22,11 +27,11 @@
  * @brief Shows current data structure in DOT viewer
  *
  * @author Mathias Soeken
+ * @author Heinz Riener
  * @since  2.3
  */
 
-#ifndef CLI_SHOW_COMMAND_HPP
-#define CLI_SHOW_COMMAND_HPP
+#pragma once
 
 #include <cstdlib>
 #include <string>
@@ -38,7 +43,7 @@
 
 using namespace boost::program_options;
 
-namespace cirkit
+namespace alice
 {
 
 using show_commands_t = std::map<std::string, boost::any>;
@@ -85,9 +90,9 @@ public:
   show_command( const environment::ptr& env ) : command( env, "Shows current data structure in DOT viewer" )
   {
     opts.add_options()
-      ( "dotname",  value( &dotname )->default_value( dotname ), "Filename for the DOT file" )
-      ( "dotcmd",   value( &dotcmd )->default_value( dotcmd ),   "Command to show DOT file" )
-      ( "silent,s",                                              "Don't show the DOT file, i.e., just save it" )
+      ( "dotname",  value( &dotname )->default_value( dotname ), "filename for the DOT file" )
+      ( "dotcmd",   value( &dotcmd )->default_value( dotcmd ),   "command to show DOT file" )
+      ( "silent,s",                                              "don't show the DOT file, i.e., just save it" )
       ;
     [](...){}( add_option_helper<S>( opts )... );
     [](...){}( init_show_commands<S>( *this, show_commands )... );
@@ -128,21 +133,7 @@ protected:
   show_commands_t show_commands;
 };
 
-/*
-OLD
-
-  if ( opts.is_set( "expr" ) )
-  {
-    for ( const auto& output : mig_info().outputs )
-    {
-      std::cout << boost::format( "[i] %s: %s" ) % output.second % mig_to_string( mig(), output.first ) << std::endl;
-    }
-  }
-*/
-
 }
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2
