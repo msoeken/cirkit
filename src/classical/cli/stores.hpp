@@ -43,8 +43,10 @@
 #include <classical/utils/expression_parser.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
-namespace cirkit
+namespace alice
 {
+
+using namespace cirkit;
 
 struct io_aiger_tag_t {};
 struct io_bench_tag_t {};

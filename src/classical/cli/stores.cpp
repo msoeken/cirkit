@@ -46,8 +46,10 @@
 #include <classical/mig/mig_utils.hpp>
 #include <classical/mig/mig_verilog.hpp>
 
-namespace cirkit
+namespace alice
 {
+
+using namespace cirkit;
 
 /******************************************************************************
  * aig_graph                                                                  *

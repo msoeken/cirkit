@@ -35,8 +35,10 @@
 #include <core/properties.hpp>
 #include <core/utils/bdd_utils.hpp>
 
-namespace cirkit
+namespace alice
 {
+
+using namespace cirkit;
 
 struct io_pla_tag_t {};
 

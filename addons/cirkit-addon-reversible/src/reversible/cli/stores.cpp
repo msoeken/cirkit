@@ -39,8 +39,10 @@
 #include <reversible/io/write_specification.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
 
-namespace cirkit
+namespace alice
 {
+
+using namespace cirkit;
 
 /******************************************************************************
  * circuit                                                                    *

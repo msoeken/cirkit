@@ -36,8 +36,10 @@
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
 
-namespace cirkit
+namespace alice
 {
+
+using namespace cirkit;
 
 struct io_real_tag_t {};
 struct io_spec_tag_t {};

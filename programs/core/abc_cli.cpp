@@ -33,7 +33,7 @@
 #include <lscli/command.hpp>
 #include <lscli/lscli.hpp>
 
-namespace cirkit
+namespace alice
 {
 
 /******************************************************************************
@@ -137,7 +137,7 @@ private:
 
 int main( int argc, char ** argv )
 {
-  using namespace cirkit;
+  using namespace alice;
 
   cli_main<abc::Gia_Man_t*> cli( "abc" );
 

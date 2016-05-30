@@ -28,8 +28,10 @@
 #include <core/io/read_pla.hpp>
 #include <core/utils/range_utils.hpp>
 
-namespace cirkit
+namespace alice
 {
+
+using namespace cirkit;
 
 /******************************************************************************
  * Types                                                                      *

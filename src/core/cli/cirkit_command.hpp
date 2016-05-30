@@ -35,6 +35,8 @@
 namespace cirkit
 {
 
+using namespace alice;
+
 class cirkit_command : public command
 {
 public:
