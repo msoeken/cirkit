@@ -37,7 +37,7 @@
 
 #include <boost/format.hpp>
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 namespace alice
 {

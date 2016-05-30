@@ -22,9 +22,9 @@
  */
 
 /**
- * @file alias.hpp
+ * @file help.hpp
  *
- * @brief Create command aliases
+ * @brief Shows help
  *
  * @author Mathias Soeken
  * @since  2.3
@@ -32,46 +32,63 @@
 
 #pragma once
 
-#include <boost/program_options.hpp>
+#include <algorithm>
+#include <iostream>
 
-#include <lscli/command.hpp>
+#include <boost/format.hpp>
 
-using namespace boost::program_options;
+#include <alice/command.hpp>
 
 namespace alice
 {
 
-class alias_command : public command
+class help_command : public command
 {
 public:
-  alias_command( const environment::ptr& env )
-    : command( env, "Create command aliases" )
+  help_command( const environment::ptr& env )  : command( env, "Shows help" )
   {
-    add_positional_option( "alias" );
-    add_positional_option( "expansion" );
     opts.add_options()
-      ( "alias",     value( &alias ),     "regular expression for the alias" )
-      ( "expansion", value( &expansion ), "expansion for the alias" )
+      ( "detailed,d", "show command descriptions" )
       ;
   }
 
 protected:
-  rules_t validity_rules() const
-  {
-    return {
-      { [this]() { return is_set( "alias" ) && is_set( "expansion" ); }, "both alias and expansion need to be set" }
-    };
-  }
-
   bool execute()
   {
-    env->aliases[alias] = expansion;
+    for ( auto& p : env->categories )
+    {
+      std::cout << p.first << " commands:" << std::endl;
+
+      std::sort( p.second.begin(), p.second.end() );
+
+      if ( is_set( "detailed" ) )
+      {
+        for ( const auto& name : p.second )
+        {
+          std::cout << boost::format( " %-17s : %s" ) % name % env->commands[name]->caption() << std::endl;
+        }
+        std::cout << std::endl;
+      }
+      else
+      {
+        auto counter = 0;
+        std::cout << " ";
+
+        for ( const auto& name : p.second )
+        {
+          if ( counter > 0 && ( counter % 4 == 0 ) )
+          {
+            std::cout << std::endl << " ";
+          }
+          std::cout << boost::format( "%-17s" ) % name;
+          ++counter;
+        }
+        std::cout << std::endl << std::endl;
+      }
+    }
+
     return true;
   }
-
-private:
-  std::string alias;
-  std::string expansion;
 };
 
 }

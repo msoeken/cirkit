@@ -35,7 +35,7 @@
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 namespace po = boost::program_options;
 

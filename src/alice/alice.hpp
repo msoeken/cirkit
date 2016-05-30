@@ -56,18 +56,18 @@
 #include <readline/history.h>
 #endif
 
-#include <lscli/command.hpp>
-#include <lscli/commands/alias.hpp>
-#include <lscli/commands/convert.hpp>
-#include <lscli/commands/current.hpp>
-#include <lscli/commands/help.hpp>
-#include <lscli/commands/print.hpp>
-#include <lscli/commands/ps.hpp>
-#include <lscli/commands/quit.hpp>
-#include <lscli/commands/read_io.hpp>
-#include <lscli/commands/show.hpp>
-#include <lscli/commands/store.hpp>
-#include <lscli/commands/write_io.hpp>
+#include <alice/command.hpp>
+#include <alice/commands/alias.hpp>
+#include <alice/commands/convert.hpp>
+#include <alice/commands/current.hpp>
+#include <alice/commands/help.hpp>
+#include <alice/commands/print.hpp>
+#include <alice/commands/ps.hpp>
+#include <alice/commands/quit.hpp>
+#include <alice/commands/read_io.hpp>
+#include <alice/commands/show.hpp>
+#include <alice/commands/store.hpp>
+#include <alice/commands/write_io.hpp>
 
 namespace po = boost::program_options;
 

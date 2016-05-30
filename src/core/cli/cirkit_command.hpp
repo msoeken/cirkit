@@ -28,7 +28,7 @@
 #ifndef CIRKIT_COMMAND_HPP
 #define CIRKIT_COMMAND_HPP
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 #include <core/properties.hpp>
 

@@ -23,7 +23,7 @@
 
 #include <boost/program_options.hpp>
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/program_options.hpp>

@@ -22,9 +22,9 @@
  */
 
 /**
- * @file help.hpp
+ * @file print.hpp
  *
- * @brief Shows help
+ * @brief Prints current data structure
  *
  * @author Mathias Soeken
  * @since  2.3
@@ -32,60 +32,51 @@
 
 #pragma once
 
-#include <algorithm>
-#include <iostream>
-
-#include <boost/format.hpp>
-
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 namespace alice
 {
 
-class help_command : public command
+template<typename S>
+int print_helper( const command& cmd, const environment::ptr& env )
+{
+  constexpr auto option = store_info<S>::option;
+  constexpr auto name   = store_info<S>::name;
+
+  if ( cmd.is_set( option ) )
+  {
+    if ( env->store<S>().current_index() == -1 )
+    {
+      std::cout << "[w] no " << name << " in store" << std::endl;
+    }
+    else
+    {
+      print_store_entry<S>( std::cout, env->store<S>().current() );
+    }
+  }
+  return 0;
+}
+
+template<class... S>
+class print_command : public command
 {
 public:
-  help_command( const environment::ptr& env )  : command( env, "Shows help" )
+  print_command( const environment::ptr& env ) : command( env, "Prints current data structure" )
   {
-    opts.add_options()
-      ( "detailed,d", "show command descriptions" )
-      ;
+    [](...){}( add_option_helper<S>( opts )... );
   }
 
 protected:
+  rules_t validity_rules() const
+  {
+    return {
+      {[this]() { return exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" }
+    };
+  }
+
   bool execute()
   {
-    for ( auto& p : env->categories )
-    {
-      std::cout << p.first << " commands:" << std::endl;
-
-      std::sort( p.second.begin(), p.second.end() );
-
-      if ( is_set( "detailed" ) )
-      {
-        for ( const auto& name : p.second )
-        {
-          std::cout << boost::format( " %-17s : %s" ) % name % env->commands[name]->caption() << std::endl;
-        }
-        std::cout << std::endl;
-      }
-      else
-      {
-        auto counter = 0;
-        std::cout << " ";
-
-        for ( const auto& name : p.second )
-        {
-          if ( counter > 0 && ( counter % 4 == 0 ) )
-          {
-            std::cout << std::endl << " ";
-          }
-          std::cout << boost::format( "%-17s" ) % name;
-          ++counter;
-        }
-        std::cout << std::endl << std::endl;
-      }
-    }
+    [](...){}( print_helper<S>( *this, env )... );
 
     return true;
   }

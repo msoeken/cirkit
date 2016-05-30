@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/bdd_utils.hpp>

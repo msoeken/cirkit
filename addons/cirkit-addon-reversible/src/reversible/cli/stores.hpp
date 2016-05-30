@@ -28,7 +28,7 @@
 #ifndef STORES_HPP
 #define STORES_HPP
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 #include <core/cli/stores.hpp>
 #include <classical/aig.hpp>

@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 using namespace boost::program_options;
 

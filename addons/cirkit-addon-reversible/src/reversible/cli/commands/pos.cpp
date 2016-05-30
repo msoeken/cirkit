@@ -18,7 +18,7 @@
 
 #include "pos.hpp"
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <reversible/cli/stores.hpp>
 #include <reversible/functions/negative_controls_to_positive.hpp>

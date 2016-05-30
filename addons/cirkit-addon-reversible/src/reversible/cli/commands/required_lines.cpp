@@ -18,7 +18,7 @@
 
 #include "required_lines.hpp"
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <core/cli/stores.hpp>
 #include <reversible/functions/calculate_additional_lines.hpp>

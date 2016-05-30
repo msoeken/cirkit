@@ -18,7 +18,7 @@
 
 #include "nct.hpp"
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/mapping/nct_mapping.hpp>
 

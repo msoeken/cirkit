@@ -20,7 +20,7 @@
 
 #include <boost/format.hpp>
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <core/cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>

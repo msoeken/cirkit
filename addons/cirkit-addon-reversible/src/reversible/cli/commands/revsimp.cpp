@@ -18,7 +18,7 @@
 
 #include "revsimp.hpp"
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/optimization/simplify.hpp>

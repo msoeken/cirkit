@@ -22,23 +22,28 @@
  */
 
 /**
- * @file print.hpp
+ * @file ps.hpp
  *
- * @brief Prints current data structure
+ * @brief Print statistics
  *
  * @author Mathias Soeken
+ * @author Heinz Riener
  * @since  2.3
  */
 
 #pragma once
 
-#include <lscli/command.hpp>
+#include <vector>
+
+#include <boost/format.hpp>
+
+#include <alice/command.hpp>
 
 namespace alice
 {
 
 template<typename S>
-int print_helper( const command& cmd, const environment::ptr& env )
+int ps_helper( const command& cmd, const environment::ptr& env )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
@@ -51,17 +56,44 @@ int print_helper( const command& cmd, const environment::ptr& env )
     }
     else
     {
-      print_store_entry<S>( std::cout, env->store<S>().current() );
+      print_store_entry_statistics<S>( std::cout, env->store<S>().current() );
     }
   }
+
+  return 0;
+}
+
+template<typename S>
+int ps_log_helper( const command& cmd, const environment::ptr& env, command::log_opt_t& ret )
+{
+  if ( ret != boost::none )
+  {
+    return 0;
+  }
+
+  constexpr auto option = store_info<S>::option;
+
+  if ( cmd.is_set( option ) )
+  {
+    if ( env->store<S>().current_index() == -1 )
+    {
+      ret = boost::none;
+    }
+    else
+    {
+      ret = log_store_entry_statistics<S>( env->store<S>().current() );
+    }
+  }
+
   return 0;
 }
 
 template<class... S>
-class print_command : public command
+class ps_command : public command
 {
 public:
-  print_command( const environment::ptr& env ) : command( env, "Prints current data structure" )
+  ps_command( const environment::ptr& env )
+    : command( env, "Print statistics" )
   {
     [](...){}( add_option_helper<S>( opts )... );
   }
@@ -70,15 +102,23 @@ protected:
   rules_t validity_rules() const
   {
     return {
-      {[this]() { return exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" }
+      {[this]() { return any_true_helper( { is_set( store_info<S>::option )... } ); }, "no store has been specified" }
     };
   }
 
   bool execute()
   {
-    [](...){}( print_helper<S>( *this, env )... );
+    [](...){}( ps_helper<S>( *this, env )... );
 
     return true;
+  }
+
+public:
+  log_opt_t log() const
+  {
+    log_opt_t ret;
+    [](...){}( ps_log_helper<S>( *this, env, ret )... );
+    return ret;
   }
 };
 

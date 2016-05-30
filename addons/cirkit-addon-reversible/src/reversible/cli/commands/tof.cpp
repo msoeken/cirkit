@@ -18,7 +18,7 @@
 
 #include "tof.hpp"
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <reversible/cli/stores.hpp>
 #include <reversible/functions/fredkin_gates_to_toffoli.hpp>

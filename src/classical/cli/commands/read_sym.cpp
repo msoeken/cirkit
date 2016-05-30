@@ -20,7 +20,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>

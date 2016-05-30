@@ -18,7 +18,7 @@
 
 #include "tbs.hpp"
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <core/utils/program_options.hpp>
 #include <classical/aig.hpp>

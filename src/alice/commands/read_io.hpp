@@ -22,9 +22,9 @@
  */
 
 /**
- * @file write_io.hpp
+ * @file read_io.hpp
  *
- * @brief Generic command for writing I/O
+ * @brief Generic command for reading I/O
  *
  * @author Mathias Soeken
  * @since  2.3
@@ -32,21 +32,41 @@
 
 #pragma once
 
+#include <wordexp.h>
 #include <string>
 
 #include <boost/program_options.hpp>
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
+#include <alice/rules.hpp>
 
 using namespace boost::program_options;
 
 namespace alice
 {
 
-template<typename Tag, typename S>
-int add_write_io_option_helper( command& cmd, unsigned& option_count, std::string& default_option )
+std::string process_filename( const std::string& filename )
 {
-  if ( store_can_write_io_type<S, Tag>( cmd ) )
+  std::string result;
+
+  wordexp_t p;
+  wordexp( filename.c_str(), &p, 0 );
+
+  for ( auto i = 0; i < p.we_wordc; ++i )
+  {
+    if ( !result.empty() ) { result += " "; }
+    result += std::string( p.we_wordv[i] );
+  }
+
+  wordfree( &p );
+
+  return result;
+}
+
+template<typename Tag, typename S>
+int add_read_io_option_helper( command& cmd, unsigned& option_count, std::string& default_option )
+{
+  if ( store_can_read_io_type<S, Tag>( cmd ) )
   {
     constexpr auto option = store_info<S>::option;
 
@@ -59,33 +79,31 @@ int add_write_io_option_helper( command& cmd, unsigned& option_count, std::strin
 }
 
 template<typename Tag, typename S>
-int write_io_helper( command& cmd, const std::string& default_option, const environment::ptr& env, const std::string& filename )
+int read_io_helper( command& cmd, const std::string& default_option, const environment::ptr& env, const std::string& filename )
 {
   constexpr auto option = store_info<S>::option;
   constexpr auto name   = store_info<S>::name;
 
   if ( cmd.is_set( option ) || option == default_option )
   {
-    if ( env->store<S>().current_index() == -1 )
+    if ( cmd.is_set( "new" ) || env->store<S>().empty() )
     {
-      std::cout << "[w] no " << name << " selected in store" << std::endl;
+      env->store<S>().extend();
     }
-    else
-    {
-      store_write_io_type<S, Tag>( env->store<S>().current(), filename, cmd );
-    }
+
+    env->store<S>().current() = store_read_io_type<S, Tag>( filename, cmd );
   }
   return 0;
 }
 
 template<class Tag, class... S>
-class write_io_command : public command
+class read_io_command : public command
 {
 public:
-  write_io_command( const environment::ptr& env, const std::string& name )
-    : command( env, boost::str( boost::format( "Write %s file" ) % name ) )
+  read_io_command( const environment::ptr& env, const std::string& name )
+    : command( env, boost::str( boost::format( "Read %s file" ) % name ) )
   {
-    [](...){}( add_write_io_option_helper<Tag, S>( *this, option_count, default_option )... );
+    [](...){}( add_read_io_option_helper<Tag, S>( *this, option_count, default_option )... );
     if ( option_count != 1u )
     {
       default_option.clear();
@@ -94,6 +112,7 @@ public:
     add_positional_option( "filename" );
     opts.add_options()
       ( "filename", value( &filename ), "filename" )
+      ( "new,n",                        "create new store entry" )
       ;
   }
 
@@ -103,13 +122,14 @@ protected:
     rules_t rules;
 
     rules.push_back( {[this]() { return option_count == 1 || exactly_one_true_helper( { is_set( store_info<S>::option )... } ); }, "exactly one store needs to be specified" } );
+    rules.push_back( file_exists_if_set( *this, process_filename( filename ), "filename" ) );
 
     return rules;
   }
 
   bool execute()
   {
-    [](...){}( write_io_helper<Tag, S>( *this, default_option, env, filename )... );
+    [](...){}( read_io_helper<Tag, S>( *this, default_option, env, process_filename( filename ) )... );
 
     return true;
   }

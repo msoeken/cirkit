@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 #include <core/utils/bdd_utils.hpp>
 

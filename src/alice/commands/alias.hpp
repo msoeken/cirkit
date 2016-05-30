@@ -22,104 +22,56 @@
  */
 
 /**
- * @file ps.hpp
+ * @file alias.hpp
  *
- * @brief Print statistics
+ * @brief Create command aliases
  *
  * @author Mathias Soeken
- * @author Heinz Riener
  * @since  2.3
  */
 
 #pragma once
 
-#include <vector>
+#include <boost/program_options.hpp>
 
-#include <boost/format.hpp>
+#include <alice/command.hpp>
 
-#include <lscli/command.hpp>
+using namespace boost::program_options;
 
 namespace alice
 {
 
-template<typename S>
-int ps_helper( const command& cmd, const environment::ptr& env )
-{
-  constexpr auto option = store_info<S>::option;
-  constexpr auto name   = store_info<S>::name;
-
-  if ( cmd.is_set( option ) )
-  {
-    if ( env->store<S>().current_index() == -1 )
-    {
-      std::cout << "[w] no " << name << " in store" << std::endl;
-    }
-    else
-    {
-      print_store_entry_statistics<S>( std::cout, env->store<S>().current() );
-    }
-  }
-
-  return 0;
-}
-
-template<typename S>
-int ps_log_helper( const command& cmd, const environment::ptr& env, command::log_opt_t& ret )
-{
-  if ( ret != boost::none )
-  {
-    return 0;
-  }
-
-  constexpr auto option = store_info<S>::option;
-
-  if ( cmd.is_set( option ) )
-  {
-    if ( env->store<S>().current_index() == -1 )
-    {
-      ret = boost::none;
-    }
-    else
-    {
-      ret = log_store_entry_statistics<S>( env->store<S>().current() );
-    }
-  }
-
-  return 0;
-}
-
-template<class... S>
-class ps_command : public command
+class alias_command : public command
 {
 public:
-  ps_command( const environment::ptr& env )
-    : command( env, "Print statistics" )
+  alias_command( const environment::ptr& env )
+    : command( env, "Create command aliases" )
   {
-    [](...){}( add_option_helper<S>( opts )... );
+    add_positional_option( "alias" );
+    add_positional_option( "expansion" );
+    opts.add_options()
+      ( "alias",     value( &alias ),     "regular expression for the alias" )
+      ( "expansion", value( &expansion ), "expansion for the alias" )
+      ;
   }
 
 protected:
   rules_t validity_rules() const
   {
     return {
-      {[this]() { return any_true_helper( { is_set( store_info<S>::option )... } ); }, "no store has been specified" }
+      { [this]() { return is_set( "alias" ) && is_set( "expansion" ); }, "both alias and expansion need to be set" }
     };
   }
 
   bool execute()
   {
-    [](...){}( ps_helper<S>( *this, env )... );
-
+    env->aliases[alias] = expansion;
     return true;
   }
 
-public:
-  log_opt_t log() const
-  {
-    log_opt_t ret;
-    [](...){}( ps_log_helper<S>( *this, env, ret )... );
-    return ret;
-  }
+private:
+  std::string alias;
+  std::string expansion;
 };
 
 }

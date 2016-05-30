@@ -29,7 +29,7 @@
 #include <boost/format.hpp>
 #include <boost/range/algorithm.hpp>
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>

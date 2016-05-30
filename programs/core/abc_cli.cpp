@@ -30,8 +30,8 @@
 
 #include <boost/format.hpp>
 
-#include <lscli/command.hpp>
-#include <lscli/lscli.hpp>
+#include <alice/command.hpp>
+#include <alice/alice.hpp>
 
 namespace alice
 {

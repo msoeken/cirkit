@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <string>
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 #include <boost/any.hpp>
 #include <boost/format.hpp>

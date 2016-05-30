@@ -28,7 +28,7 @@
 #ifndef CLI_AIG_BASE_COMMAND_HPP
 #define CLI_AIG_BASE_COMMAND_HPP
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <core/cli/cirkit_command.hpp>
 #include <classical/aig.hpp>

@@ -22,9 +22,9 @@
  */
 
 /**
- * @file rules.hpp
+ * @file quit.hpp
  *
- * @brief Some pre-defined rules
+ * @brief Quits the program
  *
  * @author Mathias Soeken
  * @since  2.3
@@ -32,37 +32,43 @@
 
 #pragma once
 
-#include <string>
+#include <sys/utsname.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
+#include <thread>
 
-#include <lscli/command.hpp>
+#include <alice/command.hpp>
 
 namespace alice
 {
 
-inline command::rule_t file_exists( const std::string& filename, const std::string& argname )
+class quit_command : public command
 {
-  return { [&]() { return boost::filesystem::exists( filename ); }, argname + " does not exist" };
-}
+public:
+  quit_command( const environment::ptr& env )
+    : command( env, "Quits the program" ) {}
 
-inline command::rule_t file_exists_if_set( const command& cmd, const std::string& filename, const std::string& argname )
-{
-  return { [&]() { return !cmd.is_set( argname ) || boost::filesystem::exists( filename ); }, argname + " does not exist" };
-}
+protected:
+  bool execute()
+  {
+    env->quit = true;
+    return true;
+  }
 
-inline command::rule_t has_addon( const std::string& addon_name )
-{
-  return { []() { return false; }, addon_name + " is not enabled" };
-}
-
-template<typename S>
-command::rule_t has_store_element( const environment::ptr& env )
-{
-  auto constexpr name = store_info<S>::name;
-  return { [&]() { return env->store<S>().current_index() >= 0; }, ( boost::format( "no current %s available" ) % name ).str() };
-}
+public:
+  log_opt_t log() const
+  {
+    utsname u;
+    uname( &u );
+    return log_opt_t({
+        {"sysname", std::string( u.sysname )},
+        {"nodename", std::string( u.nodename )},
+        {"release", std::string( u.release )},
+        {"version", std::string( u.version )},
+        {"machine", std::string( u.machine )},
+        {"supported_threads", static_cast<int>( std::thread::hardware_concurrency() )}
+      });
+  }
+};
 
 }
 

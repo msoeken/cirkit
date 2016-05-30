@@ -21,7 +21,7 @@
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>

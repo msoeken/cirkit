@@ -20,7 +20,7 @@
 
 #include <vector>
 
-#include <lscli/rules.hpp>
+#include <alice/rules.hpp>
 
 #include <core/cli/stores.hpp>
 
