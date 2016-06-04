@@ -266,7 +266,14 @@ tt tt_permute( const tt& t, unsigned i, unsigned j )
   tt c10 = tt_cof0( c1, j );
   tt c11 = tt_cof1( c1, j );
 
-  return ( ~vi & ( ( ~vj & c00 ) | ( vj & c10 ) ) ) | ( vi & ( ( ~vj & c01 ) | ( vj & c11 ) ) );
+  auto tt_new = ( ~vi & ( ( ~vj & c00 ) | ( vj & c10 ) ) ) | ( vi & ( ( ~vj & c01 ) | ( vj & c11 ) ) );
+
+  if ( n < 6u )
+  {
+    tt_shrink( tt_new, n );
+  }
+
+  return tt_new;
 }
 
 tt tt_remove_var( const tt& t, unsigned i )
