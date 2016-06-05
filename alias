@@ -1,3 +1,6 @@
+# Set variables
+alias "(\\w+) = (\\w+)" "set %1% %2%"
+
 # Convert A into B, e.g., expr > tt
 alias "(\\w+) > (\\w+)" "convert --%1%_to_%2%"
 

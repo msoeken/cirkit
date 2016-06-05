@@ -336,10 +336,18 @@ public: /* logging */
     logger << "]" << std::endl;
   }
 
+public: /* variables */
+  const std::string& variable_value( const std::string& key, const std::string& def ) const
+  {
+    const auto it = variables.find( key );
+    return it == variables.end() ? def : it->second;
+  }
+
 public:
   std::map<std::string, boost::any>               stores;
   std::map<std::string, std::shared_ptr<command>> commands;
   std::map<std::string, std::vector<std::string>> categories;
+  std::map<std::string, std::string>              variables;
 
   bool                                            log = false;
   bool                                            log_first_command = true;

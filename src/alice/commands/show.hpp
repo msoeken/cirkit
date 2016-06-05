@@ -91,7 +91,7 @@ public:
   {
     opts.add_options()
       ( "dotname",  value( &dotname )->default_value( dotname ), "filename for the DOT file" )
-      ( "dotcmd",   value( &dotcmd )->default_value( dotcmd ),   "command to show DOT file" )
+      ( "dotcmd",   value( &dotcmd ),                            "command to show DOT file\ncan be controlled with variable 'show_dotcmd' (default: 'xdg-open \"%s\" &')" )
       ( "silent,s",                                              "don't show the DOT file, i.e., just save it" )
       ;
     [](...){}( add_option_helper<S>( opts )... );
@@ -101,6 +101,11 @@ public:
 protected:
   bool execute()
   {
+    if ( !is_set( "dotcmd" ) )
+    {
+      dotcmd = env->variable_value( "show_dotcmd", "xdg-open \"%s\" &" );
+    }
+
     if ( dotname == "/tmp/test-%s.dot" )
     {
       dotname = ( boost::format( dotname ) % rand() ).str();
