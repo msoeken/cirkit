@@ -33,6 +33,7 @@
 
 #include <alice/command.hpp>
 
+#include <core/cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>
 
 #include <classical/aig.hpp>
@@ -279,6 +280,12 @@ std::string store_entry_to_string<tt>( const tt& t );
 
 template<>
 void print_store_entry<tt>( std::ostream& os, const tt& t );
+
+template<>
+inline bool store_can_write_io_type<tt, io_pla_tag_t>( command& cmd ) { return true; }
+
+template<>
+void store_write_io_type<tt, io_pla_tag_t>( const tt& t, const std::string& filename, const command& cmd );
 
 /******************************************************************************
  * expression_t::ptr                                                          *

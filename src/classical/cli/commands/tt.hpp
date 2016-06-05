@@ -49,11 +49,11 @@ public:
   log_opt_t log() const;
 
 private:
-  std::string    load;
-  std::string    planame;
-  unsigned       extend;
-  unsigned       random;
-  unsigned       hwb;
+  std::string load;
+  unsigned    extend;
+  unsigned    random;
+  unsigned    hwb;
+  std::string swap;
 };
 
 }

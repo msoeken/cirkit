@@ -74,6 +74,7 @@ int main( int argc, char ** argv )
   ADD_READ_COMMAND( verilog, "Verilog" );
   ADD_WRITE_COMMAND( aiger, "Aiger" );
   ADD_WRITE_COMMAND( edgelist, "Edge list" );
+  ADD_WRITE_COMMAND( pla, "PLA" );
   ADD_WRITE_COMMAND( verilog, "Verilog" );
   ADD_COMMAND( read_sym );
 

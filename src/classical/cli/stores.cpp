@@ -28,6 +28,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <core/graph/depth.hpp>
+#include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
 
 #include <classical/functions/aig_from_truth_table.hpp>
@@ -398,6 +399,31 @@ template<>
 void print_store_entry<tt>( std::ostream& os, const tt& t )
 {
   os << t << std::endl;
+}
+
+template<>
+void store_write_io_type<tt, io_pla_tag_t>( const tt& t, const std::string& filename, const command& cmd )
+{
+  const auto n = tt_num_vars( t );
+  std::ofstream out( filename.c_str(), std::ofstream::out );
+
+  out << ".i " << n << std::endl
+      << ".o 1" << std::endl;
+
+  auto index = 0u;
+  boost::dynamic_bitset<> input( n );
+
+  do {
+    if ( t.test( index ) )
+    {
+      out << input << " 1" << std::endl;
+    }
+
+    inc( input );
+    ++index;
+  } while ( input.any() );
+
+  out << ".e" << std::endl;
 }
 
 /******************************************************************************

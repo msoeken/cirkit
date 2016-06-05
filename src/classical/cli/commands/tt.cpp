@@ -24,6 +24,7 @@
 
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/program_options.hpp>
+#include <core/utils/string_utils.hpp>
 #include <classical/cli/stores.hpp>
 
 using namespace boost::program_options;
@@ -48,11 +49,11 @@ tt_command::tt_command( const environment::ptr& env )
 {
   add_positional_option( "load" );
   opts.add_options()
-    ( "load,l",    value( &load ),    "load a truth table into the store" )
-    ( "planame,p", value( &planame ), "write truth table to PLA" )
-    ( "extend,e",  value( &extend ),  "extend to bits" )
-    ( "random,r",  value( &random ),  "create random truth table for number of variables" )
-    ( "hwb",       value( &hwb ),     "create hwb function for number of bits" )
+    ( "load,l",   value( &load ),   "load a truth table into the store" )
+    ( "random,r", value( &random ), "create random truth table for number of variables" )
+    ( "hwb",      value( &hwb ),    "create hwb function for number of bits" )
+    ( "extend,e", value( &extend ), "extend to bits" )
+    ( "swap,s",   value( &swap ),   "swaps to variables (seperated with comma, e.g., 2,3)" )
     ;
 }
 
@@ -61,8 +62,8 @@ command::rules_t tt_command::validity_rules() const
   return {
     { [this]() { return is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },
     { [this]() { return static_cast<int>( is_set( "load" ) ) +
-                        static_cast<int>( is_set( "planame" ) ) +
                         static_cast<int>( is_set( "extend" ) ) +
+                        static_cast<int>( is_set( "swap" ) ) +
                         static_cast<int>( is_set( "random" ) ) +
                         static_cast<int>( is_set( "hwb" ) ) == 1; }, "only one option at a time" }
   };
@@ -76,28 +77,6 @@ bool tt_command::execute()
   {
     tts.extend();
     tts.current() = boost::dynamic_bitset<>( load );
-  }
-  else if ( is_set( "planame" ) )
-  {
-    std::ofstream out( planame.c_str(), std::ofstream::out );
-
-    out << ".i " << tt_num_vars( tts.current() ) << std::endl
-        << ".o 1" << std::endl;
-
-    auto index = 0u;
-    boost::dynamic_bitset<> input( tt_num_vars( tts.current() ) );
-
-    do {
-      if ( tts.current().test( index ) )
-      {
-        out << input << " 1" << std::endl;
-      }
-
-      inc( input );
-      ++index;
-    } while ( input.any() );
-
-    out << ".e" << std::endl;
   }
   else if ( is_set( "extend" ) )
   {
@@ -121,6 +100,11 @@ bool tt_command::execute()
 
     tts.extend();
     tts.current() = h;
+  }
+  else if ( is_set( "swap" ) )
+  {
+    const auto p = split_string_pair( swap, "," );
+    tts.current() = tt_permute( tts.current(), boost::lexical_cast<unsigned>( p.first ), boost::lexical_cast<unsigned>( p.second ) );
   }
 
   return true;
