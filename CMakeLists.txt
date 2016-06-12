@@ -79,10 +79,14 @@ add_definitions(-DABC_NAMESPACE=abc)
 # Libraries (include)
 include_directories(src)
 
-# Addons
 
-# Libraries
+# 3rd party libraries
+add_subdirectory( lib )
+
+# Main code
 add_subdirectory(src)
+
+# Addons
 add_subdirectory(addons)
 
 # Programs
