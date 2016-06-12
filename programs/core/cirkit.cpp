@@ -35,15 +35,22 @@
 #include <classical/cli/commands/cec.hpp>
 #include <classical/cli/commands/comb_approx.hpp>
 #include <classical/cli/commands/cone.hpp>
+#include <classical/cli/commands/cuts.hpp>
+#include <classical/cli/commands/depth.hpp>
 #include <classical/cli/commands/dsop.hpp>
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/feather.hpp>
+#include <classical/cli/commands/funchash.hpp>
+#include <classical/cli/commands/memristor.hpp>
+#include <classical/cli/commands/mig_rewrite.hpp>
 #include <classical/cli/commands/npn.hpp>
 #include <classical/cli/commands/output_noise.hpp>
+#include <classical/cli/commands/plim.hpp>
 #include <classical/cli/commands/propagate.hpp>
 #include <classical/cli/commands/read_sym.hpp>
 #include <classical/cli/commands/rename.hpp>
 #include <classical/cli/commands/satnpn.hpp>
+#include <classical/cli/commands/shuffle.hpp>
 #include <classical/cli/commands/simgraph.hpp>
 #include <classical/cli/commands/strash.hpp>
 #include <classical/cli/commands/support.hpp>
@@ -87,8 +94,11 @@ int main( int argc, char ** argv )
   cli.set_category( "Rewriting" );
   ADD_COMMAND( cone );
   ADD_COMMAND( feather );
+  ADD_COMMAND( funchash );
+  ADD_COMMAND( mig_rewrite );
   ADD_COMMAND( propagate );
   ADD_COMMAND( rename );
+  ADD_COMMAND( shuffle );
   ADD_COMMAND( strash );
 
   cli.set_category( "Verification" );
@@ -102,12 +112,19 @@ int main( int argc, char ** argv )
   ADD_COMMAND( tt );
 
   cli.set_category( "Reverse engineering" );
+  ADD_COMMAND( cuts );
   ADD_COMMAND( satnpn );
   ADD_COMMAND( simgraph );
 
+  cli.set_category( "RRAM" );
+  ADD_COMMAND( memristor );
+  ADD_COMMAND( plim );
+
+
   cli.set_category( "Various" );
-  ADD_COMMAND( bdd );
   ADD_COMMAND( abc );
+  ADD_COMMAND( bdd );
+  ADD_COMMAND( depth );
   ADD_COMMAND( dsop );
   ADD_COMMAND( expr );
   ADD_COMMAND( output_noise );
