@@ -52,6 +52,7 @@
 #include <classical/cli/commands/satnpn.hpp>
 #include <classical/cli/commands/shuffle.hpp>
 #include <classical/cli/commands/simgraph.hpp>
+#include <classical/cli/commands/simulate.hpp>
 #include <classical/cli/commands/strash.hpp>
 #include <classical/cli/commands/support.hpp>
 #include <classical/cli/commands/tt.hpp>
@@ -103,6 +104,7 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Verification" );
   ADD_COMMAND( cec );
+  ADD_COMMAND( simulate );
   ADD_COMMAND( support );
   ADD_COMMAND( unate );
 
@@ -119,7 +121,6 @@ int main( int argc, char ** argv )
   cli.set_category( "RRAM" );
   ADD_COMMAND( memristor );
   ADD_COMMAND( plim );
-
 
   cli.set_category( "Various" );
   ADD_COMMAND( abc );
