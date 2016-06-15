@@ -41,6 +41,7 @@ namespace cirkit
 revsimp_command::revsimp_command( const environment::ptr& env )
   : cirkit_command( env, "Reversible circuit simplification" )
 {
+  be_verbose();
   add_new_option();
 }
 
