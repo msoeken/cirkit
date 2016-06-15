@@ -52,7 +52,6 @@ template<typename S>
 int init_show_commands( command& cmd, show_commands_t& show_commands )
 {
   constexpr auto option   = store_info<S>::option;
-  constexpr auto mnemonic = store_info<S>::mnemonic;
 
   show_commands[option] = std::make_shared<show_store_entry<S>>( cmd );
 

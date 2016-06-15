@@ -244,12 +244,13 @@ public:
     insert_command( "store",   std::make_shared<store_command<S...>>( env ) );
 
     opts.add_options()
-      ( "command,c", po::value( &command ), "process semicolon-separated list of commands" )
-      ( "file,f",    po::value( &file ),    "process file with new-line seperated list of commands" )
-      ( "echo,e",                           "echos the command if read from command line or file" )
-      ( "counter,n",                        "show a counter in the prefix" )
-      ( "log,l",     po::value( &logname ), "logs the execution and stores many statistical information" )
-      ( "help,h",                           "produce help message" )
+      ( "command,c",     po::value( &command ), "process semicolon-separated list of commands" )
+      ( "file,f",        po::value( &file ),    "process file with new-line seperated list of commands" )
+      ( "echo,e",                               "echos the command if read from command line or file" )
+      ( "counter,n",                            "show a counter in the prefix" )
+      ( "interactive,i",                        "continue in interactive mode after processing commands (in command or file mode)" )
+      ( "log,l",         po::value( &logname ), "logs the execution and stores many statistical information" )
+      ( "help,h",                               "produce help message" )
       ;
   }
 
@@ -341,8 +342,14 @@ public:
     else if ( vm.count( "file" ) )
     {
       process_file( file, vm.count( "echo" ) );
+
+      if ( !vm.count( "interactive" ) )
+      {
+        env->quit = true;
+      }
     }
-    else
+
+    if ( ( !vm.count( "command" ) && !vm.count( "file" ) ) || ( !env->quit && vm.count( "interactive" ) ) )
     {
 #ifdef USE_READLINE
       initialize_readline();

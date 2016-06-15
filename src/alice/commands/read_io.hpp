@@ -82,7 +82,6 @@ template<typename Tag, typename S>
 int read_io_helper( command& cmd, const std::string& default_option, const environment::ptr& env, const std::string& filename )
 {
   constexpr auto option = store_info<S>::option;
-  constexpr auto name   = store_info<S>::name;
 
   if ( cmd.is_set( option ) || option == default_option )
   {
