@@ -32,6 +32,7 @@
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/cec.hpp>
+#include <classical/cli/commands/simulate.hpp>
 #include <classical/utils/expression_parser.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
@@ -114,6 +115,7 @@ int main( int argc, char ** argv )
 
   ADD_COMMAND( cec );
   ADD_COMMAND( rec );
+  ADD_COMMAND( simulate );
 
   cli.set_category( "Various" );
 
