@@ -926,7 +926,6 @@ aig_graph aig_npn_canonization( const aig_graph& aig,
   const auto verbose   = get( settings, "verbose",   false );
   const auto progress  = get( settings, "progress",  false );
   const auto miter     = get( settings, "miter",     0u );    /* 0: single, 1: shared */
-  const auto encoding  = get( settings, "encoding",  0u );    /* 0: Tseytin, 1: EMS */
   const auto heuristic = get( settings, "heuristic", 0u );    /* 0: flip-swap, 1: sifting */
 
   /* timining */

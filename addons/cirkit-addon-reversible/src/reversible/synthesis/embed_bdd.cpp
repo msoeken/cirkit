@@ -100,9 +100,6 @@ bool embed_bdd( rcbdd& cf, const bdd_function_t& bdd,
                 const properties::ptr& settings,
                 const properties::ptr& statistics )
 {
-  /* settings */
-  const auto verbose = get( settings, "verbose", false );
-
   /* timer */
   properties_timer t( statistics );
 

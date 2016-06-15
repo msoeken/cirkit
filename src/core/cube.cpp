@@ -313,7 +313,7 @@ void common_pla_print( const cube_vec_t& cubes, std::ostream& os )
 cube_vec_t common_pla_espresso( const cube_vec_t& cubes )
 {
   common_pla_write_single( cubes, "/tmp/test.pla" );
-  auto sresult = system( "espresso -t /tmp/test.pla > /tmp/test2.pla" );
+  system( "espresso -t /tmp/test.pla > /tmp/test2.pla" );
   return common_pla_read_single( "/tmp/test2.pla" );
 }
 

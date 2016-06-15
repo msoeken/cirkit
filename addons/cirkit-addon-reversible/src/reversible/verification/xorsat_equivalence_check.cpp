@@ -134,7 +134,6 @@ bool xorsat_equivalence_check( const circuit& circ1, const circuit& circ2,
 {
   /* settings */
   const auto tmpname = get( settings, "tmpname", std::string( "/tmp/test.cnf" ) );
-  const auto verbose = get( settings, "verbose", false );
 
   /* timing */
   properties_timer t( statistics );

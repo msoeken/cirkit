@@ -1299,7 +1299,6 @@ bool directed_lad2_from_aig( std::vector<unsigned>& mapping, const aig_graph& ta
   const auto functional               = get( settings, "functional",               false );
   const auto support_edges            = get( settings, "support_edges",            false );
   const auto simulation_signatures    = get( settings, "simulation_signatures",    boost::optional<unsigned>() );
-  const auto verbose                  = get( settings, "verbose",                  false );
   const auto on_filter                = get( settings, "on_filter",                domain_hook_t() );
   const auto on_before_first_branch   = get( settings, "on_before_first_branch",   domain_hook_t() );
   const auto texlogname               = get( settings, "texlogname",               std::string( "/tmp/log.tex" ) );

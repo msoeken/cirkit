@@ -122,7 +122,7 @@ void exorcism_minimization( const std::string& filename, properties::ptr setting
 
   /* Call */
   std::string hide_output = verbose ? "" : " > /dev/null 2>&1";
-  auto sresult = system( boost::str( boost::format( "(%s %s%s; echo > /dev/null)" ) % exorcism % filename % hide_output ).c_str() );
+  system( boost::str( boost::format( "(%s %s%s; echo > /dev/null)" ) % exorcism % filename % hide_output ).c_str() );
 
   /* Get ESOP filename */
   boost::filesystem::path path( filename );

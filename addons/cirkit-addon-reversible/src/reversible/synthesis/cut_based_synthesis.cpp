@@ -367,18 +367,11 @@ bool cut_based_synthesis( circuit& circ, const aig_graph& aig,
                           const properties::ptr& statistics )
 {
   /* settings */
-  const auto negative           = get( settings, "negative",           true );
-  const auto node_count         = get( settings, "node_count",         4u );
   const auto var_threshold      = get( settings, "var_threshold",      20u );
   const auto embedding          = get( settings, "embedding",          0u ); /* 0u: BDD based, 1u: PLA based */
   const auto synthesis          = get( settings, "synthesis",          0u ); /* 0u: TBS (BDD), 1u: TBS (SAT), 2u: DBS */
   const auto store_intermediate = get( settings, "store_intermediate", false );
   const auto verbose            = get( settings, "verbose",            false );
-
-  /* statistics */
-  auto num_generated_circuits  = 0u;
-  auto num_balanced_circuits   = 0u;
-  auto total_synthesis_runtime = 0.0;
 
   std::vector<bdd_function_t> si_bdds;
   std::vector<rcbdd>          si_rcbdds;

@@ -137,7 +137,6 @@ void map_barenco73_inplace( circuit& circ, unsigned pos )
 void nct_mapping_inplace( circuit& circ, const properties::ptr& settings, const properties::ptr& statistics )
 {
   /* settings */
-  const auto verbose                   = get( settings, "verbose", false );
   const auto extra_ancilla_input_name  = get( settings, "extra_ancilla_input_name", std::string( "h" ) );
   const auto extra_ancilla_output_name = get( settings, "extra_ancilla_output_name", std::string( "h" ) );
   const auto constant_value            = get( settings, "constant_value", constant( false ) );

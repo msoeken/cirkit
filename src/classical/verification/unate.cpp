@@ -294,7 +294,6 @@ boost::dynamic_bitset<> unateness_naive( const aig_graph& aig,
 {
   /* settings */
   const auto progress = get( settings, "progress", false );
-  const auto verbose  = get( settings, "verbose", false );
 
   /* timer */
   properties_timer t( statistics );
@@ -397,7 +396,6 @@ boost::dynamic_bitset<> unateness_split( const aig_graph& aig,
 {
   /* settings */
   const auto progress = get( settings, "progress", false );
-  const auto verbose  = get( settings, "verbose", false );
 
   /* timer */
   properties_timer t( statistics );
@@ -435,9 +433,6 @@ boost::dynamic_bitset<> unateness_split_parallel( const aig_graph& aig,
                                                   const properties::ptr& settings,
                                                   const properties::ptr& statistics )
 {
-  /* settings */
-  const auto verbose  = get( settings, "verbose", false );
-
   /* timer */
   properties_timer t( statistics );
 
@@ -476,9 +471,6 @@ boost::dynamic_bitset<> unateness_split_inputs_parallel( const aig_graph& aig,
                                                          const properties::ptr& settings,
                                                          const properties::ptr& statistics )
 {
-  /* settings */
-  const auto verbose  = get( settings, "verbose", false );
-
   /* timer */
   properties_timer t( statistics );
 
@@ -516,7 +508,6 @@ boost::dynamic_bitset<> unateness( const aig_graph& aig,
   /* settings */
   const auto skiplist = get( settings, "skiplist", true );
   const auto progress = get( settings, "progress", false );
-  const auto verbose  = get( settings, "verbose", false );
 
   /* timer */
   properties_timer t( statistics );

@@ -41,7 +41,6 @@ aig_graph circuit_to_aig( const circuit& circ )
 
   aig_graph aig;
   aig_initialize( aig );
-  auto& info = aig_info( aig );
 
   /* I/O vector */
   for ( auto i = 0u; i < circ.lines(); ++i )
