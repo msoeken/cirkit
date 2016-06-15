@@ -62,7 +62,7 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   {
     const int obj = abc::Gia_ManAppendCi( gia );
     node_to_obj[input.value] = abc::Abc_Lit2Var( obj );
-    const auto name = info.node_names.at( input.value );
+    const auto name = ( info.node_names.size() >= input.value ) ? info.node_names.at( input.value ) : ( boost::format("input_%d") % input.value ).str();
     abc::Vec_PtrSetEntry( gia->vNamesIn, input.index, strcpy( (char*)malloc( sizeof( char ) * ( name.size() + 1u ) ), name.c_str() ) );
   }
 
