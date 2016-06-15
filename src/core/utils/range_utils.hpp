@@ -234,6 +234,29 @@ void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, cons
  */
 std::vector<std::string> create_name_list( const std::string& pattern, unsigned length, unsigned start = 0u );
 
+/* balanced accumulate */
+template<typename Iterator, typename Fn>
+typename Iterator::value_type balanced_accumulate( Iterator begin, Iterator end, Fn&& f )
+{
+  const auto distance = std::distance( begin, end );
+  assert( distance >= 1u );
+
+  if ( distance == 1u )
+  {
+    return *begin;
+  }
+  else if ( distance == 2u )
+  {
+    return f( *begin, *( begin + 1 ) );
+  }
+  else
+  {
+    const auto mid = begin + ( distance >> 1u );
+    return f( balanced_accumulate( begin, mid, f ),
+              balanced_accumulate( mid, end, f ) );
+  }
+}
+
 }
 
 #endif
