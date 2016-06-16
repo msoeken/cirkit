@@ -35,4 +35,6 @@ add_cirkit_library(
     ${Z3_LIBRARIES}
   INCLUDE
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
+  DEFINE
+    PUBLIC ADDON_FORMAL
 )
