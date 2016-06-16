@@ -172,7 +172,6 @@ int main( int argc, char ** argv )
             { boost::regex( "^([^:]*): *(.*)$" ), [&globals, &locals, &prow, &index]( const boost::smatch& m ) {
                 parse_log_entry( std::get<1>( *prow ), m, globals );
                 parse_log_entry( std::get<2>( *prow )[index], m, locals );
-                auto itl = boost::find_if( locals, first_matches<label_type_vector_t::value_type>( m[1u] ) );
               }
             }
           } );
