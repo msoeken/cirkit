@@ -138,7 +138,7 @@ boost::optional< counterexample_t > abc_cec( const aig_graph& circuit, const aig
     /* re-simulate the counterexample */
     auto node_value_map = node_value_map_from_counterexample( circuit, cec_counterexample );
     simple_node_assignment_resimulator sim( node_value_map );
-    auto result = simulate_aig( circuit, sim, settings );
+    auto result = simulate_aig_full( circuit, sim, settings );
 
     counterexample_t cex( _num_vertices - 1u, num_outputs );
 
