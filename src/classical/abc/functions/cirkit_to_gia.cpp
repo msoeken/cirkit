@@ -32,6 +32,8 @@ inline int Gia_ManAppendAnd2_Simplified( abc::Gia_Man_t * p, int iLit0, int iLit
 {
   if ( iLit0 == iLit1 )
     return iLit1;
+  if ( (iLit0 >> 1) == (iLit1 >> 1) )
+    return 0;
   return Gia_ManAppendAnd( p, iLit0, iLit1 );
 }
 
