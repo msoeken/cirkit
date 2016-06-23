@@ -40,6 +40,7 @@
 #include <classical/cli/commands/dsop.hpp>
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/feather.hpp>
+#include <classical/cli/commands/gen_trans_arith.hpp>
 #include <classical/cli/commands/funchash.hpp>
 #include <classical/cli/commands/memristor.hpp>
 #include <classical/cli/commands/mig_rewrite.hpp>
@@ -121,6 +122,9 @@ int main( int argc, char ** argv )
   cli.set_category( "RRAM" );
   ADD_COMMAND( memristor );
   ADD_COMMAND( plim );
+
+  cli.set_category( "Generator" );
+  ADD_COMMAND( gen_trans_arith );
 
   cli.set_category( "Various" );
   ADD_COMMAND( abc );
