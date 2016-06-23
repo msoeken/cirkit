@@ -24,6 +24,8 @@
 
 #include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
+#include <classical/cli/stores.hpp>
+#include <classical/io/read_verilog.hpp>
 #include <classical/generators/transparent_arithmetic.hpp>
 
 using namespace boost::program_options;
@@ -47,18 +49,32 @@ gen_trans_arith_command::gen_trans_arith_command( const environment::ptr& env )
   : cirkit_command( env, "Generate transparent arithmetic circuits" )
 {
   opts.add_options()
-    ( "filename",     value( &filename ),                  "filename" )
-    ( "seed,s",       value( &seed ),                      "random seed (default: current time)" )
-    ( "bitwidth,w",   value_with_default( &bitwidth ),     "bitwidth" )
-    ( "min_words",    value_with_default( &min_words ),    "minimum number of input words" )
-    ( "max_words",    value_with_default( &max_words ),    "maximum number of input words" )
-    ( "max_fanout",   value_with_default( &max_fanout ),   "maximum number of fanout for each word" )
-    ( "max_rounds",   value_with_default( &max_rounds ),   "maximum number of rounds, corresponds to levels" )
-    ( "operators",    value_with_default( &operators ),    "space separated list of Verilog infix operators" )
-    ( "word_pattern", value_with_default( &word_pattern ), "formatting for words" )
-    ( "module_name",  value_with_default( &module_name ),  "name for resulting module" )
+    ( "filename",        value( &filename ),                     "filename" )
+    ( "seed,s",          value( &seed ),                         "random seed (default: current time)" )
+    ( "bitwidth,w",      value_with_default( &bitwidth ),        "bitwidth" )
+    ( "min_words",       value_with_default( &min_words ),       "minimum number of input words" )
+    ( "max_words",       value_with_default( &max_words ),       "maximum number of input words" )
+    ( "max_fanout",      value_with_default( &max_fanout ),      "maximum number of fanout for each word" )
+    ( "max_rounds",      value_with_default( &max_rounds ),      "maximum number of rounds, corresponds to levels" )
+    ( "operators",       value_with_default( &operators ),       "space separated list of Verilog infix operators" )
+    ( "mux_prob",        value_with_default( &mux_prob ),        "probability of using a mux instead of operator (between 0 and 100)" )
+    ( "new_ctrl_prob",   value_with_default( &new_ctrl_prob ),   "probability of creating a new control input instead of using an existing one (between 0 and 100)" )
+    ( "word_pattern",    value_with_default( &word_pattern ),    "formatting for words" )
+    ( "control_pattern", value_with_default( &control_pattern ), "formatting for control inputs" )
+    ( "module_name",     value_with_default( &module_name ),     "name for resulting module" )
+    ( "aig,a",                                                   "write into AIG directly (don't specify filename)" )
     ;
   add_positional_option( "filename" );
+  add_new_option();
+}
+
+command::rules_t gen_trans_arith_command::validity_rules() const
+{
+  return {
+    {[this]() { return mux_prob <= 100u; }, "mux_prob must be between 0 and 100" },
+    {[this]() { return new_ctrl_prob <= 100u; }, "new_ctrl_prob must be between 0 and 100" },
+    {[this]() { return !is_set( "aig" ) || !is_set( filename ); }, "filename must be unset if writing into AIG" }
+  };
 }
 
 bool gen_trans_arith_command::execute()
@@ -79,10 +95,17 @@ bool gen_trans_arith_command::execute()
   std::vector<std::string> voperators;
   split_string( voperators, operators, " " );
   settings->set( "operators", voperators );
+  settings->set( "mux_prob", mux_prob );
+  settings->set( "new_ctrl_prob", new_ctrl_prob );
   settings->set( "word_pattern", word_pattern );
+  settings->set( "control_pattern", control_pattern );
   settings->set( "module_name", module_name );
 
-  if ( !is_set( "filename" ) )
+  if ( is_set( "aig" ) )
+  {
+    filename = "/tmp/test.v";
+  }
+  else if ( !is_set( "filename" ) )
   {
     filename = "/dev/stdout";
   }
@@ -90,6 +113,13 @@ bool gen_trans_arith_command::execute()
   std::ofstream os( filename.c_str(), std::ofstream::out );
   generate_transparent_arithmetic_circuit( os, settings, settings );
   os.close();
+
+  if ( is_set( "aig" ) )
+  {
+    auto& aigs = env->store<aig_graph>();
+    extend_if_new( aigs );
+    aigs.current() = read_verilog_with_abc( filename );
+  }
 
   return true;
 }
@@ -103,7 +133,10 @@ command::log_opt_t gen_trans_arith_command::log() const
       {"max_fanout", max_fanout},
       {"max_rounds", max_rounds},
       {"operators", operators},
+      {"mux_prob", mux_prob},
+      {"new_ctrl_prob", new_ctrl_prob},
       {"word_pattern", word_pattern},
+      {"control_pattern", control_pattern},
       {"module_name", module_name}
     });
 }

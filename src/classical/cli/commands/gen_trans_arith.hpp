@@ -42,6 +42,7 @@ public:
   gen_trans_arith_command( const environment::ptr& env );
 
 protected:
+  rules_t validity_rules() const;
   bool execute();
 
 public:
@@ -50,14 +51,17 @@ public:
 private:
   std::string filename;
   unsigned seed;
-  unsigned bitwidth        = 8u;
-  unsigned min_words       = 3u;
-  unsigned max_words       = 10u;
-  unsigned max_fanout      = 4u;
-  unsigned max_rounds      = 4u;
-  std::string operators    = "+ - * /";
-  std::string word_pattern = "w%d";
-  std::string module_name  = "trans_arith";
+  unsigned bitwidth           = 8u;
+  unsigned min_words          = 3u;
+  unsigned max_words          = 10u;
+  unsigned max_fanout         = 4u;
+  unsigned max_rounds         = 4u;
+  std::string operators       = "+ - * /";
+  unsigned mux_prob           = 40u;
+  unsigned new_ctrl_prob      = 30u;
+  std::string word_pattern    = "w%d";
+  std::string control_pattern = "c%d";
+  std::string module_name     = "trans_arith";
 };
 
 }
