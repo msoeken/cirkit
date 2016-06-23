@@ -52,6 +52,7 @@ tt_command::tt_command( const environment::ptr& env )
     ( "load,l",   value( &load ),   "load a truth table into the store" )
     ( "random,r", value( &random ), "create random truth table for number of variables" )
     ( "hwb",      value( &hwb ),    "create hwb function for number of bits" )
+    ( "maj",      value( &maj ),    "create maj function for number of odd bits" )
     ( "extend,e", value( &extend ), "extend to bits" )
     ( "swap,s",   value( &swap ),   "swaps to variables (seperated with comma, e.g., 2,3)" )
     ;
@@ -60,12 +61,14 @@ tt_command::tt_command( const environment::ptr& env )
 command::rules_t tt_command::validity_rules() const
 {
   return {
-    { [this]() { return is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },
+    { [this]() { return is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || is_set( "maj" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },
+    { [this]() { return !is_set( "maj" ) || maj % 2 == 1; }, "argument to maj must be odd" },
     { [this]() { return static_cast<int>( is_set( "load" ) ) +
                         static_cast<int>( is_set( "extend" ) ) +
                         static_cast<int>( is_set( "swap" ) ) +
                         static_cast<int>( is_set( "random" ) ) +
-                        static_cast<int>( is_set( "hwb" ) ) == 1; }, "only one option at a time" }
+                        static_cast<int>( is_set( "hwb" ) ) +
+                        static_cast<int>( is_set( "maj" ) ) == 1; }, "only one option at a time" }
   };
 }
 
@@ -100,6 +103,20 @@ bool tt_command::execute()
 
     tts.extend();
     tts.current() = h;
+  }
+  else if ( is_set( "maj" ) )
+  {
+    tt m( 1u << maj );
+    boost::dynamic_bitset<> it( maj, 0 );
+
+    do
+    {
+      m[it.to_ulong()] = it.count() > ( maj >> 1u );
+      inc( it );
+    } while ( it.any() );
+
+    tts.extend();
+    tts.current() = m;
   }
   else if ( is_set( "swap" ) )
   {

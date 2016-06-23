@@ -53,6 +53,7 @@ private:
   unsigned    extend;
   unsigned    random;
   unsigned    hwb;
+  unsigned    maj;
   std::string swap;
 };
 
