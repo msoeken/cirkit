@@ -30,8 +30,10 @@ namespace cirkit
 
 inline int Gia_ManAppendAnd2_Simplified( abc::Gia_Man_t * p, int iLit0, int iLit1 )
 {
-  if ( iLit0 == iLit1 )
-    return iLit1;
+  if ( iLit1 < iLit0 ) return Gia_ManAppendAnd2_Simplified( p, iLit1, iLit0 );
+  if ( iLit0 == 0 ) return 0;
+  if ( iLit1 == 1 ) return iLit0;
+  if ( iLit0 == iLit1 ) return iLit1;
   if ( (iLit0 >> 1) == (iLit1 >> 1) )
     return 0;
   return Gia_ManAppendAnd( p, iLit0, iLit1 );
