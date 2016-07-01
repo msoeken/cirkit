@@ -197,7 +197,7 @@ private:
   {
     std::vector<unsigned> invperm( perm.size() );
     for ( auto i = 0u; i < perm.size(); ++i ) { invperm[perm[i]] = i; }
-    return std::move( invperm );
+    return invperm;
   }
 
 public:

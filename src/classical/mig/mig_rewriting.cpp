@@ -230,7 +230,7 @@ std::vector<children_pair_t> get_children_pairs( const mig_function_vec_t& c1,
     pos_a = pattern.find_next( pos_a );
   }
 
-  return std::move( pairs );
+  return pairs;
 }
 
 mig_rewriting_manager::mig_rewriting_manager( const mig_graph& mig, bool verbose )
