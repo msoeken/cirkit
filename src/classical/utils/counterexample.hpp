@@ -57,6 +57,11 @@ struct assignment_t
     , mask( std::string( assignment.size(), '1' ) )
   {}
 
+  bool operator==( const assignment_t& other ) const
+  {
+    return ( bits == other.bits && mask == other.mask );
+  }
+  
   unsigned size() const
   {
     assert( bits.size() == mask.size() );

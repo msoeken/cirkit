@@ -36,6 +36,7 @@
 #include <boost/property_map/property_map.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/assign/std/set.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/timer.hpp>
@@ -429,6 +430,7 @@ T simulate_aig_function( const aig_graph& aig, const aig_function& f,
 
 template<typename T>
 std::map<aig_function, T> simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator,
+                                        const std::vector< aig_function >& fs,
                                         const properties::ptr& settings = properties::ptr(),
                                         const properties::ptr& statistics = properties::ptr() )
 {
@@ -442,7 +444,84 @@ std::map<aig_function, T> simulate_aig( const aig_graph& aig, const aig_simulato
   std::map<aig_node, T> node_values;
 
   std::map<aig_function, T> results;
+  
+  for ( const auto& f : fs )
+  {
+    if ( verbose )
+    {
+      std::cout << "[i] simulate '" << f.node << "'" << std::endl;
+    }
+    T value = simulate_aig_node<T>( aig, f.node, simulator, colors, node_values );
 
+    /* value may need to be inverted */
+    results[f] = f.complemented ? simulator.invert( value ) : value;
+  }
+
+  set( statistics, "node_values", node_values );
+
+  return results;
+}
+
+template<typename T>
+std::map<aig_function, T> simulate_aig_full( const aig_graph& aig, const aig_simulator<T>& simulator,
+                                             const properties::ptr& settings = properties::ptr(),
+                                             const properties::ptr& statistics = properties::ptr() )
+{
+  auto in_degrees = precompute_in_degrees( aig );
+
+  std::vector< aig_function > fs;
+
+  std::set< aig_node > ignore_nodes;
+  ignore_nodes += 0;
+  for ( const auto& i : aig_info( aig ).inputs )
+  {
+    ignore_nodes += i;
+  }
+  for ( const auto& o : aig_info( aig ).outputs )
+  {
+    ignore_nodes += o.first.node;
+    fs += o.first;
+  }
+
+  for ( const auto& node : boost::make_iterator_range( vertices( aig ) ) )
+  {
+    if ( ignore_nodes.find( node ) != ignore_nodes.end() )
+    {
+      continue;
+    }
+    
+    if ( in_degrees[ node ] == 0u )
+    {
+      fs += aig_function( { node, false } );
+    }
+  }
+
+  // std::cout << "{ ";
+  // for ( const auto& f : fs )
+  // {
+  //   std::cout << f << ' ';
+  // }
+  // std::cout << "}" << std::endl;
+
+  return simulate_aig( aig, simulator, fs, settings, statistics );
+}
+
+template<typename T>
+std::map<aig_function, T> simulate_aig( const aig_graph& aig, const aig_simulator<T>& simulator,
+                                        const properties::ptr& settings = properties::ptr(),
+                                        const properties::ptr& statistics = properties::ptr() )
+{
+  /* settings */
+  auto verbose = get( settings, "verbose", false );
+
+  /* timer */
+  properties_timer t( statistics );
+
+  aig_node_color_map colors;
+  std::map<aig_node, T> node_values;
+
+  std::map<aig_function, T> results;
+  
   for ( const auto& o : aig_info( aig ).outputs )
   {
     if ( verbose )
