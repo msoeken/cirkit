@@ -30,8 +30,12 @@ namespace cirkit
 
 inline int Gia_ManAppendAnd2_Simplified( abc::Gia_Man_t * p, int iLit0, int iLit1 )
 {
-  if ( iLit0 == iLit1 )
-    return iLit1;
+  if ( iLit1 < iLit0 ) return Gia_ManAppendAnd2_Simplified( p, iLit1, iLit0 );
+  if ( iLit0 == 0 ) return 0;
+  if ( iLit1 == 1 ) return iLit0;
+  if ( iLit0 == iLit1 ) return iLit1;
+  if ( (iLit0 >> 1) == (iLit1 >> 1) )
+    return 0;
   return Gia_ManAppendAnd( p, iLit0, iLit1 );
 }
 
@@ -52,8 +56,9 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   gia->nConstrs = 0;
   gia->pName = strcpy( (char*)malloc( sizeof( char ) * ( info.model_name.size() + 1u ) ), info.model_name.c_str() );
 
-  std::vector< int > node_to_obj( boost::num_vertices( aig ) );
-  node_to_obj[0] = 0;
+  /* map aig_nodes to literals (in gia graph) */
+  std::vector< int > node_to_lit( boost::num_vertices( aig ) );
+  node_to_lit[0] = 0;
 
   /* inputs */
   assert( !gia->vNamesIn );
@@ -61,7 +66,7 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   for ( const auto& input : index( info.inputs ) )
   {
     const int obj = abc::Gia_ManAppendCi( gia );
-    node_to_obj[input.value] = abc::Abc_Lit2Var( obj );
+    node_to_lit[input.value] = obj;
     const auto name = ( info.node_names.size() >= input.value ) ? info.node_names.at( input.value ) : ( boost::format("input_%d") % input.value ).str();
     abc::Vec_PtrSetEntry( gia->vNamesIn, input.index, strcpy( (char*)malloc( sizeof( char ) * ( name.size() + 1u ) ), name.c_str() ) );
   }
@@ -71,7 +76,7 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   assert( _num_latches == 0u );
 
   /* and gates */
-  std::vector<unsigned> topsort( boost::num_vertices( aig ) );
+  std::vector< unsigned > topsort( boost::num_vertices( aig ) );
   boost::topological_sort( aig, topsort.begin() );
 
   for ( const auto& node : topsort )
@@ -81,11 +86,10 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
     const auto children = get_children( aig, node );
     assert( children.size() == 2u );
 
-    const int obj = Gia_ManAppendAnd2_Simplified( gia,
-                                                  abc::Abc_Var2Lit( node_to_obj[children[0].node], children[0].complemented ),
-                                                  abc::Abc_Var2Lit( node_to_obj[children[1].node], children[1].complemented ) );
-
-    node_to_obj[node] = abc::Abc_Lit2Var( obj );
+    const int child0 = children[0].complemented ? abc::Abc_LitNot(node_to_lit[children[0].node]) : node_to_lit[children[0].node];
+    const int child1 = children[1].complemented ? abc::Abc_LitNot(node_to_lit[children[1].node]) : node_to_lit[children[1].node];
+    const int obj = Gia_ManAppendAnd2_Simplified( gia, child0, child1 );
+    node_to_lit[node] = obj;
   }
 
   /* outputs */
@@ -93,7 +97,8 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   gia->vNamesOut = abc::Vec_PtrStart( info.outputs.size() );
   for ( const auto& output : index( info.outputs ) )
   {
-    abc::Gia_ManAppendCo( gia, abc::Abc_Var2Lit( node_to_obj[output.value.first.node], output.value.first.complemented ) );
+    const int arg = output.value.first.complemented ? abc::Abc_LitNot( node_to_lit[output.value.first.node] ) : node_to_lit[output.value.first.node];
+    abc::Gia_ManAppendCo( gia, arg );
     const auto name = output.value.second;
     abc::Vec_PtrSetEntry( gia->vNamesOut, output.index, strcpy( (char*)malloc( sizeof( char ) * ( name.size() + 1u ) ), name.c_str() ) );
   }
