@@ -80,7 +80,7 @@ template<>
 aig_graph store_convert<circuit, aig_graph>( const circuit& circ );
 
 template<>
-inline bool store_can_write_io_type<circuit, io_qpic_tag_t>( command& cmd ) { return true; }
+bool store_can_write_io_type<circuit, io_qpic_tag_t>( command& cmd );
 
 template<>
 void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );

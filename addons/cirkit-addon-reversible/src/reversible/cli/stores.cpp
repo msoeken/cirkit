@@ -82,9 +82,20 @@ aig_graph store_convert<circuit, aig_graph>( const circuit& circ )
 }
 
 template<>
+bool store_can_write_io_type<circuit, io_qpic_tag_t>( command& cmd )
+{
+  cmd.opts.add_options()
+    ( "print_index,i", "prints index below each gate" )
+    ;
+  return true;
+}
+
+template<>
 void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
-  write_qpic( circ, filename );
+  auto settings = std::make_shared<properties>();
+  settings->set( "print_index", cmd.is_set( "print_index" ) );
+  write_qpic( circ, filename, settings );
 }
 
 template<>

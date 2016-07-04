@@ -47,15 +47,18 @@ std::string format_target( unsigned t, const std::string& prefix = std::string()
   return boost::str( boost::format( boost::format( "%sl%d" ) % prefix % t ) );
 }
 
-void write_qpic( const circuit& circ, std::ostream& os )
+void write_qpic( const circuit& circ, std::ostream& os, const properties::ptr& settings )
 {
+  const auto print_index = get( settings, "print_index", false );
+
   for ( auto i = 0u; i < circ.lines(); ++i )
   {
     os << boost::format( "l%d W %s %s" ) % i % circ.inputs()[i] % circ.outputs()[i] << std::endl;
   }
 
-  for ( const auto& g : circ )
+  for ( auto i = 0u; i < circ.num_gates(); ++i )
   {
+    const auto& g = circ[i];
     std::vector<std::string> items;
 
     if ( is_toffoli( g ) )
@@ -89,7 +92,12 @@ void write_qpic( const circuit& circ, std::ostream& os )
       assert( false );
     }
 
-    os << boost::join( items, " " ) << std::endl;
+    os << boost::join( items, " " );
+    if ( print_index )
+    {
+      os << " %%" << i;
+    }
+    os << std::endl;
   }
 }
 
@@ -97,10 +105,10 @@ void write_qpic( const circuit& circ, std::ostream& os )
  * Public functions                                                           *
  ******************************************************************************/
 
-void write_qpic( const circuit& circ, const std::string& filename )
+void write_qpic( const circuit& circ, const std::string& filename, const properties::ptr& settings )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
-  write_qpic( circ, os );
+  write_qpic( circ, os, settings );
 }
 
 }

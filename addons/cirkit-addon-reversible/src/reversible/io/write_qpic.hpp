@@ -30,12 +30,13 @@
 
 #include <string>
 
+#include <core/properties.hpp>
 #include <reversible/circuit.hpp>
 
 namespace cirkit
 {
 
-void write_qpic( const circuit& circ, const std::string& filename );
+void write_qpic( const circuit& circ, const std::string& filename, const properties::ptr& settings = properties::ptr() );
 
 }
 
