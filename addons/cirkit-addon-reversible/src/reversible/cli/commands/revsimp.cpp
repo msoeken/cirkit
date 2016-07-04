@@ -19,6 +19,7 @@
 #include "revsimp.hpp"
 
 #include <alice/rules.hpp>
+#include <core/utils/program_options.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/optimization/simplify.hpp>
@@ -41,6 +42,10 @@ namespace cirkit
 revsimp_command::revsimp_command( const environment::ptr& env )
   : cirkit_command( env, "Reversible circuit simplification" )
 {
+  opts.add_options()
+    ( "methods",   value_with_default( &methods ), "optimization methods:\nm: try to merge gates with same target\nn: cancel NOT gates\na: merge adjacent gates\ns: propagate SWAP gates (may change output order)" )
+    ( "noreverse",                                 "do not optimize in reverse direction" )
+    ;
   be_verbose();
   add_new_option();
 }
@@ -55,6 +60,8 @@ bool revsimp_command::execute()
   auto& circuits = env->store<circuit>();
 
   auto settings = make_settings();
+  settings->set( "methods",     methods );
+  settings->set( "reverse_opt", !is_set( "noreverse" ) );
   circuit circ;
   simplify( circ, circuits.current(), settings, statistics );
 

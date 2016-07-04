@@ -28,6 +28,8 @@
 #ifndef CLI_REVSIMP_COMMAND_HPP
 #define CLI_REVSIMP_COMMAND_HPP
 
+#include <string>
+
 #include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
@@ -44,6 +46,9 @@ protected:
 
 public:
   log_opt_t log() const;
+
+private:
+  std::string methods = "mnas";
 };
 
 }
