@@ -93,6 +93,25 @@ cycles_t permutation_to_cycles( const permutation_t& perm, bool sort )
   return cycles;
 }
 
+std::vector<std::pair<unsigned, unsigned>> permutation_to_transpositions( const permutation_t& perm )
+{
+  auto perm_copy = perm;
+  std::vector<std::pair<unsigned, unsigned>> transpositions;
+
+  for ( int i = perm_copy.size() - 1; i > 1; --i )
+  {
+    if ( perm_copy[i] == i ) { continue; }
+
+    /* where is i? */
+    auto other = std::distance( perm_copy.begin(), std::find( perm_copy.begin(), perm_copy.begin() + i, i ) );
+    transpositions.push_back( {i, other} );
+
+    std::swap( perm_copy[i], perm_copy[other] );
+  }
+
+  return transpositions;
+}
+
 unsigned permutation_inv( const permutation_t& perm )
 {
   unsigned inv = 0u;
@@ -114,6 +133,31 @@ unsigned permutation_inv( const permutation_t& perm )
 int permutation_sign( const permutation_t& perm )
 {
   return ( permutation_inv( perm ) % 2 == 0u ) ? 1 : -1;
+}
+
+permutation_t permutation_multiply( const permutation_t& a, const permutation_t& b )
+{
+  assert( a.size() == b.size() );
+  permutation_t result( a.size() );
+
+  for ( auto i = 0u; i < a.size(); ++i )
+  {
+    result[i] = b[a[i]];
+  }
+
+  return result;
+}
+
+permutation_t permutation_invert( const permutation_t& perm )
+{
+  permutation_t result( perm.size() );
+
+  for ( auto i = 0u; i < perm.size(); ++i )
+  {
+    result[perm[i]] = i;
+  }
+
+  return result;
 }
 
 std::vector<unsigned> cycles_type( const cycles_t& cycles )
