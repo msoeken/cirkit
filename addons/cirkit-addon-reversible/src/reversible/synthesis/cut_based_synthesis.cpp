@@ -424,7 +424,7 @@ bool cut_based_synthesis( circuit& circ, const aig_graph& aig,
   for ( const auto& input : info.inputs )
   {
     node_to_line.insert( {input, circ.lines()} );
-    add_line_to_circuit( circ, info.node_names.at( input ), "-", constant(), true );
+    add_line_to_circuit( circ, info.node_names.at( input ), boost::str( boost::format( "garb%d" ) % circ.lines() ), constant(), true );
   }
 
   if ( verbose )
@@ -485,7 +485,7 @@ bool cut_based_synthesis( circuit& circ, const aig_graph& aig,
       {
         assert( boost::find( inputs, output ) == inputs.end() );
         node_to_line[output] = circ.lines();
-        add_line_to_circuit( circ, "0", "-", false, true );
+        add_line_to_circuit( circ, "0", boost::str( boost::format( "garb%d" ) % circ.lines() ), false, true );
       }
 
       /* we synthesize the subcircuit directly into circ */
@@ -543,7 +543,7 @@ bool cut_based_synthesis( circuit& circ, const aig_graph& aig,
       const auto additional = cf.num_vars() - inputs.size();
       const auto start_index = circ.lines();
       ntimes( additional, [&]() {
-        add_line_to_circuit( circ, "0", "-", false, true );
+          add_line_to_circuit( circ, "0", boost::str( boost::format( "garb%d" ) % circ.lines() ), false, true );
         } );
 
       /* circuit map */
