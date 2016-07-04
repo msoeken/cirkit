@@ -19,15 +19,21 @@
 #include "xorsat_equivalence_check.hpp"
 
 #include <fstream>
+#include <string>
+#include <vector>
 
 #include <boost/format.hpp>
 #include <boost/range/algorithm_ext/iota.hpp>
 
+#include <core/utils/range_utils.hpp>
 #include <core/utils/system_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/add_circuit.hpp>
+#include <reversible/functions/add_gates.hpp>
+#include <reversible/functions/copy_circuit.hpp>
 #include <reversible/functions/reverse_circuit.hpp>
+#include <reversible/utils/permutation.hpp>
 
 namespace cirkit
 {
@@ -39,6 +45,25 @@ namespace cirkit
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
+
+permutation_t derive_output_permutation( const std::vector<std::string>& a, const std::vector<std::string>& b )
+{
+  permutation_t perm( a.size() );
+
+  for ( auto i = 0u; i < a.size(); ++i )
+  {
+    const auto it = std::find( a.begin(), a.end(), b[i] );
+
+    if ( it == a.end() )
+    {
+      throw boost::str( boost::format( "cannot find output %s in a" ) % b[i] );
+    }
+
+    perm[i] = std::distance( a.begin(), it );
+  }
+
+  return perm;
+}
 
 circuit create_identity_miter( const circuit& circ1, const circuit& circ2 )
 {
@@ -133,7 +158,8 @@ bool xorsat_equivalence_check( const circuit& circ1, const circuit& circ2,
                                const properties::ptr& statistics )
 {
   /* settings */
-  const auto tmpname = get( settings, "tmpname", std::string( "/tmp/test.cnf" ) );
+  const auto name_mapping = get( settings, "name_mapping", false );
+  const auto tmpname      = get( settings, "tmpname", std::string( "/tmp/test.cnf" ) );
 
   /* timing */
   properties_timer t( statistics );
@@ -144,7 +170,32 @@ bool xorsat_equivalence_check( const circuit& circ1, const circuit& circ2,
     return false;
   }
 
-  const auto id_circ = create_identity_miter( circ1, circ2 );
+  circuit id_circ;
+
+  if ( name_mapping )
+  {
+    circuit circ2_copy;
+    copy_circuit( circ2, circ2_copy );
+
+    const auto operm = derive_output_permutation( circ1.outputs(), circ2.outputs() );
+
+    //std::cout << "operm: " << any_join( operm, " " ) << std::endl;
+
+    const auto idx = circ2_copy.num_gates();
+    for ( const auto& t : permutation_to_transpositions( operm ) )
+    {
+      //std::cout << t.first << " " << t.second << std::endl;
+      insert_cnot( circ2_copy, idx, t.first, t.second );
+      insert_cnot( circ2_copy, idx, t.second, t.first );
+      insert_cnot( circ2_copy, idx, t.first, t.second );
+    }
+
+    id_circ = create_identity_miter( circ1, circ2_copy );
+  }
+  else
+  {
+    id_circ = create_identity_miter( circ1, circ2 );
+  }
 
   write_to_dimacs( id_circ, tmpname );
   return solve_identity_miter( tmpname );

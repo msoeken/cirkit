@@ -43,8 +43,9 @@ rec_command::rec_command( const environment::ptr& env )
   : cirkit_command( env, "Equivalence checking for reversible circuits", "[L.G. Amaru, P.-E. Gaillardon, R. Wille, and G. De Micheli, DATE 2016]" )
 {
   opts.add_options()
-    ( "id1", value_with_default( &id1 ), "ID of first circuit" )
-    ( "id2", value_with_default( &id2 ), "ID of second circuit" )
+    ( "id1",            value_with_default( &id1 ), "ID of first circuit" )
+    ( "id2",            value_with_default( &id2 ), "ID of second circuit" )
+    ( "name_mapping,n",                             "map circuits by name instead by index" )
     ;
   be_verbose();
 }
@@ -54,6 +55,7 @@ bool rec_command::execute()
   const auto& circuits = env->store<circuit>();
 
   auto settings = make_settings();
+  settings->set( "name_mapping", is_set( "name_mapping" ) );
   const auto result = xorsat_equivalence_check( circuits[id1], circuits[id2], settings, statistics );
 
   if ( result )
