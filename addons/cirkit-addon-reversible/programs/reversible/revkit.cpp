@@ -52,6 +52,7 @@
 #include <reversible/cli/commands/random_circuit.hpp>
 #include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
+#include <reversible/cli/commands/revsim.hpp>
 #include <reversible/cli/commands/revsimp.hpp>
 #include <reversible/cli/commands/rms.hpp>
 #include <reversible/cli/commands/tbs.hpp>
@@ -115,6 +116,7 @@ int main( int argc, char ** argv )
 
   ADD_COMMAND( cec );
   ADD_COMMAND( rec );
+  ADD_COMMAND( revsim );
   ADD_COMMAND( simulate );
 
   cli.set_category( "Various" );
