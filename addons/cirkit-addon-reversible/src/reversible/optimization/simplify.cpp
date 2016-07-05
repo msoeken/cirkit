@@ -130,8 +130,8 @@ circuit simplify_not_gates( const circuit& base )
     {
       const auto& ctrl = g.controls().front();
       //std::cout << "[i] merge NOT gate at pos " << i << " using target " << target << std::endl;
-      /* merge stored not gate into CNOT with the same target */
-      append_cnot( circ, make_var( ctrl.line(), !ctrl.polarity() ), target );
+      /* merge stored not gate into CNOT with the same target (we may have a target at the control line) */
+      append_cnot( circ, make_var( ctrl.line(), !ctrl.polarity() != not_state[ctrl.line()] ), target );
       not_state.reset( target );
     }
     else
@@ -425,9 +425,7 @@ bool simplify( circuit& circ, const circuit& base, properties::ptr settings, pro
 
     if ( reverse_opt )
     {
-      std::cout << "[i] before reverse: " << tmp.num_gates() << std::endl;
       reverse_circuit( tmp );
-      std::cout << "[i] after reverse: " << tmp.num_gates() << std::endl;
       if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp ); vsize_out( "simple merge (r)" ); }
       if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );     vsize_out( "not gates (r)" ); }
       if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );      vsize_out( "adjacent (r)" ); }
