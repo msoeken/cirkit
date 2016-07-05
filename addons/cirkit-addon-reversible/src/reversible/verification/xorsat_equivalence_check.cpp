@@ -137,7 +137,7 @@ void write_to_dimacs( const circuit& circ, const std::string& filename )
 
 bool solve_identity_miter( const std::string& filename )
 {
-  const auto res = execute_and_return( ( "cryptominisat4 " + filename ).c_str() );
+  const auto res = execute_and_return( ( "cryptominisat5 --autodisablegauss 0 " + filename ).c_str() );
 
   if ( res.second.back() == "s UNSATISFIABLE" )
   {
@@ -145,6 +145,7 @@ bool solve_identity_miter( const std::string& filename )
   }
   else
   {
+    std::cout << res.second.back() << std::endl;
     return false;
   }
 }
