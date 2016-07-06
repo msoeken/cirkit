@@ -139,7 +139,8 @@ struct is_trivial_visitor : public boost::static_visitor<boost::optional<std::pa
 
   boost::optional<std::pair<unsigned, bool>> operator()( const mig_graph& spec ) const
   {
-    assert( false );
+    /* let's be pessimistic for now */
+    return boost::none;
   }
 };
 
