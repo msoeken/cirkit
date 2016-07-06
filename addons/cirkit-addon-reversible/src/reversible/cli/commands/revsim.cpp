@@ -44,6 +44,9 @@ command::rules_t revsim_command::validity_rules() const
   return {
     has_store_element<circuit>( env ),
     {[this]() {
+        /* ext. pattern? */
+        if ( pattern == "0*" || pattern == "1*") { return true; }
+
         for ( auto c : pattern )
         {
           if ( c != '0' && c != '1' )
@@ -53,13 +56,19 @@ command::rules_t revsim_command::validity_rules() const
         }
         return true;
       }, "pattern must consists of 0s and 1s" },
-    {[this]() { return env->store<circuit>().current().lines() == pattern.size(); }, "pattern bits must equal number of lines" }
+    {[this]() { return pattern == "0*" || pattern == "1*" || env->store<circuit>().current().lines() == pattern.size(); }, "pattern bits must equal number of lines" }
   };
 }
 
 bool revsim_command::execute()
 {
   const auto& circuits = env->store<circuit>();
+
+  /* prepare pattern */
+  if ( pattern == "0*" || pattern == "1*" )
+  {
+    pattern = std::string( circuits.current().lines(), pattern[0u] );
+  }
 
   boost::dynamic_bitset<> input( pattern );
   boost::dynamic_bitset<> output;
