@@ -18,6 +18,8 @@
 
 #include "gia_to_cirkit.hpp"
 
+#include <boost/format.hpp>
+
 #include <classical/utils/aig_utils.hpp>
 #include <classical/io/read_aiger.hpp>
 #include <classical/io/write_aiger.hpp>
@@ -43,7 +45,8 @@ aig_graph gia_to_cirkit( const abc::Gia_Man_t* gia )
   Gia_ManForEachCi( const_cast< abc::Gia_Man_t* >( gia ), obj, i )
   {
     // std::cout << "[ci] " << Gia_ObjId( const_cast< Gia_Man_t* >( gia ), obj )  << '\n';
-    aig_function pi = aig_create_pi( aig, "" );
+    const auto name = gia->vNamesIn && i < abc::Vec_PtrSize( gia->vNamesIn ) ? std::string( (char*)abc::Vec_PtrGetEntry( gia->vNamesIn, i ) ) : boost::str( boost::format( "input_%d" ) % i );
+    aig_function pi = aig_create_pi( aig, name );
     nodes.insert( { abc::Gia_ObjId( const_cast< abc::Gia_Man_t* >( gia ), obj ), pi.node } );
   }
 
@@ -75,8 +78,9 @@ aig_graph gia_to_cirkit( const abc::Gia_Man_t* gia )
   Gia_ManForEachCo( const_cast< abc::Gia_Man_t* >( gia ), obj, i )
   {
     // std::cout << "[co] " << ( Gia_ObjId(const_cast< Gia_Man_t* >( gia ), obj) - Gia_ObjDiff0(obj) )  << '\n';
+    const auto name = gia->vNamesOut && i < abc::Vec_PtrSize( gia->vNamesOut ) ? std::string( (char*)abc::Vec_PtrGetEntry( gia->vNamesOut, i ) ) : boost::str( boost::format( "output_%d" ) % i );
     const auto& n = nodes.at( abc::Gia_ObjId(const_cast< abc::Gia_Man_t* >( gia ), obj) - abc::Gia_ObjDiff0(obj) );
-    aig_create_po( aig, { n, abc::Gia_ObjFaninC0(obj)!=0 }, "" );
+    aig_create_po( aig, { n, abc::Gia_ObjFaninC0(obj)!=0 }, name );
   }
 
   return aig;
