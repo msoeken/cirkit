@@ -67,7 +67,8 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   {
     const int obj = abc::Gia_ManAppendCi( gia );
     node_to_lit[input.value] = obj;
-    const auto name = ( info.node_names.size() >= input.value ) ? info.node_names.at( input.value ) : ( boost::format("input_%d") % input.value ).str();
+    auto name = ( info.node_names.size() >= input.value ) ? info.node_names.at( input.value ) : ( boost::format("input_%d") % input.value ).str();
+    if ( name.empty() ) { name = ( boost::format( "input_%d" ) % input.value ).str(); }
     abc::Vec_PtrSetEntry( gia->vNamesIn, input.index, strcpy( (char*)malloc( sizeof( char ) * ( name.size() + 1u ) ), name.c_str() ) );
   }
 
@@ -99,7 +100,8 @@ abc::Gia_Man_t* cirkit_to_gia( const aig_graph& aig )
   {
     const int arg = output.value.first.complemented ? abc::Abc_LitNot( node_to_lit[output.value.first.node] ) : node_to_lit[output.value.first.node];
     abc::Gia_ManAppendCo( gia, arg );
-    const auto name = output.value.second;
+    auto name = output.value.second;
+    if ( name.empty() ) { name = ( boost::format( "output_%d" ) % output.index ).str(); }
     abc::Vec_PtrSetEntry( gia->vNamesOut, output.index, strcpy( (char*)malloc( sizeof( char ) * ( name.size() + 1u ) ), name.c_str() ) );
   }
 
