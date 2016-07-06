@@ -47,6 +47,7 @@ public:
 private:
   unsigned id1 = 0u;
   unsigned id2 = 1u;
+  bool result;
 };
 
 }

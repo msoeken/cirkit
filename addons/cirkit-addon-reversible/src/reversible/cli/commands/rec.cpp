@@ -56,15 +56,17 @@ bool rec_command::execute()
 
   auto settings = make_settings();
   settings->set( "name_mapping", is_set( "name_mapping" ) );
-  const auto result = xorsat_equivalence_check( circuits[id1], circuits[id2], settings, statistics );
+  result = xorsat_equivalence_check( circuits[id1], circuits[id2], settings, statistics );
+
+  print_runtime();
 
   if ( result )
   {
-    std::cout << "[i] circuits are equivalent" << std::endl;
+    std::cout << "[i] circuits are \033[1;32mequivalent\033[0m" << std::endl;
   }
   else
   {
-    std::cout << "[i] circuits are not equivalent" << std::endl;
+    std::cout << "[i] circuits are \033[1;31mnot equivalent\033[0m" << std::endl;
   }
 
   return true;
@@ -72,7 +74,10 @@ bool rec_command::execute()
 
 command::log_opt_t rec_command::log() const
 {
-  return boost::none;
+  return log_opt_t({
+      {"runtime", statistics->get<double>( "runtime" )},
+      {"equivalent", result}
+    });
 }
 
 }
