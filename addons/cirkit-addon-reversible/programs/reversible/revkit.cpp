@@ -57,6 +57,7 @@
 #include <reversible/cli/commands/rms.hpp>
 #include <reversible/cli/commands/tbs.hpp>
 #include <reversible/cli/commands/tof.hpp>
+#include <reversible/cli/commands/unique_names.hpp>
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
 #include <reversible/cli/commands/commands.hpp>
@@ -111,6 +112,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( nct );
   ADD_COMMAND( pos );
   ADD_COMMAND( tof );
+  ADD_COMMAND( unique_names );
 
   cli.set_category( "Verification" );
 
