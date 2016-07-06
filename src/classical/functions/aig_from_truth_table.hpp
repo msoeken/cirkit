@@ -34,6 +34,7 @@
 namespace cirkit
 {
 
+aig_graph aig_from_truth_table_naive( const tt& t );
 aig_graph aig_from_truth_table( const tt& t );
 
 }

@@ -22,7 +22,13 @@
 
 #include <boost/format.hpp>
 
+#include <core/utils/bitset_utils.hpp>
+#include <classical/abc/abc_api.hpp>
+#include <classical/abc/abc_manager.hpp>
+#include <classical/abc/functions/gia_to_cirkit.hpp>
 #include <classical/utils/aig_utils.hpp>
+
+#include <aig/gia/gia.h>
 
 namespace cirkit
 {
@@ -39,7 +45,7 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-aig_graph aig_from_truth_table( const tt& t )
+aig_graph aig_from_truth_table_naive( const tt& t )
 {
   aig_graph aig;
   aig_initialize( aig );
@@ -67,6 +73,31 @@ aig_graph aig_from_truth_table( const tt& t )
   aig_create_po( aig, aig_create_nary_or( aig, minterms ), "f" );
 
   return aig;
+}
+
+aig_graph aig_from_truth_table( const tt& t )
+{
+  abc_manager::get();
+  abc::Abc_FrameGetGlobalFrame();
+
+  auto* sop_cover = abc::Abc_SopFromTruthBin( const_cast<char*>( to_string( t ).c_str() ) );
+  auto* ntk = abc::Abc_NtkCreateWithNode( sop_cover );
+  ABC_FREE( sop_cover );
+
+  auto* ntk2 = abc::Abc_NtkStrash( ntk, 0, 1, 0 );
+  abc::Abc_NtkDelete( ntk );
+
+  auto* aig = abc::Abc_NtkToDar( ntk2, 0, 0 );
+  abc::Abc_NtkDelete( ntk2 );
+
+  auto* gia = abc::Gia_ManFromAig( aig );
+  abc::Aig_ManStop( aig );
+
+  /* simple */
+  //abc::Abc_NtkToAig( ntk );
+  //auto * gia = abc::Abc_NtkAigToGia( ntk, 1 );
+
+  return gia_to_cirkit( gia );
 }
 
 }
