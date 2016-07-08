@@ -57,6 +57,7 @@ private:
   unsigned max_fanout         = 4u;
   unsigned max_rounds         = 4u;
   std::string operators       = "+ - * /";
+  std::string mux_types       = "MA";
   unsigned mux_prob           = 40u;
   unsigned new_ctrl_prob      = 30u;
   std::string word_pattern    = "w%d";

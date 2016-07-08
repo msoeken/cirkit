@@ -58,6 +58,7 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
   const auto max_fanout      = get( settings, "max_fanout",      4u );
   const auto max_rounds      = get( settings, "max_rounds",      4u );
   const auto operators       = get( settings, "operators",       std::vector<std::string>( {"+", "-", "*", "/"} ) );
+  const auto mux_types       = get( settings, "mux_types",       std::string( "MA" ) );
   const auto mux_prob        = get( settings, "mux_prob",        40u );
   const auto new_ctrl_prob   = get( settings, "new_ctrl_prob",   30u );
   const auto word_pattern    = get( settings, "word_pattern",    std::string( "w%d" ) );
@@ -138,7 +139,26 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
       if ( dice( 0u, 100u ) <= mux_prob )
       {
         const auto c = get_control();
-        assigns << boost::format( "  assign %s = %s ? %s : %s;" ) % nw % c % w1 % w2 << std::endl;
+        const auto mux_type = mux_types[dice( 0, mux_types.size() - 1 )];
+
+        switch ( mux_type )
+        {
+        case 'M':
+          assigns << boost::format( "  assign %s = %s ? %s : %s;" ) % nw % c % w1 % w2 << std::endl;
+          break;
+
+        case 'A':
+          words.push_back( w2 ); /* we only use w1 */
+          for ( auto i = 0u; i < bitwidth; ++i )
+          {
+            assigns << boost::format( "  assign %s[%d] = %s & %s[%d]" ) % nw % i % c % w1 % i << std::endl;
+          }
+          break;
+
+        default:
+          std::cout << "[e] unsupported mux type " << mux_type << std::endl;
+          break;
+        }
       }
       else
       {
@@ -168,7 +188,7 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
 
   /* dump file */
   os << "// this file has been generated with CirKit using the command:" << std::endl
-     << boost::format( "//   gen_trans_arith --seed %d --bitwidth %d --min_words %d --max_words %d --max_fanout %d --max_rounds %d --operators \"%s\" --mux_prob %d --new_ctrl_prob %d --word_pattern \"%s\" --control_pattern \"%s\" --module_name \"%s\"" )
+     << boost::format( "//   gen_trans_arith --seed %d --bitwidth %d --min_words %d --max_words %d --max_fanout %d --max_rounds %d --operators \"%s\" --mux_types %s --mux_prob %d --new_ctrl_prob %d --word_pattern \"%s\" --control_pattern \"%s\" --module_name \"%s\"" )
         % seed
         % bitwidth
         % min_words
@@ -176,6 +196,7 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
         % max_fanout
         % max_rounds
         % boost::join( operators, " " )
+        % mux_types
         % mux_prob
         % new_ctrl_prob
         % word_pattern

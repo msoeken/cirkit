@@ -57,6 +57,7 @@ gen_trans_arith_command::gen_trans_arith_command( const environment::ptr& env )
     ( "max_fanout",      value_with_default( &max_fanout ),      "maximum number of fanout for each word" )
     ( "max_rounds",      value_with_default( &max_rounds ),      "maximum number of rounds, corresponds to levels" )
     ( "operators",       value_with_default( &operators ),       "space separated list of Verilog infix operators" )
+    ( "mux_types",       value_with_default( &mux_types ),       "mux types (M: standard multiplexer, A: AND gates)" )
     ( "mux_prob",        value_with_default( &mux_prob ),        "probability of using a mux instead of operator (between 0 and 100)" )
     ( "new_ctrl_prob",   value_with_default( &new_ctrl_prob ),   "probability of creating a new control input instead of using an existing one (between 0 and 100)" )
     ( "word_pattern",    value_with_default( &word_pattern ),    "formatting for words" )
@@ -73,7 +74,19 @@ command::rules_t gen_trans_arith_command::validity_rules() const
   return {
     {[this]() { return mux_prob <= 100u; }, "mux_prob must be between 0 and 100" },
     {[this]() { return new_ctrl_prob <= 100u; }, "new_ctrl_prob must be between 0 and 100" },
-    {[this]() { return !is_set( "aig" ) || !is_set( filename ); }, "filename must be unset if writing into AIG" }
+    {[this]() { return !is_set( "aig" ) || !is_set( filename ); }, "filename must be unset if writing into AIG" },
+    {[this]() { return !operators.empty(); }, "operators cannot be empty" },
+    {[this]() { return !mux_types.empty(); }, "mux_types cannot be empty" },
+    {[this]() {
+        for ( auto mt : mux_types )
+        {
+          if ( mt != 'M' && mt != 'A' )
+          {
+            return false;
+          }
+        }
+        return true;
+      }, "unsupported mux type" }
   };
 }
 
@@ -95,6 +108,7 @@ bool gen_trans_arith_command::execute()
   std::vector<std::string> voperators;
   split_string( voperators, operators, " " );
   settings->set( "operators", voperators );
+  settings->set( "mux_types", mux_types );
   settings->set( "mux_prob", mux_prob );
   settings->set( "new_ctrl_prob", new_ctrl_prob );
   settings->set( "word_pattern", word_pattern );
@@ -133,6 +147,7 @@ command::log_opt_t gen_trans_arith_command::log() const
       {"max_fanout", max_fanout},
       {"max_rounds", max_rounds},
       {"operators", operators},
+      {"mux_types", mux_types},
       {"mux_prob", mux_prob},
       {"new_ctrl_prob", new_ctrl_prob},
       {"word_pattern", word_pattern},
