@@ -63,7 +63,9 @@ void print_store_entry<circuit>( std::ostream& os, const circuit& circ )
 template<>
 void print_store_entry_statistics<circuit>( std::ostream& os, const circuit& circ )
 {
-  print_statistics( os, circ );
+  print_statistics_settings settings;
+  settings.main_template = "%1$sLines:        %2$d\nGates:        %3$d\nT-depth:      %5$d\nT-count:      %6$d\nLogic qubits:  %8$d\n";
+  print_statistics( os, circ, -1.0, settings );
 }
 
 template<>
