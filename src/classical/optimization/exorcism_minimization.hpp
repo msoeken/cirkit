@@ -35,6 +35,7 @@
 
 #include <cudd.h>
 
+#include <core/cube.hpp>
 #include <core/properties.hpp>
 
 namespace cirkit
@@ -48,8 +49,8 @@ namespace cirkit
  * @author Mathias Soeken
  */
 void exorcism_minimization( DdManager * cudd, DdNode * f,
-                            properties::ptr settings = properties::ptr(),
-                            properties::ptr statistics = properties::ptr() );
+                            const properties::ptr& settings = properties::ptr(),
+                            const properties::ptr& statistics = properties::ptr() );
 
 /**
  * @brief ESOP minimization with EXORCISM-4
@@ -57,8 +58,12 @@ void exorcism_minimization( DdManager * cudd, DdNode * f,
  * @author Mathias Soeken
  */
 void exorcism_minimization( const std::string& filename,
-                            properties::ptr settings = properties::ptr(),
-                            properties::ptr statistics = properties::ptr() );
+                            const properties::ptr& settings = properties::ptr(),
+                            const properties::ptr& statistics = properties::ptr() );
+
+void exorcism_minimization( const cube_vec_t& cubes,
+                            const properties::ptr& settings = properties::ptr(),
+                            const properties::ptr& statistics = properties::ptr() );
 
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func( properties::ptr settings = std::make_shared<properties>(),
                                                                      properties::ptr statistics = std::make_shared<properties>() );

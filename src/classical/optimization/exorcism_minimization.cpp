@@ -28,6 +28,15 @@
 #include <boost/format.hpp>
 
 #include <core/io/pla_parser.hpp>
+#include <classical/abc/abc_api.hpp>
+
+#include <misc/vec/vecInt.h>
+#include <misc/vec/vecWec.h>
+
+namespace abc
+{
+int Abc_ExorcismMain( Vec_Wec_t * vEsop, int nIns, int nOuts, char * pFileNameOut, int Quality, int Verbosity );
+}
 
 namespace cirkit
 {
@@ -87,7 +96,7 @@ private:
  * Public functions                                                           *
  ******************************************************************************/
 
-void exorcism_minimization( DdManager * cudd, DdNode * f, properties::ptr settings, properties::ptr statistics )
+void exorcism_minimization( DdManager * cudd, DdNode * f, const properties::ptr& settings, const properties::ptr& statistics )
 {
   /* Settings */
   std::string tmpfile = get( settings, "tmpfile", std::string( "/tmp/test.pla" ) );
@@ -112,7 +121,7 @@ void exorcism_minimization( DdManager * cudd, DdNode * f, properties::ptr settin
   exorcism_minimization( tmpfile, settings, statistics );
 }
 
-void exorcism_minimization( const std::string& filename, properties::ptr settings, properties::ptr statistics )
+void exorcism_minimization( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
 {
   /* Settings */
   bool            verbose  = get( settings, "verbose",  false                     );
@@ -137,6 +146,45 @@ void exorcism_minimization( const std::string& filename, properties::ptr setting
     statistics->set( "cube_count", p.cube_count() );
     statistics->set( "literal_count", p.literal_count() );
   }
+}
+
+void exorcism_minimization( const cube_vec_t& cubes,
+                            const properties::ptr& settings,
+                            const properties::ptr& statistics )
+{
+  const auto verbose  = get( settings, "verbose",  false );
+  const auto on_cube  = get( settings, "on_cube",  cube_function_t() );
+  const auto esopname = get( settings, "esopname", std::string( "/tmp/test.esop" ) );
+
+  abc::Vec_Wec_t *esop = abc::Vec_WecAlloc( 0u );
+
+  for ( const auto& cube : cubes )
+  {
+    auto * level = abc::Vec_WecPushLevel( esop );
+
+    for ( auto i = 0u; i < cube.length(); ++i )
+    {
+      if ( !cube.care()[i] ) { continue; }
+
+      abc::Vec_IntPush( level, ( i << 1u ) | !cube.bits()[i] );
+    }
+    abc::Vec_IntPush( level, -1 );
+  }
+
+  if ( verbose )
+  {
+    abc::Vec_WecPrint( esop, 0 );
+  }
+
+  abc::Abc_ExorcismMain( esop, 3, 1, const_cast<char*>( esopname.c_str() ), 2, verbose );
+  abc::Vec_WecFree( esop );
+
+  /* Parse */
+  exorcism_processor p( on_cube );
+  pla_parser( esopname, p );
+
+  set( statistics, "cube_count", p.cube_count() );
+  set( statistics, "literal_count", p.literal_count() );
 }
 
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func(properties::ptr settings, properties::ptr statistics)
