@@ -81,7 +81,7 @@ inline bool store_can_read_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( command& cm
 template<>
 inline abc::Gia_Man_t* store_read_io_type<abc::Gia_Man_t*, io_aiger_tag_t>( const std::string& filename, const command& cmd )
 {
-  return abc::Gia_AigerRead( (char*)filename.c_str(), 0, 0 );
+  return abc::Gia_AigerRead( (char*)filename.c_str(), 0, 0, 0 );
 }
 
 /* enable `write_aiger` for AIGs */
