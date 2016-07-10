@@ -18,6 +18,7 @@
 
 #include "read_bench.hpp"
 
+#include <core/utils/conversion_utils.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/utils/aig_utils.hpp>
@@ -188,7 +189,7 @@ void read_bench( aig_graph& aig, const std::string& filename )
 void read_bench( lut_graph_t& lut, const std::string& filename )
 {
   std::vector<std::string> inputs, outputs;
-  std::vector<std::tuple<std::string, unsigned, std::vector<std::string>>> gates;
+  std::vector<std::tuple<std::string, std::string, std::vector<std::string>>> gates;
 
   line_parser( filename, {
       {boost::regex( "^INPUT\\((.*)\\)$" ), [&inputs]( const boost::smatch& m ) {
@@ -207,19 +208,24 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
           std::string name( m[1] );
           boost::trim( name );
-          gates.push_back( std::make_tuple( name, value, arguments ) );
+          gates.push_back( std::make_tuple( name, std::string( m[2] ).substr( 2u ), arguments ) );
+
+          //boost::dynamic_bitset<> direct( 1u << arguments.size(), value );
+          //boost::dynamic_bitset<> indirect( convert_hex2bin( std::string( m[2] ).substr( 2u ) ) );
+
+          //std::cout << "value: " << value << " orig: " << m[2] << " " << direct << " " << indirect << std::endl;
         }},
       {boost::regex( "^(.*) = gnd" ), [&gates]( const boost::smatch& m ) {
           std::string name( m[1] );
           boost::trim( name );
 
-          gates.push_back( std::make_tuple( name, 0, std::vector<std::string>() ) );
+          gates.push_back( std::make_tuple( name, "0", std::vector<std::string>() ) );
         }},
       {boost::regex( "^(.*) = vdd" ), [&gates]( const boost::smatch& m ) {
           std::string name( m[1] );
           boost::trim( name );
 
-          gates.push_back( std::make_tuple( name, 1, std::vector<std::string>() ) );
+          gates.push_back( std::make_tuple( name, "1", std::vector<std::string>() ) );
         }},
       {boost::regex( "^#" ), []( const boost::smatch& m ) {}}
     }, true );
@@ -247,14 +253,14 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
   {
     if ( std::get<2>( gate ).empty() )
     {
-      gate_to_node[std::get<0>( gate )] = std::get<1>( gate ) ? v_vdd : v_gnd;
+      gate_to_node[std::get<0>( gate )] = std::get<1>( gate ) == "1" ? v_vdd : v_gnd;
     }
     else
     {
       auto v = add_vertex( lut );
 
       types[v] = gate_type_t::internal;
-      luts[v] = std::make_pair( std::get<2>( gate ).size(), std::get<1>( gate ) );
+      luts[v] = std::get<1>( gate );
 
       for ( const auto& arg : std::get<2>( gate ) )
       {

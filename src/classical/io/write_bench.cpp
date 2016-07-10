@@ -123,7 +123,6 @@ void write_bench( const lut_graph_t& lut, std::ostream& os, const write_bench_se
     case gate_type_t::internal:
       {
         const auto& func = luts[v];
-        tt t( 1 << func.first, func.second );
 
         std::vector<std::string> arguments;
         for ( auto w : boost::make_iterator_range( adjacent_vertices( v, lut ) ) )
@@ -132,7 +131,7 @@ void write_bench( const lut_graph_t& lut, std::ostream& os, const write_bench_se
           arguments.push_back( settings.prefix + ( is_input ? names[w] : boost::str( boost::format( "n%d" ) % w ) ) );
         }
 
-        wire << boost::format( "%sn%d = LUT 0x%x ( %s )" ) % settings.prefix % v % tt_to_hex( t ) % boost::join( arguments, ", " ) << std::endl;
+        wire << boost::format( "%sn%d = LUT 0x%x ( %s )" ) % settings.prefix % v % func % boost::join( arguments, ", " ) << std::endl;
       } break;
 
     default:
