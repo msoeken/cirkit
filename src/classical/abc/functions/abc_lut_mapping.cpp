@@ -60,7 +60,7 @@ void map_lut_nodes_with_gia( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, s
 {
   int i;
 
-  auto tts = boost::get( boost::vertex_lut, lut );
+  //auto tts = boost::get( boost::vertex_lut, lut );
   auto types = boost::get( boost::vertex_gate_type, lut );
 
   abc::Gia_ObjComputeTruthTableStart( abc_lut, k );
@@ -73,12 +73,14 @@ void map_lut_nodes_with_gia( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, s
     leaves.pArray = abc::Gia_ObjLutFanins( abc_lut, i );
 
     //abc::Vec_IntSelectSort( abc::Vec_IntArray( &leaves ), abc::Vec_IntSize( &leaves ) );
-    const auto obj = abc::Gia_ManObj( abc_lut, i );
-    const auto* pt = abc::Gia_ObjComputeTruthTableCut( abc_lut, obj, &leaves );
+    //const auto obj = abc::Gia_ManObj( abc_lut, i );
+    //const auto* pt = abc::Gia_ObjComputeTruthTableCut( abc_lut, obj, &leaves );
     //abc::Vec_IntReverseOrder( &leaves );
 
+    assert( false && "assign tts[v] with hex string of pt[0]" );
+
     auto v = add_vertex( lut );
-    tts[v] = std::make_pair( size, pt[0] );
+    //tts[v] = std::make_pair( size, pt[0] );
     types[v] = gate_type_t::internal;
 
     for ( auto j = 0; j < size; ++j )
@@ -98,7 +100,7 @@ void map_lut_nodes_with_hop( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, s
 {
   int i;
 
-  auto tts = boost::get( boost::vertex_lut, lut );
+  //auto tts = boost::get( boost::vertex_lut, lut );
   auto types = boost::get( boost::vertex_gate_type, lut );
 
   auto* hop = abc::Hop_ManStart();
@@ -117,8 +119,9 @@ void map_lut_nodes_with_hop( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, s
       abc::Extra_TruthNot( truth, truth, size );
     }
 
+    assert( false && "assign tts[v] with hex value of truth[0]" );
     auto v = add_vertex( lut );
-    tts[v] = std::make_pair( size, truth[0] );
+    //tts[v] = std::make_pair( size, truth[0] );
     types[v] = gate_type_t::internal;
 
     auto* fanin = abc::Gia_ObjLutFanins( abc_lut, i );
@@ -167,7 +170,7 @@ lut_graph_t abc_lut_mapping( const aig_graph& aig, unsigned k,
   std::unordered_map<int, lut_vertex_t> lutid_to_node;
   auto names = boost::get( boost::vertex_name, lut );
   auto types = boost::get( boost::vertex_gate_type, lut );
-  auto tts = boost::get( boost::vertex_lut, lut );
+  //auto tts = boost::get( boost::vertex_lut, lut );
 
   int i, id;
   Gia_ManForEachCiId( abc_lut, id, i )
@@ -194,7 +197,8 @@ lut_graph_t abc_lut_mapping( const aig_graph& aig, unsigned k,
     /* output inverted */
     if ( abc::Gia_ObjFaninC0( abc::Gia_ManCo( abc_lut, i ) ) == 1 )
     {
-      tts[it->second].second = ~tts[it->second].second;
+      assert( false && "fix inversion of truth table in hex format" );
+      //tts[it->second].second = ~tts[it->second].second;
     }
   }
 
