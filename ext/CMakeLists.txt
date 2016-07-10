@@ -30,14 +30,16 @@ set( cudd_INCLUDE_FILES
 
 if(APPLE)
   set( cudd_LIBRARY_FILES
-    ${cudd_SRC}/cudd/.libs/libcudd.dylib
-    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.0.dylib
+    ${cudd_SRC}/cudd/.libs/libcudd.a
+#    ${cudd_SRC}/cudd/.libs/libcudd.dylib
+#    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.0.dylib
   )
 else()
   set( cudd_LIBRARY_FILES
-    ${cudd_SRC}/cudd/.libs/libcudd.so
-    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.so.0
-    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.so.0.0.0
+    ${cudd_SRC}/cudd/.libs/libcudd.a
+#    ${cudd_SRC}/cudd/.libs/libcudd.so
+#    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.so.0
+#    ${cudd_SRC}/cudd/.libs/libcudd-3.0.0.so.0.0.0
   )
 endif()
 
@@ -50,7 +52,7 @@ endif()
 externalProject_add(cudd
   DOWNLOAD_DIR .
   URL "http://msoeken.github.io/tools/cudd-3.0.0.tar.gz"
-  CONFIGURE_COMMAND ./configure --enable-obj --enable-shared --enable-dddmp
+  CONFIGURE_COMMAND ./configure --enable-obj --enable-static --enable-dddmp
   BUILD_COMMAND make -j${ProcCount}
   INSTALL_COMMAND cp ${cudd_INCLUDE_FILES} ${ext_INCLUDE} COMMAND cp -L ${cudd_LIBRARY_FILES} ${ext_LIB}
   BUILD_IN_SOURCE 1
@@ -60,7 +62,7 @@ externalProject_add(cudd
 add_dependencies(external cudd)
 
 set(CUDD_LIBRARIES
-  ${ext_LIB}/libcudd${CMAKE_SHARED_LIBRARY_SUFFIX}
+  ${ext_LIB}/libcudd.a
 
   PARENT_SCOPE
 )
