@@ -37,7 +37,7 @@ namespace cirkit
 char convert_bin2hex( const std::string& bits );
 std::string convert_hex2bin( const char& hex );
 std::string convert_hex2bin( const std::string& hex );
-
+std::string invert_hex( const std::string& hex );
 }
 
 #endif

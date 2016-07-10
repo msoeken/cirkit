@@ -28,6 +28,8 @@
 
 #include "conversion_utils.hpp"
 
+#include <cassert>
+
 namespace cirkit
 {
 
@@ -84,6 +86,36 @@ std::string convert_hex2bin( const std::string& hex )
     bin.replace( 4u*i, 4u, convert_hex2bin( hex[i] ) );
   }
   return bin;
+}
+
+std::string invert_hex( const std::string& hex )
+{
+  std::string res;
+  for ( auto c : hex )
+  {
+    switch ( c )
+    {
+    case '0': res += 'f'; break;
+    case '1': res += 'e'; break;
+    case '2': res += 'd'; break;
+    case '3': res += 'c'; break;
+    case '4': res += 'b'; break;
+    case '5': res += 'a'; break;
+    case '6': res += '9'; break;
+    case '7': res += '8'; break;
+    case '8': res += '7'; break;
+    case '9': res += '6'; break;
+    case 'a': res += '5'; break;
+    case 'b': res += '4'; break;
+    case 'c': res += '3'; break;
+    case 'd': res += '2'; break;
+    case 'e': res += '1'; break;
+    case 'f': res += '0'; break;
+    default: assert( false );
+    }
+  }
+
+  return res;
 }
 
 }
