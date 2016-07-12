@@ -74,7 +74,7 @@ aig_graph aig_from_truth_table_naive( const tt& t )
 
 aig_graph aig_from_truth_table( const tt& t )
 {
-  return abc_run_command( boost::str( boost::format( "read_truth -x %s; strash; short_names; dc2; &get -n" ) % to_string( t )  ) );
+  return abc_run_command( boost::str( boost::format( "read_truth %s; strash; short_names; dc2; &get -n" ) % tt_to_hex( t )  ) );
 }
 
 }
