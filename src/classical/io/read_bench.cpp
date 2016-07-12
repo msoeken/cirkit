@@ -264,6 +264,7 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
       for ( const auto& arg : std::get<2>( gate ) )
       {
+        assert( gate_to_node.find( arg ) != gate_to_node.end() );
         add_edge( v, gate_to_node[arg], lut );
       }
 
