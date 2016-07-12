@@ -154,6 +154,11 @@ public:
     return insert( index, null_value );
   }
 
+  void clear()
+  {
+    values.clear();
+  }
+
   ValueType& operator[]( IndexType index )
   {
     reserve( index );
@@ -231,6 +236,12 @@ public:
     values.pop_back();
 
     return true;
+  }
+
+  void clear()
+  {
+    values.clear();
+    positions.clear();
   }
 
   bool has( IndexType index ) const
@@ -519,6 +530,11 @@ public:
     {
       bitset.resize(index.index()+1, false);
     }
+  }
+
+  void clear()
+  {
+    bitset.clear();
   }
 
 private:
