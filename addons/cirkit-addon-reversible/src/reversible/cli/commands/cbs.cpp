@@ -52,6 +52,7 @@ cbs_command::cbs_command( const environment::ptr& env )
     ( "synthesis",          value_with_default( &synthesis ), "0u: TBS (BDD), 1u: TBS (SAT), 2u: DBS" )
     ( "store_intermediate",                                   "stores all intermediate results (BDDs, RCBDDs, and circuits) in store\n"
                                                               "should only be used for debugging purposes on small functions" )
+    ( "progress,p",                                           "show progress" )
     ;
   add_new_option();
   be_verbose();
@@ -73,6 +74,7 @@ bool cbs_command::execute()
   settings->set( "embedding", embedding );
   settings->set( "synthesis", synthesis );
   settings->set( "store_intermediate", is_set( "store_intermediate" ) );
+  settings->set( "progress", is_set( "progress" ) );
 
   circuit circ;
   cut_based_synthesis( circ, aigs.current(), settings, statistics );

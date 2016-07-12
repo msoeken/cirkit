@@ -34,6 +34,7 @@
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/range_utils.hpp>
+#include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/functions/fanout_free_regions.hpp>
 #include <classical/functions/simulate_aig.hpp>
@@ -371,6 +372,7 @@ bool cut_based_synthesis( circuit& circ, const aig_graph& aig,
   const auto embedding          = get( settings, "embedding",          0u ); /* 0u: BDD based, 1u: PLA based */
   const auto synthesis          = get( settings, "synthesis",          0u ); /* 0u: TBS (BDD), 1u: TBS (SAT), 2u: DBS */
   const auto store_intermediate = get( settings, "store_intermediate", false );
+  const auto progress           = get( settings, "progress",           false );
   const auto verbose            = get( settings, "verbose",            false );
 
   std::vector<bdd_function_t> si_bdds;
@@ -445,14 +447,20 @@ bool cut_based_synthesis( circuit& circ, const aig_graph& aig,
   /*******************************************
    * synthesize regions                      *
    *******************************************/
+  null_stream ns;
+  std::ostream null_out( &ns );
+  boost::progress_display show_progress( synth_regions.size(), progress ? std::cout : null_out );
+
   for ( const auto& region : index( synth_regions ) )
   {
     const auto& inputs          = std::get<0>( region.value );
     const auto& outputs         = std::get<1>( region.value );
     const auto& preserve_inputs = std::get<2>( region.value );
 
-          //boost::sort( inputs );
-          //boost::sort( preserve_inputs );
+    //boost::sort( inputs );
+    //boost::sort( preserve_inputs );
+
+    ++show_progress;
 
     L( boost::format( "[i] synth region %d/%d: {%s} |-> {%s} (preserve %s)" ) % ( region.index + 1u ) % synth_regions.size() \
                                                                               % any_join( inputs, ", " )  \
