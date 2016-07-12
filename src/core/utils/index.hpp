@@ -36,6 +36,7 @@
 #include <stack>
 
 #include <boost/range/algorithm.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 namespace cirkit
 {
@@ -497,9 +498,9 @@ public:
   {
     reserve( index );
 
-    bool prev = bitset[ index.index() ];
+    bool prev = bitset.test( index.index() );
 
-    bitset[ index.index() ] = true;
+    bitset.set( index.index() );
 
     return prev;
   }
@@ -508,7 +509,7 @@ public:
   {
     if( has_index(index) )
     {
-      bitset[ index.index() ] = false;
+      bitset.reset( index.index() );
     }
   }
 
@@ -529,7 +530,7 @@ private:
     return index.index() < bitset.size();
   }
 
-  std::vector<bool> bitset;
+  boost::dynamic_bitset<> bitset;
 };
 
 #endif
