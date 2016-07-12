@@ -38,9 +38,9 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-npn_manager::npn_manager( unsigned num_vars, unsigned hash_table_size )
-  : num_vars( num_vars ),
-    table( hash_table_size )
+npn_manager::npn_manager( unsigned hash_table_size, const npn_classifier_t& npn_func )
+  : table( hash_table_size ),
+    npn_func( npn_func )
 {
 }
 
@@ -55,10 +55,10 @@ tt npn_manager::compute( const tt& tt, boost::dynamic_bitset<>& phase, std::vect
     const auto hash_key = ttu % table.size();
     auto& entry         = table[hash_key];
 
-    if ( entry.tt == ttu )
+    if ( entry.tt == to_string( tt ) )
     {
       ++cache_hit;
-      npn = boost::dynamic_bitset<>( 1u << num_vars, entry.npn );
+      npn = boost::dynamic_bitset<>( entry.npn );
       perm = std::vector<unsigned>( entry.perm );
       phase = boost::dynamic_bitset<>( entry.phase );
     }
@@ -66,10 +66,10 @@ tt npn_manager::compute( const tt& tt, boost::dynamic_bitset<>& phase, std::vect
     {
       ++cache_miss;
       increment_timer t( &runtime );
-      npn = exact_npn_canonization( tt, phase, perm );
+      npn = npn_func( tt, phase, perm );
 
-      entry.tt    = ttu;
-      entry.npn   = npn.to_ulong();
+      entry.tt    = to_string( tt );
+      entry.npn   = to_string( npn );
       entry.perm  = perm;
       entry.phase = phase;
     }
@@ -77,7 +77,7 @@ tt npn_manager::compute( const tt& tt, boost::dynamic_bitset<>& phase, std::vect
   else
   {
     increment_timer t( &runtime );
-    npn = exact_npn_canonization( tt, phase, perm );
+    npn = npn_func( tt, phase, perm );
   }
 
   return npn;

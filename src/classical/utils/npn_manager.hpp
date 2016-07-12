@@ -28,20 +28,31 @@
 #ifndef NPN_MANAGER_HPP
 #define NPN_MANAGER_HPP
 
+#include <functional>
 #include <iostream>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 
+#include <classical/functions/npn_canonization.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
 {
 
+inline std::function<tt(const tt&, boost::dynamic_bitset<>&, std::vector<unsigned>&)> make_exact_npn_canonization_wrapper()
+{
+  return std::function<tt(const tt&, boost::dynamic_bitset<>&, std::vector<unsigned>&)>( []( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm ) {
+      return exact_npn_canonization( t, phase, perm );
+    } );
+}
+
 class npn_manager
 {
 public:
-  npn_manager( unsigned num_vars, unsigned hash_table_size = 4096 );
+  using npn_classifier_t = std::function<tt(const tt&, boost::dynamic_bitset<>&, std::vector<unsigned>&)>;
+
+  npn_manager( unsigned hash_table_size = 4096, const npn_classifier_t& npn_func = make_exact_npn_canonization_wrapper() );
 
   tt compute( const tt& tt, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
   void print_statistics( std::ostream& os = std::cout ) const;
@@ -50,23 +61,24 @@ private:
   struct table_entry_t
   {
     table_entry_t() {}
-    table_entry_t( int tt, int npn, const std::vector<unsigned>& perm, const boost::dynamic_bitset<>& phase )
+    table_entry_t( const std::string& tt, const std::string& npn, const std::vector<unsigned>& perm, const boost::dynamic_bitset<>& phase )
       : tt( tt ), npn( npn ), perm( perm ), phase( phase ) {}
 
-    int                     tt  = -1;
-    int                     npn = -1;
+    std::string             tt;
+    std::string             npn;
     std::vector<unsigned>   perm;
     boost::dynamic_bitset<> phase;
   };
 
   using table_t = std::vector<table_entry_t>;
 
-  unsigned      num_vars;
-  table_t       table;
+  table_t          table;
 
-  double        runtime    = 0.0;
-  unsigned long cache_hit  = 0;
-  unsigned long cache_miss = 0;
+  npn_classifier_t npn_func;
+
+  double           runtime    = 0.0;
+  unsigned long    cache_hit  = 0;
+  unsigned long    cache_miss = 0;
 };
 
 }
