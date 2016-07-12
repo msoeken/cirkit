@@ -36,7 +36,7 @@ namespace cirkit
   /* inspired by http://ubuntuforums.org/showthread.php?t=739716 */
 char convert_bin2hex( const std::string& bits )
 {
-  static const std::string bin2hex = "0123456789ABCDEF";
+  static const std::string bin2hex = "0123456789abcdef";
 
   char result = 0;
 
