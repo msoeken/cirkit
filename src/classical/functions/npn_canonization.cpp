@@ -28,6 +28,10 @@
 
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
+#include <classical/abc/abc_api.hpp>
+
+#include <misc/util/utilTruth.h>
+#include <bool/lucky/lucky.h>
 
 namespace cirkit
 {
@@ -482,6 +486,44 @@ tt tt_from_npn( const tt& npn, const boost::dynamic_bitset<>& phase, std::vector
   }
 
   return t;
+}
+
+tt npn_canonization_lucky( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm )
+{
+  std::vector<unsigned long> truth( t.num_blocks() );
+  boost::to_block_range( t, &truth[0] );
+
+  const auto num_vars = tt_num_vars( t );
+
+  char pCanonPerm[16];
+  abc::resetPCanonPermArray( pCanonPerm, num_vars );
+  auto uCanonPhase = abc::luckyCanonicizer_final_fast( &truth[0], num_vars, pCanonPerm );
+
+  boost::dynamic_bitset<> phase_direct( num_vars + 1, uCanonPhase );
+  phase = phase_direct;
+
+  perm.resize( num_vars );
+  for ( auto i = 0u; i < num_vars; ++i )
+  {
+    perm[i] = pCanonPerm[i] - 'a';
+
+    if ( perm[i] >= num_vars )
+    {
+      std::cout << "[e] problem with canonization" << std::endl;
+      std::cout << "[e] pCanonPerm:";
+      for ( auto i = 0u; i < num_vars; ++i )
+      {
+        std::cout << " " << pCanonPerm[i];
+      }
+      std::cout << std::endl;
+      std::cout << "[e] truth table: " << t << std::endl;
+      std::cout << "[e] tt num vars: " << tt_num_vars( t ) << std::endl;
+      assert( false );
+    }
+    phase[perm[i]] = phase_direct[i];
+  }
+
+  return tt( truth.begin(), truth.end() );
 }
 
 }

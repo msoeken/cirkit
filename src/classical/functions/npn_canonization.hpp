@@ -58,6 +58,9 @@ tt npn_canonization_sifting( const tt& t, boost::dynamic_bitset<>& phase,
 
 tt tt_from_npn( const tt& npn, const boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
 
+/* ABC methods */
+tt npn_canonization_lucky( const tt& t, boost::dynamic_bitset<>& phase, std::vector<unsigned>& perm );
+
 }
 
 #endif
