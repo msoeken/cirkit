@@ -537,6 +537,11 @@ public:
     bitset.clear();
   }
 
+  unsigned capacity() const
+  {
+    return bitset.size();
+  }
+
 private:
 
   bool has_index( IndexType index ) const
