@@ -36,6 +36,7 @@
 #include <stack>
 
 #include <boost/range/algorithm.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 namespace cirkit
 {
@@ -153,6 +154,11 @@ public:
     return insert( index, null_value );
   }
 
+  void clear()
+  {
+    values.clear();
+  }
+
   ValueType& operator[]( IndexType index )
   {
     reserve( index );
@@ -230,6 +236,12 @@ public:
     values.pop_back();
 
     return true;
+  }
+
+  void clear()
+  {
+    values.clear();
+    positions.clear();
   }
 
   bool has( IndexType index ) const
@@ -497,9 +509,9 @@ public:
   {
     reserve( index );
 
-    bool prev = bitset[ index.index() ];
+    bool prev = bitset.test( index.index() );
 
-    bitset[ index.index() ] = true;
+    bitset.set( index.index() );
 
     return prev;
   }
@@ -508,7 +520,7 @@ public:
   {
     if( has_index(index) )
     {
-      bitset[ index.index() ] = false;
+      bitset.reset( index.index() );
     }
   }
 
@@ -520,6 +532,16 @@ public:
     }
   }
 
+  void clear()
+  {
+    bitset.clear();
+  }
+
+  unsigned capacity() const
+  {
+    return bitset.size();
+  }
+
 private:
 
   bool has_index( IndexType index ) const
@@ -529,8 +551,124 @@ private:
     return index.index() < bitset.size();
   }
 
-  std::vector<bool> bitset;
+  boost::dynamic_bitset<> bitset;
 };
+
+
+/******************************************************************************
+ * index_set_monotone                                                                  *
+ ******************************************************************************/
+
+template<typename IndexType>
+class index_set_monotone
+{
+public:
+
+  using const_iterator = typename std::vector<IndexType>::const_iterator;
+
+  bool insert( IndexType index )
+  {
+    if ( present.has( index ) )
+    {
+      return true;
+    }
+
+    values.push_back( index );
+    present.insert( index );
+
+    return false;
+  }
+
+  void clear()
+  {
+    if ( values.size() < present.capacity()/32 )
+    {
+      for( const auto& i : values )
+      {
+        present.remove(i);
+      }
+
+      values.clear();
+    }
+    else
+    {
+      values.clear();
+      present.clear();
+    }
+  }
+
+  bool has( IndexType index ) const
+  {
+    return present.has( index );
+  }
+
+  unsigned size() const
+  {
+    return values.size();
+  }
+
+  bool empty() const
+  {
+    return values.empty();
+  }
+
+  IndexType front() const
+  {
+    assert( !empty() );
+    return values.front();
+  }
+
+  IndexType back() const
+  {
+    assert( !empty() );
+    return values.back();
+  }
+
+  /* iterators */
+  const_iterator begin() const { return values.begin(); }
+  const_iterator end()   const { return values.end();   }
+
+  bool operator==( const index_set_monotone& other ) const
+  {
+    if( size() != other.size() )
+    {
+      return false;
+    }
+
+    for( auto index : other )
+    {
+      if( !has(index) )
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool operator!=(const index_set_monotone& other) const
+  {
+    return ! operator==(other);
+  }
+
+private:
+
+  std::vector<IndexType>  values;
+  index_bitset<IndexType> present;
+};
+
+template<typename T>
+std::ostream& operator<<( std::ostream& os, const index_set_monotone<T>& set )
+{
+  os << "[";
+  if ( !set.empty() )
+  {
+    std::copy( set.begin(), set.end() - 1, std::ostream_iterator<T>( os, ", " ) );
+    std::copy( set.end() - 1, set.end(), std::ostream_iterator<T>( os, "" ) );
+  }
+  os << "]";
+  return os;
+}
 
 #endif
 
