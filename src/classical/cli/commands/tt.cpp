@@ -23,6 +23,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include <core/utils/bitset_utils.hpp>
+#include <core/utils/conversion_utils.hpp>
 #include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/cli/stores.hpp>
@@ -78,6 +79,12 @@ bool tt_command::execute()
 
   if ( is_set( "load" ) )
   {
+    /* is load in hex? */
+    if ( load.size() >= 2u && load[0] == '0' && load[1] == 'x' )
+    {
+      load = convert_hex2bin( load.substr( 2u ) );
+    }
+
     tts.extend();
     tts.current() = boost::dynamic_bitset<>( load );
   }
