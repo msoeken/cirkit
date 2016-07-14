@@ -57,7 +57,7 @@ gen_trans_arith_command::gen_trans_arith_command( const environment::ptr& env )
     ( "max_fanout",      value_with_default( &max_fanout ),      "maximum number of fanout for each word" )
     ( "max_rounds",      value_with_default( &max_rounds ),      "maximum number of rounds, corresponds to levels" )
     ( "operators",       value_with_default( &operators ),       "space separated list of Verilog infix operators" )
-    ( "mux_types",       value_with_default( &mux_types ),       "mux types (M: standard multiplexer, A: AND gates)" )
+    ( "mux_types",       value_with_default( &mux_types ),       "mux types (M: standard multiplexer, O: one-hot transparencies)" )
     ( "mux_prob",        value_with_default( &mux_prob ),        "probability of using a mux instead of operator (between 0 and 100)" )
     ( "new_ctrl_prob",   value_with_default( &new_ctrl_prob ),   "probability of creating a new control input instead of using an existing one (between 0 and 100)" )
     ( "word_pattern",    value_with_default( &word_pattern ),    "formatting for words" )
@@ -80,7 +80,7 @@ command::rules_t gen_trans_arith_command::validity_rules() const
     {[this]() {
         for ( auto mt : mux_types )
         {
-          if ( mt != 'M' && mt != 'A' )
+          if ( mt != 'M' && mt != 'O' )
           {
             return false;
           }

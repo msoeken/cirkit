@@ -58,7 +58,7 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
   const auto max_fanout      = get( settings, "max_fanout",      4u );
   const auto max_rounds      = get( settings, "max_rounds",      4u );
   const auto operators       = get( settings, "operators",       std::vector<std::string>( {"+", "-", "*", "/"} ) );
-  const auto mux_types       = get( settings, "mux_types",       std::string( "MA" ) );
+  const auto mux_types       = get( settings, "mux_types",       std::string( "MO" ) );
   const auto mux_prob        = get( settings, "mux_prob",        40u );
   const auto new_ctrl_prob   = get( settings, "new_ctrl_prob",   30u );
   const auto word_pattern    = get( settings, "word_pattern",    std::string( "w%d" ) );
@@ -107,8 +107,8 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
     return new_words.back();
   };
 
-  const auto get_control = [&controls, new_ctrl_prob, control_pattern, &dice]() {
-    if ( controls.empty() || dice( 0u, 100u ) <= new_ctrl_prob )
+  const auto get_control = [&controls, new_ctrl_prob, control_pattern, &dice]( bool force_new = false ) {
+    if ( force_new || controls.empty() || dice( 0u, 100u ) <= new_ctrl_prob )
     {
       std::string c = boost::str( boost::format( control_pattern ) % ( controls.size() + 1u ) );
       controls.push_back( c );
@@ -143,15 +143,22 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
 
         switch ( mux_type )
         {
-        case 'M':
+        case 'M': /* MUX */
           assigns << boost::format( "  assign %s = %s ? %s : %s;" ) % nw % c % w1 % w2 << std::endl;
           break;
 
-        case 'A':
-          words.push_back( w2 ); /* we only use w1 */
-          for ( auto i = 0u; i < bitwidth; ++i )
+        case 'O': /* ONE-HOT */
           {
-            assigns << boost::format( "  assign %s[%d] = %s & %s[%d]" ) % nw % i % c % w1 % i << std::endl;
+            /* we need one more control and two more words */
+            const auto c2 = get_control( true );
+            const auto nw1 = new_word();
+            const auto nw2 = new_word();
+            for ( auto i = 0u; i < bitwidth; ++i )
+            {
+              assigns << boost::format( "  assign %s[%d] = %s & %s[%d];" ) % nw1 % i % c % w1 % i << std::endl;
+              assigns << boost::format( "  assign %s[%d] = %s & %s[%d];" ) % nw2 % i % c2 % w2 % i << std::endl;
+              assigns << boost::format( "  assign %s = %s | %s;" ) % nw % nw1 % nw2 << std::endl;
+            }
           }
           break;
 
