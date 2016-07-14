@@ -380,7 +380,7 @@ private:
   bool execute_line( const std::string& line )
   {
     /* split commands if line contains a semi-colon */
-    if ( !line.empty() && line[0] != '!' && line.find( ';' ) != std::string::npos )
+    if ( !line.empty() && line[0] != '!' && line[0] != '<' && line.find( ';' ) != std::string::npos )
     {
       auto result = true;
       boost::tokenizer<boost::escaped_list_separator<char>> tok( line, boost::escaped_list_separator<char>( '\\', ';', '\"' ) );
@@ -422,6 +422,15 @@ private:
         env->log_command( command::log_opt_t( log ), line, now );
       }
 
+      return true;
+    }
+
+    /* read commands from file */
+    if ( line[0] == '<' )
+    {
+      auto filename = line.substr( 1u );
+      boost::trim( filename );
+      process_file( filename, vm.count( "echo" ) );
       return true;
     }
 
