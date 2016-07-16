@@ -53,6 +53,8 @@ using gate_constraint_fun = std::function<void( z3::context& ctx, z3::solver& so
 using evaluation_fun = std::function<bool( z3::solver& solver, circuit& circ,
                                            std::vector<std::vector<z3::expr>>& network, unsigned k, unsigned n )>;
 
+using symmetry_fun = std::function<void( z3::context&, z3::solver&, std::vector<std::vector<z3::expr>>&, unsigned)>;
+
 void gate_constraints_original( z3::context& ctx, z3::solver& solver, circuit&,
                                 std::vector<std::vector<z3::expr> >& network,
                                 std::vector<std::vector<z3::expr> >& gate_values,
@@ -378,9 +380,58 @@ void input_output_constraints(z3::context& ctx, z3::solver solver,
   }
 }
 
+/******************************************************************************
+ * symmetry breaking                                                          *
+ ******************************************************************************/
+
+void symmetry_breaking_no_double_gate( z3::context& ctx, z3::solver& solver, const std::vector<std::vector<z3::expr>>& network, unsigned n )
+{
+  if ( network.size() >= 2 )
+  {
+    for ( auto i = 0; i < network.size() - 1; ++i )
+    {
+      solver.add( !( ( network[i][0] == network[i + 1][0] ) && ( network[i][1] == network[i + 1][1] ) ) );
+    }
+  }
+}
+
+void symmetry_breaking_colexicographic( z3::context& ctx, z3::solver& solver, const std::vector<std::vector<z3::expr>>& network, unsigned n )
+{
+  const auto one = ctx.bv_val( 1u, n );
+  const auto zero = ctx.bv_val( 0u, n );
+
+  if ( network.size() >= 2 )
+  {
+    for ( auto i = 0; i < network.size() - 1; ++i )
+    {
+      const z3::expr move1 = ( ( one << network[i][0] ) & network[i + 1][1] ) == zero;
+      const z3::expr move2 = ( network[i][1] & ( one << network[i + 1][0] ) ) == zero;
+
+      const z3::expr cless = z3::ule( network[i][0], network[i + 1][0] );
+      const z3::expr ceq   = ( network[i][0] == network[i + 1][0] ) && ( z3::ule( network[i][1], network[i + 1][1] ) );
+
+      solver.add( implies( move1 && move2, cless || ceq ) );
+    }
+  }
+}
+
+void symmetry_breaking_one_not_per_line( z3::context& ctx, z3::solver& solver, const std::vector<std::vector<z3::expr>>& network, unsigned n )
+{
+  const auto zero = ctx.bv_val( 0u, n );
+
+  for ( auto i = 0; i < network.size(); ++i )
+  {
+    for ( auto j = i + 1; j < network.size(); ++j )
+    {
+      /* if some gate i has no controls (i.e., NOT), then there can't be another on that line */
+      solver.add( implies( network[i][0] == zero && network[i][1] == network[j][1], network[j][0] != zero ) );
+    }
+  }
+}
+
 bool synth_len(circuit& circ, const binary_truth_table& spec,
-    properties::ptr settings, gate_constraint_fun gate_constraints,
-    evaluation_fun eval, unsigned gate_count)
+               properties::ptr settings, gate_constraint_fun gate_constraints,
+               evaluation_fun eval, const std::vector<symmetry_fun>& symmetry_breaking, unsigned gate_count)
 {
   using boost::str;
   using boost::format;
@@ -418,38 +469,54 @@ bool synth_len(circuit& circ, const binary_truth_table& spec,
   gate_constraints(ctx, solver, circ, network, gate_values, spec, gate_count,
       n);
 
-  return eval(solver, circ, network, gate_count, n);
+  for ( const auto& f : symmetry_breaking )
+  {
+    f( ctx, solver, network, n );
+  }
 
+  return eval(solver, circ, network, gate_count, n);
 }
+
+/******************************************************************************
+ * public functions                                                           *
+ ******************************************************************************/
+
 
 bool exact_synthesis(circuit& circ, const binary_truth_table& spec,
     properties::ptr settings, properties::ptr statistics)
 {
-  unsigned max_depth = get<unsigned>( settings, "max_depth", 20u );
-  bool     negative  = get<bool>(     settings, "negative",  false );
-  bool     multiple  = get<bool>(     settings, "multiple",  false );
-  bool     verbose   = get<bool>(     settings, "verbose",   false );
+  const auto start_depth = get( settings, "start_depth", 0u );
+  const auto max_depth   = get( settings, "max_depth",   20u );
+  const auto negative    = get( settings, "negative",    false );
+  const auto multiple    = get( settings, "multiple",    false );
+  const auto verbose     = get( settings, "verbose",     false );
 
   properties_timer t( statistics );
 
   circ.set_lines(spec.num_inputs());
 
-  unsigned gate_count = 0u;
+  unsigned gate_count = start_depth;
   bool result = false;
 
   gate_constraint_fun gate_constraints = &gate_constraints_original;
   evaluation_fun eval = &eval_original;
+  std::vector<symmetry_fun> symmetry_breaking;
 
+  symmetry_breaking.push_back( symmetry_breaking_no_double_gate );
   if (negative && multiple)
   {
     gate_constraints = &gate_constraints_negative_control_multiple_target;
     eval = &eval_negative_control_multiple_target;
-  } else
+    symmetry_breaking.push_back( symmetry_breaking_one_not_per_line );
+  }
+  else
   {
+    symmetry_breaking.push_back( symmetry_breaking_colexicographic );
     if (negative)
     {
       gate_constraints = &gate_constraints_negative_control;
       eval = &eval_negative_control;
+      symmetry_breaking.push_back( symmetry_breaking_one_not_per_line );
     }
     if (multiple)
     {
@@ -464,7 +531,7 @@ bool exact_synthesis(circuit& circ, const binary_truth_table& spec,
     {
       std::cout << "[i] check for depth " << gate_count << std::endl;
     }
-    result = synth_len(circ, spec, settings, gate_constraints, eval,
+    result = synth_len(circ, spec, settings, gate_constraints, eval, symmetry_breaking,
         gate_count);
   } while (!result && gate_count++ < max_depth);
 

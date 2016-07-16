@@ -48,13 +48,14 @@ exs_command::exs_command( const environment::ptr& env )
   : cirkit_command( env, "Exact synthesis" )
 {
   opts.add_options()
-    ( "mode",                value_with_default( &mode ),      "Mode (0: BDD, 1: SAT)" )
-    ( "max_depth",           value_with_default( &max_depth ), "Maximum search depth" )
-    ( "negative,n",                                            "Allow negative control lines" )
-    ( "multiple,m",                                            "Allow multiple target lines (only with SAT)" )
-    ( "all_solutions,a",                                       "Extract all solutions (only with BDD)" )
-    ( "new",                                                   "Creates a new circuit" )
+    ( "mode,m",              value_with_default( &mode ),        "mode (0: BDD, 1: SAT)" )
+    ( "start_depth,s",       value_with_default( &start_depth ), "initial search depth" )
+    ( "max_depth",           value_with_default( &max_depth ),   "maximum search depth" )
+    ( "negative,n",                                              "allow negative control lines" )
+    ( "multiple,m",                                              "allow multiple target lines (only with SAT)" )
+    ( "all_solutions,a",                                         "extract all solutions (only with BDD)" )
     ;
+  add_new_option( false );
   be_verbose();
 }
 
@@ -71,12 +72,10 @@ bool exs_command::execute()
   auto& circuits = env->store<circuit>();
   auto& specs    = env->store<binary_truth_table>();
 
-  if ( circuits.empty() || is_set( "new" ) )
-  {
-    circuits.extend();
-  }
+  extend_if_new( circuits );
 
   auto settings = make_settings();
+  settings->set( "start_depth",   start_depth );
   settings->set( "max_depth",     max_depth );
   settings->set( "negative",      is_set( "negative" ) );
   settings->set( "multiple",      is_set( "multiple" ) );

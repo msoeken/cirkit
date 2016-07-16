@@ -47,7 +47,8 @@ public:
   log_opt_t log() const;
 
 private:
-  unsigned mode = 0u;
+  unsigned mode = 1u;
+  unsigned start_depth = 0u;
   unsigned max_depth = 20u;
 };
 
