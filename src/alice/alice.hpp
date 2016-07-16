@@ -542,7 +542,10 @@ private:
         {
           fmt = fmt % std::string( m[i] );
         }
-        return fmt.str();
+
+        auto str = fmt.str();
+        boost::trim( str );
+        return preprocess_alias( str );
       }
     }
 
