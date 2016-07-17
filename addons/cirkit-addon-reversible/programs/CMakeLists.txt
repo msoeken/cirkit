@@ -51,7 +51,10 @@ add_cirkit_program(
     cirkit_reversible
     cirkit_classical
     ${READLINE_LIBRARY}
+    linenoise
 )
+
+target_compile_definitions( revkit PUBLIC USE_LINENOISE )
 
 if( enable_cirkit-addon-experimental )
   target_link_libraries( revkit cirkit_experimental_reversible )

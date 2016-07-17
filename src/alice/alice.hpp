@@ -51,12 +51,8 @@
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 
-#ifdef USE_READLINE
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
-
 #include <alice/command.hpp>
+#include <alice/readline.hpp>
 #include <alice/commands/alias.hpp>
 #include <alice/commands/convert.hpp>
 #include <alice/commands/current.hpp>
@@ -166,36 +162,6 @@ std::pair<int, std::string> execute_program( const std::string& cmd )
     }
   }
   return {exit_status, result};
-}
-
-bool read_command_line( const std::string& prefix, std::string& line )
-{
-#ifdef USE_READLINE
-  auto * cline = readline( prefix.c_str() );
-
-  /* something went wrong? */
-  if ( !cline )
-  {
-    return false;
-  }
-
-  line = cline;
-  boost::trim( line );
-  free( cline );
-
-  return true;
-
-#else // USE_READLINE
-
-  std::cout << prefix << "> ";
-  std::flush(std::cout);
-  if( !getline( std::cin, line ) ) {
-    return false;
-  }
-
-  boost::trim( line );
-  return true;
-#endif // USE_READLINE
 }
 
 }
@@ -351,17 +317,13 @@ public:
 
     if ( ( !vm.count( "command" ) && !vm.count( "file" ) ) || ( !env->quit && vm.count( "interactive" ) ) )
     {
-#ifdef USE_READLINE
-      initialize_readline();
-#endif
+      readline rl( env );
 
       std::string line;
-      while ( !env->quit && detail::read_command_line( get_prefix(), line ) )
+      while ( !env->quit && rl.read_command_line( get_prefix(), line ) )
       {
         execute_line( preprocess_alias( line ) );
-#ifdef USE_READLINE
-        add_history( line.c_str() );
-#endif
+        rl.add_to_history( line );
       }
     }
 
@@ -552,58 +514,6 @@ private:
     return line;
   }
 
-#ifdef USE_READLINE
-private:
-  static cli_main<S...>*   instance;
-  std::vector<std::string> command_names;
-
-  void initialize_readline()
-  {
-    instance = this;
-
-    for ( const auto& p : env->commands )
-    {
-      command_names.push_back( p.first );
-    }
-    rl_attempted_completion_function = cli_main<S...>::readline_completion_s;
-  }
-
-  static char ** readline_completion_s( const char* text, int start, int end )
-  {
-    if ( start == 0 )
-    {
-      return rl_completion_matches( text, []( const char* text, int state ) { return instance->command_iterator( text, state ); } );
-    }
-    else
-    {
-      return nullptr;
-    }
-  }
-
-  char * command_iterator( const char * text, int state )
-  {
-    static std::vector<std::string>::const_iterator it;
-
-    if ( state == 0 )
-    {
-      it = command_names.begin();
-    }
-
-    while ( it != command_names.end() )
-    {
-      const auto& name = *it++;
-      if ( name.find( text ) != std::string::npos )
-      {
-        char * completion = new char[name.size()];
-        strcpy( completion, name.c_str() );
-        return completion;
-      }
-    }
-
-    return nullptr;
-  }
-#endif
-
 private:
   std::string             prefix;
 
@@ -624,11 +534,6 @@ private:
 #define ADD_COMMAND( name ) cli.insert_command( #name, std::make_shared<name##_command>( cli.env ) );
 #define ADD_READ_COMMAND( name, label ) cli.insert_read_command<io_##name##_tag_t>( "read_" ALICE_SX(name), label );
 #define ADD_WRITE_COMMAND( name, label ) cli.insert_write_command<io_##name##_tag_t>( "write_" ALICE_SX(name), label );
-
-#ifdef USE_READLINE
-template<class... S>
-cli_main<S...>* cli_main<S...>::instance = nullptr;
-#endif
 
 }
 
