@@ -41,11 +41,20 @@
 #include <classical/io/read_unateness.hpp>
 #include <classical/io/read_verilog.hpp>
 #include <classical/io/write_aiger.hpp>
+#include <classical/io/write_bench.hpp>
 #include <classical/io/write_verilog.hpp>
 #include <classical/mig/mig_to_aig.hpp>
 #include <classical/mig/mig_from_string.hpp>
 #include <classical/mig/mig_utils.hpp>
 #include <classical/mig/mig_verilog.hpp>
+#include <classical/xmg/xmg_aig.hpp>
+#include <classical/xmg/xmg_cover.hpp>
+#include <classical/xmg/xmg_expr.hpp>
+#include <classical/xmg/xmg_io.hpp>
+#include <classical/xmg/xmg_lut.hpp>
+#include <classical/xmg/xmg_show.hpp>
+#include <classical/xmg/xmg_string.hpp>
+#include <classical/xmg/xmg_utils.hpp>
 
 namespace alice
 {
@@ -470,6 +479,135 @@ bdd_function_t store_convert<expression_t::ptr, bdd_function_t>( const expressio
 {
   Cudd manager;
   return bdd_from_expression( manager, expr );
+}
+
+/******************************************************************************
+ * xmg_graph                                                                  *
+ ******************************************************************************/
+
+template<>
+std::string store_entry_to_string<xmg_graph>( const xmg_graph& xmg )
+{
+  const auto name = xmg.name();
+  return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % xmg.inputs().size() % xmg.outputs().size() );
+}
+
+template<>
+void print_store_entry_statistics<xmg_graph>( std::ostream& os, const xmg_graph& xmg )
+{
+  xmg_print_stats( xmg, os );
+}
+
+template<>
+command::log_opt_t log_store_entry_statistics<xmg_graph>( const xmg_graph& xmg )
+{
+  return command::log_opt_t({
+      {"inputs", static_cast<unsigned>( xmg.inputs().size() )},
+      {"outputs", static_cast<unsigned>( xmg.outputs().size() )},
+      {"size", xmg.num_gates()},
+      {"maj", xmg.num_maj()},
+      {"real_maj", compute_pure_maj_count( xmg )},
+      {"xor", xmg.num_xor()},
+      {"depth", compute_depth( xmg )}
+    });
+}
+
+show_store_entry<xmg_graph>::show_store_entry( command& cmd )
+{
+  boost::program_options::options_description xmg_options( "XMG options" );
+
+  xmg_options.add_options()
+    ( "cover", "dump LUT cover of XMG" )
+    ;
+
+  cmd.opts.add( xmg_options );
+}
+
+bool show_store_entry<xmg_graph>::operator()( xmg_graph& xmg, const std::string& dotname, const command& cmd )
+{
+  if ( cmd.is_set( "cover" ) )
+  {
+    if ( !xmg.has_cover() )
+    {
+      std::cout << "[w] XMG has no cover" << std::endl;
+      return false;
+    }
+
+    xmg_cover_write_dot( xmg, dotname );
+  }
+  else
+  {
+    write_dot( xmg, dotname );
+  }
+
+  return true;
+}
+
+command::log_opt_t show_store_entry<xmg_graph>::log() const
+{
+  return boost::none;
+}
+
+template<>
+expression_t::ptr store_convert<xmg_graph, expression_t::ptr>( const xmg_graph& xmg )
+{
+  return xmg_to_expression( xmg, xmg.outputs().front().first );
+}
+
+template<>
+xmg_graph store_convert<expression_t::ptr, xmg_graph>( const expression_t::ptr& expr )
+{
+  xmg_graph xmg;
+  std::vector<xmg_function> pis;
+  xmg.create_po( xmg_from_expression( xmg, pis, expr ), "f" );
+  return xmg;
+}
+
+template<>
+xmg_graph store_convert<aig_graph, xmg_graph>( const aig_graph& aig )
+{
+  return xmg_from_aig( aig );
+}
+
+template<>
+void store_write_io_type<xmg_graph, io_bench_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
+{
+  if ( !xmg.has_cover() )
+  {
+    std::cout << "[w] XMG as no cover" << std::endl;
+    return;
+  }
+
+  auto lut = xmg_to_lut_graph( xmg );
+  write_bench( lut, filename );
+}
+
+template<>
+xmg_graph store_read_io_type<xmg_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
+{
+  return read_verilog( filename );
+}
+
+template<>
+bool store_can_write_io_type<xmg_graph, io_verilog_tag_t>( command& cmd )
+{
+  boost::program_options::options_description xmg_options( "XMG options" );
+
+  xmg_options.add_options()
+    ( "maj_module", "express MAJ gates as modules" )
+    ;
+
+  cmd.opts.add( xmg_options );
+
+  return true;
+}
+
+template<>
+void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
+{
+  auto settings = std::make_shared<properties>();
+  settings->set( "maj_module", cmd.is_set( "maj_module" ) );
+  write_verilog( xmg, filename, settings );
 }
 
 }

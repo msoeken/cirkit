@@ -43,6 +43,7 @@
 #include <classical/utils/counterexample.hpp>
 #include <classical/utils/expression_parser.hpp>
 #include <classical/utils/truth_table_utils.hpp>
+#include <classical/xmg/xmg.hpp>
 
 namespace alice
 {
@@ -324,6 +325,75 @@ inline bool store_can_convert<expression_t::ptr, bdd_function_t>() { return true
 
 template<>
 bdd_function_t store_convert<expression_t::ptr, bdd_function_t>( const expression_t::ptr& expr );
+
+/******************************************************************************
+ * xmg_graph                                                                  *
+ ******************************************************************************/
+
+template<>
+struct store_info<xmg_graph>
+{
+  static constexpr const char* key         = "xmgs";
+  static constexpr const char* option      = "xmg";
+  static constexpr const char* mnemonic    = "x";
+  static constexpr const char* name        = "XMG";
+  static constexpr const char* name_plural = "XMGs";
+};
+
+template<>
+std::string store_entry_to_string<xmg_graph>( const xmg_graph& xmg );
+
+template<>
+void print_store_entry_statistics<xmg_graph>( std::ostream& os, const xmg_graph& xmg );
+
+template<>
+command::log_opt_t log_store_entry_statistics<xmg_graph>( const xmg_graph& xmg );
+
+template<>
+struct show_store_entry<xmg_graph>
+{
+  show_store_entry( command& cmd );
+
+  bool operator()( xmg_graph& mig, const std::string& dotname, const command& cmd );
+
+  command::log_opt_t log() const;
+};
+
+template<>
+inline bool store_can_convert<xmg_graph, expression_t::ptr>() { return true; }
+
+template<>
+expression_t::ptr store_convert<xmg_graph, expression_t::ptr>( const xmg_graph& xmg );
+
+template<>
+inline bool store_can_convert<expression_t::ptr, xmg_graph>() { return true; }
+
+template<>
+xmg_graph store_convert<expression_t::ptr, xmg_graph>( const expression_t::ptr& expr );
+
+template<>
+inline bool store_can_convert<aig_graph, xmg_graph>() { return true; }
+
+template<>
+xmg_graph store_convert<aig_graph, xmg_graph>( const aig_graph& aig );
+
+template<>
+inline bool store_can_write_io_type<xmg_graph, io_bench_tag_t>( command& cmd ) { return true; }
+
+template<>
+void store_write_io_type<xmg_graph, io_bench_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd );
+
+template<>
+inline bool store_can_read_io_type<xmg_graph, io_verilog_tag_t>( command& cmd ) { return true; }
+
+template<>
+xmg_graph store_read_io_type<xmg_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd );
+
+template<>
+bool store_can_write_io_type<xmg_graph, io_verilog_tag_t>( command& cmd );
+
+template<>
+void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd );
 
 }
 

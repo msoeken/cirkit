@@ -59,7 +59,7 @@
 #include <classical/cli/commands/tt.hpp>
 #include <classical/cli/commands/unate.hpp>
 
-#define STORE_TYPES aig_graph, mig_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t
+#define STORE_TYPES aig_graph, mig_graph, xmg_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t
 
 #ifdef USE_EXPERIMENTAL_CLASSICAL_COMMANDS
 #include <classical/cli/commands/commands.hpp>

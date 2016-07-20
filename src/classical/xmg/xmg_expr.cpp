@@ -1,0 +1,148 @@
+/* CirKit: A circuit toolkit
+ * Copyright (C) 2009-2015  University of Bremen
+ * Copyright (C) 2015-2016  EPFL
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "xmg_expr.hpp"
+
+#include <boost/format.hpp>
+
+namespace cirkit
+{
+
+/******************************************************************************
+ * Types                                                                      *
+ ******************************************************************************/
+
+/******************************************************************************
+ * Private functions                                                          *
+ ******************************************************************************/
+
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
+
+expression_t::ptr xmg_to_expression( const xmg_graph& xmg, const xmg_function& f )
+{
+  auto expr = std::make_shared<expression_t>();
+
+  if ( f.node == 0 )
+  {
+    expr->type = expression_t::_const;
+    expr->value = f.complemented ? 1u : 0u;
+  }
+  else if ( f.complemented )
+  {
+    expr->type = expression_t::_inv;
+    expr->children.push_back( xmg_to_expression( xmg, !f ) );
+  }
+  else if ( xmg.is_maj( f.node ) )
+  {
+    expr->type = expression_t::_maj;
+    for ( const auto& c : xmg.children( f.node ) )
+    {
+      expr->children.push_back( xmg_to_expression( xmg, c ) );
+    }
+  }
+  else if ( xmg.is_xor( f.node ) )
+  {
+    expr->type = expression_t::_xor;
+    for ( const auto& c : xmg.children( f.node ) )
+    {
+      expr->children.push_back( xmg_to_expression( xmg, c ) );
+    }
+  }
+  else
+  {
+    expr->type = expression_t::_var;
+    expr->value = xmg.input_index( f.node );
+  }
+
+  return expr;
+}
+
+xmg_function xmg_from_expression( xmg_graph& xmg, std::vector<xmg_function>& pis, const expression_t::ptr& expr )
+{
+  switch ( expr->type )
+  {
+  case expression_t::_const:
+    return xmg.get_constant( expr->value == 1u );
+
+  case expression_t::_var:
+    {
+      const auto idx = expr->value;
+      if ( idx >= pis.size() )
+      {
+        for ( auto i = pis.size(); i <= idx; ++i )
+        {
+          pis.push_back( xmg.create_pi( boost::str( boost::format( "x%d" ) % i )  ) );
+        }
+      }
+      return pis[idx];
+    }
+
+  case expression_t::_inv:
+    return !xmg_from_expression( xmg, pis, expr->children.front() );
+
+  case expression_t::_and:
+    {
+      auto it = expr->children.begin();
+      const auto a = xmg_from_expression( xmg, pis, *it++ );
+      const auto b = xmg_from_expression( xmg, pis, *it );
+
+      return xmg.create_and( a, b );
+    }
+
+  case expression_t::_or:
+    {
+      auto it = expr->children.begin();
+      const auto a = xmg_from_expression( xmg, pis, *it++ );
+      const auto b = xmg_from_expression( xmg, pis, *it );
+
+      return xmg.create_or( a, b );
+    }
+
+  case expression_t::_maj:
+    {
+      auto it = expr->children.begin();
+      const auto a = xmg_from_expression( xmg, pis, *it++ );
+      const auto b = xmg_from_expression( xmg, pis, *it++ );
+      const auto c = xmg_from_expression( xmg, pis, *it );
+
+      return xmg.create_maj( a, b, c );
+    }
+
+  case expression_t::_xor:
+    {
+      auto it = expr->children.begin();
+      const auto a = xmg_from_expression( xmg, pis, *it++ );
+      const auto b = xmg_from_expression( xmg, pis, *it );
+
+      return xmg.create_xor( a, b );
+    }
+
+  default:
+    assert( false );
+  }
+}
+
+}
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:
