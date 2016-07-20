@@ -11,7 +11,11 @@ add_custom_target(
   external ALL
   ${CMAKE_COMMAND} -E echo_append ""
   COMMENT "Build external dependencies"
-)
+  )
+
+################################################################################
+# Cudd                                                                         #
+################################################################################
 
 set( cudd_SRC ${CMAKE_BINARY_DIR}/ext/cudd-prefix/src/cudd)
 set( cudd_INCLUDE_FILES
@@ -74,7 +78,10 @@ else()
   )
 endif()
 
-# abc
+################################################################################
+# ABC                                                                          #
+################################################################################
+
 set(abc_SRC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc)
 externalProject_add(abc
   DOWNLOAD_DIR .
@@ -82,7 +89,7 @@ externalProject_add(abc
   CONFIGURE_COMMAND ""
   BUILD_COMMAND make -j${ProcCount} ABC_USE_NO_CUDD=0 ABC_USE_PIC=1 ABC_USE_NO_READLINE=1 ABC_USE_NAMESPACE=abc OPTFLAGS=-O3 libabc.a
   BUILD_IN_SOURCE 1
-  INSTALL_COMMAND rsync --include "*.h" --filter "hide,! */" -avm ${abc_SRC}/src/ ${ext_INCLUDE}/abc COMMAND cp ${abc_SRC}/libabc.a ${ext_LIB}/libabc.a
+  INSTALL_COMMAND COMMAND cp ${abc_SRC}/libabc.a ${ext_LIB}/libabc.a
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
@@ -98,7 +105,10 @@ set(abc_LIBRARIES
   PARENT_SCOPE
 )
 
-# minisat
+################################################################################
+# MiniSAT                                                                      #
+################################################################################
+
 set(minisat_SRC ${CMAKE_BINARY_DIR}/ext/minisat-prefix/src/minisat)
 set(minisat_utils_HEADERS
   ${minisat_SRC}/utils/System.h

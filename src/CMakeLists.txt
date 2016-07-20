@@ -34,5 +34,5 @@ add_cirkit_library(
     ${abc_LIBRARIES}
     ${MINISAT_LIBRARIES}
   INCLUDE
-    PUBLIC ${CMAKE_SOURCE_DIR}/ext/include/abc
+    PUBLIC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc/src
 )

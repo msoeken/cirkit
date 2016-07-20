@@ -38,7 +38,7 @@ add_cirkit_program(
     ${abc_LIBRARIES}
     lscli
   INCLUDE
-    PUBLIC ${CMAKE_SOURCE_DIR}/ext/include/abc
+   PUBLIC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc/src
 )
 
 # cirkit
