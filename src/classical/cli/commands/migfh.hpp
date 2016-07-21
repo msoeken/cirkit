@@ -17,7 +17,7 @@
  */
 
 /**
- * @file funchash.hpp
+ * @file migfh.hpp
  *
  * @brief Functional hashing for MIGs
  *
@@ -25,18 +25,18 @@
  * @since  2.3
  */
 
-#ifndef CLI_FUNCHASH_COMMAND_HPP
-#define CLI_FUNCHASH_COMMAND_HPP
+#ifndef CLI_MIGFH_COMMAND_HPP
+#define CLI_MIGFH_COMMAND_HPP
 
 #include <classical/cli/mig_command.hpp>
 
 namespace cirkit
 {
 
-class funchash_command : public mig_base_command
+class migfh_command : public mig_base_command
 {
 public:
-  funchash_command( const environment::ptr& env );
+  migfh_command( const environment::ptr& env );
 
 protected:
   bool execute();

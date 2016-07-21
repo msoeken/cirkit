@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "funchash.hpp"
+#include "migfh.hpp"
 
 #include <boost/format.hpp>
 
@@ -40,23 +40,23 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-funchash_command::funchash_command( const environment::ptr& env ) : mig_base_command( env, "Functional hashing for MIGs" )
+migfh_command::migfh_command( const environment::ptr& env ) : mig_base_command( env, "Functional hashing for MIGs" )
 {
   opts.add_options()
     ( "mode",            value_with_default( &mode ),            "0: top-down\n1: bottom-up" )
-    ( "ffrs,f",                                                  "Only optimize inside FFRs" )
-    ( "depth_heuristic",                                         "Preserve depth locally" )
-    ( "hash",            value_with_default( &hash ),            "Hash table size for NPN caching" )
-    ( "progress,p",                                              "Show progress" )
-    ( "max_candidates",  value_with_default( &max_candidates ),  "Max candidates (only bottom-up)" )
-    ( "allow_area_inc",                                          "Allow area increase for candidates (only bottom-up)" )
-    ( "allow_depth_inc",                                         "Allow depth increase for candidates (only bottom-up)" )
-    ( "sort_area_first", value_with_default( &sort_area_first ), "Sort candidates by area, then depth (only bottom-up)" )
+    ( "ffrs,f",                                                  "only optimize inside FFRs" )
+    ( "depth_heuristic",                                         "preserve depth locally" )
+    ( "hash",            value_with_default( &hash ),            "hash table size for NPN caching" )
+    ( "progress,p",                                              "show progress" )
+    ( "max_candidates",  value_with_default( &max_candidates ),  "max candidates (only bottom-up)" )
+    ( "allow_area_inc",                                          "allow area increase for candidates (only bottom-up)" )
+    ( "allow_depth_inc",                                         "allow depth increase for candidates (only bottom-up)" )
+    ( "sort_area_first", value_with_default( &sort_area_first ), "sort candidates by area, then depth (only bottom-up)" )
     ;
   be_verbose();
 }
 
-bool funchash_command::execute()
+bool migfh_command::execute()
 {
   const auto settings = make_settings();
   settings->set( "top_down",            mode == 0u );
@@ -86,7 +86,7 @@ bool funchash_command::execute()
   return true;
 }
 
-command::log_opt_t funchash_command::log() const
+command::log_opt_t migfh_command::log() const
 {
   return log_opt_t({
       {"runtime", statistics->get<double>( "runtime" )},

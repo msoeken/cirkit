@@ -41,9 +41,9 @@
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/feather.hpp>
 #include <classical/cli/commands/gen_trans_arith.hpp>
-#include <classical/cli/commands/funchash.hpp>
 #include <classical/cli/commands/memristor.hpp>
 #include <classical/cli/commands/mig_rewrite.hpp>
+#include <classical/cli/commands/migfh.hpp>
 #include <classical/cli/commands/npn.hpp>
 #include <classical/cli/commands/output_noise.hpp>
 #include <classical/cli/commands/plim.hpp>
@@ -100,8 +100,8 @@ int main( int argc, char ** argv )
   cli.set_category( "Rewriting" );
   ADD_COMMAND( cone );
   ADD_COMMAND( feather );
-  ADD_COMMAND( funchash );
   ADD_COMMAND( mig_rewrite );
+  ADD_COMMAND( migfh );
   ADD_COMMAND( propagate );
   ADD_COMMAND( rename );
   ADD_COMMAND( shuffle );
