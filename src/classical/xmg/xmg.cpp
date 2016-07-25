@@ -391,12 +391,15 @@ void xmg_graph::init_marks()
 
 bool xmg_graph::is_marked( xmg_node n ) const
 {
-  return marks[n];
+  return n < marks.size() && marks[n];
 }
 
 void xmg_graph::mark( xmg_node n )
 {
-  marks.set( n );
+  if ( n < marks.size() )
+  {
+    marks.set( n );
+  }
 }
 
 /******************************************************************************
