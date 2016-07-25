@@ -157,8 +157,8 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
             {
               assigns << boost::format( "  assign %s[%d] = %s & %s[%d];" ) % nw1 % i % c % w1 % i << std::endl;
               assigns << boost::format( "  assign %s[%d] = %s & %s[%d];" ) % nw2 % i % c2 % w2 % i << std::endl;
-              assigns << boost::format( "  assign %s = %s | %s;" ) % nw % nw1 % nw2 << std::endl;
             }
+            assigns << boost::format( "  assign %s = %s | %s;" ) % nw % nw1 % nw2 << std::endl;
           }
           break;
 
