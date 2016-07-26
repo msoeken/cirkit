@@ -23,9 +23,11 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/algorithm_ext/iota.hpp>
 
+#include <core/cube.hpp>
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
+#include <classical/optimization/exorcism_minimization.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/copy_circuit.hpp>
@@ -47,7 +49,7 @@ namespace cirkit
 
 boost::dynamic_bitset<> get_optimization_vector( const std::string& methods )
 {
-  boost::dynamic_bitset<> v( 4u );
+  boost::dynamic_bitset<> v( 5u );
 
   for ( auto c : methods )
   {
@@ -56,7 +58,8 @@ boost::dynamic_bitset<> get_optimization_vector( const std::string& methods )
     case 'm': v.set( 0u ); break;
     case 'n': v.set( 1u ); break;
     case 'a': v.set( 2u ); break;
-    case 's': v.set( 3u ); break;
+    case 'e': v.set( 3u ); break;
+    case 's': v.set( 4u ); break;
     }
   }
 
@@ -379,6 +382,77 @@ circuit simple_merge_heuristic( const circuit& base )
   return circ;
 }
 
+/* moves target-adjacent gates using recomputing control lines with exorcism */
+void exorcism_merge_heuristic_add_cubes( circuit& circ, const cube_vec_t& cubes, int current_target )
+{
+  if ( cubes.empty() ) { return; }
+
+  /* just one gate, directly add it */
+  if ( cubes.size() == 1u )
+  {
+    append_toffoli( circ, make_controls( cubes.front().care(), cubes.front().bits() ), current_target );
+    return;
+  }
+
+  std::cout << boost::format( "[i] add_cubes: %d cubes" ) % cubes.size() << std::endl;
+
+  common_pla_print( cubes );
+
+  /* we call exorcism */
+  auto f = [&circ, current_target]( const cube_t& c ) {
+    /* c.first is bits, c.second is care */
+    append_toffoli( circ, make_controls( c.second, c.first ), current_target );
+  };
+  auto settings = std::make_shared<properties>();
+  settings->set( "on_cube", cube_function_t( f ) );
+  exorcism_minimization( cubes );
+}
+
+circuit exorcism_merge_heuristic( const circuit& base )
+{
+  // TODO
+  return base;
+
+  circuit circ;
+  circ.set_lines( base.lines() );
+  copy_metadata( base, circ );
+
+  auto current_target = -1;
+  cube_vec_t cubes;
+
+  for ( const auto& gate : base )
+  {
+    /* works only for Toffoli gates for now */
+    if ( !is_toffoli( gate ) )
+    {
+      exorcism_merge_heuristic_add_cubes( circ, cubes, current_target );
+      cubes.clear();
+      current_target = -1;
+      circ.append_gate() = gate;
+      continue;
+    }
+
+    const auto target = gate.targets().front();
+
+    /* apply current cubes */
+    if ( target != current_target )
+    {
+      exorcism_merge_heuristic_add_cubes( circ, cubes, current_target );
+      cubes.clear();
+      current_target = target;
+    }
+
+    /* add new cube */
+    const auto mask = control_polarity_mask( gate.controls(), circ.lines() );
+    cubes.push_back( cube( mask.second, mask.first ) );
+  }
+
+  /* leftovers? */
+  exorcism_merge_heuristic_add_cubes( circ, cubes, current_target );
+
+  return circ;
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -386,7 +460,7 @@ circuit simple_merge_heuristic( const circuit& base )
 bool simplify( circuit& circ, const circuit& base, properties::ptr settings, properties::ptr statistics )
 {
   /* settings */
-  const auto methods     = get( settings, "methods",     std::string( "mnas" ) );
+  const auto methods     = get( settings, "methods",     std::string( "mnaes" ) );
   const auto reverse_opt = get( settings, "reverse_opt", true );
   const auto verbose     = get( settings, "verbose",     false );
 
@@ -415,10 +489,11 @@ bool simplify( circuit& circ, const circuit& base, properties::ptr settings, pro
 
     vsize_out( boost::str( boost::format( "\033[1;31moptimization round %d\033[0m" ) % round ) );
 
-    if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp ); vsize_out( "simple merge" ); }
-    if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );     vsize_out( "not gates" ); }
-    if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );      vsize_out( "adjacent" ); }
-    if ( methods_vec[3u] ) {
+    if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp );   vsize_out( "simple merge" ); }
+    if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );       vsize_out( "not gates" ); }
+    if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );        vsize_out( "adjacent" ); }
+    if ( methods_vec[3u] ) { tmp = exorcism_merge_heuristic( tmp ); vsize_out( "exorcism" ); }
+    if ( methods_vec[4u] ) {
       tmp = simplify_swap_gates( tmp, perm ); vsize_out( "swap" );
       gperm = permutation_multiply( gperm, perm );
     }
@@ -426,10 +501,11 @@ bool simplify( circuit& circ, const circuit& base, properties::ptr settings, pro
     if ( reverse_opt )
     {
       reverse_circuit( tmp );
-      if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp ); vsize_out( "simple merge (r)" ); }
-      if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );     vsize_out( "not gates (r)" ); }
-      if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );      vsize_out( "adjacent (r)" ); }
-      if ( methods_vec[3u] ) {
+      if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp );   vsize_out( "simple merge (r)" ); }
+      if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );       vsize_out( "not gates (r)" ); }
+      if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );        vsize_out( "adjacent (r)" ); }
+      if ( methods_vec[3u] ) { tmp = exorcism_merge_heuristic( tmp ); vsize_out( "exorcism (r)" ); }
+      if ( methods_vec[4u] ) {
         //tmp = simplify_swap_gates( tmp, perm ); vsize_out( "swap (r)" );
       }
       reverse_circuit( tmp );
