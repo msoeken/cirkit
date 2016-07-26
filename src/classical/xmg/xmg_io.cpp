@@ -223,12 +223,13 @@ xmg_function find_function( const std::unordered_map<std::string, xmg_function>&
  * Public functions                                                           *
  ******************************************************************************/
 
-xmg_graph read_verilog( const std::string& filename )
+xmg_graph read_verilog( const std::string& filename, bool native_xor )
 {
   std::unordered_map<std::string, xmg_function> name_to_function;
   std::vector<std::string> output_names;
 
   xmg_graph xmg;
+  xmg.set_native_xor( native_xor );
 
   name_to_function.insert( {"1'b0", xmg.get_constant( false )} );
   name_to_function.insert( {"1'b1", xmg.get_constant( true )} );
@@ -243,11 +244,15 @@ xmg_graph read_verilog( const std::string& filename )
           split_string( output_names, m[1], ", " );
         }},
       {boost::regex( "assign (.*) = (.*);" ), [&xmg, &name_to_function, &output_names]( const boost::smatch& m ) {
-          const auto name = std::string( m[1] );
-          const auto expr = std::string( m[2] );
+          auto name = std::string( m[1] );
+          auto expr = std::string( m[2] );
+
+          boost::trim( name );
+          boost::trim( expr );
+
           boost::smatch match;
 
-          if ( boost::regex_search( expr, match, boost::regex( "^([^ ]+) & ([^ ]+)$" ) ) )
+          if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) & ( *[^ ]+ *)$" ) ) )
           {
             auto sm0 = std::string( match[1] );
             auto sm1 = std::string( match[2] );
@@ -255,7 +260,7 @@ xmg_graph read_verilog( const std::string& filename )
             name_to_function.insert( {name, xmg.create_and( find_function( name_to_function, sm0 ),
                                                             find_function( name_to_function, sm1 ) )} );
           }
-          else if ( boost::regex_search( expr, match, boost::regex( "^([^ ]+) \\| ([^ ]+)$" ) ) )
+          else if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) \\| ( *[^ ]+ *)$" ) ) )
           {
             auto sm0 = std::string( match[1] );
             auto sm1 = std::string( match[2] );
@@ -263,7 +268,7 @@ xmg_graph read_verilog( const std::string& filename )
             name_to_function.insert( {name, xmg.create_or( find_function( name_to_function, sm0 ),
                                                            find_function( name_to_function, sm1 ) )} );
           }
-          else if ( boost::regex_search( expr, match, boost::regex( "^([^ ]+) \\^ ([^ ]+)$" ) ) )
+          else if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) \\^ ( *[^ ]+ *)$" ) ) )
           {
             auto sm0 = std::string( match[1] );
             auto sm1 = std::string( match[2] );
@@ -271,7 +276,7 @@ xmg_graph read_verilog( const std::string& filename )
             name_to_function.insert( {name, xmg.create_xor( find_function( name_to_function, sm0 ),
                                                             find_function( name_to_function, sm1 ) )} );
           }
-          else if ( boost::regex_search( expr, match, boost::regex( "^\\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\)$" ) ) )
+          else if ( boost::regex_search( expr, match, boost::regex( "^\\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\)$" ) ) )
           {
             assert( match[1] == match[3] );
             assert( match[2] == match[5] );
@@ -285,9 +290,18 @@ xmg_graph read_verilog( const std::string& filename )
                                                             find_function( name_to_function, sm1 ),
                                                             find_function( name_to_function, sm2 ))} );
           }
+          else if ( expr == "0" )
+          {
+            name_to_function.insert( {name, xmg.get_constant( false )} );
+          }
           else
           {
-            assert( boost::find( output_names, name ) != output_names.end() );
+            if ( boost::find( output_names, name ) == output_names.end() )
+            {
+              std::cout << "[e] expected " << name << " not be part of output_names" << std::endl;
+              std::cout << "[e] in line: " << m[0] << std::endl;
+              assert( false );
+            }
             name_to_function.insert( {name, find_function( name_to_function, expr )} );
           }
         }}}, false );

@@ -583,9 +583,23 @@ void store_write_io_type<xmg_graph, io_bench_tag_t>( const xmg_graph& xmg, const
 }
 
 template<>
+bool store_can_read_io_type<xmg_graph, io_verilog_tag_t>( command& cmd )
+{
+  boost::program_options::options_description xmg_options( "XMG options" );
+
+  xmg_options.add_options()
+    ( "as_mig", "read as MIG (translate XOR to MAJ)" )
+    ;
+
+  cmd.opts.add( xmg_options );
+
+  return true;
+}
+
+template<>
 xmg_graph store_read_io_type<xmg_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
 {
-  return read_verilog( filename );
+  return read_verilog( filename, !cmd.is_set( "as_mig" ) );
 }
 
 template<>

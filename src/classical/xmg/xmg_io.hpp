@@ -36,7 +36,7 @@
 namespace cirkit
 {
 
-xmg_graph read_verilog( const std::string& filename );
+xmg_graph read_verilog( const std::string& filename, bool native_xor = true );
 
 void write_bench( const xmg_graph& xmg, const std::string& filename );
 void write_verilog( const xmg_graph& xmg, const std::string& filename, const properties::ptr& settings = properties::ptr() );
