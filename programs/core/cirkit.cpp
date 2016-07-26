@@ -63,6 +63,10 @@
 #include <formal/cli/commands/exact_mig.hpp>
 #endif
 
+#ifdef USE_FPGA_COMMANDS
+#include <classical/cli/commands/fpga_commands.hpp>
+#endif
+
 #define STORE_TYPES aig_graph, mig_graph, xmg_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t
 
 #ifdef USE_EXPERIMENTAL_CLASSICAL_COMMANDS
@@ -142,6 +146,10 @@ int main( int argc, char ** argv )
   ADD_COMMAND( dsop );
   ADD_COMMAND( expr );
   ADD_COMMAND( output_noise );
+
+#ifdef USE_FPGA_COMMANDS
+  FPGA_CLASSICAL_COMMANDS
+#endif
 
 #ifdef USE_EXPERIMENTAL_CLASSICAL_COMMANDS
   EXPERIMENTAL_CLASSICAL_COMMANDS

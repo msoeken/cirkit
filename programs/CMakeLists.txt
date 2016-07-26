@@ -59,6 +59,11 @@ if( enable_cirkit-addon-formal )
   target_compile_definitions( cirkit PUBLIC USE_FORMAL_COMMANDS )
 endif()
 
+if( enable_cirkit-addon-fpga )
+  target_link_libraries( cirkit cirkit_fpga )
+  target_compile_definitions( cirkit PUBLIC USE_FPGA_COMMANDS )
+endif()
+
 if( enable_cirkit-addon-experimental )
   target_link_libraries( cirkit cirkit_experimental_core cirkit_experimental_classical )
   target_compile_definitions( cirkit PUBLIC USE_EXPERIMENTAL_CLASSICAL_COMMANDS )
