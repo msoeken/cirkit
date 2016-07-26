@@ -55,6 +55,7 @@ add_cirkit_program(
 target_compile_definitions( cirkit PUBLIC USE_LINENOISE )
 
 if( enable_cirkit-addon-formal )
+  target_link_libraries( cirkit cirkit_formal_z3 )
   target_compile_definitions( cirkit PUBLIC USE_FORMAL_COMMANDS )
 endif()
 
