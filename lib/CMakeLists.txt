@@ -47,3 +47,12 @@ add_cirkit_library(
   INCLUDE
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/linenoise
 )
+
+add_cirkit_library(
+  NAME puma
+  SOURCES
+    puma/puma.cpp
+    puma/tc_time.cpp
+  INCLUDE
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/puma
+)

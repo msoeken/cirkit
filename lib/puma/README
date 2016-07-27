@@ -1,0 +1,203 @@
+============================================================================
+
+OKFDD-Package PUMA V2.22
+------------------------
+
+Distributors: Andreas Hett, Rolf Drechsler, Harry Hengster, Bernd Becker  
+              Institute of Computer Science
+	      Am Flughafen 17
+	      79110 Freiburg
+	      Germany
+
+              email: puma@informatik.uni-freiburg.de
+
+              fax:   (++49) 761-203-8142
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++  Since we want to inform you about updates of the package,  ++
+++  please SEND us an EMAIL if you use the package             ++
+++  so that we can include your address in the mailing list.   ++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+============================================================================
+
+
+>>> PLEASE adjust the makefiles in ./bin and ./example/bin to your machine`s
+>>> specification
+
+
+This directory contains some compressed archives with a current
+version of our PUMA-Package and some literature.
+You should find the following files:
+
+README		This file
+
+INSTALL		A simple shell-script to unpack the archives and
+		to install the package and programs.
+
+puma.tar.gz	The source code to create the package PUMA
+
+example.tar.gz	Two examples to show the usage of the package and
+		to give a first impression of the computational power 
+
+doc.tar.gz	Some literature and documentation
+
+============================================================================
+
+The archives contain the following files:
+
+puma.tar.gz:	
+
+	include/puma.h		The header-file of the package.
+				All public available member functions are 
+				documented in this file. A more detailed 
+				description will be available soon.
+
+	src/puma.c		The documented source-code of the package.
+
+	src/graph.c             Graphic functions source-code
+
+	include/tc_time.h	The header-file for functions to measure the
+				timing of the package.
+
+	src/tc_time.c		The source-code for the timing-functions.
+
+	bin/makefile		The makefile to create the library-file
+				lib/lib_puma.a
+
+
+example.tar.gz:	
+
+	example/src/test.c	The source-code for a simple test program 
+				that shows the usage of the package.
+
+	example/src/puma_shell.c  The source-code for an interactive 
+				interface that is used to give a first 
+				impression of the computational power of 
+				the package.
+
+	example/bin/makefile	The makefile for the programs test and 
+				puma_shell. To create these programs the
+				library lib/lib_puma.a must already have 
+				been created with bin/makefile.
+				Both programs can be called with the 
+				option '-h' to give a help text. If the 
+				program 'puma_shell' is called with the 
+				option '-sh' the interactive shell is entered. 
+				There the list of commands can be obtained by 
+				the 'h'-command.
+
+	example/bin/rd53
+	example/bin/add6 
+	example/bin/*.blif	Some benchmarks for testing the package. 
+				The full benchmark set for LGSynth93 is
+				available from <mcnc.org>.
+
+
+doc.tar.gz:
+
+	doc/DAC94.ps		A ps-file of the basis article on OKFDDs 
+				published at the Design Automation Conference 
+				1994, San Diego. 
+
+	doc/PACKAGE.ps		A brief summary of the package that describes 
+				some features and gives references to further 
+				published work. 
+
+============================================================================
+
+The package has been tested on different computers, i.e.:
+
+- SUN Sparc 
+- HP 9000
+- PC 386 under Linux
+
+Hardware requirements: 4 MB memory and 2 MB harddisc
+
+For the developement of the package we used g++, 
+the GNU project C++ Compiler (version 2.7.1).
+
+============================================================================
+
+Changes in OKFDD-Package PUMA V2.18:
+
+!!! The functions OKFDD_ID(utnode*) and OKFDD_Label(utnode*) did not
+    work correct for inverted edges on all machines. Now, the last bit
+    of the pointers are masked before evaluation.
+
+!!! In function OKFDD_Synthesis() the second operand was set to OKFDD_ONE 
+    even for synthesis-operations with two arguments. Therefore, the 
+    synthesized functions were not correct. This bug has been fixed.
+
+!!! The functions counting the number of 1-paths returned the correct 
+    values, but for negative Davio-nodes the output files were not correct.
+    The corresponding functions have been modified.
+
+  + A directory structure for the different files has been introduced.
+    The header-files and the library are located in subdirectories now.
+    A special subdirectory for the examples exists.
+
+  + tc_time.h is included in puma.h. Therefore, it is not necessary to
+    include tc_time.h in applications but it suffices to include puma.h.
+
+  + puma.h has been reformated to 80 colums.
+
+  + The definitions of 'uchar' 'usint' 'ulint' 'ut_max' 'name_limit' 
+    have been deleted in puma.c, since they are defined in puma.h
+
+  + The definitions of 'm_and' has been moved from puma.c to puma.h
+
+  + The file tc_time.cc has been renamed to tc_time.c.
+
+  + The -s flag for the linker have been removed in the makefile
+    to allow debugging of applications.
+
+============================================================================
+
+Changes in OKFDD-Package PUMA V2.19:
+
+!!! Control flags for some pointers have not been reset correctly, 
+    causing segmentation faults during DTL-Sifting.
+
+  + The files tc_time.h and tc_time.c have been modified, to make the 
+    functions to measure the timing also available under Solaris of SUN.
+
+============================================================================
+
+Changes in OKFDD-Package PUMA V2.20:
+
+!!! Extra flags for traversal procedures and decomposition type changes 
+    are introduced. Now, synthesis procedures and likewise functions (that
+    create and delete nodes) can be performed during traversal procedures.
+
+  + Parameter OKFDD_New_Table_Size introduced for setting of unique table
+    size with procedure OKFDD_Resize_ut.
+
+  + All private members of puma classes are changed to protected members.
+    Now the protected elements can be accessed by derived classes.
+
+  + OKFDD_Read_BLIF is more flexible with different BLIF-file descriptions.
+
+============================================================================
+
+Changes in OKFDD-Package PUMA V2.21:
+
+!!! Compilation with GNU C++ versions up to 2.7.1 possible
+
+  + Layout of sourcecode changed to 80 columns
+
+============================================================================
+
+Changes in OKFDD-Package PUMA V2.22:
+
+!!! Some allocation / deallocation problems solved
+
+!!! Improvements of Friedman algorithms (only technical stuff)
+
+  + Visualization of OKFDDs possible by procedures XShowDD, XShowDD_all and
+    XShowDD_mult and via command 'X' in user-shell
+
+============================================================================
