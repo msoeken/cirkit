@@ -74,17 +74,21 @@ store --clear -ac
 #--------------------------------------#
 # 1. Creates random circuit with seed  #
 # 2. Prints circuit                    #
-# 3. Creates truth table from circuit  #
-# 4. Performs exact synthesis with SAT #
-# 5. Prints circuit                    #
-# 6. Show circuit statistics           #
-# 7. Clear circuit and truth table     #
+# 3. Simplify circuit                  #
+# 4. Prints circuit                    #
+# 5. Creates truth table from circuit  #
+# 6. Performs exact synthesis with SAT #
+# 7. Prints circuit                    #
+# 8. Show circuit statistics           #
+# 9. Clear circuit and truth table     #
 #--------------------------------------#
 
-random_circuit --seed 2999860053
+random_circuit --seed 655321
+print -c
+revsimp
 print -c
 circuit > spec
-exs --mode 1 --new
+exs -n --new
 print -c
 ps -c
 store --clear -sc

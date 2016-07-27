@@ -156,6 +156,11 @@ void exorcism_minimization( const cube_vec_t& cubes,
   const auto on_cube  = get( settings, "on_cube",  cube_function_t() );
   const auto esopname = get( settings, "esopname", std::string( "/tmp/test.esop" ) );
 
+  if ( cubes.empty() )
+  {
+    return;
+  }
+
   abc::Vec_Wec_t *esop = abc::Vec_WecAlloc( 0u );
 
   for ( const auto& cube : cubes )
@@ -176,7 +181,7 @@ void exorcism_minimization( const cube_vec_t& cubes,
     abc::Vec_WecPrint( esop, 0 );
   }
 
-  abc::Abc_ExorcismMain( esop, 3, 1, const_cast<char*>( esopname.c_str() ), 2, verbose );
+  abc::Abc_ExorcismMain( esop, cubes.front().length(), 1, const_cast<char*>( esopname.c_str() ), 2, verbose );
   abc::Vec_WecFree( esop );
 
   /* Parse */

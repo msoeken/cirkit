@@ -43,7 +43,7 @@ revsimp_command::revsimp_command( const environment::ptr& env )
   : cirkit_command( env, "Reversible circuit simplification" )
 {
   opts.add_options()
-    ( "methods",   value_with_default( &methods ), "optimization methods:\nm: try to merge gates with same target\nn: cancel NOT gates\na: merge adjacent gates\ns: propagate SWAP gates (may change output order)" )
+    ( "methods",   value_with_default( &methods ), "optimization methods:\nm: try to merge gates with same target\nn: cancel NOT gates\na: merge adjacent gates\ne: resynthesize same-target gates with exorcism\ns: propagate SWAP gates (may change output order)" )
     ( "noreverse",                                 "do not optimize in reverse direction" )
     ;
   be_verbose();

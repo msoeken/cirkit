@@ -394,10 +394,6 @@ void exorcism_merge_heuristic_add_cubes( circuit& circ, const cube_vec_t& cubes,
     return;
   }
 
-  std::cout << boost::format( "[i] add_cubes: %d cubes" ) % cubes.size() << std::endl;
-
-  common_pla_print( cubes );
-
   /* we call exorcism */
   auto f = [&circ, current_target]( const cube_t& c ) {
     /* c.first is bits, c.second is care */
@@ -405,14 +401,12 @@ void exorcism_merge_heuristic_add_cubes( circuit& circ, const cube_vec_t& cubes,
   };
   auto settings = std::make_shared<properties>();
   settings->set( "on_cube", cube_function_t( f ) );
-  exorcism_minimization( cubes );
+  settings->set( "verbose", false );
+  exorcism_minimization( cubes, settings );
 }
 
 circuit exorcism_merge_heuristic( const circuit& base )
 {
-  // TODO
-  return base;
-
   circuit circ;
   circ.set_lines( base.lines() );
   copy_metadata( base, circ );
