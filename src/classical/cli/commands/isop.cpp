@@ -16,39 +16,53 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file isop.hpp
- *
- * @brief Compute ISOP with truth tables
- *
- * @author Mathias Soeken
- * @since  2.3
- */
+#include "isop.hpp"
 
-#ifndef TT_ISOP_HPP
-#define TT_ISOP_HPP
-
+#include <iostream>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include <core/cube.hpp>
+#include <core/utils/range_utils.hpp>
+#include <classical/cli/stores.hpp>
+#include <classical/functions/isop.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
 {
 
-/* based on ABC's Abc_Tt6IsopCover */
-tt tt_isop( const tt& on, const tt& ondc, std::vector<int>& cover );
-
-/* based on ABC's Abc_Tt6Cnf */
-std::vector<int> tt_cnf( const tt& f );
-void tt_cnf( const tt& f, std::vector<int>& cover );
-
-/* converters to cube_vec_t */
-cube_vec_t cover_to_cubes( const std::vector<int>& cover, unsigned num_vars );
-
+isop_command::isop_command( const environment::ptr& env )
+  : cirkit_command( env, "Compute ISOP" )
+{
+  opts.add_options()
+    ( "tt,t", "computes ISOP from truth table" )
+    ;
 }
 
-#endif
+command::rules_t isop_command::validity_rules() const
+{
+  return {
+    {[this]() { return !is_set( "tt" ) || env->store<tt>().current_index() != -1; }, "no truth table in store" }
+  };
+}
+
+bool isop_command::execute()
+{
+  if ( is_set( "tt" ) )
+  {
+    const auto& tts = env->store<tt>();
+
+    std::vector<int> cover;
+    tt_isop( tts.current(), tts.current(), cover );
+    const auto sop = cover_to_cubes( cover, tt_num_vars( tts.current() ) );
+    common_pla_print( sop );
+  }
+
+  return true;
+}
+
+}
 
 // Local Variables:
 // c-basic-offset: 2

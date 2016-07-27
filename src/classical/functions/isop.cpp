@@ -120,6 +120,33 @@ void tt_cnf( const tt& f, std::vector<int>& cover )
   }
 }
 
+cube_vec_t cover_to_cubes( const std::vector<int>& cover, unsigned num_vars )
+{
+  cube_vec_t sop;
+
+  for ( auto c : cover )
+  {
+    const auto cube_bv = boost::dynamic_bitset<>( num_vars << 1, c );
+    cube term( num_vars );
+    for ( auto i = 0u; i < num_vars; ++i )
+    {
+      assert( !( cube_bv[i << 1] && cube_bv[( i << 1 ) + 1] ) );
+      if ( cube_bv[i << 1] )
+      {
+        term[i] = '0';
+      }
+      else if ( cube_bv[(i << 1) + 1] )
+      {
+        term[i] = '1';
+      }
+      /* else don't care by default */
+    }
+    sop.push_back( term );
+  }
+
+  return sop;
+}
+
 }
 
 // Local Variables:

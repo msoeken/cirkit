@@ -41,6 +41,7 @@
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/feather.hpp>
 #include <classical/cli/commands/gen_trans_arith.hpp>
+#include <classical/cli/commands/isop.hpp>
 #include <classical/cli/commands/memristor.hpp>
 #include <classical/cli/commands/mig_rewrite.hpp>
 #include <classical/cli/commands/migfh.hpp>
@@ -126,6 +127,7 @@ int main( int argc, char ** argv )
 #ifdef USE_FORMAL_COMMANDS
   ADD_COMMAND( exact_mig );
 #endif
+  ADD_COMMAND( isop );
 
   cli.set_category( "Reverse engineering" );
   ADD_COMMAND( cuts );

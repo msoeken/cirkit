@@ -19,32 +19,29 @@
 /**
  * @file isop.hpp
  *
- * @brief Compute ISOP with truth tables
+ * @brief Compute ISOP
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef TT_ISOP_HPP
-#define TT_ISOP_HPP
+#ifndef CLI_ISOP_COMMAND_HPP
+#define CLI_ISOP_COMMAND_HPP
 
-#include <vector>
-
-#include <core/cube.hpp>
-#include <classical/utils/truth_table_utils.hpp>
+#include <core/cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-/* based on ABC's Abc_Tt6IsopCover */
-tt tt_isop( const tt& on, const tt& ondc, std::vector<int>& cover );
+class isop_command : public cirkit_command
+{
+public:
+  isop_command( const environment::ptr& env );
 
-/* based on ABC's Abc_Tt6Cnf */
-std::vector<int> tt_cnf( const tt& f );
-void tt_cnf( const tt& f, std::vector<int>& cover );
-
-/* converters to cube_vec_t */
-cube_vec_t cover_to_cubes( const std::vector<int>& cover, unsigned num_vars );
+protected:
+  rules_t validity_rules() const;
+  bool execute();
+};
 
 }
 
