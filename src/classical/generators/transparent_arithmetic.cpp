@@ -151,13 +151,15 @@ void generate_transparent_arithmetic_circuit( std::ostream& os,
           {
             /* we need one more control and two more words */
             const auto c2 = get_control( true );
+            const auto cw1 = new_word();
+            const auto cw2 = new_word();
             const auto nw1 = new_word();
             const auto nw2 = new_word();
-            for ( auto i = 0u; i < bitwidth; ++i )
-            {
-              assigns << boost::format( "  assign %s[%d] = %s & %s[%d];" ) % nw1 % i % c % w1 % i << std::endl;
-              assigns << boost::format( "  assign %s[%d] = %s & %s[%d];" ) % nw2 % i % c2 % w2 % i << std::endl;
-            }
+
+            assigns << boost::format( "  assign %s = {%s};" ) % cw1 % boost::join( std::vector<std::string>( bitwidth, c ), "," ) << std::endl;
+            assigns << boost::format( "  assign %s = {%s};" ) % cw2 % boost::join( std::vector<std::string>( bitwidth, c2 ), "," ) << std::endl;
+            assigns << boost::format( "  assign %s = %s & %s;" ) % nw1 % cw1 % w1 << std::endl;
+            assigns << boost::format( "  assign %s = %s & %s;" ) % nw2 % cw2 % w2 << std::endl;
             assigns << boost::format( "  assign %s = %s | %s;" ) % nw % nw1 % nw2 << std::endl;
           }
           break;
