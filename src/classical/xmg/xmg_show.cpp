@@ -51,6 +51,7 @@ public:
     {
       properties["style"] = "filled";
       properties["fillcolor"] = "lightskyblue";
+      properties["label"] = "XOR";
     }
     else if ( xmg.is_maj( n ) )
     {
@@ -59,10 +60,19 @@ public:
       if ( *( boost::adjacent_vertices( n, xmg.graph() ).first ) != 0 )
       {
         properties["fillcolor"] = "lightseagreen";
+        properties["label"] = "MAJ";
       }
       else
       {
         properties["fillcolor"] = "limegreen";
+        if ( xmg.complement()[*( boost::out_edges( n, xmg.graph() ).first )] )
+        {
+          properties["label"] = "OR";
+        }
+        else
+        {
+          properties["label"] = "AND";
+        }
       }
     }
 
@@ -77,9 +87,11 @@ public:
 
   void operator()( std::ostream& os, const xmg_edge& e )
   {
-    const auto& complement = boost::get( boost::edge_complement, xmg.graph() );
-
-    if ( complement[e] )
+    if ( boost::target( e, xmg.graph() ) == 0 )
+    {
+      os << "[style=invis]";
+    }
+    else if ( xmg.complement()[e] )
     {
       os << "[style=dashed]";
     }

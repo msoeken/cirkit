@@ -19,7 +19,7 @@
 /**
  * @file xmg_show.hpp
  *
- * @brief TODO
+ * @brief GraphViz export for XMGs
  *
  * @author Mathias Soeken
  * @since  2.3

@@ -98,6 +98,8 @@ public:
 
   using vertex_range_t = boost::iterator_range<boost::graph_traits<xmg_graph_t>::vertex_iterator>;
 
+  using complement_property_map_t = boost::property_map<graph_t, boost::edge_complement_t>::type;
+
 public:
   xmg_graph( const std::string& name = std::string() );
 
@@ -136,11 +138,14 @@ public:
   graph_t& graph();
   const input_vec_t& inputs() const;
   const output_vec_t& outputs() const;
+  input_vec_t& inputs();
+  output_vec_t& outputs();
   const std::string& input_name( xmg_node n ) const;
   const unsigned input_index( xmg_node n ) const;
   std::vector<xmg_function> children( xmg_node n ) const;
   vertex_range_t nodes() const;
   std::vector<node_t> topological_nodes() const;
+  inline const complement_property_map_t& complement() { return _complement; }
 
   /* cover */
   bool has_cover() const;
@@ -177,7 +182,7 @@ private:
   std::unordered_map<maj_strash_key_t, node_t, hash<maj_strash_key_t>> maj_strash;
   std::unordered_map<xor_strash_key_t, node_t, hash<xor_strash_key_t>> xor_strash;
 
-  boost::property_map<graph_t, boost::edge_complement_t>::type         complement;
+  complement_property_map_t                                            _complement;
 
   /* additional network information */
   dirty<std::vector<unsigned>>                                         fanout;

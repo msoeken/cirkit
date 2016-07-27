@@ -45,7 +45,8 @@ namespace cirkit
 
 xmg_graph::xmg_graph( const std::string& name )
   : constant( add_vertex( g ) ),
-    _name( name )
+    _name( name ),
+    _complement( boost::get( boost::edge_complement, g ) )
 {
   assert( constant == 0 );
 }
@@ -122,9 +123,9 @@ xmg_function xmg_graph::create_maj( const xmg_function& a, const xmg_function& b
   const auto eb = add_edge( node, children[1].node, g ).first;
   const auto ec = add_edge( node, children[2].node, g ).first;
 
-  complement[ea] = children[0].complemented;
-  complement[eb] = children[1].complemented;
-  complement[ec] = children[2].complemented;
+  _complement[ea] = children[0].complemented;
+  _complement[eb] = children[1].complemented;
+  _complement[ec] = children[2].complemented;
 
   fanout.make_dirty();
   parentss.make_dirty();
@@ -164,8 +165,8 @@ xmg_function xmg_graph::create_xor( const xmg_function& a, const xmg_function& b
     const auto ea = add_edge( node, key.first.node, g ).first;
     const auto eb = add_edge( node, key.second.node, g ).first;
 
-    complement[ea] = false;
-    complement[eb] = false;
+    _complement[ea] = false;
+    _complement[eb] = false;
 
     fanout.make_dirty();
     parentss.make_dirty();
@@ -302,6 +303,16 @@ const xmg_graph::output_vec_t& xmg_graph::outputs() const
   return _outputs;
 }
 
+xmg_graph::input_vec_t& xmg_graph::inputs()
+{
+  return _inputs;
+}
+
+xmg_graph::output_vec_t& xmg_graph::outputs()
+{
+  return _outputs;
+}
+
 const std::string& xmg_graph::input_name( xmg_node n ) const
 {
   return _inputs[_input_to_id.at( n )].second;
@@ -322,7 +333,7 @@ std::vector<xmg_function> xmg_graph::children( xmg_node n ) const
   std::vector<xmg_function> c;
   for ( const auto& e : boost::make_iterator_range( boost::out_edges( n, g ) ) )
   {
-    c.push_back( xmg_function( boost::target( e, g ), complement[e] ) );
+    c.push_back( xmg_function( boost::target( e, g ), _complement[e] ) );
   }
   return c;
 }
