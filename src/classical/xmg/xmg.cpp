@@ -127,9 +127,7 @@ xmg_function xmg_graph::create_maj( const xmg_function& a, const xmg_function& b
   _complement[eb] = children[1].complemented;
   _complement[ec] = children[2].complemented;
 
-  fanout.make_dirty();
-  parentss.make_dirty();
-  levels.make_dirty();
+  mark_as_modified();
 
   maj_strash[key] = node;
   return xmg_function( node, node_complement );
@@ -168,9 +166,7 @@ xmg_function xmg_graph::create_xor( const xmg_function& a, const xmg_function& b
     _complement[ea] = false;
     _complement[eb] = false;
 
-    fanout.make_dirty();
-    parentss.make_dirty();
-    levels.make_dirty();
+    mark_as_modified();
 
     xor_strash[key] = node;
     return xmg_function( node, node_complement );
@@ -411,6 +407,13 @@ void xmg_graph::mark( xmg_node n )
   {
     marks.set( n );
   }
+}
+
+void xmg_graph::mark_as_modified()
+{
+  fanout.make_dirty();
+  parentss.make_dirty();
+  levels.make_dirty();
 }
 
 /******************************************************************************

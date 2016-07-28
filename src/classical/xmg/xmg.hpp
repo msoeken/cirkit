@@ -164,6 +164,8 @@ public:
   bool is_marked( xmg_node n) const;
   void mark( xmg_node n );
 
+  void mark_as_modified();
+
 public: /* properties */
   inline void set_native_xor( bool native_xor ) { _native_xor = native_xor; }
   inline bool has_native_xor() const            { return _native_xor; }

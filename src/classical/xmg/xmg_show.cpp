@@ -45,13 +45,18 @@ public:
 
     if ( xmg.is_input( n ) )
     {
+      properties["style"] = "filled";
+      properties["fillcolor"] = "snow2";
       properties["shape"] = "house";
     }
     else if ( xmg.is_xor( n ) )
     {
       properties["style"] = "filled";
       properties["fillcolor"] = "lightskyblue";
-      properties["label"] = "XOR";
+      properties["label"] = "<<font point-size=\"11\">XOR</font>";
+
+      properties["label"] += boost::str( boost::format( "<br/><font point-size=\"10\">%d</font>" ) % n );
+      properties["label"] += ">";
     }
     else if ( xmg.is_maj( n ) )
     {
@@ -59,21 +64,25 @@ public:
 
       if ( *( boost::adjacent_vertices( n, xmg.graph() ).first ) != 0 )
       {
-        properties["fillcolor"] = "lightseagreen";
-        properties["label"] = "MAJ";
+        properties["fillcolor"] = "lightsalmon";
+        properties["label"] = "<<font point-size=\"11\">MAJ</font>";
       }
       else
       {
-        properties["fillcolor"] = "limegreen";
         if ( xmg.complement()[*( boost::out_edges( n, xmg.graph() ).first )] )
         {
-          properties["label"] = "OR";
+          properties["fillcolor"] = "palegreen2";
+          properties["label"] = "<<font point-size=\"11\">OR</font>";
         }
         else
         {
-          properties["label"] = "AND";
+          properties["fillcolor"] = "lightcoral";
+          properties["label"] = "<<font point-size=\"11\">AND</font>";
         }
       }
+
+      properties["label"] += boost::str( boost::format( "<br/><font point-size=\"10\">%d</font>" ) % n );
+      properties["label"] += ">";
     }
 
     if ( xmg.is_marked( n ) )
@@ -103,7 +112,7 @@ public:
     auto index = 0u;
     for ( const auto& o : xmg.outputs() )
     {
-      os << "o" << index << "[label=\"" << o.second << "\",shape=house];" << std::endl;
+      os << "o" << index << "[label=\"" << o.second << "\",shape=house,fillcolor=snow2,style=filled];" << std::endl;
       os << "o" << index << " -> " << o.first.node << " ";
       if ( o.first.complemented )
       {
