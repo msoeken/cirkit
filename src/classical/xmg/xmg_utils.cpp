@@ -19,6 +19,7 @@
 #include "xmg_utils.hpp"
 
 #include <boost/format.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include <classical/xmg/xmg_cover.hpp>
 #include <classical/xmg/xmg_simulate.hpp>
@@ -182,6 +183,19 @@ boost::dynamic_bitset<> xmg_output_mask( const xmg_graph& xmg )
   }
 
   return mask;
+}
+
+xmg_edge xmg_get_edge( const xmg_graph& xmg, xmg_node parent, xmg_node child )
+{
+  for ( const auto& edge : boost::make_iterator_range( boost::out_edges( parent, xmg.graph() ) ) )
+  {
+    if ( boost::target( edge, xmg.graph() ) == child )
+    {
+      return edge;
+    }
+  }
+
+  throw boost::str( boost::format( "no edge between %d and %d" ) % parent % child );
 }
 
 }
