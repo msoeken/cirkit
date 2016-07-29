@@ -517,7 +517,9 @@ show_store_entry<xmg_graph>::show_store_entry( command& cmd )
   boost::program_options::options_description xmg_options( "XMG options" );
 
   xmg_options.add_options()
-    ( "cover", "dump LUT cover of XMG" )
+    ( "cover",          "dump LUT cover of XMG" )
+    ( "show_all_edges", "also show edges of AND and OR gates" )
+    ( "show_node_ids",  "show node ids" )
     ;
 
   cmd.opts.add( xmg_options );
@@ -537,7 +539,10 @@ bool show_store_entry<xmg_graph>::operator()( xmg_graph& xmg, const std::string&
   }
   else
   {
-    write_dot( xmg, dotname );
+    auto settings = std::make_shared<properties>();
+    settings->set( "show_and_or_edges", cmd.is_set( "show_all_edges" ) );
+    settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
+    write_dot( xmg, dotname, settings );
   }
 
   return true;

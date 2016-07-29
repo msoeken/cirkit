@@ -36,8 +36,30 @@ namespace cirkit
 struct xmg_dot_writer
 {
 public:
-  xmg_dot_writer( xmg_graph& xmg )
-    : xmg( xmg ) {}
+  xmg_dot_writer( xmg_graph& xmg, const properties::ptr& settings )
+    : xmg( xmg )
+  {
+    xor_color = get( settings, "xor_color", xor_color );
+    maj_color = get( settings, "maj_color", maj_color );
+    and_color = get( settings, "and_color", and_color );
+    or_color  = get( settings, "or_color",  or_color );
+    io_color  = get( settings, "io_color",  io_color );
+
+    show_and_or_edges = get( settings, "show_and_or_edges", show_and_or_edges );
+    show_node_ids     = get( settings, "show_node_ids",     show_node_ids );
+  }
+
+  std::string get_node_label( xmg_node n, const std::string& label )
+  {
+    std::string str = boost::str( boost::format( "<<font point-size=\"11\">%s</font>" ) % label );
+    if ( show_node_ids )
+    {
+      str += boost::str( boost::format( "<br/><font point-size=\"10\">%d</font>" ) % n );
+    }
+    str += ">";
+
+    return str;
+  }
 
   void operator()( std::ostream& os, xmg_node n )
   {
@@ -46,17 +68,15 @@ public:
     if ( xmg.is_input( n ) )
     {
       properties["style"] = "filled";
-      properties["fillcolor"] = "snow2";
+      properties["fillcolor"] = io_color;
       properties["shape"] = "house";
+      properties["label"] = get_node_label( n, n == 0 ? "0" : xmg.input_name( n ) );
     }
     else if ( xmg.is_xor( n ) )
     {
       properties["style"] = "filled";
-      properties["fillcolor"] = "lightskyblue";
-      properties["label"] = "<<font point-size=\"11\">XOR</font>";
-
-      properties["label"] += boost::str( boost::format( "<br/><font point-size=\"10\">%d</font>" ) % n );
-      properties["label"] += ">";
+      properties["fillcolor"] = xor_color;
+      properties["label"] = get_node_label( n, "XOR" );
     }
     else if ( xmg.is_maj( n ) )
     {
@@ -64,25 +84,22 @@ public:
 
       if ( *( boost::adjacent_vertices( n, xmg.graph() ).first ) != 0 )
       {
-        properties["fillcolor"] = "lightsalmon";
-        properties["label"] = "<<font point-size=\"11\">MAJ</font>";
+        properties["fillcolor"] = maj_color;
+        properties["label"] = get_node_label( n, "MAJ" );
       }
       else
       {
         if ( xmg.complement()[*( boost::out_edges( n, xmg.graph() ).first )] )
         {
-          properties["fillcolor"] = "palegreen2";
-          properties["label"] = "<<font point-size=\"11\">OR</font>";
+          properties["fillcolor"] = or_color;
+          properties["label"] = get_node_label( n, "OR" );
         }
         else
         {
-          properties["fillcolor"] = "lightcoral";
-          properties["label"] = "<<font point-size=\"11\">AND</font>";
+          properties["fillcolor"] = and_color;
+          properties["label"] = get_node_label( n, "AND" );
         }
       }
-
-      properties["label"] += boost::str( boost::format( "<br/><font point-size=\"10\">%d</font>" ) % n );
-      properties["label"] += ">";
     }
 
     if ( xmg.is_marked( n ) )
@@ -96,7 +113,7 @@ public:
 
   void operator()( std::ostream& os, const xmg_edge& e )
   {
-    if ( boost::target( e, xmg.graph() ) == 0 )
+    if ( !show_and_or_edges && boost::target( e, xmg.graph() ) == 0 )
     {
       os << "[style=invis]";
     }
@@ -112,8 +129,8 @@ public:
     auto index = 0u;
     for ( const auto& o : xmg.outputs() )
     {
-      os << "o" << index << "[label=\"" << o.second << "\",shape=house,fillcolor=snow2,style=filled];" << std::endl;
-      os << "o" << index << " -> " << o.first.node << " ";
+      os << boost::format( "o%d[label=<<font point-size=\"11\">%s</font>>,shape=house,fillcolor=%s,style=filled];" ) % index % o.second % io_color << std::endl;
+      os << boost::format( "o%d -> %d " ) % index % o.first.node;
       if ( o.first.complemented )
       {
         os << "[style=dashed]";
@@ -153,6 +170,15 @@ public:
 
 private:
   xmg_graph& xmg;
+
+  std::string xor_color = "lightskyblue";
+  std::string maj_color = "lightsalmon";
+  std::string and_color = "lightcoral";
+  std::string or_color  = "palegreen2";
+  std::string io_color  = "snow2";
+
+  bool show_and_or_edges = false;
+  bool show_node_ids = false;
 };
 
 /******************************************************************************
@@ -162,7 +188,7 @@ private:
 void write_dot( xmg_graph& xmg, std::ostream& os,
                 const properties::ptr& settings, const properties::ptr& statistics )
 {
-  xmg_dot_writer writer( xmg );
+  xmg_dot_writer writer( xmg, settings );
   write_graphviz( os, xmg.graph(), writer, writer, writer );
 }
 
