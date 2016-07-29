@@ -378,6 +378,24 @@ template<>
 xmg_graph store_convert<aig_graph, xmg_graph>( const aig_graph& aig );
 
 template<>
+inline bool store_can_convert<xmg_graph, aig_graph>() { return true; }
+
+template<>
+aig_graph store_convert<xmg_graph, aig_graph>( const xmg_graph& aig );
+
+template<>
+inline bool store_can_convert<mig_graph, xmg_graph>() { return true; }
+
+template<>
+xmg_graph store_convert<mig_graph, xmg_graph>( const mig_graph& mig );
+
+template<>
+inline bool store_can_convert<xmg_graph, mig_graph>() { return true; }
+
+template<>
+mig_graph store_convert<xmg_graph, mig_graph>( const xmg_graph& mig );
+
+template<>
 inline bool store_can_write_io_type<xmg_graph, io_bench_tag_t>( command& cmd ) { return true; }
 
 template<>

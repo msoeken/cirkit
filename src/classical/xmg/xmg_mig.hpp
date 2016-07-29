@@ -17,27 +17,27 @@
  */
 
 /**
- * @file xmg_aig.hpp
+ * @file xmg_mig.hpp
  *
- * @brief Convert XMGs to AIGs and vice versa
+ * @brief Convert XMGs to MIGs and vice versa
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef XMG_AIG_HPP
-#define XMG_AIG_HPP
+#ifndef XMG_MIG_HPP
+#define XMG_MIG_HPP
 
-#include <classical/aig.hpp>
+#include <classical/mig/mig.hpp>
 #include <classical/xmg/xmg.hpp>
 
 namespace cirkit
 {
 
-aig_graph xmg_create_aig_topological( const xmg_graph& circ );
-aig_graph xmg_create_aig_top_down( const xmg_graph& circ, const xmg_function& f );
+mig_graph xmg_create_mig_topological( const xmg_graph& circ );
+mig_graph xmg_create_mig_top_down( const xmg_graph& circ, const xmg_function& f );
 
-xmg_graph xmg_from_aig( const aig_graph& aig );
+xmg_graph xmg_from_mig( const mig_graph& mig );
 
 }
 

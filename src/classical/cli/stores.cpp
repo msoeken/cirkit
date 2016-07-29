@@ -52,6 +52,7 @@
 #include <classical/xmg/xmg_expr.hpp>
 #include <classical/xmg/xmg_io.hpp>
 #include <classical/xmg/xmg_lut.hpp>
+#include <classical/xmg/xmg_mig.hpp>
 #include <classical/xmg/xmg_show.hpp>
 #include <classical/xmg/xmg_string.hpp>
 #include <classical/xmg/xmg_utils.hpp>
@@ -572,6 +573,24 @@ template<>
 xmg_graph store_convert<aig_graph, xmg_graph>( const aig_graph& aig )
 {
   return xmg_from_aig( aig );
+}
+
+template<>
+aig_graph store_convert<xmg_graph, aig_graph>( const xmg_graph& aig )
+{
+  return xmg_create_aig_topological( aig );
+}
+
+template<>
+xmg_graph store_convert<mig_graph, xmg_graph>( const mig_graph& mig )
+{
+  return xmg_from_mig( mig );
+}
+
+template<>
+mig_graph store_convert<xmg_graph, mig_graph>( const xmg_graph& mig )
+{
+  return xmg_create_mig_topological( mig );
 }
 
 template<>
