@@ -48,7 +48,7 @@ public:
   log_opt_t log() const;
 
 private:
-  unsigned esop_minimizer = 0u;
+  unsigned esop_minimizer = 1u;
 };
 
 }

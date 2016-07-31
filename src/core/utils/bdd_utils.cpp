@@ -28,6 +28,7 @@
 #include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/numeric.hpp>
 
+#include <cudd.h>
 #include <cuddInt.h>
 
 #include <core/utils/range_utils.hpp>
@@ -502,6 +503,43 @@ bdd_function_t compute_characteristic( const bdd_function_t& bdd, bool inputs_fi
   }
 
   return {mgr, {f}};
+}
+
+cube_vec_t bdd_to_cubes( DdManager* manager, DdNode* f )
+{
+  DdGen * gen;
+  int * ddcube;
+  CUDD_VALUE_TYPE value;
+
+  cube_vec_t cubes;
+
+  Cudd_ForeachCube( manager, f, gen, ddcube, value )
+  {
+    boost::dynamic_bitset<> bits( manager->size ), care( manager->size );
+    for ( auto i = 0; i < manager->size; ++i )
+    {
+      switch ( ddcube[i] )
+      {
+      case 0:
+        care[i] = true;
+        break;
+      case 1:
+        bits[i] = true;
+        care[i] = true;
+        break;
+      default:
+        break;
+      }
+    }
+    cubes.push_back( cube( bits, care ) );
+  }
+
+  return cubes;
+}
+
+cube_vec_t bdd_to_cubes( const Cudd& manager, BDD f )
+{
+  return bdd_to_cubes( manager.getManager(), f.getNode() );
 }
 
 /******************************************************************************

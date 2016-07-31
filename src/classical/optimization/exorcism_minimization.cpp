@@ -28,6 +28,7 @@
 #include <boost/format.hpp>
 
 #include <core/io/pla_parser.hpp>
+#include <core/utils/bdd_utils.hpp>
 #include <classical/abc/abc_api.hpp>
 
 #include <misc/vec/vecInt.h>
@@ -98,27 +99,29 @@ private:
 
 void exorcism_minimization( DdManager * cudd, DdNode * f, const properties::ptr& settings, const properties::ptr& statistics )
 {
-  /* Settings */
-  std::string tmpfile = get( settings, "tmpfile", std::string( "/tmp/test.pla" ) );
+  return exorcism_minimization( bdd_to_cubes( cudd, f ), settings, statistics );
 
-  /* Re-route stdout of Cudd */
-  FILE * old = Cudd_ReadStdout( cudd );
+  // /* Settings */
+  // std::string tmpfile = get( settings, "tmpfile", std::string( "/tmp/test.pla" ) );
 
-  /* Print cover to file */
-  FILE * fd = fopen( tmpfile.c_str(), "w" );
-  Cudd_SetStdout( cudd, fd );
+  // /* Re-route stdout of Cudd */
+  // FILE * old = Cudd_ReadStdout( cudd );
 
-  fprintf( fd, ".i %d\n.o 1\n", Cudd_ReadSize( cudd ) );
-  Cudd_PrintMinterm( cudd, f );
-  fprintf( fd, ".e\n" );
+  // /* Print cover to file */
+  // FILE * fd = fopen( tmpfile.c_str(), "w" );
+  // Cudd_SetStdout( cudd, fd );
 
-  fclose( fd );
+  // fprintf( fd, ".i %d\n.o 1\n", Cudd_ReadSize( cudd ) );
+  // Cudd_PrintMinterm( cudd, f );
+  // fprintf( fd, ".e\n" );
 
-  /* Re-set stdout of Cudd */
-  Cudd_SetStdout( cudd, old );
+  // fclose( fd );
 
-  /* Run exorcism based on the file */
-  exorcism_minimization( tmpfile, settings, statistics );
+  // /* Re-set stdout of Cudd */
+  // Cudd_SetStdout( cudd, old );
+
+  // /* Run exorcism based on the file */
+  // exorcism_minimization( tmpfile, settings, statistics );
 }
 
 void exorcism_minimization( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
