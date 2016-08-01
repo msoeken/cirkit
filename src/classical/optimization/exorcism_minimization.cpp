@@ -18,8 +18,9 @@
 
 #include "exorcism_minimization.hpp"
 
-#include <stdio.h>
+#include <fcntl.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -184,7 +185,19 @@ void exorcism_minimization( const cube_vec_t& cubes,
     abc::Vec_WecPrint( esop, 0 );
   }
 
+  /* redict STDOUT because of one output line in Abc_ExorcismMain */
+
+  int p_bak, p_new;
+  fflush( stdout );
+  p_bak = dup( 1 );
+  p_new = open( "/dev/null", O_WRONLY );
+  dup2( p_new, 1 );
+  close( p_new );
   abc::Abc_ExorcismMain( esop, cubes.front().length(), 1, const_cast<char*>( esopname.c_str() ), 2, verbose );
+  fflush( stdout );
+  dup2( p_bak, 1 );
+  close( p_bak );
+
   abc::Vec_WecFree( esop );
 
   /* Parse */
