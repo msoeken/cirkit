@@ -28,12 +28,6 @@
 namespace cirkit
 {
 
-  unsigned number_of_qubits( const circuit& circ )
-  {
-    const auto n = circ.lines();
-    return has_fully_controlled_gate( circ ) ? n + 1 : n;
-  }
-
   void print_statistics( std::ostream& os, const circuit& circ, double runtime, const print_statistics_settings& settings )
   {
     std::string runtime_string;

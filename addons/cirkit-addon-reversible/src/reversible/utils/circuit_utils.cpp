@@ -46,6 +46,12 @@ bool has_fully_controlled_gate( const circuit& circ )
   return false;
 }
 
+unsigned number_of_qubits( const circuit& circ )
+{
+  const auto n = circ.lines();
+  return has_fully_controlled_gate( circ ) ? n + 1 : n;
+}
+
 }
 
 // Local Variables:

@@ -38,6 +38,8 @@
 #include <reversible/io/write_realization.hpp>
 #include <reversible/io/write_specification.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
+#include <reversible/utils/circuit_utils.hpp>
+#include <reversible/utils/costs.hpp>
 
 namespace alice
 {
@@ -73,7 +75,10 @@ command::log_opt_t log_store_entry_statistics<circuit>( const circuit& circ )
 {
   return command::log_opt_t({
       {"gates", static_cast<int>( circ.num_gates() )},
-      {"lines", static_cast<int>( circ.lines() )}
+      {"lines", static_cast<int>( circ.lines() )},
+      {"tdepth", static_cast<unsigned>( costs( circ, costs_by_gate_func( t_depth_costs() ) ) )},
+      {"tcount", static_cast<unsigned>( costs( circ, costs_by_gate_func( t_costs() ) ) )},
+      {"qubits", number_of_qubits( circ )}
     });
 }
 
