@@ -87,7 +87,7 @@ externalProject_add(abc
   DOWNLOAD_DIR .
   URL "http://msoeken.github.io/tools/alanmi-abc-394fe1f315ae.zip"
   CONFIGURE_COMMAND ""
-  BUILD_COMMAND make -j${ProcCount} ABC_USE_NO_CUDD=0 ABC_USE_PIC=1 ABC_USE_NO_READLINE=1 ABC_USE_NAMESPACE=abc OPTFLAGS=-O3 libabc.a
+  BUILD_COMMAND make -j${ProcCount} ABC_USE_PIC=1 ABC_USE_NO_READLINE=1 ABC_USE_NAMESPACE=abc OPTFLAGS=-O3 libabc.a
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND cp ${abc_SRC}/libabc.a ${ext_LIB}/libabc.a
   LOG_DOWNLOAD 1
