@@ -56,13 +56,17 @@ class log_table:
 
         return str
 
+    def to_csv( self, sep = ',' ):
+        for slice in self.slices:
+            print( sep.join( str( self.get_data( slice, column, index ) ) for index, column in enumerate( self.columns ) ) )
+
     def sort( self, func ):
         self.slices.sort( key = func )
 
     def set_default( self, column, value ):
         self.defaults[column] = value
 
-    def format_column( self, slice, column, cid ):
+    def get_data( self, slice, column, cid ):
         if isinstance( column, tuple ):
             index = column[0]
             key   = column[1]
@@ -75,7 +79,10 @@ class log_table:
                 raise NameError( "Error for %s\nSlice: %s" % ( str( column ), slice ) )
             if len( column ) == 3:
                 data = column[2]( data )
-            return " %12s |" % data
+            return data
+
+    def format_column( self, slice, column, cid ):
+        return " %12s |" % self.get_data( slice, column, cid )
 
     # other utilities
     def sum( self, row, key ):
