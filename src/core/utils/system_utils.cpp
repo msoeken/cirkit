@@ -52,6 +52,12 @@ result_t execute_and_return( const std::string& cmd, const std::string& pattern 
   return { WEXITSTATUS( sresult ), result };
 }
 
+result_t execute_and_omit( const std::string& cmd )
+{
+  auto sresult = system( boost::str( boost::format( "( %s ) > /dev/null" ) % cmd ).c_str() );
+  return { WEXITSTATUS( sresult ), std::vector<std::string>() };
+}
+
 result_t execute_and_return( const std::string& cmd )
 {
   return execute_and_return( cmd, "( %s ) > %s" );
