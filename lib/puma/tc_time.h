@@ -38,8 +38,6 @@
 #include<sys/times.h>
 #include<sys/errno.h>
 
-using namespace std;
-
 // Defintion der Klasse stop_watch
 class stop_watch {
       long start_ticks;

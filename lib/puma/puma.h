@@ -1790,7 +1790,7 @@ class dd_man
 	// Reads next (complete line) in field line
 	// --------------------------------------------------------------------
 	void
-	get_line	(       ifstream &File_handle,
+  get_line	(       std::ifstream &File_handle,
 				char*	 Stringbuffer	    		);
 
 	// --------------------------------------------------------------------
