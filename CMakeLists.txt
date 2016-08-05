@@ -42,7 +42,7 @@ set( MAIN_Boost_LIBRARIES
 find_package(Boost REQUIRED COMPONENTS ${MAIN_Boost_LIBRARIES} )
 find_package(GMP REQUIRED)
 
-include_directories(${Boost_INCLUDE_DIR} ${GMP_INCLUDE_DIR} ext/include)
+include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${GMP_INCLUDE_DIR} ext/include)
 add_subdirectory(ext)
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs )
