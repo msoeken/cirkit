@@ -31,10 +31,10 @@
 #include <core/utils/timer.hpp>
 
 #include <classical/aig.hpp>
+#include <classical/abc/utils/abc_run_command.hpp>
 #include <classical/io/read_aiger.hpp>
 #include <classical/io/write_aiger.hpp>
 #include <classical/utils/aig_from_bdd.hpp>
-
 #include <classical/sat/sat_solver.hpp>
 #include <classical/sat/minisat.hpp>
 #include <classical/sat/operations/cardinality.hpp>
@@ -103,9 +103,10 @@ void assign_sets( const char * cube, unsigned j, std::vector<unsigned>& i10, std
 }
 
 template<typename Solver>
-unsigned synthesize_with_sat( Solver& solver, circuit& circ, unsigned n, std::vector<int>& xs, std::vector<int>& ys, int one_literal, int& sid, bool all_assumptions, bool verbose )
+void synthesize_with_sat( Solver& solver, circuit& circ, unsigned n, std::vector<int>& xs, std::vector<int>& ys, int one_literal, int& sid, bool all_assumptions, bool verbose, const properties::ptr& statistics )
 {
   auto assignment_count = 0u;
+  auto solving_time     = 0.0;
 
   if ( verbose )
   {
@@ -155,19 +156,22 @@ unsigned synthesize_with_sat( Solver& solver, circuit& circ, unsigned n, std::ve
       assume_diff = difference_clauses_plaisted_greenbaum( solver, xs, ys, sid );
       sid = assume_diff + 1;
 
-      if ( all_assumptions )
       {
-        if ( !assume_diffs.empty() ) { assume_diffs.back() *= -1; }
-        assume_diffs.push_back( -assume_diff );
+        increment_timer tim( &solving_time );
+        if ( all_assumptions )
+        {
+          if ( !assume_diffs.empty() ) { assume_diffs.back() *= -1; }
+          assume_diffs.push_back( -assume_diff );
 
-        std::vector<int> assumptions( assume_weights.size() + assume_diffs.size() );
-        boost::copy( assume_weights, assumptions.begin() );
-        boost::copy( assume_diffs, assumptions.begin() + assume_weights.size() );
-        result = solve( solver, sstats, assumptions );
-      }
-      else
-      {
-        result = solve( solver, sstats, {-assume_weight, -assume_diff} );
+          std::vector<int> assumptions( assume_weights.size() + assume_diffs.size() );
+          boost::copy( assume_weights, assumptions.begin() );
+          boost::copy( assume_diffs, assumptions.begin() + assume_weights.size() );
+          result = solve( solver, sstats, assumptions );
+        }
+        else
+        {
+          result = solve( solver, sstats, {-assume_weight, -assume_diff} );
+        }
       }
 
       if ( result == boost::none ) { break; }
@@ -248,7 +252,8 @@ unsigned synthesize_with_sat( Solver& solver, circuit& circ, unsigned n, std::ve
     assignment_count += count;
   }
 
-  return assignment_count;
+  set( statistics, "assignment_count", assignment_count );
+  set( statistics, "solving_time",     solving_time );
 }
 
 /******************************************************************************
@@ -498,14 +503,16 @@ bool symbolic_transformation_based_synthesis_sat( circuit& circ, const rcbdd& cf
 
     std::vector<int> piids, poids;
 
-    write_aiger( aig, "/tmp/test.aag" );
-    system( "aigtoaig /tmp/test.aag /tmp/test.aig" );
-    system( "abc -c \"read_aiger /tmp/test.aig; dc2; dc2; dc2; dc2; dc2; write_aiger /tmp/test.aig; quit\"" );
-    system( "aigtoaig /tmp/test.aig /tmp/test.aag" );
+    new_aig = abc_run_command( aig, "&syn3; &dc2; &syn3; &dc2; &syn3; &dc2" );
 
-    read_aiger( new_aig, "/tmp/test.aag" );
+    // write_aiger( aig, "/tmp/test.aag" );
+    // system( "aigtoaig /tmp/test.aag /tmp/test.aig" );
+    // system( "abc -c \"read_aiger /tmp/test.aig; dc2; dc2; dc2; dc2; dc2; write_aiger /tmp/test.aig; quit\"" );
+    // system( "aigtoaig /tmp/test.aig /tmp/test.aag" );
 
-    sid = add_aig( solver, new_aig, sid, piids, poids );
+    // read_aiger( new_aig, "/tmp/test.aag" );
+
+    sid = add_aig_with_gia( solver, new_aig, sid, piids, poids );
 
     add_clause( solver )( {poids[0]} );
 
@@ -539,8 +546,7 @@ bool symbolic_transformation_based_synthesis_sat( circuit& circ, const rcbdd& cf
     one_literal = 1 + 3 * xs.size();
   }
 
-  auto assignment_count = synthesize_with_sat( solver, circ, n, xs, ys, one_literal, sid, all_assumptions, verbose );
-  set( statistics, "assignment_count", assignment_count );
+  synthesize_with_sat( solver, circ, n, xs, ys, one_literal, sid, all_assumptions, verbose, statistics );
 
   return true;
 }
@@ -620,8 +626,7 @@ bool symbolic_transformation_based_synthesis_sat( circuit& dest, const circuit& 
     }
   }
 
-  auto assignment_count = synthesize_with_sat( solver, dest, n, xs, ys, one_literal, sid, all_assumptions, verbose );
-  set( statistics, "assignment_count", assignment_count );
+  synthesize_with_sat( solver, dest, n, xs, ys, one_literal, sid, all_assumptions, verbose, statistics );
 
   return true;
 }
@@ -655,8 +660,7 @@ bool symbolic_transformation_based_synthesis_sat( circuit& dest, const aig_graph
 
   dest.set_lines( n );
 
-  auto assignment_count = synthesize_with_sat( solver, dest, n, xs, ys, one_literal, sid, all_assumptions, verbose );
-  set( statistics, "assignment_count", assignment_count );
+  synthesize_with_sat( solver, dest, n, xs, ys, one_literal, sid, all_assumptions, verbose, statistics );
 
   return true;
 }

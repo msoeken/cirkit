@@ -134,6 +134,10 @@ bool tbs_command::execute()
   circuits.current() = circ;
 
   print_runtime();
+  if ( is_set( "sat" ) )
+  {
+    print_runtime( "solving_time", "SAT solving" );
+  }
 
   return true;
 }
