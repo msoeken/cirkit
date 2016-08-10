@@ -30,6 +30,7 @@
 #include <reversible/io/create_image.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/io/print_statistics.hpp>
+#include <reversible/io/read_qc.hpp>
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_pla.hpp>
@@ -194,6 +195,12 @@ void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std
   {
     os << "\\end{document}" << std::endl;
   }
+}
+
+template<>
+circuit store_read_io_type<circuit, io_qc_tag_t>( const std::string& filename, const command& cmd )
+{
+  return read_qc( filename );
 }
 
 /******************************************************************************

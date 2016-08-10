@@ -76,6 +76,7 @@ int main( int argc, char ** argv )
   ADD_READ_COMMAND( aiger, "Aiger" );
   ADD_READ_COMMAND( bench, "Bench" );
   ADD_READ_COMMAND( pla, "PLA" );
+  ADD_READ_COMMAND( qc, "QC" );
   ADD_READ_COMMAND( real, "realization" );
   ADD_READ_COMMAND( spec, "specification" );
   ADD_READ_COMMAND( verilog, "Verilog" );
