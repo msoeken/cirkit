@@ -40,6 +40,7 @@
 #include <reversible/cli/stores.hpp>
 #include <reversible/cli/commands/adding_lines.hpp>
 #include <reversible/cli/commands/cbs.hpp>
+#include <reversible/cli/commands/dxs.hpp>
 #include <reversible/cli/commands/embed.hpp>
 #include <reversible/cli/commands/enumerate.hpp>
 #include <reversible/cli/commands/esopbs.hpp>
@@ -65,7 +66,7 @@
 
 using namespace cirkit;
 
-#define STORES circuit, binary_truth_table, expression_t::ptr, bdd_function_t, rcbdd, aig_graph
+#define STORES circuit, binary_truth_table, expression_t::ptr, bdd_function_t, rcbdd, aig_graph, xmg_graph
 
 int main( int argc, char ** argv )
 {
@@ -87,6 +88,7 @@ int main( int argc, char ** argv )
   ADD_WRITE_COMMAND( real, "realization" );
   ADD_WRITE_COMMAND( spec, "specification" );
   ADD_WRITE_COMMAND( tikz, "TikZ" );
+  ADD_WRITE_COMMAND( verilog, "Verilog" );
 
   cli.set_category ("Embedding" );
 
@@ -97,6 +99,7 @@ int main( int argc, char ** argv )
 
   ADD_COMMAND( cbs );
   ADD_COMMAND( dbs );
+  ADD_COMMAND( dxs );
   ADD_COMMAND( esopbs );
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
