@@ -57,7 +57,7 @@ std::vector<bdd> bdd_subtract( const std::vector<bdd>& minuend, const std::vecto
   std::vector<bdd> diff( minuend.size() );
   bdd carry = minuend.front().manager->bdd_top();
 
-  for ( const auto& i : boost::counting_range( 0ul, minuend.size() ) )
+  for ( const auto& i : boost::counting_range( 0ul, static_cast<unsigned long>( minuend.size() ) ) )
   {
     std::tie( diff[i], carry ) = full_adder( minuend[i], !subtrahend[i], carry );
   }
@@ -70,7 +70,7 @@ std::vector<bdd> bdd_abs( const std::vector<bdd>& n )
   std::vector<bdd> mask( n.size(), n.back() );
   std::vector<bdd> result;
 
-  for ( const auto& i : boost::counting_range( 0ul, n.size() ) )
+  for ( const auto& i : boost::counting_range( 0ul, static_cast<unsigned long>( n.size() ) ) )
   {
     result.push_back( n[i] ^ mask[i] );
   }
