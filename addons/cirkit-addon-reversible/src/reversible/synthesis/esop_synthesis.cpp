@@ -147,6 +147,7 @@ namespace cirkit
     // Settings parsing
     const auto separate_polarities    = get( settings, "separate_polarities", false );
     const auto negative_control_lines = get( settings, "negative_control_lines", true );
+    const auto share_cube_on_target   = get( settings, "share_cube_on_target", true );
     const auto reordering             = get( settings, "reordering", cube_reordering_func( weighted_reordering() ) );
     const auto garbage_name           = get( settings, "garbage_name", std::string( "--" ) );
 
@@ -324,14 +325,41 @@ namespace cirkit
         }
 
         // iterate through output cube (bit by bit)
-        index = 0u;
-        for ( const auto& out_bit : it->second )
+        if ( !share_cube_on_target )
         {
-          if ( out_bit && *out_bit )
+          index = 0u;
+          for ( const auto& out_bit : it->second )
           {
-            append_toffoli( circ, controls, n + index );
+            if ( out_bit && *out_bit )
+            {
+              append_toffoli( circ, controls, n + index );
+            }
+            ++index;
           }
-          ++index;
+        }
+        else
+        {
+          index = 0u;
+          int first = -1;
+          auto pos = circ.num_gates();
+
+          for ( const auto& out_bit : it->second )
+          {
+            if ( out_bit && *out_bit )
+            {
+              if ( first == -1 )
+              {
+                append_toffoli( circ, controls, n + index );
+                first = n + index;
+              }
+              else
+              {
+                insert_cnot( circ, pos, make_var( first ), n + index );
+                append_cnot( circ, make_var( first ), n + index );
+              }
+            }
+            ++index;
+          }
         }
       }
     }

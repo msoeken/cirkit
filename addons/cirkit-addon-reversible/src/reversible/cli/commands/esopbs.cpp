@@ -49,10 +49,11 @@ esopbs_command::esopbs_command( const environment::ptr& env )
 {
   add_positional_option( "filename" );
   opts.add_options()
-    ( "filename", value( &filename ), "Filename to the ESOP file" )
-    ( "mct",                          "No negative controls" )
-    ( "new,n",                        "Create new store entry" )
+    ( "filename", value( &filename ), "filename to the ESOP file" )
+    ( "mct",                          "no negative controls" )
+    ( "no_shared_target",             "no shared target" )
     ;
+  add_new_option();
   be_verbose();
 }
 
@@ -65,16 +66,14 @@ bool esopbs_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
-  if ( circuits.empty() || is_set( "new" ) )
-  {
-    circuits.extend();
-  }
+  extend_if_new( circuits );
 
   auto settings = make_settings();
   settings->set( "negative_control_lines", !is_set( "mct" ) );
+  settings->set( "share_cube_on_target", !is_set( "no_shared_target" ) );
   esop_synthesis( circuits.current(), filename, settings, statistics );
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
 
   return true;
 }
@@ -82,6 +81,8 @@ bool esopbs_command::execute()
 command::log_opt_t esopbs_command::log() const
 {
   return log_opt_t({
+      {"mct", is_set( "mct" )},
+      {"no_shared_target", is_set( "no_shared_target" )},
       {"runtime", statistics->get<double>( "runtime" )}
     });
 }
