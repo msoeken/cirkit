@@ -145,10 +145,10 @@ namespace cirkit
   {
 
     // Settings parsing
-    bool separate_polarities = get<bool>( settings, "separate_polarities", false );
-    bool negative_control_lines = get<bool>( settings, "negative_control_lines", false );
-    cube_reordering_func reordering = get<cube_reordering_func>( settings, "reordering", weighted_reordering() );
-    std::string garbage_name = get<std::string>( settings, "garbage_name", "g" );
+    const auto separate_polarities    = get( settings, "separate_polarities", false );
+    const auto negative_control_lines = get( settings, "negative_control_lines", true );
+    const auto reordering             = get( settings, "reordering", cube_reordering_func( weighted_reordering() ) );
+    const auto garbage_name           = get( settings, "garbage_name", std::string( "--" ) );
 
     if ( separate_polarities && negative_control_lines )
     {
