@@ -86,6 +86,18 @@ paged_memory::iterator::iterator( unsigned index, unsigned address, std::vector<
 {
 }
 
+paged_memory::iterator& paged_memory::iterator::operator=( const iterator& other )
+{
+  if ( this != &other )
+  {
+    index = other.index;
+    address = other.address;
+    data = other.data;
+    additional = other.additional;
+  }
+  return *this;
+}
+
 paged_memory::iterator::reference paged_memory::iterator::operator*() const
 {
   return set( address, data, additional );

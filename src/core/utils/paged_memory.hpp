@@ -132,6 +132,9 @@ public:
     /* constructor */
     iterator( unsigned index, unsigned address, std::vector<unsigned>& data, unsigned additional );
 
+    /* assignment operator */
+    iterator& operator=( const iterator& other );
+
     /* operators */
     reference operator*() const;
     iterator& operator++();
