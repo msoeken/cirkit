@@ -185,8 +185,6 @@ boost::multiprecision::uint256_t worst_case( const aig_graph& f, const aig_graph
 
   abc::sat_solver_delete( solver );
 
-  // TODO extract solution
-
   /* clean up */
   abc::Gia_ManStop( miter );
   abc::Gia_ManStop( giaf );
