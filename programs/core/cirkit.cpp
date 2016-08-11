@@ -59,6 +59,7 @@
 #include <classical/cli/commands/support.hpp>
 #include <classical/cli/commands/tt.hpp>
 #include <classical/cli/commands/unate.hpp>
+#include <classical/cli/commands/worstcase.hpp>
 
 #ifdef USE_FORMAL_COMMANDS
 #include <formal/cli/commands/exact_mig.hpp>
@@ -98,6 +99,7 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Approximation" );
   ADD_COMMAND( comb_approx );
+  ADD_COMMAND( worstcase );
 
   cli.set_category( "Experimental" );
   ADD_COMMAND( testbdd );
