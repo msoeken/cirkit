@@ -84,12 +84,19 @@ void foreach_bit( const boost::dynamic_bitset<>& b, const Fn&& func )
 std::vector<unsigned> get_index_vector( const boost::dynamic_bitset<> b );
 
 template<class IntType>
-IntType to_multiprecision( const boost::dynamic_bitset<>& bs )
+IntType to_multiprecision( const boost::dynamic_bitset<>& bs, bool reverse = false )
 {
   IntType sum = 0;
   const IntType one = 1;
 
-  foreach_bit( bs, [&]( unsigned pos ) { sum |= (one << pos); } );
+  if ( reverse )
+  {
+    foreach_bit( bs, [&]( unsigned pos ) { sum |= (one << (bs.size() - pos - 1)); } );
+  }
+  else
+  {
+    foreach_bit( bs, [&]( unsigned pos ) { sum |= (one << pos); } );
+  }
 
   return sum;
 }
