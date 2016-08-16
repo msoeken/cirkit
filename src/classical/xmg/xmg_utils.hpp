@@ -60,6 +60,9 @@ boost::dynamic_bitset<> xmg_output_mask( const xmg_graph& xmg );
 /* returns the edge in between parent and child and fails if no such edge exists */
 xmg_edge xmg_get_edge( const xmg_graph& xmg, xmg_node parent, xmg_node child );
 
+/* delete all outputs that point to node */
+void xmg_delete_po_by_node( xmg_graph& xmg, xmg_node node );
+
 }
 
 #endif

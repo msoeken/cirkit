@@ -20,6 +20,7 @@
 
 #include <boost/format.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <range/v3/action/remove_if.hpp>
 
 #include <classical/xmg/xmg_cover.hpp>
 #include <classical/xmg/xmg_simulate.hpp>
@@ -196,6 +197,11 @@ xmg_edge xmg_get_edge( const xmg_graph& xmg, xmg_node parent, xmg_node child )
   }
 
   throw boost::str( boost::format( "no edge between %d and %d" ) % parent % child );
+}
+
+void xmg_delete_po_by_node( xmg_graph& xmg, xmg_node node )
+{
+  ranges::action::remove_if( xmg.outputs(), [node]( const xmg_graph::output_vec_t::value_type& v ) { return v.first.node == node; } );
 }
 
 }

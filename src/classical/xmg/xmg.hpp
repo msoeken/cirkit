@@ -110,6 +110,7 @@ public:
   xmg_function get_constant( bool value ) const;
   xmg_function create_pi( const std::string& name );
   void create_po( const xmg_function& f, const std::string& name );
+  void delete_po( unsigned index );
   xmg_function create_maj( const xmg_function& a, const xmg_function& b, const xmg_function& c );
   xmg_function create_xor( const xmg_function& a, const xmg_function& b );
   xmg_function create_and( const xmg_function& a, const xmg_function& b );

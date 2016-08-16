@@ -84,6 +84,14 @@ void xmg_graph::create_po( const xmg_function& f, const std::string& name )
   _outputs.push_back( {f, name} );
 }
 
+void xmg_graph::delete_po( unsigned index )
+{
+  if ( index < _outputs.size() )
+  {
+    _outputs.erase( _outputs.begin() + index );
+  }
+}
+
 xmg_function xmg_graph::create_maj( const xmg_function& a, const xmg_function& b, const xmg_function& c )
 {
   /* Special cases */
