@@ -35,7 +35,7 @@
 namespace cirkit
 {
 
-bool direct_xmg_synthesis( circuit& circ, const xmg_graph& xmg, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+bool direct_xmg_synthesis( circuit& circ, xmg_graph& xmg, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }
 

@@ -31,6 +31,184 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
+class direct_xmg_synthesis_manager
+{
+public:
+  direct_xmg_synthesis_manager( circuit& circ, xmg_graph& xmg, const properties::ptr& settings )
+    : circ( circ ),
+      xmg( xmg ),
+      node_to_line( xmg.size() )
+  {
+    garbage_name = get( settings, "garbage_name", garbage_name );
+
+    /* initialize reference counting */
+    xmg.init_refs();
+    xmg.inc_output_refs();
+  }
+
+  bool run()
+  {
+    add_inputs();
+
+    for ( auto node : xmg.topological_nodes() )
+    {
+      if ( xmg.is_input( node ) ) { continue; }
+
+      const auto children = xmg.children( node );
+      unsigned line;
+
+      if ( xmg.is_xor( node ) ) /* XOR */
+      {
+        if ( xmg.get_ref( children[0u].node ) == 1u )
+        {
+          /* set a <- a XOR b */
+          line = add_xor_inplace( children[0u], children[1u] );
+        }
+        else if ( xmg.get_ref( children[1u].node ) == 1u )
+        {
+          /* set b <- a XOR b */
+          line = add_xor_inplace( children[1u], children[0u] );
+        }
+        else
+        {
+          line = add_xor( children[0u], children[1u] );
+        }
+      }
+      else /* MAJ, AND, OR */
+      {
+        if ( children[0u].node == 0u )
+        {
+          if ( children[0u].complemented ) /* OR */
+          {
+            line = add_or( children[1u], children[2u] );
+          }
+          else /* AND */
+          {
+            line = add_and( children[1u], children[2u] );
+          }
+        }
+        else /* MAJ */
+        {
+          if ( xmg.get_ref( children[0u].node ) == 1u && xmg.get_ref( children[1u].node ) == 1u && xmg.get_ref( children[2u].node ) == 1u )
+          {
+            line = add_maj_inplace( children[0u], children[1u], children[2u] );
+          }
+          else
+          {
+            line = add_maj( children[0u], children[1u], children[2u] );
+          }
+        }
+      }
+
+      /* decrement reference counters and update line for node */
+      for ( const auto& c : children )
+      {
+        xmg.dec_ref( c.node );
+      }
+      node_to_line[node] = line;
+    }
+
+    add_outputs();
+
+    return true;
+  }
+
+private:
+  void add_inputs()
+  {
+    for ( const auto& input : xmg.inputs() )
+    {
+      node_to_line[input.first] = add_line_to_circuit( circ, input.second, garbage_name, constant(), true );
+    }
+  }
+
+  void add_outputs()
+  {
+    auto garbage = circ.garbage();
+    auto outputs = circ.outputs();
+
+    for ( const auto& output : xmg.outputs() )
+    {
+      const auto l = node_to_line[output.first.node];
+      assert( garbage[l] == true );
+
+      garbage[l] = false;
+      outputs[l] = output.second;
+
+      if ( output.first.complemented )
+      {
+        append_not( circ, l );
+      }
+    }
+
+    circ.set_garbage( garbage );
+    circ.set_outputs( outputs );
+  }
+
+  unsigned add_xor_inplace( const xmg_function& dest, const xmg_function& src )
+  {
+    append_cnot( circ, node_to_line[src.node], node_to_line[dest.node] );
+    return node_to_line[dest.node];
+  }
+
+  unsigned add_xor( const xmg_function& op1, const xmg_function& op2 )
+  {
+    const auto target = add_line_to_circuit( circ, "0", garbage_name, false, true );
+    append_cnot( circ, node_to_line[op1.node], target );
+    append_cnot( circ, node_to_line[op2.node], target );
+    return target;
+  }
+
+  unsigned add_or( const xmg_function& op1, const xmg_function& op2 )
+  {
+    const auto target = add_line_to_circuit( circ, "0", garbage_name, false, true );
+    append_toffoli( circ )( make_var( node_to_line[op1.node], op1.complemented ), make_var( node_to_line[op2.node], op2.complemented ) )( target );
+    append_not( circ, target );
+    return target;
+  }
+
+  unsigned add_and( const xmg_function& op1, const xmg_function& op2 )
+  {
+    const auto target = add_line_to_circuit( circ, "0", garbage_name, false, true );
+    append_toffoli( circ )( make_var( node_to_line[op1.node], !op1.complemented ), make_var( node_to_line[op2.node], !op2.complemented ) )( target );
+    return target;
+  }
+
+  unsigned add_maj_inplace( const xmg_function& op1, const xmg_function& op2, const xmg_function& op3 )
+  {
+    append_cnot( circ, make_var( node_to_line[op1.node], !op1.complemented ), node_to_line[op2.node] );
+    append_cnot( circ, make_var( node_to_line[op3.node], !op3.complemented ), node_to_line[op1.node] );
+    append_toffoli( circ )( make_var( node_to_line[op1.node], !op1.complemented ), make_var( node_to_line[op2.node], op2.complemented ) )( node_to_line[op3.node] );
+    return node_to_line[op3.node];
+  }
+
+  unsigned add_maj( const xmg_function& op1, const xmg_function& op2, const xmg_function& op3 )
+  {
+    const auto target = add_line_to_circuit( circ, "0", garbage_name, false, true );
+
+    const auto l0 = node_to_line[op1.node];
+    const auto l1 = node_to_line[op2.node];
+    const auto l2 = node_to_line[op3.node];
+
+    append_cnot( circ, make_var( l0, !op1.complemented ), l1 );
+    append_cnot( circ, make_var( l2, !op3.complemented ), l0 );
+    append_cnot( circ, make_var( l2, !op3.complemented ), target );
+    append_toffoli( circ )( make_var( l0, !op1.complemented ), make_var( l1, op2.complemented ) )( target );
+    append_cnot( circ, make_var( l2, !op3.complemented ), l0 );
+    append_cnot( circ, make_var( l0, !op1.complemented ), l1 );
+
+    return target;
+  }
+
+private:
+  circuit&              circ;
+  xmg_graph&            xmg;
+  std::vector<unsigned> node_to_line;
+
+  /* settings */
+  std::string garbage_name = "--";
+};
+
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
@@ -39,86 +217,14 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-bool direct_xmg_synthesis( circuit& circ, const xmg_graph& xmg, const properties::ptr& settings, const properties::ptr& statistics )
+bool direct_xmg_synthesis( circuit& circ, xmg_graph& xmg, const properties::ptr& settings, const properties::ptr& statistics )
 {
   const auto garbage_name = get( settings, "garbage_name", std::string( "--" ) );
 
   properties_timer t( statistics );
 
-  std::vector<unsigned> node_to_line( xmg.size() );
-
-  for ( const auto& input : xmg.inputs() )
-  {
-    node_to_line[input.first] = add_line_to_circuit( circ, input.second, garbage_name, constant(), true );
-  }
-
-  for ( const auto& node : xmg.topological_nodes() )
-  {
-    if ( xmg.is_input( node ) ) { continue; }
-
-    auto target = node_to_line[node] = add_line_to_circuit( circ, "0", garbage_name, false, true );
-    const auto children = xmg.children( node );
-
-    if ( xmg.is_xor( node ) ) /* XOR */
-    {
-      const auto l0 = node_to_line[children[0u].node];
-      const auto l1 = node_to_line[children[1u].node];
-
-      append_cnot( circ, make_var( l0, !children[0u].complemented ), target );
-      append_cnot( circ, make_var( l1, !children[1u].complemented ), target );
-    }
-    else /* OR, AND, MAJ */
-    {
-      const auto l1 = node_to_line[children[1u].node];
-      const auto l2 = node_to_line[children[2u].node];
-
-      if ( children[0u].node == 0u )
-      {
-        if ( children[0u].complemented ) /* OR */
-        {
-          append_toffoli( circ )( make_var( l1, children[1u].complemented ), make_var( l2, children[2u].complemented ) )( target );
-          append_not( circ, target );
-        }
-        else /* AND */
-        {
-          append_toffoli( circ )( make_var( l1, !children[1u].complemented ), make_var( l2, !children[2u].complemented ) )( target );
-        }
-      }
-      else /* MAJ */
-      {
-        const auto l0 = node_to_line[children[0u].node];
-
-        append_cnot( circ, make_var( l0, !children[0u].complemented ), l1 );
-        append_cnot( circ, make_var( l2, !children[2u].complemented ), l0 );
-        append_cnot( circ, make_var( l2, !children[2u].complemented ), target );
-        append_toffoli( circ )( make_var( l0, !children[0u].complemented ), make_var( l1, children[1u].complemented ) )( target );
-        append_cnot( circ, make_var( l2, !children[2u].complemented ), l0 );
-        append_cnot( circ, make_var( l0, !children[0u].complemented ), l1 );
-      }
-    }
-  }
-
-  auto garbage = circ.garbage();
-  auto outputs = circ.outputs();
-
-  for ( const auto& output : xmg.outputs() )
-  {
-    const auto l = node_to_line[output.first.node];
-    assert( garbage[l] == true );
-
-    garbage[l] = false;
-    outputs[l] = output.second;
-
-    if ( output.first.complemented )
-    {
-      append_not( circ, l );
-    }
-  }
-
-  circ.set_garbage( garbage );
-  circ.set_outputs( outputs );
-
-  return true;
+  direct_xmg_synthesis_manager mgr( circ, xmg, settings );
+  return mgr.run();
 }
 
 }
