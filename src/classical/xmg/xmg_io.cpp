@@ -223,13 +223,15 @@ xmg_function find_function( const std::unordered_map<std::string, xmg_function>&
  * Public functions                                                           *
  ******************************************************************************/
 
-xmg_graph read_verilog( const std::string& filename, bool native_xor )
+xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enable_structural_hashing, bool enable_inverter_propagation )
 {
   std::unordered_map<std::string, xmg_function> name_to_function;
   std::vector<std::string> output_names;
 
   xmg_graph xmg;
   xmg.set_native_xor( native_xor );
+  xmg.set_structural_hashing( enable_structural_hashing );
+  xmg.set_inverter_propagation( enable_inverter_propagation );
 
   name_to_function.insert( {"1'b0", xmg.get_constant( false )} );
   name_to_function.insert( {"1'b1", xmg.get_constant( true )} );

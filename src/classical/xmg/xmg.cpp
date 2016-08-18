@@ -107,7 +107,8 @@ xmg_function xmg_graph::create_maj( const xmg_function& a, const xmg_function& b
   std::sort( children, children + 3 );
 
   auto node_complement = false;
-  if ( static_cast<unsigned>( children[0].complemented ) + static_cast<unsigned>( children[1].complemented ) + static_cast<unsigned>( children[2].complemented ) >= 2u )
+  if ( _enable_inverter_propagation &&
+       static_cast<unsigned>( children[0].complemented ) + static_cast<unsigned>( children[1].complemented ) + static_cast<unsigned>( children[2].complemented ) >= 2u )
   {
     node_complement = true;
     children[0].complemented = !children[0].complemented;
@@ -118,7 +119,7 @@ xmg_function xmg_graph::create_maj( const xmg_function& a, const xmg_function& b
   auto key = std::make_tuple( children[0], children[1], children[2] );
 
   const auto it = maj_strash.find( key );
-  if ( it != maj_strash.end() )
+  if ( _enable_structural_hashing && it != maj_strash.end() )
   {
     return xmg_function( it->second, node_complement );
   }
@@ -155,11 +156,16 @@ xmg_function xmg_graph::create_xor( const xmg_function& a, const xmg_function& b
     auto key = a.node < b.node ? std::make_pair( a, b ) : std::make_pair( b, a );
 
     /* normalize polarities */
-    auto node_complement = key.first.complemented != key.second.complemented;
-    key.first.complemented = key.second.complemented = false;
+    auto node_complement = false;
+
+    if ( _enable_inverter_propagation )
+    {
+      node_complement = key.first.complemented != key.second.complemented;
+      key.first.complemented = key.second.complemented = false;
+    }
 
     const auto it = xor_strash.find( key );
-    if ( it != xor_strash.end() )
+    if ( _enable_structural_hashing && it != xor_strash.end() )
     {
       return xmg_function( it->second, node_complement );
     }
@@ -171,8 +177,8 @@ xmg_function xmg_graph::create_xor( const xmg_function& a, const xmg_function& b
     const auto ea = add_edge( node, key.first.node, g ).first;
     const auto eb = add_edge( node, key.second.node, g ).first;
 
-    _complement[ea] = false;
-    _complement[eb] = false;
+    _complement[ea] = key.first.complemented;
+    _complement[eb] = key.second.complemented;
 
     mark_as_modified();
 

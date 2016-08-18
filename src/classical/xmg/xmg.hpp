@@ -171,6 +171,12 @@ public: /* properties */
   inline void set_native_xor( bool native_xor ) { _native_xor = native_xor; }
   inline bool has_native_xor() const            { return _native_xor; }
 
+  inline void set_structural_hashing( bool enabled ) { _enable_structural_hashing = enabled; }
+  inline bool has_structural_hashing() const         { return _enable_structural_hashing; }
+
+  inline void set_inverter_propagation( bool enabled ) { _enable_inverter_propagation = enabled; }
+  inline bool has_inverter_propagation() const         { return _enable_inverter_propagation; }
+
 private:
   graph_t g;
   node_t  constant;
@@ -185,24 +191,26 @@ private:
   std::unordered_map<maj_strash_key_t, node_t, hash<maj_strash_key_t>> maj_strash;
   std::unordered_map<xor_strash_key_t, node_t, hash<xor_strash_key_t>> xor_strash;
 
-  complement_property_map_t                                            _complement;
+  complement_property_map_t               _complement;
 
   /* additional network information */
-  dirty<std::vector<unsigned>>                                         fanout;
-  dirty<std::vector<std::vector<node_t>>>                              parentss;
-  dirty<std::vector<unsigned>>                                         levels;
+  dirty<std::vector<unsigned>>            fanout;
+  dirty<std::vector<std::vector<node_t>>> parentss;
+  dirty<std::vector<unsigned>>            levels;
 
   /* network settings and stats */
-  bool                                                                 _native_xor = true;
-  unsigned                                                             _num_maj = 0u;
-  unsigned                                                             _num_xor = 0u;
+  bool                                    _native_xor = true;
+  bool                                    _enable_structural_hashing = true;
+  bool                                    _enable_inverter_propagation = true;
+  unsigned                                _num_maj = 0u;
+  unsigned                                _num_xor = 0u;
 
   /* cover */
-  std::shared_ptr<xmg_cover>                                           _cover = nullptr;
+  std::shared_ptr<xmg_cover>              _cover = nullptr;
 
   /* utilities */
-  std::vector<unsigned>                                                ref_count;
-  boost::dynamic_bitset<>                                              marks;
+  std::vector<unsigned>                   ref_count;
+  boost::dynamic_bitset<>                 marks;
 };
 
 }

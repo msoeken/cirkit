@@ -613,6 +613,8 @@ bool store_can_read_io_type<xmg_graph, io_verilog_tag_t>( command& cmd )
 
   xmg_options.add_options()
     ( "as_mig", "read as MIG (translate XOR to MAJ)" )
+    ( "no_strash", "disable structural hashing when reading the XMG" )
+    ( "no_invprop", "disable inverter propagation when reading the XMG" )
     ;
 
   cmd.opts.add( xmg_options );
@@ -623,7 +625,7 @@ bool store_can_read_io_type<xmg_graph, io_verilog_tag_t>( command& cmd )
 template<>
 xmg_graph store_read_io_type<xmg_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
 {
-  return read_verilog( filename, !cmd.is_set( "as_mig" ) );
+  return read_verilog( filename, !cmd.is_set( "as_mig" ), !cmd.is_set( "no_strash" ), !cmd.is_set( "no_invprop" ) );
 }
 
 template<>
