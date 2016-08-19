@@ -17,16 +17,16 @@
  */
 
 /**
- * @file read_qc.hpp
+ * @file write_qc.hpp
  *
- * @brief Read QC files
+ * @brief Write QC files
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef READ_QC_HPP
-#define READ_QC_HPP
+#ifndef WRITE_QC_HPP
+#define WRITE_QC_HPP
 
 #include <string>
 
@@ -35,7 +35,7 @@
 namespace cirkit
 {
 
-circuit read_qc( const std::string& filename );
+void write_qc( const circuit& circ, const std::string& filename );
 
 }
 

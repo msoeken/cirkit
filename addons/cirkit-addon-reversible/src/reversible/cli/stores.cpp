@@ -34,6 +34,7 @@
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_pla.hpp>
+#include <reversible/io/write_qc.hpp>
 #include <reversible/io/write_qpic.hpp>
 #include <reversible/io/write_quipper.hpp>
 #include <reversible/io/write_realization.hpp>
@@ -201,6 +202,12 @@ template<>
 circuit store_read_io_type<circuit, io_qc_tag_t>( const std::string& filename, const command& cmd )
 {
   return read_qc( filename );
+}
+
+template<>
+void store_write_io_type<circuit, io_qc_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
+{
+  write_qc( circ, filename );
 }
 
 /******************************************************************************
