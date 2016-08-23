@@ -40,6 +40,9 @@ public:
 
 protected:
   bool execute();
+
+public:
+  log_opt_t log() const;
 };
 
 }

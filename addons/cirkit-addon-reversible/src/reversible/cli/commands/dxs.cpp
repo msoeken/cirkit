@@ -55,6 +55,13 @@ bool dxs_command::execute()
   return true;
 }
 
+command::log_opt_t dxs_command::log() const
+{
+  return log_opt_t({
+      {"runtime", statistics->get<double>( "runtime" )}
+    } );
+}
+
 }
 
 // Local Variables:
