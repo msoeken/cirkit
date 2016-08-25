@@ -31,6 +31,9 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/regex.hpp>
 
+#include <range/v3/algorithm/find.hpp>
+#include <range/v3/algorithm/find_if.hpp>
+
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -188,8 +191,10 @@ void read_bench( aig_graph& aig, const std::string& filename )
 
 void read_bench( lut_graph_t& lut, const std::string& filename )
 {
+  using gate_def_t = std::tuple<std::string, std::string, std::vector<std::string>>;
+
   std::vector<std::string> inputs, outputs;
-  std::vector<std::tuple<std::string, std::string, std::vector<std::string>>> gates;
+  std::vector<gate_def_t> gates;
 
   line_parser( filename, {
       {boost::regex( "^INPUT\\((.*)\\)$" ), [&inputs]( const boost::smatch& m ) {
@@ -249,26 +254,80 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
     gate_to_node[input] = v;
   }
 
-  for ( const auto& gate : gates )
+  /* gates may not be in topological order, so we need to keep track of this */
+  std::vector<int>              waiting_refs( gates.size(), -1 ); /* if -1, gate has not been processed or is done, otherwise gives the number of fanins to wait for */
+  std::vector<std::vector<int>> notify_list( gates.size() );      /* which parents to notify that they may complete */
+
+  for ( const auto& it : index( gates ) )
   {
+    const auto& gate = it.value;
+    const auto& index = it.index;
+
     if ( std::get<2>( gate ).empty() )
     {
       gate_to_node[std::get<0>( gate )] = std::get<1>( gate ) == "1" ? v_vdd : v_gnd;
     }
     else
     {
-      auto v = add_vertex( lut );
-
-      types[v] = gate_type_t::internal;
-      luts[v] = std::get<1>( gate );
+      waiting_refs[index] = 0;
 
       for ( const auto& arg : std::get<2>( gate ) )
       {
-        assert( gate_to_node.find( arg ) != gate_to_node.end() );
-        add_edge( v, gate_to_node[arg], lut );
+        if ( gate_to_node.find( arg ) == gate_to_node.end() )
+        {
+          waiting_refs[index]++;
+          notify_list[std::distance( begin( gates ), ranges::find_if( gates, [&arg]( const gate_def_t& g ) { return std::get<0>( g ) == arg; } ) )].push_back( index );
+        }
       }
 
-      gate_to_node[std::get<0>( gate )] = v;
+      if ( waiting_refs[index] == 0 )
+      {
+        std::vector<unsigned> to_create;
+
+        std::stack<unsigned> stack;
+        stack.push( index );
+
+        while ( !stack.empty() )
+        {
+          const auto n = stack.top();
+          stack.pop();
+
+          if ( ranges::find( to_create, n ) == end( to_create ) )
+          {
+            to_create.push_back( n );
+          }
+
+          for ( auto parent : notify_list[n] )
+          {
+            if ( --waiting_refs[parent] == 0 )
+            {
+              stack.push( parent );
+            }
+          }
+        }
+
+        for ( auto n : to_create )
+        {
+          const auto& gate = gates[n];
+
+          auto v = add_vertex( lut );
+
+          types[v] = gate_type_t::internal;
+          luts[v] = std::get<1>( gate );
+
+          for ( const auto& arg : std::get<2>( gate ) )
+          {
+            if ( gate_to_node.find( arg ) == gate_to_node.end() )
+            {
+              std::cout << "[e] cannot find gate " << arg << " when constructing LUT for " << std::get<0>( gate ) << std::endl;
+              assert( false );
+            }
+            add_edge( v, gate_to_node[arg], lut );
+          }
+
+          gate_to_node[std::get<0>( gate )] = v;
+        }
+      }
     }
   }
 
@@ -276,7 +335,7 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
   {
     auto v = add_vertex( lut );
 
-    add_edge( v, gate_to_node[output], lut );
+    add_edge( v, gate_to_node.at( output ), lut );
 
     types[v] = gate_type_t::po;
     names[v] = output;
