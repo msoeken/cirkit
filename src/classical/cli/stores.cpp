@@ -518,9 +518,10 @@ show_store_entry<xmg_graph>::show_store_entry( command& cmd )
   boost::program_options::options_description xmg_options( "XMG options" );
 
   xmg_options.add_options()
-    ( "cover",          "dump LUT cover of XMG" )
-    ( "show_all_edges", "also show edges of AND and OR gates" )
-    ( "show_node_ids",  "show node ids" )
+    ( "cover",                                                                          "dump LUT cover of XMG" )
+    ( "show_all_edges",                                                                 "also show edges of AND and OR gates" )
+    ( "show_node_ids",                                                                  "show node ids" )
+    ( "format",         boost::program_options::value<unsigned>()->default_value( 0u ), "output format\n0: dot, 1: cytoscape (JS)\n" )
     ;
 
   cmd.opts.add( xmg_options );
@@ -528,25 +529,36 @@ show_store_entry<xmg_graph>::show_store_entry( command& cmd )
 
 bool show_store_entry<xmg_graph>::operator()( xmg_graph& xmg, const std::string& dotname, const command& cmd )
 {
-  if ( cmd.is_set( "cover" ) )
+  switch ( cmd.vm["format"].as<unsigned>() )
   {
-    if ( !xmg.has_cover() )
+  case 0u:
+    if ( cmd.is_set( "cover" ) )
     {
-      std::cout << "[w] XMG has no cover" << std::endl;
-      return false;
+      if ( !xmg.has_cover() )
+      {
+        std::cout << "[w] XMG has no cover" << std::endl;
+        return false;
+      }
+
+      xmg_cover_write_dot( xmg, dotname );
     }
+    else
+    {
+      auto settings = std::make_shared<properties>();
+      settings->set( "show_and_or_edges", cmd.is_set( "show_all_edges" ) );
+      settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
+      write_dot( xmg, dotname, settings );
+    }
+    return true;
 
-    xmg_cover_write_dot( xmg, dotname );
-  }
-  else
-  {
-    auto settings = std::make_shared<properties>();
-    settings->set( "show_and_or_edges", cmd.is_set( "show_all_edges" ) );
-    settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
-    write_dot( xmg, dotname, settings );
-  }
+  case 1u:
+    write_javascript_cytoscape( xmg, dotname );
+    return true;
 
-  return true;
+  default:
+    std::cout << "[w] unknown format" << std::endl;
+    return false;
+  }
 }
 
 command::log_opt_t show_store_entry<xmg_graph>::log() const

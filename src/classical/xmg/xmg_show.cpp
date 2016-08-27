@@ -20,14 +20,59 @@
 
 #include <fstream>
 #include <iostream>
+#include <regex>
 
 #include <boost/graph/graphviz.hpp>
+
+#include <range/v3/iterator_range.hpp>
+#include <range/v3/algorithm/for_each.hpp>
+#include <range/v3/view/concat.hpp>
+#include <range/v3/view/filter.hpp>
+#include <range/v3/view/iota.hpp>
+#include <range/v3/view/transform.hpp>
+#include <range/v3/view/zip.hpp>
 
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 
+using namespace ranges;
+
 namespace cirkit
 {
+
+/******************************************************************************
+ * Template engine (move later)                                               *
+ ******************************************************************************/
+
+class string_template
+{
+public:
+  string_template( const std::string& str )
+    : str( str )
+  {
+  }
+
+  std::string render( const std::unordered_map<std::string, std::string>& subst = {} ) const
+  {
+    std::string ret = str;
+
+    for ( const auto& p : subst )
+    {
+      ret = std::regex_replace( ret, std::regex( boost::str( boost::format( "\\{\\{ *%s *\\}\\}" ) % p.first ) ), p.second );
+    }
+
+    return ret;
+  }
+
+  std::string operator()( const std::unordered_map<std::string, std::string>& subst = {} ) const
+  {
+    return render( subst );
+  }
+
+private:
+  std::string str;
+};
+
 
 /******************************************************************************
  * Types                                                                      *
@@ -192,6 +237,144 @@ void write_dot( xmg_graph& xmg, std::ostream& os,
   write_graphviz( os, xmg.graph(), writer, writer, writer );
 }
 
+void write_javascript_cytoscape( xmg_graph& xmg, std::ostream& os,
+                                 const properties::ptr& settings,
+                                 const properties::ptr& statistics )
+{
+  /* settings */
+  const auto xor_color = get( settings, "xor_color", std::string( "#87cefa") );
+  const auto maj_color = get( settings, "maj_color", std::string( "#ffa07a") );
+  const auto and_color = get( settings, "and_color", std::string( "#f08080") );
+  const auto or_color  = get( settings, "or_color",  std::string( "#bdffa9") );
+  const auto io_color  = get( settings, "io_color",  std::string( "#cccaca") );
+
+  string_template t(
+    "<!DOCTYPE>\n"
+    "<html>\n"
+    "  <head>\n"
+    "    <title>{{ title }}</title>\n"
+    "    <meta name=\"viewport\" content=\"width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1\">\n\n"
+    "    <script src=\"http://code.jquery.com/jquery-2.0.3.min.js\"></script>\n"
+    "    <script src=\"http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js\"></script>\n\n"
+    "    <script src=\"https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js\"></script>\n"
+    "    <script src=\"https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.1.2/cytoscape-dagre.js\"></script>\n\n"
+    "    <style>\n"
+    "      #cy { width: 100%; height: 100%; position: absolute; left: 0; top: 0; z-index: 999 }\n"
+    "    </style>\n"
+    "    <script>\n"
+    "      $(function(){\n"
+    "        $('#cy').cytoscape({\n"
+    "          layout: { name: 'dagre' },\n"
+    "          boxSelectionEnabled: false,\n"
+    "          autounselectify: true,\n"
+    "          style: cytoscape.stylesheet()\n"
+    "            .selector('node')\n"
+    "              .css({\n"
+    "                'content': 'data(label)',\n"
+    "                'height': '25',\n"
+    "                'width': '25',\n"
+    "                'text-valign': 'center',\n"
+    "                'text-outline-width': 2,\n"
+    "                'color': '#fff'\n"
+    "              })\n"
+    "            .selector('node.and')\n"
+    "              .css({\n"
+    "                'text-outline-color': '{{ and_color }}',\n"
+    "                'background-color': '{{ and_color }}'\n"
+    "              })\n"
+    "            .selector('node.or')\n"
+    "              .css({\n"
+    "                'text-outline-color': '{{ or_color }}',\n"
+    "                'background-color': '{{ or_color }}'\n"
+    "              })\n"
+    "            .selector('node.maj')\n"
+    "              .css({\n"
+    "                'text-outline-color': '{{ maj_color }}',\n"
+    "                'background-color': '{{ maj_color }}'\n"
+    "              })\n"
+    "            .selector('node.xor')\n"
+    "              .css({\n"
+    "                'text-outline-color': '{{ xor_color }}',\n"
+    "                'background-color': '{{ xor_color }}'\n"
+    "              })\n"
+    "            .selector('node.pi')\n"
+    "              .css({\n"
+    "                'shape': 'triangle',\n"
+    "                'text-outline-color': '{{ io_color }}',\n"
+    "                'background-color': '{{ io_color }}'\n"
+    "              })\n"
+    "            .selector('node.po')\n"
+    "              .css({\n"
+    "                'shape': 'triangle',\n"
+    "                'text-outline-color': '{{ io_color }}',\n"
+    "                'background-color': '{{ io_color }}'\n"
+    "              })\n"
+    "            .selector('edge')\n"
+    "              .css({\n"
+    "                'width': '1',\n"
+    "                'source-arrow-shape': 'triangle',\n"
+    "                'curve-style': 'bezier'\n"
+    "              })\n"
+    "            .selector('edge.complemented')\n"
+    "              .css({\n"
+    "                'line-style': 'dotted'\n"
+    "              }),\n"
+    "          elements: {\n"
+    "            nodes: [\n{{ nodes }}"
+    "            ],\n"
+    "            edges: [\n{{ edges }}"
+    "            ]\n"
+    "          }\n"
+    "        });\n"
+    "      });\n"
+    "    </script>\n"
+    "  </head>\n"
+    "  <div id=\"cy\"></div>\n"
+    "</html>\n" );
+
+  std::string nodes;
+  const auto node_transform = [&xmg]( xmg_node n ) {
+    std::string type = xmg.is_input( n ) ? "pi" : ( xmg.is_maj( n ) ? ( xmg.is_pure_maj( n ) ? "maj" : ( xmg.children( n )[0].complemented ? "or" : "and" ) ) : "xor" );
+    std::string label = xmg.is_input( n ) ? ( n == 0 ? "0" : xmg.input_name( n )  ) : type;
+
+    return boost::str( boost::format( "            { data: { id: 'n%1%', type: '%2%', label: '%3%' }, classes: '%2%' },\n" ) % n % type % label );
+  };
+  const auto output_transform = []( std::pair<std::pair<xmg_function, std::string>, unsigned> t ) {
+    return boost::str( boost::format( "            { data: { id: 'o%1%', type: 'po', label: '%2%' }, classes: 'po' },\n" ) % t.second % t.first.second );
+  };
+  const auto output_pairs = view::zip( xmg.outputs(), view::ints( 0u, static_cast<unsigned>( xmg.outputs().size() ) ) );
+  const auto outputs = view::transform( output_pairs, output_transform );
+  for_each( view::concat( view::transform( xmg.nodes(), node_transform ), outputs ), [&nodes]( const std::string& s ) { nodes += s; } );
+
+  std::string edges;
+  const auto edge_filter = [&xmg]( const xmg_edge& e ) { return boost::target( e, xmg.graph() ) > 0; };
+  const auto edge_transform = [&xmg]( const xmg_edge& e ) {
+    std::string classes;
+
+    if ( xmg.complement()[e] )
+    {
+      classes += " complemented";
+    }
+    return boost::str( boost::format( "            { data: { source: 'n%d', target: 'n%d' }, classes: '%s' },\n" ) % boost::source( e, xmg.graph() ) % boost::target( e, xmg.graph() ) % classes );
+  };
+  const auto output_edges_transform = []( std::pair<std::pair<xmg_function, std::string>, unsigned> t ) {
+    return boost::str( boost::format( "            { data: { source: 'o%d', target: 'n%d' }, classes: '%s' },\n" ) % t.second % t.first.first.node % ( t.first.first.complemented ? "complemented" : "" ) );
+  };
+  const auto output_edges = view::transform( output_pairs, output_edges_transform );
+  for_each( view::concat( view::transform( view::filter( xmg.edges(), edge_filter ), edge_transform ), output_edges ), [&edges]( const std::string& s ) { edges += s; }  );
+
+  os << t( {
+      {"xor_color", xor_color},
+      {"maj_color", maj_color},
+      {"and_color", and_color},
+      {"or_color", or_color},
+      {"io_color", io_color},
+      {"title", xmg.name()},
+      {"nodes", nodes},
+      {"edges", edges}
+    } );
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -201,6 +384,14 @@ void write_dot( xmg_graph& xmg, const std::string& filename,
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
   write_dot( xmg, os, settings, statistics );
+}
+
+void write_javascript_cytoscape( xmg_graph& xmg, const std::string& filename,
+                                 const properties::ptr& settings,
+                                 const properties::ptr& statistics )
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+  write_javascript_cytoscape( xmg, os, settings, statistics );
 }
 
 }

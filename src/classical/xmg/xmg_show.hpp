@@ -40,6 +40,10 @@ void write_dot( xmg_graph& xmg, const std::string& filename,
                 const properties::ptr& settings = properties::ptr(),
                 const properties::ptr& statistics = properties::ptr() );
 
+void write_javascript_cytoscape( xmg_graph& xmg, const std::string& filename,
+                                 const properties::ptr& settings = properties::ptr(),
+                                 const properties::ptr& statistics = properties::ptr() );
+
 }
 
 #endif

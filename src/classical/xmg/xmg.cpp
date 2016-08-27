@@ -18,7 +18,7 @@
 
 #include "xmg.hpp"
 
-#include <boost/range/iterator_range.hpp>
+#include <range/v3/iterator_range.hpp>
 
 #include <core/utils/range_utils.hpp>
 #include <classical/xmg/xmg_cover.hpp>
@@ -335,7 +335,14 @@ const unsigned xmg_graph::input_index( xmg_node n ) const
 
 xmg_graph::vertex_range_t xmg_graph::nodes() const
 {
-  return boost::make_iterator_range( boost::vertices( g ) );
+  const auto v = boost::vertices( g );
+  return ranges::make_iterator_range( v.first, v.second );
+}
+
+xmg_graph::edge_range_t xmg_graph::edges() const
+{
+  const auto e = boost::edges( g );
+  return ranges::make_iterator_range( e.first, e.second );
 }
 
 std::vector<xmg_function> xmg_graph::children( xmg_node n ) const

@@ -35,7 +35,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/range/iterator_range.hpp>
+#include <range/v3/iterator_range.hpp>
 
 #include <core/utils/dirty.hpp>
 #include <core/utils/graph_utils.hpp>
@@ -96,7 +96,8 @@ public:
   using input_vec_t  = std::vector<std::pair<node_t, std::string>>;
   using output_vec_t = std::vector<std::pair<xmg_function, std::string>>;
 
-  using vertex_range_t = boost::iterator_range<boost::graph_traits<xmg_graph_t>::vertex_iterator>;
+  using vertex_range_t = ranges::iterator_range<boost::graph_traits<xmg_graph_t>::vertex_iterator>;
+  using edge_range_t   = ranges::iterator_range<boost::graph_traits<xmg_graph_t>::edge_iterator>;
 
   using complement_property_map_t = boost::property_map<graph_t, boost::edge_complement_t>::type;
 
@@ -145,6 +146,7 @@ public:
   const unsigned input_index( xmg_node n ) const;
   std::vector<xmg_function> children( xmg_node n ) const;
   vertex_range_t nodes() const;
+  edge_range_t edges() const;
   std::vector<node_t> topological_nodes() const;
   inline const complement_property_map_t& complement() { return _complement; }
 
