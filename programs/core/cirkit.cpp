@@ -122,6 +122,7 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Truth table" );
   ADD_COMMAND( bool_complex );
+  ADD_COMMAND( dectest );
   ADD_COMMAND( npn );
   ADD_COMMAND( tt );
 
