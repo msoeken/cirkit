@@ -26,6 +26,7 @@
 #include <boost/format.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <range/v3/algorithm/transform.hpp>
 
 #include <core/graph/depth.hpp>
 #include <core/utils/bitset_utils.hpp>
@@ -502,15 +503,35 @@ void print_store_entry_statistics<xmg_graph>( std::ostream& os, const xmg_graph&
 template<>
 command::log_opt_t log_store_entry_statistics<xmg_graph>( const xmg_graph& xmg )
 {
-  return command::log_opt_t({
+  auto log = command::log_map_t({
       {"inputs", static_cast<unsigned>( xmg.inputs().size() )},
       {"outputs", static_cast<unsigned>( xmg.outputs().size() )},
       {"size", xmg.num_gates()},
       {"maj", xmg.num_maj()},
       {"real_maj", compute_pure_maj_count( xmg )},
       {"xor", xmg.num_xor()},
-      {"depth", compute_depth( xmg )}
+      {"depth", compute_depth( xmg )},
     });
+
+  if ( false )
+  {
+    xmg_graph xmg_copy = xmg;
+    xmg_copy.compute_fanout();
+    xmg_copy.compute_levels();
+
+    std::vector<unsigned> fanouts( xmg.size() );
+    ranges::transform( xmg_copy.nodes(), fanouts.begin(), [&xmg_copy]( xmg_node n ) { return xmg_copy.fanout_count( n ); } );
+
+    std::vector<unsigned> level_diffs( ranges::size( xmg_copy.edges() ) );
+    ranges::transform( xmg_copy.edges(), level_diffs.begin(), [&xmg_copy]( const xmg_edge& e ) {
+        return xmg_copy.level( boost::source( e, xmg_copy.graph() ) ) - xmg_copy.level( boost::target( e, xmg_copy.graph() ) );
+      } );
+
+    log["fanouts"] = fanouts;
+    log["level_diffs"] = level_diffs;
+  }
+
+  return log;
 }
 
 show_store_entry<xmg_graph>::show_store_entry( command& cmd )
