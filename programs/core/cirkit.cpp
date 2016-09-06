@@ -36,6 +36,7 @@
 #include <classical/cli/commands/comb_approx.hpp>
 #include <classical/cli/commands/cone.hpp>
 #include <classical/cli/commands/cuts.hpp>
+#include <classical/cli/commands/dectest.hpp>
 #include <classical/cli/commands/depth.hpp>
 #include <classical/cli/commands/dsop.hpp>
 #include <classical/cli/commands/expr.hpp>
