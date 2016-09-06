@@ -162,8 +162,9 @@ xmg_graph xmg_from_mig( const mig_graph& mig )
     if ( out_degree( node, mig ) == 0u ) continue;
 
     auto children = get_children( mig, node );
-    node_to_function[node] = xmg.create_and( node_to_function[children[0u].node] ^ children[0u].complemented,
-                                             node_to_function[children[1u].node] ^ children[1u].complemented );
+    node_to_function[node] = xmg.create_maj( node_to_function[children[0u].node] ^ children[0u].complemented,
+                                             node_to_function[children[1u].node] ^ children[1u].complemented,
+                                             node_to_function[children[2u].node] ^ children[2u].complemented );
   }
 
   for ( const auto& o : info.outputs )
