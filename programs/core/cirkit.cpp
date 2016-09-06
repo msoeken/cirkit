@@ -64,6 +64,9 @@
 
 #ifdef USE_FORMAL_COMMANDS
 #include <formal/cli/commands/exact_mig.hpp>
+#include <formal/cli/commands/exact_xmg.hpp>
+#include <formal/cli/commands/xmglut.hpp>
+#include <formal/cli/commands/xmgmine.hpp>
 #endif
 
 #ifdef USE_FPGA_COMMANDS
@@ -130,6 +133,9 @@ int main( int argc, char ** argv )
   cli.set_category( "Synthesis" );
 #ifdef USE_FORMAL_COMMANDS
   ADD_COMMAND( exact_mig );
+  ADD_COMMAND( exact_xmg );
+  ADD_COMMAND( xmglut );
+  ADD_COMMAND( xmgmine );
 #endif
   ADD_COMMAND( isop );
 
