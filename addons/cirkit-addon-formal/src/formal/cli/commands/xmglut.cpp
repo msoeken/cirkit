@@ -18,6 +18,7 @@
 
 #include "xmglut.hpp"
 
+#include <boost/optional.hpp>
 #include <boost/program_options.hpp>
 
 #include <alice/rules.hpp>
@@ -57,6 +58,7 @@ xmglut_command::xmglut_command( const environment::ptr& env )
   opts.add_options()
     ( "lut_size,k", value_with_default( &lut_size ), "LUT size" )
     ( "map_cmd",    value_with_default( &map_cmd ),  "ABC map command in &space, use %d as placeholder for the LUT size" )
+    ( "timeout,t",  value( &timeout ),               "timeout in seconds (afterwards, heuristics are tried)" )
     ( "xmg,x",                                       "create cover from XMG instead of AIG" )
     ( "blif_name",  value( &blif_name ),             "read cover from BLIF instead of AIG" )
     ( "dump_luts",  value( &dump_luts ),             "if not empty, all LUTs will be written to file without performing mapping" )
@@ -84,6 +86,10 @@ bool xmglut_command::execute()
   if ( is_set( "dump_luts" ) )
   {
     settings->set( "dump_luts", dump_luts );
+  }
+  if ( is_set( "timeout" ) )
+  {
+    settings->set( "timeout", boost::optional<unsigned>( timeout ) );
   }
 
   lut_graph_t lut;
