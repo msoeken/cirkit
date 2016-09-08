@@ -32,6 +32,7 @@
 
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/bool_complex.hpp>
+#include <classical/cli/commands/blif_to_bench.hpp>
 #include <classical/cli/commands/cec.hpp>
 #include <classical/cli/commands/comb_approx.hpp>
 #include <classical/cli/commands/cone.hpp>
@@ -100,6 +101,7 @@ int main( int argc, char ** argv )
   ADD_WRITE_COMMAND( pla, "PLA" );
   ADD_WRITE_COMMAND( verilog, "Verilog" );
   ADD_COMMAND( read_sym );
+  ADD_COMMAND( blif_to_bench );
 
   cli.set_category( "Approximation" );
   ADD_COMMAND( comb_approx );
