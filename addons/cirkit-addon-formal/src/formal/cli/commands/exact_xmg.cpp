@@ -137,6 +137,7 @@ command::log_opt_t exact_xmg_command::log() const
 {
   return log_opt_t({
       {"runtime",       statistics->get<double>( "runtime" )},
+      {"last_size",     statistics->get<unsigned>( "last_size" )},
       {"start",         start},
       {"all_solutions", is_set( "all_solutions" )},
       {"objective",     objective},

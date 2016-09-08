@@ -87,6 +87,7 @@ xmg_graph xmg_exact_heuristic( const tt& spec, const properties::ptr& settings, 
       else
       {
         assert( xmg_new.size() == start - 1 );
+        xmg = xmg_new;
         --start;
       }
     }
