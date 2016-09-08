@@ -20,11 +20,16 @@
 
 #include <boost/program_options.hpp>
 
+#include <alice/rules.hpp>
 #include <core/utils/program_options.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/netlist_graphs.hpp>
 #include <classical/io/read_bench.hpp>
+#include <classical/io/read_blif.hpp>
 #include <classical/io/write_bench.hpp>
+#include <classical/utils/aig_utils.hpp>
+#include <classical/xmg/xmg_flow_map.hpp>
+#include <classical/xmg/xmg_lut.hpp>
 #include <formal/xmg/xmg_from_lut.hpp>
 #include <classical/abc/functions/abc_lut_mapping.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
@@ -47,41 +52,65 @@ namespace cirkit
  ******************************************************************************/
 
 xmglut_command::xmglut_command( const environment::ptr& env )
-  : aig_base_command( env, "Create XMG with LUT mapping" )
+  : cirkit_command( env, "Create XMG with LUT mapping" )
 {
   opts.add_options()
     ( "lut_size,k", value_with_default( &lut_size ), "LUT size" )
     ( "map_cmd",    value_with_default( &map_cmd ),  "ABC map command in &space, use %d as placeholder for the LUT size" )
+    ( "xmg,x",                                       "create cover from XMG instead of AIG" )
+    ( "blif_name",  value( &blif_name ),             "read cover from BLIF instead of AIG" )
     ( "dump_luts",  value( &dump_luts ),             "if not empty, all LUTs will be written to file without performing mapping" )
     ;
   add_new_option();
   be_verbose();
 }
 
+command::rules_t xmglut_command::validity_rules() const
+{
+  return {
+    {[this]() { return is_set( "blif_name" ) || is_set( "xmg" ) || env->store<aig_graph>().current_index() != -1; }, "no AIG in store" },
+    {[this]() { return !is_set( "xmg" ) || env->store<xmg_graph>().current_index() != -1; }, "no XMG in store" },
+    file_exists_if_set( *this, blif_name, "blif_name" )
+  };
+}
+
 bool xmglut_command::execute()
 {
+  auto& aigs = env->store<aig_graph>();
   auto& xmgs = env->store<xmg_graph>();
 
-  extend_if_new( xmgs );
-
   auto settings = make_settings();
+  settings->set( "lut_size", lut_size );
   if ( is_set( "dump_luts" ) )
   {
     settings->set( "dump_luts", dump_luts );
   }
 
-  abc_run_command_no_output( aig(), boost::str( boost::format( map_cmd ) % lut_size ) + "; &put; short_names; write_bench /tmp/test2.bench" );
   lut_graph_t lut;
-  read_bench( lut, "/tmp/test2.bench" );
-  //write_bench( lut, "/tmp/test3.bench" );
+  if ( is_set( "xmg" ) )
+  {
+    xmg_flow_map( xmgs.current(), settings );
+    lut = xmg_to_lut_graph( xmgs.current() );
+  }
+  else if ( is_set( "blif_name" ) )
+  {
+    lut = read_blif( blif_name );
+  }
+  else
+  {
+    abc_run_command_no_output( aigs.current(), boost::str( boost::format( map_cmd ) % lut_size ) + "; &put; short_names; write_bench /tmp/test2.bench" );
+    read_bench( lut, "/tmp/test2.bench" );
+    //write_bench( lut, "/tmp/test3.bench" );
+    //const auto lut = abc_lut_mapping( aig(), lut_size, settings );
+  }
 
-  //const auto lut = abc_lut_mapping( aig(), lut_size, settings );
   const auto xmg = xmg_from_lut_mapping( lut, settings, statistics );
 
   if ( !is_set( "dump_luts" ) )
   {
+    extend_if_new( xmgs );
     xmgs.current() = xmg;
-    xmgs.current().set_name( info().model_name );
+    xmgs.current().set_name( aig_info( aigs.current() ).model_name );
   }
 
   print_runtime();

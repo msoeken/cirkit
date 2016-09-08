@@ -29,12 +29,15 @@
 #include <core/utils/conversion_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <core/utils/timer.hpp>
+#include <classical/functions/aig_from_truth_table.hpp>
 #include <classical/functions/npn_canonization.hpp>
 #include <classical/utils/expression_parser.hpp>
+#include <classical/xmg/xmg_aig.hpp>
 #include <classical/xmg/xmg_expr.hpp>
 #include <classical/xmg/xmg_simulate.hpp>
 #include <classical/xmg/xmg_string.hpp>
 #include <formal/synthesis/exact_mig.hpp>
+#include <formal/xmg/xmg_exact_heuristic.hpp>
 
 namespace cirkit
 {
@@ -119,7 +122,15 @@ std::string xmg_minlib_manager::find_or_create_xmg( const std::string& hex )
 
     if ( !(bool)xmg_exact )
     {
-      assert( false && "try heuristic" );
+      /* could be done better */
+      if ( verbose )
+      {
+        std::cout << "[i] last resort, fall back to heuristic" << std::endl;
+      }
+
+      xmg = xmg_exact_heuristic( spec, exs_settings );
+      //const auto aig = aig_from_truth_table( spec );
+      //xmg = xmg_from_aig( aig );
     }
     else
     {

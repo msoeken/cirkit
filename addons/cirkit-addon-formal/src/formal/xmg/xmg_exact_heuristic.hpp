@@ -17,40 +17,25 @@
  */
 
 /**
- * @file xmglut.hpp
+ * @file xmg_exact_heuristic.hpp
  *
- * @brief Create XMG with LUT mapping
+ * @brief Heuristic based on exact XMG
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_XMGLUT_COMMAND_HPP
-#define CLI_XMGLUT_COMMAND_HPP
+#ifndef XMG_EXACT_HEURISTIC_HPP
+#define XMG_EXACT_HEURISTIC_HPP
 
-#include <core/cli/cirkit_command.hpp>
+#include <core/properties.hpp>
+#include <classical/utils/truth_table_utils.hpp>
+#include <classical/xmg/xmg.hpp>
 
 namespace cirkit
 {
 
-class xmglut_command : public cirkit_command
-{
-public:
-  xmglut_command( const environment::ptr& env );
-
-protected:
-  rules_t validity_rules() const;
-  bool execute();
-
-public:
-  log_opt_t log() const;
-
-private:
-  unsigned lut_size    = 6u;
-  std::string map_cmd  = "&if -a -K %d";
-  std::string blif_name;
-  std::string dump_luts;
-};
+xmg_graph xmg_exact_heuristic( const tt& spec, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }
 
