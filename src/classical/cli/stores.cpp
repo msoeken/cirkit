@@ -409,7 +409,8 @@ std::string store_entry_to_string<tt>( const tt& t )
 template<>
 void print_store_entry<tt>( std::ostream& os, const tt& t )
 {
-  os << t << std::endl;
+  os << tt_to_hex( t ) << std::endl
+     << t << std::endl;
 }
 
 template<>
