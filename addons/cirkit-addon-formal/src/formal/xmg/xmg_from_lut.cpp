@@ -95,13 +95,9 @@ private:
     for ( const auto& v : boost::make_iterator_range( vertices( lut ) ) )
     {
       if ( types[v] != gate_type_t::internal ) { continue; }
+      if ( boost::out_degree( v, lut ) == 1u ) { continue; }
 
       tt t( convert_hex2bin( tts[v] ) );
-
-      if ( boost::out_degree( v, lut ) == 1u && t.size() == 4u )
-      {
-        tt_shrink( t, 1u );
-      }
 
       const auto size = tt_num_vars( t );
 
@@ -196,6 +192,11 @@ private:
             if ( tts[v] == "2" )
             {
               node_to_function[v] = pi_mapping.front();
+              break;
+            }
+            else if ( tts[v] == "1" )
+            {
+              node_to_function[v] = !pi_mapping.front();
               break;
             }
 
