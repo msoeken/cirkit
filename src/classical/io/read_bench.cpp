@@ -263,14 +263,14 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
     const auto& gate = it.value;
     const auto& index = it.index;
 
+    waiting_refs[index] = 0;
+
     if ( std::get<2>( gate ).empty() )
     {
       gate_to_node[std::get<0>( gate )] = std::get<1>( gate ) == "1" ? v_vdd : v_gnd;
     }
     else
     {
-      waiting_refs[index] = 0;
-
       for ( const auto& arg : std::get<2>( gate ) )
       {
         if ( gate_to_node.find( arg ) == gate_to_node.end() )
@@ -279,54 +279,54 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
           notify_list[std::distance( begin( gates ), ranges::find_if( gates, [&arg]( const gate_def_t& g ) { return std::get<0>( g ) == arg; } ) )].push_back( index );
         }
       }
+    }
 
-      if ( waiting_refs[index] == 0 )
+    if ( waiting_refs[index] == 0 )
+    {
+      std::vector<unsigned> to_create;
+
+      std::stack<unsigned> stack;
+      stack.push( index );
+
+      while ( !stack.empty() )
       {
-        std::vector<unsigned> to_create;
+        const auto n = stack.top();
+        stack.pop();
 
-        std::stack<unsigned> stack;
-        stack.push( index );
-
-        while ( !stack.empty() )
+        if ( ranges::find( to_create, n ) == end( to_create ) )
         {
-          const auto n = stack.top();
-          stack.pop();
-
-          if ( ranges::find( to_create, n ) == end( to_create ) )
-          {
-            to_create.push_back( n );
-          }
-
-          for ( auto parent : notify_list[n] )
-          {
-            if ( --waiting_refs[parent] == 0 )
-            {
-              stack.push( parent );
-            }
-          }
+          to_create.push_back( n );
         }
 
-        for ( auto n : to_create )
+        for ( auto parent : notify_list[n] )
         {
-          const auto& gate = gates[n];
-
-          auto v = add_vertex( lut );
-
-          types[v] = gate_type_t::internal;
-          luts[v] = std::get<1>( gate );
-
-          for ( const auto& arg : std::get<2>( gate ) )
+          if ( --waiting_refs[parent] == 0 )
           {
-            if ( gate_to_node.find( arg ) == gate_to_node.end() )
-            {
-              std::cout << "[e] cannot find gate " << arg << " when constructing LUT for " << std::get<0>( gate ) << std::endl;
-              assert( false );
-            }
-            add_edge( v, gate_to_node[arg], lut );
+            stack.push( parent );
           }
-
-          gate_to_node[std::get<0>( gate )] = v;
         }
+      }
+
+      for ( auto n : to_create )
+      {
+        const auto& gate = gates[n];
+
+        auto v = add_vertex( lut );
+
+        types[v] = gate_type_t::internal;
+        luts[v] = std::get<1>( gate );
+
+        for ( const auto& arg : std::get<2>( gate ) )
+        {
+          if ( gate_to_node.find( arg ) == gate_to_node.end() )
+          {
+            std::cout << "[e] cannot find gate " << arg << " when constructing LUT for " << std::get<0>( gate ) << std::endl;
+            assert( false );
+          }
+          add_edge( v, gate_to_node[arg], lut );
+        }
+
+        gate_to_node[std::get<0>( gate )] = v;
       }
     }
   }
@@ -335,7 +335,13 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
   {
     auto v = add_vertex( lut );
 
-    add_edge( v, gate_to_node.at( output ), lut );
+    if ( gate_to_node.find( output ) == gate_to_node.end() )
+    {
+      std::cout << "[e] cannot find gate " << output << " when constructing output" << std::endl;
+      assert( false );
+    }
+
+    add_edge( v, gate_to_node[output], lut );
 
     types[v] = gate_type_t::po;
     names[v] = output;
