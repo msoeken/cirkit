@@ -62,6 +62,7 @@ xmglut_command::xmglut_command( const environment::ptr& env )
     ( "xmg,x",                                       "create cover from XMG instead of AIG" )
     ( "blif_name",  value( &blif_name ),             "read cover from BLIF instead of AIG" )
     ( "dump_luts",  value( &dump_luts ),             "if not empty, all LUTs will be written to file without performing mapping" )
+    ( "progress,p",                                  "show progress" )
     ;
   add_new_option();
   be_verbose();
@@ -83,6 +84,7 @@ bool xmglut_command::execute()
 
   auto settings = make_settings();
   settings->set( "lut_size", lut_size );
+  settings->set( "progress", is_set( "progress" ) );
   if ( is_set( "dump_luts" ) )
   {
     settings->set( "dump_luts", dump_luts );

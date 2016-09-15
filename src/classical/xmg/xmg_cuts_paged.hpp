@@ -99,6 +99,7 @@ private:
   unsigned         _k;
   unsigned         _priority = 8u;
   unsigned         _extra    = 0u;
+  bool             _progress = false;
   paged_memory     data;
   paged_memory     cones;
 

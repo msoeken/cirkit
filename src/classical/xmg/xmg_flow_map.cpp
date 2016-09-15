@@ -23,10 +23,15 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 
+#include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/xmg/xmg_cover.hpp>
 #include <classical/xmg/xmg_cuts_paged.hpp>
 #include <classical/xmg/xmg_utils.hpp>
+
+#define timer timer_class
+#include <boost/progress.hpp>
+#undef timer
 
 #define L(x) if ( verbose ) { std::cout << x; }
 #define LN(x) if ( verbose ) { std::cout << x << std::endl; }
@@ -57,8 +62,9 @@ private:
   std::shared_ptr<xmg_cuts_paged> cuts;
 
   /* settings */
-  bool     verbose;
   unsigned cut_size;
+  bool     progress;
+  bool     verbose;
 };
 
 xmg_flow_map_manager::xmg_flow_map_manager( xmg_graph& xmg, const properties::ptr& settings )
@@ -66,14 +72,18 @@ xmg_flow_map_manager::xmg_flow_map_manager( xmg_graph& xmg, const properties::pt
     node_to_cut( xmg.size() ),
     node_to_level( xmg.size() )
 {
-  verbose  = get( settings, "verbose",  false );
   cut_size = get( settings, "cut_size", 4u );
+  progress = get( settings, "progress", false );
+  verbose  = get( settings, "verbose",  false );
 }
 
 void xmg_flow_map_manager::run()
 {
   /* compute cuts */
-  cuts = std::make_shared<xmg_cuts_paged>( xmg, cut_size );
+  auto cuts_settings = std::make_shared<properties>();
+  cuts_settings->set( "progress", progress );
+
+  cuts = std::make_shared<xmg_cuts_paged>( xmg, cut_size, cuts_settings );
   LN( boost::format( "[i] enumerated %d cuts in %.2f secs" ) % cuts->total_cut_count() % cuts->enumeration_time() );
 
   find_best_cuts();
@@ -82,8 +92,14 @@ void xmg_flow_map_manager::run()
 
 void xmg_flow_map_manager::find_best_cuts()
 {
+  null_stream ns;
+  std::ostream null_out( &ns );
+  boost::progress_display show_progress( xmg.size(), progress ? std::cout : null_out );
+
   for ( auto node : xmg.topological_nodes() )
   {
+    ++show_progress;
+
     if ( xmg.is_input( node ) )
     {
       assert( cuts->count( node ) == 1u );

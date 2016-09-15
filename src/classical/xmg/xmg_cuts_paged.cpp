@@ -25,6 +25,7 @@
 
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
+#include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <classical/xmg/xmg_simulate.hpp>
@@ -38,6 +39,10 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/combine.hpp>
 #include <boost/range/numeric.hpp>
+
+#define timer timer_class
+#include <boost/progress.hpp>
+#undef timer
 
 namespace cirkit
 {
@@ -101,6 +106,7 @@ xmg_cuts_paged::xmg_cuts_paged( xmg_graph& xmg, unsigned k, const properties::pt
     _k( k ),
     _priority( get( settings, "priority", 8u ) ),
     _extra( get( settings, "extra", 0u ) ),
+    _progress( get( settings, "progress", false ) ),
     data( _xmg.size(), 2u + _extra ),
     cones( _xmg.size() )
 {
@@ -116,6 +122,7 @@ xmg_cuts_paged::xmg_cuts_paged( xmg_graph& xmg, unsigned k, const std::vector<xm
     _k( k ),
     _priority( get( settings, "priority", 8u ) ),
     _extra( get( settings, "extra", 0u ) ),
+    _progress( get( settings, "progress", false ) ),
     data( _xmg.size(), 2u + _extra ),
     cones( _xmg.size() ),
     _levels( levels )
@@ -206,10 +213,16 @@ void xmg_cuts_paged::enumerate()
   /* topsort */
   const auto top = _xmg.topological_nodes();
 
+  null_stream ns;
+  std::ostream null_out( &ns );
+  boost::progress_display show_progress( top.size(), _progress ? std::cout : null_out );
+
   /* loop */
   _top_index = 0u;
   for ( auto n : top )
   {
+    ++show_progress;
+
     if ( _xmg.is_input( n ) )
     {
       /* constant */
@@ -444,10 +457,10 @@ void xmg_cuts_paged::merge_cut( local_cut_vec_t& local_cuts, const boost::dynami
     if ( cut == new_cut ) { add = false; break; }
 
     /* cut subsumes new_cut */
-    if ( ( cut & new_cut ) == new_cut ) { add = false; break; }
+    if ( ( cut & new_cut ) == cut ) { add = false; break; }
 
     /* new_cut subsumes cut */
-    if ( ( cut & new_cut ) == cut )
+    if ( ( cut & new_cut ) == new_cut )
     {
       add = false;
       if ( first_subsume )
