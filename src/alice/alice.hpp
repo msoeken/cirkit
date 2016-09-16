@@ -341,27 +341,23 @@ public:
 private:
   bool execute_line( const std::string& line )
   {
-    /* split commands if line contains a semi-colon */
-    if ( !line.empty() && line[0] != '!' && line[0] != '<' && line.find( ';' ) != std::string::npos )
-    {
-      auto result = true;
-      boost::tokenizer<boost::escaped_list_separator<char>> tok( line, boost::escaped_list_separator<char>( '\\', ';', '\"' ) );
-
-      const auto lines = detail::split_commands( line );
-
-      if ( lines.size() > 1u )
-      {
-        for ( const auto& cline : lines )
-        {
-          result = result && execute_line( preprocess_alias( cline ) );
-        }
-
-        return result;
-      }
-    }
-
     /* ignore comments and empty lines */
     if ( line.empty() || line[0] == '#' ) { return false; }
+
+    /* split commands if line contains a semi-colon */
+    const auto lines = detail::split_commands( line );
+
+    if ( lines.size() > 1u )
+    {
+      auto result = true;
+
+      for ( const auto& cline : lines )
+      {
+        result = result && execute_line( preprocess_alias( cline ) );
+      }
+
+      return result;
+    }
 
     /* escape to shell */
     if ( line[0] == '!' )
