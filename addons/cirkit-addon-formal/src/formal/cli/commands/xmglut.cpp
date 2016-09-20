@@ -118,7 +118,11 @@ bool xmglut_command::execute()
   {
     extend_if_new( xmgs );
     xmgs.current() = xmg;
-    xmgs.current().set_name( aig_info( aigs.current() ).model_name );
+
+    if ( !is_set( "xmg" ) && !is_set( "blif_name" ) )
+    {
+      xmgs.current().set_name( aig_info( aigs.current() ).model_name );
+    }
   }
 
   print_runtime();
