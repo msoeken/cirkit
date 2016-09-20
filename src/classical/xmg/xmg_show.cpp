@@ -20,7 +20,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <regex>
 
 #include <boost/graph/graphviz.hpp>
 
@@ -33,46 +32,13 @@
 #include <range/v3/view/zip.hpp>
 
 #include <core/utils/range_utils.hpp>
+#include <core/utils/string_template.hpp>
 #include <core/utils/string_utils.hpp>
 
 using namespace ranges;
 
 namespace cirkit
 {
-
-/******************************************************************************
- * Template engine (move later)                                               *
- ******************************************************************************/
-
-class string_template
-{
-public:
-  string_template( const std::string& str )
-    : str( str )
-  {
-  }
-
-  std::string render( const std::unordered_map<std::string, std::string>& subst = {} ) const
-  {
-    std::string ret = str;
-
-    for ( const auto& p : subst )
-    {
-      ret = std::regex_replace( ret, std::regex( boost::str( boost::format( "\\{\\{ *%s *\\}\\}" ) % p.first ) ), p.second );
-    }
-
-    return ret;
-  }
-
-  std::string operator()( const std::unordered_map<std::string, std::string>& subst = {} ) const
-  {
-    return render( subst );
-  }
-
-private:
-  std::string str;
-};
-
 
 /******************************************************************************
  * Types                                                                      *
