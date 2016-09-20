@@ -44,6 +44,7 @@ using namespace cirkit;
 struct io_real_tag_t {};
 struct io_spec_tag_t {};
 struct io_quipper_tag_t {};
+struct io_liquid_tag_t {};
 struct io_tikz_tag_t {};
 struct io_qpic_tag_t {};
 struct io_qc_tag_t {};
@@ -91,6 +92,12 @@ bool store_can_write_io_type<circuit, io_quipper_tag_t>( command& cmd );
 
 template<>
 void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
+
+template<>
+bool store_can_write_io_type<circuit, io_liquid_tag_t>( command& cmd );
+
+template<>
+void store_write_io_type<circuit, io_liquid_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
 
 template<>
 bool store_can_read_io_type<circuit, io_real_tag_t>( command& cmd );

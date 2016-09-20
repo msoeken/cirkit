@@ -33,6 +33,7 @@
 #include <reversible/io/read_qc.hpp>
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/read_specification.hpp>
+#include <reversible/io/write_liquid.hpp>
 #include <reversible/io/write_pla.hpp>
 #include <reversible/io/write_qc.hpp>
 #include <reversible/io/write_qpic.hpp>
@@ -111,7 +112,7 @@ template<>
 bool store_can_write_io_type<circuit, io_quipper_tag_t>( command& cmd )
 {
   cmd.opts.add_options()
-    ( "ascii,a", "Write ASCII instead of Haskell program" )
+    ( "ascii,a", "write ASCII instead of Haskell program" )
     ;
 
   return true;
@@ -128,6 +129,25 @@ void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const 
   {
     write_quipper( circ, filename );
   }
+}
+
+template<>
+bool store_can_write_io_type<circuit, io_liquid_tag_t>( command& cmd )
+{
+  cmd.opts.add_options()
+    ( "dump,d", "write dump statement into script" )
+    ;
+
+  return true;
+}
+
+template<>
+void store_write_io_type<circuit, io_liquid_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
+{
+  auto settings = std::make_shared<properties>();
+  settings->set( "dump_statement", cmd.is_set( "dump" ) );
+
+  write_liquid( circ, filename, settings );
 }
 
 template<>
