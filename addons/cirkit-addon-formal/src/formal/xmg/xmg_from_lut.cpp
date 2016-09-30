@@ -115,6 +115,7 @@ private:
         std::cout << "[e] out degree: " << boost::out_degree( v, lut ) << std::endl;
         std::cout << "[e] num vars:   " << size << std::endl;
         std::cout << "[e] lut:        " << tts[v] << std::endl;
+        std::cout << "[e] type:       " << static_cast<unsigned>( types[v] ) << std::endl;
         assert( false );
       }
 
