@@ -31,6 +31,7 @@
 
 #include <alice/rules.hpp>
 #include <reversible/cli/stores.hpp>
+#include <reversible/simulation/partial_simulation.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
 
 using namespace boost::program_options;
@@ -42,6 +43,7 @@ revsim_command::revsim_command( const environment::ptr& env )
   : cirkit_command( env, "Reversible circuit simulation" )
 {
   opts.add_options()
+    ( "partial,r",                    "use partial simulation" )
     ( "pattern,p", value( &pattern ), "simulation pattern" )
     ;
   add_positional_option( "pattern" );
@@ -64,7 +66,9 @@ command::rules_t revsim_command::validity_rules() const
         }
         return true;
       }, "pattern must consists of 0s and 1s" },
-    {[this]() { return pattern == "0*" || pattern == "1*" || env->store<circuit>().current().lines() == pattern.size(); }, "pattern bits must equal number of lines" }
+    {[this]() { return pattern == "0*" ||
+                       pattern == "1*" ||
+                       ( is_set( "partial" ) || env->store<circuit>().current().lines() == pattern.size() ); }, "pattern bits must equal number of lines" }
   };
 }
 
@@ -80,7 +84,15 @@ bool revsim_command::execute()
 
   boost::dynamic_bitset<> input( pattern );
   boost::dynamic_bitset<> output;
-  simple_simulation( output, circuits.current(), input );
+
+  if ( is_set( "partial" ) )
+  {
+    partial_simulation( output, circuits.current(), input );
+  }
+  else
+  {
+    simple_simulation( output, circuits.current(), input );
+  }
 
   std::cout << "[i] result: " << output << std::endl;
 
