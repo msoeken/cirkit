@@ -216,11 +216,13 @@ void write_javascript_cytoscape( xmg_graph& xmg, std::ostream& os,
                                  const properties::ptr& statistics )
 {
   /* settings */
-  const auto xor_color = get( settings, "xor_color", std::string( "#87cefa") );
-  const auto maj_color = get( settings, "maj_color", std::string( "#ffa07a") );
-  const auto and_color = get( settings, "and_color", std::string( "#f08080") );
-  const auto or_color  = get( settings, "or_color",  std::string( "#bdffa9") );
-  const auto io_color  = get( settings, "io_color",  std::string( "#cccaca") );
+  const auto xor_color     = get( settings, "xor_color", std::string( "#87cefa") );
+  const auto maj_color     = get( settings, "maj_color", std::string( "#ffa07a") );
+  const auto and_color     = get( settings, "and_color", std::string( "#f08080") );
+  const auto or_color      = get( settings, "or_color",  std::string( "#bdffa9") );
+  const auto io_color      = get( settings, "io_color",  std::string( "#cccaca") );
+
+  const auto show_node_ids = get( settings, "show_node_ids", false );
 
   string_template t(
     "<!DOCTYPE>\n"
@@ -307,9 +309,10 @@ void write_javascript_cytoscape( xmg_graph& xmg, std::ostream& os,
     "</html>\n" );
 
   std::string nodes;
-  const auto node_transform = [&xmg]( xmg_node n ) {
+  const auto node_transform = [&xmg, show_node_ids]( xmg_node n ) {
     std::string type = xmg.is_input( n ) ? "pi" : ( xmg.is_maj( n ) ? ( xmg.is_pure_maj( n ) ? "maj" : ( xmg.children( n )[0].complemented ? "or" : "and" ) ) : "xor" );
-    std::string label = xmg.is_input( n ) ? ( n == 0 ? "0" : xmg.input_name( n )  ) : type;
+    std::string label = show_node_ids ? std::to_string( n )
+                                      : ( xmg.is_input( n ) ? ( n == 0 ? "0" : xmg.input_name( n )  ) : type );
 
     return boost::str( boost::format( "            { data: { id: 'n%1%', type: '%2%', label: '%3%' }, classes: '%2%' },\n" ) % n % type % label );
   };
@@ -321,21 +324,24 @@ void write_javascript_cytoscape( xmg_graph& xmg, std::ostream& os,
   for_each( view::concat( view::transform( xmg.nodes(), node_transform ), outputs ), [&nodes]( const std::string& s ) { nodes += s; } );
 
   std::string edges;
-  const auto edge_filter = [&xmg]( const xmg_edge& e ) { return boost::target( e, xmg.graph() ) > 0; };
-  const auto edge_transform = [&xmg]( const xmg_edge& e ) {
+
+  for ( const auto& e : xmg.edges() )
+  {
+    if ( boost::target( e, xmg.graph() ) == 0 ) continue;
+
     std::string classes;
 
     if ( xmg.complement()[e] )
     {
       classes += " complemented";
     }
-    return boost::str( boost::format( "            { data: { source: 'n%d', target: 'n%d' }, classes: '%s' },\n" ) % boost::source( e, xmg.graph() ) % boost::target( e, xmg.graph() ) % classes );
-  };
-  const auto output_edges_transform = []( std::pair<std::pair<xmg_function, std::string>, unsigned> t ) {
-    return boost::str( boost::format( "            { data: { source: 'o%d', target: 'n%d' }, classes: '%s' },\n" ) % t.second % t.first.first.node % ( t.first.first.complemented ? "complemented" : "" ) );
-  };
-  const auto output_edges = view::transform( output_pairs, output_edges_transform );
-  for_each( view::concat( view::transform( view::filter( xmg.edges(), edge_filter ), edge_transform ), output_edges ), [&edges]( const std::string& s ) { edges += s; }  );
+    edges += boost::str( boost::format( "            { data: { source: 'n%d', target: 'n%d' }, classes: '%s' },\n" ) % boost::source( e, xmg.graph() ) % boost::target( e, xmg.graph() ) % classes );
+  }
+
+  for ( const auto& t : index( xmg.outputs() ) )
+  {
+    edges += boost::str( boost::format( "            { data: { source: 'o%d', target: 'n%d' }, classes: '%s' },\n" ) % t.index % t.value.first.node % ( t.value.first.complemented ? "complemented" : "" ) );
+  }
 
   os << t( {
       {"xor_color", xor_color},

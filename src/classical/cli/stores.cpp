@@ -582,7 +582,11 @@ bool show_store_entry<xmg_graph>::operator()( xmg_graph& xmg, const std::string&
     return true;
 
   case 1u:
-    write_javascript_cytoscape( xmg, dotname );
+    {
+      auto settings = std::make_shared<properties>();
+      settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
+      write_javascript_cytoscape( xmg, dotname, settings );
+    }
     return true;
 
   default:
