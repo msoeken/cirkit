@@ -31,6 +31,7 @@
 
 #include <core/utils/program_options.hpp>
 #include <classical/mig/mig.hpp>
+#include <classical/mig/mig_from_string.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/mig/mig_utils.hpp>
 #include <classical/utils/truth_table_utils.hpp>
@@ -124,7 +125,18 @@ bool exact_mig_command::execute()
 
   if ( is_set( "all_solutions" ) )
   {
-    std::cout << format( "[i] found %d solutions" ) % statistics->get<std::vector<mig_graph>>( "all_solutions" ).size() << std::endl;
+    const auto& solutions = statistics->get<std::vector<mig_graph>>( "all_solutions" );
+
+    std::cout << format( "[i] found %d solutions" ) % solutions.size() << std::endl;
+
+    if ( is_set( "print_solutions" ) )
+    {
+      for ( const auto& smig : solutions )
+      {
+        auto expr = mig_to_expression( smig, mig_info( smig ).outputs.front().first );
+        std::cout << expr << std::endl;
+      }
+    }
   }
 
   std::cout << format( "[i] run-time: %.2f seconds" ) % statistics->get<double>( "runtime" ) << std::endl;
