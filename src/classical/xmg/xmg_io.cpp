@@ -60,6 +60,18 @@ std::string escape_name( const std::string& name )
   }
 }
 
+std::string unescape_name( const std::string& name )
+{
+  if ( !name.empty() && name[0] == '\\' )
+  {
+    return name.substr( 1u );
+  }
+  else
+  {
+    return name;
+  }
+}
+
 std::vector<std::string> get_input_names( const xmg_graph& xmg )
 {
   std::vector<std::string> inames;
@@ -247,7 +259,7 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
   line_parser( filename, {
       {boost::regex( "input (.*);" ), [&xmg, &name_to_function]( const boost::smatch& m ) {
           foreach_string( m[1], ", ", [&xmg, &name_to_function]( const std::string& name ) {
-              name_to_function.insert( {name, xmg.create_pi( name )} );
+              name_to_function.insert( {name, xmg.create_pi( unescape_name( name ) )} );
             } );
         }},
       {boost::regex( "output (.*);" ), [&output_names]( const boost::smatch& m ) {
@@ -318,7 +330,7 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
 
   for ( const auto& name : output_names )
   {
-    xmg.create_po( name_to_function[name], name );
+    xmg.create_po( name_to_function[name], unescape_name( name ) );
   }
 
   return xmg;
