@@ -9,7 +9,7 @@ The following software is required in order to build CirKit
 * git
 * cmake (at least version 3.0.0)
   
-  *If for some reason only older versions are available on the system, you can install cmake using `utils/tools.py install cmake` directly from CirKit. Afterwards update the `$PATH` variable by typing `export PATH=<path-to-cirkit>/ext/bin:PATH`.*
+  *If for some reason only older versions are available on the system, you can install cmake using `utils/tools.py install cmake` directly from CirKit. Afterwards update the `$PATH` variable by typing `export PATH=<path-to-cirkit>/ext/bin:$PATH`.*
 * g++ (at least version 4.9.0) or clang++ (at least version 3.5.0)
 * boost (at least version 1.56.0)
 * GNU MP, and its C++ interface GMP++
