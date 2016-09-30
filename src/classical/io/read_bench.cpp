@@ -232,13 +232,13 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
           std::string name( m[1] );
           boost::trim( name );
 
-          gates.push_back( std::make_tuple( name, "0", std::vector<std::string>() ) );
+          gates.push_back( std::make_tuple( name, "gnd", std::vector<std::string>() ) );
         }},
       {boost::regex( "^(.*) = vdd" ), [&gates]( const boost::smatch& m ) {
           std::string name( m[1] );
           boost::trim( name );
 
-          gates.push_back( std::make_tuple( name, "1", std::vector<std::string>() ) );
+          gates.push_back( std::make_tuple( name, "vdd", std::vector<std::string>() ) );
         }},
       {boost::regex( "^#" ), []( const boost::smatch& m ) {}}
     }, true );
@@ -275,7 +275,8 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
     if ( std::get<2>( gate ).empty() )
     {
-      gate_to_node[std::get<0>( gate )] = std::get<1>( gate ) == "1" ? v_vdd : v_gnd;
+      std::cout << "[i] assign " << std::get<0>( gate ) << " to constant" << std::endl;
+      gate_to_node[std::get<0>( gate )] = std::get<1>( gate ) == "vdd" ? v_vdd : v_gnd;
     }
     else
     {
@@ -318,6 +319,11 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
       for ( auto n : to_create )
       {
         const auto& gate = gates[n];
+
+        if ( std::get<1>( gate ) == "vdd" || std::get<1>( gate ) == "gnd" )
+        {
+          continue;
+        }
 
         auto v = add_vertex( lut );
 
