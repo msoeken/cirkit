@@ -47,7 +47,11 @@ namespace cirkit
 dxs_command::dxs_command( const environment::ptr& env )
   : xmg_base_command( env, "Direct XMG synthesis" )
 {
+  opts.add_options()
+    ( "bennett,b", "use Bennett trick and inplace synthesis" )
+    ;
   add_new_option();
+  be_verbose();
 }
 
 bool dxs_command::execute()
@@ -56,6 +60,7 @@ bool dxs_command::execute()
   extend_if_new( circuits );
 
   auto settings = make_settings();
+  settings->set( "bennett", is_set( "bennett" ) );
   direct_xmg_synthesis( circuits.current(), xmg(), settings, statistics );
 
   print_runtime();
