@@ -35,6 +35,7 @@
 #include <reversible/truth_table.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/synthesis/exact_synthesis.hpp>
+#include <reversible/synthesis/exact_toffoli_synthesis.hpp>
 #include <reversible/synthesis/quantified_exact_synthesis.hpp>
 
 namespace cirkit
@@ -56,7 +57,7 @@ exs_command::exs_command( const environment::ptr& env )
   : cirkit_command( env, "Exact synthesis" )
 {
   opts.add_options()
-    ( "mode,m",              value_with_default( &mode ),        "mode (0: BDD, 1: SAT)" )
+    ( "mode,m",              value_with_default( &mode ),        "mode (0: BDD, 1: SAT, 2: SAT (Toffoli))" )
     ( "start_depth,s",       value_with_default( &start_depth ), "initial search depth" )
     ( "max_depth",           value_with_default( &max_depth ),   "maximum search depth" )
     ( "negative,n",                                              "allow negative control lines" )
@@ -70,7 +71,7 @@ exs_command::exs_command( const environment::ptr& env )
 command::rules_t exs_command::validity_rules() const
 {
   return {
-    { [this]() { return this->mode <= 1u; }, "mode must be either 0 or 1" },
+    { [this]() { return this->mode <= 2u; }, "mode must be either 0 or 1" },
     has_store_element<binary_truth_table>( env )
   };
 }
@@ -99,6 +100,10 @@ bool exs_command::execute()
   else if ( mode == 1u )
   {
     result = exact_synthesis( circ, specs.current(), settings, statistics );
+  }
+  else if ( mode == 2u )
+  {
+    result = exact_toffoli_synthesis( circ, specs.current(), settings, statistics );
   }
 
   circuits.current() = circ;
