@@ -34,6 +34,8 @@
 
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
+#include <classical/xmg/xmg_coi.hpp>
+#include <classical/xmg/xmg_utils.hpp>
 #include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/add_line_to_circuit.hpp>
@@ -65,13 +67,26 @@ public:
     /* initialize reference counting */
     xmg.init_refs();
     xmg.inc_output_refs();
+
+    /* initialize reference counting for uncomputing */
+    if ( !inplace )
+    {
+      is_output = xmg_output_mask( xmg );
+      xmg.compute_fanout();
+      unccounter.resize( xmg.size() );
+      for ( auto node : xmg.nodes() )
+      {
+        unccounter[node] = xmg.fanout_count( node );
+      }
+    }
   }
 
   bool run()
   {
     add_inputs();
 
-    for ( auto node : xmg.topological_nodes() )
+    //for ( auto node : xmg.topological_nodes() )
+    for ( auto node : xmg_coi_topological_nodes( xmg ) )
     {
       if ( xmg.is_input( node ) ) { continue; }
 
@@ -82,7 +97,7 @@ public:
       line_to_node[line] = node;
       L( boost::format( "[i] node %d -> line %d" ) % node % node_to_line[node] );
 
-      if ( true )
+      if ( inplace ) /* uncompute as early as possible */
       {
         for ( const auto& c : xmg.children( node ) )
         {
@@ -99,6 +114,19 @@ public:
               L( boost::format( "[i] cannot uncompute node %d" ) % c.node );
               is_garbage[node_to_line[c.node]] = true;
             }
+          }
+        }
+      }
+      else /* defer uncomputing */
+      {
+        /* if node has output but no other fanout */
+        if ( is_output[node] && xmg.fanout_count( node ) == 0 )
+        {
+          L( "[i] start deferred uncomputing from node " << node );
+          std::stack<xmg_node> uncompute;
+          for ( const auto& c : xmg.children( node ) )
+          {
+            try_uncompute_defer( c.node );
           }
         }
       }
@@ -146,6 +174,38 @@ private:
     }
 
     return true;
+  }
+
+  bool can_uncompute_defer( xmg_node node )
+  {
+    if ( xmg.is_input( node ) || is_output[node] )
+    {
+      return false;
+    }
+
+    if ( unccounter[node] > 1 )
+    {
+      unccounter[node]--;
+      return false;
+    }
+
+    return true;
+  }
+
+  void try_uncompute_defer( xmg_node node )
+  {
+    if ( !can_uncompute_defer( node ) )
+    {
+      return;
+    }
+
+    L( boost::format( "[i] uncompute node %d" ) % node );
+    add_node_uncompute( node );
+
+    for ( const auto& c : xmg.children( node ) )
+    {
+      try_uncompute_defer( c.node );
+    }
   }
 
   unsigned add_node( xmg_node node )
@@ -493,6 +553,8 @@ private:
   std::vector<unsigned>   node_to_line;    /* maps nodes to lines */
   std::vector<unsigned>   line_to_node;    /* maps lines to nodes (0: constant or garbage) */
   boost::dynamic_bitset<> is_garbage;      /* is garbage line? */
+  std::vector<unsigned>   unccounter;      /* uncompute reference counter when not inplace */
+  boost::dynamic_bitset<> is_output;       /* is output node? */
 
   std::stack<unsigned>    constants;
 
