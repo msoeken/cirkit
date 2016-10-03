@@ -43,7 +43,33 @@
 namespace cirkit
 {
 
+/* e.g.: maps 0001 into
+ *
+ *  000 0--
+ *  001 0--
+ *  010 0--
+ *  011 1--
+ *  100 ---
+ *  101 ---
+ *  110 ---
+ *  111 ---
+ *
+ * requires one fewer line if bs is balanced
+ */
 binary_truth_table truth_table_from_bitset( const boost::dynamic_bitset<>& bs );
+
+/* e.g.: maps 0001 into
+ *
+ *   00 0  00 0
+ *   00 1  00 1
+ *   01 0  01 0
+ *   01 1  01 1
+ *   10 0  10 0
+ *   10 1  10 1
+ *   11 0  11 1
+ *   11 1  11 0
+ */
+binary_truth_table truth_table_from_bitset_bennett( const boost::dynamic_bitset<>& bs );
 
 }
 

@@ -31,10 +31,12 @@
 #include <boost/format.hpp>
 
 #include <core/utils/string_utils.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/circuit_to_aig.hpp>
 #include <reversible/functions/circuit_to_truth_table.hpp>
 #include <reversible/functions/permutation_to_truth_table.hpp>
+#include <reversible/functions/truth_table_from_bitset.hpp>
 #include <reversible/io/create_image.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/io/print_statistics.hpp>
@@ -97,6 +99,12 @@ template<>
 aig_graph store_convert<circuit, aig_graph>( const circuit& circ )
 {
   return circuit_to_aig( circ );
+}
+
+template<>
+binary_truth_table store_convert<expression_t::ptr, binary_truth_table>( const expression_t::ptr& expr )
+{
+  return truth_table_from_bitset_bennett( tt_from_expression( expr ) );
 }
 
 template<>

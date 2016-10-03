@@ -64,6 +64,27 @@ binary_truth_table truth_table_from_bitset( const boost::dynamic_bitset<>& bs )
   return spec;
 }
 
+binary_truth_table truth_table_from_bitset_bennett( const boost::dynamic_bitset<>& bs )
+{
+  const auto num_vars = tt_num_vars( bs );
+  const auto bw = 1u << num_vars;
+  binary_truth_table spec;
+
+  for ( auto c = 0; c < 2; ++c )
+  {
+    for ( auto i = 0u; i < bw; ++i )
+    {
+      auto in = number_to_truth_table_cube( i, num_vars );
+      auto out = number_to_truth_table_cube( i, num_vars );
+      in.push_back( c );
+      out.push_back( bs[i] != c );
+      spec.add_entry( in, out );
+    }
+  }
+
+  return spec;
+}
+
 }
 
 // Local Variables:
