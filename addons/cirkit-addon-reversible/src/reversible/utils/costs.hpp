@@ -155,6 +155,14 @@ namespace cirkit
   };
 
   /**
+   * @brief Returns the depth of the rev. circuit
+   */
+  struct depth_costs
+  {
+    cost_t operator()( const circuit& circ ) const;
+  };
+
+  /**
    * @brief Quantum costs from SK:2013
    *
    * Reference: Marek Szyprowski and Pawel Kerntopf, Low quantum

@@ -27,9 +27,10 @@
 #include "costs.hpp"
 
 #include <boost/range/algorithm.hpp>
+#include <boost/dynamic_bitset.hpp>
 
-#include "../target_tags.hpp"
-#include "../functions/flatten_circuit.hpp"
+#include <reversible/target_tags.hpp>
+#include <reversible/functions/flatten_circuit.hpp>
 
 #include <cmath> 
 namespace cirkit
@@ -48,6 +49,31 @@ namespace cirkit
   cost_t transistor_costs::operator()( const gate& g, unsigned lines ) const
   {
     return 8ull * g.controls().size();
+  }
+
+  cost_t depth_costs::operator()( const circuit& circ ) const
+  {
+    auto mask = ~boost::dynamic_bitset<>( circ.lines() );
+    auto depth = 0;
+
+    for ( const auto& g : circ )
+    {
+      boost::dynamic_bitset<> gate_mask( circ.lines() );
+      for ( const auto& c : g.controls() ) { gate_mask.set( c.line() ); }
+      for ( auto t : g.targets() ) { gate_mask.set( t ); }
+
+      if ( gate_mask.intersects( mask ) )
+      {
+        ++depth;
+        mask = gate_mask;
+      }
+      else
+      {
+        mask |= gate_mask;
+      }
+    }
+
+    return depth;
   }
 
   cost_t sk2013_quantum_costs::operator()( const gate& g, unsigned lines ) const

@@ -91,7 +91,8 @@ command::log_opt_t log_store_entry_statistics<circuit>( const circuit& circ )
       {"lines", static_cast<int>( circ.lines() )},
       {"tdepth", static_cast<unsigned>( costs( circ, costs_by_gate_func( t_depth_costs() ) ) )},
       {"tcount", static_cast<unsigned>( costs( circ, costs_by_gate_func( t_costs() ) ) )},
-      {"qubits", number_of_qubits( circ )}
+      {"qubits", number_of_qubits( circ )},
+      {"depth", static_cast<unsigned>( costs( circ, costs_by_circuit_func( depth_costs() ) ) )}
     });
 }
 
