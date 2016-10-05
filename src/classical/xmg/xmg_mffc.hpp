@@ -47,6 +47,11 @@ namespace cirkit
 unsigned xmg_compute_mffc( xmg_graph& xmg, xmg_node n, std::vector<xmg_node>& support );
 std::map<xmg_node, std::vector<xmg_node>> xmg_mffcs( xmg_graph& xmg );
 
+/* counts nodes including the root, but excluding the leafs */
+unsigned xmg_mffc_size( const xmg_graph& xmg, xmg_node n, const std::vector<xmg_node>& support );
+/* returns nodes including the root, but excluding the leafs */
+std::vector<xmg_node> xmg_mffc_cone( const xmg_graph& xmg, xmg_node n, const std::vector<xmg_node>& support );
+
 }
 
 #endif

@@ -26,6 +26,12 @@
 
 #include "xmg_mffc.hpp"
 
+#include <map>
+
+#include <boost/graph/depth_first_search.hpp>
+#include <boost/range/algorithm.hpp>
+
+#include <classical/xmg/xmg_dfs.hpp>
 #include <classical/xmg/xmg_utils.hpp>
 
 namespace cirkit
@@ -34,6 +40,83 @@ namespace cirkit
 /******************************************************************************
  * Types                                                                      *
  ******************************************************************************/
+struct xmg_size_visitor : public xmg_dfs_visitor
+{
+public:
+  xmg_size_visitor( const xmg_graph& xmg, const std::vector<xmg_node>& support, unsigned& size )
+    : xmg_dfs_visitor( xmg ),
+      support( support ),
+      size( size )
+  {
+  }
+
+  void finish_input( const xmg_node& node, const xmg_graph& xmg )
+  {
+  }
+
+  void finish_constant( const xmg_node& node, const xmg_graph& xmg )
+  {
+  }
+
+  void finish_xor_node( const xmg_node& node, const xmg_function& a, const xmg_function& b, const xmg_graph& xmg )
+  {
+    if ( boost::find( support, node ) == support.end() )
+    {
+      ++size;
+    }
+  }
+
+  void finish_maj_node( const xmg_node& node, const xmg_function& a, const xmg_function& b, const xmg_function& c, const xmg_graph& xmg )
+  {
+    if ( boost::find( support, node ) == support.end() )
+    {
+      ++size;
+    }
+  }
+
+private:
+  const std::vector<xmg_node>& support;
+  unsigned& size;
+};
+
+struct xmg_cone_visitor : public xmg_dfs_visitor
+{
+public:
+  xmg_cone_visitor( const xmg_graph& xmg, const std::vector<xmg_node>& support, std::vector<xmg_node>& cone )
+    : xmg_dfs_visitor( xmg ),
+      support( support ),
+      cone( cone )
+  {
+  }
+
+  void finish_input( const xmg_node& node, const xmg_graph& xmg )
+  {
+  }
+
+  void finish_constant( const xmg_node& node, const xmg_graph& xmg )
+  {
+  }
+
+  void finish_xor_node( const xmg_node& node, const xmg_function& a, const xmg_function& b, const xmg_graph& xmg )
+  {
+    if ( boost::find( support, node ) == support.end() )
+    {
+      cone.push_back( node );
+    }
+  }
+
+  void finish_maj_node( const xmg_node& node, const xmg_function& a, const xmg_function& b, const xmg_function& c, const xmg_graph& xmg )
+  {
+    if ( boost::find( support, node ) == support.end() )
+    {
+      cone.push_back( node );
+    }
+  }
+
+private:
+  const std::vector<xmg_node>& support;
+  std::vector<xmg_node>& cone;
+};
 
 /******************************************************************************
  * Private functions                                                          *
@@ -147,6 +230,32 @@ std::map<xmg_node, std::vector<xmg_node>> xmg_mffcs( xmg_graph& xmg )
   }
 
   return map;
+}
+
+unsigned xmg_mffc_size( const xmg_graph& xmg, xmg_node n, const std::vector<xmg_node>& support )
+{
+  std::map<xmg_node, boost::default_color_type> colors;
+  auto size = 0u;
+
+  boost::depth_first_visit( xmg.graph(), n,
+                            xmg_size_visitor( xmg, support, size ),
+                            boost::make_assoc_property_map( colors ),
+                            [&support]( const xmg_node& node, const xmg_graph::graph_t& g ) { return boost::find( support, node ) != support.end(); } );
+
+  return size;
+}
+
+std::vector<xmg_node> xmg_mffc_cone( const xmg_graph& xmg, xmg_node n, const std::vector<xmg_node>& support )
+{
+  std::map<xmg_node, boost::default_color_type> colors;
+  std::vector<xmg_node> cone;
+
+  boost::depth_first_visit( xmg.graph(), n,
+                            xmg_cone_visitor( xmg, support, cone ),
+                            boost::make_assoc_property_map( colors ),
+                            [&support]( const xmg_node& node, const xmg_graph::graph_t& g ) { return boost::find( support, node ) != support.end(); } );
+
+  return cone;
 }
 
 }
