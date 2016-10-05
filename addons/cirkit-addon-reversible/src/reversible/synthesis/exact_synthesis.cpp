@@ -438,8 +438,8 @@ void symmetry_breaking_one_not_per_line( z3::context& ctx, z3::solver& solver, c
 }
 
 bool synth_len(circuit& circ, const binary_truth_table& spec,
-               properties::ptr settings, gate_constraint_fun gate_constraints,
-               evaluation_fun eval, const std::vector<symmetry_fun>& symmetry_breaking, unsigned gate_count)
+               gate_constraint_fun gate_constraints,
+               evaluation_fun eval, const std::vector<symmetry_fun>& symmetry_breaking, bool only_toffoli, unsigned gate_count)
 {
   using boost::str;
   using boost::format;
@@ -482,6 +482,25 @@ bool synth_len(circuit& circ, const binary_truth_table& spec,
     f( ctx, solver, network, n );
   }
 
+  if ( only_toffoli )
+  {
+    for ( auto i = 0u; i < gate_count; ++i )
+    {
+      auto constr = ( network[i][0] == ctx.bv_val( 0u, n ) );
+      for ( auto j = 0; j < n; ++j )
+      {
+        auto mask = 1 << j;
+        constr = constr || ( network[i][0] == ctx.bv_val( mask, n ) );
+
+        for ( auto k = j + 1; k < n; ++k )
+        {
+          constr = constr || ( network[i][0] == ctx.bv_val( mask | ( 1 << k ), n ) );
+        }
+      }
+      solver.add( constr );
+    }
+  }
+
   return eval(solver, circ, network, gate_count, n);
 }
 
@@ -493,11 +512,12 @@ bool synth_len(circuit& circ, const binary_truth_table& spec,
 bool exact_synthesis(circuit& circ, const binary_truth_table& spec,
     properties::ptr settings, properties::ptr statistics)
 {
-  const auto start_depth = get( settings, "start_depth", 0u );
-  const auto max_depth   = get( settings, "max_depth",   20u );
-  const auto negative    = get( settings, "negative",    false );
-  const auto multiple    = get( settings, "multiple",    false );
-  const auto verbose     = get( settings, "verbose",     false );
+  const auto start_depth  = get( settings, "start_depth",  0u );
+  const auto max_depth    = get( settings, "max_depth",    20u );
+  const auto negative     = get( settings, "negative",     false );
+  const auto multiple     = get( settings, "multiple",     false );
+  const auto only_toffoli = get( settings, "only_toffoli", false );
+  const auto verbose      = get( settings, "verbose",      false );
 
   properties_timer t( statistics );
 
@@ -519,7 +539,7 @@ bool exact_synthesis(circuit& circ, const binary_truth_table& spec,
   }
   else
   {
-    symmetry_breaking.push_back( symmetry_breaking_colexicographic );
+    //symmetry_breaking.push_back( symmetry_breaking_colexicographic );
     if (negative)
     {
       gate_constraints = &gate_constraints_negative_control;
@@ -539,8 +559,7 @@ bool exact_synthesis(circuit& circ, const binary_truth_table& spec,
     {
       std::cout << "[i] check for depth " << gate_count << std::endl;
     }
-    result = synth_len(circ, spec, settings, gate_constraints, eval, symmetry_breaking,
-        gate_count);
+    result = synth_len( circ, spec, gate_constraints, eval, symmetry_breaking, only_toffoli, gate_count );
   } while (!result && gate_count++ < max_depth);
 
   if (result)
