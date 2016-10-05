@@ -26,20 +26,35 @@
 
 #include "direct_xmg_synthesis.hpp"
 
+#include <fstream>
 #include <queue>
 #include <stack>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
 
 #include <core/utils/range_utils.hpp>
+#include <core/utils/string_utils.hpp>
 #include <core/utils/timer.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 #include <classical/xmg/xmg_coi.hpp>
+#include <classical/xmg/xmg_mffc.hpp>
+#include <classical/xmg/xmg_simulate.hpp>
 #include <classical/xmg/xmg_utils.hpp>
+#include <reversible/target_tags.hpp>
 #include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/add_line_to_circuit.hpp>
+#include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/reverse_circuit.hpp>
+#include <reversible/functions/truth_table_from_bitset.hpp>
+#include <reversible/io/print_circuit.hpp>
+#include <reversible/synthesis/exact_synthesis.hpp>
+#include <reversible/synthesis/exact_toffoli_synthesis.hpp>
+#include <reversible/synthesis/transformation_based_synthesis.hpp>
 
 #define L(x) if ( verbose ) { std::cout << x << std::endl; }
 
@@ -50,6 +65,218 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
+class dxs_exact_manager
+{
+public:
+  dxs_exact_manager( xmg_graph& xmg, bool verbose )
+    : xmg( xmg ),
+      verbose( verbose ),
+      skip_list( xmg.size() )
+  {
+    xmg.compute_parents();
+  }
+
+  void run()
+  {
+    L( "[i] compute MFFCs" );
+    mffcs = xmg_mffcs( xmg );
+
+    compute_truth_tables();
+    compute_circuits();
+  }
+
+  bool has_network( xmg_node n ) const
+  {
+    return mffc_specs.find( n ) != mffc_specs.end();
+  }
+
+  const circuit& get_network( xmg_node n ) const
+  {
+    return *mffc_circs.at( tt_to_hex( mffc_specs.at( n ) ) );
+  }
+
+  const std::vector<xmg_node>& get_leafs( xmg_node n ) const
+  {
+    return mffcs.at( n );
+  }
+
+  bool must_skip( xmg_node n ) const
+  {
+    return skip_list.test( n );
+  }
+
+  std::vector<unsigned> get_leaf_fanouts( xmg_node n ) const
+  {
+    const auto& leafs = mffcs.at( n );
+    auto cone = xmg_mffc_cone( xmg, n, leafs );
+    boost::push_back( cone, leafs );
+
+    std::vector<unsigned> fanouts;
+
+    for ( auto l : leafs )
+    {
+      auto fanout = 0;
+
+      for ( auto p : xmg.parents( l ) )
+      {
+        if ( boost::find( cone, p ) != cone.end() )
+        {
+          ++fanout;
+        }
+      }
+
+      assert( fanout );
+      fanouts.push_back( fanout );
+    }
+
+    return fanouts;
+  }
+
+  const std::map<xmg_node, std::vector<xmg_node>>& get_mffcs() const
+  {
+    return mffcs;
+  }
+
+private:
+  void compute_truth_tables()
+  {
+    std::vector<std::string> blacklist( {"abba0330", "44504040"} );
+
+    for ( const auto& p : mffcs )
+    {
+      auto num_vars = p.second.size();
+      if ( boost::find( p.second, 0 ) != p.second.end() ) /* leafs contain constant */
+      {
+        --num_vars;
+      }
+
+      /* too many vars */
+      if ( num_vars < 2 || num_vars > var_threshold ) { continue; }
+
+      const auto size = xmg_mffc_size( xmg, p.first, p.second );
+
+      /* too few nodes */
+      if ( size == 1 ) { continue; }
+
+      std::map<xmg_node, tt> node_map;
+      auto i = 0u;
+      for ( auto leaf : p.second )
+      {
+        if ( leaf == 0 ) { continue; }
+
+        auto leaf_spec = tt_nth_var( num_vars - 1 - i++ );
+        if ( num_vars > 6 )
+        {
+          tt_extend( leaf_spec, num_vars );
+        }
+        node_map[leaf] = leaf_spec;
+      }
+
+      xmg_tt_simulator sim;
+      xmg_partial_node_assignment_simulator<tt> psim( sim, node_map, tt_const0() );
+
+      auto spec = simulate_xmg_node( xmg, p.first, psim );
+      if ( num_vars < 6 )
+      {
+        tt_shrink( spec, num_vars );
+      }
+
+      /* even permutation? */
+      if ( spec.count() % 2 != 0 ) { continue; }
+
+      /* blacklisted? */
+      const auto spec_str = tt_to_hex( spec );
+      if ( boost::find( blacklist, spec_str ) != blacklist.end() ) { continue; }
+
+      mffc_specs[p.first] = spec;
+      mffc_circs[spec_str] = boost::none;
+
+      /* update skip list */
+      for ( auto node : xmg_mffc_cone( xmg, p.first, p.second ) )
+      {
+        skip_list.set( node );
+      }
+      skip_list.reset( p.first );
+
+      L( boost::format( "[i] MFFC for %d with leafs %s and size %d: %s" ) % p.first % any_join( p.second, ", " ) % size % tt_to_hex( spec ) );
+    }
+  }
+
+  void read_circuits_from_file()
+  {
+    if ( const auto* path = std::getenv( "CIRKIT_HOME" ) )
+    {
+      const auto filename = boost::str( boost::format( "%s/dxsmin.txt" ) % path );
+      if ( boost::filesystem::exists( filename ) )
+      {
+        foreach_line_in_file( filename, [this]( const std::string& line ) {
+            const auto split = line.find( ' ' );
+
+            mffc_circs[line.substr( 0u, split )] = circuit_from_string( line.substr( split + 1 ) );
+
+            return true;
+          } );
+      }
+    }
+  }
+
+  void write_circuits_to_file()
+  {
+    if ( const auto* path = std::getenv( "CIRKIT_HOME" ) )
+    {
+      const auto filename = boost::str( boost::format( "%s/dxsmin.txt" ) % path );
+      std::ofstream os( filename.c_str(), std::ofstream::out );
+
+      for ( const auto& p : mffc_circs )
+      {
+        if ( !(bool)p.second ) { continue; }
+
+        os << p.first << " " << circuit_to_string( *p.second ) << std::endl;
+      }
+    }
+  }
+
+  void compute_circuits()
+  {
+    //read_circuits_from_file();
+
+    for ( const auto& p : mffc_specs )
+    {
+      const auto spec_str = tt_to_hex( p.second );
+
+      /* circuit already computed */
+      if ( (bool)mffc_circs[spec_str] ) { continue; }
+
+      L( boost::format( "[i] compute optimum circuit for %s" ) % spec_str );
+
+      const auto rev_spec = truth_table_from_bitset_bennett( p.second );
+      circuit circ;
+      auto es_settings = std::make_shared<properties>();
+      es_settings->set( "negative", true );
+      es_settings->set( "only_toffoli", true );
+      es_settings->set( "verbose", false );
+      //exact_synthesis( circ, rev_spec, es_settings );
+      transformation_based_synthesis( circ, rev_spec, es_settings );
+
+      mffc_circs[spec_str] = circ;
+
+      //write_circuits_to_file();
+    }
+  }
+
+private:
+  xmg_graph& xmg;
+  bool verbose;
+
+  unsigned var_threshold = 15u;
+
+  std::map<xmg_node, std::vector<xmg_node>>       mffcs;
+  std::map<xmg_node, tt>                          mffc_specs;
+  std::map<std::string, boost::optional<circuit>> mffc_circs;
+
+  boost::dynamic_bitset<>                         skip_list; /* nodes to skip in mapping */
+};
+
 class direct_xmg_synthesis_manager
 {
 public:
@@ -58,11 +285,15 @@ public:
       xmg( xmg ),
       node_to_line( xmg.size() ),
       line_to_node( xmg.inputs().size() ),
-      is_garbage( xmg.inputs().size() )
+      is_garbage( xmg.inputs().size() ),
+
+      inplace( get( settings, "inplace", inplace ) ),
+      garbage_name( get( settings, "garbage_name", garbage_name ) ),
+      verbose( get( settings, "verbose", verbose ) ),
+
+      esmgr( xmg, verbose )
   {
-    inplace      = get( settings, "inplace",      inplace );
-    garbage_name = get( settings, "garbage_name", garbage_name );
-    verbose      = get( settings, "verbose",      verbose );
+
 
     /* initialize reference counting */
     xmg.init_refs();
@@ -78,6 +309,26 @@ public:
       {
         unccounter[node] = xmg.fanout_count( node );
       }
+
+      esmgr.run();
+
+      /* adjust unccounter */
+      for ( const auto& p : esmgr.get_mffcs() )
+      {
+        if ( !esmgr.has_network( p.first ) ) { continue; }
+        for ( auto l : p.second )
+        {
+          unccounter[l] = 0; //1;
+        }
+      }
+      for ( const auto& p : esmgr.get_mffcs() )
+      {
+        if ( !esmgr.has_network( p.first ) ) { continue; }
+        for ( auto l : p.second )
+        {
+          unccounter[l] = xmg.fanout_count( l );
+        }
+      }
     }
   }
 
@@ -89,6 +340,7 @@ public:
     for ( auto node : xmg_coi_topological_nodes( xmg ) )
     {
       if ( xmg.is_input( node ) ) { continue; }
+      if ( esmgr.must_skip( node ) ) { continue; }
 
       const auto line = add_node( node );
 
@@ -97,6 +349,7 @@ public:
       line_to_node[line] = node;
       L( boost::format( "[i] node %d -> line %d" ) % node % node_to_line[node] );
 
+      /* trigger uncomputing */
       if ( inplace ) /* uncompute as early as possible */
       {
         for ( const auto& c : xmg.children( node ) )
@@ -123,10 +376,20 @@ public:
         if ( is_output[node] && xmg.fanout_count( node ) == 0 )
         {
           L( "[i] start deferred uncomputing from node " << node );
-          std::stack<xmg_node> uncompute;
-          for ( const auto& c : xmg.children( node ) )
+          if ( esmgr.has_network( node ) )
           {
-            try_uncompute_defer( c.node );
+            for ( auto n : esmgr.get_leafs( node ) )
+            {
+              assert( n != node );
+              try_uncompute_defer( n );
+            }
+          }
+          else
+          {
+            for ( const auto& c : xmg.children( node ) )
+            {
+              try_uncompute_defer( c.node );
+            }
           }
         }
       }
@@ -189,11 +452,15 @@ private:
       return false;
     }
 
+    assert( unccounter[node] == 1 );
+
     return true;
   }
 
   void try_uncompute_defer( xmg_node node )
   {
+    assert( !esmgr.must_skip( node ) );
+
     if ( !can_uncompute_defer( node ) )
     {
       return;
@@ -202,9 +469,21 @@ private:
     L( boost::format( "[i] uncompute node %d" ) % node );
     add_node_uncompute( node );
 
-    for ( const auto& c : xmg.children( node ) )
+    if ( esmgr.has_network( node ) )
     {
-      try_uncompute_defer( c.node );
+      //L( "[i]   node has network" );
+      for ( auto leaf : esmgr.get_leafs( node ) )
+      {
+        assert( leaf != node );
+        try_uncompute_defer( leaf );
+      }
+    }
+    else
+    {
+      for ( const auto& c : xmg.children( node ) )
+      {
+        try_uncompute_defer( c.node );
+      }
     }
   }
 
@@ -212,7 +491,14 @@ private:
   {
     const auto children = xmg.children( node );
 
-    if ( xmg.is_xor( node ) ) /* XOR */
+    if ( esmgr.has_network( node ) )
+    {
+      L( boost::format( "[i] node %d is computed network" ) % node );
+
+      assert( !inplace );
+      return add_computed_network( node );
+    }
+    else if ( xmg.is_xor( node ) ) /* XOR */
     {
       if ( inplace && xmg.get_ref( children[0u].node ) == 1u )
       {
@@ -279,7 +565,11 @@ private:
   {
     const auto children = xmg.children( node );
 
-    if ( xmg.is_xor( node ) ) /* XOR */
+    if ( esmgr.has_network( node ) )
+    {
+      add_computed_network_uncompute( node );
+    }
+    else if ( xmg.is_xor( node ) ) /* XOR */
     {
       add_xor_uncompute( children[0u], children[1u], node );
     }
@@ -346,9 +636,19 @@ private:
       }
       else
       {
-        assert( xmg.is_input( line_to_node[i] ) );
-        garbage[i] = true; /* but not really */
-        outputs[i] = xmg.input_name( line_to_node[i] );
+        const auto node = line_to_node[i];
+        if ( !xmg.is_input( node ) )
+        {
+          assert( unccounter[node] );
+          add_node_uncompute( node );
+          garbage[i] = true;
+          outputs[i] = "0";
+        }
+        else
+        {
+          garbage[i] = true; /* but not really */
+          outputs[i] = xmg.input_name( line_to_node[i] );
+        }
       }
     }
 
@@ -547,13 +847,83 @@ private:
     constants.push( target );
   }
 
+  unsigned add_computed_network( xmg_node node )
+  {
+    const auto target = request_constant();
+    const auto& children = esmgr.get_leafs( node );
+
+    std::vector<unsigned> line_map;
+
+    for ( auto child : children )
+    {
+      if ( !child ) { continue; }
+      assert( xmg.get_ref( child ) );
+
+      line_map.push_back( node_to_line[child] );
+    }
+    line_map.push_back( target );
+
+    L( boost::format( "[i] line map = %s" ) % any_join( line_map, " " ) );
+
+    std::cout << esmgr.get_network( node ) << std::endl;
+
+    L( boost::format( "[i] add computed network with %d gates" ) % esmgr.get_network( node ).num_gates() );
+
+    for ( const auto& g : esmgr.get_network( node ) )
+    {
+      assert( is_toffoli( g ) );
+
+      gate::control_container controls;
+      for ( const auto& c : g.controls() )
+      {
+        controls.push_back( make_var( line_map[c.line()], c.polarity() ) );
+      }
+      append_toffoli( circ, controls, line_map[g.targets().front()] );
+    }
+
+    return target;
+  }
+
+  void add_computed_network_uncompute( xmg_node node )
+  {
+    const auto target = node_to_line[node];
+    const auto& children = esmgr.get_leafs( node );
+
+    std::vector<unsigned> line_map;
+
+    for ( auto child : children )
+    {
+      if ( !child ) { continue; }
+
+      line_map.push_back( node_to_line[child] );
+    }
+    line_map.push_back( target );
+
+    const auto pos = circ.num_gates();
+    for ( const auto& g : esmgr.get_network( node ) )
+    {
+      assert( is_toffoli( g ) );
+
+      gate::control_container controls;
+      for ( const auto& c : g.controls() )
+      {
+        controls.push_back( make_var( line_map[c.line()], c.polarity() ) );
+      }
+      insert_toffoli( circ, pos, controls, line_map[g.targets().front()] );
+    }
+
+    line_to_node[target] = 0;
+    is_garbage.reset( target );
+    constants.push( target );
+  }
+
 private:
   circuit&                circ;
   xmg_graph&              xmg;
   std::vector<unsigned>   node_to_line;    /* maps nodes to lines */
   std::vector<unsigned>   line_to_node;    /* maps lines to nodes (0: constant or garbage) */
   boost::dynamic_bitset<> is_garbage;      /* is garbage line? */
-  std::vector<unsigned>   unccounter;      /* uncompute reference counter when not inplace */
+  std::vector<int>        unccounter;      /* uncompute reference counter when not inplace */
   boost::dynamic_bitset<> is_output;       /* is output node? */
 
   std::stack<unsigned>    constants;
@@ -562,6 +932,9 @@ private:
   bool        inplace      = false;
   std::string garbage_name = "--";
   bool        verbose      = false;
+
+  /* helper managers */
+  dxs_exact_manager       esmgr;
 };
 
 /******************************************************************************
