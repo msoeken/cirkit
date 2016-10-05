@@ -54,6 +54,8 @@ namespace cirkit
 
 circuit circuit_from_string( const std::string& description, const std::string& sep = "," );
 
+std::string circuit_to_string( const circuit& circ, const std::string& sep = "," );
+
 }
 
 #endif

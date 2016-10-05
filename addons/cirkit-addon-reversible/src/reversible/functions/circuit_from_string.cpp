@@ -27,6 +27,7 @@
 #include "circuit_from_string.hpp"
 
 #include <algorithm>
+#include <sstream>
 #include <vector>
 
 #include <boost/lexical_cast.hpp>
@@ -66,7 +67,7 @@ circuit circuit_from_string( const std::string& description, const std::string& 
 
     assert( lines.size() > 1u );
     assert( lines[0][0] == 't' || lines[0][0] == 'f' );
-    assert( boost::lexical_cast<unsigned>( lines[0].substr( 1u ) ) == lines.size() - 1u );
+    //assert( boost::lexical_cast<unsigned>( lines[0].substr( 1u ) ) == lines.size() - 1u );
 
     auto& _gate = circ.append_gate();
 
@@ -121,6 +122,37 @@ circuit circuit_from_string( const std::string& description, const std::string& 
   circ.set_lines( max + 1u );
 
   return circ;
+}
+
+std::string circuit_to_string( const circuit& circ, const std::string& sep )
+{
+  std::stringstream str;
+  auto first = true;
+
+  for ( const auto& g : circ )
+  {
+    if ( first )
+    {
+      first = false;
+    }
+    else
+    {
+      str << sep;
+    }
+
+    assert( is_toffoli( g ) );
+
+    str << "t" << g.controls().size();
+
+    for ( const auto& c : g.controls() )
+    {
+      str << " " << ( c.polarity() ? "" : "-" ) << std::string( 1, 'a' + c.line() );
+    }
+
+    str << " " << std::string( 1, 'a' + g.targets().front() );
+  }
+
+  return str.str();
 }
 
 }
