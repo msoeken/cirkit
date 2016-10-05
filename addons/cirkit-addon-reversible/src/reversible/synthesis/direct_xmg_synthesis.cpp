@@ -299,6 +299,8 @@ public:
     xmg.init_refs();
     xmg.inc_output_refs();
 
+    esmgr.run();
+
     /* initialize reference counting for uncomputing */
     if ( !inplace )
     {
@@ -309,8 +311,6 @@ public:
       {
         unccounter[node] = xmg.fanout_count( node );
       }
-
-      esmgr.run();
 
       /* adjust unccounter */
       for ( const auto& p : esmgr.get_mffcs() )
@@ -352,23 +352,23 @@ public:
       /* trigger uncomputing */
       if ( inplace ) /* uncompute as early as possible */
       {
-        for ( const auto& c : xmg.children( node ) )
-        {
-          xmg.dec_ref( c.node );
-          if ( xmg.get_ref( c.node ) == 0 && !xmg.is_input( c.node ) )
-          {
-            if ( can_uncompute( c.node ) )
+        foreach_child( node, [this]( xmg_node child ) {
+            xmg.dec_ref( child );
+            if ( xmg.get_ref( child ) == 0 && !xmg.is_input( child ) )
             {
-              L( boost::format( "[i] uncompute node %d" ) % c.node );
-              add_node_uncompute( c.node );
+              if ( can_uncompute( child ) )
+              {
+                L( boost::format( "[i] uncompute node %d" ) % child );
+                add_node_uncompute( child );
+              }
+              else
+              {
+                L( boost::format( "[i] cannot uncompute node %d" ) % child );
+                is_garbage[node_to_line[child]] = true;
+              }
             }
-            else
-            {
-              L( boost::format( "[i] cannot uncompute node %d" ) % c.node );
-              is_garbage[node_to_line[c.node]] = true;
-            }
-          }
-        }
+            return true;
+          } );
       }
       else /* defer uncomputing */
       {
@@ -376,21 +376,10 @@ public:
         if ( is_output[node] && xmg.fanout_count( node ) == 0 )
         {
           L( "[i] start deferred uncomputing from node " << node );
-          if ( esmgr.has_network( node ) )
-          {
-            for ( auto n : esmgr.get_leafs( node ) )
-            {
-              assert( n != node );
-              try_uncompute_defer( n );
-            }
-          }
-          else
-          {
-            for ( const auto& c : xmg.children( node ) )
-            {
-              try_uncompute_defer( c.node );
-            }
-          }
+          foreach_child( node, [this]( xmg_node child ) {
+              try_uncompute_defer( child );
+              return true;
+            } );
         }
       }
     }
@@ -401,6 +390,27 @@ public:
   }
 
 private:
+  template<typename Fn>
+  bool foreach_child( xmg_node n, Fn&& f )
+  {
+    if ( esmgr.has_network( n ) )
+    {
+      for ( auto leaf : esmgr.get_leafs( n ) )
+      {
+        if ( !f( leaf ) ) { return false; }
+      }
+    }
+    else
+    {
+      for ( const auto& child : xmg.children( n ) )
+      {
+        if ( !f( child.node ) ) { return false; }
+      }
+    }
+
+    return true;
+  }
+
   unsigned request_constant()
   {
     if ( constants.empty() )
@@ -426,14 +436,11 @@ private:
     }
 
     /* children must still be available */
-    for ( const auto& c : xmg.children( node ) )
+    if ( !foreach_child( node, [this]( xmg_node child ) {
+        return ( child == 0 || line_to_node[node_to_line[child]] == child );
+        } ) )
     {
-      if ( c.node == 0 ) { continue; } /* no constants */
-
-      if ( line_to_node[node_to_line[c.node]] != c.node )
-      {
-        return false;
-      }
+      return false;
     }
 
     return true;
@@ -469,22 +476,10 @@ private:
     L( boost::format( "[i] uncompute node %d" ) % node );
     add_node_uncompute( node );
 
-    if ( esmgr.has_network( node ) )
-    {
-      //L( "[i]   node has network" );
-      for ( auto leaf : esmgr.get_leafs( node ) )
-      {
-        assert( leaf != node );
-        try_uncompute_defer( leaf );
-      }
-    }
-    else
-    {
-      for ( const auto& c : xmg.children( node ) )
-      {
-        try_uncompute_defer( c.node );
-      }
-    }
+    foreach_child( node, [this]( xmg_node child ) {
+        try_uncompute_defer( child );
+        return true;
+      } );
   }
 
   unsigned add_node( xmg_node node )
@@ -495,7 +490,6 @@ private:
     {
       L( boost::format( "[i] node %d is computed network" ) % node );
 
-      assert( !inplace );
       return add_computed_network( node );
     }
     else if ( xmg.is_xor( node ) ) /* XOR */
@@ -618,36 +612,39 @@ private:
     }
 
     /* fix non-output lines */
-    for ( auto i = 0u; i < circ.lines(); ++i )
+    if ( !inplace )
     {
-      if ( boutputs[i] )
+      for ( auto i = 0u; i < circ.lines(); ++i )
       {
-        continue;
-      }
-      else if ( is_garbage[i] )
-      {
-        garbage[i] = true;
-        outputs[i] = garbage_name;
-      }
-      else if ( line_to_node[i] == 0 ) /* is constant */
-      {
-        garbage[i] = true; /* but not really */
-        outputs[i] = "0";
-      }
-      else
-      {
-        const auto node = line_to_node[i];
-        if ( !xmg.is_input( node ) )
+        if ( boutputs[i] )
         {
-          assert( unccounter[node] );
-          add_node_uncompute( node );
+          continue;
+        }
+        else if ( is_garbage[i] )
+        {
           garbage[i] = true;
+          outputs[i] = garbage_name;
+        }
+        else if ( line_to_node[i] == 0 ) /* is constant */
+        {
+          garbage[i] = true; /* but not really */
           outputs[i] = "0";
         }
         else
         {
-          garbage[i] = true; /* but not really */
-          outputs[i] = xmg.input_name( line_to_node[i] );
+          const auto node = line_to_node[i];
+          if ( !xmg.is_input( node ) )
+          {
+            assert( unccounter[node] );
+            add_node_uncompute( node );
+            garbage[i] = true;
+            outputs[i] = "0";
+          }
+          else
+          {
+            garbage[i] = true; /* but not really */
+            outputs[i] = xmg.input_name( line_to_node[i] );
+          }
         }
       }
     }
@@ -864,8 +861,6 @@ private:
     line_map.push_back( target );
 
     L( boost::format( "[i] line map = %s" ) % any_join( line_map, " " ) );
-
-    std::cout << esmgr.get_network( node ) << std::endl;
 
     L( boost::format( "[i] add computed network with %d gates" ) % esmgr.get_network( node ).num_gates() );
 
