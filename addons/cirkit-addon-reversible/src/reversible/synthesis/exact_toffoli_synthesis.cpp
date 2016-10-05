@@ -73,6 +73,9 @@ private:
   std::vector<int> spec_assumptions() const;
   void create_circuit( circuit& circ ) const;
 
+  int symmetry_breaking_ordering( int l );
+  int symmetry_breaking_not_same( int l );
+
   template<typename ...Lits>
   int add_clause( Lits... literals )
   {
@@ -82,6 +85,43 @@ private:
   }
 
   int make_lit( int var, int c ) const;
+
+  /* range helpers */
+  template<typename Fn>
+  void for_each_not( Fn&& f )
+  {
+    for ( int i = 0; i < n; ++i )
+    {
+      f( i );
+    }
+  }
+
+  template<typename Fn>
+  void for_each_cnot( Fn&& f )
+  {
+    for ( int i = 0; i < n; ++i )
+    {
+      for ( int j = 1; j < n; ++j )
+      {
+        f( i, j );
+      }
+    }
+  }
+
+  template<typename Fn>
+  void for_each_tof( Fn&& f )
+  {
+    for ( int i = 0; i < n; ++i )
+    {
+      for ( int j = 2; j < n; ++j )
+      {
+        for ( int k = 1; k < j; ++k )
+        {
+          f( i, j, k );
+        }
+      }
+    }
+  }
 
   void debug_vars();
 
@@ -133,9 +173,17 @@ void exact_toffoli_synthesis_manager::run( circuit& circ )
     ++r;
     nvars += num_vars_per_gate;
 
+    std::cout << "[i] try to find optimum circuit with " << r << " gates" << std::endl;
+
     abc::sat_solver_setnvars( solver.get(), nvars );
 
     gate_clauses( r - 1 );
+
+    if ( r > 1 )
+    {
+      symmetry_breaking_ordering( r - 1 );
+      symmetry_breaking_not_same( r - 1 );
+    }
     auto assump = spec_assumptions();
     int * p = &assump.front();
 
@@ -291,6 +339,72 @@ int exact_toffoli_synthesis_manager::tof_clauses( int l, int i, int j, int k, in
   return 1;
 }
 
+int exact_toffoli_synthesis_manager::symmetry_breaking_ordering( int l )
+{
+  /* no CNOT( i, j ) before NOT( i ) */
+  for_each_cnot( [this, l]( int i, int j ) {
+      add_clause( make_lit( not_var( l, i ), 1 ), make_lit( cnot_var( l - 1, i, j ), 1 ) );
+    } );
+  /* no TOF( i, j, k ) before NOT( i ) */
+  for_each_tof( [this, l]( int i, int j, int k ) {
+      add_clause( make_lit( not_var( l, i ), 1 ), make_lit( tof_var( l - 1, i, j, k ), 1 ) );
+    } );
+  /* order CNOTs with same target */
+  for_each_cnot( [this, l]( int i, int j ) {
+      for ( auto jj = 1; jj < j; ++jj )
+      {
+        add_clause( make_lit( cnot_var( l, i, j ), 1 ), make_lit( cnot_var( l - 1, i, jj ), 1 ) );
+      }
+    } );
+  /* order of TOFs with same target */
+  for_each_tof( [this, l]( int i, int j, int k ) {
+      for ( auto jj = 2; jj < j; ++jj )
+      {
+        for ( auto kk = 1; kk < jj; ++kk )
+        {
+          add_clause( make_lit( tof_var( l, i, j, k ), 1 ), make_lit( tof_var( l - 1, i, jj, kk ), 1 ) );
+        }
+      }
+      for ( auto kk = 1; kk < j; ++kk )
+      {
+        add_clause( make_lit( tof_var( l, i, j, k ), 1 ), make_lit( tof_var( l - 1, i, j, kk ), 1 ) );
+      }
+    } );
+  /* no CNOT( i, j ) before NOT( i' ) where i' not in {i, j} */
+  for_each_cnot( [this, l]( int i, int j ) {
+      for ( auto ii = 0; ii < n; ++ii )
+      {
+        if ( ii == i || ii == ( ( i + j ) % n ) ) { continue; }
+        add_clause( make_lit( not_var( l, ii ), 1 ), make_lit( cnot_var( l - 1, i, j ), 1 ) );
+      }
+    } );
+  /* no TOF( i, j, k ) before NOT( i' ) where i' not in {i, j, k} */
+  for_each_tof( [this, l]( int i, int j, int k ) {
+      for ( auto ii = 0; ii < n; ++ii )
+      {
+        if ( ii == i || ii == ( ( i + j ) % n ) || ii == ( ( i + k ) % n ) ) { continue; }
+        add_clause( make_lit( not_var( l, ii ), 1 ), make_lit( tof_var( l - 1, i, j, k ), 1 ) );
+      }
+    } );
+
+  return 1;
+}
+
+int exact_toffoli_synthesis_manager::symmetry_breaking_not_same( int l )
+{
+  for_each_not( [this, l]( int i ) {
+      add_clause( make_lit( not_var( l, i ), 1 ), make_lit( not_var( l - 1, i ), 1 ) );
+    } );
+  for_each_cnot( [this, l]( int i, int j ) {
+      add_clause( make_lit( cnot_var( l, i, j ), 1 ), make_lit( cnot_var( l - 1, i, j ), 1 ) );
+    } );
+  for_each_tof( [this, l]( int i, int j, int k ) {
+      add_clause( make_lit( tof_var( l, i, j, k ), 1 ), make_lit( tof_var( l - 1, i, j, k ), 1 ) );
+    } );
+
+  return 1;
+}
+
 void exact_toffoli_synthesis_manager::debug_vars()
 {
   for ( auto l = 0; l < r; ++l )
@@ -333,29 +447,9 @@ int exact_toffoli_synthesis_manager::gate_clauses( int l )
 {
   for ( auto t = 0; t < ( 1u << n ); ++t )
   {
-    for ( auto i = 0; i < n; ++i )
-    {
-      not_clauses( l, i, t );
-    }
-
-    for ( auto i = 0; i < n; ++i )
-    {
-      for ( auto j = 1; j < n; ++j )
-      {
-        cnot_clauses( l, i, j, t );
-      }
-    }
-
-    for ( auto i = 0; i < n; ++i )
-    {
-      for ( auto j = 2; j < n; ++j )
-      {
-        for ( auto k = 1; k < j; ++k )
-        {
-          tof_clauses( l, i, j, k, t );
-        }
-      }
-    }
+    for_each_not( [this, l, t]( int i ) { not_clauses( l, i, t ); } );
+    for_each_cnot( [this, l, t]( int i, int j ) { cnot_clauses( l, i, j, t ); } );
+    for_each_tof( [this, l, t]( int i, int j, int k ) { tof_clauses( l, i, j, k, t ); } );
   }
 
   /* at least one gate */
