@@ -104,7 +104,7 @@ solver_result_t solve<cryptominisat_solver>( cryptominisat_solver& solver, solve
       {
         
         bits[i] = ( v[i] == l_True );
-        care[i] = ( v[i] != l_False );
+        care[i] = ( v[i] != l_Undef );
       }
 
       return solver_result_t( { bits, care } );
