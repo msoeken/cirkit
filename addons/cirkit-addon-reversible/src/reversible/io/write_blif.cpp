@@ -27,6 +27,7 @@
 #include "write_blif.hpp"
 
 #include <iterator>
+#include <regex>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
@@ -37,11 +38,10 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/regex.hpp>                      //:QA_IGN
 #include <boost/tuple/tuple.hpp>
 
-#include "../circuit.hpp"
-#include "../target_tags.hpp"
+#include <reversible/circuit.hpp>
+#include <reversible/target_tags.hpp>
 
 using namespace boost::assign;
 
@@ -139,7 +139,7 @@ namespace cirkit
     for ( unsigned i = 0u; i < signals.size(); ++i )
     {
       std::string signalname = bus.has_bus( i ) ? boost::str( boost::format( "%s<%d>" ) % bus.find_bus( i ) % bus.signal_index( i ) ) : signals.at( i );
-      signalname = boost::regex_replace( signalname, boost::regex( "\\[(\\d+)\\]" ), "<*\\1*>", boost::match_default | boost::format_sed );
+      signalname = std::regex_replace( signalname, std::regex( "\\[(\\d+)\\]" ), "<*\\1*>", std::regex_constants::match_default | std::regex_constants::format_sed );
       //if ( bus.has_bus( i ) )
       //{
       signalname = prefix + signalname;

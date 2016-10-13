@@ -29,6 +29,7 @@
 #include "pla_processor.hpp"
 
 #include <fstream>
+#include <regex>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -44,12 +45,12 @@ namespace cirkit
 bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_cube )
 {
   std::string line;
-  boost::regex  whitespace( "\\s+" );
+  std::regex whitespace( "\\s+" );
 
   while ( in.good() && getline( in, line ) )
   {
     boost::trim( line );
-    line = boost::regex_replace( line, whitespace, std::string( " " ) );
+    line = std::regex_replace( line, whitespace, std::string( " " ) );
     if ( !line.size() ) { continue; }
 
     if ( boost::starts_with( line, "#" ) )

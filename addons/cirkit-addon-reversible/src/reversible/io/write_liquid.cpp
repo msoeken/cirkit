@@ -108,11 +108,11 @@ void write_liquid( const circuit& circ, std::ostream& os, const properties::ptr&
     dump = "        circ.Dump()\n";
   }
 
-  os << t( {
-      {"gates", gstrs},
-      {"lines", std::to_string( circ.lines() )},
-      {"dump", dump}
-    } );
+  os << t( std::unordered_map<std::string, std::string>( {
+        {"gates", gstrs},
+        {"lines", std::to_string( circ.lines() )},
+        {"dump", dump}
+      } ) );
 }
 
 /******************************************************************************

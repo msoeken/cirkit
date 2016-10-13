@@ -343,7 +343,7 @@ void write_javascript_cytoscape( xmg_graph& xmg, std::ostream& os,
     edges += boost::str( boost::format( "            { data: { source: 'o%d', target: 'n%d' }, classes: '%s' },\n" ) % t.index % t.value.first.node % ( t.value.first.complemented ? "complemented" : "" ) );
   }
 
-  os << t( {
+  os << t( std::unordered_map<std::string, std::string>( {
       {"xor_color", xor_color},
       {"maj_color", maj_color},
       {"and_color", and_color},
@@ -352,7 +352,7 @@ void write_javascript_cytoscape( xmg_graph& xmg, std::ostream& os,
       {"title", xmg.name()},
       {"nodes", nodes},
       {"edges", edges}
-    } );
+    } ) );
 }
 
 /******************************************************************************
