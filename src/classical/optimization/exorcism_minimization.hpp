@@ -45,6 +45,7 @@
 
 #include <core/cube.hpp>
 #include <core/properties.hpp>
+#include <classical/aig.hpp>
 
 namespace cirkit
 {
@@ -70,6 +71,10 @@ void exorcism_minimization( const std::string& filename,
                             const properties::ptr& statistics = properties::ptr() );
 
 void exorcism_minimization( const cube_vec_t& cubes,
+                            const properties::ptr& settings = properties::ptr(),
+                            const properties::ptr& statistics = properties::ptr() );
+
+void exorcism_minimization( const aig_graph& aig,
                             const properties::ptr& settings = properties::ptr(),
                             const properties::ptr& statistics = properties::ptr() );
 

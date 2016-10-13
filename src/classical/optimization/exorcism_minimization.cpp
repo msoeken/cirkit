@@ -39,6 +39,7 @@
 #include <core/io/pla_parser.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <classical/abc/abc_api.hpp>
+#include <classical/abc/functions/cirkit_to_gia.hpp>
 
 #include <misc/vec/vecInt.h>
 #include <misc/vec/vecWec.h>
@@ -46,6 +47,7 @@
 namespace abc
 {
 int Abc_ExorcismMain( Vec_Wec_t * vEsop, int nIns, int nOuts, char * pFileNameOut, int Quality, int Verbosity );
+Gia_Man_t * Eso_ManCompute( Gia_Man_t * pGia, int fVerbose, Vec_Wec_t ** pvRes );
 }
 
 namespace cirkit
@@ -164,9 +166,10 @@ void exorcism_minimization( const cube_vec_t& cubes,
                             const properties::ptr& settings,
                             const properties::ptr& statistics )
 {
-  const auto verbose  = get( settings, "verbose",  false );
-  const auto on_cube  = get( settings, "on_cube",  cube_function_t() );
-  const auto esopname = get( settings, "esopname", std::string( "/tmp/test.esop" ) );
+  const auto verbose      = get( settings, "verbose",      false );
+  const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
+  const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
+  const auto skip_parsing = get( settings, "skip_parsing", false );
 
   if ( cubes.empty() )
   {
@@ -209,11 +212,39 @@ void exorcism_minimization( const cube_vec_t& cubes,
   abc::Vec_WecFree( esop );
 
   /* Parse */
-  exorcism_processor p( on_cube );
-  pla_parser( esopname, p );
+  if ( !skip_parsing )
+  {
+    exorcism_processor p( on_cube );
+    pla_parser( esopname, p );
 
-  set( statistics, "cube_count", p.cube_count() );
-  set( statistics, "literal_count", p.literal_count() );
+    set( statistics, "cube_count", p.cube_count() );
+    set( statistics, "literal_count", p.literal_count() );
+  }
+}
+
+void exorcism_minimization( const aig_graph& aig, const properties::ptr& settings, const properties::ptr& statistics )
+{
+  const auto verbose      = get( settings, "verbose",      false );
+  const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
+  const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
+  const auto skip_parsing = get( settings, "skip_parsing", false );
+
+  abc::Vec_Wec_t * esop = nullptr;
+  auto* gia = cirkit_to_gia( aig );
+
+  abc::Eso_ManCompute( gia, verbose, &esop );
+  abc::Abc_ExorcismMain( esop, abc::Gia_ManCiNum( gia ), abc::Gia_ManCoNum( gia ), const_cast<char*>( esopname.c_str() ), 2, verbose );
+  abc::Vec_WecFree( esop );
+
+  /* Parse */
+  if ( !skip_parsing )
+  {
+    exorcism_processor p( on_cube );
+    pla_parser( esopname, p );
+
+    set( statistics, "cube_count", p.cube_count() );
+    set( statistics, "literal_count", p.literal_count() );
+  }
 }
 
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func(properties::ptr settings, properties::ptr statistics)
