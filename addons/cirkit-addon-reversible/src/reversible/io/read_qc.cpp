@@ -26,6 +26,7 @@
 
 #include "read_qc.hpp"
 
+#include <cmath>
 #include <unordered_map>
 #include <vector>
 
@@ -46,7 +47,7 @@ circuit read_qc( const std::string& filename )
   std::unordered_map<std::string, unsigned> var2line;
 
   line_parser( filename, {
-      {boost::regex( "^\\.v *(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
+      {boost::regex( "^\\.v +(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
           std::vector<std::string> variables;
           split_string( variables, m[1u], " " );
 
@@ -57,32 +58,36 @@ circuit read_qc( const std::string& filename )
             var2line[v.value] = v.index;
           }
         }},
-      {boost::regex( "^\\.i *(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
+      {boost::regex( "^\\.i +(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
           std::vector<std::string> inputs( circ.lines(), "0" );
           std::vector<constant> constants( circ.lines(), constant( false ) );
 
           std::vector<std::string> vins;
           split_string( vins, m[1u], " " );
 
+          const auto fmt_str = boost::str( boost::format( "pi%%0%dd" ) % ( floor( log10( vins.size() ) ) + 1 ) );
+
           for ( const auto& i : index( vins ) )
           {
-            inputs[var2line[i.value]] = boost::str( boost::format( "x%d" ) % i.index );
+            inputs[var2line[i.value]] = boost::str( boost::format( fmt_str ) % i.index );
             constants[var2line[i.value]] = constant();
           }
 
           circ.set_inputs( inputs );
           circ.set_constants( constants );
         }},
-      {boost::regex( "^\\.o *(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
+      {boost::regex( "^\\.o +(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
           std::vector<std::string> outputs( circ.lines(), "--" );
           std::vector<bool> garbage( circ.lines(), true );
 
           std::vector<std::string> vouts;
           split_string( vouts, m[1u], " " );
 
+          const auto fmt_str = boost::str( boost::format( "po%%0%dd" ) % ( floor( log10( vouts.size() ) ) + 1 ) );
+
           for ( const auto& i : index( vouts ) )
           {
-            outputs[var2line[i.value]] = boost::str( boost::format( "y%d" ) % i.index );
+            outputs[var2line[i.value]] = boost::str( boost::format( fmt_str ) % i.index );
             garbage[var2line[i.value]] = false;
           }
 
