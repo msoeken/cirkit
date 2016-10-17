@@ -47,9 +47,9 @@ class string_template
 public:
   string_template( const std::string& str );
 
-  std::string render( const std::unordered_map<std::string, std::string>& subst = {} ) const;
+  std::string render( const std::unordered_map<std::string, std::string>& subst ) const;
 
-  std::string operator()( const std::unordered_map<std::string, std::string>& subst = {} ) const;
+  std::string operator()( const std::unordered_map<std::string, std::string>& subst ) const;
 
 private:
   std::string str;
