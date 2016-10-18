@@ -239,6 +239,18 @@ xmg_function find_function( const std::unordered_map<std::string, xmg_function>&
   }
 }
 
+std::string make_regular( const std::string& name )
+{
+  if ( !name.empty() && name[0] == '~' )
+  {
+    return name.substr( 1u );
+  }
+  else
+  {
+    return name;
+  }
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -256,7 +268,22 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
   name_to_function.insert( {"1'b0", xmg.get_constant( false )} );
   name_to_function.insert( {"1'b1", xmg.get_constant( true )} );
 
+  /* to store the instructions */
+  struct inst_t
+  {
+    enum op_t { OP_AND, OP_OR, OP_XOR, OP_MAJ, OP_CONST, OP_BUF };
+
+    std::string target;
+    std::array<std::string, 3> operands;
+    op_t opcode;
+  };
+  digraph_t<inst_t> instructions;
+  std::unordered_map<std::string, unsigned> name_to_vertex;
+
   line_parser( filename, {
+      {boost::regex( "^module +(.*) +\\(" ), [&xmg]( const boost::smatch& m ) {
+          xmg.set_name( std::string( m[1] ) );
+        }},
       {boost::regex( "input (.*);" ), [&xmg, &name_to_function]( const boost::smatch& m ) {
           foreach_string( m[1], ", ", [&xmg, &name_to_function]( const std::string& name ) {
               name_to_function.insert( {name, xmg.create_pi( unescape_name( name ) )} );
@@ -265,7 +292,7 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
       {boost::regex( "output (.*);" ), [&output_names]( const boost::smatch& m ) {
           split_string( output_names, m[1], ", " );
         }},
-      {boost::regex( "assign (.*) = (.*);" ), [&xmg, &name_to_function, &output_names]( const boost::smatch& m ) {
+      {boost::regex( "assign (.*) = (.*);" ), [&output_names, &instructions, &name_to_vertex]( const boost::smatch& m ) {
           auto name = std::string( m[1] );
           auto expr = std::string( m[2] );
 
@@ -274,47 +301,35 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
 
           boost::smatch match;
 
+          const auto add_instruction = [&instructions, &name_to_vertex]( const std::string& name, const inst_t& inst ) {
+            const auto v = add_vertex( instructions );
+            instructions[v] = inst;
+            name_to_vertex.insert( {name, v} );
+          };
+
           if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) & ( *[^ ]+ *)$" ) ) )
           {
-            auto sm0 = std::string( match[1] );
-            auto sm1 = std::string( match[2] );
-
-            name_to_function.insert( {name, xmg.create_and( find_function( name_to_function, sm0 ),
-                                                            find_function( name_to_function, sm1 ) )} );
+            add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_AND} );
           }
           else if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) \\| ( *[^ ]+ *)$" ) ) )
           {
-            auto sm0 = std::string( match[1] );
-            auto sm1 = std::string( match[2] );
-
-            name_to_function.insert( {name, xmg.create_or( find_function( name_to_function, sm0 ),
-                                                           find_function( name_to_function, sm1 ) )} );
+            add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_OR} );
           }
           else if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) \\^ ( *[^ ]+ *)$" ) ) )
           {
-            auto sm0 = std::string( match[1] );
-            auto sm1 = std::string( match[2] );
-
-            name_to_function.insert( {name, xmg.create_xor( find_function( name_to_function, sm0 ),
-                                                            find_function( name_to_function, sm1 ) )} );
+            add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_XOR} );
           }
           else if ( boost::regex_search( expr, match, boost::regex( "^\\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\)$" ) ) )
           {
-            assert( match[1] == match[3] );
-            assert( match[2] == match[5] );
-            assert( match[4] == match[6] );
-
-            auto sm0 = std::string( match[1] );
-            auto sm1 = std::string( match[2] );
-            auto sm2 = std::string( match[4] );
-
-            name_to_function.insert( {name, xmg.create_maj( find_function( name_to_function, sm0 ),
-                                                            find_function( name_to_function, sm1 ),
-                                                            find_function( name_to_function, sm2 ))} );
+            add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] ), std::string( match[4] )}}, inst_t::OP_MAJ} );
           }
           else if ( expr == "0" )
           {
-            name_to_function.insert( {name, xmg.get_constant( false )} );
+            add_instruction( name, {name, {{std::string( "0" )}}, inst_t::OP_CONST} );
+          }
+          else if ( expr == "1" )
+          {
+            add_instruction( name, {name, {{std::string( "1" )}}, inst_t::OP_CONST} );
           }
           else
           {
@@ -324,9 +339,52 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
               std::cout << "[e] in line: " << m[0] << std::endl;
               assert( false );
             }
-            name_to_function.insert( {name, find_function( name_to_function, expr )} );
+            add_instruction( name, {name, {{expr}}, inst_t::OP_BUF} );
           }
         }}}, false );
+
+  for ( const auto v : boost::make_iterator_range( vertices( instructions ) ) )
+  {
+    const auto& inst = instructions[v];
+    const auto s = name_to_vertex[inst.target];
+    for ( auto t : inst.operands )
+    {
+      const auto it = name_to_vertex.find( make_regular( t ) );
+      if ( it != name_to_vertex.end() )
+      {
+        add_edge( s, it->second, instructions );
+      }
+    }
+  }
+
+  std::vector<unsigned> top( num_vertices( instructions ) );
+  boost::topological_sort( instructions, top.begin() );
+
+  for ( const auto v : top )
+  {
+    const auto& inst = instructions[v];
+    switch ( inst.opcode )
+    {
+    case inst_t::OP_AND:
+      name_to_function.insert( {inst.target, xmg.create_and( find_function( name_to_function, inst.operands[0] ), find_function( name_to_function, inst.operands[1] ) )} );
+      break;
+    case inst_t::OP_OR:
+      name_to_function.insert( {inst.target, xmg.create_or( find_function( name_to_function, inst.operands[0] ), find_function( name_to_function, inst.operands[1] ) )} );
+      break;
+    case inst_t::OP_XOR:
+      name_to_function.insert( {inst.target, xmg.create_xor( find_function( name_to_function, inst.operands[0] ), find_function( name_to_function, inst.operands[1] ) )} );
+      break;
+    case inst_t::OP_MAJ:
+      name_to_function.insert( {inst.target, xmg.create_maj( find_function( name_to_function, inst.operands[0] ), find_function( name_to_function, inst.operands[1] ), find_function( name_to_function, inst.operands[2] ) )} );
+      break;
+    case inst_t::OP_CONST:
+      name_to_function.insert( {inst.target, xmg.get_constant( inst.operands[0] == "0" ? false : true )} );
+      break;
+    case inst_t::OP_BUF:
+      name_to_function.insert( {inst.target, find_function( name_to_function, inst.operands[0] )} );
+      break;
+    }
+  }
 
   for ( const auto& name : output_names )
   {
