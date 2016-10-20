@@ -117,6 +117,27 @@ void foreach_line_in_file( const std::string& filename, const std::function<bool
   }
 }
 
+void foreach_line_in_file_escape( const std::string& filename, const std::function<bool(const std::string&)>& f )
+{
+  std::ifstream in( filename.c_str(), std::ifstream::in );
+  std::string line, line2;
+
+  while ( getline( in, line ) )
+  {
+    boost::trim( line );
+
+    while ( line.back() == '\\' )
+    {
+      line.pop_back();
+      boost::trim( line );
+      assert( getline( in, line2 ) );
+      line += line2;
+    }
+
+    if ( !f( line ) ) { break; }
+  }
+}
+
 bool any_line_contains( const std::string& filename, const boost::regex& r )
 {
   bool ret = false;

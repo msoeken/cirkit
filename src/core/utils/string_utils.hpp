@@ -77,6 +77,8 @@ void line_parser( const std::string& filename, const std::vector<std::pair<boost
 
 void foreach_line_in_file( const std::string& filename, const std::function<bool(const std::string&)>& f );
 
+void foreach_line_in_file_escape( const std::string& filename, const std::function<bool(const std::string&)>& f );
+
 bool any_line_contains( const std::string& filename, const boost::regex& r );
 
 using string_properties_map_t = std::map<std::string, std::string>;

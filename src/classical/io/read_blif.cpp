@@ -71,7 +71,7 @@ lut_graph_t read_blif( const std::string& filename )
   auto pla_type = pla_type_t::none;
   tt f( 1u );
 
-  foreach_line_in_file( filename, [&, gnd, vdd]( const std::string& line ) {
+  foreach_line_in_file_escape( filename, [&, gnd, vdd]( const std::string& line ) {
       /* empty line or comment */
       if ( line.empty() || line[0u] == '#' ) return true;
 
