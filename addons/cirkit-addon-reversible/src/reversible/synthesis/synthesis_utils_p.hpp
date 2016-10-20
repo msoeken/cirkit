@@ -37,6 +37,7 @@
 #ifndef SYNTHESIS_UTILS_P_HPP
 #define SYNTHESIS_UTILS_P_HPP
 
+#include <cstddef>
 #include <gmpxx.h>
 
 namespace cirkit
