@@ -38,6 +38,7 @@
 
 #include <core/io/pla_parser.hpp>
 #include <core/utils/bdd_utils.hpp>
+#include <core/utils/system_utils.hpp>
 #include <classical/abc/abc_api.hpp>
 #include <classical/abc/functions/cirkit_to_gia.hpp>
 
@@ -235,6 +236,26 @@ void exorcism_minimization( const aig_graph& aig, const properties::ptr& setting
   abc::Eso_ManCompute( gia, verbose, &esop );
   abc::Abc_ExorcismMain( esop, abc::Gia_ManCiNum( gia ), abc::Gia_ManCoNum( gia ), const_cast<char*>( esopname.c_str() ), 2, verbose );
   abc::Vec_WecFree( esop );
+
+  /* Parse */
+  if ( !skip_parsing )
+  {
+    exorcism_processor p( on_cube );
+    pla_parser( esopname, p );
+
+    set( statistics, "cube_count", p.cube_count() );
+    set( statistics, "literal_count", p.literal_count() );
+  }
+}
+
+void exorcism_minimization_blif( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
+{
+  const auto verbose      = get( settings, "verbose",      false );
+  const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
+  const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
+  const auto skip_parsing = get( settings, "skip_parsing", false );
+
+  execute_and_omit( boost::str( boost::format( "abc -c \"read_blif %s; strash; &get; &exorcism %s\"" ) % filename % esopname ) );
 
   /* Parse */
   if ( !skip_parsing )

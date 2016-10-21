@@ -78,6 +78,10 @@ void exorcism_minimization( const aig_graph& aig,
                             const properties::ptr& settings = properties::ptr(),
                             const properties::ptr& statistics = properties::ptr() );
 
+void exorcism_minimization_blif( const std::string& filename,
+                                 const properties::ptr& settings = properties::ptr(),
+                                 const properties::ptr& statistics = properties::ptr() );
+
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func( properties::ptr settings = std::make_shared<properties>(),
                                                                      properties::ptr statistics = std::make_shared<properties>() );
 
