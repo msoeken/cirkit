@@ -55,6 +55,7 @@
 #include <reversible/cli/commands/exs.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
+#include <reversible/cli/commands/lbs.hpp>
 #include <reversible/cli/commands/nct.hpp>
 #include <reversible/cli/commands/pos.hpp>
 #include <reversible/cli/commands/qbs.hpp>
@@ -113,6 +114,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( esopbs );
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
+  ADD_COMMAND( lbs );
   ADD_COMMAND( qbs );
   ADD_COMMAND( rms );
   ADD_COMMAND( tbs );
