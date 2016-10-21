@@ -40,6 +40,7 @@
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
 
+#include <classical/abc/utils/abc_run_command.hpp>
 #include <classical/functions/aig_from_truth_table.hpp>
 #include <classical/functions/aig_to_mig.hpp>
 #include <classical/functions/compute_levels.hpp>
@@ -240,7 +241,14 @@ aig_graph store_read_io_type<aig_graph, io_bench_tag_t>( const std::string& file
 template<>
 void store_write_io_type<aig_graph, io_aiger_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
 {
-  write_aiger( aig, filename );
+  if ( boost::ends_with( filename, "aag" ) )
+  {
+    write_aiger( aig, filename );
+  }
+  else
+  {
+    abc_run_command_no_output( aig, boost::str( boost::format( "&w %s") % filename ) );
+  }
 }
 
 template<>
