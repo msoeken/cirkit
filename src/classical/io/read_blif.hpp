@@ -43,7 +43,10 @@
 namespace cirkit
 {
 
-lut_graph_t read_blif( const std::string& filename );
+/**
+ * if store_cubes is true, the cubes are extracted from the BLIF without creating the function
+ */
+lut_graph_t read_blif( const std::string& filename, bool store_cubes = false );
 
 }
 

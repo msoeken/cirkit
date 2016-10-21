@@ -48,7 +48,7 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-lut_graph_t read_blif( const std::string& filename )
+lut_graph_t read_blif( const std::string& filename, bool store_cubes )
 {
   lut_graph_t g;
   auto name = get( boost::vertex_name, g );
@@ -70,8 +70,9 @@ lut_graph_t read_blif( const std::string& filename )
   enum class pla_type_t { none, on, off };
   auto pla_type = pla_type_t::none;
   tt f( 1u );
+  std::string cubes;
 
-  foreach_line_in_file_escape( filename, [&, gnd, vdd]( const std::string& line ) {
+  foreach_line_in_file_escape( filename, [&, gnd, vdd, store_cubes]( const std::string& line ) {
       /* empty line or comment */
       if ( line.empty() || line[0u] == '#' ) return true;
 
@@ -123,7 +124,7 @@ lut_graph_t read_blif( const std::string& filename )
               assert( type[v] == gate_type_t::internal );
             }
 
-            func[v] = tt_to_hex( f );
+            func[v] = store_cubes ? cubes : tt_to_hex( f );
 
             for ( auto i = 0; i < faninout.size() - 1; ++i )
             {
@@ -153,14 +154,26 @@ lut_graph_t read_blif( const std::string& filename )
         split_string( faninout, line.substr( 7u ), " " );
 
         f = tt( 1u << ( faninout.size() - 1 ) );
+        cubes.clear();
         pla_type = pla_type_t::none;
       }
       else if ( faninout.size() == 1 )
       {
         if ( line == "1" )
         {
-          f = tt( 1u, 1u );
+          if ( store_cubes )
+          {
+            cubes = line;
+          }
+          else
+          {
+            f = tt( 1u, 1u );
+          }
         }
+      }
+      else if ( store_cubes )
+      {
+        cubes += line + "\n";
       }
       else
       {
