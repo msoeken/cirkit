@@ -139,7 +139,8 @@ bool exact_mig_command::execute()
     }
   }
 
-  std::cout << format( "[i] run-time: %.2f seconds" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
+  std::cout << format( "[i] memory: %.2f MB" ) % statistics->get<double>( "memory" ) << std::endl;
 
   return true;
 }

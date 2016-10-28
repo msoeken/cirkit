@@ -1054,6 +1054,7 @@ public:
       const auto result = inst->solver.check();
       if ( result == z3::sat )
       {
+        store_memory( inst );
         return extract_solutions( inst );
       }
       else if ( result == z3::unknown && !timeout_heuristic )
@@ -1105,6 +1106,7 @@ public:
         const auto result = inst->solver.check();
         if ( result == z3::sat )
         {
+          store_memory( inst );
           return extract_solutions( inst );
         }
         else if ( result == z3::unknown && !timeout_heuristic )
@@ -1163,6 +1165,7 @@ public:
         const auto result = inst->solver.check();
         if ( result == z3::sat )
         {
+          store_memory( inst );
           return extract_solutions( inst );
         }
         else if ( result == z3::unknown && !timeout_heuristic )
@@ -1199,6 +1202,7 @@ public:
       const auto result = inst->solver.check();
       if ( result == z3::sat )
       {
+        store_memory( inst );
         return extract_solutions( inst );
       }
       else if ( result == z3::unknown && !timeout_heuristic )
@@ -1347,6 +1351,20 @@ private:
     }
   };
 
+  void store_memory( const std::shared_ptr<exact_mig_instance>& inst )
+  {
+    const auto stats = inst->solver.statistics();
+
+    for ( auto i = 0u; i < stats.size(); ++i )
+    {
+      if ( stats.key( i ) == "memory" )
+      {
+        memory = stats.double_value( i );
+        break;
+      }
+    }
+  }
+
 private:
   spec_representation spec;
   bool normal;
@@ -1382,6 +1400,7 @@ private:
 public:
   /* some statistics */
   unsigned last_size = 0u; /* the last level that has been tried (helpful when using timeout) */
+  double   memory    = -1.0; /* memory usage */
 };
 #endif
 
@@ -1408,6 +1427,7 @@ boost::optional<mig_graph> exact_mig_with_sat( const tt& spec,
     set( statistics, "all_solutions", migs );
   }
   set( statistics, "last_size", mgr.last_size );
+  set( statistics, "memory", mgr.memory );
 
   if ( migs.empty() )
   {
@@ -1442,6 +1462,7 @@ boost::optional<mig_graph> exact_mig_with_sat( const mig_graph& spec,
     set( statistics, "all_solutions", migs );
   }
   set( statistics, "last_size", mgr.last_size );
+  set( statistics, "memory", mgr.memory );
 
   if ( migs.empty() )
   {
@@ -1478,6 +1499,7 @@ boost::optional<xmg_graph> exact_xmg_with_sat( const tt& spec,
     set( statistics, "all_solutions", xmgs );
   }
   set( statistics, "last_size", mgr.last_size );
+  set( statistics, "memory", mgr.memory );
 
   if ( xmgs.empty() )
   {
@@ -1512,6 +1534,7 @@ boost::optional<xmg_graph> exact_xmg_with_sat( const mig_graph& spec,
     set( statistics, "all_solutions", xmgs );
   }
   set( statistics, "last_size", mgr.last_size );
+  set( statistics, "memory", mgr.memory );
 
   if ( xmgs.empty() )
   {
