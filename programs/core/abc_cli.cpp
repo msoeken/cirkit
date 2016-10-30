@@ -150,7 +150,7 @@ inline bool store_can_read_io_type<abc::Wlc_Ntk_t*, io_verilog_tag_t>( command& 
 template<>
 inline abc::Wlc_Ntk_t* store_read_io_type<abc::Wlc_Ntk_t*, io_verilog_tag_t>( const std::string& filename, const command& cmd )
 {
-  return abc::Wlc_ReadVer( (char*)filename.c_str() );
+  return abc::Wlc_ReadVer( (char*)filename.c_str(), nullptr );
 }
 
 /* enable `write_verilog` for WLCs */
@@ -181,7 +181,7 @@ inline bool store_can_convert<abc::Wlc_Ntk_t*, abc::Gia_Man_t*>()
 template<>
 abc::Gia_Man_t* store_convert<abc::Wlc_Ntk_t*, abc::Gia_Man_t*>( abc::Wlc_Ntk_t* const& wlc )
 {
-  return abc::Wlc_NtkBitBlast( wlc, nullptr, 0, 0 );
+  return abc::Wlc_NtkBitBlast( wlc, nullptr, -1, 2, 0, 0, 0 );
 }
 
 /******************************************************************************

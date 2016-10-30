@@ -85,7 +85,7 @@ endif()
 set(abc_SRC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc)
 externalProject_add(abc
   DOWNLOAD_DIR .
-  URL "http://msoeken.github.io/tools/alanmi-abc-394fe1f315ae.zip"
+  URL "http://msoeken.github.io/tools/alanmi-abc-be8c130480fd.zip"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND make -j${ProcCount} ABC_USE_PIC=1 ABC_USE_NO_READLINE=1 ABC_USE_NAMESPACE=abc OPTFLAGS=-O3 libabc.a
   BUILD_IN_SOURCE 1

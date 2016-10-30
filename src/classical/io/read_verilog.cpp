@@ -48,8 +48,8 @@ namespace cirkit
 
 aig_graph read_verilog_with_abc( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
 {
-  auto * wlc = abc::Wlc_ReadVer( const_cast<char*>( filename.c_str() ) );
-  auto * gia = abc::Wlc_NtkBitBlast( wlc, nullptr, 0, 0 );
+  auto * wlc = abc::Wlc_ReadVer( const_cast<char*>( filename.c_str() ), nullptr );
+  auto * gia = abc::Wlc_NtkBitBlast( wlc, nullptr, -1, 2, 0, 0, 0 );
   return gia_to_cirkit( gia );
 }
 
