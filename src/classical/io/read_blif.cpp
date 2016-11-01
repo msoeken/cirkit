@@ -199,7 +199,14 @@ lut_graph_t read_blif( const std::string& filename, bool store_cubes )
         {
           if ( p[i] == '-' ) continue;
           auto v = ( p[i] == '0' ) != ( pla_type == pla_type_t::off ) ? ~tt_nth_var( i ) : tt_nth_var( i );
-          tt_align( v, cube );
+          if ( p.size() < 6 )
+          {
+            tt_shrink( v, p.size() );
+          }
+          else
+          {
+            tt_align( v, cube );
+          }
 
           if ( pla_type == pla_type_t::on )
           {
