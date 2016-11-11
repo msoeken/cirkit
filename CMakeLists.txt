@@ -32,12 +32,11 @@ include(CTest)
 # Dependencies
 set( MAIN_Boost_LIBRARIES
   unit_test_framework
-  regex filesystem
+  filesystem
   graph
   program_options
   system
   timer
-  thread
 )
 find_package(Boost REQUIRED COMPONENTS ${MAIN_Boost_LIBRARIES} )
 find_package(GMP REQUIRED)

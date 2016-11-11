@@ -37,7 +37,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm.hpp>
-#include <boost/regex.hpp>
 
 namespace cirkit
 {

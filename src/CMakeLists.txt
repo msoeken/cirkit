@@ -5,7 +5,6 @@ add_cirkit_library(
   NAME lscli
   AUTO_DIRS lscli
   USE
-    ${Boost_REGEX_LIBRARIES}
     ${Boost_SYSTEM_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARIES}
     ${Boost_PROGRAM_OPTIONS_LIBRARIES}
