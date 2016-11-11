@@ -59,6 +59,28 @@ BDD make_cube( Cudd& manager, const std::vector<BDD>& vars )
   return boost::accumulate( vars, manager.bddOne(), []( const BDD& x1, const BDD& x2 ) { return x1 & x2; } );
 }
 
+BDD make_cube( Cudd& manager, const std::string& cube )
+{
+  std::vector<BDD> vars;
+
+  for ( auto i = 0; i < cube.size(); ++i )
+  {
+    if ( cube[i] == '0' )
+    {
+      vars.push_back( ~manager.bddVar( i ) );
+    }
+    else if ( cube[i] == '1' )
+    {
+      vars.push_back( manager.bddVar( i ) );
+    }
+    else
+    {
+      assert( cube[i] == '-' );
+    }
+  }
+  return make_cube( manager, vars );
+}
+
 bool is_selfdual( const Cudd& manager, const BDD& f )
 {
   /* negative literals */
