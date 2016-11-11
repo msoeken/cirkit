@@ -37,6 +37,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <sys/wait.h>
@@ -48,7 +49,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 
 #include <alice/command.hpp>
@@ -488,11 +488,11 @@ private:
 
   std::string preprocess_alias( const std::string& line )
   {
-    boost::smatch m;
+    std::smatch m;
 
     for ( const auto& p : env->aliases )
     {
-      if ( boost::regex_match( line, m, boost::regex( p.first ) ) )
+      if ( std::regex_match( line, m, std::regex( p.first ) ) )
       {
         auto fmt = boost::format( p.second );
 
