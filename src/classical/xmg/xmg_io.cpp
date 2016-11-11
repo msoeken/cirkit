@@ -31,7 +31,6 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/format.hpp>
-#include <boost/regex.hpp>
 
 #include <core/utils/string_utils.hpp>
 
@@ -281,25 +280,25 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
   std::unordered_map<std::string, unsigned> name_to_vertex;
 
   line_parser( filename, {
-      {boost::regex( "^module +(.*) +\\(" ), [&xmg]( const boost::smatch& m ) {
+      {std::regex( "^module +(.*) +\\(" ), [&xmg]( const std::smatch& m ) {
           xmg.set_name( std::string( m[1] ) );
         }},
-      {boost::regex( "input (.*);" ), [&xmg, &name_to_function]( const boost::smatch& m ) {
+      {std::regex( "input (.*);" ), [&xmg, &name_to_function]( const std::smatch& m ) {
           foreach_string( m[1], ", ", [&xmg, &name_to_function]( const std::string& name ) {
               name_to_function.insert( {name, xmg.create_pi( unescape_name( name ) )} );
             } );
         }},
-      {boost::regex( "output (.*);" ), [&output_names]( const boost::smatch& m ) {
+      {std::regex( "output (.*);" ), [&output_names]( const std::smatch& m ) {
           split_string( output_names, m[1], ", " );
         }},
-      {boost::regex( "assign (.*) = (.*);" ), [&output_names, &instructions, &name_to_vertex]( const boost::smatch& m ) {
+      {std::regex( "assign (.*) = (.*);" ), [&output_names, &instructions, &name_to_vertex]( const std::smatch& m ) {
           auto name = std::string( m[1] );
           auto expr = std::string( m[2] );
 
           boost::trim( name );
           boost::trim( expr );
 
-          boost::smatch match;
+          std::smatch match;
 
           const auto add_instruction = [&instructions, &name_to_vertex]( const std::string& name, const inst_t& inst ) {
             const auto v = add_vertex( instructions );
@@ -307,19 +306,19 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
             name_to_vertex.insert( {name, v} );
           };
 
-          if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) & ( *[^ ]+ *)$" ) ) )
+          if ( std::regex_search( expr, match, std::regex( "^( *[^ ]+ *) & ( *[^ ]+ *)$" ) ) )
           {
             add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_AND} );
           }
-          else if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) \\| ( *[^ ]+ *)$" ) ) )
+          else if ( std::regex_search( expr, match, std::regex( "^( *[^ ]+ *) \\| ( *[^ ]+ *)$" ) ) )
           {
             add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_OR} );
           }
-          else if ( boost::regex_search( expr, match, boost::regex( "^( *[^ ]+ *) \\^ ( *[^ ]+ *)$" ) ) )
+          else if ( std::regex_search( expr, match, std::regex( "^( *[^ ]+ *) \\^ ( *[^ ]+ *)$" ) ) )
           {
             add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_XOR} );
           }
-          else if ( boost::regex_search( expr, match, boost::regex( "^\\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\)$" ) ) )
+          else if ( std::regex_search( expr, match, std::regex( "^\\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\)$" ) ) )
           {
             add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] ), std::string( match[4] )}}, inst_t::OP_MAJ} );
           }

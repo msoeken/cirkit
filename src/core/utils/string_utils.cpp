@@ -80,19 +80,19 @@ std::pair<std::string, std::string> split_string_pair( const std::string& str, c
 }
 
 
-void line_parser( const std::string& filename, const std::vector<std::pair<boost::regex, std::function<void(const boost::smatch&)>>>& matchers, bool warn_if_unmatched )
+void line_parser( const std::string& filename, const std::vector<std::pair<std::regex, std::function<void(const std::smatch&)>>>& matchers, bool warn_if_unmatched )
 {
   std::ifstream in( filename.c_str(), std::ifstream::in );
   std::string line;
 
-  boost::smatch m;
+  std::smatch m;
 
   while ( getline( in, line ) )
   {
     bool matched = false;
     for ( const auto& matcher : matchers )
     {
-      if ( boost::regex_search( line, m, matcher.first ) )
+      if ( std::regex_search( line, m, matcher.first ) )
       {
         matcher.second( m );
         matched = true;
@@ -138,11 +138,11 @@ void foreach_line_in_file_escape( const std::string& filename, const std::functi
   }
 }
 
-bool any_line_contains( const std::string& filename, const boost::regex& r )
+bool any_line_contains( const std::string& filename, const std::regex& r )
 {
   bool ret = false;
 
-  line_parser( filename, { { r, [&]( const boost::smatch& m ) { ret = true; } } } );
+  line_parser( filename, { { r, [&]( const std::smatch& m ) { ret = true; } } } );
 
   return ret;
 }

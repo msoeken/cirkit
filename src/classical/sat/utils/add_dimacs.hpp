@@ -36,7 +36,7 @@
 #ifndef ADD_DIMACS_HPP
 #define ADD_DIMACS_HPP
 
-#include <boost/regex.hpp>
+#include <regex>
 #include <string>
 
 #include <boost/lexical_cast.hpp>
@@ -58,11 +58,11 @@ int add_dimacs( S& solver, const std::string& filename, int sid, unsigned * pnum
   auto offset = sid - 1;
   unsigned num_clauses, num_vars, count = 0u;
   line_parser( filename,
-               { { boost::regex( "p cnf (\\d+) (\\d+)" ), [&]( const boost::smatch& m ) {
+               { { std::regex( "p cnf (\\d+) (\\d+)" ), [&]( const std::smatch& m ) {
                      num_vars    = boost::lexical_cast<unsigned>( m[1] );
                      num_clauses = boost::lexical_cast<unsigned>( m[2] );
                    } },
-                 { boost::regex( "^-?\\d.*$" ), [&]( const boost::smatch& m ) {
+                 { std::regex( "^-?\\d.*$" ), [&]( const std::smatch& m ) {
                      if ( count < num_clauses )
                      {
                        std::vector<int> clause;

@@ -38,7 +38,6 @@
 #include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/regex.hpp>
 
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/range_utils.hpp>
@@ -98,10 +97,10 @@ mig_graph read_mighty_verilog( const std::string& filename,
 
   line_parser( filename,
                {
-                 { boost::regex( "^module (.*) \\($" ), [&]( const boost::smatch& m ) {
+                 { std::regex( "^module (.*) \\($" ), [&]( const std::smatch& m ) {
                      info.model_name = m[1];
                    } },
-                 { boost::regex( "^input (.*);" ), [&]( const boost::smatch& m ) {
+                 { std::regex( "^input (.*);" ), [&]( const std::smatch& m ) {
                      auto sinputs = std::string( m[1] );
                      std::vector<std::string> inputs;
                      boost::split( inputs, sinputs, boost::is_any_of( "," ), boost::algorithm::token_compress_on );
@@ -115,12 +114,12 @@ mig_graph read_mighty_verilog( const std::string& filename,
                        functions.push_back( mig_create_pi( mig, input ) );
                      }
                    } },
-                 { boost::regex( "^output (.*);" ), [&]( const boost::smatch& m ) {
+                 { std::regex( "^output (.*);" ), [&]( const std::smatch& m ) {
                      const auto soutputs = std::string( m[1] );
                      boost::split( output_names, soutputs, boost::is_any_of( "," ), boost::algorithm::token_compress_on );
                      boost::for_each( output_names, []( std::string& s ) { boost::trim( s ); } );
                    } },
-                 { boost::regex( "^wire (.*);" ), [&]( const boost::smatch& m ) {
+                 { std::regex( "^wire (.*);" ), [&]( const std::smatch& m ) {
                      auto swires = std::string( m[1] );
                      num_wires = boost::count( swires, ',' );
 
@@ -133,17 +132,17 @@ mig_graph read_mighty_verilog( const std::string& filename,
                        name_to_function.insert( {boost::str( boost::format( "w%d" ) % i ), s + i} );
                      }
                    } },
-                 { boost::regex( "^assign w(\\d+) = (.*);" ), [&]( const boost::smatch& m ) {
+                 { std::regex( "^assign w(\\d+) = (.*);" ), [&]( const std::smatch& m ) {
                      const auto id = boost::lexical_cast<unsigned>( m[1] );
 
-                     boost::smatch match;
+                     std::smatch match;
                      mighty_operation_t f;
 
                      std::vector<std::string> wire_operands;
 
                      const auto expr = std::string( m[2] );
 
-                     if ( boost::regex_search( expr, match, boost::regex( "^([^ ]+) & ([^ ]+)$" ) ) )
+                     if ( std::regex_search( expr, match, std::regex( "^([^ ]+) & ([^ ]+)$" ) ) )
                      {
                        auto sm0 = std::string( match[1] );
                        auto sm1 = std::string( match[2] );
@@ -157,7 +156,7 @@ mig_graph read_mighty_verilog( const std::string& filename,
                        if ( sm0[0] == 'w' ) { wire_operands += sm0; }
                        if ( sm1[0] == 'w' ) { wire_operands += sm1; }
                      }
-                     else if ( boost::regex_search( expr, match, boost::regex( "^([^ ]+) \\| ([^ ]+)$" ) ) )
+                     else if ( std::regex_search( expr, match, std::regex( "^([^ ]+) \\| ([^ ]+)$" ) ) )
                      {
                        auto sm0 = std::string( match[1] );
                        auto sm1 = std::string( match[2] );
@@ -171,7 +170,7 @@ mig_graph read_mighty_verilog( const std::string& filename,
                        if ( sm0[0] == 'w' ) { wire_operands += sm0; }
                        if ( sm1[0] == 'w' ) { wire_operands += sm1; }
                      }
-                     else if ( boost::regex_search( expr, match, boost::regex( "^\\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\)$" ) ) )
+                     else if ( std::regex_search( expr, match, std::regex( "^\\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\)$" ) ) )
                      {
                        //assert( match[1] == match[3] );
                        //assert( match[2] == match[5] );
@@ -207,7 +206,7 @@ mig_graph read_mighty_verilog( const std::string& filename,
 
                      wires.push_back( f );
                    } },
-                 { boost::regex( "^assign (.*) = (.*);" ), [&]( const boost::smatch& m ) {
+                 { std::regex( "^assign (.*) = (.*);" ), [&]( const std::smatch& m ) {
                      if ( boost::find( output_names, m[1] ) != output_names.end() )
                      {
                        outputs += std::make_pair( m[1], m[2] );

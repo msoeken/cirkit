@@ -47,7 +47,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/adaptors.hpp>
-#include <boost/regex.hpp>
 
 namespace cirkit
 {
@@ -73,13 +72,13 @@ void foreach_string( const std::string& str, const std::string& delimiter, std::
 
 std::pair<std::string, std::string> split_string_pair( const std::string& str, const std::string& delimiter );
 
-void line_parser( const std::string& filename, const std::vector<std::pair<boost::regex, std::function<void(const boost::smatch&)>>>& matchers, bool warn_if_unmatched = false );
+void line_parser( const std::string& filename, const std::vector<std::pair<std::regex, std::function<void(const std::smatch&)>>>& matchers, bool warn_if_unmatched = false );
 
 void foreach_line_in_file( const std::string& filename, const std::function<bool(const std::string&)>& f );
 
 void foreach_line_in_file_escape( const std::string& filename, const std::function<bool(const std::string&)>& f );
 
-bool any_line_contains( const std::string& filename, const boost::regex& r );
+bool any_line_contains( const std::string& filename, const std::regex& r );
 
 using string_properties_map_t = std::map<std::string, std::string>;
 std::string make_properties_string( const string_properties_map_t& properties, const std::string& sep = "," );

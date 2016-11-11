@@ -31,7 +31,6 @@
 #include <vector>
 
 #include <boost/format.hpp>
-#include <boost/regex.hpp>
 
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
@@ -47,7 +46,7 @@ circuit read_qc( const std::string& filename )
   std::unordered_map<std::string, unsigned> var2line;
 
   line_parser( filename, {
-      {boost::regex( "^\\.v +(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
+      {std::regex( "^\\.v +(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
           std::vector<std::string> variables;
           split_string( variables, m[1u], " " );
 
@@ -58,7 +57,7 @@ circuit read_qc( const std::string& filename )
             var2line[v.value] = v.index;
           }
         }},
-      {boost::regex( "^\\.i +(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
+      {std::regex( "^\\.i +(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
           std::vector<std::string> inputs( circ.lines(), "0" );
           std::vector<constant> constants( circ.lines(), constant( false ) );
 
@@ -76,7 +75,7 @@ circuit read_qc( const std::string& filename )
           circ.set_inputs( inputs );
           circ.set_constants( constants );
         }},
-      {boost::regex( "^\\.o +(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
+      {std::regex( "^\\.o +(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
           std::vector<std::string> outputs( circ.lines(), "--" );
           std::vector<bool> garbage( circ.lines(), true );
 
@@ -94,7 +93,7 @@ circuit read_qc( const std::string& filename )
           circ.set_outputs( outputs );
           circ.set_garbage( garbage );
         }},
-      {boost::regex( "^t(\\d+) *(.*)$" ), [&circ, &var2line]( const boost::smatch& m ) {
+      {std::regex( "^t(\\d+) *(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
           std::vector<std::string> lines;
           split_string( lines, m[2u], " " );
 

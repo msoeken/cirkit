@@ -38,7 +38,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/regex.hpp>
 #include <boost/variant.hpp>
 
 #include <core/utils/program_options.hpp>
@@ -66,7 +65,7 @@ label_type_vector_t parse_label_type_string( const std::string& str )
   return vec;
 }
 
-void parse_log_entry( column_t& column, const boost::smatch& m, const label_type_vector_t& label_types )
+void parse_log_entry( column_t& column, const std::smatch& m, const label_type_vector_t& label_types )
 {
   auto it = boost::find_if( label_types, first_matches<label_type_vector_t::value_type>( m[1] ) );
   if ( it != label_types.end() )
@@ -177,7 +176,7 @@ int main( int argc, char ** argv )
         std::get<2>( *prow )[index] = column_t( locals.size() );
 
         line_parser( boost::str( boost::format( "%s/%s.log" ) % f.path().parent_path().string() % f.path().stem().string() ), {
-            { boost::regex( "^([^:]*): *(.*)$" ), [&globals, &locals, &prow, &index]( const boost::smatch& m ) {
+            { std::regex( "^([^:]*): *(.*)$" ), [&globals, &locals, &prow, &index]( const std::smatch& m ) {
                 parse_log_entry( std::get<1>( *prow ), m, globals );
                 parse_log_entry( std::get<2>( *prow )[index], m, locals );
               }

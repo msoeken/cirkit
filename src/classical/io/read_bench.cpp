@@ -37,7 +37,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/range/algorithm.hpp>
-#include <boost/regex.hpp>
 
 #include <range/v3/algorithm/find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
@@ -205,13 +204,13 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
   std::vector<gate_def_t> gates;
 
   line_parser( filename, {
-      {boost::regex( "^INPUT\\((.*)\\)$" ), [&inputs]( const boost::smatch& m ) {
+      {std::regex( "^INPUT\\((.*)\\)$" ), [&inputs]( const std::smatch& m ) {
           inputs.push_back( std::string( m[1] ) );
         }},
-      {boost::regex( "^OUTPUT\\((.*)\\)$" ), [&outputs]( const boost::smatch& m ) {
+      {std::regex( "^OUTPUT\\((.*)\\)$" ), [&outputs]( const std::smatch& m ) {
           outputs.push_back( std::string( m[1] ) );
         }},
-      {boost::regex( "^(.*) = LUT (.*) \\( (.*) \\)$" ), [&gates]( const boost::smatch& m ) {
+      {std::regex( "^(.*) = LUT (.*) \\( (.*) \\)$" ), [&gates]( const std::smatch& m ) {
           unsigned value;
           std::stringstream converter( m[2] );
           converter >> std::hex >> value;
@@ -228,19 +227,19 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
           //std::cout << "value: " << value << " orig: " << m[2] << " " << direct << " " << indirect << std::endl;
         }},
-      {boost::regex( "^(.*) = gnd" ), [&gates]( const boost::smatch& m ) {
+      {std::regex( "^(.*) = gnd" ), [&gates]( const std::smatch& m ) {
           std::string name( m[1] );
           boost::trim( name );
 
           gates.push_back( std::make_tuple( name, "gnd", std::vector<std::string>() ) );
         }},
-      {boost::regex( "^(.*) = vdd" ), [&gates]( const boost::smatch& m ) {
+      {std::regex( "^(.*) = vdd" ), [&gates]( const std::smatch& m ) {
           std::string name( m[1] );
           boost::trim( name );
 
           gates.push_back( std::make_tuple( name, "vdd", std::vector<std::string>() ) );
         }},
-      {boost::regex( "^#" ), []( const boost::smatch& m ) {}}
+      {std::regex( "^#" ), []( const std::smatch& m ) {}}
     }, true );
 
   std::map<std::string, lut_vertex_t> gate_to_node;
