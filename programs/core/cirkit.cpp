@@ -43,6 +43,7 @@
 #include <classical/cli/commands/blif_to_bench.hpp>
 #include <classical/cli/commands/cec.hpp>
 #include <classical/cli/commands/comb_approx.hpp>
+#include <classical/cli/commands/compress.hpp>
 #include <classical/cli/commands/cone.hpp>
 #include <classical/cli/commands/cuts.hpp>
 #include <classical/cli/commands/dectest.hpp>
@@ -164,6 +165,7 @@ int main( int argc, char ** argv )
   cli.set_category( "Various" );
   ADD_COMMAND( abc );
   ADD_COMMAND( bdd );
+  ADD_COMMAND( compress );
   ADD_COMMAND( depth );
   ADD_COMMAND( dsop );
   ADD_COMMAND( expr );
