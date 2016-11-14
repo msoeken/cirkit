@@ -129,6 +129,11 @@ protected:
     return env->store<aig_graph>().current();
   }
 
+  inline aig_graph_info& aig_info()
+  {
+    return cirkit::aig_info( aig() );
+  }
+
   inline const aig_graph_info& aig_info() const
   {
     return cirkit::aig_info( aig() );
@@ -142,6 +147,11 @@ protected:
   inline const mig_graph& mig() const
   {
     return env->store<mig_graph>().current();
+  }
+
+  inline mig_graph_info& mig_info()
+  {
+    return cirkit::mig_info( mig() );
   }
 
   inline const mig_graph_info& mig_info() const
