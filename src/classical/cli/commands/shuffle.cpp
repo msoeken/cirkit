@@ -56,7 +56,7 @@ struct rng
 
   unsigned operator()( unsigned max )
   {
-    dist_t dist( 0u, max );
+    dist_t dist( 0u, max - 1 );
     return dist( gen );
   }
 
@@ -96,8 +96,8 @@ bool shuffle_command::before()
 
 bool shuffle_command::execute_aig()
 {
-  shuffle( cirkit::aig_info( aig() ).inputs, seed );
-  shuffle( cirkit::aig_info( aig() ).outputs, seed );
+  shuffle( aig_info().inputs, seed );
+  shuffle( aig_info().outputs, seed );
 
   return true;
 }
