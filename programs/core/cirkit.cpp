@@ -52,6 +52,7 @@
 #include <classical/cli/commands/dsop.hpp>
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/feather.hpp>
+#include <classical/cli/commands/gen_npn_circuit.hpp>
 #include <classical/cli/commands/gen_trans_arith.hpp>
 #include <classical/cli/commands/isop.hpp>
 #include <classical/cli/commands/memristor.hpp>
@@ -162,6 +163,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( plim );
 
   cli.set_category( "Generator" );
+  ADD_COMMAND( gen_npn_circuit );
   ADD_COMMAND( gen_trans_arith );
 
   cli.set_category( "Various" );
