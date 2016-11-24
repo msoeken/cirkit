@@ -54,6 +54,7 @@
 #include <reversible/cli/commands/esopbs.hpp>
 #include <reversible/cli/commands/exs.hpp>
 #include <reversible/cli/commands/dbs.hpp>
+#include <reversible/cli/commands/gen_reciprocal.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
 #include <reversible/cli/commands/nct.hpp>
 #include <reversible/cli/commands/pos.hpp>
@@ -135,6 +136,9 @@ int main( int argc, char ** argv )
   ADD_COMMAND( rec );
   ADD_COMMAND( revsim );
   ADD_COMMAND( simulate );
+
+  cli.set_category( "Generator" );
+  ADD_COMMAND( gen_reciprocal );
 
   cli.set_category( "Various" );
 
