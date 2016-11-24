@@ -216,20 +216,13 @@ xmg_function xmg_graph::create_ite( const xmg_function& c, const xmg_function& t
 
 xmg_function xmg_graph::create_nary_and( const std::vector<xmg_function>& ops )
 {
-  return balanced_accumulate( ops.begin(), ops.end(),
-                              std::bind( &xmg_graph::create_and,
-                                         this, std::placeholders::_1,
-                                         std::placeholders::_2 ) );
+  return balanced_accumulate( ops.begin(), ops.end(), [this]( const xmg_function& a, const xmg_function& b ) { return create_and( a, b ); } );
 }
 
 xmg_function xmg_graph::create_nary_or( const std::vector<xmg_function>& ops )
 {
-    return balanced_accumulate( ops.begin(), ops.end(),
-                              std::bind( &xmg_graph::create_or,
-                                         this, std::placeholders::_1,
-                                         std::placeholders::_2 ) );
+  return balanced_accumulate( ops.begin(), ops.end(), [this]( const xmg_function& a, const xmg_function& b ) { return create_or( a, b ); } );
 }
-
 
 unsigned xmg_graph::fanin_count( node_t n ) const
 {
