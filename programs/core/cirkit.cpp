@@ -45,6 +45,7 @@
 #include <classical/cli/commands/comb_approx.hpp>
 #include <classical/cli/commands/compress.hpp>
 #include <classical/cli/commands/cone.hpp>
+#include <classical/cli/commands/contrinv.hpp>
 #include <classical/cli/commands/cuts.hpp>
 #include <classical/cli/commands/dectest.hpp>
 #include <classical/cli/commands/depth.hpp>
@@ -151,6 +152,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( isop );
 
   cli.set_category( "Reverse engineering" );
+  ADD_COMMAND( contrinv );
   ADD_COMMAND( cuts );
   ADD_COMMAND( satnpn );
   ADD_COMMAND( simgraph );
