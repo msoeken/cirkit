@@ -36,9 +36,11 @@
 #ifndef CIRKIT_COI_HPP
 #define CIRKIT_COI_HPP
 
+#include <algorithm>
 #include <stack>
-#include <unordered_set>
+#include <vector>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/iterator_range.hpp>
 
@@ -48,9 +50,10 @@ namespace cirkit
 {
 
 template<class Graph>
-std::unordered_set<vertex_t<Graph>> compute_coi( const Graph& g, const vertex_t<Graph>& node )
+std::vector<vertex_t<Graph>> compute_coi( const Graph& g, const vertex_t<Graph>& node )
 {
-  std::unordered_set<vertex_t<Graph>> coi;
+  std::vector<vertex_t<Graph>> coi; /* in reverse topological order */
+  boost::dynamic_bitset<> mark( boost::num_vertices( g ) );
 
   std::stack<vertex_t<Graph>> stack;
   stack.push( node );
@@ -59,9 +62,9 @@ std::unordered_set<vertex_t<Graph>> compute_coi( const Graph& g, const vertex_t<
   {
     auto top = stack.top(); stack.pop();
 
-    if ( coi.find( top ) != coi.end() ) { continue; }
-
-    coi.insert( top );
+    if ( mark[top] ) { continue; }
+    coi.push_back( top );
+    mark.set( top );
 
     for ( const auto& child : boost::make_iterator_range( boost::adjacent_vertices( top, g ) ) )
     {
@@ -69,13 +72,45 @@ std::unordered_set<vertex_t<Graph>> compute_coi( const Graph& g, const vertex_t<
     }
   }
 
-  return std::move( coi );
+  return coi;
 }
 
 template<class Graph>
 unsigned compute_coi_size( const Graph& g, const vertex_t<Graph>& node )
 {
   return compute_coi( g, node ).size();
+}
+
+template<class Graph>
+std::vector<vertex_t<Graph>> coi_topological_nodes( const Graph& g, const std::vector<vertex_t<Graph>>& nodes )
+{
+  /* get cois for each output */
+  using pair_t = std::pair<vertex_t<Graph>, std::vector<vertex_t<Graph>>>;
+  std::vector<pair_t> output_cois;
+  for ( const auto& n : nodes )
+  {
+    output_cois.emplace_back( n, compute_coi( g, n ) );
+  }
+
+  /* sort cois by size */
+  std::stable_sort( output_cois.begin(), output_cois.end(),
+                    []( const pair_t& p1, const pair_t& p2 ) {
+                      return p1.second.size() > p2.second.size();
+                    } );
+
+  std::vector<vertex_t<Graph>> topo;
+  boost::dynamic_bitset<> mark( boost::num_vertices( g ) );
+  for ( const auto& p : output_cois )
+  {
+    for ( auto it = p.second.rbegin(); it != p.second.rend(); ++it )
+    {
+      if ( mark[*it] ) { continue; }
+      topo.push_back( *it );
+      mark.set( *it );
+    }
+  }
+
+  return topo;
 }
 
 }
