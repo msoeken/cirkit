@@ -532,6 +532,7 @@ template<typename T, typename Tag>
 T store_read_io_type( const std::string& filename, const command& cmd )
 {
   assert( false );
+  return T();
 }
 
 /* for the use in commands */
