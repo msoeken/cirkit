@@ -165,6 +165,8 @@ unsigned aig_output_index( const aig_graph_info& info, const std::string& name )
   }
 
   assert( false );
+
+  return 0;
 }
 
 void aig_print_stats( const aig_graph& aig, std::ostream& os )
