@@ -207,6 +207,7 @@ bool Extra_bddUnate( DdManager * dd, DdNode * f, std::vector<int>& ps )
   /* this should not happen */
   assert( r == EXTRA_BDD_COMPARE_EQ );
   assert( false );
+  return false;
 }
 
 bool is_unate( const Cudd& manager, const BDD& f, std::vector<int>& ps )
