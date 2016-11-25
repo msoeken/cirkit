@@ -164,6 +164,7 @@ namespace internal
     }
 
     assert( false );
+    return dd_node();
   }
 
   bool dd_root_is_complemented( const dd_node& node, const dd& graph )
@@ -218,6 +219,7 @@ namespace internal
     else
     {
       assert( false );
+      return false;
     }
   }
 

@@ -144,6 +144,7 @@ namespace cirkit
     else
     {
       assert( false );
+      return input;
     }
   }
 

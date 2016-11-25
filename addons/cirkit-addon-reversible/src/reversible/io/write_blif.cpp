@@ -139,7 +139,7 @@ namespace cirkit
     for ( unsigned i = 0u; i < signals.size(); ++i )
     {
       std::string signalname = bus.has_bus( i ) ? boost::str( boost::format( "%s<%d>" ) % bus.find_bus( i ) % bus.signal_index( i ) ) : signals.at( i );
-      signalname = std::regex_replace( signalname, std::regex( "\\[(\\d+)\\]" ), "<*\\1*>", std::regex_constants::match_default | std::regex_constants::format_sed );
+      signalname = std::regex_replace( signalname, std::regex( "\\[(\\d+)\\]" ), std::string( "<*\\1*>" ), std::regex_constants::match_default | std::regex_constants::format_sed );
       //if ( bus.has_bus( i ) )
       //{
       signalname = prefix + signalname;
