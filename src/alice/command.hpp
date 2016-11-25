@@ -507,6 +507,7 @@ template<typename Source, typename Dest>
 Dest store_convert( const Source& src )
 {
   assert( false );
+  return Dest();
 }
 
 template<typename T, typename Tag>

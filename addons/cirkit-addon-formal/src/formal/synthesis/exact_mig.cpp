@@ -1028,6 +1028,7 @@ public:
         return exact_mig_depth_size_explicit();
       default:
         assert( false );
+        return std::vector<T>();
       }
     }
   }
