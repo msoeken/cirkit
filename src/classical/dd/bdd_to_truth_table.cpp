@@ -105,6 +105,8 @@ tt bdd_to_truth_table( const bdd& b,
 
   std::cerr << "[e] invalid method selected" << std::endl;
   assert( false );
+
+  return tt();
 }
 
 std::vector<unsigned> bdds_to_truth_table_unsigned( const std::vector<bdd>& fs,
