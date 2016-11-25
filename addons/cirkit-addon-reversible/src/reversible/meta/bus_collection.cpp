@@ -131,6 +131,7 @@ namespace cirkit
     }
 
     assert( false );
+    return 0;
   }
 
   void bus_collection::set_initial_value( const std::string& name, unsigned initial_value )
