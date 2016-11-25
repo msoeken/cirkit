@@ -30,6 +30,7 @@
  * @brief Create a NPN computation circuit
  *
  * @author Mathias Soeken
+ * @author Eleonora Testa
  * @since  2.3
  */
 
