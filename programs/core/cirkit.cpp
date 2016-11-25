@@ -48,6 +48,7 @@
 #include <classical/cli/commands/contrinv.hpp>
 #include <classical/cli/commands/cuts.hpp>
 #include <classical/cli/commands/dectest.hpp>
+#include <classical/cli/commands/demo.hpp>
 #include <classical/cli/commands/depth.hpp>
 #include <classical/cli/commands/dsop.hpp>
 #include <classical/cli/commands/expr.hpp>
@@ -170,6 +171,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( abc );
   ADD_COMMAND( bdd );
   ADD_COMMAND( compress );
+  ADD_COMMAND( demo );
   ADD_COMMAND( depth );
   ADD_COMMAND( dsop );
   ADD_COMMAND( expr );
