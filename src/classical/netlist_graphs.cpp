@@ -61,6 +61,8 @@ std::string type_to_name( gate_type_t type )
   case gate_type_t::fadd: return "FADD";
   default: assert( 0 );
   }
+
+  return "UNKNOWN";
 }
 
 /******************************************************************************

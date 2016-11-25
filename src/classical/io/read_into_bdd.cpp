@@ -105,6 +105,8 @@ std::pair<bdd_manager_ptr, std::vector<bdd>> read_into_bdd( const std::string& f
 
   std::cerr << "[e] unknown suffix" << std::endl;
   assert( false );
+
+  return std::make_pair( bdd_manager_ptr(), std::vector<bdd>() );
 }
 
 }

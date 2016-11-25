@@ -447,6 +447,8 @@ mig_function mig_rewriting_manager::distributivity_ltr( const mig_node& node )
   if ( it != old_to_new.end() ) { return it->second; }
 
   assert( false );
+
+  return mig_function();
 }
 
 boost::optional<std::pair<unsigned, unsigned>> mig_rewriting_manager::find_depth_distributivity_candidate( const mig_node& node ) const
