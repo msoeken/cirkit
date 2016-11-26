@@ -48,6 +48,7 @@ template<>
 cryptominisat_solver make_solver<cryptominisat_solver>( properties::ptr settings )
 {
   std::unique_ptr<CMSat::SATSolver> solver( new CMSat::SATSolver );
+  solver->set_num_threads( 4 );
   return { std::move( solver ), std::vector<int>(), true, 0, 0, -1 };
 }
 
@@ -102,7 +103,7 @@ solver_result_t solve<cryptominisat_solver>( cryptominisat_solver& solver, solve
       auto v = solver.solver->get_model();
       for ( auto i = 0u; i < solver.solver->nVars(); ++i )
       {
-        
+
         bits[i] = ( v[i] == l_True );
         care[i] = ( v[i] != l_Undef );
       }
@@ -120,6 +121,18 @@ template<>
 void solver_gen_model<cryptominisat_solver>( cryptominisat_solver& solver, bool genmodel )
 {
   solver.genmodel = genmodel;
+}
+
+template<>
+void solver_add_blocking_var( cryptominisat_solver& solver, int var )
+{
+  solver.blocking_vars.push_back( var );
+}
+
+template<>
+void solver_clear_blocking_vars( cryptominisat_solver& solver )
+{
+  solver.blocking_vars.clear();
 }
 
 }

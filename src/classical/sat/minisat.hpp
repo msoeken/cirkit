@@ -110,6 +110,12 @@ solver_result_t solve<minisat_solver>( minisat_solver& solver, solver_execution_
 template<>
 void solver_gen_model<minisat_solver>( minisat_solver& solver, bool genmodel );
 
+template<>
+void solver_add_blocking_var( minisat_solver& solver, int var );
+
+template<>
+void solver_clear_blocking_vars( minisat_solver& solver );
+
 }
 
 #endif

@@ -93,6 +93,7 @@ struct solver_execution_statistics
   unsigned num_clauses;
   double parse_time;
   double runtime;
+  uint64_t num_conflicts;
 };
 
 template<class S>
@@ -135,6 +136,18 @@ solver_result_t solve( S& solver )
 
 template<class S>
 void solver_gen_model( S& solver, bool genmodel )
+{
+  assert( false && "not implemented" );
+}
+
+template<class S>
+void solver_add_blocking_var( S& solver, int var )
+{
+  assert( false && "not implemented" );
+}
+
+template<class S>
+void solver_clear_blocking_vars( S& solver )
 {
   assert( false && "not implemented" );
 }

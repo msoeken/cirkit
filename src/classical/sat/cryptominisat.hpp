@@ -63,7 +63,7 @@ struct cryptominisat_clause_adder
       solver.solver->new_var();
     }
   }
-  
+
   template <typename Clause>
   void add_to_lits( std::vector<CMSat::Lit>& lits, const Clause& clause )
   {
@@ -112,7 +112,7 @@ struct cryptominisat_xor_clause_adder
       solver.solver->new_var();
     }
   }
-  
+
   template <typename Clause>
   void add_to_lits( std::vector<unsigned>& vars, const Clause& clause )
   {
@@ -158,7 +158,13 @@ solver_result_t solve<cryptominisat_solver>( cryptominisat_solver& solver, solve
 
 template<>
 void solver_gen_model<cryptominisat_solver>( cryptominisat_solver& solver, bool genmodel );
-  
+
+template<>
+void solver_add_blocking_var( cryptominisat_solver& solver, int var );
+
+template<>
+void solver_clear_blocking_vars( cryptominisat_solver& solver );
+
 } /* cirkit */
 
 #endif
