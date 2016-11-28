@@ -309,19 +309,19 @@ void write_javascript_cytoscape( xmg_graph& xmg, std::ostream& os,
     "</html>\n" );
 
   std::string nodes;
-  const auto node_transform = [&xmg, show_node_ids]( xmg_node n ) {
+
+  for ( auto n : xmg.nodes() )
+  {
     std::string type = xmg.is_input( n ) ? "pi" : ( xmg.is_maj( n ) ? ( xmg.is_pure_maj( n ) ? "maj" : ( xmg.children( n )[0].complemented ? "or" : "and" ) ) : "xor" );
     std::string label = show_node_ids ? std::to_string( n )
                                       : ( xmg.is_input( n ) ? ( n == 0 ? "0" : xmg.input_name( n )  ) : type );
 
-    return boost::str( boost::format( "            { data: { id: 'n%1%', type: '%2%', label: '%3%' }, classes: '%2%' },\n" ) % n % type % label );
-  };
-  const auto output_transform = []( std::pair<std::pair<xmg_function, std::string>, unsigned> t ) {
-    return boost::str( boost::format( "            { data: { id: 'o%1%', type: 'po', label: '%2%' }, classes: 'po' },\n" ) % t.second % t.first.second );
-  };
-  const auto output_pairs = view::zip( xmg.outputs(), view::ints( 0u, static_cast<unsigned>( xmg.outputs().size() ) ) );
-  const auto outputs = view::transform( output_pairs, output_transform );
-  for_each( view::concat( view::transform( xmg.nodes(), node_transform ), outputs ), [&nodes]( const std::string& s ) { nodes += s; } );
+    nodes += boost::str( boost::format( "            { data: { id: 'n%1%', type: '%2%', label: '%3%' }, classes: '%2%' },\n" ) % n % type % label );
+  }
+  for ( const auto& output : index( xmg.outputs() ) )
+  {
+    nodes += boost::str( boost::format( "            { data: { id: 'o%1%', type: 'po', label: '%2%' }, classes: 'po' },\n" ) % output.index % output.value.second );
+  }
 
   std::string edges;
 
