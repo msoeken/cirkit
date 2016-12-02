@@ -28,7 +28,7 @@
 #define BOOST_TEST_MODULE circuit
 
 #include <boost/assign/std/vector.hpp>
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <reversible/circuit.hpp>
 #include <reversible/target_tags.hpp>

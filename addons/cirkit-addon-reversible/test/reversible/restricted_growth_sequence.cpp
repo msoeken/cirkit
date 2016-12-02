@@ -33,7 +33,7 @@
 
 #include <boost/format.hpp>
 #define timer timer_class
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #undef timer
 
 #include <core/utils/benchmark_table.hpp>

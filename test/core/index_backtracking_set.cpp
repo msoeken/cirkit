@@ -28,7 +28,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE index_backtracking_set
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <core/utils/index.hpp>
 

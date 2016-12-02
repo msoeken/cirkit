@@ -28,7 +28,7 @@
 #define BOOST_TEST_MODULE permutation
 
 #define timer timer_class
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #undef timer
 
 #include <core/utils/bdd_utils.hpp>

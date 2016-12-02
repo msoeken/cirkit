@@ -27,7 +27,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE truth_table_based_synthesis
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <vector>
 

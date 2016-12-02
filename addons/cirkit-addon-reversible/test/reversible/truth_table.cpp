@@ -27,7 +27,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE truth_table
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <boost/test/output_test_stream.hpp>
 
 #include <reversible/truth_table.hpp>
