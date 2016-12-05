@@ -116,7 +116,7 @@ class package_espresso:
     subdir      = "espresso-ab-1.0"
     url         = "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/eqntott/espresso-ab-1.0.tar.gz"
     fmt         = "tar-gz"
-    build       = [ "./configure", "make" ]
+    build       = [ "./configure", "make || make CFLAGS=-ansi" ]
     install     = [ "cp -v src/espresso %s" ]
 
 class package_directed_lad:
