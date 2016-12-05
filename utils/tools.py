@@ -114,9 +114,9 @@ class package_dimacs2sat:
 class package_espresso:
     description = "Espresso is a multi-valued PLA minimization (adjusted version)"
     subdir      = "espresso-ab-1.0"
-    url         = "https://eqntott.googlecode.com/files/espresso-ab-1.0.tar.gz"
+    url         = "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/eqntott/espresso-ab-1.0.tar.gz"
     fmt         = "tar-gz"
-    build       = [ "./configure", "make" ]
+    build       = [ "./configure", "make CFLAGS=-ansi" ]
     install     = [ "cp -v src/espresso %s" ]
 
 class package_directed_lad:
