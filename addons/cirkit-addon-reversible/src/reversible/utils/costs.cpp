@@ -149,31 +149,54 @@ namespace cirkit
     /* the following computation is based on
      * [N. Abdessaied, M. Amy, M. Soeken, and R. Drechsler, ISMVL, 2016, http://msoeken.github.io/papers/2016_ismvl_2.pdf]
      */
-    auto ac = g.controls().size();
+    // auto ac = g.controls().size();
+
+    // switch ( ac )
+    // {
+    // case 0u:
+    // case 1u:
+    //   return 0;
+    // case 2u:
+    //   return 7;
+    // case 3u:
+    //   return 22;
+    // case 4u:
+    //   return lines >= 7 ? 28 : 52;
+    // default:
+    //   if ( ( lines + 1 ) / 2 >= ac )
+    //   {
+    //     return 12 * ( ac - 2 ) + 4;
+    //   }
+    //   else
+    //   {
+    //     return 24 * ( ac - 3 ) + 8;
+    //   }
+    // }
+
+    /* the following computation is based on
+     * [D. Maslov, Phys Rev A 93, 022311, 2016.
+     */
+    const auto ac = g.controls().size();
 
     switch ( ac )
     {
     case 0u:
     case 1u:
       return 0;
+
     case 2u:
       return 7;
-    case 3u:
-      return 22;
-    case 4u:
-      return lines >= 7 ? 28 : 52;
+
     default:
-      if ( ( lines + 1 ) / 2 >= ac )
+      if ( lines - ac - 1 >= ( ac - 1 ) / 2 )
       {
-        return 12 * ( ac - 2 ) + 4;
+        return 8 * ( ac - 1 );
       }
       else
       {
-        return 24 * ( ac - 3 ) + 8;
+        return 16 * ( ac - 1 );
       }
     }
-
-    //return 7ull * toffoli_gates( ac, lines );
   }
 
   cost_t h_costs::operator()( const gate& g, unsigned lines ) const
