@@ -139,6 +139,15 @@ void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_f
 }
 
 template<>
+command::log_opt_t log_store_entry_statistics<bdd_function_t>( const bdd_function_t& bdd )
+{
+  return command::log_opt_t({
+      {"inputs", bdd.first.ReadSize()},
+      {"outputs", static_cast<unsigned>( bdd.second.size() )}
+    });
+}
+
+template<>
 bdd_function_t store_read_io_type<bdd_function_t, io_pla_tag_t>( const std::string& filename, const command& cmd )
 {
   return read_pla( filename );

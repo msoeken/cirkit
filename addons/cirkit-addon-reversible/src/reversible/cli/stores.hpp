@@ -206,6 +206,9 @@ template<>
 std::string store_entry_to_string<rcbdd>( const rcbdd& bdd );
 
 template<>
+command::log_opt_t log_store_entry_statistics<rcbdd>( const rcbdd& bdd );
+
+template<>
 struct show_store_entry<rcbdd>
 {
   show_store_entry( const command& cmd );

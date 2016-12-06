@@ -84,6 +84,9 @@ template<>
 void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd );
 
 template<>
+command::log_opt_t log_store_entry_statistics<bdd_function_t>( const bdd_function_t& bdd );
+
+template<>
 inline bool store_can_read_io_type<bdd_function_t, io_pla_tag_t>( command& cmd ) { return true; }
 
 template<>

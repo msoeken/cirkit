@@ -320,6 +320,14 @@ std::string store_entry_to_string<rcbdd>( const rcbdd& bdd )
   return ( boost::format( "%d variables, %d nodes" ) % bdd.num_vars() % bdd.chi().nodeCount() ).str();
 }
 
+template<>
+command::log_opt_t log_store_entry_statistics<rcbdd>( const rcbdd& bdd )
+{
+  return command::log_opt_t({
+      {"variables", bdd.num_vars()}
+    });
+}
+
 show_store_entry<rcbdd>::show_store_entry( const command& cmd )
 {
 }
