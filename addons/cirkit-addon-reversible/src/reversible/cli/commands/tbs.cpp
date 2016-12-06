@@ -77,6 +77,9 @@ tbs_command::tbs_command( const environment::ptr& env )
     ( "circuit,c",       "use circuit as input" )
     ( "aig,a",           "use AIG as input" )
     ( "cnf_from_aig",    "create initial CNF from AIG instead of BDD (if input is RCBDD)" )
+    ( "optimize_aig",    "if CNF is from AIG, then optimize AIG before encoding (if input is RCBDD)" )
+    ( "sorting_network", "use sorting network instead of cardinality constraints (if input is RCBDD)" )
+    ( "inc_optimize",    "incrementally optimize after each Hamming weight (if input is RCBDD)" )
     ( "all_assumptions", "use all assumptions for the SAT call" )
     ;
 
@@ -113,6 +116,7 @@ bool tbs_command::execute()
   else if ( is_set( "sat" ) )
   {
     settings->set( "cnf_from_aig", is_set( "cnf_from_aig" ) );
+    settings->set( "optimize_aig", is_set( "optimize_aig" ) );
     settings->set( "all_assumptions", is_set( "all_assumptions" ) );
     if ( is_set( "circuit" ) )
     {
@@ -122,6 +126,14 @@ bool tbs_command::execute()
     {
       const auto& aigs = env->store<aig_graph>();
       symbolic_transformation_based_synthesis_sat( circ, aigs.current(), settings, statistics );
+    }
+    else if ( is_set( "inc_optimize" ) )
+    {
+      symbolic_transformation_based_synthesis_sat_incremental( circ, rcbdds.current(), settings, statistics );
+    }
+    else if ( is_set( "sorting_network" ) )
+    {
+      symbolic_transformation_based_synthesis_sat_sorting_network( circ, rcbdds.current(), settings, statistics );
     }
     else
     {

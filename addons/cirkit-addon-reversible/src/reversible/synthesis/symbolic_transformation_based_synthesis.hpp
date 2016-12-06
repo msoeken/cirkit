@@ -52,6 +52,14 @@ bool symbolic_transformation_based_synthesis_sat( circuit& circ, const rcbdd& cf
                                                   const properties::ptr& settings = properties::ptr(),
                                                   const properties::ptr& statistics = properties::ptr() );
 
+bool symbolic_transformation_based_synthesis_sat_incremental( circuit& circ, const rcbdd& cf,
+                                                              const properties::ptr& settings = properties::ptr(),
+                                                              const properties::ptr& statistics = properties::ptr() );
+
+bool symbolic_transformation_based_synthesis_sat_sorting_network( circuit& circ, const rcbdd& cf,
+                                                                  const properties::ptr& settings = properties::ptr(),
+                                                                  const properties::ptr& statistics = properties::ptr() );
+
 bool symbolic_transformation_based_synthesis_sat( circuit& dest, const circuit& src,
                                                   const properties::ptr& settings = properties::ptr(),
                                                   const properties::ptr& statistics = properties::ptr() );
