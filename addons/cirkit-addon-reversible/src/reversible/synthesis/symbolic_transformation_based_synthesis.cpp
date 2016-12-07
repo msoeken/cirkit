@@ -258,19 +258,38 @@ void extract_gate_information( const boost::dynamic_bitset<>& result,
   }
 }
 
+void prepend_multi_target_toffoli( circuit& circ, const std::vector<unsigned>& controls, const std::vector<unsigned>& targets, bool copy_target = true )
+{
+  if ( targets.empty() ) return;
+
+  if ( copy_target )
+  {
+    for ( auto i = 1u; i < targets.size(); ++i )
+    {
+      prepend_cnot( circ, targets[0], targets[i] );
+    }
+    prepend_toffoli( circ, controls, targets[0] );
+    for ( auto i = 1u; i < targets.size(); ++i )
+    {
+      prepend_cnot( circ, targets[0], targets[i] );
+    }
+  }
+  else
+  {
+    for ( auto t : targets )
+    {
+      prepend_toffoli( circ, controls, t );
+    }
+  }
+}
+
 void add_gates_to_circuit( circuit& circ,
                            const std::vector<unsigned>& i10, const std::vector<unsigned>& i01,
                            const std::vector<unsigned>& x1, const std::vector<unsigned>& y1 )
 {
   /* add gates to circuit */
-  for ( const auto& k : i10 )
-  {
-    prepend_toffoli( circ, y1, k );
-  }
-  for ( const auto& k : i01 )
-  {
-    prepend_toffoli( circ, x1, k );
-  }
+  prepend_multi_target_toffoli( circ, y1, i10, true );
+  prepend_multi_target_toffoli( circ, x1, i01, true );
 }
 
 template<typename Solver>

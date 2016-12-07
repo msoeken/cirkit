@@ -162,6 +162,18 @@ bool tbs_command::execute()
   return true;
 }
 
+command::log_opt_t tbs_command::log() const
+{
+  return log_opt_t({
+      {"runtime", statistics->get<double>( "runtime" )},
+      {"bdd", is_set( "bdd" )},
+      {"sat", is_set( "sat" )},
+      {"aig_from_cnf", is_set( "aig_from_cnf" )},
+      {"optimize_aig", is_set( "optimize_aig" )},
+      {"sorting_network", is_set( "sorting_network" )}
+    });
+}
+
 }
 
 // Local Variables:

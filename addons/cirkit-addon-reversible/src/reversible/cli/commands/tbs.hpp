@@ -50,6 +50,9 @@ protected:
   rules_t validity_rules() const;
   bool execute();
 
+public:
+  log_opt_t log() const;
+
 private:
   bool bidirectional = true;
 };
