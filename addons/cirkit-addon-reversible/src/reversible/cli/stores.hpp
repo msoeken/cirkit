@@ -227,6 +227,12 @@ inline bool store_can_convert<circuit, rcbdd>() { return true; }
 template<>
 rcbdd store_convert<circuit, rcbdd>( const circuit& circ );
 
+template<>
+bool store_can_write_io_type<rcbdd, io_pla_tag_t>( command& cmd );
+
+template<>
+void store_write_io_type<rcbdd, io_pla_tag_t>( const rcbdd& bdd, const std::string& filename, const command& cmd );
+
 }
 
 #endif

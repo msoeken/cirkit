@@ -376,6 +376,21 @@ rcbdd store_convert<circuit, rcbdd>( const circuit& circ )
   return cf;
 }
 
+template<>
+bool store_can_write_io_type<rcbdd, io_pla_tag_t>( command& cmd )
+{
+  cmd.opts.add_options()
+    ( "full", "also write constants and garbage (only for RCBDD)" )
+    ;
+  return true;
+}
+
+template<>
+void store_write_io_type<rcbdd, io_pla_tag_t>( const rcbdd& bdd, const std::string& filename, const command& cmd )
+{
+  bdd.write_pla( filename, cmd.is_set( "full" ) );
+}
+
 }
 
 // Local Variables:

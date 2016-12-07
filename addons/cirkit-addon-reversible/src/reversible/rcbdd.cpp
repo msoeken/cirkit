@@ -344,7 +344,7 @@ void rcbdd::print_truth_table() const
   }
 }
 
-void rcbdd::write_pla( const std::string& filename )
+void rcbdd::write_pla( const std::string& filename, bool full ) const
 {
   using boost::adaptors::transformed;
 
@@ -360,16 +360,38 @@ void rcbdd::write_pla( const std::string& filename )
   fb.open( filename.c_str(), std::ios::out );
   std::ostream os( &fb );
 
-  os << ".i " << n << std::endl
-     << ".o " << m << std::endl
-     << ".ilb " << boost::join( input_labels(), " " ) << std::endl
-     << ".ob " << boost::join( output_labels(), " " ) << std::endl;
+  if ( full )
+  {
+    os << ".i " << vars << std::endl
+       << ".o " << vars << std::endl
+       << ".ilb";
+
+    for ( auto i = 0; i < vars - n; ++i )
+    {
+      os << " kappa" << ( i + 1 );
+    }
+    os << " " << boost::join( input_labels(), " " ) << std::endl
+       << ".ob " << boost::join( output_labels(), " " );
+
+    for ( auto i = 0; i < vars - m; ++i )
+    {
+      os << " gamma" << ( i + 1 );
+    }
+    os << std::endl;
+  }
+  else
+  {
+    os << ".i " << n << std::endl
+       << ".o " << m << std::endl
+       << ".ilb " << boost::join( input_labels(), " " ) << std::endl
+       << ".ob " << boost::join( output_labels(), " " ) << std::endl;
+  }
 
   Cudd_ForeachCube( manager().getManager(), _chi.getNode(), gen, cube, value )
   {
-    os << boost::join( boost::counting_range( vars - n, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" )
+    os << boost::join( boost::counting_range( full ? 0 : vars - n, vars ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i], 1u ); } ), "" )
        << " "
-       << boost::join( boost::counting_range( 0u, m ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" )
+       << boost::join( boost::counting_range( 0u, full ? vars : m ) | transformed( [cube]( unsigned i ) { return std::string( "01-" ).substr( cube[3u * i + 1u], 1u ); } ), "" )
        << std::endl;
   }
 

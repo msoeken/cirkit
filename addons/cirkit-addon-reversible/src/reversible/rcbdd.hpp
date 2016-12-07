@@ -93,7 +93,7 @@ namespace cirkit
     BDD create_from_circuit( const circuit& circ ) const;
 
     void print_truth_table() const;
-    void write_pla( const std::string& filename );
+    void write_pla( const std::string& filename, bool full = false ) const;
 
   private:
     boost::optional<Cudd> _manager;
