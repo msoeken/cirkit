@@ -668,7 +668,14 @@ void synthesize_with_sat_sorting_network( Solver& solver, circuit& circ, unsigne
 
       {
         increment_timer tim( &local_runtime );
-        result = solve( solver, sstats, {-card[k], -assume_diff} );
+        if ( k > 1 )
+        {
+          result = solve( solver, sstats, {-card[k], card[k - 1], -assume_diff} );
+        }
+        else
+        {
+          result = solve( solver, sstats, {-card[k], -assume_diff} );
+        }
       }
 
       if ( result == boost::none ) { break; }
@@ -775,14 +782,18 @@ bool symbolic_transformation_based_synthesis( circuit& circ, const rcbdd& cf,
         assign_sets( cube, j, i10, i01, x1, y1 );
       }
 
+      add_gates_to_circuit( circ, i10, i01, x1, y1 );
+
+      circuit tmp_circ( circ.lines() );
+
       for ( const auto& k : i10 )
       {
-        auto& g = prepend_toffoli( circ, y1, k );
+        auto& g = prepend_toffoli( tmp_circ, y1, k );
         f = cf.compose( f, cf.create_from_gate( g ) );
       }
       for ( const auto& k : i01 )
       {
-        auto g = prepend_toffoli( circ, x1, k );
+        auto g = prepend_toffoli( tmp_circ, x1, k );
         f = cf.compose( f, cf.create_from_gate( g ) );
       }
 
