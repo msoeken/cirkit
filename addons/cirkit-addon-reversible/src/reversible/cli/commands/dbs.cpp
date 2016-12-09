@@ -81,19 +81,20 @@ dbs_command::dbs_command( const environment::ptr& env )
   : cirkit_command( env, "Decomposition based synthesis", "[A. De Vos, Y. Van Rentergem, Adv. Math. Commun. 2 (2008), 183-200]\n[M. Soeken, L. Tague, G.W. Dueck, R. Drechsler, J. of Symb. Comp. 73 (2016), 1-26]" )
 {
   opts.add_options()
-    ( "symbolic,s",                                            "Use symbolic variant (works on RCBDDs)" )
+    ( "symbolic,s",                                            "use symbolic variant (works on RCBDDs)" )
     ( "esop_minimizer", value_with_default( &esop_minimizer ), "ESOP minizer (0: built-in, 1: exorcism); only with symbolic approach" )
-    ( "new,n",                                                 "Add a new entry to the store; if not set, the current entry is overriden" )
+    ( "new,n",                                                 "add a new entry to the store; if not set, the current entry is overriden" )
     ;
 
   options_description tt_options( "Options for the truth table variant" );
   tt_options.add_options()
-    ( "ordering",       value( &ordering ),                    "Complete variable ordering (space separated, only for truth table variant)" )
+    ( "ordering",       value( &ordering ),                    "complete variable ordering (space separated, only for truth table variant)" )
     ;
 
   options_description symb_options( "Options for the symbolic variant" );
   symb_options.add_options()
-    ( "mode",           value_with_default( &mode ),           "Mode (0: default, 1: swap, 2: hamming)" )
+    ( "mode",           value_with_default( &mode ),           "mode (0: default, 1: swap, 2: hamming)" )
+    ( "progress,p",                                            "show progress" )
     ;
 
   opts.add( tt_options );
@@ -133,6 +134,7 @@ bool dbs_command::execute()
   if ( is_set( "symbolic" ) )
   {
     settings->set( "mode", mode );
+    settings->set( "progress", is_set( "progress" ) );
 
     rcbdd_synthesis( circ, rcbdds.current(), settings, statistics );
   }

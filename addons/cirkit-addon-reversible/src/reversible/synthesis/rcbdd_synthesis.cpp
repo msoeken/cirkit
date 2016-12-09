@@ -32,12 +32,17 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
+#include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 #include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/pattern_to_circuit.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <classical/optimization/optimization.hpp>
+
+#define timer timer_class
+#include <boost/progress.hpp>
+#undef timer
 
 #include <cuddInt.h>
 
@@ -590,12 +595,13 @@ struct rcbdd_synthesis_manager
 
   void default_synthesis()
   {
+    null_stream ns;
+    std::ostream null_out( &ns );
+    boost::progress_display show_progress( cf.num_vars(), progress ? std::cout : null_out );
+
     for (unsigned var = 0; var < cf.num_vars(); ++var)
     {
-      if ( verbose || progress )
-      {
-        std::cout << "Adjust variable " << var << " / " << cf.num_vars() << std::endl;
-      }
+      ++show_progress;
       set_var(var);
 
       if ( synthesis_method == ResolveCycles )
