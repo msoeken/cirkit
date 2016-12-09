@@ -118,7 +118,6 @@ bool dbs_command::execute()
   auto& specs    = env->store<binary_truth_table>();
 
   auto settings = make_settings();
-  auto statistics = std::make_shared<properties>();
 
   if ( circuits.empty() || is_set( "new" ) )
   {
