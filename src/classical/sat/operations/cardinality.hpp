@@ -164,6 +164,101 @@ unsigned equals_sinz( S& solver, const clause_t& x, unsigned r, int sid )
 }
 
 /******************************************************************************
+ * Binary tree encoding from Bailleux and Boufkhad                            *
+ ******************************************************************************/
+template<class S>
+unsigned less_or_equal_bailleux_boufkhad( S& solver, const clause_t& x, unsigned r, int sid )
+{
+  const auto n = x.size();                    /* number of variables */
+  std::vector<unsigned> ts_count( 2 * n, 1 ); /* pre-assign t's with 1 (for the leaves), we don't use index 0 */
+  std::vector<int> ts( 2 * n, 0 );
+  std::vector<int> pol( 2 * n, 1 );
+
+  auto offset = sid;
+  for ( int k = n - 1; k > 1; --k )
+  {
+    ts_count[k] = std::min( ts_count[k << 1] + ts_count[( k << 1 ) + 1], r );
+    ts[k] = offset;
+    offset += ts_count[k];
+  }
+  for ( int k = n; k < 2 * n; ++k )
+  {
+    ts[k] = abs( x[k - n] );
+    pol[k] = x[k - n] > 0 ? 1 : -1;
+  }
+
+  for ( int k = 2; k < n; ++k )
+  {
+    for ( int i = 0; i <= ts_count[k << 1]; ++i )
+    {
+      for ( int j = 0; j <= ts_count[( k << 1 ) + 1]; ++j )
+      {
+        if ( ( i + j < 1 ) || ( i + j > ts_count[k] + 1 ) ) { continue; }
+
+        std::vector<int> clause;
+        if ( i > 0 ) { clause.push_back( -pol[k << 1] * ( ts[k << 1] + i - 1 ) ); }
+        if ( j > 0 ) { clause.push_back( -pol[( k << 1 ) + 1] * ( ts[( k << 1 ) + 1] + j - 1 ) ); }
+        if ( i + j <= r ) { clause.push_back( pol[k] * ( ts[k] + i + j - 1 ) ); }
+
+        if ( !clause.empty() )
+        {
+          add_clause( solver )( clause );
+        }
+      }
+    }
+  }
+
+  for ( int i = 0; i <= ts_count[2]; ++i )
+  {
+    for ( int j = 0; j <= ts_count[3]; ++j )
+    {
+      if ( i + j == r + 1 )
+      {
+        assert( i && j );
+        add_clause( solver )( {-pol[2] * ( ts[2] + i - 1 ), -pol[3] * ( ts[3] + j - 1 )} );
+      }
+    }
+  }
+
+  return offset;
+}
+
+template<class S>
+unsigned greater_or_equal_bailleux_boufkhad( S& solver, const clause_t& x, unsigned r, int sid )
+{
+  using boost::adaptors::transformed;
+
+  clause_t xn;
+  boost::push_back( xn, x | transformed( []( int v ) { return -v; } ) );
+  return less_or_equal_bailleux_boufkhad( solver, xn, x.size() - r, sid );
+}
+
+template < class S >
+unsigned equals_bailleux_boufkhad( S& solver, const clause_t& x, unsigned r, int sid )
+{
+  if ( r == 0u )
+  {
+    for ( const auto& l : x )
+    {
+      add_clause( solver )( {-l} );
+    }
+    return sid;
+  }
+
+  if ( r == x.size() )
+  {
+    for ( const auto& l : x )
+    {
+      add_clause( solver )( {l} );
+    }
+    return sid;
+  }
+
+  sid = less_or_equal_bailleux_boufkhad( solver, x, r, sid );
+  return greater_or_equal_bailleux_boufkhad( solver, x, r, sid );
+}
+
+/******************************************************************************
  * Pairwise cardinality networks                                              *
  ******************************************************************************/
 
