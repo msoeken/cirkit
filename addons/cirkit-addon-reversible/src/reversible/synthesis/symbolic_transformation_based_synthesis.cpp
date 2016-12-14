@@ -147,13 +147,17 @@ int difference_clauses_plaisted_greenbaum( S& solver, const std::vector<int>& xs
     add_clause( solver )( {-xs[i], -ys[i], -xorids[i]} );
   }
 
-  auto orid = sid;
+  xorids.push_back( sid );
+  add_clause( solver )( xorids );
+  return sid;
 
-  logic_or( solver, xorids, orid );
+  // auto orid = sid;
 
-  add_clause( solver )( {orid + 1, orid} );
+  // logic_or( solver, xorids, orid );
 
-  return orid + 1;
+  // add_clause( solver )( {orid + 1, orid} );
+
+  // return orid + 1;
 }
 
 template<typename S>
