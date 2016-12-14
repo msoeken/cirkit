@@ -68,6 +68,7 @@ xmglut_command::xmglut_command( const environment::ptr& env )
     ( "map_cmd",    value_with_default( &map_cmd ),  "ABC map command in &space, use %d as placeholder for the LUT size" )
     ( "timeout,t",  value( &timeout ),               "timeout in seconds (afterwards, heuristics are tried)" )
     ( "xmg,x",                                       "create cover from XMG instead of AIG" )
+    ( "noxor",                                       "don't use XOR, only works with LUT sizes up to 4" )
     ( "blif_name",  value( &blif_name ),             "read cover from BLIF instead of AIG" )
     ( "dump_luts",  value( &dump_luts ),             "if not empty, all LUTs will be written to file without performing mapping" )
     ( "progress,p",                                  "show progress" )
@@ -81,6 +82,7 @@ command::rules_t xmglut_command::validity_rules() const
   return {
     {[this]() { return is_set( "blif_name" ) || is_set( "xmg" ) || env->store<aig_graph>().current_index() != -1; }, "no AIG in store" },
     {[this]() { return !is_set( "xmg" ) || env->store<xmg_graph>().current_index() != -1; }, "no XMG in store" },
+    {[this]() { return !is_set( "noxor" ) || lut_size <= 4; }, "LUT size can be at most 4 if no XOR is allowed" },
     file_exists_if_set( *this, blif_name, "blif_name" )
   };
 }
@@ -92,6 +94,7 @@ bool xmglut_command::execute()
 
   auto settings = make_settings();
   settings->set( "lut_size", lut_size );
+  settings->set( "noxor", is_set( "noxor" ) );
   settings->set( "progress", is_set( "progress" ) );
   if ( is_set( "dump_luts" ) )
   {

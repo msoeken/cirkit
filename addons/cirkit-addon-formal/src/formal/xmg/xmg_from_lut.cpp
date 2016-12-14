@@ -67,6 +67,7 @@ public:
     /* settings */
     dump_luts = get( settings, "dump_luts", std::string() );
     npn       = get( settings, "npn",       true );
+    noxor     = get( settings, "noxor",     false );
   }
 
   xmg_graph run()
@@ -77,13 +78,27 @@ public:
       return xmg;
     }
 
-    minlib.load_library_string( xmg_minlib_manager::npn2_s );
-    minlib.load_library_string( xmg_minlib_manager::npn3_s );
-    minlib.load_library_string( xmg_minlib_manager::npn4_s );
+    if ( !noxor )
+    {
+      minlib.load_library_string( xmg_minlib_manager::npn2_s );
+      minlib.load_library_string( xmg_minlib_manager::npn3_s );
+      minlib.load_library_string( xmg_minlib_manager::npn4_s );
 
-    read_library_from_file();
+      read_library_from_file();
+    }
+    else
+    {
+      minlib.load_library_string( xmg_minlib_manager::npn2_s_mig );
+      minlib.load_library_string( xmg_minlib_manager::npn3_s_mig );
+      minlib.load_library_string( xmg_minlib_manager::npn4_s_mig );
+    }
+
     compute_optimal_xmgs();
-    write_library_to_file();
+
+    if ( !noxor )
+    {
+      write_library_to_file();
+    }
 
     initialize_xmg();
     map();
@@ -119,7 +134,7 @@ private:
         assert( false );
       }
 
-      //tt_extend( t, 4u ); /* at least 4 variables */
+      // tt_extend( t, 4u ); /* at least 4 variables */
 
       if ( optimal_xmgs.find( tts[v] ) != optimal_xmgs.end() )
       {
@@ -321,6 +336,7 @@ private:
   bool verbose;
   std::string dump_luts; /* if not empty, no mapping is performed but only luts are dumped */
   bool npn = true;
+  bool noxor = false;
 
   std::unordered_map<std::string, xmg_graph> optimal_xmgs;
   std::vector<xmg_function> node_to_function;

@@ -93,6 +93,9 @@ public: /* libraries */
   static std::string npn2_s;
   static std::string npn3_s, npn3_sd, npn3_ds;
   static std::string npn4_s, npn4_sd, npn4_ds;
+  static std::string npn2_s_mig;
+  static std::string npn3_s_mig;
+  static std::string npn4_s_mig;
 };
 
 }
