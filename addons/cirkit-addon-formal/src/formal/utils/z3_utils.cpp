@@ -43,7 +43,7 @@ void check_error( const z3::context& ctx )
   const Z3_error_code e = Z3_get_error_code( ctx );
   if ( e != Z3_OK )
   {
-    std::cerr << "[E] " << Z3_get_error_msg_ex( ctx, e ) << std::endl;
+    std::cerr << "[e] " << Z3_get_error_msg( ctx, e ) << std::endl;
     exit(1);
   }
 }
