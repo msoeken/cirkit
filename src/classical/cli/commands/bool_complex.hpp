@@ -51,6 +51,8 @@ protected:
 
 private:
   void compute( bool length );
+  void compute_ub();
+  void compute_ub_aig();
   void compute_maj( bool length, bool npn = false );
 
 private:
