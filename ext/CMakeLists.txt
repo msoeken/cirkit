@@ -170,6 +170,25 @@ add_dependencies(external cryptominisat)
 
 set(CRYPTOMINISAT_LIBRARIES
   ${ext_LIB}/${cryptominisat_LIBNAME}
+  PARENT_SCOPE
+)
 
+################################################################################
+# DepQBF                                                                       #
+################################################################################
+externalProject_add(depqbf
+  DOWNLOAD_DIR .
+  URL https://github.com/lonsing/depqbf/archive/version-5.01.tar.gz
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND make -j4
+  BUILD_IN_SOURCE 1
+  INSTALL_COMMAND cp libqdpll.so.1.0 ${ext_LIB}/libqdpll.so.1.0 COMMAND cp -R qdpll.h ${ext_INCLUDE}
+  LOG_DOWNLOAD 1
+  LOG_BUILD 1
+  LOG_INSTALL 1)
+add_dependencies(external depqbf)
+
+set(DEPQBF_LIBRARIES
+  "${ext_LIB}/libqdpll.so.1.0"
   PARENT_SCOPE
 )
