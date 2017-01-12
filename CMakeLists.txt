@@ -50,6 +50,9 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs )
 option(cirkit_ENABLE_PROGRAMS "build programs" on)
 option(cirkit_BUILD_SHARED "build shared libraries" on)
 set(cirkit_PACKAGES "" CACHE STRING "if non-empty, then only the packages in the semicolon-separated lists are build")
+set(cirkit_addon_command_libraries "" CACHE INTERNAL "" FORCE )
+set(cirkit_addon_command_includes "" CACHE INTERNAL "" FORCE )
+set(cirkit_addon_command_defines "" CACHE INTERNAL "" FORCE )
 
 # Readline
 include(CheckCXXSourceRuns)

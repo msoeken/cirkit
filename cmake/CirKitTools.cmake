@@ -22,7 +22,7 @@ function( add_cirkit_library )
     "arg"
     ""
     "NAME"
-    "SOURCES;AUTO_DIRS;USE;INCLUDE;DEFINE"
+    "SOURCES;AUTO_DIRS;USE;INCLUDE;DEFINE;COMMANDS"
     ${ARGN}
   )
 
@@ -69,6 +69,16 @@ function( add_cirkit_library )
 
   if( DEFINED arg_DEFINE )
     target_compile_definitions( ${arg_NAME} ${arg_DEFINE} )
+  endif( )
+
+  if( DEFINED arg_COMMANDS )
+    if(cirkit_ENABLE_PROGRAMS)
+      set(cirkit_addon_command_libraries ${cirkit_addon_command_libraries} ${arg_NAME} CACHE INTERNAL "" FORCE )
+      set(cirkit_addon_command_includes "${cirkit_addon_command_includes}#include <${arg_COMMANDS}>;" CACHE INTERNAL "" FORCE )
+
+      string( TOUPPER ${arg_NAME} arg_NAME_UC )
+      set(cirkit_addon_command_defines "${cirkit_addon_command_defines}${arg_NAME_UC}_COMMANDS;" CACHE INTERNAL "" FORCE )
+    endif()
   endif( )
 
 endfunction( )

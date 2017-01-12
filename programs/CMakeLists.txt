@@ -41,7 +41,6 @@ add_cirkit_program(
    PUBLIC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc/src
 )
 
-# cirkit
 add_cirkit_program(
   NAME cirkit
   SOURCES
@@ -53,23 +52,16 @@ add_cirkit_program(
 )
 
 target_compile_definitions( cirkit PUBLIC USE_LINENOISE )
+target_link_libraries( cirkit ${cirkit_addon_command_libraries} )
 
-if( enable_cirkit-addon-formal )
-  target_link_libraries( cirkit cirkit_formal_z3 )
-  target_compile_definitions( cirkit PUBLIC USE_FORMAL_COMMANDS )
-endif()
+file( WRITE ${CMAKE_BINARY_DIR}/programs/addon_commands.hpp "" )
+foreach( inc ${cirkit_addon_command_includes} )
+  file( APPEND ${CMAKE_BINARY_DIR}/programs/addon_commands.hpp "${inc}\n" )
+endforeach()
 
-if( enable_cirkit-addon-fpga )
-  target_link_libraries( cirkit cirkit_fpga )
-  target_compile_definitions( cirkit PUBLIC USE_FPGA_COMMANDS )
-endif()
+file( WRITE ${CMAKE_BINARY_DIR}/programs/addon_defines.hpp "" )
+foreach( def ${cirkit_addon_command_defines} )
+  file( APPEND ${CMAKE_BINARY_DIR}/programs/addon_defines.hpp "${def}\n" )
+endforeach()
+target_include_directories( cirkit PUBLIC ${CMAKE_BINARY_DIR}/programs )
 
-if( enable_cirkit-addon-experimental )
-  target_link_libraries( cirkit cirkit_experimental_core cirkit_experimental_classical )
-  target_compile_definitions( cirkit PUBLIC USE_EXPERIMENTAL_CLASSICAL_COMMANDS )
-
-  if( enable_cirkit-addon-formal )
-    target_link_libraries( cirkit cirkit_experimental_formal )
-    target_compile_definitions( cirkit PUBLIC USE_EXPERIMENTAL_FORMAL_COMMANDS )
-  endif()
-endif()

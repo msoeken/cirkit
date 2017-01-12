@@ -75,26 +75,9 @@
 #include <classical/cli/commands/unate.hpp>
 #include <classical/cli/commands/worstcase.hpp>
 
-#ifdef USE_FORMAL_COMMANDS
-#include <formal/cli/commands/exact_mig.hpp>
-#include <formal/cli/commands/exact_xmg.hpp>
-#include <formal/cli/commands/xmglut.hpp>
-#include <formal/cli/commands/xmgmine.hpp>
-#endif
-
-#ifdef USE_FPGA_COMMANDS
-#include <classical/cli/commands/fpga_commands.hpp>
-#endif
-
 #define STORE_TYPES aig_graph, mig_graph, xmg_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t
 
-#ifdef USE_EXPERIMENTAL_CLASSICAL_COMMANDS
-#include <classical/cli/commands/commands.hpp>
-#endif
-
-#ifdef USE_EXPERIMENTAL_FORMAL_COMMANDS
-#include <formal/cli/commands/experimental_commands.hpp>
-#endif
+#include <addon_commands.hpp> // auto-generated file from CMake
 
 using namespace cirkit;
 
@@ -145,12 +128,6 @@ int main( int argc, char ** argv )
   ADD_COMMAND( tt );
 
   cli.set_category( "Synthesis" );
-#ifdef USE_FORMAL_COMMANDS
-  ADD_COMMAND( exact_mig );
-  ADD_COMMAND( exact_xmg );
-  ADD_COMMAND( xmglut );
-  ADD_COMMAND( xmgmine );
-#endif
   ADD_COMMAND( isop );
 
   cli.set_category( "Reverse engineering" );
@@ -177,17 +154,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( expr );
   ADD_COMMAND( output_noise );
 
-#ifdef USE_FPGA_COMMANDS
-  FPGA_CLASSICAL_COMMANDS
-#endif
-
-#ifdef USE_EXPERIMENTAL_CLASSICAL_COMMANDS
-  EXPERIMENTAL_CLASSICAL_COMMANDS
-#endif
-
-#ifdef USE_EXPERIMENTAL_FORMAL_COMMANDS
-  EXPERIMENTAL_FORMAL_COMMANDS
-#endif
+#include <addon_defines.hpp>
 
   return cli.run( argc, argv );
 }

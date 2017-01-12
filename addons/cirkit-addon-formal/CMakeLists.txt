@@ -37,4 +37,6 @@ add_cirkit_library(
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
   DEFINE
     PUBLIC ADDON_FORMAL
-)
+  COMMANDS
+    formal/cli/commands/commands.hpp
+  )
