@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import subprocess
 import sys
@@ -113,7 +113,10 @@ if __name__ == "__main__":
     basename = os.path.basename( name )
 
     pathname = "./" if addon == "." else "addons/cirkit-addon-%s/" % addon
-    filename = pathname + "src/" + name
+    pathname = pathname + "src/" + os.path.dirname( name )
+    if not os.path.isdir( pathname ):
+        os.makedirs( pathname )
+    filename = pathname + "/" + basename
 
     with open( filename + ".hpp", "w" ) as f:
         f.write( make_header( header, basename, author ) + "\n" )
