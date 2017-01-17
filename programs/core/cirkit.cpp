@@ -61,6 +61,7 @@
 #include <classical/cli/commands/migfh.hpp>
 #include <classical/cli/commands/npn.hpp>
 #include <classical/cli/commands/output_noise.hpp>
+#include <classical/cli/commands/permmask.hpp>
 #include <classical/cli/commands/plim.hpp>
 #include <classical/cli/commands/propagate.hpp>
 #include <classical/cli/commands/read_sym.hpp>
@@ -125,6 +126,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( bool_complex );
   ADD_COMMAND( dectest );
   ADD_COMMAND( npn );
+  ADD_COMMAND( permmask );
   ADD_COMMAND( tt );
 
   cli.set_category( "Synthesis" );
