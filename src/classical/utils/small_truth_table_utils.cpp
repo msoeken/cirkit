@@ -59,7 +59,6 @@ std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left
     std::vector<unsigned>::iterator a, b; /* numbers in left or right */
     unsigned lf, rf;                      /* left field right field */
     bool visited = false;
-    //bool changed;                         /* indicates whether numbers where changed */
   };
 
   std::vector<node_t> nodes( 1 << n );
