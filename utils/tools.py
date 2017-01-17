@@ -242,6 +242,31 @@ class package_cryptominisat:
     build       = [ "mkdir build", "cd build; cmake ..; make -j5 cryptominisat4" ]
     install     = [ "cp -v build/cryptominisat4 %s" ]
 
+class package_bloqqer:
+    description = "A preprocessor for quantified Boolean formulas"
+    subdir      = "bloqqer-037-8660cb9-151127"
+    url         = "http://fmv.jku.at/bloqqer/bloqqer-037-8660cb9-151127.tar.gz"
+    fmt         = "tgz"
+    build       = [ "./configure", "make" ]
+    install     = [ "cp -v bloqqer %s" ]
+
+class package_depqbf:
+    description = "A solver for quantified Boolean formulae (QBF)"
+    subdir      = "depqbf-version-5.01"
+    url         = "https://github.com/lonsing/depqbf/archive/version-5.01.tar.gz"
+    fmt         = "tgz"
+    build       = [ "./configure", "make" ]
+    install     = [ "cp -v depqbf %s" ]
+
+class package_rareqs:
+    description = "Recursive Abstraction Refinement QBF Solver"
+    subdir      = "rareqs"
+    url         = "http://sat.inesc-id.pt/~mikolas/sw/areqs/rareqs-1.1.tgz"
+    fmt         = "tgz"
+    build       = [ "" ]
+    install     = [ "mv rareqs-1.1 rareqs", "cp -v rareqs %s" ]
+    makedir     = True
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
