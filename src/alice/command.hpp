@@ -106,6 +106,11 @@ public:
     os << i;
   }
 
+  void operator()( uint64_t i ) const
+  {
+    os << i;
+  }
+
   void operator()( double d ) const
   {
     os << d;
@@ -156,7 +161,7 @@ inline std::string make_caption( const std::string& caption, const std::string& 
   return c;
 }
 
-using log_var_t = boost::variant<std::string, int, unsigned, double, bool, std::vector<std::string>, std::vector<int>, std::vector<unsigned>, std::vector<std::vector<int>>, std::vector<std::vector<unsigned>>>;
+using log_var_t = boost::variant<std::string, int, unsigned, uint64_t, double, bool, std::vector<std::string>, std::vector<int>, std::vector<unsigned>, std::vector<uint64_t>, std::vector<std::vector<int>>, std::vector<std::vector<unsigned>>>;
 using log_map_t = std::unordered_map<std::string, log_var_t>;
 using log_opt_t = boost::optional<log_map_t>;
 
