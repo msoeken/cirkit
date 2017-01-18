@@ -106,7 +106,10 @@ std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left
   }
 
   /* traverse graph and compute masks */
-  auto mask_left = 0u, mask_right = 1u;
+  auto mask_left = 0u, mask_right = 0u;
+
+  // std::cout << "[i] left =  " << any_join( left, " " ) << std::endl
+  //           << "[i] right = " << any_join( right, " " ) << std::endl;
 
   while ( true )
   {
@@ -123,7 +126,7 @@ std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left
     do {      
       auto& n = nodes[idx];
 
-      //std::cout << boost::format( "[i] enter loop with idx = %d, nr = %d, left_side = %d, *n.a = %d, *n.b = %d, n.lf = %d, n.rf = %d" ) % idx % nr % left_side % *n.a % *n.b % n.lf % n.rf << std::endl;
+      // std::cout << boost::format( "[i] enter loop with idx = %d, nr = %d, left_side = %d, *n.a = %d, *n.b = %d, n.lf = %d, n.rf = %d" ) % idx % nr % left_side % *n.a % *n.b % n.lf % n.rf << std::endl;
 
       auto match = *n.a == nr;
       
@@ -147,7 +150,7 @@ std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left
 
       left_side = !left_side;
 
-      //std::cout << boost::format( "[i] exit loop with idx = %d, nr = %d, left_side = %d" ) % idx % nr % left_side << std::endl;
+      // std::cout << boost::format( "[i] exit loop with idx = %d, nr = %d, left_side = %d" ) % idx % nr % left_side << std::endl;
     } while ( idx != start );
   }
 
@@ -178,12 +181,15 @@ std::vector<uint64_t> stt_compute_mask_sequence( const std::vector<unsigned>& pe
     std::tie( masks[i], masks[2 * n - 2 - i] ) = stt_compute_mask_pair( left, right, i, n );
   }
 
+  // std::cout << "[i] left =  " << any_join( left, " " ) << std::endl
+  //           << "[i] right = " << any_join( right, " " ) << std::endl;
+
   /* compute middle mask */
   for ( auto i = 0u; i < ( 1 << ( n - 1 ) ); ++i )
   {
     if ( left[i] != right[i] )
     {
-      masks[n] |= 1 << i;
+      masks[n - 1] |= 1 << i;
     }
   }
   
