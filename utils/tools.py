@@ -250,12 +250,21 @@ class package_bloqqer:
     build       = [ "./configure", "make" ]
     install     = [ "cp -v bloqqer %s" ]
 
+# https://github.com/lonsing/depqbf/issues/7#issuecomment-159021610
+class package_bloqqer_qdo:
+    description = "Bloqqer configured to produce partial assignments (requires depqbf installed)"
+    subdir      = "bloqqer-037-8660cb9-151127"
+    url         = "http://fmv.jku.at/bloqqer/bloqqer-037-8660cb9-151127.tar.gz"
+    fmt         = "tgz"
+    build       = [ "sed -e \"s/DEPQBF=.*/DEPQBF=..\/depqbf-version-5.01\//\" configure > tmp", "cp tmp configure", "./configure -s", "make" ]
+    install     = [ "mv bloqqer bloqqer-qdo", "cp -v bloqqer-qdo %s" ]
+
 class package_depqbf:
     description = "A solver for quantified Boolean formulae (QBF)"
     subdir      = "depqbf-version-5.01"
     url         = "https://github.com/lonsing/depqbf/archive/version-5.01.tar.gz"
     fmt         = "tgz"
-    build       = [ "./configure", "make" ]
+    build       = [ "make" ]
     install     = [ "cp -v depqbf %s" ]
 
 class package_rareqs:
@@ -265,6 +274,31 @@ class package_rareqs:
     fmt         = "tgz"
     build       = [ "" ]
     install     = [ "mv rareqs-1.1 rareqs", "cp -v rareqs %s" ]
+    makedir     = True
+
+class package_alejtehad:
+    description = "A solver for quantified Boolean formulas based on counterexample-guided expansion"
+    subdir      = "ijtihad"
+    url         = "https://extgit.iaik.tugraz.at/scos/ijtihad.git"
+    fmt         = "git"
+    build       = [ "make" ]
+    install     = [ "mv mysolver alejtehad", "cp -v alejtehad %s" ]
+
+class package_cadet:
+    description = "Algorithm for determining the truth of quantified Boolean formulas limited to a single quantifier alternations"
+    subdir      = "cadet"
+    url         = ["http://www.eecs.berkeley.edu/~rabe/cadet_linux"]
+    fmt         = "wget-list"
+    build       = [ "" ]
+    install     = [ "mv cadet_linux cadet", "chmod a+x cadet", "cp -v cadet %s" ]
+
+class package_skizzo:
+    description = "A solver for deciding Quantified Boolean Formulas (QBFs)"
+    subdir      = "skizzo"
+    url         = ["http://skizzo.site/software/linux/sKizzo-v0.12"]
+    fmt         = "wget-list"
+    build       = [ "" ]
+    install     = [ "mv sKizzo-v0.12 skizzo", "chmod a+x skizzo", "cp -v skizzo %s" ]
     makedir     = True
 
 ################################################################################
