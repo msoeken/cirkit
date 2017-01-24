@@ -32,6 +32,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/assign/std/vector.hpp>
+#include <boost/assign/std/map.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/counting_range.hpp>
@@ -317,6 +318,15 @@ void read_aiger( aig_graph& aig, std::string& comment, std::istream& in )
     // std::cout << line << '\n';
     comment += line + '\n';;
   }
+
+  /* fill up symbol table with empty entries */
+  for ( const auto& i : index( info.inputs ) )
+  {
+    if ( info.node_names.find( i.value ) == info.node_names.end() )
+    {
+      info.node_names += std::make_pair( i.value, "" );
+    }
+  }
 }
 
 unsigned aiger_decode( std::istream& in )
@@ -422,6 +432,7 @@ void read_aiger_binary( aig_graph& aig, const std::string& filename, bool noopt 
   read_aiger_binary( aig, in, noopt );
 
   aig_info( aig ).model_name = boost::filesystem::path( filename ).stem().string();
+  in.close();
 }
 
 }
