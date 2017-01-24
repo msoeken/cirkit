@@ -56,6 +56,60 @@ inline void blocking_and( S& solver, int sel, int a, int b, int c )
 }
 
 template<class S>
+void blocking_and( S& solver, int sel, const clause_t& x, int c )
+{
+  using boost::adaptors::transformed;
+
+  for ( auto l : x )
+  {
+    add_clause( solver )( {-sel, l, -c} );
+  }
+  clause_t clause = { -sel };
+  boost::push_back( clause, x | transformed( []( int l ) { return -l; } ) );
+  clause += c;
+  add_clause( solver )( clause );
+}
+
+template<class S>
+inline void blocking_or( S& solver, int sel, int a, int b, int c )
+{
+  add_clause( solver )( {-sel, -a, c} );
+  add_clause( solver )( {-sel, -b, c} );
+  add_clause( solver )( {-sel, a, b, -c} );
+}
+
+template<class S>
+void blocking_or( S& solver, int sel, const clause_t& x, int c )
+{
+  for ( auto l : x )
+  {
+    add_clause( solver )( {-sel, -l, c} );
+  }
+  clause_t clause( x.begin(), x.end() );
+  clause += -sel;
+  clause += -c;
+  add_clause( solver )( clause );
+}
+
+template<class S>
+inline void blocking_xor( S& solver, int sel, int a, int b, int c )
+{
+  add_clause( solver )( {-sel, -a, b, c} );
+  add_clause( solver )( {-sel, a, -b, c} );
+  add_clause( solver )( {-sel, a, b, -c} );
+  add_clause( solver )( {-sel, -a, -b, -c} );
+}
+
+template<class S>
+inline void blocking_xnor( S& solver, int sel, int a, int b, int c )
+{
+  add_clause( solver )( {-sel, -a, b, -c} );
+  add_clause( solver )( {-sel, a, -b, -c} );
+  add_clause( solver )( {-sel, a, b, c} );
+  add_clause( solver )( {-sel, -a, -b, c} );
+}
+
+template<class S>
 inline void logic_and( S& solver, int a, int b, int c )
 {
   add_clause( solver )( {a, -c} );
