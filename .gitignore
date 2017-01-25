@@ -9,6 +9,7 @@ ext/bin
 ext/share
 tmp
 
+scripts/
 .tags
 .idea/
 
