@@ -59,6 +59,24 @@ RevKit can be executed with
     
 Check the [documentation](http://msoeken.github.io/cirkit_doc.html) for more details.
 
+## Troubleshooting
+
+It's best to set the environment variable `CIRKIT_HOME` to the
+directory of CirKit using
+
+    export CIRKIT_HOME=<full-path-to-cirkit>
+    
+or some other command depending on the user's shell.  Also, sometimes
+depending libraries are not found, then run
+
+    export LD_LIBRARY_PATH=$CIRKIT_HOME/ext/lib:$LD_LIBRARY_PATH
+    
+on Linux or
+
+    export DYLD_LIBRARY_PATH=$CIRKIT_HOME/ext/lib:$DYLD_LIBRARY_PATH
+
+on Mac OS.
+
 ## Build CirKit Addons
 
 CirKit can be extended by addons, you can learn more in the `addons/README.md`
