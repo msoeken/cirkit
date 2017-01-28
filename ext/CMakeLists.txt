@@ -200,7 +200,7 @@ externalProject_add(depqbf
   CONFIGURE_COMMAND ""
   BUILD_COMMAND make -j4
   BUILD_IN_SOURCE 1
-  INSTALL_COMMAND cp libqdpll.so.1.0 ${ext_LIB}/libqdpll.so.1.0 COMMAND cp -R qdpll.h ${ext_INCLUDE}
+  INSTALL_COMMAND cp libqdpll.so.1.0 ${ext_LIB}/libqdpll.so.1.0 COMMAND cp libqdpll.so.1.0 ${ext_LIB}/libqdpll.so.1 COMMAND cp -R qdpll.h ${ext_INCLUDE}
   LOG_DOWNLOAD 1
   LOG_BUILD 1
   LOG_INSTALL 1)
