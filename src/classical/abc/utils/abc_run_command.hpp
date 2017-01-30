@@ -52,6 +52,11 @@ void abc_run_command_no_output( const aig_graph& aig, const std::string& command
 
 boost::optional< boost::dynamic_bitset<> > abc_run_command_get_counterexample( const std::string& commands );
 
+namespace abc_command_constants
+{
+static const std::string resyn2_command = "balance; rewrite; refactor; balance; rewrite; rewrite -z; balance; refactor -z; rewrite -z; balance";
+}
+
 }
 
 #endif
