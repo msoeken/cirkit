@@ -289,6 +289,10 @@ void foreach_topological( const Graph& g, Fn&& f )
   }
 }
 
+/* some special graphs */
+graph_t<> line_graph( unsigned order );
+graph_t<> ring_graph( unsigned order );
+
 }
 
 #endif
