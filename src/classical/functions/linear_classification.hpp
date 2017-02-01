@@ -42,6 +42,9 @@ namespace cirkit
 {
 
 uint64_t exact_linear_classification( uint64_t func, unsigned num_vars );
+uint64_t exact_linear_classification_output( uint64_t func, unsigned num_vars );
+uint64_t exact_affine_classification( uint64_t func, unsigned num_vars );
+uint64_t exact_affine_classification_output( uint64_t func, unsigned num_vars );
 
 }
 

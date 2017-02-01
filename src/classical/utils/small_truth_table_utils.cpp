@@ -44,6 +44,11 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
+uint64_t stt_flip( uint64_t func, unsigned var )
+{
+  return ( ( func << ( 1 << var ) ) & stt_constants::truths[var] ) | ( ( func & stt_constants::truths[var] ) >> ( 1 << var ) );
+}
+
 std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left,
                                                      std::vector<unsigned>& right,
                                                      unsigned step,

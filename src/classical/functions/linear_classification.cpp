@@ -31,6 +31,7 @@
 #include <algorithm>
 
 #include <classical/utils/small_truth_table_utils.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
 {
@@ -71,6 +72,39 @@ uint64_t exact_linear_classification( uint64_t func, unsigned num_vars )
   }
 
   return best;
+}
+
+uint64_t exact_linear_classification_output( uint64_t func, unsigned num_vars )
+{
+  const auto mask = num_vars == 6 ? ~0 : ( ( 1 << ( 1 << num_vars ) ) - 1 );
+  const auto func_c = ~func & mask;
+
+  return std::min( exact_linear_classification( func, num_vars ), exact_linear_classification( func_c, num_vars ) );
+}
+
+uint64_t exact_affine_classification( uint64_t func, unsigned num_vars )
+{
+  const auto& flip_array = tt_store::i().flips( num_vars );
+  const auto total_flips = flip_array.size();
+
+  auto fcopy = func;
+  auto best = exact_linear_classification( fcopy, num_vars );
+
+  for ( int j = total_flips - 1; j >= 0; --j )
+  {
+    fcopy = stt_flip( fcopy, flip_array[j] );
+    best = std::min( best, exact_linear_classification( fcopy, num_vars ) );
+  }
+
+  return best;
+}
+
+uint64_t exact_affine_classification_output( uint64_t func, unsigned num_vars )
+{
+  const auto mask = num_vars == 6 ? ~0 : ( ( 1 << ( 1 << num_vars ) ) - 1 );
+  const auto func_c = ~func & mask;
+
+  return std::min( exact_affine_classification( func, num_vars ), exact_affine_classification( func_c, num_vars ) );
 }
 
 }

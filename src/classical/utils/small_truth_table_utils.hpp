@@ -43,6 +43,15 @@
 namespace cirkit
 {
 
+namespace stt_constants
+{
+
+const uint64_t truths[6] = {0xAAAAAAAAAAAAAAAA, 0xCCCCCCCCCCCCCCCC, 0xF0F0F0F0F0F0F0F0, 0xFF00FF00FF00FF00, 0xFFFF0000FFFF0000, 0xFFFFFFFF00000000};
+
+}
+
+uint64_t stt_flip( uint64_t func, unsigned var );
+
 // see TAOCP 7.1.3-(69)
 uint64_t stt_delta_swap( uint64_t func, uint64_t delta, uint64_t omega );
 
