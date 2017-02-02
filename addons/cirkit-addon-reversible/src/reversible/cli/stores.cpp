@@ -109,6 +109,12 @@ binary_truth_table store_convert<expression_t::ptr, binary_truth_table>( const e
 }
 
 template<>
+binary_truth_table store_convert<tt, binary_truth_table>( const tt& func )
+{
+  return truth_table_from_bitset_bennett( func );
+}
+
+template<>
 bool store_can_write_io_type<circuit, io_qpic_tag_t>( command& cmd )
 {
   cmd.opts.add_options()

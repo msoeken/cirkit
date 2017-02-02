@@ -41,6 +41,7 @@
 #include <core/cli/stores.hpp>
 #include <classical/aig.hpp>
 #include <classical/utils/expression_parser.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -169,6 +170,12 @@ inline bool store_can_convert<expression_t::ptr, binary_truth_table>() { return 
 
 template<>
 binary_truth_table store_convert<expression_t::ptr, binary_truth_table>( const expression_t::ptr& expr );
+
+template<>
+inline bool store_can_convert<tt, binary_truth_table>() { return true; }
+
+template<>
+binary_truth_table store_convert<tt, binary_truth_table>( const tt& func );
 
 template<>
 bool store_can_read_io_type<binary_truth_table, io_spec_tag_t>( command& cmd );

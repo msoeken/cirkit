@@ -41,7 +41,9 @@
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/cec.hpp>
 #include <classical/cli/commands/simulate.hpp>
+#include <classical/cli/commands/tt.hpp>
 #include <classical/utils/expression_parser.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -75,7 +77,7 @@
 
 using namespace cirkit;
 
-#define STORES circuit, binary_truth_table, expression_t::ptr, bdd_function_t, rcbdd, aig_graph, xmg_graph
+#define STORES circuit, binary_truth_table, tt, expression_t::ptr, bdd_function_t, rcbdd, aig_graph, xmg_graph
 
 int main( int argc, char ** argv )
 {
@@ -138,6 +140,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( simulate );
 
   cli.set_category( "Generator" );
+
   ADD_COMMAND( gen_reciprocal );
 
   cli.set_category( "Various" );
@@ -147,6 +150,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
   ADD_COMMAND( random_circuit );
+  ADD_COMMAND( tt );
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
   EXPERIMENTAL_REVERSIBLE_COMMANDS
