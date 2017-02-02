@@ -49,6 +49,18 @@ namespace cirkit
 
 boost::dynamic_bitset<>& inc( boost::dynamic_bitset<>& bitset );
 
+template<typename Fn>
+void foreach_bitset( unsigned num_bits, const Fn&& func )
+{
+  boost::dynamic_bitset<> bs( num_bits );
+
+  do
+  {
+    func( bs );
+    inc( bs );
+  } while ( bs.any() );
+}
+
 std::vector<boost::dynamic_bitset<>> transpose( const std::vector<boost::dynamic_bitset<>>& vs );
 
 template<class URNG>
