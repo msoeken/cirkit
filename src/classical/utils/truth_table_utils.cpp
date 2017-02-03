@@ -32,6 +32,7 @@
 #include <boost/pending/integer_log2.hpp>
 
 #include <core/utils/conversion_utils.hpp>
+#include <core/utils/string_utils.hpp>
 
 namespace cirkit
 {
@@ -455,6 +456,69 @@ tt tt_from_expression( const expression_t::ptr& expr )
   auto t = v.first;
   tt_shrink( t, v.second );
   return t;
+}
+
+tt tt_from_sop_spec( const std::string& spec )
+{
+  enum class pla_type_t { none, on, off };
+  auto pla_type = pla_type_t::none;
+  tt f( 1u );
+  
+  foreach_string( spec, "\n", [&f, &pla_type]( const std::string& line ) {
+      std::cout << "line: " << line << std::endl;
+      
+      const auto pair = split_string_pair( line, " " );
+      const auto p = pair.first;
+
+      switch ( pla_type )
+      {
+      case pla_type_t::none:
+        pla_type = ( pair.second == "1" ) ? pla_type_t::on : pla_type_t::off;
+        f = tt( 1u << p.size() );
+        if ( pla_type == pla_type_t::off )
+        {
+          f.flip();
+        }
+        break;
+      case pla_type_t::on:   assert( pair.second == "1" ); break;
+      case pla_type_t::off:  assert( pair.second == "0" ); break;
+      }
+
+      auto cube = ( pla_type == pla_type_t::on ) ? ~tt( 1 << p.size() ) : tt( 1 << p.size() );
+      for ( auto i = 0u; i < p.size(); ++i )
+      {
+        if ( p[i] == '-' ) continue;
+        auto v = ( p[i] == '0' ) != ( pla_type == pla_type_t::off ) ? ~tt_nth_var( i ) : tt_nth_var( i );
+        if ( p.size() < 6 )
+        {
+          tt_shrink( v, p.size() );
+        }
+        else
+        {
+          tt_align( v, cube );
+        }
+        
+        if ( pla_type == pla_type_t::on )
+        {
+          cube &= v;
+        }
+        else
+        {
+          cube |= v;
+        }
+      }
+      
+      if ( pla_type == pla_type_t::on )
+      {
+        f |= cube;
+      }
+      else
+      {
+        f &= cube;
+      }
+    } );
+
+  return f;
 }
 
 }
