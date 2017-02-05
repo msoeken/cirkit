@@ -465,8 +465,6 @@ tt tt_from_sop_spec( const std::string& spec )
   tt f( 1u );
   
   foreach_string( spec, "\n", [&f, &pla_type]( const std::string& line ) {
-      std::cout << "line: " << line << std::endl;
-      
       const auto pair = split_string_pair( line, " " );
       const auto p = pair.first;
 
