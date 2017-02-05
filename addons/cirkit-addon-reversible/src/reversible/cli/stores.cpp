@@ -198,9 +198,25 @@ circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename,
 }
 
 template<>
+bool store_can_write_io_type<circuit, io_real_tag_t>( command& cmd )
+{
+  cmd.opts.add_options()
+    ( "string,s", "write to string (which can be read with read_real -s)" )
+    ;
+  return true;
+}
+
+template<>
 void store_write_io_type<circuit, io_real_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
-  write_realization( circ, filename );
+  if ( cmd.is_set( "string" ) )
+  {
+    std::cout << circuit_to_string( circ ) << std::endl;
+  }
+  else
+  {
+    write_realization( circ, filename );
+  }
 }
 
 template<>
