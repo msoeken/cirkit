@@ -36,26 +36,53 @@ bool is_pauli( const gate& g )
   return is_type<pauli_tag>( g.type() );
 }
 
-gate& create_pauli( gate& g, unsigned target, pauli_axis axis, unsigned root )
+gate& create_pauli( gate& g, unsigned target, pauli_axis axis, unsigned root, bool adjoint )
 {
   g.add_target( target );
-  g.set_type( pauli_tag( axis, root ) );
+  g.set_type( pauli_tag( axis, root, adjoint ) );
   return g;
 }
 
-gate& append_pauli( circuit& circ, unsigned target, pauli_axis axis, unsigned root )
+gate& append_pauli( circuit& circ, unsigned target, pauli_axis axis, unsigned root, bool adjoint )
 {
-  return create_pauli( circ.append_gate(), target, axis, root );
+  return create_pauli( circ.append_gate(), target, axis, root, adjoint );
 }
 
-gate& prepend_pauli( circuit& circ, unsigned target, pauli_axis axis, unsigned root  )
+gate& prepend_pauli( circuit& circ, unsigned target, pauli_axis axis, unsigned root, bool adjoint )
 {
-  return create_pauli( circ.prepend_gate(), target, axis, root );
+  return create_pauli( circ.prepend_gate(), target, axis, root, adjoint );
 }
 
-gate& insert_pauli( circuit& circ, unsigned n, unsigned target, pauli_axis axis, unsigned root )
+gate& insert_pauli( circuit& circ, unsigned n, unsigned target, pauli_axis axis, unsigned root, bool adjoint )
 {
-  return create_pauli( circ.insert_gate( n ), target, axis, root );
+  return create_pauli( circ.insert_gate( n ), target, axis, root, adjoint );
+}
+
+bool is_hadamard( const gate& g )
+{
+  return is_type<hadamard_tag>( g.type() );
+}
+
+gate& create_hadamard( gate& g, unsigned target )
+{
+  g.add_target( target );
+  g.set_type( hadamard_tag() );
+  return g;
+}
+
+gate& append_hadamard( circuit& circ, unsigned target )
+{
+  return create_hadamard( circ.append_gate(), target );
+}
+
+gate& prepend_hadamard( circuit& circ, unsigned target )
+{
+  return create_hadamard( circ.prepend_gate(), target );
+}
+
+gate& insert_hadamard( circuit& circ, unsigned n, unsigned target )
+{
+  return create_hadamard( circ.insert_gate( n ), target );
 }
 
 }

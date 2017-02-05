@@ -29,6 +29,7 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/dynamic_bitset.hpp>
 
+#include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/flatten_circuit.hpp>
 
@@ -137,9 +138,14 @@ namespace cirkit
     {
       ac = g.controls().size() + 1u;
     }
-    else
+    else if ( is_hadamard( g ) )
     {
-      assert( false );
+      return 0ull;
+    }
+    else if ( is_pauli( g ) )
+    {
+      const auto& tag = boost::any_cast<pauli_tag>( g.type() );
+      return ( tag.axis == pauli_axis::Z && tag.root == 4u ) ? 1ull : 0ull;
     }
     return 3ull * toffoli_gates( ac, lines );
   }
@@ -176,26 +182,38 @@ namespace cirkit
     /* the following computation is based on
      * [D. Maslov, Phys Rev A 93, 022311, 2016.
      */
-    const auto ac = g.controls().size();
-
-    switch ( ac )
+    if ( is_toffoli( g ) || is_fredkin( g ) )
     {
-    case 0u:
-    case 1u:
-      return 0;
+      const auto ac = g.controls().size();
 
-    case 2u:
-      return 7;
+      switch ( ac )
+      {
+      case 0u:
+      case 1u:
+        return 0;
 
-    default:
-      if ( lines - ac - 1 >= ( ac - 1 ) / 2 )
-      {
-        return 8 * ( ac - 1 );
+      case 2u:
+        return 7;
+
+      default:
+        if ( lines - ac - 1 >= ( ac - 1 ) / 2 )
+        {
+          return 8 * ( ac - 1 );
+        }
+        else
+        {
+          return 16 * ( ac - 1 );
+        }
       }
-      else
-      {
-        return 16 * ( ac - 1 );
-      }
+    }
+    else if ( is_pauli( g ) )
+    {
+      const auto& tag = boost::any_cast<pauli_tag>( g.type() );
+      return ( tag.axis == pauli_axis::Z && tag.root == 4u ) ? 1ull : 0ull;
+    }
+    else
+    {
+      return 0ull;
     }
   }
 

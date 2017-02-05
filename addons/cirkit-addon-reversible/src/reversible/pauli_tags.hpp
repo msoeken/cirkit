@@ -51,8 +51,10 @@ struct pauli_tag
 {
   pauli_tag() {}
 
-  pauli_tag( pauli_axis axis, unsigned root = 1u )
-    : axis( axis ), root( root )
+  pauli_tag( pauli_axis axis, unsigned root = 1u, bool adjoint = false )
+    : axis( axis ),
+      root( root ),
+      adjoint( adjoint )
   {
   }
 
@@ -65,13 +67,26 @@ struct pauli_tag
    * @brief root, i.e., U^{1/root}
    */
   unsigned root = 1u;
+
+  /**
+   * @brief Sets whether it's the adjoint (dagger)
+   */
+  bool adjoint = false;
 };
 
 bool is_pauli( const gate& g );
 
-gate& append_pauli( circuit& circ, unsigned target, pauli_axis axis, unsigned root = 1u );
-gate& prepend_pauli( circuit& circ, unsigned target, pauli_axis axis, unsigned root = 1u );
-gate& insert_pauli( circuit& circ, unsigned n, unsigned target, pauli_axis axis, unsigned root = 1u );
+gate& append_pauli( circuit& circ, unsigned target, pauli_axis axis, unsigned root = 1u, bool adjoint = false );
+gate& prepend_pauli( circuit& circ, unsigned target, pauli_axis axis, unsigned root = 1u, bool adjoint = false );
+gate& insert_pauli( circuit& circ, unsigned n, unsigned target, pauli_axis axis, unsigned root = 1u, bool adjoint = false );
+
+struct hadamard_tag {};
+
+bool is_hadamard( const gate& g );
+
+gate& append_hadamard( circuit& circ, unsigned target );
+gate& prepend_hadamard( circuit& circ, unsigned target );
+gate& insert_hadamard( circuit& circ, unsigned n, unsigned target );
 
 }
 

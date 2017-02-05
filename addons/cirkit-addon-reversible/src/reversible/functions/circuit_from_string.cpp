@@ -34,6 +34,7 @@
 
 #include <core/utils/string_utils.hpp>
 
+#include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
 
 namespace cirkit
@@ -65,14 +66,34 @@ circuit circuit_from_string( const std::string& description, const std::string& 
     std::vector<std::string> lines;
     split_string( lines, g, " " );
 
-    assert( lines.size() > 1u );
-    assert( lines[0][0] == 't' || lines[0][0] == 'f' );
-    //assert( boost::lexical_cast<unsigned>( lines[0].substr( 1u ) ) == lines.size() - 1u );
+    if ( lines.size() <= 1u )
+    {
+      std::cout << "[e] cannot understand " << g << std::endl;
+      assert( false );
+    }
+
+    const auto tc = lines[0][0]; /* target char */
+    assert( tc == 't' || tc == 'f' || tc == 'X' || tc == 'Y' || tc == 'Z' || tc == 'H' );
+
+    /* check if there is a root */
+    bool adjoint = false;
+    auto adj_offset = 0u;
+    if ( ( tc == 'X' || tc == 'Y' || tc == 'Z' ) && lines[0].size() >= 2 && lines[0][1] == '+' )
+    {
+      adjoint = true;
+      adj_offset = 1u;
+    }
+    
+    auto root = 1u;
+    if ( ( tc == 'X' || tc == 'Y' || tc == 'Z' ) && lines[0].size() >= 4 + adj_offset && lines[0][1 + adj_offset] == '[' && lines[0].back() == ']' )
+    {
+      root = boost::lexical_cast<unsigned>( lines[0].substr( 2 + adj_offset, lines[0].size() - 3u - adj_offset ) );
+    }
 
     auto& _gate = circ.append_gate();
 
     auto num_targets = 1u;
-    switch ( lines[0][0] )
+    switch ( tc )
     {
     case 't':
       _gate.set_type( toffoli_tag() );
@@ -80,6 +101,22 @@ circuit circuit_from_string( const std::string& description, const std::string& 
     case 'f':
       num_targets = 2u;
       _gate.set_type( fredkin_tag() );
+      break;
+    case 'X':
+      num_targets = 1u;
+      _gate.set_type( pauli_tag( pauli_axis::X, root, adjoint ) );
+      break;
+    case 'Y':
+      num_targets = 1u;
+      _gate.set_type( pauli_tag( pauli_axis::Y, root, adjoint ) );
+      break;
+    case 'Z':
+      num_targets = 1u;
+      _gate.set_type( pauli_tag( pauli_axis::Z, root, adjoint ) );
+      break;
+    case 'H':
+      num_targets = 1u;
+      _gate.set_type( hadamard_tag() );
       break;
     }
 
@@ -109,7 +146,11 @@ circuit circuit_from_string( const std::string& description, const std::string& 
 
     for ( auto i = lines.size() - num_targets; i < lines.size(); ++i )
     {
-      assert( lines[i].size() == 1u );
+      if ( lines[i].size() != 1u )
+      {
+        std::cout << "[e] problem parsing target " << lines[i] << std::endl;
+        assert( false );
+      }
 
       const auto c = lines[i][0];
       assert( c >= 'a' && c <= 'z' );
@@ -140,16 +181,58 @@ std::string circuit_to_string( const circuit& circ, const std::string& sep )
       str << sep;
     }
 
-    assert( is_toffoli( g ) );
-
-    str << "t" << g.controls().size();
-
-    for ( const auto& c : g.controls() )
+    if ( is_toffoli( g ) )
     {
-      str << " " << ( c.polarity() ? "" : "-" ) << std::string( 1, 'a' + c.line() );
-    }
+      str << "t" << ( g.controls().size() + 1u );
 
-    str << " " << std::string( 1, 'a' + g.targets().front() );
+      for ( const auto& c : g.controls() )
+      {
+        str << " " << ( c.polarity() ? "" : "-" ) << std::string( 1, 'a' + c.line() );
+      }
+
+      str << " " << std::string( 1, 'a' + g.targets().front() );
+    }
+    else if ( is_fredkin( g ) )
+    {
+      str << "f" << ( g.controls().size() + 2u );
+
+      for ( const auto& c : g.controls() )
+      {
+        str << " " << ( c.polarity() ? "" : "-" ) << std::string( 1, 'a' + c.line() );
+      }
+
+      str << " " << std::string( 1, 'a' + g.targets()[0u] ) << " " << std::string( 1, 'a' + g.targets()[1u] );
+    }
+    else if ( is_pauli( g ) )
+    {
+      const auto& tag = boost::any_cast<pauli_tag>( g.type() );
+      switch ( tag.axis )
+      {
+      case pauli_axis::X: str << "X"; break;
+      case pauli_axis::Y: str << "Y"; break;
+      case pauli_axis::Z: str << "Z"; break;
+      }
+
+      if ( tag.adjoint )
+      {
+        str << "+";
+      }
+
+      if ( tag.root != 1u )
+      {
+        str << "[" << tag.root << "]";
+      }
+
+      str << " " << std::string( 1, 'a' + g.targets().front() );
+    }
+    else if ( is_hadamard( g ) )
+    {
+      str << "H " << std::string( 1, 'a' + g.targets().front() );
+    }
+    else
+    {
+      assert( false );
+    }
   }
 
   return str.str();

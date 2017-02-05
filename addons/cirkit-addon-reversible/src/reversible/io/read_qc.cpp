@@ -35,6 +35,7 @@
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <reversible/gate.hpp>
+#include <reversible/pauli_tags.hpp>
 #include <reversible/functions/add_gates.hpp>
 
 namespace cirkit
@@ -46,6 +47,12 @@ circuit read_qc( const std::string& filename )
   std::unordered_map<std::string, unsigned> var2line;
 
   line_parser( filename, {
+      {std::regex( "^ *#.*$" ), []( const std::smatch& m ) {
+          /* comment */
+        }},
+      {std::regex("^ *$" ), []( const std::smatch& m ) {
+          /* empty line */
+        }},
       {std::regex( "^\\.v +(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
           std::vector<std::string> variables;
           split_string( variables, m[1u], " " );
@@ -93,11 +100,16 @@ circuit read_qc( const std::string& filename )
           circ.set_outputs( outputs );
           circ.set_garbage( garbage );
         }},
-      {std::regex( "^t(\\d+) *(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
+      {std::regex( "BEGIN|END" ), []( const std::smatch& m ) {
+        }},
+      {std::regex( "^t(of|\\d+) *(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
           std::vector<std::string> lines;
           split_string( lines, m[2u], " " );
 
-          assert( boost::lexical_cast<unsigned>( std::string( m[1u] ) ) == lines.size() );
+          if ( std::string( m[1u] ) != "of" )
+          {
+            assert( boost::lexical_cast<unsigned>( std::string( m[1u] ) ) == lines.size() );
+          }
 
           gate::control_container controls;
           for ( auto i = 0; i < lines.size() - 1; ++i )
@@ -105,8 +117,48 @@ circuit read_qc( const std::string& filename )
             controls.push_back( make_var( var2line[lines[i]], lines[i].back() != '\'' ) );
           }
           append_toffoli( circ, controls, var2line[lines.back()] );
+        }},
+      {std::regex( "^H *(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
+          std::vector<std::string> lines;
+          split_string( lines, m[1u], " " );
+
+          assert( lines.size() == 1u );
+
+          append_hadamard( circ, var2line[lines.back()] );
+        }},
+      {std::regex( "^X *(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
+          std::vector<std::string> lines;
+          split_string( lines, m[1u], " " );
+
+          assert( lines.size() == 1u );
+
+          append_not( circ, var2line[lines.back()] );
+        }},
+      {std::regex( "^Z *(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
+          std::vector<std::string> lines;
+          split_string( lines, m[1u], " " );
+
+          assert( lines.size() == 1u );
+
+          append_pauli( circ, var2line[lines.back()], pauli_axis::Z );
+        }},
+      {std::regex( "^(S|P)(\\*?) *(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
+          std::vector<std::string> lines;
+          split_string( lines, m[3u], " " );
+
+          assert( lines.size() == 1u );
+
+          append_pauli( circ, var2line[lines.back()], pauli_axis::Z, 2u, !std::string( m[2u] ).empty() );
+        }},
+      {std::regex( "^T(\\*?) *(.*)$" ), [&circ, &var2line]( const std::smatch& m ) {
+          std::vector<std::string> lines;
+          split_string( lines, m[2u], " " );
+
+          assert( lines.size() == 1u );
+
+          append_pauli( circ, var2line[lines.back()], pauli_axis::Z, 4u, !std::string( m[1u] ).empty() );
         }}
-    } );
+    }, true );
 
   return circ;
 }
