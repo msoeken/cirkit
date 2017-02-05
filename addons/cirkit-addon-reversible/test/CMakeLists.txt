@@ -4,6 +4,7 @@ set(reversible_tests
   circuit_io
   copy_circuit
   esop_synthesis
+  modules
   permutation
   rcbdd_scalability
   redundancy_functions
