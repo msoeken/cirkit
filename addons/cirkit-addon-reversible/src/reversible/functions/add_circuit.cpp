@@ -32,19 +32,19 @@
 namespace cirkit
 {
 
-  void append_circuit( circuit& circ, const circuit& src, const gate::control_container& controls )
+  void append_circuit( circuit& circ, const circuit& src, const gate::control_container& controls, const std::vector<unsigned>& line_map )
   {
     insert_circuit( circ, circ.num_gates(), src, controls );
   }
 
-  void prepend_circuit( circuit& circ, const circuit& src, const gate::control_container& controls )
+  void prepend_circuit( circuit& circ, const circuit& src, const gate::control_container& controls, const std::vector<unsigned>& line_map )
   {
     insert_circuit( circ, 0, src, controls );
   }
 
-  void insert_circuit( circuit& circ, unsigned pos, const circuit& src, const gate::control_container& controls )
+  void insert_circuit( circuit& circ, unsigned pos, const circuit& src, const gate::control_container& controls, const std::vector<unsigned>& line_map )
   {
-    if ( controls.empty() )
+    if ( controls.empty() && line_map.empty() )
     {
       for ( const auto& g : src )
       {
@@ -57,8 +57,16 @@ namespace cirkit
       {
         gate& new_gate = circ.insert_gate( pos++ );
         boost::for_each( controls, [&new_gate](variable c) { new_gate.add_control( c ); } );
-        boost::for_each( g.controls(), [&new_gate](variable c) { new_gate.add_control( c ); } );
-        boost::for_each( g.targets(), [&new_gate](unsigned t) { new_gate.add_target( t ); } );
+        if ( line_map.empty() )
+        {
+          boost::for_each( g.controls(), [&new_gate](variable c) { new_gate.add_control( c ); } );
+          boost::for_each( g.targets(), [&new_gate](unsigned t) { new_gate.add_target( t ); } );
+        }
+        else
+        {
+          boost::for_each( g.controls(), [&new_gate, &line_map](variable c) { new_gate.add_control( make_var( line_map[c.line()], c.polarity() ) ); } );
+          boost::for_each( g.targets(), [&new_gate, &line_map](unsigned t) { new_gate.add_target( line_map[t] ); } );
+        }
         new_gate.set_type( g.type() );
       }
     }

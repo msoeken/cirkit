@@ -33,44 +33,49 @@
  * @since  1.0
  */
 
+#include <vector>
+
 #include <reversible/circuit.hpp>
 
 namespace cirkit
 {
 
-  /**
-   * @brief Insert a circuit \p src at the end of another circuit \p circ
-   *
-   * @param circ Destination circuit
-   * @param src  Source circuit
-   * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
-   *
-   * @since  1.0
-   */
-  void append_circuit( circuit& circ, const circuit& src, const gate::control_container& controls = gate::control_container() );
+/**
+ * @brief Insert a circuit \p src at the end of another circuit \p circ
+ *
+ * @param circ Destination circuit
+ * @param src  Source circuit
+ * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
+ * @param line_map If not empty, maps lines from src to circ according to map
+ *
+ * @since  1.0
+ */
+void append_circuit( circuit& circ, const circuit& src, const gate::control_container& controls = gate::control_container(), const std::vector<unsigned>& line_map = std::vector<unsigned>() );
 
-  /**
-   * @brief Insert a circuit \p src at the beginning of another circuit \p circ
-   *
-   * @param circ Destination circuit
-   * @param src  Source circuit
-   * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
-   *
-   * @since  1.0
-   */
-  void prepend_circuit( circuit& circ, const circuit& src, const gate::control_container& controls = gate::control_container() );
+/**
+ * @brief Insert a circuit \p src at the beginning of another circuit \p circ
+ *
+ * @param circ Destination circuit
+ * @param src  Source circuit
+ * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
+ * @param line_map If not empty, maps lines from src to circ according to map
+ *
+ * @since  1.0
+ */
+void prepend_circuit( circuit& circ, const circuit& src, const gate::control_container& controls = gate::control_container(), const std::vector<unsigned>& line_map = std::vector<unsigned>() );
 
-  /**
-   * @brief Insert a circuit \p src before gate \p pos (counting from 0) of another circuit \p circ
-   *
-   * @param circ Destination circuit
-   * @param pos  Position where to insert
-   * @param src  Source circuit
-   * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
-   *
-   * @since  1.0
-   */
-  void insert_circuit( circuit& circ, unsigned pos, const circuit& src, const gate::control_container& controls = gate::control_container() );
+/**
+ * @brief Insert a circuit \p src before gate \p pos (counting from 0) of another circuit \p circ
+ *
+ * @param circ Destination circuit
+ * @param pos  Position where to insert
+ * @param src  Source circuit
+ * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
+ * @param line_map If not empty, maps lines from src to circ according to map
+ *
+ * @since  1.0
+ */
+void insert_circuit( circuit& circ, unsigned pos, const circuit& src, const gate::control_container& controls = gate::control_container(), const std::vector<unsigned>& line_map = std::vector<unsigned>() );
 
 }
 
