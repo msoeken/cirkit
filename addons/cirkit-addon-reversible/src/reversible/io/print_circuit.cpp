@@ -36,6 +36,7 @@
 #include <boost/range/counting_range.hpp>
 
 #include <reversible/circuit.hpp>
+#include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
 
 namespace cirkit
@@ -66,6 +67,37 @@ namespace cirkit
     else if ( is_module( g ) )
     {
       return "□";
+    }
+    else if ( is_hadamard( g ) )
+    {
+      return "H";
+    }
+    else if ( is_pauli( g ) )
+    {
+      const auto& tag = boost::any_cast<pauli_tag>( g.type() );
+
+      switch ( tag.axis )
+      {
+      case pauli_axis::X:
+        return ( tag.root == 1u ) ? "X" : "⁈";
+
+      case pauli_axis::Y:
+        return ( tag.root == 1u ) ? "Y" : "⁈";
+
+      case pauli_axis::Z:
+        switch ( tag.root )
+        {
+        case 1u:
+          return "Z";
+        case 2u:
+          return "S";
+        case 4u:
+          return tag.adjoint ? "Ŧ" : "T";
+        default:
+          return "⁈";
+        }
+      }
+
     }
     else
     {
