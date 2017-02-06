@@ -58,6 +58,7 @@
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/gen_reciprocal.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
+#include <reversible/cli/commands/mitm.hpp>
 #include <reversible/cli/commands/nct.hpp>
 #include <reversible/cli/commands/pos.hpp>
 #include <reversible/cli/commands/qbs.hpp>
@@ -127,6 +128,7 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Mapping and rewriting" );
 
+  ADD_COMMAND( mitm );
   ADD_COMMAND( nct );
   ADD_COMMAND( pos );
   ADD_COMMAND( tof );
