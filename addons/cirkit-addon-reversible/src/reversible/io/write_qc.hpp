@@ -43,7 +43,10 @@
 namespace cirkit
 {
 
-void write_qc( const circuit& circ, const std::string& filename );
+/**
+ * @param iqc_compliant If true, use tof for tX and X for t1
+ */
+void write_qc( const circuit& circ, const std::string& filename, bool iqc_compliant = false );
 
 }
 

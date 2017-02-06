@@ -264,9 +264,18 @@ circuit store_read_io_type<circuit, io_qc_tag_t>( const std::string& filename, c
 }
 
 template<>
+bool store_can_write_io_type<circuit, io_qc_tag_t>( command& cmd )
+{
+  cmd.opts.add_options()
+    ( "iqc", "write IQC compliant files" )
+    ;
+  return true;
+}
+
+template<>
 void store_write_io_type<circuit, io_qc_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
-  write_qc( circ, filename );
+  write_qc( circ, filename, cmd.is_set( "iqc" ) );
 }
 
 /******************************************************************************

@@ -31,6 +31,7 @@
 #include <boost/algorithm/string/join.hpp>
 
 #include <core/utils/range_utils.hpp>
+#include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
 
 namespace cirkit
@@ -44,27 +45,96 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-void write_qc( const circuit& circ, std::ostream& os )
+void write_qc( const circuit& circ, std::ostream& os, bool iqc_compliant )
 {
   const auto vars = create_name_list( "v%d", circ.lines() );
 
-  os << ".v " << boost::join( vars, " " ) << std::endl
-     << "BEGIN" << std::endl;
+  os << ".v " << boost::join( vars, " " ) << std::endl;
+
+  os << ".i";
+  for ( auto i = 0u; i < circ.lines(); ++i )
+  {
+    if ( !circ.constants()[i] )
+    {
+      os << " v" << i;
+    }
+  }
+  os << std::endl;
+  
+  os << "BEGIN" << std::endl;
 
   for ( const auto& gate : circ )
   {
-    assert( is_toffoli( gate ) );
-
-    os << "t" << ( gate.controls().size() + 1 );
-    for ( const auto& c : gate.controls() )
+    if ( is_toffoli( gate ) )
     {
-      os << " " << vars[c.line()];
-      if ( !c.polarity() )
+      if ( iqc_compliant )
       {
-        os << "'";
+        os << ( gate.controls().empty() ? "X" : "tof" );
       }
+      else
+      {
+        os << "t" << ( gate.controls().size() + 1 );
+      }
+    
+      for ( const auto& c : gate.controls() )
+      {
+        os << " " << vars[c.line()];
+        if ( !c.polarity() )
+        {
+          os << "'";
+        }
+      }
+      os << " " << vars[gate.targets().front()] << std::endl;
     }
-    os << " " << vars[gate.targets().front()] << std::endl;
+    else if ( is_pauli( gate ) )
+    {
+      const auto& tag = boost::any_cast<pauli_tag>( gate.type() );
+
+      switch ( tag.axis )
+      {
+      case pauli_axis::X:
+        assert( tag.root == 1u );
+        os << "X";
+        break;
+
+      case pauli_axis::Y:
+        assert( tag.root == 1u );
+        os << "Y";
+        break;
+
+      case pauli_axis::Z:
+        switch ( tag.root )
+        {
+        case 1u:
+          os << "Z";
+          break;
+        case 2u:
+          os << ( iqc_compliant ? "P" : "S" );
+          break;
+        case 4u:
+          os << "T";
+          break;
+        default:
+          assert( false );
+        }
+        break;
+      }
+
+      if ( tag.adjoint )
+      {
+        os << "*";
+      }
+
+      os << " " << vars[gate.targets().front()] << std::endl;
+    }
+    else if ( is_hadamard( gate ) )
+    {
+      os << "H " << vars[gate.targets().front()] << std::endl;
+    }
+    else
+    {
+      assert( false );
+    }
   }
 
   os << "END" << std::endl;
@@ -74,10 +144,10 @@ void write_qc( const circuit& circ, std::ostream& os )
  * Public functions                                                           *
  ******************************************************************************/
 
-void write_qc( const circuit& circ, const std::string& filename )
+void write_qc( const circuit& circ, const std::string& filename, bool iqc_compliant )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
-  write_qc( circ, os );
+  write_qc( circ, os, iqc_compliant );
   os.close();
 }
 
