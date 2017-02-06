@@ -96,8 +96,9 @@ namespace cirkit
         default:
           return "⁈";
         }
+      default:
+        return "⁈";
       }
-
     }
     else
     {
