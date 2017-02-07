@@ -26,8 +26,44 @@
 
 #include "xmg_simulate.hpp"
 
+#include <core/utils/range_utils.hpp>
+
 namespace cirkit
 {
+
+/******************************************************************************
+ * Pattern simulation                                                         *
+ ******************************************************************************/
+
+xmg_pattern_simulator::xmg_pattern_simulator( const boost::dynamic_bitset<>& pattern )
+  : pattern( pattern )
+{
+}
+
+bool xmg_pattern_simulator::get_input( const xmg_node& node, const xmg_graph& xmg ) const
+{
+  return pattern[xmg.input_index( node )];
+}
+
+bool xmg_pattern_simulator::get_constant() const
+{
+  return false;
+}
+
+bool xmg_pattern_simulator::invert( const bool& v ) const
+{
+  return !v;
+}
+
+bool xmg_pattern_simulator::xor_op( const xmg_node& node, const bool& v1, const bool& v2 ) const
+{
+  return v1 != v2;
+}
+
+bool xmg_pattern_simulator::maj_op( const xmg_node& node, const bool& v1, const bool& v2, const bool& v3 ) const
+{
+  return ( v1 && v2 ) || ( v1 && v3 ) || ( v2 && v3 );
+}
 
 /******************************************************************************
  * Truth table simulation                                                     *
@@ -67,6 +103,25 @@ tt xmg_tt_simulator::maj_op( const xmg_node& node, const tt& v1, const tt& v2, c
   tt_align( _v2, _v3 );
   return ( _v1 & _v2 ) | ( _v1 & _v3 ) | ( _v2 & _v3 );
 }
+
+/******************************************************************************
+ * Utility functions for simulation                                           *
+ ******************************************************************************/
+
+boost::dynamic_bitset<> xmg_simulate_pattern( const xmg_graph& xmg, const boost::dynamic_bitset<>& pattern )
+{
+  xmg_pattern_simulator sim( pattern );
+  const auto result = simulate_xmg( xmg, sim );
+
+  boost::dynamic_bitset<> opattern( xmg.outputs().size() );
+  for ( const auto& po : index( xmg.outputs() ) )
+  {
+    opattern.set( po.index, result.at( po.value.first ) );
+  }
+
+  return opattern;
+}
+
 
 }
 

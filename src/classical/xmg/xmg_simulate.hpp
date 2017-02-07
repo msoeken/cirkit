@@ -39,6 +39,8 @@
 #include <map>
 #include <unordered_map>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include <core/properties.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/utils/truth_table_utils.hpp>
@@ -79,6 +81,21 @@ public:
 /******************************************************************************
  * Several simulator implementations                                          *
  ******************************************************************************/
+
+class xmg_pattern_simulator : public xmg_simulator<bool>
+{
+public:
+  xmg_pattern_simulator( const boost::dynamic_bitset<>& pattern );
+
+  bool get_input( const xmg_node& node, const xmg_graph& xmg ) const;
+  bool get_constant() const;
+  bool invert( const bool& v ) const;
+  bool xor_op( const xmg_node& node, const bool& v1, const bool& v2 ) const;
+  bool maj_op( const xmg_node& node, const bool& v1, const bool& v2, const bool& v3 ) const;
+
+private:
+  boost::dynamic_bitset<> pattern;
+};
 
 class xmg_tt_simulator : public xmg_simulator<tt>
 {
@@ -284,6 +301,11 @@ std::map<xmg_function, T> simulate_xmg( const xmg_graph& xmg, const xmg_simulato
   return results;
 }
 
+/******************************************************************************
+ * Utility functions for simulation                                           *
+ ******************************************************************************/
+
+boost::dynamic_bitset<> xmg_simulate_pattern( const xmg_graph& xmg, const boost::dynamic_bitset<>& pattern );
 
 }
 
