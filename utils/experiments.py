@@ -29,6 +29,10 @@ def chunked( filename, commands_per_entry, offset = 0 ):
     num_slices = int( ( len( data ) - 1 ) / commands_per_entry )
     return [data[i * commands_per_entry:(i * commands_per_entry) + commands_per_entry] for i in range( num_slices )]
 
+class log_table_custom_entry:
+    def __init__( self, value ):
+        self.value = value
+
 class log_table:
     def __init__( self, filename, commands_per_entry, offset = 0 ):
         self.headers = []
@@ -80,6 +84,8 @@ class log_table:
             if len( column ) == 3:
                 data = column[2]( data )
             return data
+        elif isinstance( column, log_table_custom_entry ):
+            return column.value
 
     def format_column( self, slice, column, cid ):
         return " %12s |" % self.get_data( slice, column, cid )
@@ -97,7 +103,19 @@ class log_table:
         filename = value.split()[-1]
         return os.path.splitext( os.path.basename( filename ) )[0]
 
+    def prec2( value ):
+        return "%.2f" % float( value )
+
     @staticmethod
     def re_search( expr ):
         return lambda x : re.search( expr, x ).group( 1 )
 
+class fmt_combine:
+    def __init__( self, *args ):
+        self.fmts = args
+
+    def __call__( self, value ):
+        v = value
+        for f in self.fmts:
+            v = f( v )
+        return v
