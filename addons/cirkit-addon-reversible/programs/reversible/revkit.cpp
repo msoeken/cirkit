@@ -58,6 +58,7 @@
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/gen_reciprocal.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
+#include <reversible/cli/commands/is_identity.hpp>
 #include <reversible/cli/commands/mitm.hpp>
 #include <reversible/cli/commands/nct.hpp>
 #include <reversible/cli/commands/pos.hpp>
@@ -137,6 +138,7 @@ int main( int argc, char ** argv )
   cli.set_category( "Verification" );
 
   ADD_COMMAND( cec );
+  ADD_COMMAND( is_identity );
   ADD_COMMAND( rec );
   ADD_COMMAND( revsim );
   ADD_COMMAND( simulate );

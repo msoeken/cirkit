@@ -25,48 +25,35 @@
  */
 
 /**
+ * @file is_identity.hpp
+ *
+ * @brief Check whether circuit computes identity
+ *
  * @author Mathias Soeken
+ * @since  2.3
  */
 
-#include <iostream>
-#include <string>
+#ifndef CLI_IS_IDENTITY_COMMAND_HPP
+#define CLI_IS_IDENTITY_COMMAND_HPP
 
-#include <reversible/circuit.hpp>
-#include <reversible/functions/is_identity.hpp>
-#include <reversible/io/read_realization.hpp>
-#include <reversible/utils/reversible_program_options.hpp>
+#include <core/cli/cirkit_command.hpp>
 
-using namespace cirkit;
-
-int main( int argc, char ** argv )
+namespace cirkit
 {
-  using boost::program_options::value;
 
-  reversible_program_options opts;
-  opts.add_read_realization_option();
+class is_identity_command : public cirkit_command
+{
+public:
+  is_identity_command( const environment::ptr& env );
 
-  opts.parse( argc, argv );
+protected:
+  rules_t validity_rules() const;
+  bool execute();
+};
 
-  if ( !opts.good() )
-  {
-    std::cout << opts << std::endl;
-    return 1;
-  }
-
-  circuit circ;
-  read_realization( circ, opts.read_realization_filename() );
-
-  if ( is_identity( circ ) )
-  {
-    std::cout << "[i] circuit represents the identity function" << std::endl;
-  }
-  else
-  {
-    std::cout << "[i] circuit does not represent the identity function" << std::endl;
-  }
-
-  return 0;
 }
+
+#endif
 
 // Local Variables:
 // c-basic-offset: 2

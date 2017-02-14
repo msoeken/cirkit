@@ -24,47 +24,43 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @author Mathias Soeken
- */
+#include "is_identity.hpp"
 
-#include <reversible/circuit.hpp>
-#include <reversible/truth_table.hpp>
-#include <reversible/functions/circuit_to_truth_table.hpp>
-#include <reversible/io/read_realization.hpp>
-#include <reversible/io/write_specification.hpp>
-#include <reversible/simulation/simple_simulation.hpp>
-#include <reversible/utils/reversible_program_options.hpp>
+#include <alice/rules.hpp>
 
-using namespace cirkit;
+#include <reversible/cli/stores.hpp>
+#include <reversible/functions/is_identity.hpp>
 
-int main( int argc, char ** argv )
+namespace cirkit
 {
-  using boost::program_options::value;
 
-  std::string specname;
+is_identity_command::is_identity_command( const environment::ptr& env )
+  : cirkit_command( env, "Check whether circuit computes identity" )
+{
+}
 
-  reversible_program_options opts;
-  opts.add_read_realization_option();
-  opts.add_options()
-    ( "specname", value<std::string>( &specname ), "SPEC filename" )
-    ;
-  opts.parse( argc, argv );
+command::rules_t is_identity_command::validity_rules() const
+{
+  return {has_store_element<circuit>( env )};
 
-  if ( !opts.good() || !opts.is_set( "specname" ) )
+}
+
+bool is_identity_command::execute()
+{
+  const auto& circuits = env->store<circuit>();
+
+  if ( is_identity( circuits.current() ) )
   {
-    std::cout << opts << std::endl;
-    return 1;
+    std::cout << "[i] circuit represents the identity function" << std::endl;
+  }
+  else
+  {
+    std::cout << "[i] circuit does not represent the identity function" << std::endl;
   }
 
-  circuit circ;
-  binary_truth_table spec;
+  return true;
+}
 
-  read_realization( circ, opts.read_realization_filename() );
-  circuit_to_truth_table( circ, spec, simple_simulation_func() );
-  write_specification( spec, specname );
-
-  return 0;
 }
 
 // Local Variables:
