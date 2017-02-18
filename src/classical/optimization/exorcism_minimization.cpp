@@ -144,6 +144,7 @@ void exorcism_minimization( const std::string& filename, const properties::ptr& 
   std::string     exorcism = get( settings, "exorcism", std::string( "exorcism" ) );
   cube_function_t on_cube  = get( settings, "on_cube",  cube_function_t()         );
 
+  properties_timer t( statistics );
 
   /* Call */
   std::string hide_output = verbose ? "" : " > /dev/null 2>&1";
@@ -172,6 +173,8 @@ void exorcism_minimization( const cube_vec_t& cubes,
   const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
   const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
   const auto skip_parsing = get( settings, "skip_parsing", false );
+
+  properties_timer t( statistics );
 
   if ( cubes.empty() )
   {
@@ -230,6 +233,8 @@ void exorcism_minimization( const aig_graph& aig, const properties::ptr& setting
   const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
   const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
   const auto skip_parsing = get( settings, "skip_parsing", false );
+
+  properties_timer t( statistics );
 
   abc::Vec_Wec_t * esop = nullptr;
   auto* gia = cirkit_to_gia( aig );
