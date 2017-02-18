@@ -40,6 +40,7 @@
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/cec.hpp>
+#include <classical/cli/commands/exorcism.hpp>
 #include <classical/cli/commands/simulate.hpp>
 #include <classical/cli/commands/tt.hpp>
 #include <classical/utils/expression_parser.hpp>
@@ -125,6 +126,7 @@ int main( int argc, char ** argv )
   cli.set_category( "Optimization" );
 
   ADD_COMMAND( adding_lines );
+  ADD_COMMAND( exorcism );
   ADD_COMMAND( revsimp );
 
   cli.set_category( "Mapping and rewriting" );
