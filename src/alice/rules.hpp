@@ -64,6 +64,13 @@ command::rule_t has_store_element( const environment::ptr& env )
   return { [&]() { return env->store<S>().current_index() >= 0; }, ( boost::format( "no current %s available" ) % name ).str() };
 }
 
+template<typename S>
+command::rule_t has_store_element_if_set( const command& cmd, const environment::ptr& env, const std::string& argname )
+{
+  auto constexpr name = store_info<S>::name;
+  return { [&cmd, &env, name, argname]() { return !cmd.is_set( argname ) || env->store<S>().current_index() >= 0; }, ( boost::format( "no current %s available" ) % name ).str() };
+}
+
 }
 
 // Local Variables:
