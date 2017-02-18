@@ -48,6 +48,7 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor = true, boo
 
 void write_bench( const xmg_graph& xmg, const std::string& filename );
 void write_verilog( const xmg_graph& xmg, const std::string& filename, const properties::ptr& settings = properties::ptr() );
+void write_smtlib2( const xmg_graph& xmg, const std::string& filename, const properties::ptr& settings = properties::ptr() );
 
 }
 

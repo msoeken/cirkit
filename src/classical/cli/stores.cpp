@@ -704,6 +704,12 @@ void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, con
   write_verilog( xmg, filename, settings );
 }
 
+template<>
+void store_write_io_type<xmg_graph, io_smt_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
+{
+  write_smtlib2( xmg, filename );
+}
+
 }
 
 // Local Variables:

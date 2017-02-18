@@ -226,6 +226,68 @@ void write_verilog( const xmg_graph& xmg, std::ostream& os, const properties::pt
   os << "endmodule" << std::endl;
 }
 
+void write_smtlib2( const xmg_graph& xmg, std::ostream& os, const properties::ptr& settings )
+{
+  const auto is_miter = get( settings, "is_miter", true );
+
+  for ( auto i = 0u; i < xmg.size(); ++i )
+  {
+    os << boost::format( "(declare-const n%d Bool)" ) % i << std::endl;
+  }
+
+  const auto fmt_arg = []( const xmg_function& f ) {
+    return boost::str( ( f.complemented ? boost::format( "(not n%d)" ) : boost::format( "n%d" ) ) % f.node );
+  };
+
+  for ( auto n : xmg.topological_nodes() )
+  {
+    if ( n == 0u )
+    {
+      os << boost::format( "(assert (not n0))" ) << std::endl;
+    }
+    else if ( xmg.is_xor( n ) )
+    {
+      const auto c = xmg.children( n );
+      os << boost::format( "(assert (xor (not n%d) n%d n%d))" ) % n % c[0u].node % c[1u].node << std::endl;
+    }
+    else if ( xmg.is_maj( n ) )
+    {
+      const auto c = xmg.children( n );
+      const auto arg1 = fmt_arg( c[1] );
+      const auto arg2 = fmt_arg( c[2] );
+
+      if ( c[0].node == 0u )
+      {
+        os << boost::format( "(assert (= n%d (%s %s %s)))" ) % n % ( c[0].complemented ? "or" : "and" ) % arg1 % arg2 << std::endl;
+      }
+      else
+      {
+        const auto arg0 = boost::str( c[0].complemented ? boost::format( "(not n%d)" ) % c[0].node : boost::format( "n%d" ) % c[0].node );
+        os << boost::format( "(assert (= n%d (at-least-2 %s %s %s)))" ) % n % arg0 % arg1 % arg2 << std::endl;
+      }
+    }
+  }
+
+  if ( is_miter )
+  {
+    if ( xmg.outputs().size() == 1u )
+    {
+      os << boost::format( "(assert %s" ) % fmt_arg( xmg.outputs().front().first ) << std::endl;
+    }
+    else
+    {
+      os << "(assert (or";
+      for ( const auto& output : xmg.outputs() )
+      {
+        os << boost::format( " %s" ) % fmt_arg( output.first ) << std::endl;
+      }
+      os << "))" << std::endl;
+    }
+  }
+
+  os << "(check-sat)" << std::endl;
+}
+
 xmg_function find_function( const std::unordered_map<std::string, xmg_function>& name_to_function, const std::string& name )
 {
   if ( name[0] == '~' )
@@ -403,6 +465,12 @@ void write_verilog( const xmg_graph& xmg, const std::string& filename, const pro
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
   write_verilog( xmg, os, settings );
+}
+
+void write_smtlib2( const xmg_graph& xmg, const std::string& filename, const properties::ptr& settings )
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+  write_smtlib2( xmg, os, settings );
 }
 
 }
