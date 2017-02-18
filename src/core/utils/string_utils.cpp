@@ -89,6 +89,7 @@ void line_parser( const std::string& filename, const std::vector<std::pair<std::
 
   while ( getline( in, line ) )
   {
+    boost::trim( line );
     bool matched = false;
     for ( const auto& matcher : matchers )
     {
