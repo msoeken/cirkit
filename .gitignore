@@ -13,5 +13,7 @@ scripts/
 .tags
 .idea/
 
+xmgmin.txt
+
 **/.DS_Store
 **/__pycache__
