@@ -158,7 +158,7 @@ circuit read_qc( const std::string& filename )
 
           append_pauli( circ, var2line[lines.back()], pauli_axis::Z, 4u, !std::string( m[1u] ).empty() );
         }}
-    }, true );
+    }, false );
 
   return circ;
 }
