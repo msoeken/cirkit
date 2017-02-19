@@ -33,6 +33,7 @@
 #include <boost/format.hpp>
 
 #include <core/utils/string_utils.hpp>
+#include <classical/xmg/xmg_xor_blocks.hpp>
 
 using boost::format;
 
@@ -228,7 +229,16 @@ void write_verilog( const xmg_graph& xmg, std::ostream& os, const properties::pt
 
 void write_smtlib2( const xmg_graph& xmg, std::ostream& os, const properties::ptr& settings )
 {
-  const auto is_miter = get( settings, "is_miter", true );
+  const auto is_miter   = get( settings, "is_miter",   true );
+  const auto xor_blocks = get( settings, "xor_blocks", true );
+
+  std::unordered_map<xmg_node, xmg_xor_block_t> blocks;
+
+  if ( xor_blocks )
+  {
+    blocks = xmg_find_xor_blocks( const_cast<xmg_graph&>( xmg ) );
+    std::cout << "[i] xor blocks " << blocks.size() << std::endl;
+  }
 
   for ( auto i = 0u; i < xmg.size(); ++i )
   {
@@ -247,8 +257,24 @@ void write_smtlib2( const xmg_graph& xmg, std::ostream& os, const properties::pt
     }
     else if ( xmg.is_xor( n ) )
     {
-      const auto c = xmg.children( n );
-      os << boost::format( "(assert (xor (not n%d) n%d n%d))" ) % n % c[0u].node % c[1u].node << std::endl;
+      if ( xor_blocks )
+      {
+        const auto it = blocks.find( n );
+        if ( it != blocks.end() )
+        {
+          os << boost::format( "(assert (xor %d" ) % fmt_arg( xmg_function( n, !it->second.second ) );
+          for ( auto c : it->second.first )
+          {
+            os << boost::format( " n%d" ) % c;
+          }
+          os << "))" << std::endl;
+        }
+      }
+      else
+      {
+        const auto c = xmg.children( n );
+        os << boost::format( "(assert (xor (not n%d) n%d n%d))" ) % n % c[0u].node % c[1u].node << std::endl;
+      }
     }
     else if ( xmg.is_maj( n ) )
     {
@@ -263,7 +289,7 @@ void write_smtlib2( const xmg_graph& xmg, std::ostream& os, const properties::pt
       else
       {
         const auto arg0 = boost::str( c[0].complemented ? boost::format( "(not n%d)" ) % c[0].node : boost::format( "n%d" ) % c[0].node );
-        os << boost::format( "(assert (= n%d (at-least-2 %s %s %s)))" ) % n % arg0 % arg1 % arg2 << std::endl;
+        os << boost::format( "(assert (= n%d ((_ at-least 2) %s %s %s)))" ) % n % arg0 % arg1 % arg2 << std::endl;
       }
     }
   }
@@ -272,7 +298,7 @@ void write_smtlib2( const xmg_graph& xmg, std::ostream& os, const properties::pt
   {
     if ( xmg.outputs().size() == 1u )
     {
-      os << boost::format( "(assert %s" ) % fmt_arg( xmg.outputs().front().first ) << std::endl;
+      os << boost::format( "(assert %s)" ) % fmt_arg( xmg.outputs().front().first ) << std::endl;
     }
     else
     {
