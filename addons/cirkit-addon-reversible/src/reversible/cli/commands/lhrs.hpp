@@ -25,7 +25,7 @@
  */
 
 /**
- * @file lbs.hpp
+ * @file lhrs.hpp
  *
  * @brief LUT-based synthesis
  *
@@ -33,18 +33,18 @@
  * @since  2.3
  */
 
-#ifndef CLI_LBS_COMMAND_HPP
-#define CLI_LBS_COMMAND_HPP
+#ifndef CLI_LHRS_COMMAND_HPP
+#define CLI_LHRS_COMMAND_HPP
 
 #include <classical/cli/aig_command.hpp>
 
 namespace cirkit
 {
 
-class lbs_command : public aig_base_command
+class lhrs_command : public aig_base_command
 {
 public:
-  lbs_command( const environment::ptr& env );
+  lhrs_command( const environment::ptr& env );
 
 protected:
   bool execute();
@@ -55,6 +55,7 @@ public:
 private:
   unsigned order_heuristic = 0u;
   unsigned cut_size = 16u;
+  unsigned lut_count = 0u;
 };
 
 }

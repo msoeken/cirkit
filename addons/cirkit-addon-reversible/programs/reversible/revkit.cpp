@@ -60,6 +60,7 @@
 #include <reversible/cli/commands/gen_reciprocal.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
 #include <reversible/cli/commands/is_identity.hpp>
+#include <reversible/cli/commands/lhrs.hpp>
 #include <reversible/cli/commands/mitm.hpp>
 #include <reversible/cli/commands/nct.hpp>
 #include <reversible/cli/commands/pos.hpp>
@@ -119,6 +120,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( esopbs );
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
+  ADD_COMMAND( lhrs );
   ADD_COMMAND( qbs );
   ADD_COMMAND( rms );
   ADD_COMMAND( tbs );

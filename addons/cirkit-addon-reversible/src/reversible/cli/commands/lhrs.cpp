@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "lbs.hpp"
+#include "lhrs.hpp"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -43,7 +43,7 @@ using boost::program_options::value;
 namespace cirkit
 {
 
-lbs_command::lbs_command( const environment::ptr& env )
+lhrs_command::lhrs_command( const environment::ptr& env )
   : aig_base_command( env, "LUT based synthesis" )
 {
   opts.add_options()
@@ -56,7 +56,7 @@ lbs_command::lbs_command( const environment::ptr& env )
   add_new_option();
 }
 
-bool lbs_command::execute()
+bool lhrs_command::execute()
 {
   auto& circuits = env->store<circuit>();
   extend_if_new( circuits );
@@ -68,11 +68,12 @@ bool lbs_command::execute()
 
   lut_graph_t lut;
   {
-    temporary_filename blifname( "/tmp/lbs-%d.blif" );
+    temporary_filename blifname( "/tmp/lhrs-%d.blif" );
 
     abc_run_command_no_output( aig(), boost::str( boost::format( "&if -K %d -a; &put; write_blif %s" ) % cut_size % blifname.name() ) );
 
     lut = read_blif( blifname.name(), true );
+    lut_count = lut_graph_lut_count( lut );
   }
 
   circuit circ;
@@ -83,11 +84,12 @@ bool lbs_command::execute()
   return true;
 }
 
-command::log_opt_t lbs_command::log() const
+command::log_opt_t lhrs_command::log() const
 {
   return log_opt_t({
       {"runtime", statistics->get<double>( "runtime" )},
       {"cut_size", cut_size},
+      {"lut_count", lut_count},
       {"num_decomp_default", statistics->get<unsigned>( "num_decomp_default" )},
       {"num_decomp_lut", statistics->get<unsigned>( "num_decomp_lut" )},
       {"class_counter", statistics->get<std::vector<std::vector<unsigned>>>( "class_counter" )},
