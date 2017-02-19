@@ -137,6 +137,13 @@ void write_simple_fanout_graph( std::ostream& os, const simple_fanout_graph_t& g
   os << "endmodule" << std::endl;
 }
 
+unsigned lut_graph_lut_count( const lut_graph_t& g )
+{
+  const auto& type = boost::get( boost::vertex_gate_type, g );
+
+  return boost::count_if( boost::vertices( g ), [&type]( lut_vertex_t v ) { return type[v] == gate_type_t::internal; } );
+}
+
 }
 
 // Local Variables:

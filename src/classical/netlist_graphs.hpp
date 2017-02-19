@@ -97,6 +97,8 @@ using lut_graph_t  = digraph_t<lut_graph_vertex_properties_t>;
 using lut_vertex_t = vertex_t<lut_graph_t>;
 using lut_edge_t   = edge_t<lut_graph_t>;
 
+unsigned lut_graph_lut_count( const lut_graph_t& g );
+
 }
 
 #endif
