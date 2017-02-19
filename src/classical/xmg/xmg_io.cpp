@@ -262,8 +262,8 @@ void write_smtlib2( const xmg_graph& xmg, std::ostream& os, const properties::pt
         const auto it = blocks.find( n );
         if ( it != blocks.end() )
         {
-          os << boost::format( "(assert (xor %d" ) % fmt_arg( xmg_function( n, !it->second.second ) );
-          for ( auto c : it->second.first )
+          os << boost::format( "(assert (xor (not n%d)" ) % n;
+          for ( auto c : it->second )
           {
             os << boost::format( " n%d" ) % c;
           }

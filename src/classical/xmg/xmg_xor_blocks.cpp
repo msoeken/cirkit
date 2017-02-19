@@ -115,7 +115,6 @@ std::unordered_map<xmg_node, xmg_xor_block_t> xmg_find_xor_blocks( xmg_graph& xm
     std::stack<xmg_node> block_stack;
     block_stack.push( n );
     std::vector<xmg_node> block;
-    bool polarity = true;
     auto block_size = 0u;
 
     while ( !block_stack.empty() )
@@ -137,7 +136,7 @@ std::unordered_map<xmg_node, xmg_xor_block_t> xmg_find_xor_blocks( xmg_graph& xm
       processed[bn] = true;
       for ( const auto& c : xmg.children( bn ) )
       {
-        polarity = ( polarity != c.complemented );
+        assert( !c.complemented );
         block_stack.push( c.node );
       }
       if ( bn != n && boost::find( internals, bn ) == internals.end() )
@@ -146,10 +145,10 @@ std::unordered_map<xmg_node, xmg_xor_block_t> xmg_find_xor_blocks( xmg_graph& xm
       }
     }
 
-    if ( block_size > 1u )
-    {
-      result.insert( {n, {block, polarity}} );
-    }
+    //if ( block_size > 1u )
+    //{
+    result.insert( {n, block} );
+    //}
 
     for ( auto bn : block )
     {

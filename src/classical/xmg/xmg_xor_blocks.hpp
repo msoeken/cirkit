@@ -45,7 +45,7 @@
 namespace cirkit
 {
 
-using xmg_xor_block_t = std::pair<std::vector<xmg_node>, bool>;
+using xmg_xor_block_t = std::vector<xmg_node>;
 
 std::unordered_map<xmg_node, xmg_xor_block_t> xmg_find_xor_blocks( xmg_graph& xmg,
                                                                    const properties::ptr& settings = properties::ptr(),

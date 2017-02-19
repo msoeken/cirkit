@@ -278,7 +278,7 @@ void xmg_cuts_paged::enumerate_with_xor_blocks( const std::unordered_map<xmg_nod
   for ( const auto& p : blocks )
   {
     auto root = p.first;
-    const auto& leafs = p.second.first;
+    const auto& leafs = p.second;
     boost::dynamic_bitset<> area( _xmg.size() );
     area.set( p.first );
 
@@ -342,8 +342,8 @@ void xmg_cuts_paged::enumerate_with_xor_blocks( const std::unordered_map<xmg_nod
       data.append_begin( n );
       cones.append_begin( n );
 
-      std::vector<unsigned> leafs( it->second.first.size() );
-      boost::copy( it->second.first, leafs.begin() );
+      std::vector<unsigned> leafs( it->second.size() );
+      boost::copy( it->second, leafs.begin() );
 
       const auto& area = block_areas[n];
       data.append_set( n, leafs, get_extra( 0u, area.count() ) );
