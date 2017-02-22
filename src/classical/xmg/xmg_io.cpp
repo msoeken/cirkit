@@ -230,14 +230,13 @@ void write_verilog( const xmg_graph& xmg, std::ostream& os, const properties::pt
 void write_smtlib2( const xmg_graph& xmg, std::ostream& os, const properties::ptr& settings )
 {
   const auto is_miter   = get( settings, "is_miter",   true );
-  const auto xor_blocks = get( settings, "xor_blocks", true );
+  const auto xor_blocks = get( settings, "xor_blocks", false );
 
   std::unordered_map<xmg_node, xmg_xor_block_t> blocks;
 
   if ( xor_blocks )
   {
     blocks = xmg_find_xor_blocks( const_cast<xmg_graph&>( xmg ) );
-    std::cout << "[i] xor blocks " << blocks.size() << std::endl;
   }
 
   for ( auto i = 0u; i < xmg.size(); ++i )

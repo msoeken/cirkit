@@ -705,9 +705,26 @@ void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, con
 }
 
 template<>
+bool store_can_write_io_type<xmg_graph, io_smt_tag_t>( command& cmd )
+{
+  boost::program_options::options_description xmg_options( "XMG options" );
+
+  xmg_options.add_options()
+    ( "xor_blocks", "write XOR blocks" )
+    ;
+
+  cmd.opts.add( xmg_options );
+
+  return true;
+
+}
+
+template<>
 void store_write_io_type<xmg_graph, io_smt_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
 {
-  write_smtlib2( xmg, filename );
+  auto settings = std::make_shared<properties>();
+  settings->set( "xor_blocks", cmd.is_set( "xor_blocks" ) );
+  write_smtlib2( xmg, filename, settings );
 }
 
 }
