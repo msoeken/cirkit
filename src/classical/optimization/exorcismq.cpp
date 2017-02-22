@@ -461,7 +461,7 @@ private:
       } );
 
     /* and add all pairs according to their distance */
-    for ( auto i = 0; i < distances.size(); ++i )
+    for ( auto i = 0u; i < distances.size(); ++i )
     {
       const auto d = distances[i] - 2;
       if ( d <= 2 )
@@ -637,7 +637,7 @@ public:
           const auto cost = calculate_group_costs( res, d, invalids );
 
           /* cost improvement? */
-          if ( cost < pair_cost || ( !strict && cost == pair_cost ) )
+          if ( cost < static_cast<int64_t>( pair_cost ) || ( !strict && ( cost == static_cast<int64_t>( pair_cost ) ) ) )
           {
             accept_group( c1_id, c2_id, res, d, invalids, new_cubes );
             return false;
@@ -671,7 +671,7 @@ public:
           const auto cost = calculate_group_costs( res, d, invalids );
 
           /* cost improvement? */
-          if ( cost < pair_cost )
+          if ( cost < static_cast<int64_t>( pair_cost ) )
           {
             int64_t improvement = pair_cost - cost;
             if ( improvement > best_improvement )
@@ -785,7 +785,7 @@ private:
       cubes.invalidate_cube( j );
     }
 
-    for ( auto j = 0; j < distance; ++j )
+    for ( auto j = 0u; j < distance; ++j )
     {
       if ( !res[j].invalid )
       {
@@ -820,7 +820,7 @@ private:
 
     //assert( c1.positions( c2 ) == std::get<3>( p ) );
 
-    for ( auto j = 0; j < distance; ++j )
+    for ( auto j = 0u; j < distance; ++j )
     {
       assert( !res[j].invalid );
 
@@ -832,7 +832,7 @@ private:
         std::cout << " c2: ";
         c2.print( std::cout, cubes.numvars() );
 
-        for ( auto jj = 0; jj < distance; ++jj )
+        for ( auto jj = 0u; jj < distance; ++jj )
         {
           std::cout << " ";
           if ( j == jj )

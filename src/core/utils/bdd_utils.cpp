@@ -63,7 +63,7 @@ BDD make_cube( Cudd& manager, const std::string& cube )
 {
   std::vector<BDD> vars;
 
-  for ( auto i = 0; i < cube.size(); ++i )
+  for ( auto i = 0u; i < cube.size(); ++i )
   {
     if ( cube[i] == '0' )
     {
@@ -95,7 +95,7 @@ bool is_selfdual( const Cudd& manager, const BDD& f )
 
 bool is_monotone( const Cudd& manager, const BDD& f )
 {
-  for ( auto i = 0u; i < manager.ReadSize(); ++i )
+  for ( auto i = 0; i < manager.ReadSize(); ++i )
   {
     if ( !f.Increasing( i ) ) { return false; }
   }
@@ -409,7 +409,7 @@ unsigned count_complement_edges( const Cudd& manager, const std::vector<BDD>& fs
   return count_complement_edges( manager.getManager(), fs_native );
 }
 
-BDD make_eq_rec( const Cudd& manager, const std::vector<BDD>& vars, int pos, int k, std::map<std::pair<int, int>, BDD>& visited )
+BDD make_eq_rec( const Cudd& manager, const std::vector<BDD>& vars, unsigned pos, int k, std::map<std::pair<unsigned, int>, BDD>& visited )
 {
   /* terminal */
   if ( pos == vars.size() )
@@ -418,7 +418,7 @@ BDD make_eq_rec( const Cudd& manager, const std::vector<BDD>& vars, int pos, int
   }
 
   /* cannot be 1 anymore */
-  if ( ( k < 0 ) || ( k > ( vars.size() - pos ) ) )
+  if ( ( k < 0 ) || ( k > static_cast<int>( vars.size() - pos ) ) )
   {
     return manager.bddZero();
   }
@@ -437,7 +437,7 @@ BDD make_eq_rec( const Cudd& manager, const std::vector<BDD>& vars, int pos, int
 
 BDD make_eq( const Cudd& manager, const std::vector<BDD>& vars, unsigned k )
 {
-  std::map<std::pair<int, int>, BDD> visited;
+  std::map<std::pair<unsigned, int>, BDD> visited;
   return make_eq_rec( manager, vars, 0, (int)k, visited );
 }
 

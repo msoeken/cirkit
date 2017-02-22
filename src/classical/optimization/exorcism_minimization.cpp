@@ -256,7 +256,6 @@ void exorcism_minimization( const aig_graph& aig, const properties::ptr& setting
 
 void exorcism_minimization_blif( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
 {
-  const auto verbose      = get( settings, "verbose",      false );
   const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
   const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
   const auto skip_parsing = get( settings, "skip_parsing", false );

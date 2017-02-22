@@ -34,7 +34,7 @@ graph_t<> line_graph( unsigned order )
   graph_t<> g;
   auto last = add_vertex( g );
 
-  for ( auto i = 1; i < order; ++i )
+  for ( auto i = 1u; i < order; ++i )
   {
     auto next = add_vertex( g );
     add_edge( last, next, g );

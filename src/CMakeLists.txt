@@ -29,5 +29,5 @@ add_cirkit_library(
     ${MINISAT_LIBRARIES}
     ${CRYPTOMINISAT_LIBRARIES}
   INCLUDE
-    PUBLIC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc/src
+    SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc/src
 )

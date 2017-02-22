@@ -126,7 +126,7 @@ lut_graph_t read_blif( const std::string& filename, bool store_cubes )
 
             func[v] = store_cubes ? cubes : tt_to_hex( f );
 
-            for ( auto i = 0; i < faninout.size() - 1; ++i )
+            for ( auto i = 0u; i < faninout.size() - 1; ++i )
             {
               lut_vertex_t tgt;
               const auto it = name_to_node.find( faninout[i] );

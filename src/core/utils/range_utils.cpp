@@ -52,7 +52,7 @@ std::vector<std::string> create_name_list( const std::string& pattern, unsigned 
 {
   std::vector<std::string> names( length );
 
-  for ( auto i = 0; i < length; ++i )
+  for ( auto i = 0u; i < length; ++i )
   {
     names[i] = boost::str( boost::format( pattern ) % ( i + start ) );
   }

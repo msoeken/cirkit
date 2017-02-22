@@ -116,8 +116,8 @@ std::vector<cube> cube::disjoint_sharp( const cube& other ) const
     }
 
     bposother.flip( i ); cposother.flip( i );
-    auto _bits = bpos & bposother & first_mask | bpos & ~first_mask;
-    auto _care = cpos & cposother & first_mask | cpos & ~first_mask;
+    auto _bits = ( bpos & bposother & first_mask ) | ( bpos & ~first_mask );
+    auto _care = ( cpos & cposother & first_mask ) | ( cpos & ~first_mask );
     bposother.flip( i ); cposother.flip( i );
 
     vec += cube( ~_bits, _bits ^ _care );

@@ -184,12 +184,12 @@ private:
         assert( num_inputs > 0u );
         counterexample.resize( num_inputs );
 
-        for ( unsigned i = 0u; i < cex->nPis; ++i )
+        for ( auto i = 0; i < cex->nPis; ++i )
         {
           if ( abc::Abc_InfoHasBit( cex->pData, cex->nRegs + i ) )
           {
             /* store the inputs in reverse order */
-            counterexample[ num_inputs - i - 1u ] = 1;
+            counterexample[num_inputs - i - 1u] = 1;
           }
         }
       }

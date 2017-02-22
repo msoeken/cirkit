@@ -48,10 +48,10 @@ char convert_bin2hex( const std::string& bits )
 
   char result = 0;
 
-  for ( char n = 0; n < bits.length(); ++n )
+  for ( const auto& bit : bits )
   {
     result <<= 1;
-    result |= ( bits[n] == '1' ? 1 : 0 );
+    result |= ( bit == '1' ? 1 : 0 );
   }
   return bin2hex[result];
 }
