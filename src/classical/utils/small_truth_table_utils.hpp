@@ -59,7 +59,7 @@ uint64_t stt_delta_swap( uint64_t func, uint64_t delta, uint64_t omega );
 template<std::size_t N>
 uint64_t stt_permute( uint64_t func, uint64_t const mask[2 * N - 1] )
 {
-  for ( auto k = 0; k < N; ++k )
+  for ( auto k = 0u; k < N; ++k )
   {
     func = stt_delta_swap( func, 1 << k, mask[k] );
   }

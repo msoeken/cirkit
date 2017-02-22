@@ -126,7 +126,7 @@ void npn_canonization_sifting_loop( tt& npn, unsigned n, boost::dynamic_bitset<>
 
     improvement = false;
 
-    for ( int i = forward ? 0 : n - 2; forward ? i < ( n - 1 ) : i >= 0; forward ? ++i : --i )
+    for ( int i = forward ? 0 : n - 2; forward ? i < static_cast<int>( n - 1 ) : i >= 0; forward ? ++i : --i )
     {
       auto local_improvement = false;
       for ( auto k = 1u; k < 8u; ++k )

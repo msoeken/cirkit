@@ -93,7 +93,7 @@ solver_result_t solve<abc_solver>( abc_solver& solver, solver_execution_statisti
     boost::dynamic_bitset<> bits( statistics.num_vars );
     boost::dynamic_bitset<> care( statistics.num_vars );
 
-    for ( auto i = 0; i < statistics.num_vars; ++i )
+    for ( auto i = 0u; i < statistics.num_vars; ++i )
     {
       auto v = sat_solver_get_var_value( solver->solver, i );
       bits[i] = ( v == abc::l_True );

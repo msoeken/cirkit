@@ -71,9 +71,9 @@ std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left
   /* compute graph */
   auto idx1 = 0u, idx2 = 0u;
   auto it1 = std::begin( left );
-  for ( auto l1 = 0u; l1 < loops; ++l1 )
+  for ( auto l1 = 0; l1 < loops; ++l1 )
   {
-    for ( auto c1 = 0u; c1 < diff; ++c1 )
+    for ( auto c1 = 0; c1 < diff; ++c1 )
     {
       auto it2 = std::begin( right );
       idx2 = offset;
@@ -81,16 +81,16 @@ std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left
       nodes[idx1].a = it1;
       nodes[idx1].b = it1 + diff;
 
-      for ( auto l2 = 0u; l2 < loops; ++l2 )
+      for ( auto l2 = 0; l2 < loops; ++l2 )
       {
-        for ( auto c2 = 0u; c2 < diff; ++c2 )
+        for ( auto c2 = 0; c2 < diff; ++c2 )
         {
           if ( idx1 == 0u )
           {
             nodes[idx2].a = it2;
             nodes[idx2].b = it2 + diff;
           }
-          
+
           /* pair elements */
           auto& n1 = nodes[idx1];
           auto& n2 = nodes[idx2];
@@ -118,7 +118,7 @@ std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left
 
   while ( true )
   {
-    auto idx = 0u;
+    auto idx = 0;
 
     while ( idx < offset && nodes[idx].visited ) { ++idx; }
 
@@ -128,13 +128,13 @@ std::pair<uint64_t, uint64_t> stt_compute_mask_pair( std::vector<unsigned>& left
     auto nr = *nodes[idx].a;
     auto start = idx;
 
-    do {      
+    do {
       auto& n = nodes[idx];
 
       // std::cout << boost::format( "[i] enter loop with idx = %d, nr = %d, left_side = %d, *n.a = %d, *n.b = %d, n.lf = %d, n.rf = %d" ) % idx % nr % left_side % *n.a % *n.b % n.lf % n.rf << std::endl;
 
       auto match = *n.a == nr;
-      
+
       nr = match ? *n.b : *n.a;
       idx = match ? n.rf : n.lf;
       n.visited = true;
@@ -181,7 +181,7 @@ std::vector<uint64_t> stt_compute_mask_sequence( const std::vector<unsigned>& pe
   boost::iota( left, 0u );
 
   /* all masks except the middle one */
-  for ( auto i = 0; i < n - 1; ++i )
+  for ( auto i = 0u; i < n - 1; ++i )
   {
     std::tie( masks[i], masks[2 * n - 2 - i] ) = stt_compute_mask_pair( left, right, i, n );
   }
@@ -197,7 +197,7 @@ std::vector<uint64_t> stt_compute_mask_sequence( const std::vector<unsigned>& pe
       masks[n - 1] |= 1 << i;
     }
   }
-  
+
   return masks;
 }
 

@@ -98,7 +98,7 @@ void generate_npn_circuit( std::ostream& os, unsigned n,
        << boost::format( "  input  [%d:0] F;" ) % ( N - 1 ) << std::endl
        << boost::format( "  output [%d:0] Fo;" ) % ( N - 1 ) << std::endl;
 
-    for ( auto i = 0; i < perm.size(); ++i )
+    for ( auto i = 0u; i < perm.size(); ++i )
     {
       os << boost::format( "  assign Fo[%d] = F[%d];" ) % i % perm[i] << std::endl;
     }

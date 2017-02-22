@@ -302,9 +302,9 @@ public:
 
   BDD on_var( unsigned index ) const
   {
-    if ( manager.ReadSize() < index )
+    if ( manager.ReadSize() < static_cast<int>( index ) )
     {
-      for ( auto i = manager.ReadSize(); i <= index; ++i )
+      for ( auto i = manager.ReadSize(); i <= static_cast<int>( index ); ++i )
       {
         manager.bddVar();
       }

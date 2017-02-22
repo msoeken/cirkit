@@ -262,8 +262,9 @@ bool lad2_domain::augmenting_path( int u, int nbv )
 
 std::ostream& operator<<( std::ostream& os, const lad2_domain& d )
 {
-  int u, i;
-  for ( u = 0; u < d.nb_val.size(); ++u )
+  unsigned u;
+  int i;
+  for ( u = 0u; u < d.nb_val.size(); ++u )
   {
     os << format( "D[%d] = " ) % u;
     for ( i = 0; i < d.nb_val[u]; ++i )
@@ -537,7 +538,7 @@ bool update_matching( int size_of_u, int size_of_v, const vec_int_t& degree, con
   }
 
   j = 0;
-  while ( j < unmatched.size() )
+  while ( j < static_cast<int>( unmatched.size() ) )
   {
     u = unmatched[j];
     for ( i = first_adj[u]; ( ( i < first_adj[u] + degree[u] ) && ( matched_with_v[adj[i]] >= 0 ) ); ++i );
@@ -827,7 +828,7 @@ bool lad2_manager::match_vertices( stack_int_t& to_be_matched )
     u = to_be_matched.top();
     to_be_matched.pop();
     v = d.val[d.first_val[u]];
-    for ( u2 = 0; u2 < gp.size(); ++u2 )
+    for ( u2 = 0; u2 < static_cast<int>( gp.size() ); ++u2 )
     {
       if ( u != u2 )
       {
@@ -871,11 +872,11 @@ bool lad2_manager::ensure_gac_all_diff()
   vec_vec_int_t pred( gp.size(), vec_int_t( gt.size() ) );
   vec_int_t nb_succ( gt.size() );
   vec_vec_int_t succ( gt.size(), vec_int_t( gp.size() ) );
-	int u, v, i, w, old_nb_val;
+  int u, v, i, w, old_nb_val;
   vec_int_t numv( gt.size() ), numu( gp.size() );
   stack_int_t to_match;
   std::vector<std::vector<char>> used( gp.size(), std::vector<char>( gt.size() ) );
-  for ( u = 0; u < gp.size(); ++u )
+  for ( u = 0; u < static_cast<int>( gp.size() ); ++u )
   {
     for ( i = 0; i < d.nb_val[u]; ++i )
     {
@@ -891,7 +892,7 @@ bool lad2_manager::ensure_gac_all_diff()
 
   vec_int_t list( gt.size() );
   int nb = 0;
-  for ( v = 0; v < gt.size(); ++v )
+  for ( v = 0; v < static_cast<int>( gt.size() ); ++v )
   {
     if ( d.global_matching_t[v] < 0 )
     {
@@ -923,7 +924,7 @@ bool lad2_manager::ensure_gac_all_diff()
   lad2_scc( gp.size(), gt.size(), numv, numu,
             nb_succ, succ, nb_pred, pred, d.global_matching_p, d.global_matching_t );
 
-	for ( u = 0; u < gp.size(); ++u )
+  for ( u = 0; u < static_cast<int>( gp.size() ); ++u )
   {
     old_nb_val = d.nb_val[u];
 		for ( i = 0; i < d.nb_val[u]; ++i)
@@ -977,7 +978,7 @@ bool lad2_manager::check_lad( int u, int v )
    * It is first check whether all edges match. If that is the
    * case, true is returned.
    */
-  auto nb_matched = 0;
+  auto nb_matched = 0u;
   auto idx = 0u;
   for ( const auto& u2 : gp.adjacent( u ) )
   {
@@ -998,7 +999,7 @@ bool lad2_manager::check_lad( int u, int v )
   {
     nb_comp[idx] = 0;
     first_comp[idx] = pos_in_comp;
-    if ( d.nb_val[u2] > gt.degree( v ) )
+    if ( d.nb_val[u2] > static_cast<int>( gt.degree( v ) ) )
     {
       for ( const auto& v2 : d.get( u2 ) )
       {
@@ -1047,7 +1048,7 @@ bool lad2_manager::check_lad( int u, int v )
   {
     return false;
   }
-  for ( auto i = 0; i < gp.degree( u ); ++i )
+  for ( auto i = 0u; i < gp.degree( u ); ++i )
   {
     d.matching( u, v, i ) = num_inv[matched_with_u[i]];
   }
@@ -1219,7 +1220,7 @@ bool lad2_manager::start_lad( std::vector<unsigned>& mapping )
 
   int u;
   stack_int_t to_match;
-  for ( u = 0; u < gp.size(); ++u )
+  for ( u = 0; u < static_cast<int>( gp.size() ); ++u )
   {
     d.global_matching_t[d.global_matching_p[u]] = u;
     if ( d.nb_val[u] == 1 )

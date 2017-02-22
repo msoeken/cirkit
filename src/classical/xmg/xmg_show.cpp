@@ -180,7 +180,7 @@ public:
     }
 
     os << "{rank = same;";
-    for ( auto i = 0; i < xmg.outputs().size(); ++i )
+    for ( auto i = 0u; i < xmg.outputs().size(); ++i )
     {
       os << " o" << i << ";";
     }

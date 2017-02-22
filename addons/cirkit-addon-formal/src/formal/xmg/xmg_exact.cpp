@@ -419,7 +419,7 @@ struct xmg_exact_instance
         {
           children[x] = xmg.get_constant( false );
         }
-        else if ( sel_val > 0 && sel_val <= num_vars )
+        else if ( sel_val > 0 && sel_val <= static_cast<int>( num_vars ) )
         {
           children[x] = inputs[sel_val - 1u];
         }

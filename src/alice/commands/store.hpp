@@ -59,7 +59,7 @@ int show_helper( const command& cmd, const environment::ptr& env )
     else
     {
       std::cout << boost::format( "[i] %s in store:" ) % name_plural << std::endl;
-      auto index = 0u;
+      auto index = 0;
       for ( const auto& element : store.data() )
       {
         std::cout << boost::format( "  %c %2d: " ) % ( store.current_index() == index ? '*' : ' ' ) % index;

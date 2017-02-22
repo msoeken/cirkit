@@ -462,8 +462,8 @@ void bool_complex_command::compute_maj( bool length, bool npn )
       length_to_npn.push_back( std::unordered_set<unsigned>() );
     }
 
-    int j = 0u;
-    int k = 0u;
+    auto j = 0u;
+    auto k = 0u;
     int l = current_length - 1;
 
     do
@@ -476,7 +476,7 @@ void bool_complex_command::compute_maj( bool length, bool npn )
           const auto& fh = length_to_func[k][h];
           if ( fg == fh ) { continue; }
 
-          for ( auto i = ( k == l ) ? ( h + 1u ) : ( ( j == l ) ? ( g + 1u ) : 0u ); i < length_to_func[l].size(); ++i )
+          for ( auto i = ( static_cast<int>( k ) == l ) ? ( h + 1u ) : ( ( static_cast<int>( j ) == l ) ? ( g + 1u ) : 0u ); i < length_to_func[l].size(); ++i )
           {
             const auto& fi = length_to_func[l][i];
             if ( fg == fi || fh == fi ) { continue; }

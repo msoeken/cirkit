@@ -853,7 +853,7 @@ private:
 
   bool verbose = false;
 
-  unsigned opt_rounds = 0;
+  //unsigned opt_rounds = 0u;
 
   static unsigned cube_groups[];
   static unsigned cube_group_count[];

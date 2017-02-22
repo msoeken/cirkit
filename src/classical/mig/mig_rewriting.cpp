@@ -862,7 +862,7 @@ mig_function mig_rewriting_manager::memristor_optimization( const mig_node& f )
   const auto children = get_children( mig_old, f );
 
   /* if at least two children are complemented */
-  if ( ( static_cast<int>( children[0u].complemented ) + static_cast<int>( children[1u].complemented ) + static_cast<int>( children[2u].complemented ) >= 2u ) ) //&& indegree[f] == 1u )
+  if ( ( static_cast<int>( children[0u].complemented ) + static_cast<int>( children[1u].complemented ) + static_cast<int>( children[2u].complemented ) >= 2 ) ) //&& indegree[f] == 1u )
   {
     res = !mig_create_maj( mig_current,
                            make_function( memristor_optimization( children[0u].node ), !children[0u].complemented ),

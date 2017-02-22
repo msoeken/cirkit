@@ -120,7 +120,7 @@ struct lad2_domain
 
   inline void reset_to_filter( int size )
   {
-    for ( unsigned i = 0u; i < size; ++i ) { marked_to_filter.reset( i ); }
+    for ( auto i = 0; i < size; ++i ) { marked_to_filter.reset( i ); }
     //std::fill( marked_to_filter.begin(), marked_to_filter.begin() + size, 0 );
     next_out_to_filter = -1;
   }

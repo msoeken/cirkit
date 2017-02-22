@@ -330,11 +330,11 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   const auto& vertex_label = boost::get( boost::vertex_label, graph );
   const auto& edge_label   = boost::get( boost::edge_label, graph );
 
-  for ( auto i = 0; i < n; ++i )
+  for ( auto i = 0u; i < n; ++i )
   {
     vertex_label[i] = 0u;
   }
-  for ( auto i = 0; i < m; ++i )
+  for ( auto i = 0u; i < m; ++i )
   {
     vertex_label[n + vectors.size() + i] = 1u;
 
@@ -352,7 +352,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   auto offset = n;
   for ( const auto& p : index( partition ) )
   {
-    for ( auto i = 0; i < p.value; ++i )
+    for ( auto i = 0u; i < p.value; ++i )
     {
       vertex_label[offset + i] = 2u + p.index;
 

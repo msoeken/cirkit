@@ -739,7 +739,7 @@ struct exact_mig_instance
         {
           children[x] = mig_get_constant( mig, false );
         }
-        else if ( sel_val > 0 && sel_val <= num_vars )
+        else if ( sel_val > 0 && sel_val <= static_cast<int>( num_vars ) )
         {
           children[x] = inputs[sel_val - 1u];
         }
@@ -798,7 +798,7 @@ struct exact_mig_instance
         {
           children[x] = xmg.get_constant( false );
         }
-        else if ( sel_val > 0 && sel_val <= num_vars )
+        else if ( sel_val > 0 && sel_val <= static_cast<int>( num_vars ) )
         {
           children[x] = inputs[sel_val - 1u];
         }
@@ -1146,7 +1146,7 @@ public:
     {
       const auto max_gates = ( static_cast<int>( pow( 3, d ) ) - 1 ) / 2;
 
-      for ( auto k = ( d == start_depth ) ? start : 1u; k <= max_gates; ++k )
+      for ( int k = ( d == start_depth ) ? start : 1; k <= max_gates; ++k )
       {
         if ( verbose )
         {
@@ -1155,7 +1155,7 @@ public:
 
         const auto inst = create_instance();
 
-        for ( auto i = 0u; i < k; ++i )
+        for ( auto i = 0; i < k; ++i )
         {
           inst->add_level( symmetry_breaking );
         }

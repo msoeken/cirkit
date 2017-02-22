@@ -121,7 +121,7 @@ boost::optional< boost::dynamic_bitset<> > abc_run_command_get_counterexample( c
       assert( num_inputs > 0u );
       result.resize( num_inputs );
 
-      for ( unsigned i = 0u; i < cex->nPis; ++i )
+      for ( auto i = 0; i < cex->nPis; ++i )
       {
         if ( abc::Abc_InfoHasBit( cex->pData, cex->nRegs + i ) )
         {

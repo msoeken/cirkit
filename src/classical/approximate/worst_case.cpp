@@ -113,8 +113,6 @@ boost::multiprecision::uint256_t worst_case( const aig_graph& f, const aig_graph
                                              const properties::ptr& settings,
                                              const properties::ptr& statistics )
 {
-  const auto verbose = get( settings, "verbose", false );
-
   properties_timer t( statistics );
 
   const auto& finfo = aig_info( f );
@@ -134,7 +132,7 @@ boost::multiprecision::uint256_t worst_case( const aig_graph& f, const aig_graph
   /* append giafhat to giaf and share PIs */
   std::vector<int> po1, po2;
   auto miter = Gia_ManDupAppendNewWithoutPOs( giaf, giafhat, po1, po2 );
-  assert( abc::Gia_ManCiNum( miter ) == finfo.inputs.size() );
+  assert( abc::Gia_ManCiNum( miter ) == static_cast<int>( finfo.inputs.size() ) );
   assert( abc::Gia_ManCoNum( miter ) == 0 );
   assert( po1.size() == num_bits );
   assert( po2.size() == num_bits );

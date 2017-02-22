@@ -84,7 +84,7 @@ lexicographic_solution( Solver& solver, const std::vector<int>& vars,
 
   auto ys = extract_solution( result, vars );
 
-  int d_iter = -1;
+  auto d_iter = std::string::npos;
 
   while ( true )
   {

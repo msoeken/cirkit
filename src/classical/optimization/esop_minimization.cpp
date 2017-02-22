@@ -601,7 +601,7 @@ void generate_exact_psdkro( esop_manager& esop, DdManager * cudd, DdNode * f, ch
     using boost::adaptors::indexed;
 
     unsigned n = Cudd_ReadSize( cudd );
-    for ( int i = last_index + 1; i < n; ++i )
+    for ( unsigned i = last_index + 1; i < n; ++i )
     {
       var_values[i] = VariableAbsent;
     }

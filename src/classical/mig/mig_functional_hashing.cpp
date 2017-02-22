@@ -553,7 +553,7 @@ tt mig_functional_hashing_manager::compute_npn( const tt& tt, boost::dynamic_bit
     const auto hash_key = ttu % npn_table.size();
     auto& entry   = npn_table[hash_key];
 
-    if ( entry.tt == ttu )
+    if ( static_cast<unsigned long>( entry.tt ) == ttu )
     {
       ++cache_hit;
       npn = boost::dynamic_bitset<>( 16u, entry.npn );

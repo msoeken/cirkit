@@ -855,7 +855,7 @@ void aig_npn_canonization_sifting_generic( const aig_graph& aig, boost::dynamic_
 
     improvement = false;
 
-    for ( int i = forward ? 0 : n - 2; forward ? i < ( n - 1 ) : i >= 0; forward ? ++i : --i )
+    for ( int i = forward ? 0 : n - 2; forward ? i < static_cast<int>( n - 1 ) : i >= 0; forward ? ++i : --i )
     {
       if ( mgr.try_sift( i ) )
       {
@@ -882,7 +882,7 @@ void aig_npn_canonization_sifting_generic( const aig_graph& aig, boost::dynamic_
 
     improvement = false;
 
-    for ( int i = forward ? 0 : n - 2; forward ? i < ( n - 1 ) : i >= 0; forward ? ++i : --i )
+    for ( int i = forward ? 0 : n - 2; forward ? i < static_cast<int>( n - 1 ) : i >= 0; forward ? ++i : --i )
     {
       if ( mgr.try_sift( i ) )
       {

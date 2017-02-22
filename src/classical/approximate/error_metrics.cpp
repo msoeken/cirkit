@@ -99,7 +99,7 @@ std::vector<bdd> compute_diff( const std::vector<bdd>& f, const std::vector<bdd>
                                   const auto vsubtr = boost::get<4>( p );
                                   const auto vdiff  = boost::get<5>( p );
 
-                                  const auto row_valid = ( vf == vzf ) && ( vfhat == vzfhat ) && ( vsubtr == ( vzf - vzfhat ) ) && ( abs( vsubtr ) == vdiff );
+                                  const auto row_valid = ( vf == vzf ) && ( vfhat == vzfhat ) && ( vsubtr == static_cast<int>( vzf - vzfhat ) ) && ( abs( vsubtr ) == static_cast<int>( vdiff ) );
                                   valid = valid && row_valid;
                                   max   = std::max( max, vdiff );
                                   sum  += vdiff;

@@ -73,11 +73,11 @@ struct tokens : std::ctype< char >
     static cctype::mask rc[ cctype::table_size ];
     std::memcpy( rc, const_rc, cctype::table_size * sizeof(cctype::mask) );
 
-    rc[SYM_COMMA]  = std::ctype_base::space;
-    rc[SYM_ASSIGN] = std::ctype_base::space;
-    rc[SYM_LPAREN] = std::ctype_base::space;
-    rc[SYM_RPAREN] = std::ctype_base::space;
-    rc[SYM_SPACE]  = std::ctype_base::space;
+    rc[static_cast<int>( SYM_COMMA )]  = std::ctype_base::space;
+    rc[static_cast<int>( SYM_ASSIGN )] = std::ctype_base::space;
+    rc[static_cast<int>( SYM_LPAREN )] = std::ctype_base::space;
+    rc[static_cast<int>( SYM_RPAREN )] = std::ctype_base::space;
+    rc[static_cast<int>( SYM_SPACE )]  = std::ctype_base::space;
     return &rc[0];
   }
 };

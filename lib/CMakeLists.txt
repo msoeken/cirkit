@@ -38,14 +38,14 @@ add_cirkit_library(
   USE
     ${CUDD_LIBRARIES}
   INCLUDE
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/extra
+    SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/extra
 )
 add_cirkit_library(
   NAME linenoise
   SOURCES
     linenoise/linenoise.c
   INCLUDE
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/linenoise
+    SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/linenoise
 )
 
 add_cirkit_library(
@@ -54,5 +54,5 @@ add_cirkit_library(
     puma/puma.cpp
     puma/tc_time.cpp
   INCLUDE
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/puma
+    SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/puma
 )
