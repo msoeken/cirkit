@@ -158,7 +158,7 @@ endif()
 set(cryptominisat_SRC ${CMAKE_BINARY_DIR}/ext/cryptominisat-prefix/src/cryptominisat)
 externalProject_add(cryptominisat
   DOWNLOAD_DIR .
-  URL https://github.com/msoos/cryptominisat/archive/5.0.1.zip
+  URL "http://msoeken.github.io/tools/cryptominisat-5.0.1.zip"
   CONFIGURE_COMMAND cmake -DENABLE_TESTING=OFF .
   BUILD_COMMAND make -j4
   BUILD_IN_SOURCE 1
