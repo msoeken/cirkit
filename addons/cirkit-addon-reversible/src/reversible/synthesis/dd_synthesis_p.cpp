@@ -522,7 +522,7 @@ namespace internal
 
     /* I/O */
     auto& info = get_property( graph, boost::graph_name );
-    for ( auto i = 0u; i < bdds.first.ReadSize(); ++i )
+    for ( auto i = 0; i < bdds.first.ReadSize(); ++i )
     {
       info.labels.push_back( boost::str( boost::format( "i%d" ) % i ) );
     }

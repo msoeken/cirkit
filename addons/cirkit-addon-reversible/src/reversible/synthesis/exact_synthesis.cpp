@@ -396,7 +396,7 @@ void symmetry_breaking_no_double_gate( z3::context& ctx, z3::solver& solver, con
 {
   if ( network.size() >= 2 )
   {
-    for ( auto i = 0; i < network.size() - 1; ++i )
+    for ( auto i = 0u; i < network.size() - 1; ++i )
     {
       solver.add( !( ( network[i][0] == network[i + 1][0] ) && ( network[i][1] == network[i + 1][1] ) ) );
     }
@@ -410,7 +410,7 @@ void symmetry_breaking_colexicographic( z3::context& ctx, z3::solver& solver, co
 
   if ( network.size() >= 2 )
   {
-    for ( auto i = 0; i < network.size() - 1; ++i )
+    for ( auto i = 0u; i < network.size() - 1; ++i )
     {
       const z3::expr move1 = ( ( one << network[i][0] ) & network[i + 1][1] ) == zero;
       const z3::expr move2 = ( network[i][1] & ( one << network[i + 1][0] ) ) == zero;
@@ -427,7 +427,7 @@ void symmetry_breaking_one_not_per_line( z3::context& ctx, z3::solver& solver, c
 {
   const auto zero = ctx.bv_val( 0u, n );
 
-  for ( auto i = 0; i < network.size(); ++i )
+  for ( auto i = 0u; i < network.size(); ++i )
   {
     for ( auto j = i + 1; j < network.size(); ++j )
     {
@@ -487,7 +487,7 @@ bool synth_len(circuit& circ, const binary_truth_table& spec,
     for ( auto i = 0u; i < gate_count; ++i )
     {
       auto constr = ( network[i][0] == ctx.bv_val( 0u, n ) );
-      for ( auto j = 0; j < n; ++j )
+      for ( auto j = 0u; j < n; ++j )
       {
         auto mask = 1 << j;
         constr = constr || ( network[i][0] == ctx.bv_val( mask, n ) );

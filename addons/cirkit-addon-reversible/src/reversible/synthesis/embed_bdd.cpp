@@ -205,7 +205,7 @@ bool embed_bdd( rcbdd& cf, const bdd_function_t& bdd,
       /* garbage */
       auto dec_garbage = garbage[mu];
 
-      for ( auto i = 0; i < garbage_lines; ++i )
+      for ( auto i = 0u; i < garbage_lines; ++i )
       {
         if ( i < dont_cares.size() )
         {

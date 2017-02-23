@@ -106,8 +106,8 @@ dbs_command::dbs_command( const environment::ptr& env )
 command::rules_t dbs_command::validity_rules() const
 {
   return {
-    { [&]() { return !this->is_set( "symbolic" ) || env->store<rcbdd>().current_index() >= 0u; }, "symbolic method require RCBDD in store" },
-    { [&]() { return this->is_set( "symbolic" ) || env->store<binary_truth_table>().current_index() >= 0u; }, "no truth table in store" }
+    { [&]() { return !this->is_set( "symbolic" ) || env->store<rcbdd>().current_index() >= 0; }, "symbolic method require RCBDD in store" },
+    { [&]() { return this->is_set( "symbolic" ) || env->store<binary_truth_table>().current_index() >= 0; }, "no truth table in store" }
   };
 }
 

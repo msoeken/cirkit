@@ -437,7 +437,7 @@ circuit exorcism_merge_heuristic( const circuit& base )
     const auto target = gate.targets().front();
 
     /* apply current cubes */
-    if ( target != current_target )
+    if ( static_cast<int>( target ) != current_target )
     {
       exorcism_merge_heuristic_add_cubes( circ, cubes, current_target );
       cubes.clear();

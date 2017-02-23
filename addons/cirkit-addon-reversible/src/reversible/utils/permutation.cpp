@@ -108,7 +108,7 @@ std::vector<std::pair<unsigned, unsigned>> permutation_to_transpositions( const 
 
   for ( int i = perm_copy.size() - 1; i > 1; --i )
   {
-    if ( perm_copy[i] == i ) { continue; }
+    if ( static_cast<int>( perm_copy[i] ) == i ) { continue; }
 
     /* where is i? */
     auto other = std::distance( perm_copy.begin(), std::find( perm_copy.begin(), perm_copy.begin() + i, i ) );

@@ -319,7 +319,7 @@ int create_initial_cnf( Solver& solver, const rcbdd& cf, int sid, std::vector<in
 
     add_clause( solver )( {poids[0]} );
 
-    for ( auto i = 0; i < xs.size(); ++i )
+    for ( auto i = 0u; i < xs.size(); ++i )
     {
       xs[i] = piids[3 * i];
       ys[i] = piids[3 * i + 1];
@@ -343,7 +343,7 @@ int create_initial_cnf( Solver& solver, const rcbdd& cf, int sid, std::vector<in
     }
     add_clause( solver )( {chi_id} );
 
-    for ( auto i = 0; i < xs.size(); ++i )
+    for ( auto i = 0u; i < xs.size(); ++i )
     {
       xs[i] = old_sid + 3 * i;
       ys[i] = old_sid + 3 * i + 1;
@@ -530,7 +530,7 @@ aig_graph synthesize_with_sat_incremental( unsigned k, const aig_graph& aig, cir
 
   add_clause( solver )( {poids[0]} );
 
-  for ( auto i = 0; i < n; ++i )
+  for ( auto i = 0u; i < n; ++i )
   {
     xs[i] = piids[3 * i];
     ys[i] = poids[i + 1];
@@ -633,7 +633,7 @@ aig_graph synthesize_with_sat_incremental( unsigned k, const aig_graph& aig, cir
     std::cout << boost::format( " assigns = %7d local = %9.2f avg = %4.2f total = %9.2f enc = %8.2f" ) % count % local_runtime % ( local_runtime / count ) % solving_time % enc_runtime;
   }
 
-  for ( auto i = 0; i < n; ++i )
+  for ( auto i = 0u; i < n; ++i )
   {
     aig_create_po( aig_new, outputs_new[i], names_old[i] );
   }
@@ -880,7 +880,7 @@ bool symbolic_transformation_based_synthesis_sat_incremental( circuit& circ, con
   auto info = aig_info( aig );
 
   /* expose y outputs */
-  for ( auto i = 0; i < n; ++i )
+  for ( auto i = 0u; i < n; ++i )
   {
     aig_create_po( aig, {info.inputs[ 3 * i + 1 ], false}, "y" + std::to_string( i ) );
   }

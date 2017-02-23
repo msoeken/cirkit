@@ -366,14 +366,14 @@ void rcbdd::write_pla( const std::string& filename, bool full ) const
        << ".o " << vars << std::endl
        << ".ilb";
 
-    for ( auto i = 0; i < vars - n; ++i )
+    for ( auto i = 0u; i < vars - n; ++i )
     {
       os << " kappa" << ( i + 1 );
     }
     os << " " << boost::join( input_labels(), " " ) << std::endl
        << ".ob " << boost::join( output_labels(), " " );
 
-    for ( auto i = 0; i < vars - m; ++i )
+    for ( auto i = 0u; i < vars - m; ++i )
     {
       os << " gamma" << ( i + 1 );
     }

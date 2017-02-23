@@ -252,7 +252,7 @@ bool embed_pla( rcbdd& cf, const std::string& filename,
 
   /* We store the garbage variables */
   std::vector<BDD> garbage;
-  for (int i = req_vars - 1; i >= p.m; --i)
+  for (int i = req_vars - 1; i >= static_cast<int>( p.m ); --i)
   {
     garbage += cf.y(i);
   }

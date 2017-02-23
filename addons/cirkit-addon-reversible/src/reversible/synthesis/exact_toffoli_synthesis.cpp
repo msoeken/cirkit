@@ -90,7 +90,7 @@ private:
   template<typename Fn>
   void for_each_not( Fn&& f )
   {
-    for ( int i = 0; i < n; ++i )
+    for ( auto i = 0u; i < n; ++i )
     {
       f( i );
     }
@@ -99,9 +99,9 @@ private:
   template<typename Fn>
   void for_each_cnot( Fn&& f )
   {
-    for ( int i = 0; i < n; ++i )
+    for ( auto i = 0u; i < n; ++i )
     {
-      for ( int j = 1; j < n; ++j )
+      for ( auto j = 1u; j < n; ++j )
       {
         f( i, j );
       }
@@ -111,11 +111,11 @@ private:
   template<typename Fn>
   void for_each_tof( Fn&& f )
   {
-    for ( int i = 0; i < n; ++i )
+    for ( auto i = 0u; i < n; ++i )
     {
-      for ( int j = 2; j < n; ++j )
+      for ( auto j = 2u; j < n; ++j )
       {
-        for ( int k = 1; k < j; ++k )
+        for ( auto k = 1u; k < j; ++k )
         {
           f( i, j, k );
         }
@@ -202,43 +202,43 @@ void exact_toffoli_synthesis_manager::run( circuit& circ )
 
 inline int exact_toffoli_synthesis_manager::var_offset( int l ) const
 {
-  assert( l < r );
+  assert( l < static_cast<int>( r ) );
 
   return l * num_vars_per_gate;
 }
 
 inline int exact_toffoli_synthesis_manager::sim_var( int l, int i, int t ) const
 {
-  assert( l < r );
-  assert( i < n );
-  assert( t < ( 1u << n ) );
+  assert( l < static_cast<int>( r ) );
+  assert( i < static_cast<int>( n ) );
+  assert( t < static_cast<int>( 1u << n ) );
 
   return var_offset( l ) + i * ( 1 << n ) + t;
 }
 
 inline int exact_toffoli_synthesis_manager::not_var( int l, int i ) const
 {
-  assert( l < r );
-  assert( i < n );
+  assert( l < static_cast<int>( r ) );
+  assert( i < static_cast<int>( n ) );
 
   return var_offset( l ) + sim_offset + i;
 }
 
 inline int exact_toffoli_synthesis_manager::cnot_var( int l, int i, int j ) const
 {
-  assert( l < r );
-  assert( i < n );
-  assert( j > 0 && j < n );
+  assert( l < static_cast<int>( r ) );
+  assert( i < static_cast<int>( n ) );
+  assert( j > 0 && j < static_cast<int>( n ) );
 
   return var_offset( l ) + sim_offset + n + i * ( n - 1 ) + j - 1;
 }
 
 inline int exact_toffoli_synthesis_manager::tof_var( int l, int i, int j, int k ) const
 {
-  assert( l < r );
-  assert( i < n );
-  assert( j > 1 && j < n );
-  assert( k > 0 && k < j );
+  assert( l < static_cast<int>( r ) );
+  assert( i < static_cast<int>( n ) );
+  assert( j > 1 && j < static_cast<int>( n ) );
+  assert( k > 0 && k < static_cast<int>( j ) );
 
   auto offset = var_offset( l ) + sim_offset + n + n * ( n - 1 );
   offset += i * ( ( n - 2 ) * ( n - 1 ) ) / 2; /* offset based on target */
@@ -249,9 +249,9 @@ inline int exact_toffoli_synthesis_manager::tof_var( int l, int i, int j, int k 
 
 inline int exact_toffoli_synthesis_manager::equal_other_clauses( int g, int l, int t, int i )
 {
-  for ( auto ii = 0; ii < n; ++ii )
+  for ( auto ii = 0u; ii < n; ++ii )
   {
-    if ( ii == i ) continue;
+    if ( static_cast<int>( ii ) == i ) continue;
 
     if ( l == 0 )
     {
@@ -372,17 +372,17 @@ int exact_toffoli_synthesis_manager::symmetry_breaking_ordering( int l )
     } );
   /* no CNOT( i, j ) before NOT( i' ) where i' not in {i, j} */
   for_each_cnot( [this, l]( int i, int j ) {
-      for ( auto ii = 0; ii < n; ++ii )
+      for ( auto ii = 0u; ii < n; ++ii )
       {
-        if ( ii == i || ii == ( ( i + j ) % n ) ) { continue; }
+        if ( static_cast<int>( ii ) == i || ii == ( ( i + j ) % n ) ) { continue; }
         add_clause( make_lit( not_var( l, ii ), 1 ), make_lit( cnot_var( l - 1, i, j ), 1 ) );
       }
     } );
   /* no TOF( i, j, k ) before NOT( i' ) where i' not in {i, j, k} */
   for_each_tof( [this, l]( int i, int j, int k ) {
-      for ( auto ii = 0; ii < n; ++ii )
+      for ( auto ii = 0u; ii < n; ++ii )
       {
-        if ( ii == i || ii == ( ( i + j ) % n ) || ii == ( ( i + k ) % n ) ) { continue; }
+        if ( static_cast<int>( ii ) == i || ii == ( ( i + j ) % n ) || ii == ( ( i + k ) % n ) ) { continue; }
         add_clause( make_lit( not_var( l, ii ), 1 ), make_lit( tof_var( l - 1, i, j, k ), 1 ) );
       }
     } );
@@ -407,34 +407,34 @@ int exact_toffoli_synthesis_manager::symmetry_breaking_not_same( int l )
 
 void exact_toffoli_synthesis_manager::debug_vars()
 {
-  for ( auto l = 0; l < r; ++l )
+  for ( auto l = 0u; l < r; ++l )
   {
-    for ( auto i = 0; i < n; ++i )
+    for ( auto i = 0u; i < n; ++i )
     {
-      for ( auto t = 0; t < ( 1 << n ); ++t )
+      for ( auto t = 0u; t < ( 1 << n ); ++t )
       {
         std::cout << boost::format( "%6d sim_var( %d, %d, %d )" ) % sim_var( l, i, t ) % l % i % t << std::endl;
       }
     }
 
-    for ( auto i = 0; i < n; ++i )
+    for ( auto i = 0u; i < n; ++i )
     {
       std::cout << boost::format( "%6d not_var( %d, %d )" ) % not_var( l, i ) % l % i << std::endl;
     }
 
-    for ( auto i = 0; i < n; ++i )
+    for ( auto i = 0u; i < n; ++i )
     {
-      for ( auto j = 1; j < n; ++j )
+      for ( auto j = 1u; j < n; ++j )
       {
         std::cout << boost::format( "%6d cnot_var( %d, %d, %d )" ) % cnot_var( l, i, j ) % l % i % j << std::endl;
       }
     }
 
-    for ( auto i = 0; i < n; ++i )
+    for ( auto i = 0u; i < n; ++i )
     {
-      for ( auto j = 2; j < n; ++j )
+      for ( auto j = 2u; j < n; ++j )
       {
-        for ( auto k = 1; k < j; ++k )
+        for ( auto k = 1u; k < j; ++k )
         {
           std::cout << boost::format( "%6d tof_var( %d, %d, %d, %d )" ) % tof_var( l, i, j, k ) % l % i % j % k << std::endl;
         }
@@ -445,7 +445,7 @@ void exact_toffoli_synthesis_manager::debug_vars()
 
 int exact_toffoli_synthesis_manager::gate_clauses( int l )
 {
-  for ( auto t = 0; t < ( 1u << n ); ++t )
+  for ( auto t = 0u; t < ( 1u << n ); ++t )
   {
     for_each_not( [this, l, t]( int i ) { not_clauses( l, i, t ); } );
     for_each_cnot( [this, l, t]( int i, int j ) { cnot_clauses( l, i, j, t ); } );
@@ -455,15 +455,15 @@ int exact_toffoli_synthesis_manager::gate_clauses( int l )
   /* at least one gate */
   std::vector<int> gates;
 
-  for ( auto i = 0; i < n; ++i )
+  for ( auto i = 0u; i < n; ++i )
   {
     gates.push_back( make_lit( not_var( l, i ), 0 ) );
 
-    for ( auto j = 1; j < n; ++j )
+    for ( auto j = 1u; j < n; ++j )
     {
       gates.push_back( make_lit( cnot_var( l, i, j ), 0 ) );
 
-      for ( auto k = 1; k < j; ++k )
+      for ( auto k = 1u; k < j; ++k )
       {
         gates.push_back( make_lit( tof_var( l, i, j, k ), 0 ) );
       }
@@ -481,9 +481,9 @@ std::vector<int> exact_toffoli_synthesis_manager::spec_assumptions() const
   std::vector<int> assumptions;
   assumptions.reserve(  sim_offset );
 
-  for ( auto i = 0; i < n; ++i )
+  for ( auto i = 0u; i < n; ++i )
   {
-    for ( auto t = 0; t < ( 1 << n ); ++t )
+    for ( auto t = 0u; t < ( 1 << n ); ++t )
     {
       assumptions.push_back( make_lit( sim_var( r - 1, i, t ), spec_vec[t][i] ? 0 : 1 ) );
     }
@@ -496,11 +496,11 @@ void exact_toffoli_synthesis_manager::create_circuit( circuit& circ ) const
 {
   circ.set_lines( n );
 
-  for ( auto l = 0; l < r; ++l )
+  for ( auto l = 0u; l < r; ++l )
   {
     auto added = false;
 
-    for ( auto i = 0; i < n; ++i )
+    for ( auto i = 0u; i < n; ++i )
     {
       if ( abc::sat_solver_var_value( solver.get(), not_var( l, i ) ) )
       {
@@ -512,7 +512,7 @@ void exact_toffoli_synthesis_manager::create_circuit( circuit& circ ) const
         else { std::cout << "[w] alternative gate found" << std::endl; }
       }
 
-      for ( auto j = 1; j < n; ++j )
+      for ( auto j = 1u; j < n; ++j )
       {
         if ( abc::sat_solver_var_value( solver.get(), cnot_var( l, i, j ) ) )
         {
@@ -524,7 +524,7 @@ void exact_toffoli_synthesis_manager::create_circuit( circuit& circ ) const
           else { std::cout << "[w] alternative gate found" << std::endl; }
         }
 
-        for ( auto k = 1; k < j; ++k )
+        for ( auto k = 1u; k < j; ++k )
         {
           if ( abc::sat_solver_var_value( solver.get(), tof_var( l, i, j, k ) ) )
           {

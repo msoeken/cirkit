@@ -278,7 +278,7 @@ binary_truth_table pla_from_bdd( const Cudd& mgr, const std::vector<BDD>& output
     {
       binary_truth_table::cube_type in( mgr.ReadSize(), boost::optional<bool>() );
 
-      for ( auto i = 0u; i < mgr.ReadSize(); ++i )
+      for ( auto i = 0; i < mgr.ReadSize(); ++i )
       {
         if ( cube[i] == 0 )
         {

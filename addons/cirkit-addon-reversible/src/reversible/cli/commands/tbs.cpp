@@ -91,10 +91,10 @@ tbs_command::tbs_command( const environment::ptr& env )
 command::rules_t tbs_command::validity_rules() const
 {
   return {
-    { [&]() { return !this->is_set( "bdd" ) || env->store<rcbdd>().current_index() >= 0u; }, "symbolid BDD method requires RCBDD in store" },
-    { [&]() { return !this->is_set( "sat" ) || env->store<rcbdd>().current_index() >= 0u || env->store<circuit>().current_index() >= 0u || env->store<aig_graph>().current_index() >= 0u; }, "symbolid SAT method requires RCBDDor circuit in store" },
-    { [&]() { return this->is_set( "bdd" ) || this->is_set( "sat" ) || env->store<binary_truth_table>().current_index() >= 0u; }, "no truth table in store" },
-    { [&]() { return static_cast<int>( this->is_set( "bdd" ) ) + static_cast<int>( this->is_set( "sat" ) ) <= 1u; }, "options bdd and sat cannot be set at the same time" }
+    { [&]() { return !this->is_set( "bdd" ) || env->store<rcbdd>().current_index() >= 0; }, "symbolid BDD method requires RCBDD in store" },
+    { [&]() { return !this->is_set( "sat" ) || env->store<rcbdd>().current_index() >= 0 || env->store<circuit>().current_index() >= 0 || env->store<aig_graph>().current_index() >= 0; }, "symbolid SAT method requires RCBDDor circuit in store" },
+    { [&]() { return this->is_set( "bdd" ) || this->is_set( "sat" ) || env->store<binary_truth_table>().current_index() >= 0; }, "no truth table in store" },
+    { [&]() { return static_cast<int>( this->is_set( "bdd" ) ) + static_cast<int>( this->is_set( "sat" ) ) <= 1; }, "options bdd and sat cannot be set at the same time" }
   };
 }
 

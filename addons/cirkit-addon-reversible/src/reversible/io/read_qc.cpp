@@ -112,7 +112,7 @@ circuit read_qc( const std::string& filename )
           }
 
           gate::control_container controls;
-          for ( auto i = 0; i < lines.size() - 1; ++i )
+          for ( auto i = 0u; i < lines.size() - 1; ++i )
           {
             controls.push_back( make_var( var2line[lines[i]], lines[i].back() != '\'' ) );
           }

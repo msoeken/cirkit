@@ -93,9 +93,9 @@ int less_or_equal_sinz( S& solver, const clause_t& x, unsigned r, int sid, int s
 
   //std::cerr << "n = " << n << " r = " << r << " sid = " << sid << '\n';
   assert( n > r );
-  for ( int j = 0; j < n - r - 1; ++j )
+  for ( auto j = 0u; j < n - r - 1; ++j )
   {
-    for ( int k = 0; k < r; ++k )
+    for ( auto k = 0u; k < r; ++k )
     {
       // std::cerr << "(" << j << "," << k << ")" << '\n';
       //const int l1 = spol * -(sid + j * (n - r) + k);
@@ -106,9 +106,9 @@ int less_or_equal_sinz( S& solver, const clause_t& x, unsigned r, int sid, int s
     }
   }
 
-  for ( int j = 0; j < (n - r); ++j )
+  for ( auto j = 0u; j < (n - r); ++j )
   {
-    for ( int k = 0; k <= r; ++k )
+    for ( auto k = 0u; k <= r; ++k )
     {
       // std::cerr << "(" << j << "," << k << ")" << '\n';
       clause_t clause;
@@ -175,23 +175,23 @@ int less_or_equal_bailleux_boufkhad_assume( S& solver, int assume, const clause_
   std::vector<int> pol( 2 * n, 1 );
 
   auto offset = sid;
-  for ( int k = n - 1; k > 1; --k )
+  for ( auto k = n - 1; k > 1; --k )
   {
     ts_count[k] = std::min( ts_count[k << 1] + ts_count[( k << 1 ) + 1], r );
     ts[k] = offset;
     offset += ts_count[k];
   }
-  for ( int k = n; k < 2 * n; ++k )
+  for ( auto k = n; k < 2 * n; ++k )
   {
     ts[k] = abs( x[k - n] );
     pol[k] = x[k - n] > 0 ? 1 : -1;
   }
 
-  for ( int k = 2; k < n; ++k )
+  for ( auto k = 2u; k < n; ++k )
   {
-    for ( int i = 0; i <= ts_count[k << 1]; ++i )
+    for ( auto i = 0u; i <= ts_count[k << 1]; ++i )
     {
-      for ( int j = 0; j <= ts_count[( k << 1 ) + 1]; ++j )
+      for ( auto j = 0u; j <= ts_count[( k << 1 ) + 1]; ++j )
       {
         if ( ( i + j < 1 ) || ( i + j > ts_count[k] + 1 ) ) { continue; }
 
@@ -208,9 +208,9 @@ int less_or_equal_bailleux_boufkhad_assume( S& solver, int assume, const clause_
     }
   }
 
-  for ( int i = 0; i <= ts_count[2]; ++i )
+  for ( auto i = 0u; i <= ts_count[2]; ++i )
   {
-    for ( int j = 0; j <= ts_count[3]; ++j )
+    for ( auto j = 0u; j <= ts_count[3]; ++j )
     {
       if ( i + j == r + 1 )
       {
@@ -238,17 +238,17 @@ int less_or_equal_bailleux_boufkhad( S& solver, const clause_t& x, unsigned r, i
     ts[k] = offset;
     offset += ts_count[k];
   }
-  for ( int k = n; k < 2 * n; ++k )
+  for ( auto k = n; k < 2 * n; ++k )
   {
     ts[k] = abs( x[k - n] );
     pol[k] = x[k - n] > 0 ? 1 : -1;
   }
 
-  for ( int k = 2; k < n; ++k )
+  for ( auto k = 2u; k < n; ++k )
   {
-    for ( int i = 0; i <= ts_count[k << 1]; ++i )
+    for ( auto i = 0u; i <= ts_count[k << 1]; ++i )
     {
-      for ( int j = 0; j <= ts_count[( k << 1 ) + 1]; ++j )
+      for ( auto j = 0u; j <= ts_count[( k << 1 ) + 1]; ++j )
       {
         if ( ( i + j < 1 ) || ( i + j > ts_count[k] + 1 ) ) { continue; }
 
@@ -265,9 +265,9 @@ int less_or_equal_bailleux_boufkhad( S& solver, const clause_t& x, unsigned r, i
     }
   }
 
-  for ( int i = 0; i <= ts_count[2]; ++i )
+  for ( auto i = 0u; i <= ts_count[2]; ++i )
   {
-    for ( int j = 0; j <= ts_count[3]; ++j )
+    for ( auto j = 0u; j <= ts_count[3]; ++j )
     {
       if ( i + j == r + 1 )
       {
@@ -453,14 +453,14 @@ int sat_pairwise_merge( S& solver, const std::vector<int>& as, const std::vector
   std::vector<int> ds( n ), es( n );
 
   ds[0u] = cs[0];
-  for ( auto i = 1; i < n; ++i ) { ds[i] = sid++; }
+  for ( auto i = 1u; i < n; ++i ) { ds[i] = sid++; }
 
-  for ( auto i = 0; i < n - 1; ++i ) { es[i] = sid++; }
+  for ( auto i = 0u; i < n - 1; ++i ) { es[i] = sid++; }
   es[n - 1] = cs[2 * n - 1];
 
   /* fill a0, b0, a1, b1 */
   std::vector<int> a0( n / 2 ), b0( n / 2 ), a1( n / 2 ), b1( n / 2 );
-  for ( auto i = 0; i < n / 2; ++i )
+  for ( auto i = 0u; i < n / 2; ++i )
   {
     a0[i] = as[2 * i];
     a1[i] = as[2 * i + 1];
@@ -471,13 +471,13 @@ int sat_pairwise_merge( S& solver, const std::vector<int>& as, const std::vector
   sid = sat_pairwise_merge( solver, a0, b0, ds, sid );
   sid = sat_pairwise_merge( solver, a1, b1, es, sid );
 
-  for ( auto i = 0; i < n - 1; ++i )
+  for ( auto i = 0u; i < n - 1; ++i )
   {
     sat_pairwise_comparator( solver, es[i], ds[i + 1], cs[2 * i + 1], cs[2 * i + 2] );
   }
 
   /* sort outputs */
-  for ( auto i = 0; i < cs.size() - 1; ++i )
+  for ( auto i = 0u; i < cs.size() - 1; ++i )
   {
     add_clause( solver )( {cs[i], -cs[i + 1]} );
   }

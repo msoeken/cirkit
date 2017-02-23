@@ -253,7 +253,7 @@ public:
             auto can_uncompute = true;
             for ( const auto& cchild : boost::make_iterator_range( boost::adjacent_vertices( child, lut() ) ) )
             {
-              if ( line_to_lut[(*this)[cchild]] != cchild )
+              if ( line_to_lut[(*this)[cchild]] != static_cast<int>( cchild ) )
               {
                 can_uncompute = false;
                 break;

@@ -77,7 +77,7 @@ aig_function aig_from_bdd( aig_graph& aig, DdManager* dd, DdNode* node )
   auto n = Cudd_ReadSize( dd );
   auto num_pis = info.inputs.size();
 
-  for ( auto i = num_pis; i < n; ++i )
+  for ( auto i = num_pis; static_cast<int>( i ) < n; ++i )
   {
     aig_create_pi( aig, boost::str( boost::format( "x%d" ) % i ) );
   }
