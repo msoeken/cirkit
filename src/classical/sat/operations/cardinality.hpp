@@ -208,11 +208,11 @@ int less_or_equal_bailleux_boufkhad_assume( S& solver, int assume, const clause_
     }
   }
 
-  for ( auto i = 0u; i <= ts_count[2]; ++i )
+  for ( auto i = 0; i <= static_cast<int>( ts_count[2] ); ++i )
   {
-    for ( auto j = 0u; j <= ts_count[3]; ++j )
+    for ( auto j = 0; j <= static_cast<int>( ts_count[3] ); ++j )
     {
-      if ( i + j == r + 1 )
+      if ( i + j == static_cast<int>( r ) + 1 )
       {
         assert( i && j );
         add_clause( solver )( { -assume, -pol[2] * ( ts[2] + i - 1 ), -pol[3] * ( ts[3] + j - 1 )} );
@@ -265,11 +265,11 @@ int less_or_equal_bailleux_boufkhad( S& solver, const clause_t& x, unsigned r, i
     }
   }
 
-  for ( auto i = 0u; i <= ts_count[2]; ++i )
+  for ( auto i = 0; i <= static_cast<int>( ts_count[2] ); ++i )
   {
-    for ( auto j = 0u; j <= ts_count[3]; ++j )
+    for ( auto j = 0; j <= static_cast<int>( ts_count[3] ); ++j )
     {
-      if ( i + j == r + 1 )
+      if ( i + j == static_cast<int>( r ) + 1 )
       {
         assert( i && j );
         add_clause( solver )( {-pol[2] * ( ts[2] + i - 1 ), -pol[3] * ( ts[3] + j - 1 )} );
