@@ -250,8 +250,10 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
   auto v_gnd = add_vertex( lut );
   types[v_gnd] = gate_type_t::gnd;
+  gate_to_node["gnd"] = v_gnd;
   auto v_vdd = add_vertex( lut );
   types[v_vdd] = gate_type_t::vdd;
+  gate_to_node["vdd"] = v_vdd;
 
   for ( const auto& input : inputs )
   {
