@@ -65,7 +65,7 @@ void xmg_to_lut_add_cut( const xmg_graph& xmg, lut_graph_t& lut, xmg_node n,
   auto tt = xmg_simulate_cut( xmg, n, leafs );
 
   auto node = add_vertex( lut );
-  boost::get( boost::vertex_gate_type, lut )[node] = gate_type_t::internal;
+  boost::get( boost::vertex_lut_type, lut )[node] = lut_type_t::internal;
   boost::get( boost::vertex_lut, lut )[node ] = tt_to_hex( tt );
   node_to_node[n] = node;
   visited.set( n );
@@ -92,7 +92,7 @@ lut_graph_t xmg_to_lut_graph( const xmg_graph& xmg )
   /* graph */
   lut_graph_t lut;
   const auto& name = get( boost::vertex_name, lut );
-  const auto& gate = get( boost::vertex_gate_type, lut );
+  const auto& gate = get( boost::vertex_lut_type, lut );
   const auto& luts = get( boost::vertex_lut, lut );
 
   boost::dynamic_bitset<> visited( xmg.size() );
@@ -101,20 +101,20 @@ lut_graph_t xmg_to_lut_graph( const xmg_graph& xmg )
   /* constants */
   auto gnd = add_vertex( lut );
   name[gnd] = "gnd";
-  gate[gnd] = gate_type_t::gnd;
+  gate[gnd] = lut_type_t::gnd;
   visited.set( 0 );
   node_to_node[0] = gnd;
 
   auto vdd = add_vertex( lut );
   name[vdd] = "vdd";
-  gate[vdd] = gate_type_t::vdd;
+  gate[vdd] = lut_type_t::vdd;
 
   /* copy inputs */
   for ( const auto& pi : xmg.inputs() )
   {
     auto n = add_vertex( lut );
     name[n] = pi.second;
-    gate[n] = gate_type_t::pi;
+    gate[n] = lut_type_t::pi;
 
     visited.set( pi.first );
     node_to_node[pi.first] = n;
@@ -155,7 +155,7 @@ lut_graph_t xmg_to_lut_graph( const xmg_graph& xmg )
           {
             target = add_vertex( lut );
             add_edge( target, node_to_node[node], lut );
-            gate[target] = gate_type_t::internal;
+            gate[target] = lut_type_t::internal;
             luts[target] = "1";
             output_to_node[( node << 1u ) + 1u] = target;
           }
@@ -190,7 +190,7 @@ lut_graph_t xmg_to_lut_graph( const xmg_graph& xmg )
           add_edge( target, child, lut );
         }
 
-        gate[target] = gate_type_t::internal;
+        gate[target] = lut_type_t::internal;
         const auto& ltt = luts[node_to_node[node]];
         luts[target] = invert_hex( ltt );
         output_to_node[ ( node << 1u ) + 1u ] = target;
@@ -233,7 +233,7 @@ lut_graph_t xmg_to_lut_graph( const xmg_graph& xmg )
 
     auto n = add_vertex( lut );
     name[n] = po.second;
-    gate[n] = gate_type_t::po;
+    gate[n] = lut_type_t::po;
     add_edge( n, target, lut );
   }
 

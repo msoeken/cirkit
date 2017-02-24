@@ -24,33 +24,29 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @file read_blif.hpp
- *
- * @brief Read from BLIF files
- *
- * @author Mathias Soeken
- * @since  2.3
- */
+#include "lut_graph.hpp"
 
-#ifndef READ_BLIF_HPP
-#define READ_BLIF_HPP
-
-#include <string>
-
-#include <classical/lut/lut_graph.hpp>
+using namespace boost::assign;
 
 namespace cirkit
 {
 
-/**
- * if store_cubes is true, the cubes are extracted from the BLIF without creating the function
- */
-lut_graph_t read_blif( const std::string& filename, bool store_cubes = false );
+/******************************************************************************
+ * Private functions                                                          *
+ ******************************************************************************/
 
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
+
+unsigned lut_graph_lut_count( const lut_graph_t& g )
+{
+  const auto& type = boost::get( boost::vertex_lut_type, g );
+
+  return boost::count_if( boost::vertices( g ), [&type]( lut_vertex_t v ) { return type[v] == lut_type_t::internal; } );
 }
 
-#endif
+}
 
 // Local Variables:
 // c-basic-offset: 2

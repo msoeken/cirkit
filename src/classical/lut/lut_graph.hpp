@@ -25,16 +25,16 @@
  */
 
 /**
- * @file netlist_graphs.hpp
+ * @file lut_graph.hpp
  *
- * @brief Graph data structures for netlists
+ * @brief LUT Graph
  *
  * @author Mathias Soeken
  * @since  2.2
  */
 
-#ifndef NETLIST_GRAPHS_HPP
-#define NETLIST_GRAPHS_HPP
+#ifndef LUT_GRAPH_HPP
+#define LUT_GRAPH_HPP
 
 #include <iostream>
 
@@ -47,8 +47,11 @@
 namespace boost
 {
 
-enum vertex_gate_type_t { vertex_gate_type };
-BOOST_INSTALL_PROPERTY(vertex, gate_type);
+enum vertex_lut_type_t { vertex_lut_type };
+BOOST_INSTALL_PROPERTY(vertex, lut_type);
+
+enum vertex_lut_t { vertex_lut };
+BOOST_INSTALL_PROPERTY(vertex, lut);
 
 }
 
@@ -63,24 +66,24 @@ using boost::graph_traits;
 using boost::property;
 using boost::vecS;
 using boost::vertex_color_t;
-using boost::vertex_gate_type_t;
 using boost::vertex_name_t;
+using boost::vertex_lut_t;
+using boost::vertex_lut_type_t;
 
-enum class gate_type_t { pi, po, gnd, vdd, fanout, inv, buf, _and, _or, nand, nor, _xor, xnor, mux, fadd, internal, pwr, dff, dffrs };
+enum class lut_type_t { pi, po, gnd, vdd, internal };
 
 /******************************************************************************
- * Simple fan-out graph                                                       *
+ * LUT graph                                                                  *
  ******************************************************************************/
 
-using simple_fanout_vertex_properties_t = property<vertex_name_t, std::string,
-                                          property<vertex_gate_type_t, gate_type_t>>;
-using simple_fanout_edge_properties_t   = property<edge_name_t, std::pair<std::string, std::string>>;
+using lut_graph_vertex_properties_t = property<vertex_name_t, std::string,
+                                      property<vertex_lut_t, std::string,
+                                      property<vertex_lut_type_t, lut_type_t>>>;
+using lut_graph_t  = digraph_t<lut_graph_vertex_properties_t>;
+using lut_vertex_t = vertex_t<lut_graph_t>;
+using lut_edge_t   = edge_t<lut_graph_t>;
 
-using simple_fanout_graph_t  = digraph_t<simple_fanout_vertex_properties_t, simple_fanout_edge_properties_t>;
-using simple_fanout_vertex_t = vertex_t<simple_fanout_graph_t>;
-using simple_fanout_edge_t   = edge_t<simple_fanout_graph_t>;
-
-void write_simple_fanout_graph( std::ostream& os, const simple_fanout_graph_t& g );
+unsigned lut_graph_lut_count( const lut_graph_t& g );
 
 }
 

@@ -69,7 +69,7 @@ void map_lut_nodes_with_gia( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, s
   int i;
 
   //auto tts = boost::get( boost::vertex_lut, lut );
-  auto types = boost::get( boost::vertex_gate_type, lut );
+  auto types = boost::get( boost::vertex_lut_type, lut );
 
   abc::Gia_ObjComputeTruthTableStart( abc_lut, k );
   Gia_ManForEachLut( abc_lut, i )
@@ -89,7 +89,7 @@ void map_lut_nodes_with_gia( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, s
 
     auto v = add_vertex( lut );
     //tts[v] = std::make_pair( size, pt[0] );
-    types[v] = gate_type_t::internal;
+    types[v] = lut_type_t::internal;
 
     for ( auto j = 0; j < size; ++j )
     {
@@ -109,7 +109,7 @@ void map_lut_nodes_with_hop( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, s
   int i;
 
   //auto tts = boost::get( boost::vertex_lut, lut );
-  auto types = boost::get( boost::vertex_gate_type, lut );
+  auto types = boost::get( boost::vertex_lut_type, lut );
 
   auto* hop = abc::Hop_ManStart();
 
@@ -130,7 +130,7 @@ void map_lut_nodes_with_hop( lut_graph_t& lut, abc::Gia_Man_t* abc_lut, int k, s
     assert( false && "assign tts[v] with hex value of truth[0]" );
     auto v = add_vertex( lut );
     //tts[v] = std::make_pair( size, truth[0] );
-    types[v] = gate_type_t::internal;
+    types[v] = lut_type_t::internal;
 
     auto* fanin = abc::Gia_ObjLutFanins( abc_lut, i );
     for ( auto j = 0; j < size; ++j )
@@ -177,7 +177,7 @@ lut_graph_t abc_lut_mapping( const aig_graph& aig, unsigned k,
   lut_graph_t lut;
   std::unordered_map<int, lut_vertex_t> lutid_to_node;
   auto names = boost::get( boost::vertex_name, lut );
-  auto types = boost::get( boost::vertex_gate_type, lut );
+  auto types = boost::get( boost::vertex_lut_type, lut );
   //auto tts = boost::get( boost::vertex_lut, lut );
 
   int i, id;
@@ -185,7 +185,7 @@ lut_graph_t abc_lut_mapping( const aig_graph& aig, unsigned k,
   {
     auto v = add_vertex( lut );
     lutid_to_node.insert( {id, v} );
-    types[v] = gate_type_t::pi;
+    types[v] = lut_type_t::pi;
     names[v] = std::string( (char*)abc::Vec_PtrGetEntry( abc_lut->vNamesIn, i ) );
   }
 
@@ -194,7 +194,7 @@ lut_graph_t abc_lut_mapping( const aig_graph& aig, unsigned k,
   Gia_ManForEachCoDriverId( abc_lut, id, i )
   {
     auto v = add_vertex( lut );
-    types[v] = gate_type_t::po;
+    types[v] = lut_type_t::po;
     names[v] = std::string( (char*)abc::Vec_PtrGetEntry( abc_lut->vNamesOut, i ) );
 
     const auto it = lutid_to_node.find( id );

@@ -39,7 +39,7 @@
 #define READ_BENCH_HPP
 
 #include <classical/aig.hpp>
-#include <classical/netlist_graphs.hpp>
+#include <classical/lut/lut_graph.hpp>
 
 #include <iostream>
 #include <string>

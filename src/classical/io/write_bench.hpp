@@ -40,7 +40,7 @@
 #include <string>
 
 #include <classical/aig.hpp>
-#include <classical/netlist_graphs.hpp>
+#include <classical/lut/lut_graph.hpp>
 
 namespace cirkit
 {

@@ -244,22 +244,22 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
   std::map<std::string, lut_vertex_t> gate_to_node;
 
-  auto types = boost::get( boost::vertex_gate_type, lut );
+  auto types = boost::get( boost::vertex_lut_type, lut );
   auto luts  = boost::get( boost::vertex_lut, lut );
   auto names = boost::get( boost::vertex_name, lut );
 
   auto v_gnd = add_vertex( lut );
-  types[v_gnd] = gate_type_t::gnd;
+  types[v_gnd] = lut_type_t::gnd;
   gate_to_node["gnd"] = v_gnd;
   auto v_vdd = add_vertex( lut );
-  types[v_vdd] = gate_type_t::vdd;
+  types[v_vdd] = lut_type_t::vdd;
   gate_to_node["vdd"] = v_vdd;
 
   for ( const auto& input : inputs )
   {
     auto v = add_vertex( lut );
     names[v] = input;
-    types[v] = gate_type_t::pi;
+    types[v] = lut_type_t::pi;
     gate_to_node[input] = v;
   }
 
@@ -328,7 +328,7 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
         auto v = add_vertex( lut );
 
-        types[v] = gate_type_t::internal;
+        types[v] = lut_type_t::internal;
         luts[v] = std::get<1>( gate );
 
         for ( const auto& arg : std::get<2>( gate ) )
@@ -358,7 +358,7 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
     add_edge( v, gate_to_node[output], lut );
 
-    types[v] = gate_type_t::po;
+    types[v] = lut_type_t::po;
     names[v] = output;
   }
 }
