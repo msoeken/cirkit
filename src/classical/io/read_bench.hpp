@@ -50,7 +50,8 @@ namespace cirkit
 void read_bench( aig_graph& aig, std::ifstream& is );
 void read_bench( aig_graph& aig, const std::string& filename );
 
-void read_bench( lut_graph_t& aig, const std::string& filename );
+void read_bench( lut_graph_t& graph, const std::string& filename );
+void read_bench( lut_graph& graph, const std::string& filename );
 
 }
 
