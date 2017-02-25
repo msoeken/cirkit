@@ -396,6 +396,33 @@ std::string tt_to_hex( const tt& t )
   return result;
 }
 
+tt tt_from_hex( const std::string& s )
+{
+  const auto bin = convert_hex2bin( s );
+  auto t = tt( bin.size(), 0u );
+  for ( auto i = 0u; i < bin.size(); ++i )
+  {
+    assert( bin[i] == '0' || bin[i] == '1' );
+    t[ t.size() - i - 1 ] = ( bin[i] == '1' );
+  }
+  return t;
+}
+
+tt tt_from_hex( const std::string& s, unsigned to )
+{
+  auto t = tt_from_hex( s );
+  const auto num_vars = tt_num_vars( t );
+  if ( num_vars < to )
+  {
+    tt_extend( t, to );
+  }
+  else if ( num_vars > to )
+  {
+    tt_shrink( t, to );
+  }
+  return t;
+}
+
 /******************************************************************************
  * truth table from expression                                                *
  ******************************************************************************/

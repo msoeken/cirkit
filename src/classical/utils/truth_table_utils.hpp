@@ -231,7 +231,24 @@ void tt_to_minbase_and_discard( tt& t, unsigned max_size = 6u, boost::dynamic_bi
  */
 void tt_from_minbase( tt& t, const boost::dynamic_bitset<> pattern );
 
+/**
+ * @brief Converts truth table to hex string
+ */
 std::string tt_to_hex( const tt& t );
+
+/**
+ * @brief Converts hex string to truth table
+ *
+ * The truth table has at least two variables.
+ */
+tt tt_from_hex( const std::string& s );
+
+/**
+ * @brief Converts hex string to a truth table and adjusts size
+ *
+ * This may cut off variables
+ */
+tt tt_from_hex( const std::string& s, unsigned to );
 
 /**
  * @brief Iterate through each minterm
