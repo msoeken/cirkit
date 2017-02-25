@@ -26,6 +26,8 @@
 
 #include "lut_graph.hpp"
 
+#include <classical/lut/lut_utils.hpp>
+
 #include <boost/format.hpp>
 
 using namespace boost::assign;
@@ -77,8 +79,7 @@ void lut_graph::compute_parents()
 
 void lut_graph::compute_levels()
 {
-  assert( false && "yet not implemented" );
-  // levels.update( [this]() { return lut_compute_levels( *this ); } );
+  levels.update( [this]() { return lut_compute_levels( *this ); } );
 }
 
 lut_graph::node_t lut_graph::get_constant( bool value ) const
@@ -144,7 +145,6 @@ const std::vector<lut_graph::node_t>& lut_graph::parents( const node_t& n ) cons
 
 unsigned lut_graph::level( const node_t& n ) const
 {
-  assert( false && "yet not implemented" );
   return (*levels)[n];
 }
 
