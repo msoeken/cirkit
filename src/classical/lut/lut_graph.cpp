@@ -92,7 +92,7 @@ lut_graph::node_t lut_graph::create_pi( const std::string& name )
   const auto node = add_vertex( g );
   _names[node] = name;
   _types[node] = lut_type_t::pi;
-  // _input_to_id.insert( {node, _inputs.size()} );
+  _input_to_id.insert( {node, _inputs.size()} );
   _inputs.push_back( {node, name} );
   return node;
 }
@@ -206,6 +206,16 @@ lut_graph::input_vec_t& lut_graph::inputs()
 lut_graph::output_vec_t& lut_graph::outputs()
 {
   return _outputs;
+}
+
+const std::string& lut_graph::input_name( const node_t& n ) const
+{
+  return _inputs[_input_to_id.at( n )].second;
+}
+
+const unsigned lut_graph::input_index( const node_t& n ) const
+{
+  return _input_to_id.at( n );
 }
 
 lut_graph::vertex_range_t lut_graph::nodes() const

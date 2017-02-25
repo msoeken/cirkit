@@ -130,6 +130,8 @@ public:
   const output_vec_t& outputs() const;
   input_vec_t& inputs();
   output_vec_t& outputs();
+  const std::string& input_name( const node_t& n ) const;
+  const unsigned input_index( const node_t& n ) const;
   std::vector<node_t> children( const node_t& n ) const;
   vertex_range_t nodes() const;
   edge_range_t edges() const;
@@ -150,6 +152,7 @@ private:
   std::string  _name;
   input_vec_t  _inputs;
   output_vec_t _outputs;
+  std::unordered_map<node_t, unsigned> _input_to_id;
 
   name_property_map_t      _names;
   gate_type_property_map_t _types;
