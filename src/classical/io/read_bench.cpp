@@ -481,6 +481,7 @@ void read_bench( lut_graph& graph, const std::string& filename )
 
         if ( std::find( std::begin(outputs), std::end(outputs), std::get<0>(gate) ) != std::end(outputs) )
         {
+          if ( std::get<2>(gate).empty() ) continue;
           output_map[std::get<0>(gate)] = std::get<2>(gate)[0u];
           continue;
         }
