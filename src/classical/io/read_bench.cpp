@@ -251,9 +251,11 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
   auto v_gnd = add_vertex( lut );
   types[v_gnd] = lut_type_t::gnd;
   gate_to_node["gnd"] = v_gnd;
+  names[v_gnd] = "gnd";
   auto v_vdd = add_vertex( lut );
   types[v_vdd] = lut_type_t::vdd;
   gate_to_node["vdd"] = v_vdd;
+  names[v_vdd] = "vdd";
 
   for ( const auto& input : inputs )
   {
@@ -513,19 +515,22 @@ void read_bench( lut_graph& graph, const std::string& filename )
     }
   }
 
-  for ( const auto& output : output_map )
+  for ( auto i = 0u; i < outputs.size(); ++i )
   {
-    const auto gate = output.second;
-    if ( gate_to_node.find(gate) == std::end(gate_to_node) )
+    const auto name = outputs[i];
+    if ( output_map.find( name ) != std::end(output_map) )
     {
-      std::cout << "[e] cannot find gate " << gate << " when constructing output" << std::endl;
-      assert( false );
+      const auto gate = output_map[ name ];
+      if ( gate_to_node.find(gate) == std::end(gate_to_node) )
+      {
+        std::cout << "[e] cannot find gate " << gate << " when constructing output" << std::endl;
+        assert( false );
+      }
+      else
+      {
+        graph.create_po( gate_to_node[gate], name );
+      }
     }
-    else
-    {
-      graph.create_po( gate_to_node[ gate ], output.first );
-    }
-    continue;
   }
 }
 
