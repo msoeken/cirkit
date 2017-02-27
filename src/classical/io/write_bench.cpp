@@ -178,10 +178,6 @@ void write_bench( const lut_graph& graph, std::ostream& os, const write_bench_se
         {
           output << boost::format( "OUTPUT(%s%s)" ) % settings.prefix % names[node] << std::endl;
         }
-        const auto w = *( adjacent_vertices( node, graph.graph() ).first );
-        wire << boost::format( "%s%s = LUT 0x2 ( %s%s )" )
-                    % settings.prefix % names[node] % settings.prefix % names[w]
-             << std::endl;
       }
       break;
     case lut_type_t::internal:

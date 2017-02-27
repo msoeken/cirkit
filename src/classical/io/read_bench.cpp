@@ -425,8 +425,6 @@ void read_bench( lut_graph& graph, const std::string& filename )
   std::vector<int>              waiting_refs( gates.size(), -1 ); /* if -1, gate has not been processed or is done, otherwise gives the number of fanins to wait for */
   std::vector<std::vector<int>> notify_list( gates.size() );      /* which parents to notify that they may complete */
 
-  std::map<std::string,std::string> output_map;
- 
   for ( const auto& it : index( gates ) )
   {
     const auto& gate = it.value;
@@ -481,13 +479,6 @@ void read_bench( lut_graph& graph, const std::string& filename )
       {
         const auto& gate = gates[n];
 
-        if ( std::find( std::begin(outputs), std::end(outputs), std::get<0>(gate) ) != std::end(outputs) )
-        {
-          if ( std::get<2>(gate).empty() ) continue;
-          output_map[std::get<0>(gate)] = std::get<2>(gate)[0u];
-          continue;
-        }
-        
         if ( std::get<1>( gate ) == "gnd" )
         {
           gate_to_node[std::get<0>( gate )] = graph.get_constant(false);
@@ -518,18 +509,14 @@ void read_bench( lut_graph& graph, const std::string& filename )
   for ( auto i = 0u; i < outputs.size(); ++i )
   {
     const auto name = outputs[i];
-    if ( output_map.find( name ) != std::end(output_map) )
+    if ( gate_to_node.find(outputs[i]) == std::end(gate_to_node) )
     {
-      const auto gate = output_map[ name ];
-      if ( gate_to_node.find(gate) == std::end(gate_to_node) )
-      {
-        std::cout << "[e] cannot find gate " << gate << " when constructing output" << std::endl;
-        assert( false );
-      }
-      else
-      {
-        graph.create_po( gate_to_node[gate], name );
-      }
+      std::cout << "[e] cannot find gate " << outputs[i] << " when constructing output" << std::endl;
+      assert( false );
+    }
+    else
+    {
+      graph.create_po( gate_to_node[outputs[i]], name );
     }
   }
 }
