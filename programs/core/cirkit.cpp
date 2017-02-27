@@ -41,7 +41,6 @@
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/bool_complex.hpp>
 #include <classical/cli/commands/blif_to_bench.hpp>
-#include <classical/cli/commands/cec.hpp>
 #include <classical/cli/commands/comb_approx.hpp>
 #include <classical/cli/commands/compress.hpp>
 #include <classical/cli/commands/cone.hpp>
@@ -118,7 +117,6 @@ int main( int argc, char ** argv )
   ADD_COMMAND( strash );
 
   cli.set_category( "Verification" );
-  ADD_COMMAND( cec );
   ADD_COMMAND( simulate );
   ADD_COMMAND( support );
   ADD_COMMAND( unate );
