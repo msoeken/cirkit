@@ -185,6 +185,10 @@ bool tt_cof1_is_const0( const tt& t, unsigned i );
 bool tt_cof1_is_const1( const tt& t, unsigned i );
 bool tt_cofs_opposite( const tt& t, unsigned i );
 
+void tt_resize( tt& t, unsigned size );
+bool tt_is_const0( const tt& t );
+bool tt_is_const1( const tt& t );
+
 /**
  * @brief Existential quantification
  */

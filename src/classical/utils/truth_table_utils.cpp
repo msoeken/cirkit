@@ -245,6 +245,34 @@ bool tt_cofs_opposite( const tt& t, unsigned i )
   return ((tc << shift) & tv) == (~tc & tv);
 }
 
+void tt_resize( tt& t, unsigned size )
+{
+  auto num_vars = tt_num_vars( t );
+  if ( num_vars == size ) return;
+  else if ( num_vars < size )
+  {
+    tt_extend( t, size );
+  }
+  else
+  {
+    tt_shrink( t, size );
+  }
+}
+
+bool tt_is_const0( const tt& t )
+{
+  tt t0 = tt_const0();
+  tt_resize( t0, tt_num_vars( t ) );
+  return t0 == t;
+}
+
+bool tt_is_const1( const tt& t )
+{
+  tt t1 = tt_const1();
+  tt_resize( t1, tt_num_vars( t ) );
+  return t1 == t;
+}
+
 tt tt_exists( const tt& t, unsigned i )
 {
   return tt_cof0( t, i ) | tt_cof1( t, i );
