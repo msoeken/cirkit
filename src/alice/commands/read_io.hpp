@@ -52,7 +52,7 @@ std::string process_filename( const std::string& filename )
   wordexp_t p;
   wordexp( filename.c_str(), &p, 0 );
 
-  for ( auto i = 0; i < p.we_wordc; ++i )
+  for ( auto i = 0u; i < p.we_wordc; ++i )
   {
     if ( !result.empty() ) { result += " "; }
     result += std::string( p.we_wordv[i] );
