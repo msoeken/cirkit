@@ -185,6 +185,10 @@ bool tt_cof1_is_const0( const tt& t, unsigned i );
 bool tt_cof1_is_const1( const tt& t, unsigned i );
 bool tt_cofs_opposite( const tt& t, unsigned i );
 
+void tt_resize( tt& t, unsigned size );
+bool tt_is_const0( const tt& t );
+bool tt_is_const1( const tt& t );
+
 /**
  * @brief Existential quantification
  */
@@ -231,7 +235,24 @@ void tt_to_minbase_and_discard( tt& t, unsigned max_size = 6u, boost::dynamic_bi
  */
 void tt_from_minbase( tt& t, const boost::dynamic_bitset<> pattern );
 
+/**
+ * @brief Converts truth table to hex string
+ */
 std::string tt_to_hex( const tt& t );
+
+/**
+ * @brief Converts hex string to truth table
+ *
+ * The truth table has at least two variables.
+ */
+tt tt_from_hex( const std::string& s );
+
+/**
+ * @brief Converts hex string to a truth table and adjusts size
+ *
+ * This may cut off variables
+ */
+tt tt_from_hex( const std::string& s, unsigned to );
 
 /**
  * @brief Iterate through each minterm

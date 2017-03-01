@@ -52,16 +52,16 @@ lut_graph_t read_blif( const std::string& filename, bool store_cubes )
 {
   lut_graph_t g;
   auto name = get( boost::vertex_name, g );
-  auto type = get( boost::vertex_gate_type, g );
+  auto type = get( boost::vertex_lut_type, g );
   auto func = get( boost::vertex_lut, g );
 
   const auto gnd = add_vertex( g );
   name[gnd] = "gnd";
-  type[gnd] = gate_type_t::gnd;
+  type[gnd] = lut_type_t::gnd;
 
   const auto vdd = add_vertex( g );
   name[vdd] = "vdd";
-  type[vdd] = gate_type_t::vdd;
+  type[vdd] = lut_type_t::vdd;
 
   std::unordered_map<std::string, lut_vertex_t> name_to_node;
   std::vector<std::string> faninout;
@@ -85,7 +85,7 @@ lut_graph_t read_blif( const std::string& filename, bool store_cubes )
         foreach_string( line.substr( 8u ), " ", [&g, &name, &type, &name_to_node]( const std::string& str ) {
             auto v = add_vertex( g );
             name[v] = str;
-            type[v] = gate_type_t::pi;
+            type[v] = lut_type_t::pi;
             name_to_node[str] = v;
           } );
       }
@@ -114,14 +114,14 @@ lut_graph_t read_blif( const std::string& filename, bool store_cubes )
             {
               v = add_vertex( g );
               name[v] = faninout.back();
-              type[v] = gate_type_t::internal;
+              type[v] = lut_type_t::internal;
               name_to_node[faninout.back()] = v;
             }
             else
             {
               v = it_out->second;
               assert( name[v] == faninout.back() );
-              assert( type[v] == gate_type_t::internal );
+              assert( type[v] == lut_type_t::internal );
             }
 
             func[v] = store_cubes ? cubes : tt_to_hex( f );
@@ -135,7 +135,7 @@ lut_graph_t read_blif( const std::string& filename, bool store_cubes )
                 /* precreate node */
                 tgt = add_vertex( g );
                 name[tgt] = faninout[i];
-                type[tgt] = gate_type_t::internal;
+                type[tgt] = lut_type_t::internal;
                 name_to_node[faninout[i]] = tgt;
               }
               else
@@ -234,7 +234,7 @@ lut_graph_t read_blif( const std::string& filename, bool store_cubes )
   foreach_string( outputs, " ", [&g, &name, &type, &name_to_node]( const std::string& str ) {
       auto v = add_vertex( g );
       name[v] = str;
-      type[v] = gate_type_t::po;
+      type[v] = lut_type_t::po;
 
       add_edge( v, name_to_node.at( str ), g );
     } );

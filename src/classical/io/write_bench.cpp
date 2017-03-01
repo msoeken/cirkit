@@ -105,7 +105,7 @@ void write_bench( const lut_graph_t& lut, std::ostream& os, const write_bench_se
 {
   std::stringstream output, wire;
 
-  auto types = boost::get( boost::vertex_gate_type, lut );
+  auto types = boost::get( boost::vertex_lut_type, lut );
   auto names = boost::get( boost::vertex_name, lut );
   auto luts = boost::get( boost::vertex_lut, lut );
 
@@ -113,29 +113,29 @@ void write_bench( const lut_graph_t& lut, std::ostream& os, const write_bench_se
   {
     switch ( types[v] )
     {
-    case gate_type_t::pi:
+    case lut_type_t::pi:
       if ( !settings.write_input_declarations ) { continue; }
       os << boost::format( "INPUT(%s%s)" ) % settings.prefix % names[v] << std::endl;
       break;
-    case gate_type_t::po:
+    case lut_type_t::po:
       {
         if ( settings.write_output_declarations )
         {
           output << boost::format( "OUTPUT(%s%s)" ) % settings.prefix % names[v] << std::endl;
         }
         const auto w = *( adjacent_vertices( v, lut ).first );
-        const auto is_input = types[w] == gate_type_t::pi || types[w] == gate_type_t::gnd || types[w] == gate_type_t::vdd;
+        const auto is_input = types[w] == lut_type_t::pi || types[w] == lut_type_t::gnd || types[w] == lut_type_t::vdd;
         const auto argument = settings.prefix + ( is_input ? names[w] : boost::str( boost::format( "n%d" ) % w ) );
         wire << boost::format( "%s%s = LUT 0x2 ( %s )" ) % settings.prefix % names[v] % argument << std::endl;
       } break;
-    case gate_type_t::internal:
+    case lut_type_t::internal:
       {
         const auto& func = luts[v];
 
         std::vector<std::string> arguments;
         for ( auto w : boost::make_iterator_range( adjacent_vertices( v, lut ) ) )
         {
-          const auto is_input = types[w] == gate_type_t::pi || types[w] == gate_type_t::gnd || types[w] == gate_type_t::vdd;
+          const auto is_input = types[w] == lut_type_t::pi || types[w] == lut_type_t::gnd || types[w] == lut_type_t::vdd;
           arguments.push_back( settings.prefix + ( is_input ? names[w] : boost::str( boost::format( "n%d" ) % w ) ) );
         }
 
@@ -154,6 +154,55 @@ void write_bench( const lut_graph_t& lut, const std::string& filename, const wri
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
   write_bench( lut, os, settings );
+  os.close();
+}
+
+void write_bench( const lut_graph& graph, std::ostream& os, const write_bench_settings& settings )
+{
+  std::stringstream output, wire;
+  const auto& names = graph.names();
+  const auto& types = graph.types();
+  const auto& luts = graph.luts();
+
+  for ( const auto& node : graph.nodes() )
+  {
+    switch( types[node] )
+    {
+    case lut_type_t::pi:
+      if ( !settings.write_input_declarations ) { continue; }
+      os << boost::format( "INPUT(%s%s)" ) % settings.prefix % names[node] << std::endl;
+      break;
+    case lut_type_t::po:
+      {
+        if ( settings.write_output_declarations )
+        {
+          output << boost::format( "OUTPUT(%s%s)" ) % settings.prefix % names[node] << std::endl;
+        }
+      }
+      break;
+    case lut_type_t::internal:
+      {
+        const auto& func = luts[node];
+        std::vector<std::string> arguments;
+        for ( auto w : boost::make_iterator_range( adjacent_vertices( node, graph.graph() ) ) )
+        {
+          arguments.push_back( settings.prefix + names[w] );
+        }
+        wire << boost::format( "%s%s = LUT 0x%s ( %s )" ) % settings.prefix % names[node] % func % boost::join( arguments, ", " ) << std::endl;
+      }
+      break;
+    default:
+      break;
+    };
+  }
+
+  os << output.str() << wire.str();
+}
+
+void write_bench( const lut_graph& graph, const std::string& filename, const write_bench_settings& settings )
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+  write_bench( graph, os, settings );
   os.close();
 }
 

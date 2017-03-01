@@ -36,7 +36,7 @@
 #ifndef XMG_LUT_HPP
 #define XMG_LUT_HPP
 
-#include <classical/netlist_graphs.hpp>
+#include <classical/lut/lut_graph.hpp>
 #include <classical/xmg/xmg.hpp>
 
 namespace cirkit

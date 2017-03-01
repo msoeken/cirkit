@@ -244,22 +244,24 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
   std::map<std::string, lut_vertex_t> gate_to_node;
 
-  auto types = boost::get( boost::vertex_gate_type, lut );
+  auto types = boost::get( boost::vertex_lut_type, lut );
   auto luts  = boost::get( boost::vertex_lut, lut );
   auto names = boost::get( boost::vertex_name, lut );
 
   auto v_gnd = add_vertex( lut );
-  types[v_gnd] = gate_type_t::gnd;
+  types[v_gnd] = lut_type_t::gnd;
   gate_to_node["gnd"] = v_gnd;
+  names[v_gnd] = "gnd";
   auto v_vdd = add_vertex( lut );
-  types[v_vdd] = gate_type_t::vdd;
+  types[v_vdd] = lut_type_t::vdd;
   gate_to_node["vdd"] = v_vdd;
+  names[v_vdd] = "vdd";
 
   for ( const auto& input : inputs )
   {
     auto v = add_vertex( lut );
     names[v] = input;
-    types[v] = gate_type_t::pi;
+    types[v] = lut_type_t::pi;
     gate_to_node[input] = v;
   }
 
@@ -328,7 +330,7 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
         auto v = add_vertex( lut );
 
-        types[v] = gate_type_t::internal;
+        types[v] = lut_type_t::internal;
         luts[v] = std::get<1>( gate );
 
         for ( const auto& arg : std::get<2>( gate ) )
@@ -358,8 +360,164 @@ void read_bench( lut_graph_t& lut, const std::string& filename )
 
     add_edge( v, gate_to_node[output], lut );
 
-    types[v] = gate_type_t::po;
+    types[v] = lut_type_t::po;
     names[v] = output;
+  }
+}
+
+void read_bench( lut_graph& graph, const std::string& filename )
+{
+  using gate_def_t = std::tuple<std::string, std::string, std::vector<std::string>>;
+
+  std::vector<std::string> inputs, outputs;
+  std::vector<gate_def_t> gates;
+
+  line_parser( filename, {
+      {std::regex( "^INPUT\\((.*)\\)$" ), [&inputs]( const std::smatch& m ) {
+          inputs.push_back( std::string( m[1] ) );
+        }},
+      {std::regex( "^OUTPUT\\((.*)\\)$" ), [&outputs]( const std::smatch& m ) {
+          outputs.push_back( std::string( m[1] ) );
+        }},
+      {std::regex( "^(.*) = LUT (.*) \\( (.*) \\)$" ), [&gates]( const std::smatch& m ) {
+          unsigned value;
+          std::stringstream converter( m[2] );
+          converter >> std::hex >> value;
+
+          std::vector<std::string> arguments;
+          split_string( arguments, m[3], ", " );
+
+          std::string name( m[1] );
+          boost::trim( name );
+          gates.push_back( std::make_tuple( name, std::string( m[2] ).substr( 2u ), arguments ) );
+
+          //boost::dynamic_bitset<> direct( 1u << arguments.size(), value );
+          //boost::dynamic_bitset<> indirect( convert_hex2bin( std::string( m[2] ).substr( 2u ) ) );
+
+          //std::cout << "value: " << value << " orig: " << m[2] << " " << direct << " " << indirect << std::endl;
+        }},
+      {std::regex( "^(.*) = gnd" ), [&gates]( const std::smatch& m ) {
+          std::string name( m[1] );
+          boost::trim( name );
+
+          gates.push_back( std::make_tuple( name, "gnd", std::vector<std::string>() ) );
+        }},
+      {std::regex( "^(.*) = vdd" ), [&gates]( const std::smatch& m ) {
+          std::string name( m[1] );
+          boost::trim( name );
+
+          gates.push_back( std::make_tuple( name, "vdd", std::vector<std::string>() ) );
+        }},
+      {std::regex( "^#" ), []( const std::smatch& m ) {}}
+    }, true );
+
+  std::map<std::string, lut_vertex_t> gate_to_node;
+
+  gate_to_node["gnd"] = graph.get_constant(false);
+  gate_to_node["vdd"] = graph.get_constant(true);
+
+  for ( const auto& input : inputs )
+  {
+    gate_to_node[input] = graph.create_pi( input );
+  }
+
+  /* gates may not be in topological order, so we need to keep track of this */
+  std::vector<int>              waiting_refs( gates.size(), -1 ); /* if -1, gate has not been processed or is done, otherwise gives the number of fanins to wait for */
+  std::vector<std::vector<int>> notify_list( gates.size() );      /* which parents to notify that they may complete */
+
+  for ( const auto& it : index( gates ) )
+  {
+    const auto& gate = it.value;
+    const auto& index = it.index;
+
+    waiting_refs[index] = 0;
+
+    if ( std::get<2>( gate ).empty() )
+    {
+      std::cout << "[i] assign " << std::get<0>( gate ) << " to constant" << std::endl;
+      gate_to_node[std::get<0>( gate )] = graph.get_constant( std::get<1>( gate ) == "vdd" );
+    }
+    else
+    {
+      for ( const auto& arg : std::get<2>( gate ) )
+      {
+        if ( gate_to_node.find( arg ) == gate_to_node.end() )
+        {
+          waiting_refs[index]++;
+          notify_list[std::distance( begin( gates ), ranges::find_if( gates, [&arg]( const gate_def_t& g ) { return std::get<0>( g ) == arg; } ) )].push_back( index );
+        }
+      }
+    }
+
+    if ( waiting_refs[index] == 0 )
+    {
+      std::vector<unsigned> to_create;
+
+      std::stack<unsigned> stack;
+      stack.push( index );
+
+      while ( !stack.empty() )
+      {
+        const auto n = stack.top();
+        stack.pop();
+
+        if ( ranges::find( to_create, n ) == end( to_create ) )
+        {
+          to_create.push_back( n );
+        }
+
+        for ( auto parent : notify_list[n] )
+        {
+          if ( --waiting_refs[parent] == 0 )
+          {
+            stack.push( parent );
+          }
+        }
+      }
+
+      for ( auto n : to_create )
+      {
+        const auto& gate = gates[n];
+
+        if ( std::get<1>( gate ) == "gnd" )
+        {
+          gate_to_node[std::get<0>( gate )] = graph.get_constant(false);
+          continue;
+        }
+        else if ( std::get<1>( gate ) == "vdd" )
+        {
+          gate_to_node[std::get<0>( gate )] = graph.get_constant(true);
+          continue;
+        }
+
+        std::vector<lut_vertex_t> ops;
+        for ( const auto& arg : std::get<2>( gate ) )
+        {
+          if ( gate_to_node.find(arg) == std::end(gate_to_node) )
+          {
+            std::cout << "[e] cannot find gate " << arg << " when constructing LUT for " << std::get<0>( gate ) << std::endl;
+            assert( false );
+          }
+          ops += gate_to_node[arg];
+        }
+        
+        gate_to_node[std::get<0>( gate )] = graph.create_lut( std::get<1>( gate ), ops, std::get<0>( gate ) );
+      }
+    }
+  }
+
+  for ( auto i = 0u; i < outputs.size(); ++i )
+  {
+    const auto name = outputs[i];
+    if ( gate_to_node.find(outputs[i]) == std::end(gate_to_node) )
+    {
+      std::cout << "[e] cannot find gate " << outputs[i] << " when constructing output" << std::endl;
+      assert( false );
+    }
+    else
+    {
+      graph.create_po( gate_to_node[outputs[i]], name );
+    }
   }
 }
 

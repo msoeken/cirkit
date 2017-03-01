@@ -245,6 +245,34 @@ bool tt_cofs_opposite( const tt& t, unsigned i )
   return ((tc << shift) & tv) == (~tc & tv);
 }
 
+void tt_resize( tt& t, unsigned size )
+{
+  auto num_vars = tt_num_vars( t );
+  if ( num_vars == size ) return;
+  else if ( num_vars < size )
+  {
+    tt_extend( t, size );
+  }
+  else
+  {
+    tt_shrink( t, size );
+  }
+}
+
+bool tt_is_const0( const tt& t )
+{
+  tt t0 = tt_const0();
+  tt_resize( t0, tt_num_vars( t ) );
+  return t0 == t;
+}
+
+bool tt_is_const1( const tt& t )
+{
+  tt t1 = tt_const1();
+  tt_resize( t1, tt_num_vars( t ) );
+  return t1 == t;
+}
+
 tt tt_exists( const tt& t, unsigned i )
 {
   return tt_cof0( t, i ) | tt_cof1( t, i );
@@ -394,6 +422,33 @@ std::string tt_to_hex( const tt& t )
     result += convert_bin2hex( s.substr( i, 4u ) );
   }
   return result;
+}
+
+tt tt_from_hex( const std::string& s )
+{
+  const auto bin = convert_hex2bin( s );
+  auto t = tt( bin.size(), 0u );
+  for ( auto i = 0u; i < bin.size(); ++i )
+  {
+    assert( bin[i] == '0' || bin[i] == '1' );
+    t[ t.size() - i - 1 ] = ( bin[i] == '1' );
+  }
+  return t;
+}
+
+tt tt_from_hex( const std::string& s, unsigned to )
+{
+  auto t = tt_from_hex( s );
+  const auto num_vars = tt_num_vars( t );
+  if ( num_vars < to )
+  {
+    tt_extend( t, to );
+  }
+  else if ( num_vars > to )
+  {
+    tt_shrink( t, to );
+  }
+  return t;
 }
 
 /******************************************************************************

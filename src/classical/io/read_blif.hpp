@@ -38,7 +38,7 @@
 
 #include <string>
 
-#include <classical/netlist_graphs.hpp>
+#include <classical/lut/lut_graph.hpp>
 
 namespace cirkit
 {

@@ -24,15 +24,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "cec.hpp"
+#include "lut_utils.hpp"
 
-#include <core/utils/program_options.hpp>
-
-#include <classical/abc/functions/abc_cec.hpp>
-
-#include <classical/cli/stores.hpp>
-
-using namespace boost::program_options;
+#include <boost/format.hpp>
 
 namespace cirkit
 {
@@ -45,64 +39,76 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
+int compute_depth_rec( const lut_graph& graph, const lut_vertex_t& node, std::vector<int>& depths )
+{
+  if ( depths[node] >= 0 ) return depths[node];
+
+  if ( graph.is_input(node) )
+  {
+    return depths[node] = 0;
+  }
+  else
+  {
+    int depth = 0;
+    for ( const auto& c : graph.children( node ) )
+    {
+      depth = std::max( compute_depth_rec( graph, c, depths ), depth );
+    }
+    return depths[node] = ( depth + 1 );
+  }
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
 
-cec_command::cec_command( const environment::ptr& env )
-  : cirkit_command( env, "Combinatorial equivalence checking of two aigs" )
+unsigned lut_compute_depth( const lut_graph& graph )
 {
-  opts.add_options()
-    ( "circuit1",  value_with_default( &circ1 ),  "store-ID of circuit1" )
-    ( "circuit2",  value_with_default( &circ2 ),  "store-ID of circuit2" )
-    ;
+  std::vector<int> depths( graph.size(), -1 );
 
-  if ( env->has_store<counterexample_t>() )
+  int depth = -1;
+
+  for ( const auto& output : graph.outputs() )
   {
-    add_new_option();
+    depth = std::max( compute_depth_rec( graph, output.first, depths ), depth );
   }
-  be_verbose();
+
+  return static_cast<unsigned>( depth );
 }
 
-command::rules_t cec_command::validity_rules() const
+void lut_print_stats( const lut_graph& graph, std::ostream& os )
 {
-  return {
-    {[&]() { return circ1 < env->store<aig_graph>().size(); }, "store-ID of circuit1 is invalid" },
-    {[&]() { return circ2 < env->store<aig_graph>().size(); }, "store-ID of circuit2 is invalid" }
-  };
-}
-
-bool cec_command::execute()
-{
-  auto& aigs = env->store<aig_graph>();
-
-  const auto& aig_circ1 = aigs[circ1];
-  const auto& aig_circ2 = aigs[circ2];
-
-  auto settings = make_settings();
-  boost::optional<counterexample_t> cex_result = abc_cec( aig_circ1, aig_circ2, settings, statistics );
-  print_runtime();
-
-  if ( (bool)cex_result )
+  auto name = graph.name();
+  if ( name.empty() )
   {
-    if ( env->has_store<counterexample_t>() )
+    name = "(unnamed)";
+  }
+
+  os << boost::format( "[i] %20s: i/o = %7d / %7d gates = %7d lev = %4d" ) % name % graph.inputs().size() % graph.outputs().size() % graph.num_gates() % lut_compute_depth( graph );
+
+  os << std::endl;
+}
+
+std::vector<unsigned> lut_compute_levels( const lut_graph& graph )
+{
+  std::vector<unsigned> levels( graph.size() );
+  for ( const auto& n : graph.topological_nodes() )
+  {
+    if ( graph.is_input( n ) )
     {
-      auto& cex = env->store<counterexample_t>();
-      extend_if_new( cex );
-      cex.current() = *cex_result;
+      levels[n] = 0u;
     }
-    std::cout << "[i] counterexample: " << *cex_result << std::endl;
+    else
+    {
+      auto level = 0u;
+      for ( const auto& c : graph.children( n ) )
+      {
+        level = std::max( level, levels[c] );
+      }
+      levels[n] = level + 1u;
+    }
   }
-  else
-  {
-    std::cout << "[i] functionally equivalent: no counterexample" << std::endl;
-  }
-  return true;
-}
-
-command::log_opt_t cec_command::log() const
-{
-  return log_opt_t({{"runtime", statistics->get<double>( "runtime" )}});
+  return levels;
 }
 
 }

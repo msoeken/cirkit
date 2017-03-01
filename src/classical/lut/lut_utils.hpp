@@ -25,41 +25,27 @@
  */
 
 /**
- * @file cec.hpp
+ * @file lut_utils.hpp
  *
- * @brief Combinatorial equivalence checking of two aigs
+ * @brief LUT graph utility functions
  *
  * @author Heinz Riener
  * @since  2.3
  */
 
-#ifndef CLI_CEC_COMMAND_HPP
-#define CLI_CEC_COMMAND_HPP
+#ifndef LUT_UTILS_HPP
+#define LUT_UTILS_HPP
 
-#include <core/cli/cirkit_command.hpp>
-
-#include <classical/aig.hpp>
-#include <classical/utils/counterexample.hpp>
+#include <classical/lut/lut_graph.hpp>
 
 namespace cirkit
 {
 
-class cec_command : public cirkit_command
-{
-public:
-  cec_command( const environment::ptr& env );
+unsigned lut_compute_depth( const lut_graph& graph );
 
-protected:
-  rules_t validity_rules() const;
-  bool execute();
+void lut_print_stats( const lut_graph& graph, std::ostream& os );
 
-public:
-  log_opt_t log() const;
-
-private:
-  unsigned circ1 = 0u;
-  unsigned circ2 = 1u;
-};
+std::vector<unsigned> lut_compute_levels( const lut_graph& graph );
 
 }
 

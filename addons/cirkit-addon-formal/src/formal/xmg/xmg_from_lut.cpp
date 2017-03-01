@@ -38,7 +38,6 @@
 #include <core/utils/conversion_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/functions/npn_canonization.hpp>
-#include <classical/netlist_graphs.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <classical/xmg/xmg_rewrite.hpp>
 #include <formal/synthesis/exact_mig.hpp>
@@ -110,14 +109,14 @@ private:
   void compute_optimal_xmgs()
   {
     const auto tts = get( boost::vertex_lut, lut );
-    const auto types = get( boost::vertex_gate_type, lut );
+    const auto types = get( boost::vertex_lut_type, lut );
 
     auto ex_settings = std::make_shared<properties>();
     ex_settings->set( "verbose", verbose );
 
     for ( const auto& v : boost::make_iterator_range( vertices( lut ) ) )
     {
-      if ( types[v] != gate_type_t::internal ) { continue; }
+      if ( types[v] != lut_type_t::internal ) { continue; }
       if ( boost::out_degree( v, lut ) == 1u ) { continue; }
 
       tt t( convert_hex2bin( tts[v] ) );
@@ -166,21 +165,21 @@ private:
   void initialize_xmg()
   {
     const auto names = boost::get( boost::vertex_name, lut );
-    const auto types = boost::get( boost::vertex_gate_type, lut );
+    const auto types = boost::get( boost::vertex_lut_type, lut );
 
     for ( const auto& v : boost::make_iterator_range( vertices( lut ) ) )
     {
       switch ( types[v] )
       {
-      case gate_type_t::gnd:
+      case lut_type_t::gnd:
         node_to_function[v] = xmg.get_constant( false );
         break;
 
-      case gate_type_t::vdd:
+      case lut_type_t::vdd:
         node_to_function[v] = xmg.get_constant( true );
         break;
 
-      case gate_type_t::pi:
+      case lut_type_t::pi:
         node_to_function[v] = xmg.create_pi( names[v] );
         break;
 
@@ -194,7 +193,7 @@ private:
   {
     auto names = boost::get( boost::vertex_name, lut );
     auto tts = boost::get( boost::vertex_lut, lut );
-    auto types = boost::get( boost::vertex_gate_type, lut );
+    auto types = boost::get( boost::vertex_lut_type, lut );
 
     std::vector<lut_vertex_t> topsort( num_vertices( lut ) );
     boost::topological_sort( lut, topsort.begin() );
@@ -202,7 +201,7 @@ private:
     {
       switch ( types[v] )
       {
-      case gate_type_t::internal:
+      case lut_type_t::internal:
         {
           std::vector<xmg_function> pi_mapping;
           for ( const auto& child : boost::make_iterator_range( boost::adjacent_vertices( v, lut ) ) )
@@ -256,7 +255,7 @@ private:
           node_to_function[v] = outputs.front();
         } break;
 
-      case gate_type_t::po:
+      case lut_type_t::po:
         {
           xmg.create_po( node_to_function[*boost::adjacent_vertices( v, lut ).first], names[v] );
         } break;
@@ -292,11 +291,11 @@ private:
     std::ofstream os( dump_luts.c_str(), std::ofstream::out );
 
     const auto tts = get( boost::vertex_lut, lut );
-    const auto types = get( boost::vertex_gate_type, lut );
+    const auto types = get( boost::vertex_lut_type, lut );
 
     for ( const auto& v : boost::make_iterator_range( vertices( lut ) ) )
     {
-      if ( types[v] != gate_type_t::internal ) { continue; }
+      if ( types[v] != lut_type_t::internal ) { continue; }
       if ( boost::out_degree( v, lut ) <= 4u ) { continue; }
 
       tt t( convert_hex2bin( tts[v] ) );
