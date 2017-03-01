@@ -38,9 +38,10 @@
 
 #include <iostream>
 
-#include <core/utils/graph_utils.hpp>
 #include <core/utils/dirty.hpp>
+#include <core/utils/graph_utils.hpp>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
 #include <range/v3/iterator_range.hpp>
@@ -144,6 +145,13 @@ public:
   inline const gate_type_property_map_t& types() { return _types; }
   inline const gate_type_property_map_t& types() const { return _types; }
 
+  /* marking */
+  void init_marks() const;
+  bool is_marked( const lut_vertex_t& n ) const;
+  void mark( const lut_vertex_t& n ) const;
+
+  void mark_as_modified() const;
+
 private:
   graph_t g;
   node_t gnd;
@@ -159,12 +167,15 @@ private:
   lut_property_map_t       _luts;
 
   /* additional network information */
-  dirty<std::vector<unsigned>>            fanout;
-  dirty<std::vector<std::vector<node_t>>> parentss;
-  dirty<std::vector<unsigned>>            levels;
+  mutable dirty<std::vector<unsigned>>            fanout;
+  mutable dirty<std::vector<std::vector<node_t>>> parentss;
+  mutable dirty<std::vector<unsigned>>            levels;
 
   /* network settings and stats */
   unsigned                                _num_lut = 0u;
+
+  /* utilities */
+  mutable boost::dynamic_bitset<>                 marks;
 };
 
 }

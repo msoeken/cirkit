@@ -247,6 +247,32 @@ std::vector<lut_graph::node_t> lut_graph::topological_nodes() const
   return top;
 }
 
+void lut_graph::init_marks() const
+{
+  marks.resize( size() );
+  marks.reset();
+}
+
+bool lut_graph::is_marked( const lut_vertex_t& n ) const
+{
+  return n < marks.size() && marks[n];
+}
+
+void lut_graph::mark( const lut_vertex_t& n ) const
+{
+  if ( n < marks.size() )
+  {
+    marks.set( n );
+  }
+}
+
+void lut_graph::mark_as_modified() const
+{
+  fanout.make_dirty();
+  parentss.make_dirty();
+  levels.make_dirty();
+}
+
 }
 
 // Local Variables:
