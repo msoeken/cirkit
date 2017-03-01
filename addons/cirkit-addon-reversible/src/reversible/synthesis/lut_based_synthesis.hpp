@@ -37,7 +37,7 @@
 #define LUT_BASED_SYNTHESIS_HPP
 
 #include <core/properties.hpp>
-#include <classical/netlist_graphs.hpp>
+#include <classical/lut/lut_graph.hpp>
 #include <reversible/circuit.hpp>
 
 namespace cirkit

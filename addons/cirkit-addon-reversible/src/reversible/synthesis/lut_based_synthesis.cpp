@@ -115,10 +115,10 @@ public:
 protected:
   void add_default_input_steps()
   {
-    const auto type = boost::get( boost::vertex_gate_type, lut() );
+    const auto type = boost::get( boost::vertex_lut_type, lut() );
     for ( auto n : boost::make_iterator_range( vertices( lut() ) ) )
     {
-      if ( type[n] != gate_type_t::pi ) continue;
+      if ( type[n] != lut_type_t::pi ) continue;
 
       const auto line = _next_free++;
       _node_to_line[n] = line;
@@ -128,10 +128,10 @@ protected:
 
   void add_default_output_steps()
   {
-    const auto type = boost::get( boost::vertex_gate_type, lut() );
+    const auto type = boost::get( boost::vertex_lut_type, lut() );
     for ( auto n : boost::make_iterator_range( vertices( lut() ) ) )
     {
-      if ( type[n] != gate_type_t::po ) continue;
+      if ( type[n] != lut_type_t::po ) continue;
 
       const auto node = *( boost::adjacent_vertices( n, lut() ).first );
       add_step( n, _node_to_line[node], step_type::po );
@@ -227,10 +227,10 @@ public:
   virtual unsigned compute_steps()
   {
     add_input_steps();
-    const auto type = get( boost::vertex_gate_type, lut() );
+    const auto type = get( boost::vertex_lut_type, lut() );
 
     foreach_topological( lut(), [this, &type]( const lut_vertex_t& n ) {
-        if ( type[n] != gate_type_t::internal ) return true;
+        if ( type[n] != lut_type_t::internal ) return true;
 
         const auto target = request_constant();
         (*this)[n] = target;
@@ -245,7 +245,7 @@ public:
         /* check for unused children */
         for ( const auto& child : boost::make_iterator_range( boost::adjacent_vertices( n, lut() ) ) )
         {
-          if ( type[child] != gate_type_t::internal ) continue;
+          if ( type[child] != lut_type_t::internal ) continue;
 
           if ( --indegrees[child] == 0u )
           {
@@ -279,10 +279,10 @@ public:
 
   void add_input_steps()
   {
-    const auto type = boost::get( boost::vertex_gate_type, lut() );
+    const auto type = boost::get( boost::vertex_lut_type, lut() );
     for ( auto n : boost::make_iterator_range( vertices( lut() ) ) )
     {
-      if ( type[n] != gate_type_t::pi ) continue;
+      if ( type[n] != lut_type_t::pi ) continue;
 
       const auto line = _next_free++;
       (*this)[n] = line;
@@ -329,9 +329,9 @@ private:
     adjust_indegrees();
 
     foreach_topological( lut(), [this]( const lut_vertex_t& n ) {
-        const auto type = get( boost::vertex_gate_type, lut() );
+        const auto type = get( boost::vertex_lut_type, lut() );
 
-        if ( type[n] != gate_type_t::internal ) return true;
+        if ( type[n] != lut_type_t::internal ) return true;
 
         const auto target = request_constant();
         (*this)[n] = target;
@@ -354,10 +354,10 @@ private:
 
   void adjust_indegrees()
   {
-    const auto type = get( boost::vertex_gate_type, lut() );
+    const auto type = get( boost::vertex_lut_type, lut() );
     for ( auto n : boost::make_iterator_range( vertices( lut() ) ) )
     {
-      if ( type[n] != gate_type_t::po ) { continue; }
+      if ( type[n] != lut_type_t::po ) { continue; }
 
       assert( boost::out_degree( n, lut() ) == 1 );
 
@@ -367,10 +367,10 @@ private:
 
   void decrease_children_indegrees( lut_vertex_t node )
   {
-    const auto type = get( boost::vertex_gate_type, lut() );
+    const auto type = get( boost::vertex_lut_type, lut() );
     for ( auto n : boost::make_iterator_range( adjacent_vertices( node, lut() ) ) )
     {
-      if ( type[n] != gate_type_t::internal ) { continue; }
+      if ( type[n] != lut_type_t::internal ) { continue; }
 
       indegrees[n]--;
     }
@@ -378,10 +378,10 @@ private:
 
   void uncompute_children( lut_vertex_t node )
   {
-    const auto type = get( boost::vertex_gate_type, lut() );
+    const auto type = get( boost::vertex_lut_type, lut() );
     for ( auto n : boost::make_iterator_range( adjacent_vertices( node, lut() ) ) )
     {
-      if ( type[n] != gate_type_t::internal ) { continue; }
+      if ( type[n] != lut_type_t::internal ) { continue; }
 
       if ( indegrees[n] == 0 )
       {
@@ -585,15 +585,15 @@ protected:
       const auto sub_lut = read_blif( blifname );
 
       std::vector<unsigned> lut_to_line( boost::num_vertices( sub_lut ), 0u );
-      const auto type = boost::get( boost::vertex_gate_type, sub_lut );
+      const auto type = boost::get( boost::vertex_lut_type, sub_lut );
       const auto sub_spec = boost::get( boost::vertex_lut, sub_lut );
 
       /* first pass: count ancillas and determine root gate */
       lut_vertex_t root{};
       for ( auto v : boost::make_iterator_range( boost::vertices( sub_lut ) ) )
       {
-        if ( type[v] == gate_type_t::internal ) { ++num_ancilla; }
-        if ( type[v] == gate_type_t::po )
+        if ( type[v] == lut_type_t::internal ) { ++num_ancilla; }
+        if ( type[v] == lut_type_t::po )
         {
           root = boost::target( *boost::out_edges( v, sub_lut ).first, sub_lut );
         }
@@ -610,11 +610,11 @@ protected:
       boost::topological_sort( sub_lut, top.begin() );
       for ( auto v : top )
       {
-        if ( type[v] == gate_type_t::pi )
+        if ( type[v] == lut_type_t::pi )
         {
           lut_to_line[v] = pi_index++;
         }
-        if ( type[v] == gate_type_t::internal )
+        if ( type[v] == lut_type_t::internal )
         {
           if ( v == root )
           {
