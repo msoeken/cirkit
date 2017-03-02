@@ -120,6 +120,26 @@ std::string to_string( const boost::dynamic_bitset<>& b )
   return s;
 }
 
+std::string bitset_join( const boost::dynamic_bitset<>& b, const std::string& sep )
+{
+  std::stringstream s;
+  auto first = true;
+  for ( auto i = 0u; i < b.size(); ++i )
+  {
+    if ( !first )
+    {
+      s << sep;
+    }
+    else
+    {
+      first = false;
+    }
+
+    s << b[i];
+  }
+  return s.str();
+}
+
 }
 
 // Local Variables:

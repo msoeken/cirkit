@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <sstream>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
@@ -122,6 +123,28 @@ IntType to_multiprecision( const boost::dynamic_bitset<>& bs, bool reverse = fal
 }
 
 std::string to_string( const boost::dynamic_bitset<>& b );
+std::string bitset_join( const boost::dynamic_bitset<>& b, const std::string& sep = " " );
+template<class ContainerType>
+std::string bitset_indexed_join( const boost::dynamic_bitset<>& b, const ContainerType& indexes, const std::string& sep = " " )
+{
+  std::stringstream s;
+  auto first = true;
+  for ( auto i : indexes )
+  {
+    if ( !first )
+    {
+      s << sep;
+    }
+    else
+    {
+      first = false;
+    }
+
+    s << b[i];
+  }
+  return s.str();
+}
+
 
 }
 
