@@ -125,7 +125,7 @@ IntType to_multiprecision( const boost::dynamic_bitset<>& bs, bool reverse = fal
 std::string to_string( const boost::dynamic_bitset<>& b );
 std::string bitset_join( const boost::dynamic_bitset<>& b, const std::string& sep = " " );
 template<class ContainerType>
-std::string bitset_indexed_join( const boost::dynamic_bitset<>& b, const ContainerType& indexes, const std::string& sep = " " )
+std::string bitset_indexed_join( const boost::dynamic_bitset<>& b, const ContainerType& indexes, const std::string& sep = " ", int offset = 0 )
 {
   std::stringstream s;
   auto first = true;
@@ -140,7 +140,7 @@ std::string bitset_indexed_join( const boost::dynamic_bitset<>& b, const Contain
       first = false;
     }
 
-    s << b[i];
+    s << b[i + offset];
   }
   return s.str();
 }
