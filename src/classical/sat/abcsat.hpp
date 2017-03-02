@@ -43,11 +43,19 @@ namespace cirkit
 struct abc_solver_t
 {
   abc_solver_t() : solver( abc::sat_solver_new() ) {}
-  ~abc_solver_t() { abc::sat_solver_delete( solver ); }
+  abc_solver_t( abc::sat_solver * other ) : solver( other ), borrowed( true ) {}
+  ~abc_solver_t()
+  {
+    if ( !borrowed )
+    {
+      abc::sat_solver_delete( solver );
+    }
+  }
 
   abc::sat_solver * solver;
   std::vector<int>  blocking_vars;
   bool              genmodel = true;
+  bool              borrowed = false;
 };
 
 using abc_solver = std::unique_ptr<abc_solver_t>;

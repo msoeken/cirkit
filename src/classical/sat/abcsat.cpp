@@ -38,8 +38,18 @@ namespace cirkit
 template<>
 abc_solver make_solver<abc_solver>( properties::ptr settings )
 {
-  std::unique_ptr<abc_solver_t> solver( new abc_solver_t );
-  return solver;
+  const auto reuse_solver = get<abc::sat_solver*>( settings, "reuse_solver", nullptr );
+
+  if ( reuse_solver )
+  {
+    std::unique_ptr<abc_solver_t> solver( new abc_solver_t( reuse_solver ) );
+    return solver;
+  }
+  else
+  {
+    std::unique_ptr<abc_solver_t> solver( new abc_solver_t );
+    return solver;
+  }
 }
 
 template<>
