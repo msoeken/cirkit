@@ -35,6 +35,7 @@
 #include <classical/sat/sat_solver.hpp>
 
 #include <sat/bsat/satSolver.h>
+#include <sat/bsat/satVec.h>
 
 namespace cirkit
 {
