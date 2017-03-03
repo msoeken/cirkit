@@ -742,9 +742,9 @@ public:
     const auto lines = order_heuristic->compute_steps();
     circ.set_lines( lines );
 
-    null_stream ns;
-    std::ostream null_out( &ns );
-    boost::progress_display show_progress( order_heuristic->steps().size(), progress ? std::cout : null_out );
+    //null_stream ns;
+    //std::ostream null_out( &ns );
+    //boost::progress_display show_progress( order_heuristic->steps().size(), progress ? std::cout : null_out );
 
     std::vector<std::string> inputs( lines, "0" );
     std::vector<std::string> outputs( lines, "0" );
@@ -753,9 +753,12 @@ public:
 
     const auto name = boost::get( boost::vertex_name, lut );
 
+    auto step_index = 0u;
     for ( const auto& step : order_heuristic->steps() )
     {
-      ++show_progress;
+      std::cout << boost::format( "[i] step %5d/%5d\r" ) % ++step_index % order_heuristic->steps().size();
+      std::cout.flush();
+      //++show_progress;
 
       switch ( step.type )
       {
