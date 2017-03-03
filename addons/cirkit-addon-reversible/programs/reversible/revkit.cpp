@@ -39,7 +39,6 @@
 #include <classical/cli/stores.hpp>
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/abc.hpp>
-#include <classical/cli/commands/cec.hpp>
 #include <classical/cli/commands/exorcism.hpp>
 #include <classical/cli/commands/simulate.hpp>
 #include <classical/cli/commands/tt.hpp>
@@ -141,7 +140,6 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Verification" );
 
-  ADD_COMMAND( cec );
   ADD_COMMAND( is_identity );
   ADD_COMMAND( rec );
   ADD_COMMAND( revsim );
