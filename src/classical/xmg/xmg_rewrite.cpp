@@ -246,6 +246,26 @@ xmg_graph xmg_strash( const xmg_graph& xmg, const properties::ptr& settings, con
   return xmg_rewrite_top_down( xmg, rewrite_default_maj, rewrite_default_xor, settings, statistics );
 }
 
+xmg_graph xmg_merge( const xmg_graph& xmg1, const xmg_graph& xmg2, const properties::ptr& settings, const properties::ptr& statistics )
+{
+  auto xmg = xmg_strash( xmg1 );
+
+  std::vector<xmg_function> pi_mapping;
+  for ( const auto& pi : xmg.inputs() )
+  {
+    pi_mapping.push_back( xmg_function( pi.first, false ) );
+  }
+
+  const auto outputs = xmg_rewrite_top_down_inplace( xmg, xmg2, rewrite_default_maj, rewrite_default_xor, pi_mapping, settings, statistics );
+
+  for ( const auto& po : index( xmg2.outputs() ) )
+  {
+    xmg.create_po( outputs[po.index], po.value.second );
+  }
+
+  return xmg;
+}
+
 xmg_graph xmg_to_mig( const xmg_graph& xmg, const properties::ptr& settings, const properties::ptr& statistics )
 {
   settings->set( "init", xmg_init_func_t( []( xmg_graph& xmg_new ) { xmg_new.set_native_xor( false ); } ) );

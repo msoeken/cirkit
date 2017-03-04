@@ -74,6 +74,7 @@ xmg_graph xmg_rewrite_bottom_up( const xmg_graph& xmg,
                                  const properties::ptr& statistics = properties::ptr() );
 
 xmg_graph xmg_strash( const xmg_graph& xmg, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+xmg_graph xmg_merge( const xmg_graph& xmg1, const xmg_graph& xmg2, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 xmg_graph xmg_to_mig( const xmg_graph& xmg, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }
