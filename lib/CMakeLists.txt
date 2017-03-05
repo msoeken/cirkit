@@ -39,6 +39,8 @@ add_cirkit_library(
     ${CUDD_LIBRARIES}
   INCLUDE
     SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/extra
+  OPTIONS
+    PRIVATE -Wno-comment -Wno-parentheses -Wno-incompatible-pointer-types -Wno-implicit-int -Wno-int-to-pointer-cast
 )
 add_cirkit_library(
   NAME linenoise
@@ -55,4 +57,6 @@ add_cirkit_library(
     puma/tc_time.cpp
   INCLUDE
     SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/puma
+  OPTIONS
+    PRIVATE -Wno-sign-compare
 )

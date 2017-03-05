@@ -22,7 +22,7 @@ function( add_cirkit_library )
     "arg"
     ""
     "NAME"
-    "SOURCES;AUTO_DIRS;USE;INCLUDE;DEFINE;COMMANDS"
+    "SOURCES;AUTO_DIRS;USE;INCLUDE;DEFINE;COMMANDS;OPTIONS"
     ${ARGN}
   )
 
@@ -44,7 +44,6 @@ function( add_cirkit_library )
       list( APPEND arg_SOURCES ${files} )
     endforeach( )
   endif( )
-
 
   if( cirkit_BUILD_SHARED )
     set( type SHARED )
@@ -69,6 +68,10 @@ function( add_cirkit_library )
 
   if( DEFINED arg_DEFINE )
     target_compile_definitions( ${arg_NAME} ${arg_DEFINE} )
+  endif( )
+
+  if( DEFINED arg_OPTIONS )
+    target_compile_options( ${arg_NAME} ${arg_OPTIONS} )
   endif( )
 
   if( DEFINED arg_COMMANDS )
