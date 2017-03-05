@@ -172,7 +172,7 @@ private:
     abc::Gia_Man_t* result_gia = abc::Abc_FrameGetGia( abc );
     if ( result_gia )
     {
-      abc::Abc_Cex_t* cex = abc::Abc_FrameReadCex( abc );
+      auto cex = static_cast<abc::Abc_Cex_t*>( abc::Abc_FrameReadCex( abc ) );
       if ( cex )
       {
         // Abc_CexPrint( cex );

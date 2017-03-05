@@ -68,7 +68,7 @@ int add_aig_with_gia( S& solver, const aig_graph& aig, int sid, std::vector<int>
 
   /* write to CNF */
   auto gia = cirkit_to_gia( aig );
-  const auto cnf = Mf_ManGenerateCnf( gia, 8, 0, 0, 0 );
+  const auto cnf = static_cast<abc::Cnf_Dat_t*>( Mf_ManGenerateCnf( gia, 8, 0, 0, 0, 0 ) );
 
   const int offset = sid - 1;
   // std::cout << "[i] offset: " << offset << std::endl;

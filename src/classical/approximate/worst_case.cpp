@@ -161,7 +161,7 @@ boost::multiprecision::uint256_t worst_case( const aig_graph& f, const aig_graph
   abc::Gia_ManHashStop( miter );
 
   /* create CNF */
-  auto * cnf = abc::Mf_ManGenerateCnf( miter, 8, 0, 0, 0 );
+  auto * cnf = static_cast<abc::Cnf_Dat_t*>( abc::Mf_ManGenerateCnf( miter, 8, 0, 0, 0, 0 ) );
   auto * solver = (abc::sat_solver *)abc::Cnf_DataWriteIntoSolver( cnf, 1, 0 );
   abc::Cnf_DataFree( cnf );
 

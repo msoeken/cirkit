@@ -50,7 +50,7 @@ void Abc_UtilsPrintHello( Abc_Frame_t * pAbc );
 void Abc_UtilsSource( Abc_Frame_t * pAbc );
 char * Abc_UtilsGetUsersInput( Abc_Frame_t * pAbc );
 void Mf_ManDumpCnf( Gia_Man_t * p, char * pFileName, int nLutSize, int fCnfObjIds, int fAddOrCla, int fVerbose );
-Cnf_Dat_t * Mf_ManGenerateCnf( Gia_Man_t * pGia, int nLutSize, int fCnfObjIds, int fAddOrCla, int fVerbose );
+void * Mf_ManGenerateCnf( Gia_Man_t * pGia, int nLutSize, int fCnfObjIds, int fAddOrCla, int fMapping, int fVerbose );
 Aig_Man_t * Gia_ManToAig( Gia_Man_t * p, int fChoices );
 Gia_Man_t * Gia_ManFromAig( Aig_Man_t * p );
 Abc_Ntk_t * Abc_NtkFromAigPhase( Aig_Man_t * pMan );
