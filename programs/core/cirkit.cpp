@@ -73,6 +73,7 @@
 #include <classical/cli/commands/support.hpp>
 #include <classical/cli/commands/tt.hpp>
 #include <classical/cli/commands/unate.hpp>
+#include <classical/cli/commands/xmgmerge.hpp>
 #include <classical/cli/commands/worstcase.hpp>
 
 #define STORE_TYPES aig_graph, mig_graph, xmg_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t
@@ -115,6 +116,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( rename );
   ADD_COMMAND( shuffle );
   ADD_COMMAND( strash );
+  ADD_COMMAND( xmgmerge );
 
   cli.set_category( "Verification" );
   ADD_COMMAND( simulate );
