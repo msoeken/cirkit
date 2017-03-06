@@ -38,9 +38,10 @@
 
 #include <iostream>
 
-#include <core/utils/graph_utils.hpp>
 #include <core/utils/dirty.hpp>
+#include <core/utils/graph_utils.hpp>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
 #include <range/v3/iterator_range.hpp>
@@ -102,9 +103,9 @@ public:
 
   lut_graph( const std::string& name = std::string() );
 
-  void compute_fanout();
-  void compute_parents();
-  void compute_levels();
+  void compute_fanout() const;
+  void compute_parents() const;
+  void compute_levels() const;
 
   node_t get_constant( bool value ) const;
   node_t create_pi( const std::string& name );
@@ -144,6 +145,20 @@ public:
   inline const gate_type_property_map_t& types() { return _types; }
   inline const gate_type_property_map_t& types() const { return _types; }
 
+  /* ref counting */
+  void init_refs() const;
+  unsigned get_ref( const lut_vertex_t& n ) const;
+  unsigned inc_ref( const lut_vertex_t& n ) const;
+  unsigned dec_ref( const lut_vertex_t& n ) const;
+  void inc_output_refs() const;
+
+  /* marking */
+  void init_marks() const;
+  bool is_marked( const lut_vertex_t& n ) const;
+  void mark( const lut_vertex_t& n ) const;
+
+  void mark_as_modified() const;
+
 private:
   graph_t g;
   node_t gnd;
@@ -159,12 +174,16 @@ private:
   lut_property_map_t       _luts;
 
   /* additional network information */
-  dirty<std::vector<unsigned>>            fanout;
-  dirty<std::vector<std::vector<node_t>>> parentss;
-  dirty<std::vector<unsigned>>            levels;
+  mutable dirty<std::vector<unsigned>>            fanout;
+  mutable dirty<std::vector<std::vector<node_t>>> parentss;
+  mutable dirty<std::vector<unsigned>>            levels;
 
   /* network settings and stats */
   unsigned                                _num_lut = 0u;
+
+  /* utilities */
+  mutable std::vector<unsigned>                   ref_count;
+  mutable boost::dynamic_bitset<>                 marks;
 };
 
 }

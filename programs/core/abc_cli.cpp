@@ -136,7 +136,7 @@ inline std::string store_entry_to_string<abc::Wlc_Ntk_t*>( abc::Wlc_Ntk_t* const
 template<>
 inline void print_store_entry_statistics<abc::Wlc_Ntk_t*>( std::ostream& os, abc::Wlc_Ntk_t* const& wlc )
 {
-  abc::Wlc_NtkPrintStats( wlc, 0, 0 );
+  abc::Wlc_NtkPrintStats( wlc, 0, 0, 0 );
 }
 
 /* enable `read_verilog` for WLCs */

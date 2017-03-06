@@ -67,17 +67,17 @@ lut_graph::lut_graph( const std::string& name )
   _names[vdd] = "vdd";
 }
 
-void lut_graph::compute_fanout()
+void lut_graph::compute_fanout() const
 {
   fanout.update( [this]() { return precompute_in_degrees( g ); } );
 }
 
-void lut_graph::compute_parents()
+void lut_graph::compute_parents() const
 {
   parentss.update( [this]() { return precompute_ingoing_vertices( g ); } );
 }
 
-void lut_graph::compute_levels()
+void lut_graph::compute_levels() const
 {
   levels.update( [this]() { return lut_compute_levels( *this ); } );
 }
@@ -245,6 +245,62 @@ std::vector<lut_graph::node_t> lut_graph::topological_nodes() const
   std::vector<node_t> top( num_vertices( g ) );
   boost::topological_sort( g, top.begin() );
   return top;
+}
+
+void lut_graph::init_refs() const
+{
+  compute_fanout();
+  ref_count = *fanout;
+}
+
+unsigned lut_graph::get_ref( const lut_vertex_t& n ) const
+{
+  return ref_count[n];
+}
+
+unsigned lut_graph::inc_ref( const lut_vertex_t& n ) const
+{
+  return ref_count[n]++;
+}
+
+unsigned lut_graph::dec_ref( const lut_vertex_t& n ) const
+{
+  assert( ref_count[n] > 0 );
+  return --ref_count[n];
+}
+
+void lut_graph::inc_output_refs() const
+{
+  for ( const auto& output : outputs() )
+  {
+    ++ref_count[output.first];
+  }
+}
+
+void lut_graph::init_marks() const
+{
+  marks.resize( size() );
+  marks.reset();
+}
+
+bool lut_graph::is_marked( const lut_vertex_t& n ) const
+{
+  return n < marks.size() && marks[n];
+}
+
+void lut_graph::mark( const lut_vertex_t& n ) const
+{
+  if ( n < marks.size() )
+  {
+    marks.set( n );
+  }
+}
+
+void lut_graph::mark_as_modified() const
+{
+  fanout.make_dirty();
+  parentss.make_dirty();
+  levels.make_dirty();
 }
 
 }
