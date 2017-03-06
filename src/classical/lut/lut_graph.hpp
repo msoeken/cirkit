@@ -103,6 +103,38 @@ public:
 
   lut_graph( const std::string& name = std::string() );
 
+  lut_graph& operator=( const lut_graph& other )
+  {
+    g = other.g;
+    gnd = other.gnd;
+    vdd = other.vdd;
+
+    _name = other._name;
+    _inputs = other._inputs;
+    _outputs = other._outputs;
+    _input_to_id = other._input_to_id;
+
+    _names = boost::get( boost::vertex_name, g );
+    _types = boost::get( boost::vertex_lut_type, g );
+    _luts = boost::get( boost::vertex_lut, g );
+    for ( const auto& v : boost::make_iterator_range( boost::vertices( g ) ) )
+    {
+      _names[ v ] = other._names[ v ];
+      _types[ v ] = other._types[ v ];
+      _luts[ v ] = other._luts[ v ];
+    }
+
+    // fanout = other.fanout;
+    // parentss = other.parentss;
+    // levels = other.levels;
+
+    _num_lut = other._num_lut;
+
+    // ref_count = other.ref_count;
+    // marks = other.marks;
+
+    return *this;
+  }
   void compute_fanout() const;
   void compute_parents() const;
   void compute_levels() const;
