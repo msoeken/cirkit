@@ -179,7 +179,9 @@ private:
       for ( const auto& e : it->second )
       {
         const auto parent = boost::source( e, mig );
-        const auto level = levels.at( parent );
+        const auto it2 = levels.find( parent );
+        if ( it2 == levels.end() ) continue;
+        const auto level = it2->second;
         min = std::min( min, level );
         max = std::max( max, level );
       }
