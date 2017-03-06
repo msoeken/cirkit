@@ -727,6 +727,11 @@ struct exact_mig_instance
 
     const auto m = solver.get_model();
 
+    if ( very_verbose )
+    {
+      std::cout << m << std::endl;
+    }
+
     for ( auto i = 0u; i < gates.size(); ++i )
     {
       mig_function children[3];
@@ -886,7 +891,11 @@ struct exact_mig_instance
       const auto& b = dvars[1u][i];
       const auto& c = dvars[2u][i];
 
-      solver.add( dvars[3u][i] == ite( a > b, ite( a > c, a, c ), ite( b > c, b, c ) ) + 1 );
+      //solver.add( dvars[3u][i] == ite( a > b, ite( a > c, a, c ), ite( b > c, b, c ) ) + 1 );
+
+      solver.add( dvars[3u][i] == ite( greater_than( a, b ),
+                                       ite( greater_than( a, c ), a, c ),
+                                       ite( greater_than( b, c ), b, c ) ) + 1 );
 
       /* depth of inputs */
       for ( auto x = 0u; x < 3u; ++x )
@@ -927,6 +936,30 @@ struct exact_mig_instance
     else
     {
       return ( expr <= static_cast<int>( value ) );
+    }
+  }
+
+  z3::expr less_than( const z3::expr& expr1, const z3::expr& expr2 )
+  {
+    if ( enc_bv )
+    {
+      return z3::ult( expr1, expr2 );
+    }
+    else
+    {
+      return expr1 < expr2;
+    }
+  }
+
+  z3::expr greater_than( const z3::expr& expr1, const z3::expr& expr2 )
+  {
+    if ( enc_bv )
+    {
+      return z3::ugt( expr1, expr2 );
+    }
+    else
+    {
+      return expr1 > expr2;
     }
   }
 
