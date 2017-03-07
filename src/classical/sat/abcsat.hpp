@@ -64,6 +64,7 @@ struct abc_solver_t
   std::vector<int>  blocking_vars;
   bool              genmodel = true;
   bool              borrowed = false;
+  int               conf_budget = 0; /* 0 : unlimited */
 };
 
 using abc_solver = std::unique_ptr<abc_solver_t>;
