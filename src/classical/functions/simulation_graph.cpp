@@ -1,6 +1,6 @@
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
- * Copyright (C) 2015-2016  EPFL
+ * Copyright (C) 2015-2017  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -112,6 +112,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   }
 
   /* simulate */
+  std::cout << "[i] ... start simulate" << std::endl;
   word_assignment_simulator::aig_name_value_map map( info.inputs.size() );
   const auto sim_vectors_t = transpose( sim_vectors );
   for ( const auto& p : boost::combine( info.inputs, sim_vectors_t ) )
@@ -119,7 +120,10 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     map.insert( {info.node_names.at( boost::get<0>( p ) ), boost::get<1>( p )} );
   }
 
-  const auto results = simulate_aig( aig, word_assignment_simulator( map ) );
+  auto results = simulate_aig( aig, word_assignment_simulator( map ) );
+  std::cout << "[i] ... end simulate" << std::endl;
+
+  std::cout << "[i] ... start something with " << sim_vectors.size() << " bvs of size " << m << std::endl;
 
   /* prepare annotation of simvectors */
   std::vector<boost::dynamic_bitset<>> results_t;
@@ -129,15 +133,25 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     results_t.resize( sim_vectors.size(), boost::dynamic_bitset<>( m ) );
   }
 
+  std::cout << "[i] ... start something with " << sim_vectors.size() << " bvs of size b " << m << std::endl;
+
   /* create edges */
   for ( auto j = 0u; j < m; ++j )
   {
-    const auto& ovalue = results.at( info.outputs[j].first );
+    const auto& ovalue = results[info.outputs[j].first];
     for ( auto i = 0u; i < sim_vectors.size(); ++i )
     {
       if ( ovalue[i] )
       {
-        add_edge_func( n + i, n + sim_vectors.size() + j );
+        const auto from = n + i;
+        const auto to = n + sim_vectors.size() + j;
+        auto e = add_edge( from, to, g ).first;
+        edge_lookup.insert( std::make_pair( std::make_pair( from, to ), e ) );
+        edge_lookup.insert( std::make_pair( std::make_pair( to, from ), e ) );
+        vertex_in_degree[to]++;
+        vertex_out_degree[from]++;
+
+        // add_edge_func( n + i, n + sim_vectors.size() + j );
       }
 
       if ( annotate_simvectors )
@@ -147,7 +161,10 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     }
   }
 
+  std::cout << "[i] ... end something" << std::endl;
+
   /* annotate support size */
+  std::cout << "[i] ... start support" << std::endl;
   if ( support )
   {
     const auto& vertex_support = boost::get( boost::vertex_support, g );
@@ -188,6 +205,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
       }
     }
   }
+  std::cout << "[i] ... end support" << std::endl;
 
   /* port to node mapping */
   for ( const auto& i : index( info.inputs ) )
@@ -303,6 +321,7 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
                                           const properties::ptr& settings,
                                           const properties::ptr& statistics )
 {
+  std::cout << "[i] start sg" << std::endl;
   auto additional_vectors = get( settings, "additional_vectors", std::vector<boost::dynamic_bitset<>>() );
   auto support_edges      = get( settings, "support_edges",      false );
 
@@ -314,16 +333,20 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
 
   std::vector<boost::dynamic_bitset<>> vectors;
 
+  std::cout << "[i] ... start create sv" << std::endl;
   {
     properties_timer t( statistics, "simulation_runtime" );
     vectors = create_simulation_vectors( info.inputs.size(), types, &partition );
   }
+  std::cout << "[i] ... end create sv" << std::endl;
 
   boost::push_back( vectors, additional_vectors );
 
   set( statistics, "vectors", vectors );
 
+  std::cout << "[i] ... start create graph" << std::endl;
   auto        graph   = create_simulation_graph( aig, vectors, settings, statistics );
+  std::cout << "[i] ... end create graph" << std::endl;
 
   properties_timer t( statistics, "labeling_runtime" );
 
@@ -364,6 +387,8 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
     }
     offset += p.value;
   }
+
+  std::cout << "[i] end sg" << std::endl;
 
   return graph;
 }
@@ -450,6 +475,8 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
     vedge_direction( boost::num_vertices( graph ) )
 #endif
 {
+  std::cout << "[i] start sg wrapper" << std::endl;
+
   vertex_label                = boost::get( boost::vertex_label, graph );
   vertex_in_degree            = boost::get( boost::vertex_in_degree, graph );
   vertex_out_degree           = boost::get( boost::vertex_out_degree, graph );
@@ -475,6 +502,8 @@ simulation_graph_wrapper::simulation_graph_wrapper( const aig_graph& g,
     vedge_direction[tgt].insert( {src, 1} );
 #endif
   }
+
+  std::cout << "[i] end sg wrapper" << std::endl;
 }
 
 void simulation_graph_wrapper::fill_neighbor_degree_sequence_out( unsigned u, std::vector<unsigned>& degrees ) const

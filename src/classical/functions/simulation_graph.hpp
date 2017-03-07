@@ -1,6 +1,6 @@
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
- * Copyright (C) 2015-2016  EPFL
+ * Copyright (C) 2015-2017  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -176,7 +176,7 @@ std::vector<simulation_signature_t::value_type> compute_simulation_signatures( c
  * If FAST_EDGE_ACCESS is defined, edge directions and edge labels are stored
  * in an adjacency matrix, which increases performance but also memory usage.
  */
-#define FAST_EDGE_ACCESS
+//#define FAST_EDGE_ACCESS
 
 class simulation_graph_wrapper
 {
