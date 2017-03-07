@@ -48,8 +48,9 @@ template<>
 minisat_solver make_solver<minisat_solver>( properties::ptr settings )
 {
   std::unique_ptr<Minisat::Solver> solver( new Minisat::Solver );
+  const auto conf_budget = get(settings, "conf_budget", -1 );
   //  minisat_solver solver( new Minisat::Solver );
-  return { std::move( solver ), std::vector<int>(), true, -1 };
+  return { std::move( solver ), std::vector<int>(), true, conf_budget };
 }
 
 template<>
