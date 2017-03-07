@@ -89,11 +89,11 @@ using solver_result_t = boost::optional<std::pair<boost::dynamic_bitset<>, boost
 
 struct solver_execution_statistics
 {
-  unsigned num_vars;
-  unsigned num_clauses;
-  double parse_time;
-  double runtime;
-  uint64_t num_conflicts;
+  unsigned num_vars = 0;
+  unsigned num_clauses = 0;
+  double parse_time = 0.0;
+  double runtime = 0.0;
+  uint64_t num_conflicts = 0;
 };
 
 template<class S>
