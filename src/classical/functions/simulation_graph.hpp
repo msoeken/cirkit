@@ -57,9 +57,6 @@
 namespace boost
 {
 
-enum graph_edge_lookup_t { graph_edge_lookup };
-BOOST_INSTALL_PROPERTY(graph, edge_lookup);
-
 enum graph_meta_t { graph_meta };
 BOOST_INSTALL_PROPERTY(graph, meta);
 
@@ -91,23 +88,10 @@ namespace cirkit
 
 using vertex_pair_t    = std::pair<unsigned, unsigned>;
 
-struct edge_lookup_hash_t
-{
-  inline std::size_t operator()( const vertex_pair_t& p ) const
-  {
-    std::size_t seed = 0;
-    boost::hash_combine( seed, p.first );
-    boost::hash_combine( seed, p.second );
-    return seed;
-  }
-};
-
 namespace detail
 {
   using simulation_graph_traits_t          = boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>;
 }
-
-using edge_lookup_t                        = std::unordered_map<vertex_pair_t, detail::simulation_graph_traits_t::edge_descriptor, edge_lookup_hash_t>;
 
 struct simulation_graph_meta_t
 {
@@ -123,8 +107,7 @@ using simulation_signature_t               = boost::optional<std::vector<unsigne
 /* In order to allow an O(1) lookup for edges in the graph, this
  * edge lookup table is added as a property to the simulation graph
  */
-using simulation_graph_properties_t        = boost::property<boost::graph_meta_t, simulation_graph_meta_t,
-                                             boost::property<boost::graph_edge_lookup_t, edge_lookup_t>>;
+using simulation_graph_properties_t        = boost::property<boost::graph_meta_t, simulation_graph_meta_t>;
 
 /* In order to allow an O(1) access to the vertex in- and out-degree,
  * they are stored additionally as property maps for the vertices.

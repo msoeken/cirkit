@@ -56,7 +56,6 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
                                           const properties::ptr& settings, const properties::ptr& statistics )
 {
   simulation_graph g;
-  auto& edge_lookup             = boost::get_property( g, boost::graph_edge_lookup );
   auto& meta                    = boost::get_property( g, boost::graph_meta );
   const auto& vertex_in_degree  = boost::get( boost::vertex_in_degree, g );
   const auto& vertex_out_degree = boost::get( boost::vertex_out_degree, g );
@@ -91,13 +90,10 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
   /* add vertices */
   const auto vertices_count = n + m + sim_vectors.size();
   add_vertices( g, vertices_count );
-  edge_lookup.reserve( vertices_count << 5u );
 
   /* edge inserting */
   const auto add_edge_func = [&]( unsigned from, unsigned to ) {
     auto e = add_edge( from, to, g ).first;
-    edge_lookup.insert( std::make_pair( std::make_pair( from, to ), e ) );
-    edge_lookup.insert( std::make_pair( std::make_pair( to, from ), e ) );
     vertex_in_degree[to]++;
     vertex_out_degree[from]++;
     return e;
@@ -146,8 +142,6 @@ simulation_graph create_simulation_graph( const aig_graph& aig, const std::vecto
         const auto from = n + i;
         const auto to = n + sim_vectors.size() + j;
         auto e = add_edge( from, to, g ).first;
-        edge_lookup.insert( std::make_pair( std::make_pair( from, to ), e ) );
-        edge_lookup.insert( std::make_pair( std::make_pair( to, from ), e ) );
         vertex_in_degree[to]++;
         vertex_out_degree[from]++;
 
