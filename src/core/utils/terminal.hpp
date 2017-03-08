@@ -36,8 +36,11 @@
 #ifndef TERMINAL_HPP
 #define TERMINAL_HPP
 
+#include <algorithm>
 #include <iostream>
 #include <string>
+
+#include <boost/format.hpp>
 
 namespace cirkit
 {
@@ -48,6 +51,59 @@ class null_stream : public std::streambuf
 {
 public:
   inline int overflow( int c ) { return c; }
+};
+
+/**
+ * progress_line
+ *
+ * Over-writing single-line progress bar
+ *
+ * Typical usecase:
+ *
+ * Use a settings variable `progress' of type `bool' that is default
+ * initialized to `true'.  Assume that you want to show progress in
+ * the algorithm for three variables `aString', `aNumber', and
+ * `aFloat'.  Then you get a progress line as follows:
+ *
+ *     progress_line p( "[i] s = %s   n = %d    f = %f", progress );
+ *
+ *     while ( ... )
+ *     {
+ *       p( aString, aNumber, aFloat );
+ *     }
+ *
+ * The deconstructor of progress_line will clear the line by printing
+ * as many spaces as the maximum line processed.  Make sure not to
+ * have line breaks in the string passed to the constructor, and not
+ * to have any writes to the output stream passed to progress_line.
+ */
+class progress_line
+{
+public:
+  progress_line( const std::string& format, bool enable = true, std::ostream& os = std::cout );
+  ~progress_line();
+
+  template<typename... Args>
+  void operator()( Args&&... args )
+  {
+    if ( !enable ) return;
+
+    boost::format fmt( format );
+    using unroll = int[];
+    static_cast<void>( unroll{0, ( fmt % std::forward<Args>( args ), 0)...} );
+
+    const auto s = boost::str( fmt );
+    max_length = std::max( s.size(), max_length );
+
+    os << boost::str( fmt ) << "\r";
+    os.flush();
+  }
+
+private:
+  std::string format;
+  bool enable;
+  std::ostream& os;
+  std::size_t max_length = 0u;
 };
 
 }

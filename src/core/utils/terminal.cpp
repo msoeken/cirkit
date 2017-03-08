@@ -39,6 +39,19 @@ void print_banner( const std::string& caption, unsigned width )
             << '+' << std::string( width - 2u, '-' ) << '+' << std::endl;
 }
 
+progress_line::progress_line( const std::string& format, bool enable, std::ostream& os )
+  : format( format ),
+    enable( enable ),
+    os( os )
+{
+}
+
+progress_line::~progress_line()
+{
+  os << std::string( max_length, ' ' ) << '\r';
+  os.flush();
+}
+
 }
 
 // Local Variables:
