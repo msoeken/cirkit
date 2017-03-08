@@ -290,7 +290,7 @@ public:
         }
         else
         {
-          if ( boost::starts_with( line, "abc" ) )
+          if ( boost::starts_with( line, "abc " ) )
           {
             collect_commands = true;
             abc_opts = ( line.size() > 4u ? (line.substr( 4u ) + " ") : "" );
