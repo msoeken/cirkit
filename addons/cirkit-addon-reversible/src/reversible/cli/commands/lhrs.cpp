@@ -47,10 +47,10 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   : aig_base_command( env, "LUT based synthesis" )
 {
   opts.add_options()
-    ( "cut_size,k",        value_with_default( &cut_size ),        "cut size" )
-    ( "order_heuristic,o", value_with_default( &order_heuristic ), "order heuristic\n0: defer\n1: eager" )
-    ( "lutdecomp,l",                                               "apply LUT decomposition technique where possible" )
-    ( "progress,p",                                                "show progress" )
+    ( "cut_size,k",   value_with_default( &cut_size ), "cut size" )
+    ( "lutdecomp,l",                                   "apply LUT decomposition technique where possible" )
+    ( "progress,p",                                    "show progress" )
+    ( "dry",                                           "dry run (do not create gates)" )
     ;
   be_verbose();
   add_new_option();
@@ -62,9 +62,9 @@ bool lhrs_command::execute()
   extend_if_new( circuits );
 
   const auto settings = make_settings();
-  settings->set( "order_heuristic", order_heuristic == 0 ? std::string( "defer" ) : std::string( "eager" ) );
   settings->set( "lutdecomp", is_set( "lutdecomp" ) );
   settings->set( "progress", is_set( "progress" ) );
+  settings->set( "dry", is_set( "dry" ) );
 
   lut_graph_t lut;
   {

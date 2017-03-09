@@ -211,87 +211,6 @@ protected:
   std::vector<unsigned> indegrees;
 };
 
-class eager_lut_order_heuristic : public lut_order_heuristic
-{
-public:
-  eager_lut_order_heuristic( const lut_graph_t& lut )
-    : lut_order_heuristic( lut )
-  {
-  }
-
-public:
-  virtual unsigned compute_steps()
-  {
-    add_input_steps();
-    const auto type = get( boost::vertex_lut_type, lut() );
-
-    foreach_topological( lut(), [this, &type]( const lut_vertex_t& n ) {
-        if ( type[n] != lut_type_t::internal ) return true;
-
-        const auto target = request_constant();
-        (*this)[n] = target;
-        add_step( n, target, lut_order_heuristic::compute );
-
-        if ( target >= line_to_lut.size() )
-        {
-          line_to_lut.resize( target + 1 );
-          line_to_lut[target] = n;
-        }
-
-        /* check for unused children */
-        for ( const auto& child : boost::make_iterator_range( boost::adjacent_vertices( n, lut() ) ) )
-        {
-          if ( type[child] != lut_type_t::internal ) continue;
-
-          if ( --indegrees[child] == 0u )
-          {
-            /* child is potential candidate for uncomputing, but all its children must still have legal values */
-            auto can_uncompute = true;
-            for ( const auto& cchild : boost::make_iterator_range( boost::adjacent_vertices( child, lut() ) ) )
-            {
-              if ( line_to_lut[(*this)[cchild]] != static_cast<int>( cchild ) )
-              {
-                can_uncompute = false;
-                break;
-              }
-            }
-
-            if ( can_uncompute )
-            {
-              add_step( child, (*this)[child], lut_order_heuristic::uncompute );
-              free_constant( (*this)[child] );
-              line_to_lut[(*this)[child]] = -1;
-            }
-          }
-        }
-
-        return true;
-      } );
-
-    add_default_output_steps();
-
-    return next_free();
-  }
-
-  void add_input_steps()
-  {
-    const auto type = boost::get( boost::vertex_lut_type, lut() );
-    for ( auto n : boost::make_iterator_range( vertices( lut() ) ) )
-    {
-      if ( type[n] != lut_type_t::pi ) continue;
-
-      const auto line = _next_free++;
-      (*this)[n] = line;
-      assert( line == line_to_lut.size() );
-      line_to_lut.push_back( n );
-      add_step( n, line, step_type::pi );
-    }
-  }
-
-private:
-  std::vector<int> line_to_lut;
-};
-
 class defer_lut_order_heuristic : public lut_order_heuristic
 {
 public:
@@ -406,8 +325,10 @@ private:
 class lut_partial_synthesizer
 {
 public:
-  explicit lut_partial_synthesizer( const lut_graph_t& lut )
-    : _lut( lut )
+  explicit lut_partial_synthesizer( const lut_graph_t& lut, const properties::ptr& settings, const properties::ptr& statistics )
+    : _lut( lut ),
+      settings( settings ),
+      statistics( statistics )
   {
   }
 
@@ -457,35 +378,53 @@ private:
   temporary_filename blifname{ "/tmp/lbs-%d.blif" };
 
   mutable unsigned counter = 0u;
+
+protected:
+  const properties::ptr& settings;
+  const properties::ptr& statistics;
 };
 
 class exorcism_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
-  explicit exorcism_lut_partial_synthesizer( const lut_graph_t& lut ) : lut_partial_synthesizer( lut ) {}
+  explicit exorcism_lut_partial_synthesizer( const lut_graph_t& lut, const properties::ptr& settings, const properties::ptr& statistics )
+    : lut_partial_synthesizer( lut, settings, statistics ),
+      dry( get( settings, "dry", dry ) )
+  {
+  }
 
 protected:
   circuit compute( lut_vertex_t node ) const
   {
-    const auto blifname = write_blif( node );
-    const auto es_settings = std::make_shared<properties>();
-    es_settings->set( "esopname", esopname.name() );
-    exorcism_minimization_blif( blifname, es_settings );
+    if ( dry )
+    {
+      return circuit( boost::out_degree( node, lut() ) + 1u );
+    }
+    else
+    {
+      const auto blifname = write_blif( node );
+      const auto es_settings = std::make_shared<properties>();
+      es_settings->set( "esopname", esopname.name() );
+      exorcism_minimization_blif( blifname, es_settings );
 
-    circuit local_circ;
-    esop_synthesis( local_circ, esopname.name() );
+      circuit local_circ;
+      esop_synthesis( local_circ, esopname.name() );
 
-    return local_circ;
+      return local_circ;
+    }
   }
 
 private:
   temporary_filename esopname{ "/tmp/lbs-%d.esop" };
+
+  /* settings */
+  bool dry = false;
 };
 
 class exorcismq_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
-  explicit exorcismq_lut_partial_synthesizer( const lut_graph_t& lut ) : lut_partial_synthesizer( lut ) {}
+  explicit exorcismq_lut_partial_synthesizer( const lut_graph_t& lut, const properties::ptr& settings, const properties::ptr& statistics ) : lut_partial_synthesizer( lut, settings, statistics ) {}
 
 protected:
   circuit compute( lut_vertex_t node ) const
@@ -508,7 +447,7 @@ private:
 class hybrid_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
-  explicit hybrid_lut_partial_synthesizer( const lut_graph_t& lut ) : lut_partial_synthesizer( lut ) {}
+  explicit hybrid_lut_partial_synthesizer( const lut_graph_t& lut, const properties::ptr& settings, const properties::ptr& statistics ) : lut_partial_synthesizer( lut, settings, statistics ) {}
 
 protected:
   circuit compute( lut_vertex_t node ) const
@@ -535,8 +474,8 @@ private:
 class lutdecomp_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
-  explicit lutdecomp_lut_partial_synthesizer( const lut_graph_t& lut )
-    : lut_partial_synthesizer( lut ),
+  explicit lutdecomp_lut_partial_synthesizer( const lut_graph_t& lut, const properties::ptr& settings, const properties::ptr& statistics )
+    : lut_partial_synthesizer( lut, settings, statistics ),
       class_circuits( 3u ),
       class_counter( 3u ),
       class_hash( 3u )
@@ -552,6 +491,12 @@ public:
         class_circuits[i].push_back( circuit_from_string( optimal_quantum_circuits::affine_classification[i][j] ) );
       }
     }
+  }
+
+  ~lutdecomp_lut_partial_synthesizer()
+  {
+    set( statistics, "class_counter", class_counter );
+    set( statistics, "class_runtime", class_runtime );
   }
 
 protected:
@@ -712,23 +657,17 @@ public: /* settings */
 class lut_based_synthesis_manager
 {
 public:
-  lut_based_synthesis_manager( circuit& circ, const lut_graph_t& lut, const properties::ptr& settings )
+  lut_based_synthesis_manager( circuit& circ, const lut_graph_t& lut, const properties::ptr& settings, const properties::ptr& statistics )
     : circ( circ ),
       lut( lut ),
-      synthesizer( lut ),
-      decomp_synthesizer( lut ),
+      statistics( statistics ),
+      order_heuristic( std::make_shared<defer_lut_order_heuristic>( lut ) ),
+      synthesizer( lut, settings, statistics ),
+      decomp_synthesizer( lut, settings, statistics ),
       verbose( get( settings, "verbose", verbose ) ),
       progress( get( settings, "progress", progress ) ),
       lutdecomp( get( settings, "lutdecomp", lutdecomp ) )
   {
-    if ( get( settings, "order_heuristic", std::string( "defer" ) ) == "defer" )
-    {
-      order_heuristic = std::make_shared<defer_lut_order_heuristic>( lut );
-    }
-    else
-    {
-      order_heuristic = std::make_shared<eager_lut_order_heuristic>( lut );
-    }
   }
 
   bool run()
@@ -746,10 +685,11 @@ public:
     const auto name = boost::get( boost::vertex_name, lut );
 
     auto step_index = 0u;
-    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d\r", progress );
+    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   total = %6.2f\r", progress );
     for ( const auto& step : order_heuristic->steps() )
     {
-      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut );
+      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, synthesis_time );
+      increment_timer t( &synthesis_time );
 
       switch ( step.type )
       {
@@ -791,11 +731,8 @@ public:
     circ.set_constants( constants );
     circ.set_garbage( garbage );
 
-    if ( lutdecomp )
-    {
-      class_counter = decomp_synthesizer.class_counter;
-      class_runtime = decomp_synthesizer.class_runtime;
-    }
+    set( statistics, "num_decomp_default", num_decomp_default );
+    set( statistics, "num_decomp_lut", num_decomp_lut );
 
     return true;
   }
@@ -841,6 +778,8 @@ private:
   circuit& circ;
   const lut_graph_t& lut;
 
+  const properties::ptr& statistics;
+
   std::unordered_map<unsigned, circuit> computed_circuits;
 
   std::shared_ptr<lut_order_heuristic> order_heuristic;
@@ -851,11 +790,10 @@ private:
   bool progress = false;
   bool lutdecomp = false;
 
-public: /* statistics */
+private: /* statistics */
+  double   synthesis_time = 0.0;
   unsigned num_decomp_default = 0u;
   unsigned num_decomp_lut = 0u;
-  std::vector<std::vector<unsigned>> class_counter;
-  double class_runtime = 0.0;
 };
 
 /******************************************************************************
@@ -871,13 +809,8 @@ bool lut_based_synthesis( circuit& circ, const lut_graph_t& lut, const propertie
   /* timing */
   properties_timer t( statistics );
 
-  lut_based_synthesis_manager mgr( circ, lut, settings );
+  lut_based_synthesis_manager mgr( circ, lut, settings, statistics );
   const auto result = mgr.run();
-
-  set( statistics, "num_decomp_default", mgr.num_decomp_default );
-  set( statistics, "num_decomp_lut", mgr.num_decomp_lut );
-  set( statistics, "class_counter", mgr.class_counter );
-  set( statistics, "class_runtime", mgr.class_runtime );
 
   return result;
 }

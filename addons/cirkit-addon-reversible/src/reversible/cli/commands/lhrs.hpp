@@ -53,7 +53,6 @@ public:
   log_opt_t log() const;
 
 private:
-  unsigned order_heuristic = 0u;
   unsigned cut_size = 16u;
   unsigned lut_count = 0u;
 };
