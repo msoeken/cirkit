@@ -38,6 +38,9 @@
 #include <core/cli/commands/testbdd.hpp>
 #include <core/utils/bdd_utils.hpp>
 
+#include <boost/mpl/fold.hpp>
+#include <boost/mpl/vector.hpp>
+
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/bool_complex.hpp>
 #include <classical/cli/commands/blif_to_bench.hpp>
@@ -76,15 +79,25 @@
 #include <classical/cli/commands/xmgmerge.hpp>
 #include <classical/cli/commands/worstcase.hpp>
 
-#define STORE_TYPES aig_graph, mig_graph, xmg_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t
+using namespace cirkit;
+
+using cirkit_store_types = boost::mpl::vector<aig_graph, mig_graph, xmg_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t>;
+
+#define STORE_TYPES cirkit_store_types
 
 #include <addon_commands.hpp> // auto-generated file from CMake
 
-using namespace cirkit;
+template<typename CLI, typename T> struct extend_cli_main;
+template<typename T, typename... Ts>
+struct extend_cli_main<cli_main<Ts...>, T>
+{
+  using type = cli_main<Ts..., T>;
+};
+using cli_t = boost::mpl::fold<STORE_TYPES, cli_main<>, extend_cli_main<boost::mpl::_1, boost::mpl::_2>>::type;
 
 int main( int argc, char ** argv )
 {
-  cli_main<STORE_TYPES> cli( "cirkit" );
+  cli_t cli( "cirkit" );
 
   cli.set_category( "I/O" );
 
