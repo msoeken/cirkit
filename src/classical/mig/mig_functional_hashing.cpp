@@ -386,7 +386,6 @@ int mig_functional_hashing_manager::find_best_cut( const mig_node& node, const s
 {
   auto best_gain  = 0u;
   auto best_index = -1;
-  auto best_npn   = 0u;
 
   for ( const auto& cut : index( cuts.at( node ) ) )
   {
@@ -430,8 +429,6 @@ int mig_functional_hashing_manager::find_best_cut( const mig_node& node, const s
       phase      = local_phase;
       perm       = local_perm;
       expr       = std::get<3>( mig_functional_hashing_constants::min_depth_mig_sizes.at( npn.to_ulong() ) );
-
-      best_npn   = npn.to_ulong();
     }
   }
 

@@ -232,7 +232,7 @@ boost::dynamic_bitset<> unateness_single_output( const aig_graph& aig, unsigned 
 
   boost::dynamic_bitset<> result( mapped_inputs.size() << 1u );
   result.set();
-  boost::dynamic_bitset<>::size_type pos;
+  boost::dynamic_bitset<>::size_type pos = boost::dynamic_bitset<>::npos;
 
   /* prepare assumptions */
   std::vector<int> assumptions( poids.begin() + 2u, poids.end() );

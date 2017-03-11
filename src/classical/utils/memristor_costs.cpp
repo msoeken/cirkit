@@ -61,7 +61,6 @@ std::pair<unsigned, unsigned> memristor_costs( const mig_graph& mig )
 
   const auto& complement = boost::get( boost::edge_complement, mig );
 
-  auto current_max_level = 0u;
   auto current_max_size  = 0u;
   auto levels_with_complement = 0u;
 
@@ -80,7 +79,6 @@ std::pair<unsigned, unsigned> memristor_costs( const mig_graph& mig )
     if ( size > current_max_size )
     {
       current_max_size = size;
-      current_max_level = l;
     }
 
     if ( size > 6u * level_to_nodes[l].size() ) { ++levels_with_complement; }
