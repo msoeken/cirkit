@@ -86,15 +86,23 @@ bool lhrs_command::execute()
 
 command::log_opt_t lhrs_command::log() const
 {
-  return log_opt_t({
+  log_map_t map({
       {"runtime", statistics->get<double>( "runtime" )},
       {"cut_size", cut_size},
       {"lut_count", lut_count},
       {"num_decomp_default", statistics->get<unsigned>( "num_decomp_default" )},
       {"num_decomp_lut", statistics->get<unsigned>( "num_decomp_lut" )},
-      {"class_counter", statistics->get<std::vector<std::vector<unsigned>>>( "class_counter" )},
-      {"class_runtime", statistics->get<double>( "class_runtime" )}
+      {"exorcism_time", statistics->get<double>( "exorcism_time" )}
     });
+
+  if ( is_set( "lutdecomp" ) )
+  {
+    map["class_counter"] = statistics->get<std::vector<std::vector<unsigned>>>( "class_counter" );
+    map["class_runtime"] = statistics->get<double>( "class_runtime" );
+    map["mapping_runtime"] = statistics->get<double>( "mapping_runtime" );
+  }
+
+  return map;
 }
 
 }

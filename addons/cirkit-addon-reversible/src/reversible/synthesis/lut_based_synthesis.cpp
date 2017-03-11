@@ -393,6 +393,11 @@ public:
   {
   }
 
+  virtual ~exorcism_lut_partial_synthesizer()
+  {
+    set( statistics, "exorcism_time", exorcism_time );
+  }
+
 protected:
   circuit compute( lut_vertex_t node ) const
   {
@@ -402,6 +407,8 @@ protected:
     }
     else
     {
+      increment_timer t( &exorcism_time );
+
       const auto blifname = write_blif( node );
       const auto es_settings = std::make_shared<properties>();
       es_settings->set( "esopname", esopname.name() );
@@ -419,6 +426,9 @@ private:
 
   /* settings */
   bool dry = false;
+
+public: /* for progress line */
+  mutable double exorcism_time = 0.0;
 };
 
 class exorcismq_lut_partial_synthesizer : public lut_partial_synthesizer
@@ -493,10 +503,11 @@ public:
     }
   }
 
-  ~lutdecomp_lut_partial_synthesizer()
+  virtual ~lutdecomp_lut_partial_synthesizer()
   {
     set( statistics, "class_counter", class_counter );
     set( statistics, "class_runtime", class_runtime );
+    set( statistics, "mapping_runtime", mapping_runtime );
   }
 
 protected:
@@ -519,11 +530,16 @@ protected:
     {
       //std::cout << boost::format( "[i] node %d has %d inputs" ) % node % num_inputs << std::endl;
 
-      const auto blifname = write_blif( node );
-      abc_run_command_no_output( boost::str( boost::format( "read_blif %s; strash; %s; %s; if -K 4 -a; write_blif %s" )
-                                             % blifname % abc_command_constants::resyn2_command % abc_command_constants::resyn2_command % blifname ) );
+      std::string blifname;
+      lut_graph_t sub_lut;
 
-      const auto sub_lut = read_blif( blifname );
+      {
+        increment_timer t( &mapping_runtime );
+        blifname = write_blif( node );
+        abc_run_command_no_output( boost::str( boost::format( "read_blif %s; strash; %s; %s; if -K 4 -a; write_blif %s" )
+                                               % blifname % "dc2" % "dc2" /*abc_command_constants::resyn2_command % abc_command_constants::resyn2_command*/ % blifname ) );
+        sub_lut = read_blif( blifname );
+      }
 
       std::vector<unsigned> lut_to_line( boost::num_vertices( sub_lut ), 0u );
       const auto type = boost::get( boost::vertex_lut_type, sub_lut );
@@ -568,7 +584,11 @@ protected:
             synth_order[ins_index] = synth_order[synth_order.size() - 1 - ins_index] = v;
             ++ins_index;
           }
-          aff_class[v] = classify( tt( convert_hex2bin( sub_spec[v] ) ).to_ulong(), boost::out_degree( v, sub_lut ) );
+
+          if ( boost::out_degree( v, sub_lut ) >= 2 )
+          {
+            aff_class[v] = classify( tt( convert_hex2bin( sub_spec[v] ) ).to_ulong(), boost::out_degree( v, sub_lut ) );
+          }
         }
       }
 
@@ -585,32 +605,42 @@ protected:
         }
         line_map.push_back( lut_to_line[v] );
 
-        const auto& aff_circ = class_circuits[num_inputs - 2u][class_index[num_inputs - 2u].at( aff_class[v] )];
-        if ( aff_circ.lines() > num_inputs + 1u )
+        switch ( num_inputs )
         {
-          assert( aff_circ.lines() == num_inputs + 2u );
-
-          // find any free line
-          auto free_line = -1;
-          for ( auto i = 0u; i < num_inputs + 1 + num_ancilla; ++i )
+        case 0u:
+          assert( false );
+          break;
+        case 1u:
+          assert( sub_spec[v] == "1" );
+          append_cnot( local_circ, make_var( line_map[0], false ), line_map[1] );
+          break;
+        default:
+          const auto& aff_circ = class_circuits[num_inputs - 2u][class_index[num_inputs - 2u].at( aff_class[v] )];
+          if ( aff_circ.lines() > num_inputs + 1u )
           {
-            if ( std::find( line_map.begin(), line_map.end(), i ) == line_map.end() )
+            assert( aff_circ.lines() == num_inputs + 2u );
+
+            // find any free line
+            auto free_line = -1;
+            for ( auto i = 0u; i < num_inputs + 1 + num_ancilla; ++i )
             {
-              free_line = i;
-              break;
+              if ( std::find( line_map.begin(), line_map.end(), i ) == line_map.end() )
+              {
+                free_line = i;
+                break;
+              }
             }
+
+            assert( free_line != -1 );
+
+            line_map.push_back( free_line );
           }
-
-          assert( free_line != -1 );
-
-          line_map.push_back( free_line );
+          append_circuit( local_circ, aff_circ, gate::control_container(), line_map );
+          break;
         }
-
-        append_circuit( local_circ, aff_circ, gate::control_container(), line_map );
       }
 
       return local_circ;
-      //std::cout << boost::format( "[i] LUT graph has %d vertices and %d nodes (%d)" ) % boost::num_vertices( sub_lut ) % count % ( boost::num_vertices( sub_lut ) - num_inputs - 3u ) << std::endl;
     }
   }
 
@@ -644,9 +674,12 @@ private:
   std::vector<std::vector<circuit>> class_circuits;
   mutable std::vector<std::unordered_map<uint64_t, uint64_t>> class_hash;
 
-public: /* settings */
-  mutable double class_runtime = 0.0;
+private: /* statistics */
   mutable std::vector<std::vector<unsigned>> class_counter;
+
+public: /* for progress printing */
+  mutable double class_runtime = 0.0;
+  mutable double mapping_runtime = 0.0;
 };
 
 
@@ -685,10 +718,10 @@ public:
     const auto name = boost::get( boost::vertex_name, lut );
 
     auto step_index = 0u;
-    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   total = %6.2f\r", progress );
+    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f\r", progress );
     for ( const auto& step : order_heuristic->steps() )
     {
-      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, synthesis_time );
+      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, synthesizer.exorcism_time, decomp_synthesizer.mapping_runtime, decomp_synthesizer.class_runtime, synthesis_time );
       increment_timer t( &synthesis_time );
 
       switch ( step.type )
