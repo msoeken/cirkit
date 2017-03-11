@@ -113,9 +113,8 @@ solver_result_t solve<abc_solver>( abc_solver& solver, solver_execution_statisti
 
     for ( auto i = 0u; i < statistics.num_vars; ++i )
     {
-      auto v = sat_solver_var_value( solver->solver, i );
-      bits[i] = ( v == abc::l_True );
-      care[i] = ( v != abc::l_Undef );
+      bits[i] = sat_solver_var_value( solver->solver, i ) == 1;
+      care[i] = true;
     }
 
     return solver_result_t( {bits, care} );
