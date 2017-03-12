@@ -82,6 +82,11 @@ void lut_graph::compute_levels() const
   levels.update( [this]() { return lut_compute_levels( *this ); } );
 }
 
+void lut_graph::compute_sections() const
+{
+  sections.update( [this]() { return lut_compute_sections( *this ); } );
+}
+
 lut_graph::node_t lut_graph::get_constant( bool value ) const
 {
   return value ? vdd : gnd;
@@ -141,6 +146,11 @@ unsigned lut_graph::fanout_count( const node_t& n ) const
 const std::vector<lut_graph::node_t>& lut_graph::parents( const node_t& n ) const
 {
   return (*parentss)[n];
+}
+
+const boost::dynamic_bitset<>& lut_graph::section( const node_t& n ) const
+{
+  return (*sections)[n];
 }
 
 unsigned lut_graph::level( const node_t& n ) const
@@ -301,6 +311,7 @@ void lut_graph::mark_as_modified() const
   fanout.make_dirty();
   parentss.make_dirty();
   levels.make_dirty();
+  sections.make_dirty();
 }
 
 }

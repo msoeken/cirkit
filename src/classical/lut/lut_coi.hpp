@@ -1,6 +1,6 @@
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
- * Copyright (C) 2015-2017  EPFL
+ * Copyright (C) 2015-2016  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,29 +25,30 @@
  */
 
 /**
- * @file lut_utils.hpp
+ * @file lut_coi.hpp
  *
- * @brief LUT graph utility functions
+ * @brief Compute COI of nodes
  *
- * @author Heinz Riener
+ * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef LUT_UTILS_HPP
-#define LUT_UTILS_HPP
+#ifndef LUT_COI_HPP
+#define LUT_COI_HPP
 
 #include <classical/lut/lut_graph.hpp>
+
+#include <vector>
 
 namespace cirkit
 {
 
-unsigned lut_compute_depth( const lut_graph& graph );
+/* the function returns the number of nodes in the COI and if primary_inputs is not null, it puts the PIs in order of appearance */
+unsigned lut_compute_coi( const lut_graph& graph, const lut_vertex_t& start_node, std::vector<lut_vertex_t>* primary_inputs = nullptr );
 
-void lut_print_stats( const lut_graph& graph, std::ostream& os );
+boost::dynamic_bitset<> lut_compute_coi_as_bitset( const lut_graph& graph, const lut_vertex_t& start_node );
 
-std::vector<unsigned> lut_compute_levels( const lut_graph& graph );
-
-std::vector<boost::dynamic_bitset<>> lut_compute_sections( const lut_graph& graph );
+std::vector<lut_vertex_t> lut_coi_topological_nodes( const lut_graph& graph );
 
 }
 

@@ -138,6 +138,7 @@ public:
   void compute_fanout() const;
   void compute_parents() const;
   void compute_levels() const;
+  void compute_sections() const;
 
   node_t get_constant( bool value ) const;
   node_t create_pi( const std::string& name );
@@ -148,6 +149,7 @@ public:
   unsigned fanin_count( const node_t& n ) const;
   unsigned fanout_count( const node_t& n ) const;
   const std::vector<node_t>& parents( const node_t& n ) const;
+  const boost::dynamic_bitset<>& section( const node_t& n ) const;
   unsigned level( const node_t& n ) const;
 
   bool is_input( const node_t& n ) const;
@@ -176,6 +178,8 @@ public:
   inline const lut_property_map_t& luts() const { return _luts; }
   inline const gate_type_property_map_t& types() { return _types; }
   inline const gate_type_property_map_t& types() const { return _types; }
+
+  inline unsigned num_luts() const { return _num_lut; }
 
   /* ref counting */
   void init_refs() const;
@@ -206,9 +210,10 @@ private:
   lut_property_map_t       _luts;
 
   /* additional network information */
-  mutable dirty<std::vector<unsigned>>            fanout;
-  mutable dirty<std::vector<std::vector<node_t>>> parentss;
-  mutable dirty<std::vector<unsigned>>            levels;
+  mutable dirty<std::vector<unsigned>>                fanout;
+  mutable dirty<std::vector<std::vector<node_t>>>     parentss;
+  mutable dirty<std::vector<unsigned>>                levels;
+  mutable dirty<std::vector<boost::dynamic_bitset<>>> sections;
 
   /* network settings and stats */
   unsigned                                _num_lut = 0u;
