@@ -41,13 +41,16 @@
 #include <core/utils/system_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/abc/abc_api.hpp>
+#include <classical/abc/abc_manager.hpp>
 #include <classical/abc/functions/cirkit_to_gia.hpp>
 
+#include <base/exor/exor.h>
 #include <misc/vec/vecInt.h>
 #include <misc/vec/vecWec.h>
 
 namespace abc
 {
+extern cinfo g_CoverInfo;
 int Abc_ExorcismMain( Vec_Wec_t * vEsop, int nIns, int nOuts, char * pFileNameOut, int Quality, int Verbosity, int nCubesMax, int fUseQCost );
 Gia_Man_t * Eso_ManCompute( Gia_Man_t * pGia, int fVerbose, Vec_Wec_t ** pvRes );
 }
@@ -256,13 +259,37 @@ void exorcism_minimization( const aig_graph& aig, const properties::ptr& setting
 
 void exorcism_minimization_blif( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
 {
+  const auto verbose      = get( settings, "verbose",      false );
+  const auto very_verbose = get( settings, "very_verbose", false );
   const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
   const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
   const auto skip_parsing = get( settings, "skip_parsing", false );
 
   properties_timer t( statistics );
 
-  execute_and_omit( boost::str( boost::format( "abc -c \"read_blif %s; strash; &get; &exorcism %s\"" ) % filename % esopname ) );
+  abc_manager::get();
+  abc::Abc_FrameGetGlobalFrame();
+
+  auto ntk = abc::Io_Read( const_cast<char*>( filename.c_str() ), abc::IO_FILE_BLIF, 0, 0 );
+  auto strash = abc::Abc_NtkStrash( ntk, 0, 1, 0 );
+  auto aig = abc::Abc_NtkToDar( strash, 0, 0 );
+  abc::Abc_NtkDelete( strash );
+  auto gia = abc::Gia_ManFromAig( aig );
+  abc::Aig_ManStop( aig );
+  auto inits = abc::Abc_NtkCollectLatchValuesStr( ntk );
+  abc::Abc_NtkDelete( ntk );
+  auto tmp = gia;
+  gia = Gia_ManDupZeroUndc( tmp, inits, 0, 0 );
+  abc::Gia_ManStop( tmp );
+  ABC_FREE( inits );
+
+  abc::Vec_Wec_t * esop = nullptr;
+  {
+    properties_timer t( statistics, "exorcism_cover_time" );
+    abc::Eso_ManCompute( gia, 0, &esop );
+  }
+  abc::Abc_ExorcismMain( esop, abc::Gia_ManCiNum( gia ), abc::Gia_ManCoNum( gia ), const_cast<char*>( esopname.c_str() ), 2, very_verbose ? 2 : ( verbose ? 1 : 0 ), 20000, 0 );
+  abc::Vec_WecFree( esop );
 
   /* Parse */
   if ( !skip_parsing )
@@ -273,6 +300,7 @@ void exorcism_minimization_blif( const std::string& filename, const properties::
     set( statistics, "cube_count", p.cube_count() );
     set( statistics, "literal_count", p.literal_count() );
   }
+  set( statistics, "exorcism_opt_time", static_cast<double>( TICKS_TO_SECONDS( abc::g_CoverInfo.TimeMin ) ) );
 }
 
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func(properties::ptr settings, properties::ptr statistics)
