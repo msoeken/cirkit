@@ -389,7 +389,8 @@ class exorcism_lut_partial_synthesizer : public lut_partial_synthesizer
 public:
   explicit exorcism_lut_partial_synthesizer( const lut_graph_t& lut, const properties::ptr& settings, const properties::ptr& statistics )
     : lut_partial_synthesizer( lut, settings, statistics ),
-      dry( get( settings, "dry", dry ) )
+      dry( get( settings, "dry", dry ) ),
+      verbose( get( settings, "verbose", verbose ) )
   {
   }
 
@@ -412,7 +413,11 @@ protected:
       const auto blifname = write_blif( node );
       const auto es_settings = std::make_shared<properties>();
       es_settings->set( "esopname", esopname.name() );
-      exorcism_minimization_blif( blifname, es_settings );
+      es_settings->set( "skip_parsing", true );
+      es_settings->set( "verbose",      verbose );
+      es_settings->set( "very_verbose", false );
+      const auto es_statistics = std::make_shared<properties>();
+      exorcism_minimization_blif( blifname, es_settings, es_statistics );
 
       circuit local_circ;
       esop_synthesis( local_circ, esopname.name() );
@@ -426,6 +431,7 @@ private:
 
   /* settings */
   bool dry = false;
+  bool verbose = false;
 
 public: /* for progress line */
   mutable double exorcism_time = 0.0;
