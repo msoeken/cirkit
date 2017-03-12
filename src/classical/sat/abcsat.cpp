@@ -47,15 +47,18 @@ template<>
 abc_solver make_solver<abc_solver>( properties::ptr settings )
 {
   const auto reuse_solver = get<abc::sat_solver*>( settings, "reuse_solver", nullptr );
+  const auto conf_budget = get(settings, "conf_budget", 0 );
 
   if ( reuse_solver )
   {
     std::unique_ptr<abc_solver_t> solver( new abc_solver_t( reuse_solver ) );
+    solver->conf_budget = conf_budget;
     return solver;
   }
   else
   {
     std::unique_ptr<abc_solver_t> solver( new abc_solver_t );
+    solver->conf_budget = conf_budget;
     return solver;
   }
 }
@@ -76,7 +79,7 @@ solver_result_t solve<abc_solver>( abc_solver& solver, solver_execution_statisti
 
     if ( assumptions.empty() )
     {
-      result = abc::sat_solver_solve( solver->solver, nullptr, nullptr, 0, 0, 0, 0 );
+      result = abc::sat_solver_solve( solver->solver, nullptr, nullptr, /* nConfLimit = */solver->conf_budget, 0, 0, 0 );
     }
     else
     {
@@ -95,12 +98,13 @@ solver_result_t solve<abc_solver>( abc_solver& solver, solver_execution_statisti
         lits.push_back( ( var << 1u ) | ( parsed_lit < 0 ) );
       }
 
-      result = abc::sat_solver_solve( solver->solver, &lits[0], &lits[0] + lits.size(), 0, 0, 0, 0 );
+      result = abc::sat_solver_solve( solver->solver, &lits[0], &lits[0] + lits.size(), /* nConfLimit = */solver->conf_budget, 0, 0, 0 );
     }
   }
 
-  statistics.num_vars    = abc::sat_solver_nvars( solver->solver );
-  statistics.num_clauses = abc::sat_solver_nclauses( solver->solver );
+  statistics.num_vars      = abc::sat_solver_nvars( solver->solver );
+  statistics.num_clauses   = abc::sat_solver_nclauses( solver->solver );
+  statistics.num_conflicts = abc::sat_solver_nconflicts( solver->solver );
 
   if ( result == abc::l_True && !solver->genmodel )
   {

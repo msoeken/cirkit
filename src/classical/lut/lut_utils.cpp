@@ -26,6 +26,11 @@
 
 #include "lut_utils.hpp"
 
+#include <classical/lut/lut_coi.hpp>
+#include <core/utils/bitset_utils.hpp>
+#include <core/utils/range_utils.hpp>
+
+#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 
 namespace cirkit
@@ -109,6 +114,26 @@ std::vector<unsigned> lut_compute_levels( const lut_graph& graph )
     }
   }
   return levels;
+}
+
+std::vector<boost::dynamic_bitset<>> lut_compute_sections( const lut_graph& graph )
+{
+  using namespace boost::assign;
+
+  std::vector< boost::dynamic_bitset<> > sections;
+  for ( const auto& o : graph.outputs() )
+  {
+    sections += lut_compute_coi_as_bitset( graph, o.first );
+  }
+  sections = transpose( sections );
+
+  std::vector< boost::dynamic_bitset<> > node_to_section;
+  node_to_section.resize( graph.nodes().size() );
+  for ( const auto& s : index( sections ) )
+  {
+    node_to_section[ s.index + 2u ] = s.value;
+  }
+  return node_to_section;
 }
 
 }
