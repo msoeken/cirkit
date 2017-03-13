@@ -71,6 +71,9 @@ namespace cirkit
     }
   }
 
+  void make_settings_rec( const properties::ptr& settings )
+  {
+  }
 }
 
 // Local Variables:

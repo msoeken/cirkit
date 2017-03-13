@@ -298,6 +298,68 @@ namespace cirkit
    */
   void set_error_message( properties::ptr statistics, const std::string& error );
 
+/**
+ * Utility functions to create settings object
+ */
+
+namespace detail
+{
+
+template<typename T>
+struct make_one_setting
+{
+  static void impl( const properties::ptr& settings, T v )
+  {
+    std::cout << "unknown" << std::endl;
+  }
+};
+
+template<class S, class U>
+struct make_one_setting<std::pair<S, U>>
+{
+  static void impl( const properties::ptr& settings, std::pair<S, U> p )
+  {
+    settings->set( p.first, p.second );
+  }
+};
+
+template<>
+struct make_one_setting<std::string>
+{
+  static void impl( const properties::ptr& settings, std::string s )
+  {
+    settings->set( s, true );
+  }
+};
+
+template<>
+struct make_one_setting<const char*>
+{
+  static void impl( const properties::ptr& settings, const char* s )
+  {
+    settings->set( s, true );
+  }
+};
+
+}
+
+void make_settings_rec( const properties::ptr& settings );
+
+template<class T, class... Ts>
+void make_settings_rec( const properties::ptr& settings, T value, Ts... rest )
+{
+  detail::make_one_setting<T>::impl( settings, value );
+  make_settings_rec( settings, rest... );
+}
+
+template<class... Ts>
+properties::ptr make_settings_from( Ts... values )
+{
+  const auto settings = std::make_shared<properties>();
+  make_settings_rec( settings, values... );
+  return settings;
+}
+
 }
 
 #endif /* PROPERTIES_HPP */
