@@ -53,6 +53,13 @@ namespace abc
 extern cinfo g_CoverInfo;
 int Abc_ExorcismMain( Vec_Wec_t * vEsop, int nIns, int nOuts, char * pFileNameOut, int Quality, int Verbosity, int nCubesMax, int fUseQCost );
 Gia_Man_t * Eso_ManCompute( Gia_Man_t * pGia, int fVerbose, Vec_Wec_t ** pvRes );
+
+void AddCubesToStartingCover( Vec_Wec_t * vEsop );
+int ReduceEsopCover();
+
+Cube* IterCubeSetStart();
+Cube* IterCubeSetNext();
+varvalue GetVar( Cube * pC, int Var );
 }
 
 namespace cirkit
@@ -301,6 +308,102 @@ void exorcism_minimization_blif( const std::string& filename, const properties::
     set( statistics, "literal_count", p.literal_count() );
   }
   set( statistics, "exorcism_opt_time", static_cast<double>( TICKS_TO_SECONDS( abc::g_CoverInfo.TimeMin ) ) );
+}
+
+void exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs,
+                            const properties::ptr& settings,
+                            const properties::ptr& statistics )
+{
+  /* settings */
+  const auto quality      = get( settings, "quality",      2u );
+  const auto cubes_max    = get( settings, "cubes_max",    50000u );
+  const auto verbose      = get( settings, "verbose",      false );
+  const auto very_verbose = get( settings, "very_verbose", false );
+
+  properties_timer t( statistics );
+
+  /* initialize */
+  memset( &abc::g_CoverInfo, 0, sizeof( abc::cinfo ) );
+  abc::g_CoverInfo.Quality = static_cast<int>( quality );
+  abc::g_CoverInfo.Verbosity = very_verbose ? 2 : ( verbose ? 1 : 0 );
+  abc::g_CoverInfo.nCubesMax = static_cast<int>( cubes_max );
+  abc::PrepareBitSetModule();
+
+  int rbits = ( ninputs * 2 ) % ( sizeof(unsigned) * 8 );
+  int twords = ( ninputs * 2 ) / ( sizeof(unsigned) * 8 ) + ( rbits > 0 );
+  abc::g_CoverInfo.nVarsIn = ninputs;
+  abc::g_CoverInfo.nWordsIn = twords;
+
+  rbits = ( noutputs * 2 ) % ( sizeof(unsigned) * 8 );
+  twords = ( noutputs * 2 ) / ( sizeof(unsigned) * 8 ) + ( rbits > 0 );
+  abc::g_CoverInfo.nVarsOut = noutputs;
+  abc::g_CoverInfo.nWordsOut = twords;
+  abc::g_CoverInfo.cIDs = 1;
+
+  abc::g_CoverInfo.nCubesBefore = abc::Vec_WecSize( esop.get() );
+
+  if ( abc::g_CoverInfo.nCubesBefore > abc::g_CoverInfo.nCubesMax )
+  {
+    std::cout << boost::format( "[e] the size of the starting cover is too large: %d (allowed: %d)" )
+      % abc::g_CoverInfo.nCubesBefore % abc::g_CoverInfo.nCubesMax << std::endl;
+    return;
+  }
+
+  /* prepare internal data structures */
+  abc::g_CoverInfo.nCubesAlloc = abc::g_CoverInfo.nCubesBefore + ADDITIONAL_CUBES;
+  if ( !abc::AllocateCover( abc::g_CoverInfo.nCubesAlloc, abc::g_CoverInfo.nWordsIn, abc::g_CoverInfo.nWordsOut ) ||
+       !abc::AllocateCubeSets( abc::g_CoverInfo.nVarsIn, abc::g_CoverInfo.nVarsOut ) ||
+       !abc::AllocateQueques( abc::g_CoverInfo.nCubesAlloc * abc::g_CoverInfo.nCubesAlloc / CUBE_PAIR_FACTOR ) )
+  {
+    std::cout << "[e] not enough memory" << std::endl;
+    return;
+  }
+
+  /* reduce */
+  abc::AddCubesToStartingCover( esop.get() );
+  {
+    properties_timer t( statistics, "exorcism_opt_time" );
+    abc::ReduceEsopCover();
+  }
+
+  /* extract cover */
+  abc::Cube *p;
+  for ( p = abc::IterCubeSetStart(); p; p = abc::IterCubeSetNext() )
+  {
+    for ( auto v = 0u; v < ninputs; ++v )
+    {
+      switch ( GetVar( p, v ) )
+      {
+      case abc::VAR_NEG: std::cout << "0"; break;
+      case abc::VAR_POS: std::cout << "1"; break;
+      case abc::VAR_ABS: std::cout << "-"; break;
+      }
+    }
+    std::cout << " ";
+
+    auto coutputs = 0u;
+    const auto wordsize = 8 * sizeof( unsigned );
+    for ( auto w = 0; w < abc::g_CoverInfo.nWordsOut; ++w )
+    {
+      for ( auto v = 0ul; v < wordsize; ++v )
+      {
+        std::cout << ( ( p->pCubeDataOut[w] & ( 1 << v ) ) ? "1" : "0" );
+        if ( ++coutputs == noutputs ) break;
+      }
+    }
+
+    std::cout << std::endl;
+  }
+
+  abc::DelocateCubeSets();
+  abc::DelocateCover();
+  abc::DelocateQueques();
+}
+
+void exorcism_minimization( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+{
+  const auto& esop = gia.compute_esop_cover();
+  return exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
 }
 
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func(properties::ptr settings, properties::ptr statistics)

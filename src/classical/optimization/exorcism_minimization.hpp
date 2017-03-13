@@ -45,6 +45,7 @@
 
 #include <core/cube.hpp>
 #include <core/properties.hpp>
+#include <classical/abc/gia/gia.hpp>
 #include <classical/aig.hpp>
 
 namespace cirkit
@@ -81,6 +82,15 @@ void exorcism_minimization( const aig_graph& aig,
 void exorcism_minimization_blif( const std::string& filename,
                                  const properties::ptr& settings = properties::ptr(),
                                  const properties::ptr& statistics = properties::ptr() );
+
+void exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs,
+                            const properties::ptr& settings = properties::ptr(),
+                            const properties::ptr& statistics = properties::ptr() );
+
+void exorcism_minimization( const gia_graph& gia,
+                            const properties::ptr& settings = properties::ptr(),
+                            const properties::ptr& statistics = properties::ptr() );
+
 
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func( properties::ptr settings = std::make_shared<properties>(),
                                                                      properties::ptr statistics = std::make_shared<properties>() );
