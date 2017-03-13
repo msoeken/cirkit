@@ -30,6 +30,7 @@
 #include <boost/program_options.hpp>
 
 #include <alice/rules.hpp>
+#include <classical/cli/stores.hpp>
 
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>
@@ -60,6 +61,7 @@ esopbs_command::esopbs_command( const environment::ptr& env )
     ( "filename", value( &filename ), "filename to the ESOP file" )
     ( "mct",                          "no negative controls" )
     ( "no_shared_target",             "no shared target" )
+    ( "aig,a",                        "read from AIG" )
     ;
   add_new_option();
   be_verbose();
@@ -67,7 +69,10 @@ esopbs_command::esopbs_command( const environment::ptr& env )
 
 command::rules_t esopbs_command::validity_rules() const
 {
-  return {file_exists( filename, "filename" )};
+  return {
+    file_exists_if_set( *this, filename, "filename" ),
+    has_store_element_if_set<aig_graph>( *this, env, "aig" )
+  };
 }
 
 bool esopbs_command::execute()
@@ -77,11 +82,21 @@ bool esopbs_command::execute()
   extend_if_new( circuits );
 
   auto settings = make_settings();
-  settings->set( "negative_control_lines", !is_set( "mct" ) );
-  settings->set( "share_cube_on_target", !is_set( "no_shared_target" ) );
-  esop_synthesis( circuits.current(), filename, settings, statistics );
+  if ( is_set( "filename" ) )
+  {
+    settings->set( "negative_control_lines", !is_set( "mct" ) );
+    settings->set( "share_cube_on_target", !is_set( "no_shared_target" ) );
+    esop_synthesis( circuits.current(), filename, settings, statistics );
 
-  print_runtime();
+    print_runtime();
+  }
+  else if ( is_set( "aig" ) )
+  {
+    const auto& aigs = env->store<aig_graph>();
+    esop_synthesis( circuits.current(), gia_graph( aigs.current() ), settings, statistics );
+
+    print_runtime();
+  }
 
   return true;
 }
