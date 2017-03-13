@@ -72,6 +72,10 @@ public:
   /** access GIA object */
   inline abc::Gia_Obj_t* object( int index ) const { return abc::Gia_ManObj( p_gia, index ); }
 
+  /** number of inputs */
+  inline int num_inputs() const { return abc::Gia_ManPiNum( p_gia ); }
+  inline int num_outputs() const { return abc::Gia_ManPoNum( p_gia ); }
+
   /// MAPPING
 
   gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
