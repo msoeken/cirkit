@@ -71,6 +71,7 @@ public:
 
   /** access GIA object */
   inline abc::Gia_Obj_t* object( int index ) const { return abc::Gia_ManObj( p_gia, index ); }
+  inline unsigned& value( int index ) const { return abc::Gia_ManObj( p_gia, index )->Value; }
 
   /** number of inputs */
   inline int num_inputs() const { return abc::Gia_ManPiNum( p_gia ); }
@@ -80,6 +81,14 @@ public:
 
   gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
+  inline int lut_count() const { return abc::Gia_ManLutNum( p_gia ); }
+  inline bool is_lut( int index ) const { return abc::Gia_ObjIsLut( p_gia, index ); }
+  inline int lut_size( int index ) const { return abc::Gia_ObjLutSize( p_gia, index ); }
+  inline int lut_ref_num( int index ) const { return Gia_ObjLutRefNumId( p_gia, index ); }
+  inline int lut_ref_dec( int index ) const { return Gia_ObjLutRefDecId( p_gia, index ); }
+  inline int lut_ref_inc( int index ) const { return Gia_ObjLutRefIncId( p_gia, index ); }
+
+  void init_lut_refs() const;
   gia_graph extract_lut( int index ) const;
 
   /// PRINTING
@@ -98,10 +107,42 @@ public:
   /// ITERATORS
 
   template<typename Fn>
+  void foreach_input( Fn&& f ) const
+  {
+    abc::Gia_Obj_t* obj{};
+    int i{};
+    Gia_ManForEachPi( p_gia, obj, i )
+    {
+      f( abc::Gia_ManCiIdToId( p_gia, i ), i );
+    }
+  }
+
+  template<typename Fn>
+  void foreach_output( Fn&& f ) const
+  {
+    abc::Gia_Obj_t* obj{};
+    int i{};
+    Gia_ManForEachPo( p_gia, obj, i )
+    {
+      f( abc::Gia_ManCoIdToId( p_gia, i ), i );
+    }
+  }
+
+  template<typename Fn>
   void foreach_lut( Fn&& f ) const
   {
     int i{};
     Gia_ManForEachLut( p_gia, i )
+    {
+      f( i );
+    }
+  }
+
+  template<typename Fn>
+  void foreach_lut_fanin( int index, Fn&& f ) const
+  {
+    int i{}, k{};
+    Gia_LutForEachFanin( p_gia, index, i, k )
     {
       f( i );
     }

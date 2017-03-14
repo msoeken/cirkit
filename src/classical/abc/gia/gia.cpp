@@ -83,12 +83,8 @@ Gia_Man_t * Gia_ManDupLUT( Gia_Man_t* p, int index )
   Gia_ManGetCone( p, Gia_ManObj( p, index ), Gia_ObjLutFanins( p, index ), nLeaves, vNodes );
   nNodes = Vec_IntSize( vNodes );
 
-  Vec_IntPrint( vNodes );
-
   Gia_ManFillValue( p );
   pNew = Gia_ManStart( nNodes + 2 );
-
-  std::cout << "nLeaves = " << nLeaves << " nNodes = " << nNodes << " nObjs " << pNew->nObjs << std::endl;
 
   assert( !p->pMuxes ); /* for now */
   pNew->nConstrs = p->nConstrs;
@@ -98,7 +94,6 @@ Gia_Man_t * Gia_ManDupLUT( Gia_Man_t* p, int index )
 
   for ( i = 0; i < nLeaves; ++i )
   {
-    std::cout << "i = " << i << std::endl;
     Gia_ManObj( p, Vec_IntEntry( vNodes, i ) )->Value = Gia_ManAppendCi( pNew );
   }
 
@@ -169,6 +164,11 @@ gia_graph gia_graph::if_mapping( const properties::ptr& settings, const properti
   auto mapped_gia = abc::Gia_ManPerformMapping( p_gia, &params );
 
   return gia_graph( mapped_gia );
+}
+
+void gia_graph::init_lut_refs() const
+{
+  abc::Gia_ManSetLutRefs( p_gia );
 }
 
 gia_graph gia_graph::extract_lut( int index ) const
