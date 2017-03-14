@@ -34,12 +34,12 @@ namespace cirkit
 
   void append_circuit( circuit& circ, const circuit& src, const gate::control_container& controls, const std::vector<unsigned>& line_map )
   {
-    insert_circuit( circ, circ.num_gates(), src, controls );
+    insert_circuit( circ, circ.num_gates(), src, controls, line_map );
   }
 
   void prepend_circuit( circuit& circ, const circuit& src, const gate::control_container& controls, const std::vector<unsigned>& line_map )
   {
-    insert_circuit( circ, 0, src, controls );
+    insert_circuit( circ, 0, src, controls, line_map );
   }
 
   void insert_circuit( circuit& circ, unsigned pos, const circuit& src, const gate::control_container& controls, const std::vector<unsigned>& line_map )
