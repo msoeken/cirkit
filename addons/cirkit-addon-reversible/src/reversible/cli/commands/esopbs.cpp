@@ -31,6 +31,7 @@
 
 #include <alice/rules.hpp>
 #include <classical/cli/stores.hpp>
+#include <classical/optimization/exorcism_minimization.hpp>
 
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>
@@ -62,6 +63,7 @@ esopbs_command::esopbs_command( const environment::ptr& env )
     ( "mct",                          "no negative controls" )
     ( "no_shared_target",             "no shared target" )
     ( "aig,a",                        "read from AIG" )
+    ( "exorcism,e",                   "use exorcism to optimize ESOP cover (only for --aig)" )
     ;
   add_new_option();
   be_verbose();
@@ -93,7 +95,14 @@ bool esopbs_command::execute()
   else if ( is_set( "aig" ) )
   {
     const auto& aigs = env->store<aig_graph>();
-    esop_synthesis( circuits.current(), gia_graph( aigs.current() ), settings, statistics );
+
+    gia_graph gia( aigs.current() );
+    auto esop = gia.compute_esop_cover();
+    if ( is_set( "exorcism" ) )
+    {
+      esop = exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs() );
+    }
+    esop_synthesis( circuits.current(), esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
 
     print_runtime();
   }

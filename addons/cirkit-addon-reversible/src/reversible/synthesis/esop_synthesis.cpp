@@ -399,15 +399,29 @@ bool esop_synthesis( circuit& circ, const gia_graph::esop_ptr& esop_cover, unsig
   {
     /* controls */
     gate::control_container controls;
-    for ( auto j = 0; j < abc::Vec_IntSize( vec ) - 1; ++j )
+    std::vector<unsigned> targets;
+    for ( auto j = 0; j < abc::Vec_IntSize( vec ); ++j )
     {
       const auto lit = abc::Vec_IntEntry( vec, j );
-      assert( lit >= 0 );
-      controls.push_back( make_var( abc::Abc_Lit2Var( lit ), !abc::Abc_LitIsCompl( lit ) ) );
+
+      if ( lit < 0 )
+      {
+        targets.push_back( static_cast<int>( ninputs ) - lit - 1 );
+      }
+      else
+      {
+        controls.push_back( make_var( abc::Abc_Lit2Var( lit ), !abc::Abc_LitIsCompl( lit ) ) );
+      }
     }
-    const auto lit = abc::Vec_IntEntryLast( vec );
-    assert( lit < 0 );
-    append_toffoli( circ, controls, static_cast<int>( ninputs ) - lit - 1 );
+
+    auto pos = circ.num_gates();
+
+    for ( auto j = 0u; j < targets.size() - 1; ++j )
+    {
+      insert_cnot( circ, pos, targets.back(), targets[j] );
+      insert_cnot( circ, pos++, targets.back(), targets[j] );
+    }
+    insert_toffoli( circ, pos, controls, targets.back() );
   }
 
   return true;
