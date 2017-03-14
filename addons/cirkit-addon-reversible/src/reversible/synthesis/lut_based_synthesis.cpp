@@ -38,6 +38,7 @@
 #include <core/utils/temporary_filename.hpp>
 #include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
+#include <classical/abc/gia/gia.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
 #include <classical/functions/linear_classification.hpp>
 #include <classical/io/read_blif.hpp>
@@ -56,6 +57,345 @@
 
 namespace cirkit
 {
+
+/******************************************************************************
+ * Order heuristics (new)                                                     *
+ ******************************************************************************/
+
+class lut_order_heuristic_new
+{
+public:
+  enum step_type { pi, po, compute, uncompute };
+
+  /* describes a single computation step */
+  struct step
+  {
+    int                  node;          /* the node to synthesize */
+    unsigned             target;        /* the target line for the result */
+    step_type            type;          /* which step to perform */
+    std::stack<unsigned> clean_ancilla; /* number of clean ancillae */
+  };
+
+  using step_vec = std::vector<step>;
+
+public:
+  explicit lut_order_heuristic_new( const gia_graph& gia )
+    : _gia( gia )
+  {
+  }
+
+  virtual unsigned compute_steps() = 0;
+  inline const step_vec& steps() const { return _steps; }
+
+  inline unsigned& node_to_line( int index ) { return _node_to_line[index]; }
+  inline unsigned node_to_line( int index ) const { return _node_to_line.find( index )->second; }
+  inline unsigned& operator[]( int index ) { return _node_to_line[index]; }
+
+  std::vector<unsigned> compute_line_map( int index ) const
+  {
+    std::vector<unsigned> line_map;
+
+    _gia.foreach_lut_fanin( index, [this, &line_map]( int fanin ) {
+        const auto it = _node_to_line.find( fanin );
+        if ( it == _node_to_line.end() )
+        {
+          std::cout << "no line for node " << fanin << std::endl;
+          assert( false );
+        }
+        line_map.push_back( node_to_line( fanin ) );
+      } );
+
+    const auto it = _node_to_line.find( index );
+    if ( it == _node_to_line.end() )
+    {
+      std::cout << "no line for node " << index << std::endl;
+      assert( false );
+    }
+    line_map.push_back( node_to_line( index ) );
+    return line_map;
+  }
+
+  unsigned num_clean_ancilla()
+  {
+    return _constants.size();
+  }
+
+protected:
+  void add_default_input_steps()
+  {
+    _gia.foreach_input( [this]( int index, int e ) {
+        const auto line = _next_free++;
+        node_to_line( index ) = line;
+        add_step( index, line, step_type::pi );
+      } );
+  }
+
+  void add_default_output_steps()
+  {
+    _gia.foreach_output( [this]( int index, int e ) {
+        const auto driver = abc::Gia_ObjFaninId0p( _gia, abc::Gia_ManCo( _gia, e ) );
+        add_step( index, node_to_line( driver ), step_type::po );
+      } );
+  }
+
+  void add_step( int index, unsigned target, step_type type )
+  {
+    if ( !_dry_run )
+    {
+      _steps.push_back( {index, target, type, _constants} );
+    }
+  }
+
+  unsigned request_constant()
+  {
+    if ( !_constants.empty() )
+    {
+      const auto line = _constants.top();
+      _constants.pop();
+      return line;
+    }
+
+    return _next_free++;
+  }
+
+  void add_constants( unsigned max )
+  {
+    while ( _next_free < max )
+    {
+      _constants.push( _next_free++ );
+    }
+  }
+
+  void free_constant( unsigned line )
+  {
+    _constants.push( line );
+  }
+
+  inline const gia_graph& gia() const { return _gia; }
+
+  inline unsigned next_free() const { return _next_free; }
+
+  void set_mem_point()
+  {
+    _constants_mem = _constants;
+    _next_free_mem = _next_free;
+  }
+
+  void return_to_mem_point()
+  {
+    std::swap( _constants, _constants_mem );
+    std::swap( _next_free, _next_free_mem );
+  }
+
+  void set_dry_run( bool dry_run )
+  {
+    _dry_run = dry_run;
+  }
+
+private:
+  const gia_graph& _gia;
+  step_vec _steps;
+  std::unordered_map<int, unsigned> _node_to_line;
+  std::stack<unsigned> _constants;
+
+  /* for memory */
+  std::stack<unsigned> _constants_mem;
+  unsigned _next_free_mem;
+
+  bool _dry_run = false;
+
+protected:
+  unsigned _next_free = 0u;
+};
+
+class defer_lut_order_heuristic_new : public lut_order_heuristic_new
+{
+public:
+  defer_lut_order_heuristic_new( const gia_graph& gia )
+    : lut_order_heuristic_new( gia )
+  {
+  }
+
+public:
+  virtual unsigned compute_steps()
+  {
+    set_mem_point();
+    set_dry_run( true );
+    const auto next_free = compute_steps_int();
+    set_dry_run( false );
+    return_to_mem_point();
+
+    return compute_steps_int( next_free );
+  }
+
+private:
+  unsigned compute_steps_int( unsigned add_frees = 0u )
+  {
+    gia().init_lut_refs();
+
+    add_default_input_steps();
+
+    if ( add_frees )
+    {
+      add_constants( add_frees );
+    }
+
+    adjust_indegrees();
+
+    gia().foreach_lut( [this]( int index ) {
+        const auto target = request_constant();
+        (*this)[index] = target;
+
+        add_step( index, target, lut_order_heuristic_new::compute );
+
+        /* start uncomputing */
+        if ( gia().lut_ref_num( index ) == 0 )
+        {
+          decrease_children_indegrees( index );
+          uncompute_children( index );
+        }
+      } );
+
+    add_default_output_steps();
+
+    return next_free();
+  }
+
+  void adjust_indegrees()
+  {
+    gia().foreach_output( [this]( int index, int e ) {
+        const auto driver = abc::Gia_ObjFaninId0p( gia(), abc::Gia_ManCo( gia(), e ) );
+        gia().lut_ref_dec( driver );
+      } );
+  }
+
+  void decrease_children_indegrees( int index )
+  {
+    gia().foreach_lut_fanin( index, [this]( int fanin ) {
+        if ( gia().is_lut( fanin ) )
+        {
+          gia().lut_ref_dec( fanin );
+        }
+      } );
+  }
+
+  void uncompute_children( int index )
+  {
+    gia().foreach_lut_fanin( index, [this]( int fanin ) {
+        if ( gia().is_lut( fanin ) && gia().lut_ref_num( fanin ) == 0 )
+        {
+          uncompute_node( fanin );
+        }
+      } );
+  }
+
+  void uncompute_node( int index )
+  {
+    assert( gia().lut_ref_num( index ) == 0 );
+
+    const auto target = (*this)[index];
+    add_step( index, target, lut_order_heuristic_new::uncompute );
+    free_constant( target );
+
+    decrease_children_indegrees( index );
+    uncompute_children( index );
+  }
+};
+
+/******************************************************************************
+ * Partial synthesizers (new)                                                 *
+ ******************************************************************************/
+
+class lut_partial_synthesizer_new
+{
+public:
+  explicit lut_partial_synthesizer_new( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+    : _gia( gia ),
+      settings( settings ),
+      statistics( statistics )
+  {
+  }
+
+  const circuit& lookup_or_compute( int index, bool lookup )
+  {
+    if ( lookup )
+    {
+      return circuits[index];
+    }
+
+    return circuits[index] = compute( index );
+  }
+
+protected:
+  virtual circuit compute( int index ) const = 0;
+
+  inline const gia_graph& gia() const
+  {
+    return _gia;
+  }
+
+private:
+  const gia_graph& _gia;
+  std::unordered_map<unsigned, circuit> circuits;
+
+protected:
+  const properties::ptr& settings;
+  const properties::ptr& statistics;
+};
+
+class exorcism_lut_partial_synthesizer_new : public lut_partial_synthesizer_new
+{
+public:
+  explicit exorcism_lut_partial_synthesizer_new( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+    : lut_partial_synthesizer_new( gia, settings, statistics ),
+      dry( get( settings, "dry", dry ) ),
+      verbose( get( settings, "verbose", verbose ) )
+  {
+  }
+
+  virtual ~exorcism_lut_partial_synthesizer_new()
+  {
+    set( statistics, "cover_time", cover_time );
+    set( statistics, "exorcism_time", exorcism_time );
+  }
+
+protected:
+  circuit compute( int index ) const
+  {
+    if ( dry )
+    {
+      return circuit( gia().lut_size( index ) + 1u );
+    }
+    else
+    {
+      // TODO runtime
+      circuit local_circ;
+      const auto lut = gia().extract_lut( index );
+
+      auto esop = [this, &lut]() {
+        increment_timer t( &cover_time );
+        return lut.compute_esop_cover();
+      }();
+
+      esop = [this, &esop, &lut]() {
+        increment_timer t( &exorcism_time );
+        return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs() );
+      }();
+
+      esop_synthesis( local_circ, esop, lut.num_inputs(), lut.num_outputs() );
+      return local_circ;
+    }
+  }
+
+private:
+  /* settings */
+  bool dry = false;
+  bool verbose = false;
+
+public: /* for progress line */
+  mutable double cover_time    = 0.0;
+  mutable double exorcism_time = 0.0;
+};
 
 /******************************************************************************
  * Order heuristics                                                           *
@@ -688,6 +1028,150 @@ public: /* for progress printing */
   mutable double mapping_runtime = 0.0;
 };
 
+/******************************************************************************
+ * Manager (new)                                                              *
+ ******************************************************************************/
+
+class lut_based_synthesis_manager_new
+{
+public:
+  lut_based_synthesis_manager_new( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+    : circ( circ ),
+      gia( gia ),
+      statistics( statistics ),
+      order_heuristic( std::make_shared<defer_lut_order_heuristic_new>( gia ) ),
+      synthesizer( gia, settings, statistics ),
+      //decomp_synthesizer( lut, settings, statistics ),
+      verbose( get( settings, "verbose", verbose ) ),
+      progress( get( settings, "progress", progress ) ),
+      lutdecomp( get( settings, "lutdecomp", lutdecomp ) )
+  {
+  }
+
+  bool run()
+  {
+    clear_circuit( circ );
+
+    const auto lines = order_heuristic->compute_steps();
+    circ.set_lines( lines );
+
+    std::vector<std::string> inputs( lines, "0" );
+    std::vector<std::string> outputs( lines, "0" );
+    std::vector<constant> constants( lines, false );
+    std::vector<bool> garbage( lines, true );
+
+    auto step_index = 0u;
+    //progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f\r", progress );
+    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   total = %6.2f\r", progress );
+    for ( const auto& step : order_heuristic->steps() )
+    {
+      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, synthesizer.cover_time, synthesizer.exorcism_time, /*decomp_synthesizer.mapping_runtime, decomp_synthesizer.class_runtime, */synthesis_time );
+      increment_timer t( &synthesis_time );
+
+      switch ( step.type )
+      {
+      case lut_order_heuristic::pi:
+        inputs[step.target] = outputs[step.target] = "x"; // TODO name[step.node];
+        constants[step.target] = boost::none;
+        break;
+
+      case lut_order_heuristic::po:
+        if ( outputs[step.target] != "0" )
+        {
+          circ.set_lines( circ.lines() + 1 );
+          inputs.push_back( "0" );
+          constants.push_back( false );
+          outputs.push_back( "y" /*name[step.node]*/ ); // TODO
+          garbage.push_back( false );
+
+          append_cnot( circ, step.target, circ.lines() - 1 );
+        }
+        else
+        {
+          outputs[step.target] = "y"; // name[step.node];
+          garbage[step.target] = false;
+        }
+        break;
+
+      case lut_order_heuristic::compute:
+        synthesize_node( step.node, false, step.clean_ancilla );
+        break;
+
+      case lut_order_heuristic::uncompute:
+        synthesize_node( step.node, true, step.clean_ancilla );
+        break;
+      }
+    }
+
+    circ.set_inputs( inputs );
+    circ.set_outputs( outputs );
+    circ.set_constants( constants );
+    circ.set_garbage( garbage );
+
+    set( statistics, "num_decomp_default", num_decomp_default );
+    set( statistics, "num_decomp_lut", num_decomp_lut );
+
+    return true;
+  }
+
+private:
+  void synthesize_node( int index, bool lookup, const std::stack<unsigned>& clean_ancilla )
+  {
+    /* map circuit */
+    auto line_map = order_heuristic->compute_line_map( index );
+
+    circuit local_circ;
+
+    // if ( lutdecomp )
+    // {
+    //   local_circ = decomp_synthesizer.lookup_or_compute( node, lookup );
+    //   const auto num_ancilla = local_circ.lines() - line_map.size();
+    //   if ( num_ancilla > clean_ancilla.size() )
+    //   {
+    //     local_circ = synthesizer.lookup_or_compute( node, lookup );
+    //     ++num_decomp_default;
+    //   }
+    //   else
+    //   {
+    //     auto cstack = clean_ancilla;
+    //     for ( auto i = 0u; i < num_ancilla; ++i )
+    //     {
+    //       line_map.push_back( cstack.top() );
+    //       cstack.pop();
+    //     }
+    //     ++num_decomp_lut;
+    //   }
+    // }
+    // else
+    {
+      local_circ = synthesizer.lookup_or_compute( index, lookup );
+      ++num_decomp_default;
+    }
+
+    append_circuit( circ, local_circ, gate::control_container(), line_map );
+  }
+
+private:
+  circuit& circ;
+  const gia_graph& gia;
+
+  const properties::ptr& statistics;
+
+  std::unordered_map<unsigned, circuit> computed_circuits;
+
+  std::shared_ptr<lut_order_heuristic_new> order_heuristic;
+  exorcism_lut_partial_synthesizer_new synthesizer;
+  //lutdecomp_lut_partial_synthesizer decomp_synthesizer;
+
+  bool verbose = false;
+  bool progress = false;
+  bool lutdecomp = false;
+
+private: /* statistics */
+  double   synthesis_time = 0.0;
+  unsigned num_decomp_default = 0u;
+  unsigned num_decomp_lut = 0u;
+};
 
 /******************************************************************************
  * Manager                                                                    *
@@ -842,6 +1326,17 @@ private: /* statistics */
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
+
+bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+{
+  /* timing */
+  properties_timer t( statistics );
+
+  lut_based_synthesis_manager_new mgr( circ, gia, settings, statistics );
+  const auto result = mgr.run();
+
+  return result;
+}
 
 bool lut_based_synthesis( circuit& circ, const lut_graph_t& lut, const properties::ptr& settings, const properties::ptr& statistics )
 {

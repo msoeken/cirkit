@@ -49,6 +49,7 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   opts.add_options()
     ( "cut_size,k",   value_with_default( &cut_size ), "cut size" )
     ( "lutdecomp,l",                                   "apply LUT decomposition technique where possible" )
+    ( "gia,g",                                         "process from GIA" )
     ( "progress,p",                                    "show progress" )
     ( "dry",                                           "dry run (do not create gates)" )
     ;
@@ -66,18 +67,28 @@ bool lhrs_command::execute()
   settings->set( "progress", is_set( "progress" ) );
   settings->set( "dry", is_set( "dry" ) );
 
-  lut_graph_t lut;
-  {
-    temporary_filename blifname( "/tmp/lhrs-%d.blif" );
-
-    abc_run_command_no_output( aig(), boost::str( boost::format( "&if -K %d -a; &put; write_blif %s" ) % cut_size % blifname.name() ) );
-
-    lut = read_blif( blifname.name(), true );
-    lut_count = lut_graph_lut_count( lut );
-  }
-
   circuit circ;
-  lut_based_synthesis( circuits.current(), lut, settings, statistics );
+
+  if ( is_set( "gia" ) )
+  {
+    const auto lut = gia_graph( aig() ).if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping" ) );
+    lut_based_synthesis( circuits.current(), lut, settings, statistics );
+    lut_count = lut.lut_count();
+  }
+  else
+  {
+    lut_graph_t lut;
+    {
+      temporary_filename blifname( "/tmp/lhrs-%d.blif" );
+
+      abc_run_command_no_output( aig(), boost::str( boost::format( "&if -K %d -a; &put; write_blif %s" ) % cut_size % blifname.name() ) );
+
+      lut = read_blif( blifname.name(), true );
+      lut_count = lut_graph_lut_count( lut );
+    }
+
+    lut_based_synthesis( circuits.current(), lut, settings, statistics );
+  }
 
   print_runtime();
 

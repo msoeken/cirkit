@@ -37,12 +37,14 @@
 #define LUT_BASED_SYNTHESIS_HPP
 
 #include <core/properties.hpp>
+#include <classical/abc/gia/gia.hpp>
 #include <classical/lut/lut_graph.hpp>
 #include <reversible/circuit.hpp>
 
 namespace cirkit
 {
 
+bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 bool lut_based_synthesis( circuit& circ, const lut_graph_t& lut, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }
