@@ -310,9 +310,9 @@ void exorcism_minimization_blif( const std::string& filename, const properties::
   set( statistics, "exorcism_opt_time", static_cast<double>( TICKS_TO_SECONDS( abc::g_CoverInfo.TimeMin ) ) );
 }
 
-void exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs,
-                            const properties::ptr& settings,
-                            const properties::ptr& statistics )
+gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs,
+                                           const properties::ptr& settings,
+                                           const properties::ptr& statistics )
 {
   /* settings */
   const auto quality      = get( settings, "quality",      2u );
@@ -346,7 +346,7 @@ void exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, u
   {
     std::cout << boost::format( "[e] the size of the starting cover is too large: %d (allowed: %d)" )
       % abc::g_CoverInfo.nCubesBefore % abc::g_CoverInfo.nCubesMax << std::endl;
-    return;
+    return gia_graph::esop_ptr( nullptr, &abc::Vec_WecFree );
   }
 
   /* prepare internal data structures */
@@ -356,7 +356,7 @@ void exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, u
        !abc::AllocateQueques( abc::g_CoverInfo.nCubesAlloc * abc::g_CoverInfo.nCubesAlloc / CUBE_PAIR_FACTOR ) )
   {
     std::cout << "[e] not enough memory" << std::endl;
-    return;
+    return gia_graph::esop_ptr( nullptr, &abc::Vec_WecFree );
   }
 
   /* reduce */
@@ -367,19 +367,24 @@ void exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, u
   }
 
   /* extract cover */
+  abc::Vec_Wec_t* esop_opt;
+  abc::Vec_Int_t* level;
+  esop_opt = abc::Vec_WecAlloc( abc::g_CoverInfo.nCubesInUse );
+
   abc::Cube *p;
   for ( p = abc::IterCubeSetStart(); p; p = abc::IterCubeSetNext() )
   {
+    level = abc::Vec_WecPushLevel( esop_opt );
+
     for ( auto v = 0u; v < ninputs; ++v )
     {
       switch ( GetVar( p, v ) )
       {
-      case abc::VAR_NEG: std::cout << "0"; break;
-      case abc::VAR_POS: std::cout << "1"; break;
-      case abc::VAR_ABS: std::cout << "-"; break;
+      case abc::VAR_NEG: abc::Vec_IntPush( level, abc::Abc_Var2Lit( v, 1 ) ); break;
+      case abc::VAR_POS: abc::Vec_IntPush( level, abc::Abc_Var2Lit( v, 0 ) ); break;
+      case abc::VAR_ABS: break;
       }
     }
-    std::cout << " ";
 
     auto coutputs = 0u;
     const auto wordsize = 8 * sizeof( unsigned );
@@ -387,20 +392,23 @@ void exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, u
     {
       for ( auto v = 0ul; v < wordsize; ++v )
       {
-        std::cout << ( ( p->pCubeDataOut[w] & ( 1 << v ) ) ? "1" : "0" );
+        if ( p->pCubeDataOut[w] & ( 1 << v ) )
+        {
+          abc::Vec_IntPush( level, -coutputs - 1 );
+        }
         if ( ++coutputs == noutputs ) break;
       }
     }
-
-    std::cout << std::endl;
   }
 
   abc::DelocateCubeSets();
   abc::DelocateCover();
   abc::DelocateQueques();
+
+  return gia_graph::esop_ptr( esop_opt, &abc::Vec_WecFree );
 }
 
-void exorcism_minimization( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+gia_graph::esop_ptr exorcism_minimization( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
 {
   const auto& esop = gia.compute_esop_cover();
   return exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
