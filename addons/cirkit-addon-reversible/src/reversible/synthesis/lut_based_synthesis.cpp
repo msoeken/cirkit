@@ -55,6 +55,8 @@
 #include <reversible/synthesis/esop_synthesis.hpp>
 #include <reversible/synthesis/optimal_quantum_circuits.hpp>
 
+#include <misc/vec/vecWrd.h>
+
 namespace cirkit
 {
 
@@ -827,6 +829,182 @@ private:
   temporary_filename esopname2{ "/tmp/lbs-%d.esop" };
 };
 
+class lutdecomp_lut_partial_synthesizer_new : public lut_partial_synthesizer_new
+{
+public:
+  explicit lutdecomp_lut_partial_synthesizer_new( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+    : lut_partial_synthesizer_new( gia, settings, statistics ),
+      class_circuits( 3u ),
+      class_counter( 3u ),
+      class_hash( 3u )
+  {
+    class_counter[0u].resize( 3u );
+    class_counter[1u].resize( 6u );
+    class_counter[2u].resize( 18u );
+
+    for ( auto i = 0u; i < 3u; ++i )
+    {
+      for ( auto j = 0u; j < class_counter[i].size(); ++j )
+      {
+        class_circuits[i].push_back( circuit_from_string( optimal_quantum_circuits::affine_classification[i][j] ) );
+      }
+    }
+
+    gia.init_truth_tables();
+  }
+
+  virtual ~lutdecomp_lut_partial_synthesizer_new()
+  {
+    set( statistics, "class_counter", class_counter );
+    set( statistics, "class_runtime", class_runtime );
+    set( statistics, "mapping_runtime", mapping_runtime );
+  }
+
+protected:
+  circuit compute( int index ) const
+  {
+    const auto num_inputs = gia().lut_size( index );
+
+    if ( num_inputs < 5 )
+    {
+      const auto tt_spec = gia().lut_truth_table( index );
+      const auto affine_class = classify( tt_spec, num_inputs );
+
+      return class_circuits[num_inputs - 2u][class_index[num_inputs - 2u].at( affine_class )];
+    }
+    else
+    {
+      const auto lut = gia().extract_lut( index );
+      const auto sub_lut = [this, &lut]() {
+        increment_timer t( &mapping_runtime );
+        return lut.if_mapping( make_settings_from( std::make_pair( "lut_size", 4u ), "area_mapping" ) );
+      }();
+      sub_lut.init_truth_tables();
+
+      std::vector<unsigned> lut_to_line( sub_lut.size() );
+
+      /* count ancillas and determine root gate */
+      auto num_ancilla = sub_lut.lut_count() - 1;
+      auto root = abc::Gia_ObjFaninId0p( sub_lut, abc::Gia_ManCo( sub_lut, 0 ) );
+
+      /* second pass: map LUTs to lines, and compute classes */
+      auto pi_index = 0u;
+      sub_lut.foreach_input( [&lut_to_line, &pi_index]( int index, int e ) {
+          lut_to_line[index] = pi_index++;
+        } );
+
+      auto anc_index = num_inputs + 1u;
+      auto ins_index = 0u;
+      std::vector<unsigned> synth_order( 2 * num_ancilla + 1, 99 );
+      std::vector<uint64_t> aff_class( sub_lut.size() );
+      sub_lut.foreach_lut( [&]( int index ) {
+          if ( index == root )
+          {
+            lut_to_line[index] = pi_index++;
+            synth_order[ins_index] = index;
+          }
+          else
+          {
+            lut_to_line[index] = anc_index++;
+            synth_order[ins_index] = synth_order[synth_order.size() - 1 - ins_index] = index;
+            ++ins_index;
+          }
+
+          if ( sub_lut.lut_size( index ) >= 2 )
+          {
+            aff_class[index] = classify( sub_lut.lut_truth_table( index ), sub_lut.lut_size( index ) );
+          }
+        } );
+
+      circuit local_circ( num_inputs + 1 + num_ancilla );
+      for ( auto index : synth_order )
+      {
+        const auto num_inputs = sub_lut.lut_size( index );
+        std::vector<unsigned> line_map;
+        line_map.reserve( num_inputs + 1u );
+
+        sub_lut.foreach_lut_fanin( index, [&line_map, &lut_to_line]( int fanin ) {
+            line_map.push_back( lut_to_line[fanin] );
+          } );
+        line_map.push_back( lut_to_line[index] );
+
+        switch ( num_inputs )
+        {
+        case 0u:
+          assert( false );
+          break;
+        case 1u:
+          //assert( sub_spec[v] == "1" ); // TODO
+          append_cnot( local_circ, make_var( line_map[0], false ), line_map[1] );
+          break;
+        default:
+          const auto& aff_circ = class_circuits[num_inputs - 2u][class_index[num_inputs - 2u].at( aff_class[index] )];
+          if ( aff_circ.lines() > num_inputs + 1u )
+          {
+            assert( aff_circ.lines() == num_inputs + 2u );
+
+            // find any free line
+            auto free_line = -1;
+            for ( auto i = 0; i < num_inputs + 1 + num_ancilla; ++i )
+            {
+              if ( std::find( line_map.begin(), line_map.end(), i ) == line_map.end() )
+              {
+                free_line = i;
+                break;
+              }
+            }
+
+            assert( free_line != -1 );
+
+            line_map.push_back( free_line );
+          }
+          append_circuit( local_circ, aff_circ, gate::control_container(), line_map );
+          break;
+        }
+      }
+
+      return local_circ;
+    }
+  }
+
+private:
+  inline uint64_t classify( uint64_t func, unsigned num_vars ) const
+  {
+    increment_timer t( &class_runtime );
+
+    uint64_t afunc{};
+    const auto it = class_hash[num_vars - 2u].find( func );
+    if ( it == class_hash[num_vars - 2u].end() )
+    {
+      afunc = exact_affine_classification_output( func, num_vars );
+      class_hash[num_vars - 2u].insert( std::make_pair( func, afunc ) );
+    }
+    else
+    {
+      afunc = it->second;
+    }
+    ++class_counter[num_vars - 2u][class_index[num_vars - 2u].at( afunc )];
+    return afunc;
+  }
+
+private:
+  std::vector<std::unordered_map<uint64_t, unsigned>> class_index = {
+    {{0x0, 0}, {0x1, 1}, {0x3, 2}},
+    {{0x00, 0}, {0x01, 1}, {0x03, 2}, {0x07, 3}, {0x0f, 4}, {0x17, 5}},
+    {{0x0000, 0},{0x0001, 1},{0x0003, 2},{0x0007, 3},{0x000f, 4},{0x0017, 5},{0x001f, 6},{0x003f, 7},{0x007f, 8},{0x00ff, 9},{0x0117, 10},{0x011f, 11},{0x013f, 12},{0x017f, 13},{0x033f, 14},{0x0356, 15},{0x0357, 16},{0x035f, 17}}
+  };
+
+  std::vector<std::vector<circuit>> class_circuits;
+  mutable std::vector<std::unordered_map<uint64_t, uint64_t>> class_hash;
+
+private: /* statistics */
+  mutable std::vector<std::vector<unsigned>> class_counter;
+
+public: /* for progress printing */
+  mutable double class_runtime = 0.0;
+  mutable double mapping_runtime = 0.0;
+};
+
 class lutdecomp_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
@@ -1041,7 +1219,7 @@ public:
       statistics( statistics ),
       order_heuristic( std::make_shared<defer_lut_order_heuristic_new>( gia ) ),
       synthesizer( gia, settings, statistics ),
-      //decomp_synthesizer( lut, settings, statistics ),
+      decomp_synthesizer( gia, settings, statistics ),
       verbose( get( settings, "verbose", verbose ) ),
       progress( get( settings, "progress", progress ) ),
       lutdecomp( get( settings, "lutdecomp", lutdecomp ) )
@@ -1062,10 +1240,10 @@ public:
 
     auto step_index = 0u;
     //progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f\r", progress );
-    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   total = %6.2f\r", progress );
+    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   total = %6.2f\r", progress );
     for ( const auto& step : order_heuristic->steps() )
     {
-      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, synthesizer.cover_time, synthesizer.exorcism_time, /*decomp_synthesizer.mapping_runtime, decomp_synthesizer.class_runtime, */synthesis_time );
+      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, synthesizer.cover_time, synthesizer.exorcism_time, decomp_synthesizer.mapping_runtime, /*decomp_synthesizer.class_runtime, */synthesis_time );
       increment_timer t( &synthesis_time );
 
       switch ( step.type )
@@ -1122,27 +1300,27 @@ private:
 
     circuit local_circ;
 
-    // if ( lutdecomp )
-    // {
-    //   local_circ = decomp_synthesizer.lookup_or_compute( node, lookup );
-    //   const auto num_ancilla = local_circ.lines() - line_map.size();
-    //   if ( num_ancilla > clean_ancilla.size() )
-    //   {
-    //     local_circ = synthesizer.lookup_or_compute( node, lookup );
-    //     ++num_decomp_default;
-    //   }
-    //   else
-    //   {
-    //     auto cstack = clean_ancilla;
-    //     for ( auto i = 0u; i < num_ancilla; ++i )
-    //     {
-    //       line_map.push_back( cstack.top() );
-    //       cstack.pop();
-    //     }
-    //     ++num_decomp_lut;
-    //   }
-    // }
-    // else
+    if ( lutdecomp )
+    {
+      local_circ = decomp_synthesizer.lookup_or_compute( index, lookup );
+      const auto num_ancilla = local_circ.lines() - line_map.size();
+      if ( num_ancilla > clean_ancilla.size() )
+      {
+        local_circ = synthesizer.lookup_or_compute( index, lookup );
+        ++num_decomp_default;
+      }
+      else
+      {
+        auto cstack = clean_ancilla;
+        for ( auto i = 0u; i < num_ancilla; ++i )
+        {
+          line_map.push_back( cstack.top() );
+          cstack.pop();
+        }
+        ++num_decomp_lut;
+      }
+    }
+    else
     {
       local_circ = synthesizer.lookup_or_compute( index, lookup );
       ++num_decomp_default;
@@ -1161,7 +1339,7 @@ private:
 
   std::shared_ptr<lut_order_heuristic_new> order_heuristic;
   exorcism_lut_partial_synthesizer_new synthesizer;
-  //lutdecomp_lut_partial_synthesizer decomp_synthesizer;
+  lutdecomp_lut_partial_synthesizer_new decomp_synthesizer;
 
   bool verbose = false;
   bool progress = false;
