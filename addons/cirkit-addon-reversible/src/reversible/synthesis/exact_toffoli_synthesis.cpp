@@ -411,7 +411,7 @@ void exact_toffoli_synthesis_manager::debug_vars()
   {
     for ( auto i = 0u; i < n; ++i )
     {
-      for ( auto t = 0u; t < ( 1 << n ); ++t )
+      for ( auto t = 0u; t < ( 1u << n ); ++t )
       {
         std::cout << boost::format( "%6d sim_var( %d, %d, %d )" ) % sim_var( l, i, t ) % l % i % t << std::endl;
       }
@@ -483,7 +483,7 @@ std::vector<int> exact_toffoli_synthesis_manager::spec_assumptions() const
 
   for ( auto i = 0u; i < n; ++i )
   {
-    for ( auto t = 0u; t < ( 1 << n ); ++t )
+    for ( auto t = 0u; t < ( 1u << n ); ++t )
     {
       assumptions.push_back( make_lit( sim_var( r - 1, i, t ), spec_vec[t][i] ? 0 : 1 ) );
     }

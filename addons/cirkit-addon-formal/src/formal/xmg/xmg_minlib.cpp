@@ -228,7 +228,7 @@ void xmg_minlib_manager::write_library_file( const std::string& filename, unsign
 
   for ( const auto& p : library )
   {
-    if ( minsize < 2 || p.first.size() < ( 1 << ( minsize - 2 ) ) )
+    if ( minsize < 2 || p.first.size() < ( 1u << ( minsize - 2 ) ) )
     {
       continue;
     }
