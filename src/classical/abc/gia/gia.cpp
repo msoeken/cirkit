@@ -31,6 +31,7 @@
 #include <classical/abc/functions/cirkit_to_gia.hpp>
 
 #include <map/if/if.h>
+#include <misc/util/utilTruth.h>
 #include <misc/vec/vecInt.h>
 
 namespace abc
@@ -137,6 +138,10 @@ gia_graph::gia_graph( const aig_graph& aig )
 
 gia_graph::~gia_graph()
 {
+  if ( p_truths )
+  {
+    abc::Vec_WrdFree( p_truths );
+  }
   if ( p_gia )
   {
     abc::Gia_ManStop( p_gia );
@@ -148,7 +153,7 @@ gia_graph::~gia_graph()
  * Mapping                                                                    *
  ******************************************************************************/
 
-gia_graph gia_graph::if_mapping( const properties::ptr& settings, const properties::ptr& statistics )
+gia_graph gia_graph::if_mapping( const properties::ptr& settings, const properties::ptr& statistics ) const
 {
   /* settings */
   const auto lut_size     = get( settings, "lut_size",     6u );
@@ -174,6 +179,20 @@ void gia_graph::init_lut_refs() const
 gia_graph gia_graph::extract_lut( int index ) const
 {
   return gia_graph( abc::Gia_ManDupLUT( p_gia, index ) );
+}
+
+void gia_graph::init_truth_tables() const
+{
+  if ( !p_truths )
+  {
+    p_truths = abc::Vec_WrdStart( abc::Gia_ManObjNum( p_gia ) );
+  }
+}
+
+uint64_t gia_graph::lut_truth_table( int index ) const
+{
+  const auto t = abc::Gia_ObjComputeTruthTable6Lut( p_gia, index, p_truths );
+  return t & abc::Abc_Tt6Mask( 1 << lut_size( index ) );
 }
 
 /******************************************************************************

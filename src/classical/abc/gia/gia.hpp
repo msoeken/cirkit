@@ -69,6 +69,9 @@ public:
   /** implicit conversion to ABC type */
   inline operator abc::Gia_Man_t*() const { return p_gia; }
 
+  /** GIA properties */
+  inline int size() const { return abc::Gia_ManObjNum( p_gia ); }
+
   /** access GIA object */
   inline abc::Gia_Obj_t* object( int index ) const { return abc::Gia_ManObj( p_gia, index ); }
   inline unsigned& value( int index ) const { return abc::Gia_ManObj( p_gia, index )->Value; }
@@ -79,7 +82,7 @@ public:
 
   /// MAPPING
 
-  gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+  gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
 
   inline int lut_count() const { return abc::Gia_ManLutNum( p_gia ); }
   inline bool is_lut( int index ) const { return abc::Gia_ObjIsLut( p_gia, index ); }
@@ -90,6 +93,9 @@ public:
 
   void init_lut_refs() const;
   gia_graph extract_lut( int index ) const;
+
+  void init_truth_tables() const;
+  uint64_t lut_truth_table( int index ) const;
 
   /// PRINTING
 
@@ -150,6 +156,8 @@ public:
 
 private:
   abc::Gia_Man_t* p_gia = nullptr;
+
+  mutable abc::Vec_Wrd_t* p_truths = nullptr;
 };
 
 }
