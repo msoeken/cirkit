@@ -1239,11 +1239,10 @@ public:
     std::vector<bool> garbage( lines, true );
 
     auto step_index = 0u;
-    //progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f\r", progress );
-    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   total = %6.2f\r", progress );
+    progress_line p( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f\r", progress );
     for ( const auto& step : order_heuristic->steps() )
     {
-      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, synthesizer.cover_time, synthesizer.exorcism_time, decomp_synthesizer.mapping_runtime, /*decomp_synthesizer.class_runtime, */synthesis_time );
+      p( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, synthesizer.cover_time, synthesizer.exorcism_time, decomp_synthesizer.mapping_runtime, decomp_synthesizer.class_runtime, synthesis_time );
       increment_timer t( &synthesis_time );
 
       switch ( step.type )
