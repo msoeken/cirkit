@@ -105,8 +105,8 @@ command::log_opt_t lhrs_command::log() const
       {"lut_count", lut_count},
       {"num_decomp_default", statistics->get<unsigned>( "num_decomp_default" )},
       {"num_decomp_lut", statistics->get<unsigned>( "num_decomp_lut" )},
-      {"exorcism_time", statistics->get<double>( "exorcism_time" )},
-      {"cover_time", statistics->get<double>( "cover_time" )}
+      {"exorcism_runtime", statistics->get<double>( "exorcism_runtime" )},
+      {"cover_runtime", statistics->get<double>( "cover_runtime" )}
     });
 
   if ( is_set( "lutdecomp" ) )
