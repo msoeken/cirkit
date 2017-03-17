@@ -27,7 +27,7 @@
 /**
  * @file lhrs.hpp
  *
- * @brief LUT-based synthesis
+ * @brief LUT-based hierarchical reversible synthesis
  *
  * @author Mathias Soeken
  * @since  2.3

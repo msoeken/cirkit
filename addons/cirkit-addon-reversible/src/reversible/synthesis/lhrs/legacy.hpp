@@ -1,6 +1,6 @@
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
- * Copyright (C) 2015-2017  EPFL
+ * Copyright (C) 2015-2016  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,26 +25,30 @@
  */
 
 /**
- * @file lut_based_synthesis.hpp
+ * @file legacy.hpp
  *
- * @brief LUT based synthesis algorithm
+ * @brief Old implementations of LHRS
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef LUT_BASED_SYNTHESIS_HPP
-#define LUT_BASED_SYNTHESIS_HPP
+#ifndef LHRS_LEGACY_HPP
+#define LHRS_LEGACY_HPP
 
 #include <core/properties.hpp>
-#include <classical/abc/gia/gia.hpp>
 #include <classical/lut/lut_graph.hpp>
 #include <reversible/circuit.hpp>
 
 namespace cirkit
 {
 
-bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+namespace version1
+{
+
+bool lut_based_synthesis( circuit& circ, const lut_graph_t& lut, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+
+}
 
 }
 

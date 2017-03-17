@@ -37,6 +37,7 @@
 #include <classical/io/read_blif.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/synthesis/lut_based_synthesis.hpp>
+#include <reversible/synthesis/lhrs/legacy.hpp>
 
 using boost::program_options::value;
 
@@ -44,12 +45,12 @@ namespace cirkit
 {
 
 lhrs_command::lhrs_command( const environment::ptr& env )
-  : aig_base_command( env, "LUT based synthesis" )
+  : aig_base_command( env, "LUT-based hierarchical reversible synthesis" )
 {
   opts.add_options()
     ( "cut_size,k",   value_with_default( &cut_size ), "cut size" )
     ( "lutdecomp,l",                                   "apply LUT decomposition technique where possible" )
-    ( "gia,g",                                         "process from GIA" )
+    ( "legacy",                                        "run the old version" )
     ( "progress,p",                                    "show progress" )
     ( "dry",                                           "dry run (do not create gates)" )
     ;
@@ -69,13 +70,7 @@ bool lhrs_command::execute()
 
   circuit circ;
 
-  if ( is_set( "gia" ) )
-  {
-    const auto lut = gia_graph( aig() ).if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping" ) );
-    lut_based_synthesis( circuits.current(), lut, settings, statistics );
-    lut_count = lut.lut_count();
-  }
-  else
+  if ( is_set( "legacy" ) )
   {
     lut_graph_t lut;
     {
@@ -87,7 +82,14 @@ bool lhrs_command::execute()
       lut_count = lut_graph_lut_count( lut );
     }
 
+    version1::lut_based_synthesis( circuits.current(), lut, settings, statistics );
+  }
+  else
+  {
+    const auto gia = gia_graph( aig() );
+    const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping" ) );
     lut_based_synthesis( circuits.current(), lut, settings, statistics );
+    lut_count = lut.lut_count();
   }
 
   print_runtime();
