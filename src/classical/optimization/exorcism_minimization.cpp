@@ -39,6 +39,7 @@
 #include <core/io/pla_parser.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <core/utils/system_utils.hpp>
+#include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/abc/abc_api.hpp>
 #include <classical/abc/abc_manager.hpp>
@@ -51,6 +52,7 @@
 namespace abc
 {
 extern cinfo g_CoverInfo;
+extern int s_fDecreaseLiterals;
 int Abc_ExorcismMain( Vec_Wec_t * vEsop, int nIns, int nOuts, char * pFileNameOut, int Quality, int Verbosity, int nCubesMax, int fUseQCost );
 Gia_Man_t * Eso_ManCompute( Gia_Man_t * pGia, int fVerbose, Vec_Wec_t ** pvRes );
 
@@ -115,6 +117,93 @@ private:
   unsigned _cube_count = 0u;
   unsigned _literal_count = 0u;
 };
+
+void reduce_cover()
+{
+  int gain_total{};
+  int iter_wo_improv = 0;
+
+  unsigned iteration = 0;
+  double runtime = 0.0;
+
+  progress_line p( "[i] exorcism   iter = %3d   cubes = %6d/%6d   total = %6.2f" );
+
+  do
+  {
+    increment_timer t( &runtime );
+    p( ++iteration, abc::g_CoverInfo.nCubesInUse, abc::g_CoverInfo.nCubesBefore, runtime );
+
+    gain_total = 0;
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    if ( iter_wo_improv > (int)(abc::g_CoverInfo.Quality>0) )
+    {
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+      gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink3( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink4( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink4( 1|2|0 );
+
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+      gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink3( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink4( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink4( 1|2|0 );
+    }
+
+    if ( gain_total )
+    {
+      iter_wo_improv = 0;
+    }
+    else
+    {
+      ++iter_wo_improv;
+    }
+  } while ( iter_wo_improv < abc::g_CoverInfo.Quality + 1 );
+
+  abc::s_fDecreaseLiterals = 1;
+  for ( auto z = 0; z < 1; z++ )
+  {
+    gain_total  = 0;
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+  }
+}
 
 /******************************************************************************
  * Public functions                                                           *
@@ -212,17 +301,7 @@ void exorcism_minimization( const cube_vec_t& cubes,
   }
 
   /* redict STDOUT because of one output line in Abc_ExorcismMain */
-
-  int p_bak, p_new;
-  fflush( stdout );
-  p_bak = dup( 1 );
-  p_new = open( "/dev/null", O_WRONLY );
-  dup2( p_new, 1 );
-  close( p_new );
   abc::Abc_ExorcismMain( esop, cubes.front().length(), 1, const_cast<char*>( esopname.c_str() ), 2, verbose, 20000, 0 );
-  fflush( stdout );
-  dup2( p_bak, 1 );
-  close( p_bak );
 
   abc::Vec_WecFree( esop );
 
@@ -363,7 +442,7 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
   abc::AddCubesToStartingCover( esop.get() );
   {
     properties_timer t( statistics, "exorcism_opt_time" );
-    abc::ReduceEsopCover();
+    reduce_cover();
   }
 
   /* extract cover */
