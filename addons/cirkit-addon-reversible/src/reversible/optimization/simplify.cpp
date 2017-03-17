@@ -340,8 +340,7 @@ circuit simplify_swap_gates( const circuit& base, std::vector<unsigned>& perm )
 /* tries to move gates with same target line together, only forward looking moving backwards */
 circuit simple_merge_heuristic( const circuit& base )
 {
-  circuit circ;
-  circ.set_lines( base.lines() );
+  circuit circ( base.lines() );
   copy_metadata( base, circ );
 
   boost::dynamic_bitset<> moved( base.num_gates() );
