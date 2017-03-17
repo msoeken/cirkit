@@ -71,6 +71,8 @@ public:
 
   /** GIA properties */
   inline int size() const { return abc::Gia_ManObjNum( p_gia ); }
+  std::string input_name( int input_index ) const;
+  std::string output_name( int output_index ) const;
 
   /** access GIA object */
   inline abc::Gia_Obj_t* object( int index ) const { return abc::Gia_ManObj( p_gia, index ); }

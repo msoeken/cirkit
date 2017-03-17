@@ -28,6 +28,8 @@
 
 #include <iostream>
 
+#include <boost/format.hpp>
+
 #include <classical/abc/functions/cirkit_to_gia.hpp>
 
 #include <map/if/if.h>
@@ -146,6 +148,34 @@ gia_graph::~gia_graph()
   {
     abc::Gia_ManStop( p_gia );
     p_gia = nullptr;
+  }
+}
+
+/******************************************************************************
+ * GIA properties                                                             *
+ ******************************************************************************/
+
+std::string gia_graph::input_name( int input_index ) const
+{
+  if ( p_gia->vNamesIn && input_index < abc::Vec_PtrSize( p_gia->vNamesIn ) )
+  {
+    return std::string( (char*)abc::Vec_PtrGetEntry( p_gia->vNamesIn, input_index ) );
+  }
+  else
+  {
+    return boost::str( boost::format( "input_%d" ) % input_index );
+  }
+}
+
+std::string gia_graph::output_name( int output_index ) const
+{
+  if ( p_gia->vNamesOut && output_index < abc::Vec_PtrSize( p_gia->vNamesOut ) )
+  {
+    return std::string( (char*)abc::Vec_PtrGetEntry( p_gia->vNamesOut, output_index ) );
+  }
+  else
+  {
+    return boost::str( boost::format( "input_%d" ) % output_index );
   }
 }
 
