@@ -48,6 +48,16 @@ progress_line::progress_line( const std::string& format, bool enable, std::ostre
 
 progress_line::~progress_line()
 {
+  clear();
+
+  if ( _keep_last )
+  {
+    os << last_string << std::endl;
+  }
+}
+
+void progress_line::clear()
+{
   os << std::string( max_length, ' ' ) << '\r';
   os.flush();
 }

@@ -83,6 +83,9 @@ public:
   progress_line( const std::string& format, bool enable = true, std::ostream& os = std::cout );
   ~progress_line();
 
+  inline void keep_last() { _keep_last = true; }
+  void clear();
+
   template<typename... Args>
   void operator()( Args&&... args )
   {
@@ -92,10 +95,10 @@ public:
     using unroll = int[];
     static_cast<void>( unroll{0, ( fmt % std::forward<Args>( args ), 0)...} );
 
-    const auto s = boost::str( fmt );
-    max_length = std::max( s.size(), max_length );
+    last_string = boost::str( fmt );
+    max_length = std::max( last_string.size(), max_length );
 
-    os << boost::str( fmt ) << "\r";
+    os << last_string << "\r";
     os.flush();
   }
 
@@ -103,6 +106,8 @@ private:
   std::string format;
   bool enable;
   std::ostream& os;
+  bool _keep_last = false;
+  std::string last_string;
   std::size_t max_length = 0u;
 };
 
