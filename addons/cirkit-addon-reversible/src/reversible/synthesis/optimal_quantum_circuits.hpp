@@ -36,7 +36,9 @@
 #ifndef OPTIMAL_QUANTUM_CIRCUITS_HPP
 #define OPTIMAL_QUANTUM_CIRCUITS_HPP
 
+#include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace cirkit
@@ -78,6 +80,12 @@ const std::vector<std::vector<std::string>> affine_classification = {
    "H e,t2 c f,t2 b c,t1 c,t1 f,t1 a,Z+[4] e,Z+[4] b,Z[4] c,Z+[2] f,Z+[4] f,Z[4] a,t2 b e,t2 a c,t2 a f,t2 c f,t2 c a,t2 b f,t2 e b,t2 e a,Z[4] e,Z[4] a,t2 a e,t2 b a,t1 c,H f,t2 f c,t2 f e,t1 c,Z[4] f,Z+[4] e,Z[4] c,t2 e f,t2 c f,t2 c e,t2 f e,t2 f c,Z+[4] f,t2 c f,t2 e f,H e,t2 b c,t2 e c,t2 c b,Z+[4] b,Z[4] c,t2 e b,t2 e c,t2 b c,t2 e c,Z[2] e,Z+[2] c,Z[2] f,t2 c e,t2 e c,H b,t2 a d,t2 b d,t2 b a,t1 a,Z[4] d,Z[4] b,Z[4] a,t2 b d,t2 a d,t2 b a,t2 d a,t2 d b,Z[4] d,t2 a d,t2 b d,t2 b e,Z d,Z f,Z[2] b,Z[2] e,t2 b d,t2 b e,H a,t2 e a,t2 c e,t2 e c,t2 a c,t2 a e,Z[4] c,Z+[4] a,Z+[4] e,t2 a c,t2 e c,t2 a e,t2 c e,t2 c a,Z[4] c,t2 a c,t2 e c,H e,t2 d b,t2 e b,t2 e d,t1 d,Z[4] b,Z[4] e,Z[4] d,t2 e b,t2 d b,t2 e d,t2 b d,t2 b e,Z[4] b,t2 d b,t1 f,H d,H a,t2 d f,t2 a d,t2 a c,t2 d c,t1 f,Z[4] a,Z+[4] d,Z+[4] c,Z[4] f,t2 f a,t2 f d,t2 d c,t2 a f,t2 a c,Z[4] d,Z+[4] a,t2 f d,t2 f a,t2 d a,Z[2] a,H f,t2 f a,t2 f c,Z[2] f,Z[4] f,Z+[4] a,Z+[2] c,Z+[4] c,t2 a f,t2 c f,t2 c a,t2 e a,t2 e c,t2 a e,t2 f e,t2 f a,Z[4] f,Z[4] a,Z+[4] c,t2 a f,t2 c f,t2 e f,t2 e a,t2 e c,t2 a c,H f,t2 b a,t2 f a,t2 f b,t1 b,Z[4] a,Z[4] f,Z[4] b,t2 f a,t2 b a,t2 f b,t2 a b,t2 a f,Z[4] a,t2 b a,H b,t2 c b,t2 e c,t2 c e,t2 b e,t2 b c,Z[4] e,Z+[4] b,Z+[4] c,t2 b e,t2 c e,t2 b c,t2 e c,t2 e b,Z[4] e,t2 b e,t2 c e,H c,t2 a f,t2 c f,t2 c a,t1 a,Z[4] f,Z[4] c,Z[4] a,t2 c f,t2 a f,t2 c a,t2 f a,t2 f c,Z[4] f,t2 a f,H a,H b,t2 b d,t2 b f,t1 d,Z[4] b,Z+[4] f,Z[4] d,t2 f b,t2 d b,t2 d f,t2 b f,t2 b d,Z+[4] b,t2 d b,t2 f b,H f,t2 f c,t2 f e,t1 c,Z[4] f,Z+[4] e,Z[4] c,t2 e f,t2 c f,t2 c e,t2 f e,t2 f c,Z+[4] f,t2 c f,t2 e f,t1 b,H c,H e,t2 e b,t2 e d,t1 b,Z[4] e,Z+[4] d,Z[4] b,t2 d e,t2 b e,t2 b d,t2 e d,t2 e b,Z+[4] e,t2 b e,t2 d e,t1 f,H d,t2 e c,t2 c e,t2 e c,t2 c b,t2 b c,t2 c b,t2 b a,t2 a b,t2 b a,t2 d f,t2 f d",
    "H f,H e,t2 b a,t2 f a,t2 c b,t2 b c,Z+[4] b,Z[4] f,Z[4] a,Z+[4] c,Z+[4] d,t2 e b,t2 c f,t2 c a,t2 e c,t2 e d,Z[2] e,Z[4] e,Z[4] b,Z[4] c,Z[4] a,Z[4] f,Z[4] d,t2 c e,t2 a e,t2 f e,t2 c b,t2 a c,t2 f c,t2 d c,t2 f a,t2 a f,t2 c d,t2 e d,t2 e f,t2 e c,t2 e a,H f,t2 f b,t2 f d,Z[4] f,Z+[4] b,Z+[4] d,t2 b f,t2 d f,t2 b d,t2 f d,t2 f b,Z[4] f,t2 b f,t2 d f,H d,Z[2] d,Z e,t2 e d,t2 d e,Z[2] d,t2 e d,t1 c,H e,t2 e c,t2 e b,t1 c,Z[4] e,Z+[4] b,Z[4] c,t2 b e,t2 c e,t2 c b,t2 e b,t2 e c,Z+[4] e,t2 c e,t2 b e,t1 d,H b,t2 b d,t2 b a,t1 d,Z[4] b,Z+[4] a,Z[4] d,t2 a b,t2 d b,t2 d a,t2 b a,t2 b d,Z+[4] b,t2 d b,t2 a b,H a,H c,t2 a b,t2 b a,t2 a b,t2 b d,t2 d b,t2 b d,t2 d e,t2 e d,t2 d e,t2 e c,t2 c e,t2 e c,t2 c f,t2 f c,t2 c f"
   }
+};
+
+const std::vector<std::unordered_map<uint64_t, unsigned>> affine_classification_index = {
+    {{0x0, 0}, {0x1, 1}, {0x3, 2}},
+    {{0x00, 0}, {0x01, 1}, {0x03, 2}, {0x07, 3}, {0x0f, 4}, {0x17, 5}},
+    {{0x0000, 0},{0x0001, 1},{0x0003, 2},{0x0007, 3},{0x000f, 4},{0x0017, 5},{0x001f, 6},{0x003f, 7},{0x007f, 8},{0x00ff, 9},{0x0117, 10},{0x011f, 11},{0x013f, 12},{0x017f, 13},{0x033f, 14},{0x0356, 15},{0x0357, 16},{0x035f, 17}}
 };
 
 }

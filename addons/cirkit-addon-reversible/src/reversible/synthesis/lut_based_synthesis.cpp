@@ -27,7 +27,6 @@
 #include "lut_based_synthesis.hpp"
 
 #include <fstream>
-#include <stack>
 #include <vector>
 
 #include <boost/format.hpp>
@@ -47,6 +46,7 @@
 #include <classical/optimization/exorcism_minimization.hpp>
 #include <classical/optimization/exorcismq.hpp>
 #include <classical/utils/truth_table_utils.hpp>
+#include <reversible/gate.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/add_gates.hpp>
@@ -59,6 +59,29 @@
 
 namespace cirkit
 {
+
+/******************************************************************************
+ * Private functions                                                          *
+ ******************************************************************************/
+
+gate& append_stg_from_line_map( circuit& circ, uint64_t spec, const std::vector<unsigned>& line_map )
+{
+  auto& g = circ.append_gate();
+
+  const auto num_vars = line_map.size() - 1;
+
+  for ( auto i = 0u; i < num_vars; ++i )
+  {
+    g.add_control( make_var( line_map[i], true ) );
+  }
+  g.add_target( line_map.back() );
+
+  stg_tag stg;
+  stg.function = boost::dynamic_bitset<>( 1 << num_vars, spec );
+  g.set_type( stg );
+
+  return g;
+}
 
 /******************************************************************************
  * Merge properties                                                           *
@@ -90,10 +113,10 @@ public:
   /* describes a single computation step */
   struct step
   {
-    int                  node;          /* the node to synthesize */
-    unsigned             target;        /* the target line for the result */
-    step_type            type;          /* which step to perform */
-    std::stack<unsigned> clean_ancilla; /* number of clean ancillae */
+    int                   node;          /* the node to synthesize */
+    unsigned              target;        /* the target line for the result */
+    step_type             type;          /* which step to perform */
+    std::vector<unsigned> clean_ancilla; /* number of clean ancillae */
   };
 
   using step_vec = std::vector<step>;
@@ -170,8 +193,8 @@ protected:
   {
     if ( !_constants.empty() )
     {
-      const auto line = _constants.top();
-      _constants.pop();
+      const auto line = _constants.back();
+      _constants.pop_back();
       return line;
     }
 
@@ -182,13 +205,13 @@ protected:
   {
     while ( _next_free < max )
     {
-      _constants.push( _next_free++ );
+      _constants.push_back( _next_free++ );
     }
   }
 
   void free_constant( unsigned line )
   {
-    _constants.push( line );
+    _constants.push_back( line );
   }
 
   inline const gia_graph& gia() const { return _gia; }
@@ -216,10 +239,10 @@ private:
   const gia_graph& _gia;
   step_vec _steps;
   std::unordered_map<int, unsigned> _node_to_line;
-  std::stack<unsigned> _constants;
+  std::vector<unsigned> _constants;
 
   /* for memory */
-  std::stack<unsigned> _constants_mem;
+  std::vector<unsigned> _constants_mem;
   unsigned _next_free_mem;
 
   bool _dry_run = false;
@@ -329,33 +352,21 @@ private:
 class lut_partial_synthesizer
 {
 public:
-  explicit lut_partial_synthesizer( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
-    : _gia( gia ),
+  explicit lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+    : _circ( circ ),
+      _gia( gia ),
       settings( settings ),
       statistics( statistics )
   {
   }
 
-  circuit* lookup_or_compute( int index, unsigned free_lines, bool lookup )
-  {
-    if ( lookup )
-    {
-      return &circuits[index];
-    }
-
-    const auto circ = compute( index, free_lines );
-    if ( circ == boost::none )
-    {
-      return nullptr;
-    }
-    else
-    {
-      return &( circuits[index] = *circ );
-    }
-  }
+  virtual bool compute( int index, const std::vector<unsigned>& line_map, const std::vector<unsigned>& ancilas ) const = 0;
 
 protected:
-  virtual boost::optional<circuit> compute( int index, unsigned free_lines ) const = 0;
+  inline circuit& circ() const
+  {
+    return _circ;
+  }
 
   inline const gia_graph& gia() const
   {
@@ -363,8 +374,8 @@ protected:
   }
 
 private:
+  circuit& _circ;
   const gia_graph& _gia;
-  std::unordered_map<unsigned, circuit> circuits;
 
 protected:
   const properties::ptr& settings;
@@ -374,8 +385,8 @@ protected:
 class exorcism_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
-  explicit exorcism_lut_partial_synthesizer( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
-    : lut_partial_synthesizer( gia, settings, statistics ),
+  explicit exorcism_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+    : lut_partial_synthesizer( circ, gia, settings, statistics ),
       dry( get( settings, "dry", dry ) ),
       verbose( get( settings, "verbose", verbose ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
@@ -383,31 +394,26 @@ public:
   {
   }
 
-protected:
-  boost::optional<circuit> compute( int index, unsigned free_lines ) const
+public:
+  bool compute( int index, const std::vector<unsigned>& line_map, const std::vector<unsigned>& ancilas ) const
   {
-    if ( dry )
-    {
-      return circuit( gia().lut_size( index ) + 1u );
-    }
-    else
-    {
-      circuit local_circ;
-      const auto lut = gia().extract_lut( index );
+    const auto lut = gia().extract_lut( index );
 
-      auto esop = [this, &lut]() {
-        increment_timer t( cover_runtime );
-        return lut.compute_esop_cover();
-      }();
+    auto esop = [this, &lut]() {
+      increment_timer t( cover_runtime );
+      return lut.compute_esop_cover();
+    }();
 
-      esop = [this, &esop, &lut]() {
-        increment_timer t( exorcism_runtime );
-        return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs() );
-      }();
+    esop = [this, &esop, &lut]() {
+      increment_timer t( exorcism_runtime );
+      return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs() );
+    }();
 
-      esop_synthesis( local_circ, esop, lut.num_inputs(), lut.num_outputs() );
-      return local_circ;
-    }
+    if ( dry ) return true;
+    const auto es_settings = make_settings_from( std::make_pair( "line_map", line_map ) );
+    esop_synthesis( circ(), esop, lut.num_inputs(), lut.num_outputs(), es_settings );
+
+    return true;
   }
 
 private:
@@ -422,29 +428,20 @@ private:
 class lutdecomp_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
-  explicit lutdecomp_lut_partial_synthesizer( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
-    : lut_partial_synthesizer( gia, settings, statistics ),
-      class_circuits( 3u ),
+  explicit lutdecomp_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+    : lut_partial_synthesizer( circ, gia, settings, statistics ),
       class_counter( 3u ),
       class_hash( 3u ),
       mapping_runtime( settings->get<double*>( "mapping_runtime" ) ),
       class_runtime( settings->get<double*>( "class_runtime" ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
       cover_runtime( settings->get<double*>( "cover_runtime" ) ),
-      pt( "lutdecomp %w secs\n", true ),
+      dry( get( settings, "dry", dry ) ),
       progress( get( settings, "verbose", progress ) )
   {
     class_counter[0u].resize( 3u );
     class_counter[1u].resize( 6u );
     class_counter[2u].resize( 18u );
-
-    for ( auto i = 0u; i < 3u; ++i )
-    {
-      for ( auto j = 0u; j < class_counter[i].size(); ++j )
-      {
-        class_circuits[i].push_back( circuit_from_string( optimal_quantum_circuits::affine_classification[i][j] ) );
-      }
-    }
 
     gia.init_truth_tables();
   }
@@ -454,8 +451,7 @@ public:
     set( statistics, "class_counter", class_counter );
   }
 
-protected:
-  boost::optional<circuit> compute( int index, unsigned free_lines ) const
+  bool compute( int index, const std::vector<unsigned>& line_map, const std::vector<unsigned>& ancillas ) const
   {
     const auto num_inputs = gia().lut_size( index );
 
@@ -464,7 +460,9 @@ protected:
       const auto tt_spec = gia().lut_truth_table( index );
       const auto affine_class = classify( tt_spec, num_inputs );
 
-      return class_circuits[num_inputs - 2u][class_index[num_inputs - 2u].at( affine_class )];
+      if ( dry ) return true;
+
+      append_stg_from_line_map( circ(), affine_class, line_map );
     }
     else
     {
@@ -480,15 +478,15 @@ protected:
       /* count ancillas and determine root gate */
       auto num_ancilla = sub_lut.lut_count() - 1;
 
-      if ( num_ancilla > static_cast<int>( free_lines ) )
+      if ( num_ancilla > static_cast<int>( ancillas.size() ) )
       {
-        if ( free_lines == 0u )
+        if ( ancillas.empty() )
         {
-          return boost::none;
+          return false;
         }
         else
         {
-          while ( num_ancilla > static_cast<int>( free_lines ) )
+          while ( num_ancilla > static_cast<int>( ancillas.size() ) )
           {
             abc::Gia_ManMergeTopLuts( sub_lut );
             --num_ancilla;
@@ -500,24 +498,24 @@ protected:
 
       /* second pass: map LUTs to lines, and compute classes */
       auto pi_index = 0u;
-      auto anc_index = num_inputs + 1u;
+      auto anc_index = 0u;
       auto ins_index = 0u;
       std::vector<unsigned> synth_order( 2 * num_ancilla + 1, 99 );
       std::vector<uint64_t> aff_class( sub_lut.size() );
 
-      sub_lut.foreach_input( [&lut_to_line, &pi_index]( int index, int e ) {
-          lut_to_line[index] = pi_index++;
+      sub_lut.foreach_input( [&lut_to_line, &pi_index, line_map]( int index, int e ) {
+          lut_to_line[index] = line_map[pi_index++];
         } );
 
       sub_lut.foreach_lut( [&]( int index ) {
           if ( index == root )
           {
-            lut_to_line[index] = pi_index++;
+            lut_to_line[index] = line_map[pi_index++];
             synth_order[ins_index] = index;
           }
           else
           {
-            lut_to_line[index] = anc_index++;
+            lut_to_line[index] = ancillas[anc_index++];
             synth_order[ins_index] = synth_order[synth_order.size() - 1 - ins_index] = index;
             ++ins_index;
           }
@@ -528,17 +526,16 @@ protected:
           }
         } );
 
-      circuit local_circ( num_inputs + 1 + num_ancilla );
       for ( auto index : synth_order )
       {
         const auto num_inputs = sub_lut.lut_size( index );
-        std::vector<unsigned> line_map;
-        line_map.reserve( num_inputs + 1u );
+        std::vector<unsigned> local_line_map;
+        local_line_map.reserve( num_inputs + 1u );
 
-        sub_lut.foreach_lut_fanin( index, [&line_map, &lut_to_line]( int fanin ) {
-            line_map.push_back( lut_to_line[fanin] );
+        sub_lut.foreach_lut_fanin( index, [&local_line_map, &lut_to_line]( int fanin ) {
+            local_line_map.push_back( lut_to_line[fanin] );
           } );
-        line_map.push_back( lut_to_line[index] );
+        local_line_map.push_back( lut_to_line[index] );
 
         if ( num_inputs == 0 )
         {
@@ -547,32 +544,13 @@ protected:
         else if ( num_inputs == 1 )
         {
           assert( sub_lut.lut_truth_table( index ) == 1 );
-          append_cnot( local_circ, make_var( line_map[0], false ), line_map[1] );
+          if ( dry ) continue;
+          append_cnot( circ(), make_var( local_line_map[0], false ), local_line_map[1] );
         }
         else if ( num_inputs < 5 )
         {
-          const auto& aff_circ = class_circuits[num_inputs - 2u][class_index[num_inputs - 2u].at( aff_class[index] )];
-          if ( aff_circ.lines() > num_inputs + 1u )
-          {
-            assert( aff_circ.lines() == num_inputs + 2u );
-
-            // find any free line
-            auto free_line = -1;
-            for ( auto i = 0; i < num_inputs + 1 + num_ancilla; ++i )
-            {
-              if ( std::find( line_map.begin(), line_map.end(), i ) == line_map.end() )
-              {
-                free_line = i;
-                break;
-              }
-            }
-
-            assert( free_line != -1 );
-
-            line_map.push_back( free_line );
-          }
-          increment_timer t( mapping_runtime );
-          append_circuit( local_circ, aff_circ, gate::control_container(), line_map );
+          if ( dry ) continue;
+          auto& g = append_stg_from_line_map( circ(), aff_class[index], local_line_map );
         }
         else
         {
@@ -592,18 +570,18 @@ protected:
             return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs() );
           }();
 
-          circuit esop_circ;
-          esop_synthesis( esop_circ, esop, lut.num_inputs(), lut.num_outputs() );
-          append_circuit( local_circ, esop_circ, gate::control_container(), line_map );
+          if ( dry ) continue;
+          const auto es_settings = make_settings_from( std::make_pair( "line_map", local_line_map ) );
+          esop_synthesis( circ(), esop, lut.num_inputs(), lut.num_outputs(), es_settings );
           if ( progress )
           {
             std::cout << "\e[A";
           }
         }
       }
-
-      return local_circ;
     }
+
+    return true;
   }
 
 private:
@@ -622,18 +600,11 @@ private:
     {
       afunc = it->second;
     }
-    ++class_counter[num_vars - 2u][class_index[num_vars - 2u].at( afunc )];
+    ++class_counter[num_vars - 2u][optimal_quantum_circuits::affine_classification_index[num_vars - 2u].at( afunc )];
     return afunc;
   }
 
 private:
-  std::vector<std::unordered_map<uint64_t, unsigned>> class_index = {
-    {{0x0, 0}, {0x1, 1}, {0x3, 2}},
-    {{0x00, 0}, {0x01, 1}, {0x03, 2}, {0x07, 3}, {0x0f, 4}, {0x17, 5}},
-    {{0x0000, 0},{0x0001, 1},{0x0003, 2},{0x0007, 3},{0x000f, 4},{0x0017, 5},{0x001f, 6},{0x003f, 7},{0x007f, 8},{0x00ff, 9},{0x0117, 10},{0x011f, 11},{0x013f, 12},{0x017f, 13},{0x033f, 14},{0x0356, 15},{0x0357, 16},{0x035f, 17}}
-  };
-
-  std::vector<std::vector<circuit>> class_circuits;
   mutable std::vector<std::unordered_map<uint64_t, uint64_t>> class_hash;
 
 private: /* statistics */
@@ -644,8 +615,7 @@ private: /* statistics */
   double* cover_runtime;
   double* exorcism_runtime;
 
-  print_timer pt;
-
+  bool dry = false;
   bool progress = false;
 };
 
@@ -661,14 +631,14 @@ public:
       gia( gia ),
       statistics( statistics ),
       order_heuristic( std::make_shared<defer_lut_order_heuristic>( gia ) ),
-      synthesizer( gia,
+      synthesizer( circ, gia,
                    merge_properties(
                                     settings,
                                     make_settings_from(
                                                        std::make_pair( "exorcism_runtime", &exorcism_runtime ),
                                                        std::make_pair( "cover_runtime", &cover_runtime ) ) ),
                    statistics ),
-      decomp_synthesizer( gia, merge_properties(
+      decomp_synthesizer( circ, gia, merge_properties(
                                     settings,
                                     make_settings_from(
                                                        std::make_pair( "mapping_runtime", &mapping_runtime ),
@@ -759,46 +729,21 @@ public:
   }
 
 private:
-  void synthesize_node( int index, bool lookup, const std::stack<unsigned>& clean_ancilla )
+  void synthesize_node( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
   {
     /* map circuit */
-    auto line_map = order_heuristic->compute_line_map( index );
-    const auto num_ancilla = clean_ancilla.size();
+    const auto line_map = order_heuristic->compute_line_map( index );
 
-    circuit* local_circ;
-
-    if ( lutdecomp )
+    if ( lutdecomp && decomp_synthesizer.compute( index, line_map, clean_ancilla ) )
     {
-      local_circ = decomp_synthesizer.lookup_or_compute( index, num_ancilla, false );
-      if ( !local_circ )
-      {
-        std::cout << "\n";
-        local_circ = synthesizer.lookup_or_compute( index, num_ancilla, lookup );
-        ++num_decomp_default;
-        std::cout << "\e[A";
-      }
-      else
-      {
-        auto cstack = clean_ancilla;
-        const auto req_lines = local_circ->lines() - line_map.size();
-        for ( auto i = 0u; i < req_lines; ++i )
-        {
-          line_map.push_back( cstack.top() );
-          cstack.pop();
-        }
-        ++num_decomp_lut;
-      }
-    }
-    else
-    {
-      std::cout << "\n";
-      local_circ = synthesizer.lookup_or_compute( index, num_ancilla, lookup );
-      ++num_decomp_default;
-      std::cout << "\e[A";
+      ++num_decomp_lut;
+      return;
     }
 
-    assert( local_circ );
-    append_circuit( circ, *local_circ, gate::control_container(), line_map );
+    std::cout << "\n";
+    synthesizer.compute( index, line_map, clean_ancilla );
+    ++num_decomp_default;
+    std::cout << "\e[A";
   }
 
 private:
