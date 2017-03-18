@@ -42,134 +42,161 @@
 #include <reversible/gate.hpp>
 
 #include <boost/any.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 namespace cirkit
 {
 
-  /**
-   * @brief Target Tag for Toffoli gates.
-   *
-   * @sa \ref sub_target_tags
-   *
-   * @since  1.0
-   */
-  struct toffoli_tag {};
+/**
+ * @brief Target Tag for Toffoli gates.
+ *
+ * @sa \ref sub_target_tags
+ *
+ * @since  1.0
+ */
+struct toffoli_tag {};
 
-  /**
-   * @brief Target Tag for Fredkin gates.
-   *
-   * @sa \ref sub_target_tags
-   *
-   * @since  1.0
-   */
-  struct fredkin_tag {};
+/**
+ * @brief Target Tag for Fredkin gates.
+ *
+ * @sa \ref sub_target_tags
+ *
+ * @since  1.0
+ */
+struct fredkin_tag {};
 
-  /**
-   * @brief Target Tag for Peres gates.
-   *
-   * @sa \ref sub_target_tags
-   *
-   * @since  1.0
-   */
-  struct peres_tag {};
+/**
+ * @brief Target Tag for Peres gates.
+ *
+ * @sa \ref sub_target_tags
+ *
+ * @since  1.0
+ */
+struct peres_tag {};
 
+/**
+ * @brief Target Tag for Modules
+ *
+ * @sa \ref sub_target_tags
+ *
+ * @since  1.1
+ */
+struct module_tag
+{
   /**
-   * @brief Target Tag for Modules
-   *
-   * @sa \ref sub_target_tags
+   * @brief Name of the module
    *
    * @since  1.1
    */
-  struct module_tag
-  {
-    /**
-     * @brief Name of the module
-     *
-     * @since  1.1
-     */
-    std::string name;
-
-    /**
-     * @brief Reference to the circuit
-     *
-     * Usually the circuit is inside of the
-     * circuit modules list.
-     *
-     * @since  1.1
-     */
-    std::shared_ptr<circuit> reference;
-  };
+  std::string name;
 
   /**
-   * @brief Compares type of a boost::any variable
+   * @brief Reference to the circuit
    *
-   * This method is called by is_\em gate functions
-   * like is_toffoli().
-   *
-   * @param operand A variable of type boost::any
-   * @return true, if \p operand is of type \p T.
-   *
-   * @since  1.0
-   */
-  template<typename T>
-  bool is_type( const boost::any& operand )
-  {
-    return operand.type() == typeid( T );
-  }
-
-  /**
-   * @brief Checks if two gates have the same type
-   *
-   * Use this function, since == does not work on gate::type
-   * to compare to gates by its type.
-   *
-   * @param g1 First gate
-   * @param g2 Second gate
-   * @return true, if they have the same target tag, otherwise false
-   *
-   * @since  1.0
-   */
-  bool same_type( const gate& g1, const gate& g2 );
-
-  /**
-   * @brief Returns whether a gate is a Toffoli gate
-   *
-   * @param g Gate
-   * @return true, if \p g is a Toffoli gate
-   *
-   * @since  1.0
-   */
-  bool is_toffoli( const gate& g );
-
-  /**
-   * @brief Returns whether a gate is a Fredkin gate
-   *
-   * @param g Gate
-   * @return true, if \p g is a Fredkin gate
-   *
-   * @since  1.0
-   */
-  bool is_fredkin( const gate& g );
-
-  /**
-   * @brief Returns whether a gate is a Peres gate
-   *
-   * @param g Gate
-   * @return true, if \p g is a Peres gate
-   *
-   * @since  1.0
-   */
-  bool is_peres( const gate& g );
-
-  /**
-   * @brief Returns whether a gate is a module
-   *
-   * @param g Gate
-   * @return true, if \p g is a module
+   * Usually the circuit is inside of the
+   * circuit modules list.
    *
    * @since  1.1
    */
-  bool is_module( const gate& g );
+  std::shared_ptr<circuit> reference;
+};
+
+/**
+ * @brief Single target tag
+ *
+ * @sa \ref sub_target_tags
+ *
+ * @since 2.3
+ */
+struct stg_tag
+{
+  boost::dynamic_bitset<> function;
+};
+
+/**
+ * @brief Compares type of a boost::any variable
+ *
+ * This method is called by is_\em gate functions
+ * like is_toffoli().
+ *
+ * @param operand A variable of type boost::any
+ * @return true, if \p operand is of type \p T.
+ *
+ * @since  1.0
+ */
+template<typename T>
+bool is_type( const boost::any& operand )
+{
+  return operand.type() == typeid( T );
+}
+
+/**
+ * @brief Checks if two gates have the same type
+ *
+ * Use this function, since == does not work on gate::type
+ * to compare to gates by its type.
+ *
+ * @param g1 First gate
+ * @param g2 Second gate
+ * @return true, if they have the same target tag, otherwise false
+ *
+ * @since  1.0
+ */
+bool same_type( const gate& g1, const gate& g2 );
+
+/**
+ * @brief Returns whether a gate is a Toffoli gate
+ *
+ * @param g Gate
+ * @return true, if \p g is a Toffoli gate
+ *
+ * @since  1.0
+ */
+bool is_toffoli( const gate& g );
+
+/**
+ * @brief Returns whether a gate is a Fredkin gate
+ *
+ * @param g Gate
+ * @return true, if \p g is a Fredkin gate
+ *
+ * @since  1.0
+ */
+bool is_fredkin( const gate& g );
+
+/**
+ * @brief Returns whether a gate is a Peres gate
+ *
+ * @param g Gate
+ * @return true, if \p g is a Peres gate
+ *
+ * @since  1.0
+ */
+bool is_peres( const gate& g );
+
+/**
+ * @brief Returns whether a gate is a module
+ *
+ * @param g Gate
+ * @return true, if \p g is a module
+ *
+ * @since  1.1
+ */
+bool is_module( const gate& g );
+
+/**
+ * @brief Returns whether a gate is a single-target gate
+ *
+ * @param g Gate
+ * @return true, if \p g is a single-target gate
+ *
+ * This function does not return true, e.g., if \p g is a Toffoli gate
+ * even though a Toffoli gate can be considered a specialization of a
+ * single-target gate
+ *
+ * @since  2.3
+ */
+bool is_stg( const gate& g );
 
 }
 
