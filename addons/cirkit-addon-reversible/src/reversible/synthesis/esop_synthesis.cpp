@@ -379,18 +379,23 @@ bool esop_synthesis( circuit& circ, const std::string& filename, properties::ptr
 
 bool esop_synthesis( circuit& circ, const gia_graph::esop_ptr& esop_cover, unsigned ninputs, unsigned noutputs, const properties::ptr& settings, const properties::ptr& statistics )
 {
+  const auto line_map = get( settings, "line_map", std::vector<unsigned>() );
+
   properties_timer t( statistics );
 
   /* meta data */
-  clear_circuit( circ );
-  circ.set_lines( ninputs + noutputs );
-
-  auto constants = circ.constants();
-  for ( auto i = ninputs; i < circ.lines(); ++i )
+  if ( line_map.empty() )
   {
-    constants[i] = false;
+    clear_circuit( circ );
+    circ.set_lines( ninputs + noutputs );
+
+    auto constants = circ.constants();
+    for ( auto i = ninputs; i < circ.lines(); ++i )
+    {
+      constants[i] = false;
+    }
+    circ.set_constants( constants );
   }
-  circ.set_constants( constants );
 
   /* cubes */
   int i;
@@ -406,11 +411,13 @@ bool esop_synthesis( circuit& circ, const gia_graph::esop_ptr& esop_cover, unsig
 
       if ( lit < 0 )
       {
-        targets.push_back( static_cast<int>( ninputs ) - lit - 1 );
+        const auto tgt = static_cast<int>( ninputs ) - lit - 1;
+        targets.push_back( line_map.empty() ? tgt : line_map[tgt] );
       }
       else
       {
-        controls.push_back( make_var( abc::Abc_Lit2Var( lit ), !abc::Abc_LitIsCompl( lit ) ) );
+        const auto ctr = abc::Abc_Lit2Var( lit );
+        controls.push_back( make_var( line_map.empty() ? ctr : line_map[ctr], !abc::Abc_LitIsCompl( lit ) ) );
       }
     }
 
