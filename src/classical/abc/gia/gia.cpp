@@ -175,7 +175,7 @@ std::string gia_graph::output_name( int output_index ) const
   }
   else
   {
-    return boost::str( boost::format( "input_%d" ) % output_index );
+    return boost::str( boost::format( "output_%d" ) % output_index );
   }
 }
 
