@@ -126,12 +126,12 @@ void reduce_cover()
   unsigned iteration = 0;
   double runtime = 0.0;
 
-  progress_line p( "[i] exorcism   iter = %3d   cubes = %6d/%6d   total = %6.2f" );
+  progress_line p( "[i] exorcism   iter = %3d   i/o = %2d/%2d   cubes = %6d/%6d   total = %6.2f" );
 
   do
   {
     increment_timer t( &runtime );
-    p( ++iteration, abc::g_CoverInfo.nCubesInUse, abc::g_CoverInfo.nCubesBefore, runtime );
+    p( ++iteration, abc::g_CoverInfo.nVarsIn, abc::g_CoverInfo.nVarsOut, abc::g_CoverInfo.nCubesInUse, abc::g_CoverInfo.nCubesBefore, runtime );
 
     gain_total = 0;
 
