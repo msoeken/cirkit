@@ -39,6 +39,7 @@
 #include <classical/cli/stores.hpp>
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/abc.hpp>
+#include <classical/cli/commands/cone.hpp>
 #include <classical/cli/commands/exorcism.hpp>
 #include <classical/cli/commands/simulate.hpp>
 #include <classical/cli/commands/tt.hpp>
@@ -137,6 +138,10 @@ int main( int argc, char ** argv )
   ADD_COMMAND( pos );
   ADD_COMMAND( tof );
   ADD_COMMAND( unique_names );
+
+  cli.set_category( "AIG rewriting" );
+
+  ADD_COMMAND( cone );
 
   cli.set_category( "Verification" );
 
