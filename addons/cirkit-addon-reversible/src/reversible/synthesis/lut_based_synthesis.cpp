@@ -432,8 +432,8 @@ class exorcism_lut_partial_synthesizer : public lut_partial_synthesizer
 public:
   explicit exorcism_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
     : lut_partial_synthesizer( circ, gia, settings, statistics ),
-      dry( get( settings, "dry", dry ) ),
-      verbose( get( settings, "verbose", verbose ) ),
+      dry( get( settings, "dry", false ) ),
+      verbose( get( settings, "verbose", false ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
       cover_runtime( settings->get<double*>( "cover_runtime" ) )
   {
@@ -481,8 +481,9 @@ public:
       class_runtime( settings->get<double*>( "class_runtime" ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
       cover_runtime( settings->get<double*>( "cover_runtime" ) ),
-      dry( get( settings, "dry", dry ) ),
-      progress( get( settings, "verbose", progress ) )
+      lut_size_max( abc::Gia_ManLutSizeMax( gia ) ),
+      dry( get( settings, "dry", false ) ),
+      progress( get( settings, "progress", false ) )
   {
     class_counter[0u].resize( 3u );
     class_counter[1u].resize( 6u );
@@ -540,6 +541,10 @@ public:
       }
 
       auto root = abc::Gia_ObjFaninId0p( sub_lut, abc::Gia_ManCo( sub_lut, 0 ) );
+      if ( sub_lut.lut_size( root ) > lut_size_max )
+      {
+        return false;
+      }
 
       /* second pass: map LUTs to lines, and compute classes */
       auto pi_index = 0u;
@@ -659,6 +664,8 @@ private: /* statistics */
   double* class_runtime;
   double* cover_runtime;
   double* exorcism_runtime;
+
+  int lut_size_max = 0;
 
   bool dry = false;
   bool progress = false;
