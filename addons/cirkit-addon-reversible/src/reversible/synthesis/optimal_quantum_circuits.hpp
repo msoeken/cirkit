@@ -82,6 +82,12 @@ const std::vector<std::vector<std::string>> affine_classification = {
   }
 };
 
+const std::vector<std::vector<unsigned>> affine_classification_tcount = {
+  {0, 7, 0},
+  {0, 15, 7, 16, 0, 7},
+  {0, 40, 15, 47, 7, 23, 43, 16, 40, 0, 79, 27, 48, 140, 7, 12, 61, 23}
+};
+
 const std::vector<std::unordered_map<uint64_t, unsigned>> affine_classification_index = {
     {{0x0, 0}, {0x1, 1}, {0x3, 2}},
     {{0x00, 0}, {0x01, 1}, {0x03, 2}, {0x07, 3}, {0x0f, 4}, {0x17, 5}},

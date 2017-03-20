@@ -29,10 +29,12 @@
 #include <fstream>
 #include <vector>
 
+#include <classical/utils/truth_table_utils.hpp>
+#include <reversible/target_tags.hpp>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/format.hpp>
 
-#include <reversible/target_tags.hpp>
 
 namespace cirkit
 {
@@ -93,6 +95,20 @@ void write_qpic( const circuit& circ, std::ostream& os, const properties::ptr& s
       for ( const auto& c : g.controls() )
       {
         items.push_back( format_control( c ) );
+      }
+    }
+    else if ( is_stg( g ) )
+    {
+      const auto& stg = boost::any_cast<stg_tag>( g.type() );
+      for ( const auto& c : g.controls() )
+      {
+        items.push_back( format_control( c ) );
+      }
+
+      items.push_back( boost::str( boost::format( "G:style=rounded_corners=2pt \\rotatebox{90}{\\scriptsize\\texttt{%s}}") % tt_to_hex( stg.function ) ) );
+      for ( const auto& t : g.targets() )
+      {
+        items.push_back( format_target( t, "+" ) );
       }
     }
     else

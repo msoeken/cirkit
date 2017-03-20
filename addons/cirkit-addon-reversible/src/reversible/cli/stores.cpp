@@ -26,11 +26,13 @@
 
 #include "stores.hpp"
 
+#include <cstdlib>
 #include <vector>
 
 #include <boost/format.hpp>
 
 #include <core/utils/string_utils.hpp>
+#include <core/utils/temporary_filename.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/circuit_to_aig.hpp>
@@ -94,6 +96,26 @@ command::log_opt_t log_store_entry_statistics<circuit>( const circuit& circ )
       {"qubits", number_of_qubits( circ )},
       {"depth", static_cast<unsigned>( costs( circ, costs_by_circuit_func( depth_costs() ) ) )}
     });
+}
+
+show_store_entry<circuit>::show_store_entry( const command& cmd )
+{
+}
+
+bool show_store_entry<circuit>::operator()( circuit& circ, const std::string& dotname, const command& cmd )
+{
+  temporary_filename qpic_filename( "test-%d.qpic" );
+  temporary_filename png_filename( "test-%d.png" );
+  write_qpic( circ, qpic_filename.name() );
+  system( boost::str( boost::format( "qpic -o %s -f png %s" ) % png_filename.name() % qpic_filename.name() ).c_str() );
+  system( boost::str( boost::format( "convert %1% -background white -alpha remove -resize x300 %1%" ) % png_filename.name() ).c_str() );
+  system( boost::str( boost::format( "imgcat %s" ) % png_filename.name() ).c_str() );
+  return false;
+}
+
+command::command::log_opt_t show_store_entry<circuit>::log() const
+{
+  return boost::none;
 }
 
 template<>

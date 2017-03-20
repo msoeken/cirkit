@@ -28,12 +28,14 @@
 
 #include <boost/range/algorithm.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/integer/integer_log2.hpp>
 
 #include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/flatten_circuit.hpp>
+#include <reversible/synthesis/optimal_quantum_circuits.hpp>
 
-#include <cmath> 
+#include <cmath>
 namespace cirkit
 {
 
@@ -210,6 +212,28 @@ namespace cirkit
     {
       const auto& tag = boost::any_cast<pauli_tag>( g.type() );
       return ( tag.axis == pauli_axis::Z && tag.root == 4u ) ? 1ull : 0ull;
+    }
+    else if ( is_stg( g ) )
+    {
+      const auto& tag = boost::any_cast<stg_tag>( g.type() );
+      const auto num_vars = boost::integer_log2( tag.function.size() );
+      if ( num_vars >= 2 && num_vars <= 4 )
+      {
+        const auto& idx_map = optimal_quantum_circuits::affine_classification_index[num_vars - 2u];
+        const auto it = idx_map.find( tag.function.to_ulong() );
+        if ( it == idx_map.end() )
+        {
+          return 0ull; /* UNKNOWN */
+        }
+        else
+        {
+          return optimal_quantum_circuits::affine_classification_tcount[num_vars - 2u][it->second];
+        }
+      }
+      else
+      {
+        return 0ull; /* UNKNOWN */
+      }
     }
     else
     {

@@ -86,6 +86,16 @@ template<>
 command::log_opt_t log_store_entry_statistics<circuit>( const circuit& circ );
 
 template<>
+struct show_store_entry<circuit>
+{
+  show_store_entry( const command& cmd );
+
+  bool operator()( circuit& circ, const std::string& dotname, const command& cmd );
+
+  command::log_opt_t log() const;
+};
+
+template<>
 inline bool store_can_convert<circuit, aig_graph>() { return true; }
 
 template<>
