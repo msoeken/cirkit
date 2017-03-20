@@ -205,7 +205,7 @@ protected:
   {
     while ( _next_free < max )
     {
-      _constants.push_back( _next_free++ );
+      _constants.insert( _constants.begin(), _next_free++ );
     }
   }
 
@@ -251,6 +251,20 @@ protected:
   unsigned _next_free = 0u;
 };
 
+std::ostream& operator<<( std::ostream& os, const lut_order_heuristic::step& s )
+{
+  switch ( s.type )
+  {
+  case lut_order_heuristic::pi:        os << "PI"; break;
+  case lut_order_heuristic::po:        os << "PO"; break;
+  case lut_order_heuristic::inv_po:    os << "PO'"; break;
+  case lut_order_heuristic::compute:   os << "COMPUTE"; break;
+  case lut_order_heuristic::uncompute: os << "UNCOMPUTE"; break;
+  }
+  os << boost::format( " %d ↦ %d" ) % s.node % s.target;
+  return os;
+}
+
 class defer_lut_order_heuristic : public lut_order_heuristic
 {
 public:
@@ -294,6 +308,7 @@ private:
         /* start uncomputing */
         if ( gia().lut_ref_num( index ) == 0 )
         {
+          visited.clear();
           decrease_children_indegrees( index );
           uncompute_children( index );
         }
@@ -308,6 +323,7 @@ private:
   {
     gia().foreach_output( [this]( int index, int e ) {
         const auto driver = abc::Gia_ObjFaninId0p( gia(), abc::Gia_ManCo( gia(), e ) );
+        output_luts.push_back( driver );
         gia().lut_ref_dec( driver );
       } );
   }
@@ -334,15 +350,44 @@ private:
 
   void uncompute_node( int index )
   {
+    if ( is_visited( index ) ) return;
     assert( gia().lut_ref_num( index ) == 0 );
 
-    const auto target = (*this)[index];
-    add_step( index, target, lut_order_heuristic::uncompute );
-    free_constant( target );
+    if ( !is_output_lut( index ) )
+    {
+      const auto target = (*this)[index];
+      add_step( index, target, lut_order_heuristic::uncompute );
+      free_constant( target );
+    }
+
+    visited.push_back( index );
 
     decrease_children_indegrees( index );
     uncompute_children( index );
   }
+
+  void print_lut_refs()
+  {
+    std::cout << "[i] LUT refs:";
+    gia().foreach_lut( [this]( int index ) {
+        std::cout << boost::format( "  %d:%d" ) % index % gia().lut_ref_num( index );
+      });
+    std::cout << std::endl;
+  }
+
+private:
+  inline bool is_visited( int index ) const
+  {
+    return std::find( visited.begin(), visited.end(), index ) != visited.end();
+  }
+
+  inline bool is_output_lut( int index ) const
+  {
+    return std::find( output_luts.begin(), output_luts.end(), index ) != output_luts.end();
+  }
+
+  std::vector<int> visited;
+  std::vector<int> output_luts;
 };
 
 /******************************************************************************
@@ -646,9 +691,10 @@ public:
                                                        std::make_pair( "exorcism_runtime", &exorcism_runtime ),
                                                        std::make_pair( "cover_runtime", &cover_runtime ) ) ),
                           statistics ),
-      verbose( get( settings, "verbose", verbose ) ),
-      progress( get( settings, "progress", progress ) ),
-      lutdecomp( get( settings, "lutdecomp", lutdecomp ) )
+      verbose( get( settings, "verbose", false ) ),
+      progress( get( settings, "progress", false ) ),
+      showsteps( get( settings, "showsteps", false ) ),
+      lutdecomp( get( settings, "lutdecomp", false ) )
   {
   }
 
@@ -664,11 +710,17 @@ public:
     std::vector<constant> constants( lines, false );
     std::vector<bool> garbage( lines, true );
 
+    std::unordered_map<unsigned, lut_order_heuristic::step_type> orig_step_type; /* first step type of an output */
+
     auto step_index = 0u;
     progress_line pbar( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f\r", progress );
     pbar.keep_last();
     for ( const auto& step : order_heuristic->steps() )
     {
+      if ( showsteps )
+      {
+        std::cout << step << std::endl;
+      }
       pbar( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, cover_runtime, exorcism_runtime, mapping_runtime, class_runtime, synthesis_runtime );
       increment_timer t( &synthesis_runtime );
 
@@ -689,8 +741,8 @@ public:
           outputs.push_back( gia.output_name( abc::Gia_ManIdToCioId( gia, step.node ) ) );
           garbage.push_back( false );
 
-          append_cnot( circ, step.target, circ.lines() - 1 );
-          assert( false );
+          const auto pol = orig_step_type[step.target] == step.type ? true : false;
+          append_cnot( circ, make_var( step.target, pol ), circ.lines() - 1 );
         }
         else
         {
@@ -701,6 +753,7 @@ public:
           {
             append_not( circ, step.target );
           }
+          orig_step_type.insert( {step.target, step.type} );
         }
         break;
 
@@ -769,6 +822,7 @@ private:
 
   bool verbose = false;
   bool progress = false;
+  bool showsteps = false;
   bool lutdecomp = false;
 };
 
