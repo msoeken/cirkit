@@ -30,6 +30,7 @@
 
 #include <core/utils/program_options.hpp>
 #include <classical/functions/aig_cone.hpp>
+#include <classical/utils/aig_utils.hpp>
 
 using namespace boost::program_options;
 
@@ -51,7 +52,8 @@ namespace cirkit
 cone_command::cone_command( const environment::ptr& env ) : aig_base_command( env, "Extracts cone by outputs" )
 {
   opts.add_options()
-    ( "output,o", value( &outputs )->composing(), "Names of outputs that should be kept" )
+    ( "output,o",      value( &outputs )->composing(),        "names of outputs that should be kept" )
+    ( "ouput_index,i", value( &output_indexes )->composing(), "indexes of outputs that should be kept" )
     ;
   be_verbose();
 }
@@ -59,7 +61,7 @@ cone_command::cone_command( const environment::ptr& env ) : aig_base_command( en
 command::rules_t cone_command::validity_rules() const
 {
   return {
-    {[&]() { return !outputs.empty(); }, "no output name specified" },
+    {[&]() { return !outputs.empty() || !output_indexes.empty(); }, "no output name specified" },
   };
 }
 
@@ -67,7 +69,17 @@ bool cone_command::execute()
 {
   auto settings = make_settings();
   auto statistics = std::make_shared<properties>();
-  aig() = aig_cone( aig(), outputs, settings, statistics );
+
+  for ( const auto& name : outputs )
+  {
+    const auto id = aig_output_index( aig(), name );
+    if ( std::find( output_indexes.begin(), output_indexes.end(), id ) == output_indexes.end() )
+    {
+      output_indexes.push_back( id );
+    }
+  }
+
+  aig() = aig_cone( aig(), output_indexes, settings, statistics );
   std::cout << boost::format( "[i] Run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
 
   return true;

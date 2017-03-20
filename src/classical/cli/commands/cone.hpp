@@ -55,6 +55,7 @@ protected:
 
 private:
   std::vector<std::string> outputs;
+  std::vector<unsigned> output_indexes;
 };
 
 }
