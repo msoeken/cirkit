@@ -36,13 +36,15 @@
 #ifndef AIG_FROM_TRUTH_TABLE_HPP
 #define AIG_FROM_TRUTH_TABLE_HPP
 
+#include <vector>
 #include <classical/aig.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
 namespace cirkit
 {
 
-aig_graph aig_from_truth_table_naive( const tt& t );
+aig_graph aig_from_truth_table_naive( const tt& t, const std::vector<aig_function>& leafs = std::vector<aig_function>() );
+aig_function aig_from_truth_table_naive( aig_graph& aig, const tt& t, const std::vector<aig_function>& leafs );
 aig_graph aig_from_truth_table( const tt& t );
 
 }
