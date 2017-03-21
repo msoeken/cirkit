@@ -49,6 +49,7 @@
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/add_line_to_circuit.hpp>
 #include <reversible/functions/circuit_from_string.hpp>
+#include <reversible/functions/clear_circuit.hpp>
 #include <reversible/functions/reverse_circuit.hpp>
 #include <reversible/functions/truth_table_from_bitset.hpp>
 #include <reversible/io/print_circuit.hpp>
@@ -293,7 +294,7 @@ public:
 
       esmgr( xmg, verbose )
   {
-
+    clear_circuit( circ );
 
     /* initialize reference counting */
     xmg.init_refs();
