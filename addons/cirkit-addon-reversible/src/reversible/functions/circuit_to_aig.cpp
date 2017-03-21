@@ -26,7 +26,9 @@
 
 #include "circuit_to_aig.hpp"
 
+#include <classical/functions/aig_from_truth_table.hpp>
 #include <classical/utils/aig_utils.hpp>
+#include <reversible/target_tags.hpp>
 
 namespace cirkit
 {
@@ -67,20 +69,38 @@ aig_graph circuit_to_aig( const circuit& circ )
   /* compute all gates */
   for ( const auto& g : circ )
   {
-    const auto target = g.targets().front();
+    if ( is_toffoli( g ) )
+    {
+      const auto target = g.targets().front();
 
-    if ( g.controls().empty() )
-    {
-      fs[target].complemented ^= 1;
+      if ( g.controls().empty() )
+      {
+        fs[target].complemented ^= 1;
+      }
+      else
+      {
+        std::vector<aig_function> operands;
+        for ( const auto& c : g.controls() )
+        {
+          operands += make_function( fs[c.line()], !c.polarity() );
+        }
+        fs[target] = aig_create_xor( aig, fs[target], aig_create_nary_and( aig, operands ) );
+      }
     }
-    else
+    else if ( is_stg( g ) )
     {
+      const auto& stg = boost::any_cast<stg_tag>( g.type() );
       std::vector<aig_function> operands;
       for ( const auto& c : g.controls() )
       {
-        operands += make_function( fs[c.line()], !c.polarity() );
+        operands += make_function( fs[c.line()], false );
       }
-      fs[target] = aig_create_xor( aig, fs[target], aig_create_nary_and( aig, operands ) );
+      const auto target = g.targets().front();
+      fs[target] = aig_create_xor( aig, fs[target], aig_from_truth_table_naive( aig, stg.function, operands ) );
+    }
+    else
+    {
+      assert( false );
     }
   }
 

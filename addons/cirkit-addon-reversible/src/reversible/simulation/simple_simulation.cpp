@@ -141,6 +141,24 @@ namespace cirkit
 
       return input;
     }
+    else if ( is_stg( g ) )
+    {
+      const auto stg = boost::any_cast<stg_tag>( g.type() );
+
+      boost::dynamic_bitset<> f_pattern( g.controls().size() );
+      for ( auto i = 0u; i < g.controls().size(); ++i )
+      {
+        if ( input.test( g.controls()[i].line() ) )
+        {
+          f_pattern.set( i );
+        }
+      }
+      if ( stg.function.test( f_pattern.to_ulong() ) )
+      {
+        input.flip( g.targets().front() );
+      }
+      return input;
+    }
     else
     {
       assert( false );
