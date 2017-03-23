@@ -102,6 +102,35 @@ public:
     os.flush();
   }
 
+  class subprogress_t
+  {
+  public:
+    subprogress_t( bool enable, std::ostream& os ) : enable( enable ), os( os )
+    {
+      if ( enable )
+      {
+        os << "\n";
+      }
+    }
+
+    ~subprogress_t()
+    {
+      if ( enable )
+      {
+        os << "\e[A";
+      }
+    }
+
+  private:
+    bool enable;
+    std::ostream& os;
+  };
+
+  std::unique_ptr<subprogress_t> subprogress() const
+  {
+    return std::unique_ptr<subprogress_t>( new subprogress_t( enable, os ) );
+  }
+
 private:
   std::string format;
   bool enable;
