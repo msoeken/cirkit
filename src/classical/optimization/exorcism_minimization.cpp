@@ -118,7 +118,7 @@ private:
   unsigned _literal_count = 0u;
 };
 
-void reduce_cover()
+void reduce_cover( bool progress )
 {
   int gain_total{};
   int iter_wo_improv = 0;
@@ -126,7 +126,7 @@ void reduce_cover()
   unsigned iteration = 0;
   double runtime = 0.0;
 
-  progress_line p( "[i] exorcism   iter = %3d   i/o = %2d/%2d   cubes = %6d/%6d   total = %6.2f" );
+  progress_line p( "[i] exorcism   iter = %3d   i/o = %2d/%2d   cubes = %6d/%6d   total = %6.2f", progress );
 
   do
   {
@@ -396,6 +396,7 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
   /* settings */
   const auto quality      = get( settings, "quality",      2u );
   const auto cubes_max    = get( settings, "cubes_max",    50000u );
+  const auto progress     = get( settings, "progress",     false );
   const auto verbose      = get( settings, "verbose",      false );
   const auto very_verbose = get( settings, "very_verbose", false );
 
@@ -442,7 +443,7 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
   abc::AddCubesToStartingCover( esop.get() );
   {
     properties_timer t( statistics, "exorcism_opt_time" );
-    reduce_cover();
+    reduce_cover( progress );
   }
 
   /* extract cover */
