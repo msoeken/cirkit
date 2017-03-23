@@ -39,6 +39,7 @@
 namespace abc
 {
 Gia_Man_t * Eso_ManCompute( Gia_Man_t * pGia, int fVerbose, Vec_Wec_t ** pvRes );
+void Gia_ManLutSat( Gia_Man_t * p, int LutSize, int nNumber, int nImproves, int nBTLimit, int DelayMax, int nEdges, int fDelay, int fReverse, int fVerbose, int fVeryVerbose );
 }
 
 /******************************************************************************
@@ -199,6 +200,23 @@ gia_graph gia_graph::if_mapping( const properties::ptr& settings, const properti
   auto mapped_gia = abc::Gia_ManPerformMapping( p_gia, &params );
 
   return gia_graph( mapped_gia );
+}
+
+void gia_graph::satlut_mapping( const properties::ptr& settings, const properties::ptr& statistics ) const
+{
+  const auto window_size    = get( settings, "window_size",    128 );
+  const auto improves       = get( settings, "improves",       0 );
+  const auto conflict_limit = get( settings, "conflict_limit", 100 );
+  const auto verbose        = get( settings, "verbose",        false );
+  const auto very_verbose   = get( settings, "very_verbose",   false );
+
+  const auto lut_size  = max_lut_size();
+  const auto delay_max = 0;
+  const auto edges_max = 0;
+  const auto opt_delay = false;
+  const auto reverse   = false;
+
+  abc::Gia_ManLutSat( p_gia, lut_size, window_size, improves, conflict_limit, delay_max, edges_max, opt_delay, reverse, verbose, very_verbose );
 }
 
 void gia_graph::init_lut_refs() const

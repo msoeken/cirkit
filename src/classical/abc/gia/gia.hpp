@@ -85,8 +85,10 @@ public:
   /// MAPPING
 
   gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
+  void satlut_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
 
   inline int lut_count() const { return abc::Gia_ManLutNum( p_gia ); }
+  inline int max_lut_size() const { return abc::Gia_ManLutSizeMax( p_gia ); }
   inline bool is_lut( int index ) const { return abc::Gia_ObjIsLut( p_gia, index ); }
   inline int lut_size( int index ) const { return abc::Gia_ObjLutSize( p_gia, index ); }
   inline int lut_ref_num( int index ) const { return Gia_ObjLutRefNumId( p_gia, index ); }
