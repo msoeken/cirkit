@@ -433,6 +433,7 @@ public:
   explicit exorcism_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
     : lut_partial_synthesizer( circ, gia, settings, statistics ),
       dry( get( settings, "dry", false ) ),
+      progress( get( settings, "progress", false ) ),
       verbose( get( settings, "verbose", false ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
       cover_runtime( settings->get<double*>( "cover_runtime" ) )
@@ -451,7 +452,8 @@ public:
 
     esop = [this, &esop, &lut]() {
       increment_timer t( exorcism_runtime );
-      return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs() );
+      const auto em_settings = make_settings_from( std::make_pair( "progress", progress ) );
+      return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
     }();
 
     if ( dry ) return true;
@@ -464,6 +466,7 @@ public:
 private:
   /* settings */
   bool dry = false;
+  bool progress = false;
   bool verbose = false;
 
   double* cover_runtime;
@@ -623,7 +626,8 @@ public:
 
           esop = [this, &esop, &lut]() {
             increment_timer t( exorcism_runtime );
-            return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs() );
+            const auto em_settings = make_settings_from( std::make_pair( "progress", progress ) );
+            return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
           }();
 
           if ( dry ) continue;
@@ -708,7 +712,8 @@ public:
       verbose( get( settings, "verbose", false ) ),
       progress( get( settings, "progress", false ) ),
       showsteps( get( settings, "showsteps", false ) ),
-      lutdecomp( get( settings, "lutdecomp", false ) )
+      lutdecomp( get( settings, "lutdecomp", false ) ),
+      pbar( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f", progress )
   {
   }
 
@@ -727,7 +732,6 @@ public:
     std::unordered_map<unsigned, lut_order_heuristic::step_type> orig_step_type; /* first step type of an output */
 
     auto step_index = 0u;
-    progress_line pbar( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f\r", progress );
     pbar.keep_last();
     for ( const auto& step : order_heuristic->steps() )
     {
@@ -807,10 +811,11 @@ private:
       return;
     }
 
-    std::cout << "\n";
-    synthesizer.compute( index, line_map, clean_ancilla );
-    ++num_decomp_default;
-    std::cout << "\e[A";
+    {
+      const auto sp = pbar.subprogress();
+      synthesizer.compute( index, line_map, clean_ancilla );
+      ++num_decomp_default;
+    }
   }
 
 private:
@@ -838,6 +843,8 @@ private:
   bool progress = false;
   bool showsteps = false;
   bool lutdecomp = false;
+
+  progress_line pbar;
 };
 
 /******************************************************************************
