@@ -50,9 +50,10 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   opts.add_options()
     ( "cut_size,k",   value_with_default( &cut_size ), "cut size" )
     ( "lutdecomp,l",                                   "apply LUT decomposition technique where possible" )
-    ( "legacy",                                        "run the old version" )
+    ( "satlut,s",                                      "optimize mapping with SAT where possible" )
     ( "progress,p",                                    "show progress" )
     ( "dry",                                           "dry run (do not create gates)" )
+    ( "legacy",                                        "run the old version" )
     ;
   be_verbose();
   add_new_option();
@@ -65,6 +66,7 @@ bool lhrs_command::execute()
 
   const auto settings = make_settings();
   settings->set( "lutdecomp", is_set( "lutdecomp" ) );
+  settings->set( "satlut", is_set( "satlut" ) );
   settings->set( "progress", is_set( "progress" ) );
   settings->set( "dry", is_set( "dry" ) );
 

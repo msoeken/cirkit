@@ -481,7 +481,8 @@ public:
       class_runtime( settings->get<double*>( "class_runtime" ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
       cover_runtime( settings->get<double*>( "cover_runtime" ) ),
-      lut_size_max( abc::Gia_ManLutSizeMax( gia ) ),
+      lut_size_max( gia.max_lut_size() ),
+      satlut( get( settings, "satlut", false ) ),
       dry( get( settings, "dry", false ) ),
       progress( get( settings, "progress", false ) )
   {
@@ -515,7 +516,12 @@ public:
       const auto sub_lut = [this, index]() {
         increment_timer t( mapping_runtime );
         const auto lut = gia().extract_lut( index );
-        return lut.if_mapping( make_settings_from( std::make_pair( "lut_size", 4u ), "area_mapping" ) );
+        const auto sub_lut = lut.if_mapping( make_settings_from( std::make_pair( "lut_size", 4u ), "area_mapping" ) );
+        if ( satlut )
+        {
+          sub_lut.satlut_mapping();
+        }
+        return sub_lut;
       }();
       sub_lut.init_truth_tables();
 
@@ -667,6 +673,7 @@ private: /* statistics */
 
   int lut_size_max = 0;
 
+  bool satlut = false;
   bool dry = false;
   bool progress = false;
 };
