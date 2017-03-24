@@ -44,7 +44,6 @@
 #include <classical/functions/linear_classification.hpp>
 #include <classical/io/read_blif.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
-#include <classical/optimization/exorcismq.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <reversible/gate.hpp>
 #include <reversible/target_tags.hpp>
@@ -435,8 +434,10 @@ public:
       dry( get( settings, "dry", false ) ),
       progress( get( settings, "progress", false ) ),
       verbose( get( settings, "verbose", false ) ),
+      dumpesop( get( settings, "dumpesop", std::string() ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
-      cover_runtime( settings->get<double*>( "cover_runtime" ) )
+      cover_runtime( settings->get<double*>( "cover_runtime" ) ),
+      esopfile_counter( settings->get<unsigned*>( "esopfile_counter" ) )
   {
   }
 
@@ -456,6 +457,12 @@ public:
       return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
     }();
 
+    if ( !dumpesop.empty() )
+    {
+      write_esop( esop, lut.num_inputs(), lut.num_outputs(),
+                  boost::str( boost::format( "%s/esop-%d.esop" ) % dumpesop % ( *esopfile_counter )++ ) );
+    }
+
     if ( dry ) return true;
     const auto es_settings = make_settings_from( std::make_pair( "line_map", line_map ) );
     esop_synthesis( circ(), esop, lut.num_inputs(), lut.num_outputs(), es_settings );
@@ -465,12 +472,14 @@ public:
 
 private:
   /* settings */
-  bool dry = false;
-  bool progress = false;
-  bool verbose = false;
+  bool dry      = false; /* dry run, do everything but do not add gates */
+  bool progress = false; /* show progress line */
+  bool verbose  = false; /* be verbose */
+  std::string dumpesop;  /* dump ESOP file for each ESP cover */
 
-  double* cover_runtime;
-  double* exorcism_runtime;
+  double*   cover_runtime;
+  double*   exorcism_runtime;
+  unsigned* esopfile_counter;
 };
 
 class lutdecomp_lut_partial_synthesizer : public lut_partial_synthesizer
@@ -480,14 +489,16 @@ public:
     : lut_partial_synthesizer( circ, gia, settings, statistics ),
       class_counter( 3u ),
       class_hash( 3u ),
+      lut_size_max( gia.max_lut_size() ),
+      satlut( get( settings, "satlut", false ) ),
+      dry( get( settings, "dry", false ) ),
+      progress( get( settings, "progress", false ) ),
+      dumpesop( get( settings, "dumpesop", std::string() ) ),
       mapping_runtime( settings->get<double*>( "mapping_runtime" ) ),
       class_runtime( settings->get<double*>( "class_runtime" ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
       cover_runtime( settings->get<double*>( "cover_runtime" ) ),
-      lut_size_max( gia.max_lut_size() ),
-      satlut( get( settings, "satlut", false ) ),
-      dry( get( settings, "dry", false ) ),
-      progress( get( settings, "progress", false ) )
+      esopfile_counter( settings->get<unsigned*>( "esopfile_counter" ) )
   {
     class_counter[0u].resize( 3u );
     class_counter[1u].resize( 6u );
@@ -630,6 +641,12 @@ public:
             return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
           }();
 
+          if ( !dumpesop.empty() )
+          {
+            write_esop( esop, lut.num_inputs(), lut.num_outputs(),
+                        boost::str( boost::format( "%s/esop-%d.esop" ) % dumpesop % ( *esopfile_counter )++ ) );
+          }
+
           if ( dry ) continue;
           const auto es_settings = make_settings_from( std::make_pair( "line_map", local_line_map ) );
           esop_synthesis( circ(), esop, lut.num_inputs(), lut.num_outputs(), es_settings );
@@ -670,16 +687,18 @@ private:
 private: /* statistics */
   mutable std::vector<std::vector<unsigned>> class_counter;
 
-  double* mapping_runtime;
-  double* class_runtime;
-  double* cover_runtime;
-  double* exorcism_runtime;
-
   int lut_size_max = 0;
 
-  bool satlut = false;
-  bool dry = false;
-  bool progress = false;
+  bool satlut   = false; /* perform SAT-based LUT mapping as post-processing step to decrease mapping size */
+  bool dry      = false; /* dry run, do everything but do not add gates */
+  bool progress = false; /* show progress line */
+  std::string dumpesop;  /* dump ESOP file for each ESP cover */
+
+  double*   mapping_runtime;
+  double*   class_runtime;
+  double*   cover_runtime;
+  double*   exorcism_runtime;
+  unsigned* esopfile_counter;
 };
 
 /******************************************************************************
@@ -699,7 +718,8 @@ public:
                                     settings,
                                     make_settings_from(
                                                        std::make_pair( "exorcism_runtime", &exorcism_runtime ),
-                                                       std::make_pair( "cover_runtime", &cover_runtime ) ) ),
+                                                       std::make_pair( "cover_runtime", &cover_runtime ),
+                                                       std::make_pair( "esopfile_counter", &esopfile_counter ) ) ),
                    statistics ),
       decomp_synthesizer( circ, gia, merge_properties(
                                     settings,
@@ -707,11 +727,11 @@ public:
                                                        std::make_pair( "mapping_runtime", &mapping_runtime ),
                                                        std::make_pair( "class_runtime", &class_runtime ),
                                                        std::make_pair( "exorcism_runtime", &exorcism_runtime ),
-                                                       std::make_pair( "cover_runtime", &cover_runtime ) ) ),
+                                                       std::make_pair( "cover_runtime", &cover_runtime ),
+                                                       std::make_pair( "esopfile_counter", &esopfile_counter ) ) ),
                           statistics ),
       verbose( get( settings, "verbose", false ) ),
       progress( get( settings, "progress", false ) ),
-      showsteps( get( settings, "showsteps", false ) ),
       lutdecomp( get( settings, "lutdecomp", false ) ),
       pbar( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f", progress )
   {
@@ -735,7 +755,7 @@ public:
     pbar.keep_last();
     for ( const auto& step : order_heuristic->steps() )
     {
-      if ( showsteps )
+      if ( verbose )
       {
         std::cout << step << std::endl;
       }
@@ -827,22 +847,23 @@ private:
   std::unordered_map<unsigned, circuit> computed_circuits;
 
   /* statistics */
-  double   synthesis_runtime = 0.0;
-  double   exorcism_runtime  = 0.0;
-  double   cover_runtime     = 0.0;
-  double   mapping_runtime   = 0.0;
-  double   class_runtime     = 0.0;
+  double   synthesis_runtime  = 0.0;
+  double   exorcism_runtime   = 0.0;
+  double   cover_runtime      = 0.0;
+  double   mapping_runtime    = 0.0;
+  double   class_runtime      = 0.0;
   unsigned num_decomp_default = 0u;
-  unsigned num_decomp_lut = 0u;
+  unsigned num_decomp_lut     = 0u;
+  unsigned esopfile_counter   = 0u; /* if ESOP files should be dumbed, this counter is increased */
 
   std::shared_ptr<lut_order_heuristic> order_heuristic;
   exorcism_lut_partial_synthesizer synthesizer;
   lutdecomp_lut_partial_synthesizer decomp_synthesizer;
 
-  bool verbose = false;
-  bool progress = false;
-  bool showsteps = false;
-  bool lutdecomp = false;
+  /* settings (other settings are passed to decomposition classes directly and parsed there) */
+  bool verbose = false;    /* be verbose */
+  bool progress = false;   /* show progress line */
+  bool lutdecomp = false;  /* enable LUT-based decomposition */
 
   progress_line pbar;
 };

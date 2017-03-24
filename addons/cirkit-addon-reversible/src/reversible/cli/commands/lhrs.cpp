@@ -54,6 +54,7 @@ lhrs_command::lhrs_command( const environment::ptr& env )
     ( "progress,p",                                    "show progress" )
     ( "dry",                                           "dry run (do not create gates)" )
     ( "legacy",                                        "run the old version" )
+    ( "dumpesop",     value( &dumpesop ),              "name of existing directory to dump ESOP files after exorcism minimization" )
     ;
   be_verbose();
   add_new_option();
@@ -69,6 +70,11 @@ bool lhrs_command::execute()
   settings->set( "satlut", is_set( "satlut" ) );
   settings->set( "progress", is_set( "progress" ) );
   settings->set( "dry", is_set( "dry" ) );
+
+  if ( is_set( "dumpesop" ) )
+  {
+    settings->set( "dumpesop", dumpesop );
+  }
 
   circuit circ;
 
