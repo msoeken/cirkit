@@ -494,6 +494,50 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph& gia, const propertie
   return exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
 }
 
+void write_esop( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs, const std::string& filename )
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+  write_esop( esop, ninputs, noutputs, os );
+}
+
+void write_esop( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs, std::ostream& os )
+{
+  os << boost::format( ".i %d" ) % ninputs << std::endl
+     << boost::format( ".o %d" ) % noutputs << std::endl
+     << boost::format( ".p %d" ) % abc::Vec_WecSize( esop.get() ) << std::endl
+     << ".type esop" << std::endl;
+
+  /* cubes */
+  int i;
+  abc::Vec_Int_t *vec;
+  Vec_WecForEachLevel( esop.get(), vec, i )
+  {
+    std::string cubein( ninputs, '-' );
+    std::string cubeout( noutputs, '0' );
+
+    /* controls */
+    for ( auto j = 0; j < abc::Vec_IntSize( vec ); ++j )
+    {
+      const auto lit = abc::Vec_IntEntry( vec, j );
+
+      if ( lit < 0 )
+      {
+        const auto out = -lit - 1;
+        cubeout[out] = '1';
+      }
+      else
+      {
+        const auto in = abc::Abc_Lit2Var( lit );
+        cubein[in] = abc::Abc_LitIsCompl( lit ) ? '0' : '1';
+      }
+    }
+
+    os << boost::format( "%s %s" ) % cubein % cubeout << std::endl;
+  }
+
+  os << ".e" << std::endl;
+}
+
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func(properties::ptr settings, properties::ptr statistics)
 {
   dd_based_esop_optimization_func f = [&settings, &statistics]( DdManager * cudd, DdNode * f ) {
