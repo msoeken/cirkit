@@ -542,7 +542,7 @@ public:
       std::vector<unsigned> lut_to_line( sub_lut.size() );
 
       /* count ancillas and determine root gate */
-      auto num_ancilla = sub_lut.lut_count() - 1;
+      auto num_ancilla = sub_lut.lut_count() - 1; /* no need to store the output LUT */
 
       if ( num_ancilla > static_cast<int>( ancillas.size() ) )
       {
@@ -561,7 +561,7 @@ public:
       }
 
       auto root = abc::Gia_ObjFaninId0p( sub_lut, abc::Gia_ManCo( sub_lut, 0 ) );
-      if ( sub_lut.lut_size( root ) > lut_size_max )
+      if ( sub_lut.lut_size( root ) > num_inputs )
       {
         return false;
       }
