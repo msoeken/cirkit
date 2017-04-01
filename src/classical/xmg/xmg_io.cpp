@@ -366,19 +366,19 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
   digraph_t<inst_t> instructions;
   std::unordered_map<std::string, unsigned> name_to_vertex;
 
+  std::regex re_and( "^( *[^ ]+ *) & ( *[^ ]+ *)$" );
+  std::regex re_or( "^( *[^ ]+ *) \\| ( *[^ ]+ *)$" );
+  std::regex re_xor( "^( *[^ ]+ *) \\^ ( *[^ ]+ *)$" );
+  std::regex re_maj( "^\\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\)$" );
+
+  const auto add_instruction = [&instructions, &name_to_vertex]( const std::string& name, const inst_t& inst ) {
+    const auto v = add_vertex( instructions );
+    instructions[v] = inst;
+    name_to_vertex.insert( {name, v} );
+  };
+
   line_parser( filename, {
-      {std::regex( "^module +(.*) +\\(" ), [&xmg]( const std::smatch& m ) {
-          xmg.set_name( std::string( m[1] ) );
-        }},
-      {std::regex( "input (.*);" ), [&xmg, &name_to_function]( const std::smatch& m ) {
-          foreach_string( m[1], ", ", [&xmg, &name_to_function]( const std::string& name ) {
-              name_to_function.insert( {name, xmg.create_pi( unescape_name( name ) )} );
-            } );
-        }},
-      {std::regex( "output (.*);" ), [&output_names]( const std::smatch& m ) {
-          split_string( output_names, m[1], ", " );
-        }},
-      {std::regex( "assign (.*) = (.*);" ), [&output_names, &instructions, &name_to_vertex]( const std::smatch& m ) {
+      {std::regex( "assign (.*) = (.*);" ), [&output_names, &instructions, &name_to_vertex, &re_and, &re_or, &re_xor, &re_maj, &add_instruction]( const std::smatch& m ) {
           auto name = std::string( m[1] );
           auto expr = std::string( m[2] );
 
@@ -387,25 +387,19 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
 
           std::smatch match;
 
-          const auto add_instruction = [&instructions, &name_to_vertex]( const std::string& name, const inst_t& inst ) {
-            const auto v = add_vertex( instructions );
-            instructions[v] = inst;
-            name_to_vertex.insert( {name, v} );
-          };
-
-          if ( std::regex_search( expr, match, std::regex( "^( *[^ ]+ *) & ( *[^ ]+ *)$" ) ) )
+          if ( std::regex_search( expr, match, re_and ) )
           {
             add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_AND} );
           }
-          else if ( std::regex_search( expr, match, std::regex( "^( *[^ ]+ *) \\| ( *[^ ]+ *)$" ) ) )
+          else if ( std::regex_search( expr, match, re_or ) )
           {
             add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_OR} );
           }
-          else if ( std::regex_search( expr, match, std::regex( "^( *[^ ]+ *) \\^ ( *[^ ]+ *)$" ) ) )
+          else if ( std::regex_search( expr, match, re_xor ) )
           {
             add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] )}}, inst_t::OP_XOR} );
           }
-          else if ( std::regex_search( expr, match, std::regex( "^\\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\) \\| \\( *([^ ]+) & ([^ ]+) *\\)$" ) ) )
+          else if ( std::regex_search( expr, match, re_maj ) )
           {
             add_instruction( name, {name, {{std::string( match[1] ), std::string( match[2] ), std::string( match[4] )}}, inst_t::OP_MAJ} );
           }
@@ -427,7 +421,18 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
             }
             add_instruction( name, {name, {{expr}}, inst_t::OP_BUF} );
           }
-        }}}, false );
+        }},
+      {std::regex( "^module +(.*) +\\(" ), [&xmg]( const std::smatch& m ) {
+          xmg.set_name( std::string( m[1] ) );
+        }},
+      {std::regex( "input (.*);" ), [&xmg, &name_to_function]( const std::smatch& m ) {
+          foreach_string( m[1], ", ", [&xmg, &name_to_function]( const std::string& name ) {
+              name_to_function.insert( {name, xmg.create_pi( unescape_name( name ) )} );
+            } );
+        }},
+      {std::regex( "output (.*);" ), [&output_names]( const std::smatch& m ) {
+          split_string( output_names, m[1], ", " );
+        }}}, true );
 
   for ( const auto v : boost::make_iterator_range( vertices( instructions ) ) )
   {

@@ -79,7 +79,6 @@ std::pair<std::string, std::string> split_string_pair( const std::string& str, c
   return {str_list[0u], str_list[1u]};
 }
 
-
 void line_parser( const std::string& filename, const std::vector<std::pair<std::regex, std::function<void(const std::smatch&)>>>& matchers, bool warn_if_unmatched )
 {
   std::ifstream in( filename.c_str(), std::ifstream::in );
@@ -97,6 +96,7 @@ void line_parser( const std::string& filename, const std::vector<std::pair<std::
       {
         matcher.second( m );
         matched = true;
+        break;
       }
     }
     if ( !matched && warn_if_unmatched )
