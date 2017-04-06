@@ -110,6 +110,17 @@ class log_table:
     def re_search( expr ):
         return lambda x : re.search( expr, x ).group( 1 )
 
+class log_parser:
+    def __init__( self, filename, commands_per_entry, offset = 0 ):
+        self.slices = chunked( filename, commands_per_entry, offset )
+
+    def __getitem__( self, key ):
+        if isinstance( key, tuple ) and len( key ) == 2:
+            slice_index, slice_key = key
+            return [d[slice_index][slice_key] for d in self.slices]
+        else:
+            raise "I don't understand the key"
+
 class fmt_combine:
     def __init__( self, *args ):
         self.fmts = args
