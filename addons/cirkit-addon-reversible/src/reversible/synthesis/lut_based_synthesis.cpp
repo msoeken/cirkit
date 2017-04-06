@@ -432,6 +432,7 @@ public:
   explicit exorcism_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
     : lut_partial_synthesizer( circ, gia, settings, statistics ),
       dry( get( settings, "dry", false ) ),
+      optimize_esop( get( settings, "optimize_esop", true ) ),
       progress( get( settings, "progress", false ) ),
       verbose( get( settings, "verbose", false ) ),
       dumpesop( get( settings, "dumpesop", std::string() ) ),
@@ -451,11 +452,14 @@ public:
       return lut.compute_esop_cover();
     }();
 
-    esop = [this, &esop, &lut]() {
-      increment_timer t( exorcism_runtime );
-      const auto em_settings = make_settings_from( std::make_pair( "progress", progress ) );
-      return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
-    }();
+    if ( optimize_esop )
+    {
+      esop = [this, &esop, &lut]() {
+        increment_timer t( exorcism_runtime );
+        const auto em_settings = make_settings_from( std::make_pair( "progress", progress ) );
+        return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
+      }();
+    }
 
     if ( !dumpesop.empty() )
     {
@@ -472,9 +476,10 @@ public:
 
 private:
   /* settings */
-  bool dry      = false; /* dry run, do everything but do not add gates */
-  bool progress = false; /* show progress line */
-  bool verbose  = false; /* be verbose */
+  bool dry           = false; /* dry run, do everything but do not add gates */
+  bool optimize_esop = true;  /* optimize ESOP cover */
+  bool progress      = false; /* show progress line */
+  bool verbose       = false; /* be verbose */
   std::string dumpesop;  /* dump ESOP file for each ESP cover */
 
   double*   cover_runtime;
@@ -491,6 +496,7 @@ public:
       class_hash( 3u ),
       lut_size_max( gia.max_lut_size() ),
       satlut( get( settings, "satlut", false ) ),
+      optimize_esop( get( settings, "optimize_esop", true ) ),
       dry( get( settings, "dry", false ) ),
       progress( get( settings, "progress", false ) ),
       dumpesop( get( settings, "dumpesop", std::string() ) ),
@@ -635,11 +641,14 @@ public:
             return lut.compute_esop_cover();
           }();
 
-          esop = [this, &esop, &lut]() {
-            increment_timer t( exorcism_runtime );
-            const auto em_settings = make_settings_from( std::make_pair( "progress", progress ) );
-            return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
-          }();
+          if ( optimize_esop )
+          {
+            esop = [this, &esop, &lut]() {
+              increment_timer t( exorcism_runtime );
+              const auto em_settings = make_settings_from( std::make_pair( "progress", progress ) );
+              return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
+            }();
+          }
 
           if ( !dumpesop.empty() )
           {
@@ -689,9 +698,10 @@ private: /* statistics */
 
   int lut_size_max = 0;
 
-  bool satlut   = false; /* perform SAT-based LUT mapping as post-processing step to decrease mapping size */
-  bool dry      = false; /* dry run, do everything but do not add gates */
-  bool progress = false; /* show progress line */
+  bool satlut        = false; /* perform SAT-based LUT mapping as post-processing step to decrease mapping size */
+  bool optimize_esop = true;  /* optimize ESOP cover */
+  bool dry           = false; /* dry run, do everything but do not add gates */
+  bool progress      = false; /* show progress line */
   std::string dumpesop;  /* dump ESOP file for each ESP cover */
 
   double*   mapping_runtime;

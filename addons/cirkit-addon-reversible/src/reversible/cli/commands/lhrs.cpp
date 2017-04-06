@@ -51,6 +51,7 @@ lhrs_command::lhrs_command( const environment::ptr& env )
     ( "cut_size,k",   value_with_default( &cut_size ), "cut size" )
     ( "lutdecomp,l",                                   "apply LUT decomposition technique where possible" )
     ( "satlut,s",                                      "optimize mapping with SAT where possible" )
+    ( "noesopopt",                                     "do not optimize ESOP cover" )
     ( "progress,p",                                    "show progress" )
     ( "dry",                                           "dry run (do not create gates)" )
     ( "legacy",                                        "run the old version" )
@@ -70,6 +71,7 @@ bool lhrs_command::execute()
   settings->set( "satlut", is_set( "satlut" ) );
   settings->set( "progress", is_set( "progress" ) );
   settings->set( "dry", is_set( "dry" ) );
+  settings->set( "optimize_esop", !is_set( "noesopopt" ) );
 
   if ( is_set( "dumpesop" ) )
   {
