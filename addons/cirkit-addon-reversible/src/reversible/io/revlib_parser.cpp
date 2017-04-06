@@ -33,9 +33,11 @@
 
 #include <boost/algorithm/string/find.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/assign/std/vector.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/format.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
@@ -46,8 +48,10 @@
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/spirit/include/qi.hpp>
 
-#include "../target_tags.hpp"
-#include "revlib_processor.hpp"
+#include <core/utils/conversion_utils.hpp>
+#include <core/utils/string_utils.hpp>
+#include <reversible/target_tags.hpp>
+#include <reversible/io/revlib_processor.hpp>
 
 using namespace boost::assign;
 
@@ -667,6 +671,14 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
           module_tag module_t;
           module_t.name = command;
           gate_type = module_t;
+        }
+        else if ( boost::starts_with( command, "stg" ) )
+        {
+          const auto p = split_string_pair( command.substr( 3u, command.size() - 4u ), "[" );
+          assert( line_indices.size() > 2 );
+          stg_tag stg_t;
+          stg_t.function = boost::dynamic_bitset<>( convert_hex2bin( p.second ) );
+          gate_type = stg_t;
         }
         else
         {

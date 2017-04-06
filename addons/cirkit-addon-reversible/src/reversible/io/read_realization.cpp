@@ -39,10 +39,10 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/variant.hpp>
 
-#include "revlib_parser.hpp"
-#include "print_circuit.hpp"
-#include "../target_tags.hpp"
-#include "../functions/add_gates.hpp"
+#include <reversible/target_tags.hpp>
+#include <reversible/functions/add_gates.hpp>
+#include <reversible/io/revlib_parser.hpp>
+#include <reversible/io/print_circuit.hpp>
 
 using namespace boost::assign;
 
