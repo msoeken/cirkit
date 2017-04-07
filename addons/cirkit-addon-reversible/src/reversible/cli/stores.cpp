@@ -48,6 +48,7 @@
 #include <reversible/io/write_liquid.hpp>
 #include <reversible/io/write_pla.hpp>
 #include <reversible/io/write_qc.hpp>
+#include <reversible/io/write_qcode.hpp>
 #include <reversible/io/write_qpic.hpp>
 #include <reversible/io/write_quipper.hpp>
 #include <reversible/io/write_realization.hpp>
@@ -299,6 +300,12 @@ template<>
 void store_write_io_type<circuit, io_qc_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   write_qc( circ, filename, cmd.is_set( "iqc" ) );
+}
+
+template<>
+void store_write_io_type<circuit, io_qcode_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
+{
+  write_qcode( circ, filename );
 }
 
 /******************************************************************************

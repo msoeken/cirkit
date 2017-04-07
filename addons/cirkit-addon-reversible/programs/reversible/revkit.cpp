@@ -100,6 +100,7 @@ int main( int argc, char ** argv )
   ADD_WRITE_COMMAND( liquid, "LIQUi|>" );
   ADD_WRITE_COMMAND( pla, "PLA" );
   ADD_WRITE_COMMAND( qc, "QC" );
+  ADD_WRITE_COMMAND( qcode, "QCode" );
   ADD_WRITE_COMMAND( qpic, "qpic" );
   ADD_WRITE_COMMAND( quipper, "Quipper" );
   ADD_WRITE_COMMAND( real, "realization" );
