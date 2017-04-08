@@ -51,12 +51,13 @@
 #include <reversible/cli/stores.hpp>
 #include <reversible/cli/commands/adding_lines.hpp>
 #include <reversible/cli/commands/cbs.hpp>
+#include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/dxs.hpp>
 #include <reversible/cli/commands/embed.hpp>
 #include <reversible/cli/commands/enumerate.hpp>
 #include <reversible/cli/commands/esopbs.hpp>
 #include <reversible/cli/commands/exs.hpp>
-#include <reversible/cli/commands/dbs.hpp>
+#include <reversible/cli/commands/filter.hpp>
 #include <reversible/cli/commands/gen_reciprocal.hpp>
 #include <reversible/cli/commands/hdbs.hpp>
 #include <reversible/cli/commands/is_identity.hpp>
@@ -134,6 +135,7 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Mapping and rewriting" );
 
+  ADD_COMMAND( filter );
   ADD_COMMAND( mitm );
   ADD_COMMAND( nct );
   ADD_COMMAND( pos );
