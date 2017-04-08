@@ -395,7 +395,7 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
 {
   /* settings */
   const auto quality      = get( settings, "quality",      2u );
-  const auto cubes_max    = get( settings, "cubes_max",    50000u );
+  const auto cubes_max    = get( settings, "cubes_max",    1000000u );
   const auto progress     = get( settings, "progress",     false );
   const auto verbose      = get( settings, "verbose",      false );
   const auto very_verbose = get( settings, "very_verbose", false );
