@@ -48,7 +48,7 @@ progress_line::progress_line( const std::string& format, bool enable, std::ostre
 
 progress_line::~progress_line()
 {
-  if ( enable ) return;
+  if ( !enable ) return;
   clear();
 
   if ( _keep_last )
@@ -59,7 +59,7 @@ progress_line::~progress_line()
 
 void progress_line::clear()
 {
-  if ( enable ) return;
+  if ( !enable ) return;
   os << std::string( max_length, ' ' ) << '\r';
   os.flush();
 }
