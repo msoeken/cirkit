@@ -99,6 +99,7 @@ public:
     : command( env, "Print statistics" )
   {
     [](...){}( add_option_helper<S>( opts )... );
+    opts.add_options()( "silent", "produce no output" );
   }
 
 protected:
@@ -111,7 +112,10 @@ protected:
 
   bool execute()
   {
-    [](...){}( ps_helper<S>( *this, env )... );
+    if ( !is_set( "silent" ) )
+    {
+      [](...){}( ps_helper<S>( *this, env )... );
+    }
 
     return true;
   }
