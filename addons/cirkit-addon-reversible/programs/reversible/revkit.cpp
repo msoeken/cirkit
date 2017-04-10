@@ -45,6 +45,7 @@
 #include <classical/cli/commands/tt.hpp>
 #include <classical/utils/expression_parser.hpp>
 #include <classical/utils/truth_table_utils.hpp>
+#include <formal/cli/commands/xmglut.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
@@ -142,9 +143,10 @@ int main( int argc, char ** argv )
   ADD_COMMAND( tof );
   ADD_COMMAND( unique_names );
 
-  cli.set_category( "AIG rewriting" );
+  cli.set_category( "AIG and XMG synthesis" );
 
   ADD_COMMAND( cone );
+  ADD_COMMAND( xmglut );
 
   cli.set_category( "Verification" );
 
