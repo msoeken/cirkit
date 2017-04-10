@@ -199,7 +199,8 @@ public:
 
         const auto& name = hana::first( hana::second( c ) );
         const auto cmd = env->commands[name] = hana::second( hana::second( c ) );
-        methods.push_back( {name.c_str(), self->template wrapper<Cmd>(), METH_VARARGS | METH_KEYWORDS, cmd->caption().c_str()} );
+        auto named = strdup( name.c_str() );
+        methods.push_back( {named, self->template wrapper<Cmd>(), METH_VARARGS | METH_KEYWORDS, cmd->caption().c_str()} );
       } );
   }
 
@@ -214,9 +215,19 @@ public:
 
     auto m = PyModule_Create( &cirkit_module );
 
+    if ( !m )
+    {
+      std::cout << "[e] could not create python module" << std::endl;
+      Py_RETURN_NONE;
+    }
+
     methods.push_back( {nullptr, nullptr, 0, nullptr} );
 
-    PyModule_AddFunctions( m, &methods[0] );
+    if ( PyModule_AddFunctions( m, &methods[0] ) == -1 )
+    {
+      std::cout << "[e] could not add methods to module" << std::endl;
+      Py_RETURN_NONE;
+    }
 
     return m;
   }
