@@ -69,6 +69,11 @@ properties::ptr cirkit_command::make_settings() const
 
 void cirkit_command::print_runtime( const std::string& key, const std::string& label ) const
 {
+  if ( env->variable_value("omit_runtime", "0") != "0" )
+  {
+    return;
+  }
+
   if ( label.empty() )
   {
     std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( key ) << std::endl;
