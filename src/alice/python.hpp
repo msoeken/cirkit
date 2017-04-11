@@ -141,6 +141,11 @@ PyObject* python_run_command( const std::string& name, const std::shared_ptr<com
           pargs.push_back( "--" + skey );
         }
       }
+      else if ( PyLong_Check( value ) )
+      {
+        pargs.push_back( "--" + skey );
+        pargs.push_back( std::to_string( PyLong_AsLong( value ) ) );
+      }
       else
       {
         pargs.push_back( "--" + skey );
