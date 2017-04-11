@@ -35,6 +35,7 @@
 #include <core/utils/temporary_filename.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
 #include <classical/io/read_blif.hpp>
+#include <classical/optimization/exorcism_minimization.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/synthesis/lut_based_synthesis.hpp>
 #include <reversible/synthesis/lhrs/legacy.hpp>
@@ -48,14 +49,15 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   : aig_base_command( env, "LUT-based hierarchical reversible synthesis" )
 {
   opts.add_options()
-    ( "cut_size,k",   value_with_default( &cut_size ), "cut size" )
-    ( "lutdecomp,l",                                   "apply LUT decomposition technique where possible" )
-    ( "satlut,s",                                      "optimize mapping with SAT where possible" )
-    ( "noesopopt",                                     "do not optimize ESOP cover" )
-    ( "progress,p",                                    "show progress" )
-    ( "dry",                                           "dry run (do not create gates)" )
-    ( "legacy",                                        "run the old version" )
-    ( "dumpesop",     value( &dumpesop ),              "name of existing directory to dump ESOP files after exorcism minimization" )
+    ( "cut_size,k",   value_with_default( &cut_size ),   "cut size" )
+    ( "lutdecomp,l",                                     "apply LUT decomposition technique where possible" )
+    ( "satlut,s",                                        "optimize mapping with SAT where possible" )
+    ( "noesopopt",                                       "do not optimize ESOP cover" )
+    ( "esopscript",   value_with_default( &esopscript ), "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4" )
+    ( "progress,p",                                      "show progress" )
+    ( "dry",                                             "dry run (do not create gates)" )
+    ( "legacy",                                          "run the old version" )
+    ( "dumpesop",     value( &dumpesop ),                "name of existing directory to dump ESOP files after exorcism minimization" )
     ;
   be_verbose();
   add_new_option();
@@ -72,6 +74,7 @@ bool lhrs_command::execute()
   settings->set( "progress", is_set( "progress" ) );
   settings->set( "dry", is_set( "dry" ) );
   settings->set( "optimize_esop", !is_set( "noesopopt" ) );
+  settings->set( "script", script_from_string( esopscript ) );
 
   if ( is_set( "dumpesop" ) )
   {

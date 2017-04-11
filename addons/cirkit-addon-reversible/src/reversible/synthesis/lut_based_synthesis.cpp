@@ -422,8 +422,8 @@ private:
   const gia_graph& _gia;
 
 protected:
-  const properties::ptr& settings;
-  const properties::ptr& statistics;
+  properties::ptr settings;
+  properties::ptr statistics;
 };
 
 class exorcism_lut_partial_synthesizer : public lut_partial_synthesizer
@@ -456,7 +456,7 @@ public:
     {
       esop = [this, &esop, &lut]() {
         increment_timer t( exorcism_runtime );
-        const auto em_settings = make_settings_from( std::make_pair( "progress", progress ) );
+        const auto em_settings = make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "script", settings->get<exorcism_script>( "script" ) ) );
         return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
       }();
     }
@@ -645,7 +645,7 @@ public:
           {
             esop = [this, &esop, &lut]() {
               increment_timer t( exorcism_runtime );
-              const auto em_settings = make_settings_from( std::make_pair( "progress", progress ) );
+              const auto em_settings = make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "script", settings->get<exorcism_script>( "script" ) ) );
               return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
             }();
           }
