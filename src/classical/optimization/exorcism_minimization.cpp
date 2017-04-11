@@ -118,7 +118,24 @@ private:
   unsigned _literal_count = 0u;
 };
 
-void reduce_cover( bool progress )
+exorcism_script script_from_string( const std::string& s )
+{
+  if ( s == "def" )
+  {
+    return exorcism_script::def;
+  }
+  else if ( s == "def_wo4" )
+  {
+    return exorcism_script::def_wo4;
+  }
+  else
+  {
+    std::cout << "[e] unknown exorcism script" << std::endl;
+    assert( false );
+  }
+}
+
+void reduce_cover_script_def( bool progress )
 {
   int gain_total{};
   int iter_wo_improv = 0;
@@ -202,6 +219,102 @@ void reduce_cover( bool progress )
 
     gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
     gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+  }
+}
+
+void reduce_cover_script_def_wo4( bool progress )
+{
+  int gain_total{};
+  int iter_wo_improv = 0;
+
+  unsigned iteration = 0;
+  double runtime = 0.0;
+
+  progress_line p( "[i] exorcism   iter = %3d   i/o = %2d/%2d   cubes = %6d/%6d   total = %6.2f", progress );
+
+  do
+  {
+    increment_timer t( &runtime );
+    p( ++iteration, abc::g_CoverInfo.nVarsIn, abc::g_CoverInfo.nVarsOut, abc::g_CoverInfo.nCubesInUse, abc::g_CoverInfo.nCubesBefore, runtime );
+
+    gain_total = 0;
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    if ( iter_wo_improv > (int)(abc::g_CoverInfo.Quality>0) )
+    {
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+      gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink3( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+      gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink3( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+      gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+    }
+
+    if ( gain_total )
+    {
+      iter_wo_improv = 0;
+    }
+    else
+    {
+      ++iter_wo_improv;
+    }
+  } while ( iter_wo_improv < abc::g_CoverInfo.Quality + 1 );
+
+  abc::s_fDecreaseLiterals = 1;
+  for ( auto z = 0; z < 1; z++ )
+  {
+    gain_total  = 0;
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+  }
+}
+
+void reduce_cover( bool progress, exorcism_script script )
+{
+  switch ( script )
+  {
+  case exorcism_script::def:
+    reduce_cover_script_def( progress );
+    break;
+  case exorcism_script::def_wo4:
+    reduce_cover_script_def_wo4( progress );
+    break;
   }
 }
 
@@ -396,6 +509,7 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
   /* settings */
   const auto quality      = get( settings, "quality",      2u );
   const auto cubes_max    = get( settings, "cubes_max",    1000000u );
+  const auto script       = get( settings, "script",       exorcism_script::def );
   const auto progress     = get( settings, "progress",     false );
   const auto verbose      = get( settings, "verbose",      false );
   const auto very_verbose = get( settings, "very_verbose", false );
@@ -443,7 +557,7 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
   abc::AddCubesToStartingCover( esop.get() );
   {
     properties_timer t( statistics, "exorcism_opt_time" );
-    reduce_cover( progress );
+    reduce_cover( progress, script );
   }
 
   /* extract cover */

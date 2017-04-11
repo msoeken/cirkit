@@ -83,6 +83,19 @@ void exorcism_minimization_blif( const std::string& filename,
                                  const properties::ptr& settings = properties::ptr(),
                                  const properties::ptr& statistics = properties::ptr() );
 
+/******************************************************************************
+ * New exorcism optimization                                                  *
+ ******************************************************************************/
+
+enum class exorcism_script
+{
+  def,
+  def_wo4
+};
+
+exorcism_script script_from_string( const std::string& s );
+
+
 gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs,
                                            const properties::ptr& settings = properties::ptr(),
                                            const properties::ptr& statistics = properties::ptr() );
