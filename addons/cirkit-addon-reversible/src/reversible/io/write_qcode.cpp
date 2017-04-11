@@ -59,6 +59,25 @@ void write_qcode( const circuit& circ, std::ostream& os )
 {
   os << "qubits " << circ.lines() << std::endl << std::endl;
 
+  /* explicit constant initialization */
+  bool explinit = false;
+  for ( auto i = 0u; i < circ.lines(); ++i )
+  {
+    if ( circ.constants()[i] )
+    {
+      os << "prepz q" << i << std::endl;
+      if ( *( circ.constants()[i] ) )
+      {
+        os << "x q" << i << std::endl;
+      }
+      explinit = true;
+    }
+  }
+  if ( explinit )
+  {
+    os << std::endl;
+  }
+
   for ( const auto& g : circ )
   {
     if ( is_toffoli( g ) )
@@ -78,7 +97,7 @@ void write_qcode( const circuit& circ, std::ostream& os )
           }
           else
           {
-            os << boost::format( "cnot q%d q%d" ) % c.line() % target << std::endl;
+            os << boost::format( "cnot q%d, q%d" ) % c.line() % target << std::endl;
           }
         } break;
       case 2u:
@@ -91,7 +110,7 @@ void write_qcode( const circuit& circ, std::ostream& os )
           }
           else
           {
-            os << boost::format( "toffoli q%d q%d q%d" ) % c1.line() % c2.line() % target << std::endl;
+            os << boost::format( "toffoli q%d, q%d, q%d" ) % c1.line() % c2.line() % target << std::endl;
           }
         } break;
       default:
@@ -107,7 +126,7 @@ void write_qcode( const circuit& circ, std::ostream& os )
       }
       else
       {
-        os << boost::format( "swap q%d q%d" ) % g.targets()[0u] % g.targets()[1u] << std::endl;
+        os << boost::format( "swap q%d, q%d" ) % g.targets()[0u] % g.targets()[1u] << std::endl;
       }
     }
     else if ( is_pauli( g ) )
