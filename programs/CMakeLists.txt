@@ -67,8 +67,7 @@ target_include_directories( cirkit PUBLIC ${CMAKE_BINARY_DIR}/programs )
 
 # Python API
 find_package( PythonLibs 3 )
-if( PYTHONLIBS_FOUND )
-  message( "Build Python API" )
+if( PYTHONLIBS_FOUND AND cirkit_ENABLE_PYTHON_API )
   add_library( cirkit_python SHARED core/cirkit_python.cpp )
   set_target_properties( cirkit_python PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED YES )
   set_target_properties( cirkit_python PROPERTIES PREFIX "" )

@@ -42,8 +42,7 @@ endif()
 
 # Python API
 find_package( PythonLibs 3 )
-if( PYTHONLIBS_FOUND )
-  message( "Build RevKit Python API" )
+if( PYTHONLIBS_FOUND AND cirkit_ENABLE_PYTHON_API )
   add_library( revkit_python SHARED reversible/revkit_python.cpp )
   set_target_properties( revkit_python PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED YES )
   set_target_properties( revkit_python PROPERTIES PREFIX "" )

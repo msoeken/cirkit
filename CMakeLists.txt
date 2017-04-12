@@ -49,6 +49,7 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs )
 # Options
 option(cirkit_ENABLE_PROGRAMS "build programs" on)
 option(cirkit_BUILD_SHARED "build shared libraries" on)
+option(cirkit_ENABLE_PYTHON_API "build Python APIs (experimental)" off)
 set(cirkit_PACKAGES "" CACHE STRING "if non-empty, then only the packages in the semicolon-separated lists are build")
 set(cirkit_addon_command_libraries "" CACHE INTERNAL "" FORCE )
 set(cirkit_addon_command_includes "" CACHE INTERNAL "" FORCE )
