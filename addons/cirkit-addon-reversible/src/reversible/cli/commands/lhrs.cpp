@@ -51,14 +51,27 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   opts.add_options()
     ( "cut_size,k",   value_with_default( &cut_size ),   "cut size" )
     ( "lutdecomp,l",                                     "apply LUT decomposition technique where possible" )
-    ( "satlut,s",                                        "optimize mapping with SAT where possible" )
     ( "noesopopt",                                       "do not optimize ESOP cover" )
     ( "esopscript",   value_with_default( &esopscript ), "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4" )
     ( "progress,p",                                      "show progress" )
+    ;
+
+  boost::program_options::options_description lutdecomp_options( "LUT decomposition options" );
+  lutdecomp_options.add_options()
+    ( "satlut,s",                                        "optimize mapping with SAT where possible" )
+    ( "area_iters", value_with_default( &area_iters ),   "number of exact area recovery iterations" )
+    ( "flow_iters", value_with_default( &flow_iters ),   "number of area flow recovery iterations" )
+    ;
+  opts.add( lutdecomp_options );
+
+  boost::program_options::options_description debug_options( "Debug options" );
+  debug_options.add_options()
     ( "dry",                                             "dry run (do not create gates)" )
     ( "legacy",                                          "run the old version" )
     ( "dumpesop",     value( &dumpesop ),                "name of existing directory to dump ESOP files after exorcism minimization" )
     ;
+  opts.add( debug_options );
+
   be_verbose();
   add_new_option();
 }
@@ -70,11 +83,14 @@ bool lhrs_command::execute()
 
   const auto settings = make_settings();
   settings->set( "lutdecomp", is_set( "lutdecomp" ) );
-  settings->set( "satlut", is_set( "satlut" ) );
   settings->set( "progress", is_set( "progress" ) );
   settings->set( "dry", is_set( "dry" ) );
   settings->set( "optimize_esop", !is_set( "noesopopt" ) );
+  settings->set( "optimize_postesop", false );
   settings->set( "script", script_from_string( esopscript ) );
+  settings->set( "satlut", is_set( "satlut" ) );
+  settings->set( "area_iters", area_iters );
+  settings->set( "flow_iters", flow_iters );
 
   if ( is_set( "dumpesop" ) )
   {
@@ -127,6 +143,11 @@ command::log_opt_t lhrs_command::log() const
     map["class_counter"] = statistics->get<std::vector<std::vector<unsigned>>>( "class_counter" );
     map["class_runtime"] = statistics->get<double>( "class_runtime" );
     map["mapping_runtime"] = statistics->get<double>( "mapping_runtime" );
+  }
+  else
+  {
+    map["class_runtime"] = 0.0;
+    map["mapping_runtime"] = 0.0;
   }
 
   return map;

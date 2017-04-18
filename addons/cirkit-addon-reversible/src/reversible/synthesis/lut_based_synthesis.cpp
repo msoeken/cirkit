@@ -53,6 +53,7 @@
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/clear_circuit.hpp>
 #include <reversible/io/print_circuit.hpp>
+#include <reversible/optimization/pair_combination.hpp>
 #include <reversible/synthesis/esop_synthesis.hpp>
 #include <reversible/synthesis/optimal_quantum_circuits.hpp>
 
@@ -393,6 +394,46 @@ private:
  * Partial synthesizers                                                       *
  ******************************************************************************/
 
+void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vector<unsigned>& line_map,
+                             bool progress, bool optimize_esop, bool optimize_postesop, exorcism_script script, const std::string& dumpesop, bool dry,
+                             double *cover_runtime, double *exorcism_runtime, unsigned *esopfile_counter )
+{
+  auto esop = [&lut, cover_runtime]() {
+    increment_timer t( cover_runtime );
+    return lut.compute_esop_cover();
+  }();
+
+  if ( optimize_esop )
+  {
+    esop = [&esop, &lut, exorcism_runtime, progress, script]() {
+      increment_timer t( exorcism_runtime );
+      const auto em_settings = make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "script", script ) );
+      return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
+    }();
+  }
+
+  if ( !dumpesop.empty() )
+  {
+    write_esop( esop, lut.num_inputs(), lut.num_outputs(),
+                boost::str( boost::format( "%s/esop-%d.esop" ) % dumpesop % ( *esopfile_counter )++ ) );
+  }
+
+  if ( dry ) return;
+
+  if ( optimize_postesop )
+  {
+    circuit circ_local;
+    esop_synthesis( circ_local, esop, lut.num_inputs(), lut.num_outputs() );
+    auto circ_opt = pair_combination( circ_local );
+    append_circuit( circ, circ_opt, gate::control_container(), line_map );
+  }
+  else
+  {
+    const auto es_settings = make_settings_from( std::make_pair( "line_map", line_map ) );
+    esop_synthesis( circ, esop, lut.num_inputs(), lut.num_outputs(), es_settings );
+  }
+}
+
 class lut_partial_synthesizer
 {
 public:
@@ -433,6 +474,7 @@ public:
     : lut_partial_synthesizer( circ, gia, settings, statistics ),
       dry( get( settings, "dry", false ) ),
       optimize_esop( get( settings, "optimize_esop", true ) ),
+      optimize_postesop( get( settings, "optimize_postesop", false ) ),
       progress( get( settings, "progress", false ) ),
       verbose( get( settings, "verbose", false ) ),
       dumpesop( get( settings, "dumpesop", std::string() ) ),
@@ -447,39 +489,20 @@ public:
   {
     const auto lut = gia().extract_lut( index );
 
-    auto esop = [this, &lut]() {
-      increment_timer t( cover_runtime );
-      return lut.compute_esop_cover();
-    }();
-
-    if ( optimize_esop )
-    {
-      esop = [this, &esop, &lut]() {
-        increment_timer t( exorcism_runtime );
-        const auto em_settings = make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "script", settings->get<exorcism_script>( "script" ) ) );
-        return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
-      }();
-    }
-
-    if ( !dumpesop.empty() )
-    {
-      write_esop( esop, lut.num_inputs(), lut.num_outputs(),
-                  boost::str( boost::format( "%s/esop-%d.esop" ) % dumpesop % ( *esopfile_counter )++ ) );
-    }
-
-    if ( dry ) return true;
-    const auto es_settings = make_settings_from( std::make_pair( "line_map", line_map ) );
-    esop_synthesis( circ(), esop, lut.num_inputs(), lut.num_outputs(), es_settings );
+    esop_synthesis_wrapper( lut, circ(), line_map,
+                            progress, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop, dry,
+                            cover_runtime, exorcism_runtime, esopfile_counter );
 
     return true;
   }
 
 private:
   /* settings */
-  bool dry           = false; /* dry run, do everything but do not add gates */
-  bool optimize_esop = true;  /* optimize ESOP cover */
-  bool progress      = false; /* show progress line */
-  bool verbose       = false; /* be verbose */
+  bool dry               = false; /* dry run, do everything but do not add gates */
+  bool optimize_esop     = true;  /* optimize ESOP cover */
+  bool optimize_postesop = false; /* optimize ESOP synthesized circuit */
+  bool progress          = false; /* show progress line */
+  bool verbose           = false; /* be verbose */
   std::string dumpesop;  /* dump ESOP file for each ESP cover */
 
   double*   cover_runtime;
@@ -496,7 +519,10 @@ public:
       class_hash( 3u ),
       lut_size_max( gia.max_lut_size() ),
       satlut( get( settings, "satlut", false ) ),
+      area_iters( get( settings, "area_iters", 2u ) ),
+      flow_iters( get( settings, "flow_iters", 1u ) ),
       optimize_esop( get( settings, "optimize_esop", true ) ),
+      optimize_postesop( get( settings, "optimize_postesop", false ) ),
       dry( get( settings, "dry", false ) ),
       progress( get( settings, "progress", false ) ),
       dumpesop( get( settings, "dumpesop", std::string() ) ),
@@ -536,7 +562,10 @@ public:
       const auto sub_lut = [this, index]() {
         increment_timer t( mapping_runtime );
         const auto lut = gia().extract_lut( index );
-        const auto sub_lut = lut.if_mapping( make_settings_from( std::make_pair( "lut_size", 4u ), "area_mapping" ) );
+        const auto sub_lut = lut.if_mapping( make_settings_from( std::make_pair( "lut_size", 4u ),
+                                                                 "area_mapping",
+                                                                 std::make_pair( "area_iters", area_iters ),
+                                                                 std::make_pair( "flow_iters", flow_iters ) ) );
         if ( satlut )
         {
           sub_lut.satlut_mapping();
@@ -636,29 +665,10 @@ public:
           }
           const auto lut = sub_lut.extract_lut( index );
 
-          auto esop = [this, &lut]() {
-            increment_timer t( cover_runtime );
-            return lut.compute_esop_cover();
-          }();
+          esop_synthesis_wrapper( lut, circ(), local_line_map,
+                                  progress, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop, dry,
+                                  cover_runtime, exorcism_runtime, esopfile_counter );
 
-          if ( optimize_esop )
-          {
-            esop = [this, &esop, &lut]() {
-              increment_timer t( exorcism_runtime );
-              const auto em_settings = make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "script", settings->get<exorcism_script>( "script" ) ) );
-              return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
-            }();
-          }
-
-          if ( !dumpesop.empty() )
-          {
-            write_esop( esop, lut.num_inputs(), lut.num_outputs(),
-                        boost::str( boost::format( "%s/esop-%d.esop" ) % dumpesop % ( *esopfile_counter )++ ) );
-          }
-
-          if ( dry ) continue;
-          const auto es_settings = make_settings_from( std::make_pair( "line_map", local_line_map ) );
-          esop_synthesis( circ(), esop, lut.num_inputs(), lut.num_outputs(), es_settings );
           if ( progress )
           {
             std::cout << "\e[A";
@@ -698,10 +708,13 @@ private: /* statistics */
 
   int lut_size_max = 0;
 
-  bool satlut        = false; /* perform SAT-based LUT mapping as post-processing step to decrease mapping size */
-  bool optimize_esop = true;  /* optimize ESOP cover */
-  bool dry           = false; /* dry run, do everything but do not add gates */
-  bool progress      = false; /* show progress line */
+  bool satlut            = false; /* perform SAT-based LUT mapping as post-processing step to decrease mapping size */
+  unsigned area_iters    = 2u;    /* number of exact area recovery iterations */
+  unsigned flow_iters    = 1u;    /* number of area flow recovery iterations */
+  bool optimize_esop     = true;  /* optimize ESOP cover */
+  bool optimize_postesop = false; /* optimize ESOP synthesized circuit */
+  bool dry               = false; /* dry run, do everything but do not add gates */
+  bool progress          = false; /* show progress line */
   std::string dumpesop;  /* dump ESOP file for each ESP cover */
 
   double*   mapping_runtime;

@@ -56,6 +56,8 @@ private:
   unsigned cut_size = 16u;
   unsigned lut_count = 0u;
   std::string esopscript = "def";
+  unsigned area_iters = 2u;
+  unsigned flow_iters = 1u;
   std::string dumpesop;
 };
 
