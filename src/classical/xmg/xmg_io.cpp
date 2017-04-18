@@ -432,7 +432,7 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
         }},
       {std::regex( "output (.*);" ), [&output_names]( const std::smatch& m ) {
           split_string( output_names, m[1], ", " );
-        }}}, true );
+        }}}, false );
 
   for ( const auto v : boost::make_iterator_range( vertices( instructions ) ) )
   {
