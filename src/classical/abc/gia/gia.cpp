@@ -189,6 +189,9 @@ gia_graph gia_graph::if_mapping( const properties::ptr& settings, const properti
   /* settings */
   const auto lut_size     = get( settings, "lut_size",     6u );
   const auto area_mapping = get( settings, "area_mapping", false );
+  const auto expred_cuts  = get( settings, "expred_cuts",  true );
+  const auto flow_iters   = get( settings, "flow_iters",   1u );
+  const auto area_iters   = get( settings, "area_iters",   2u );
 
   abc::If_Par_t params;
 
@@ -196,6 +199,9 @@ gia_graph gia_graph::if_mapping( const properties::ptr& settings, const properti
   params.nLutSize = lut_size;
   params.pLutLib  = nullptr;
   params.fArea    = area_mapping ? 1 : 0;
+  params.fExpRed  = expred_cuts ? 1 : 0;
+  params.nFlowIters = flow_iters;
+  params.nAreaIters = area_iters;
 
   auto mapped_gia = abc::Gia_ManPerformMapping( p_gia, &params );
 
