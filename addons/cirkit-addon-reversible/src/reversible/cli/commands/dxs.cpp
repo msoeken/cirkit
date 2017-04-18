@@ -26,6 +26,7 @@
 
 #include "dxs.hpp"
 
+#include <core/utils/program_options.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/synthesis/direct_xmg_synthesis.hpp>
 
@@ -48,7 +49,8 @@ dxs_command::dxs_command( const environment::ptr& env )
   : xmg_base_command( env, "Direct XMG synthesis" )
 {
   opts.add_options()
-    ( "bennett,b", "use Bennett trick and inplace synthesis" )
+    ( "bennett,b",                                     "use Bennett trick and inplace synthesis" )
+    ( "threshold,t", value_with_default( &threshold ), "synthesize MFFCs with this number of PIs using TBS" )
     ;
   add_new_option();
   be_verbose();
@@ -61,6 +63,7 @@ bool dxs_command::execute()
 
   auto settings = make_settings();
   settings->set( "bennett", is_set( "bennett" ) );
+  settings->set( "var_threshold", threshold );
   direct_xmg_synthesis( circuits.current(), xmg(), settings, statistics );
 
   print_runtime();

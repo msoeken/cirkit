@@ -69,9 +69,10 @@ namespace cirkit
 class dxs_exact_manager
 {
 public:
-  dxs_exact_manager( xmg_graph& xmg, bool verbose )
+  dxs_exact_manager( xmg_graph& xmg, bool verbose, unsigned var_threshold )
     : xmg( xmg ),
       verbose( verbose ),
+      var_threshold( var_threshold ),
       skip_list( xmg.size() )
   {
     xmg.compute_parents();
@@ -289,10 +290,11 @@ public:
       is_garbage( xmg.inputs().size() ),
 
       inplace( get( settings, "inplace", inplace ) ),
+      var_threshold( get( settings, "var_threshold", 0u ) ),
       garbage_name( get( settings, "garbage_name", garbage_name ) ),
       verbose( get( settings, "verbose", verbose ) ),
 
-      esmgr( xmg, verbose )
+      esmgr( xmg, verbose, var_threshold )
   {
     clear_circuit( circ );
 
@@ -300,7 +302,10 @@ public:
     xmg.init_refs();
     xmg.inc_output_refs();
 
-    esmgr.run();
+    if ( var_threshold )
+    {
+      esmgr.run();
+    }
 
     /* initialize reference counting for uncomputing */
     if ( !inplace )
@@ -925,9 +930,10 @@ private:
   std::stack<unsigned>    constants;
 
   /* settings */
-  bool        inplace      = false;
-  std::string garbage_name = "--";
-  bool        verbose      = false;
+  bool        inplace       = false;
+  unsigned    var_threshold = 0u;
+  std::string garbage_name  = "--";
+  bool        verbose       = false;
 
   /* helper managers */
   dxs_exact_manager       esmgr;
