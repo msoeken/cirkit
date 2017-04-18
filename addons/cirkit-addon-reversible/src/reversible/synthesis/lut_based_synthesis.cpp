@@ -53,7 +53,6 @@
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/clear_circuit.hpp>
 #include <reversible/io/print_circuit.hpp>
-#include <reversible/optimization/pair_combination.hpp>
 #include <reversible/synthesis/esop_synthesis.hpp>
 #include <reversible/synthesis/optimal_quantum_circuits.hpp>
 
@@ -420,18 +419,18 @@ void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vec
 
   if ( dry ) return;
 
-  if ( optimize_postesop )
-  {
-    circuit circ_local;
-    esop_synthesis( circ_local, esop, lut.num_inputs(), lut.num_outputs() );
-    auto circ_opt = pair_combination( circ_local );
-    append_circuit( circ, circ_opt, gate::control_container(), line_map );
-  }
-  else
-  {
+  // if ( optimize_postesop )
+  // {
+  //   circuit circ_local;
+  //   esop_synthesis( circ_local, esop, lut.num_inputs(), lut.num_outputs() );
+  //   auto circ_opt = pair_combination( circ_local );
+  //   append_circuit( circ, circ_opt, gate::control_container(), line_map );
+  // }
+  // else
+  // {
     const auto es_settings = make_settings_from( std::make_pair( "line_map", line_map ) );
     esop_synthesis( circ, esop, lut.num_inputs(), lut.num_outputs(), es_settings );
-  }
+  // }
 }
 
 class lut_partial_synthesizer
