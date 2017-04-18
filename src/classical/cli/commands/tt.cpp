@@ -29,6 +29,7 @@
 #include <fstream>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/conversion_utils.hpp>
@@ -58,7 +59,7 @@ tt_command::tt_command( const environment::ptr& env )
 {
   add_positional_option( "load" );
   opts.add_options()
-    ( "load,l",   value( &load ),   "load a truth table into the store" )
+    ( "load,l",   value( &load ),   "load a truth table into the store (default is binary format, use 0x prefix for hexadecimal format)" )
     ( "random,r", value( &random ), "create random truth table for number of variables" )
     ( "hwb",      value( &hwb ),    "create hwb function for number of bits" )
     ( "maj",      value( &maj ),    "create maj function for number of odd bits" )
@@ -91,6 +92,19 @@ bool tt_command::execute()
     if ( load.size() >= 2u && load[0] == '0' && load[1] == 'x' )
     {
       load = convert_hex2bin( load.substr( 2u ) );
+    }
+    else if ( load.size() >= 2u && load[0] == '0' && load[1] == 'd' )
+    {
+      const auto col = load.find(':');
+      if ( col == std::string::npos )
+      {
+        return true;
+      }
+
+      const auto num_vars = boost::lexical_cast<unsigned>( load.substr( 2u, col - 2u ) );
+      const auto func     = boost::lexical_cast<unsigned>( load.substr( col + 1 ) );
+
+      load = to_string( boost::dynamic_bitset<>( 1 << num_vars, func ) );
     }
 
     tts.extend();
