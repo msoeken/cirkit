@@ -2,6 +2,7 @@
 
 # CirKit: A circuit toolkit
 # Copyright (C) 2009-2015  University of Bremen
+# Copyright (C) 2015-2017  EPFL
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,6 +45,7 @@
 import glob
 import importlib
 import inspect
+import multiprocessing
 import os
 import shutil
 import sys
@@ -61,7 +63,7 @@ import sys
 # url         - Either a string or a list of where to find the sources
 # fmt         - Describes how the sources are obtained and extracted
 #               hg        : Checkout with mercurial
-#               tar-gz    : Downloads url and uses tar xvfz for unpacking
+#               tar-gz    : Downloads url and uses tar xfz for unpacking
 #               wget-list : url must be a list, all files are downloaded and
 #                           placed into subdir
 # build       - A list of commands that should be executed for building
@@ -76,7 +78,7 @@ class package_abc:
     subdir      = "abc"
     url         = "https://bitbucket.org/alanmi/abc"
     fmt         = "hg"
-    build       = [ "make -j5" ]
+    build       = [ "make -j%d"  % multiprocessing.cpu_count() ]
     install     = [ "cp -v abc %s" ]
 
 class package_minisat:
@@ -148,23 +150,23 @@ class package_cmake:
     subdir      = "cmake-3.0.2"
     url         = "http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz"
     fmt         = "tar-gz"
-    build       = [ "./bootstrap --prefix=../../../ext", "make -j5" ]
+    build       = [ "./bootstrap --prefix=../../../ext", "make -j%d" % multiprocessing.cpu_count() ]
     install     = [ "make install" ]
 
 class package_boost:
     description = "Boost C++ libraries"
-    subdir      = "boost_1_56_0"
-    url         = "http://downloads.sourceforge.net/project/boost/boost/1.56.0/boost_1_56_0.tar.gz"
+    subdir      = "boost_1_63_0"
+    url         = "http://downloads.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz"
     fmt         = "tar-gz"
-    build       = [ "./bootstrap.sh --prefix=../../../ext", "./b2 -j5" ]
-    install     = [ "./b2 install" ]
+    build       = [ "./bootstrap.sh --with-libraries=test,filesystem,graph,program_options,system,timer", "./b2 -j%d" % multiprocessing.cpu_count() ]
+    install     = []
 
 class package_yosys:
     description = "Yosys Open SYnthesis Suite"
     subdir      = "yosys"
     url         = "https://github.com/cliffordwolf/yosys"
     fmt         = "git"
-    build       = [ "make config-clang", "make -j5", "make lib" ]
+    build       = [ "make config-clang", "make -j%d" % multiprocessing.cpu_count(), "make lib" ]
     install     = [ "for i in `find backends frontends kernel libs passes -type f \( -name '*.h' -o -name '*.hh' \) -printf '%h\n' | sort -u`; do mkdir -p ../../../ext/include/yosys/$i; done", "for i in `find backends frontends kernel libs passes -type f \( -name '*.h' -o -name '*.hh' \)`; do cp -v $i ../../../ext/include/yosys/$i; done", "cp -v yosys %s", "cp -v libyosys.so ../../../ext/lib" ]
 
 class package_yices:
@@ -172,7 +174,7 @@ class package_yices:
     subdir      = "yices-2.4.1"
     url         = [ "http://yices.csl.sri.com/cgi-bin/yices2-newnewdownload.cgi\?file\=yices-2.4.1-src.tar.gz\&accept\=I+Agree", "yices-2.4.1-src.tar.gz" ]
     fmt         = "tar-gz-mv"
-    build       = [ "./configure --prefix=`pwd`/../../../ext", "make -j8" ]
+    build       = [ "./configure --prefix=`pwd`/../../../ext", "make -j%d" % multiprocessing.cpu_count() ]
     install     = [ "make install" ]
 
 class package_efsmt:
@@ -188,7 +190,7 @@ class package_aiger:
     subdir      = "aiger-1.9.9"
     url         = "http://fmv.jku.at/aiger/aiger-1.9.9.tar.gz"
     fmt         = "tar-gz"
-    build       = [ "./configure.sh", "make -j8" ]
+    build       = [ "./configure.sh", "make -j%d" % multiprocessing.cpu_count() ]
     install     = [ "cp -v aigand aigdd aigflip aigfuzz aiginfo aigjoin aigmiter aigmove aignm aigor aigreset aigsim aigsplit aigstrip aigtoaig aigtoblif aigtocnf aigtodot aigtosmv aigunconstraint aigunroll aigvis andtoaig bliftoaig smvtoaig soltostim wrapstim %s" ]
 
 class package_iimc:
@@ -196,7 +198,7 @@ class package_iimc:
     subdir      = "iimc-2.0"
     url         = "ftp://vlsi.colorado.edu/pub/iimc/iimc-2.0.tar.gz"
     fmt         = "tar-gz"
-    build       = [ "./configure", "make -j4" ]
+    build       = [ "./configure", "make -j%d" % multiprocessing.cpu_count() ]
     install     = [ "cp -v iimc %s" ]
 
 class package_cbmc_i386:
@@ -239,7 +241,7 @@ class package_cryptominisat:
     subdir      = "cryptominisat"
     url         = "https://github.com/msoos/cryptominisat"
     fmt         = "git"
-    build       = [ "mkdir build", "cd build; cmake ..; make -j5 cryptominisat4" ]
+    build       = [ "mkdir build", "cd build; cmake ..; make -j%d cryptominisat4" % multiprocessing.cpu_count() ]
     install     = [ "cp -v build/cryptominisat4 %s" ]
 
 class package_bloqqer:
@@ -344,7 +346,7 @@ def checkout_or_download( package ):
             os.system( "mkdir {1}; mv `basename {0}` {1}".format(package.url,subdir) )
         else:
             subdir = "."
-        os.system( "tar xvfz {1}/`basename {0}` -C {1}".format(package.url,subdir) )
+        os.system( "tar xfz {1}/`basename {0}` -C {1}".format(package.url,subdir) )
         os.system( "rm {1}/`basename {0}`".format(package.url,subdir) )
     elif package.fmt in ["zip"]:
         os.system( "wget %s" % package.url )
@@ -352,7 +354,7 @@ def checkout_or_download( package ):
         os.system( "rm `basename %s`" % package.url )
     elif package.fmt in ["tar-gz-mv"]:
         os.system( "wget %s -O %s" % tuple( package.url ) )
-        os.system( "tar xvfz %s" % package.url[1] )
+        os.system( "tar xfz %s" % package.url[1] )
         os.system( "rm %s" % package.url[1] )
     elif package.fmt == "wget-list":
         os.mkdir( package.subdir )
