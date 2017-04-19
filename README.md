@@ -8,7 +8,7 @@ The following software is required in order to build CirKit
 
 * git
 * cmake (at least version 3.0.0)
-  
+
   *If for some reason only older versions are available on the system, you can install cmake using `utils/tools.py install cmake` directly from CirKit. Afterwards update the `$PATH` variable by typing `export PATH=<path-to-cirkit>/ext/bin:$PATH`.*
 * g++ (at least version 4.9.0) or clang++ (at least version 3.5.0)
 * boost (at least version 1.56.0)
@@ -22,7 +22,7 @@ In *Ubuntu* the packages can be installed with
 In *arch* the packages can be installed with
 
     sudo pacman -S base-devel git g++ cmake boost boost-libs gmp libxml2
-    
+
 In *Mac* it's recommended to use [Homebrew](http://brew.sh/) to install the required packages:
 
     brew install boost cmake gmp readline git
@@ -56,10 +56,12 @@ After extracting or cloning CirKit perform the following steps
 RevKit can be executed with
 
     build/programs/revkit
-    
+
 Check the [documentation](http://msoeken.github.io/cirkit_doc.html) for more details.
 
 ## Troubleshooting
+
+### Libraries not found
 
 It's best to set the environment variable `CIRKIT_HOME` to the
 directory of CirKit using
@@ -76,6 +78,21 @@ on Linux or
     export DYLD_LIBRARY_PATH=$CIRKIT_HOME/ext/lib:$DYLD_LIBRARY_PATH
 
 on Mac OS.
+
+### No recent Boost version
+
+There is a manual way to install Boost and CirKit's package manager
+can help.  Before installing CirKit run:
+
+    mkdir build
+    ./utils/tools.py install boost
+    cd build
+    cmake -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT:PATHNAME=`pwd`/tools/boost_1_63_0/ ..
+    make external
+    make cirkit
+
+Of course, one can add further options to the `cmake` command in the
+fourth line, e.g., to build RevKit.
 
 ## Build CirKit Addons
 
