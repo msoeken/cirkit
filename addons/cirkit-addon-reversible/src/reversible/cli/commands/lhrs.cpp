@@ -49,31 +49,45 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   : aig_base_command( env, "LUT-based hierarchical reversible synthesis" )
 {
   opts.add_options()
-    ( "cut_size,k",   value_with_default( &cut_size ),   "cut size" )
-    ( "lutdecomp,l",                                     "apply LUT decomposition technique where possible" )
-    ( "noesopopt",                                       "do not optimize ESOP cover" )
-    ( "esopscript",   value_with_default( &esopscript ), "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4" )
-    ( "progress,p",                                      "show progress" )
+    ( "cut_size,k",      value_with_default( &cut_size ),        "cut size" )
+    ( "lutdecomp,l",                                             "apply LUT decomposition technique where possible" )
+    ( "progress,p",                                              "show progress" )
+    ( "onlylines",                                               "do not create gates (useful for qubit estimation)" )
+    ( "area_iters_init", value_with_default( &area_iters_init ), "number of exact area recovery iterations (in initial mapping)" )
+    ( "flow_iters_init", value_with_default( &flow_iters_init ), "number of area flow recovery iterations (in initial mapping)" )
     ;
+
+  boost::program_options::options_description esopdecomp_options( "ESOP decomposition options" );
+  esopdecomp_options.add_options()
+    ( "esopscript", value_with_default( &esopscript ), "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nnone: do not optimize ESOP cover" )
+    ( "esoppostopt",                                   "Post-optimize network derived from ESOP synthesis" )
+    ;
+  opts.add( esopdecomp_options );
 
   boost::program_options::options_description lutdecomp_options( "LUT decomposition options" );
   lutdecomp_options.add_options()
-    ( "satlut,s",                                        "optimize mapping with SAT where possible" )
-    ( "area_iters", value_with_default( &area_iters ),   "number of exact area recovery iterations" )
-    ( "flow_iters", value_with_default( &flow_iters ),   "number of area flow recovery iterations" )
+    ( "satlut,s",                                      "optimize mapping with SAT where possible" )
+    ( "area_iters", value_with_default( &area_iters ), "number of exact area recovery iterations" )
+    ( "flow_iters", value_with_default( &flow_iters ), "number of area flow recovery iterations" )
     ;
   opts.add( lutdecomp_options );
 
   boost::program_options::options_description debug_options( "Debug options" );
   debug_options.add_options()
-    ( "dry",                                             "dry run (do not create gates)" )
-    ( "legacy",                                          "run the old version" )
-    ( "dumpesop",     value( &dumpesop ),                "name of existing directory to dump ESOP files after exorcism minimization" )
+    ( "legacy",                       "run the old version" )
+    ( "dumpesop", value( &dumpesop ), "name of existing directory to dump ESOP files after exorcism minimization" )
     ;
   opts.add( debug_options );
 
   be_verbose();
   add_new_option();
+}
+
+command::rules_t lhrs_command::validity_rules() const
+{
+  return {
+    {[this]() { return esopscript == "def" || esopscript == "def_wo4" || esopscript == "none"; }, "unknown exorcism script"}
+  };
 }
 
 bool lhrs_command::execute()
@@ -84,9 +98,9 @@ bool lhrs_command::execute()
   const auto settings = make_settings();
   settings->set( "lutdecomp", is_set( "lutdecomp" ) );
   settings->set( "progress", is_set( "progress" ) );
-  settings->set( "dry", is_set( "dry" ) );
-  settings->set( "optimize_esop", !is_set( "noesopopt" ) );
-  settings->set( "optimize_postesop", false );
+  settings->set( "onlylines", is_set( "onlylines" ) );
+  settings->set( "optimize_esop", esopscript != "none" );
+  settings->set( "optimize_postesop", is_set( "esoppostopt" ) );
   settings->set( "script", script_from_string( esopscript ) );
   settings->set( "satlut", is_set( "satlut" ) );
   settings->set( "area_iters", area_iters );
@@ -116,7 +130,7 @@ bool lhrs_command::execute()
   else
   {
     const auto gia = gia_graph( aig() );
-    const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping" ) );
+    const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ) ) );
     lut_based_synthesis( circuits.current(), lut, settings, statistics );
     lut_count = lut.lut_count();
   }
@@ -132,6 +146,14 @@ command::log_opt_t lhrs_command::log() const
       {"runtime", statistics->get<double>( "runtime" )},
       {"cut_size", cut_size},
       {"lut_count", lut_count},
+      {"onlylines", is_set( "onlylines" )},
+      {"area_iters_init", area_iters_init},
+      {"flow_iters_init", flow_iters_init},
+      {"esopscript", esopscript},
+      {"esoppostopt", is_set( "esoppostopt" )},
+      {"satlut", is_set( "satlut" )},
+      {"area_iters", area_iters},
+      {"flow_iters", flow_iters},
       {"num_decomp_default", statistics->get<unsigned>( "num_decomp_default" )},
       {"num_decomp_lut", statistics->get<unsigned>( "num_decomp_lut" )},
       {"exorcism_runtime", statistics->get<double>( "exorcism_runtime" )},

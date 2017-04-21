@@ -47,6 +47,7 @@ public:
   lhrs_command( const environment::ptr& env );
 
 protected:
+  rules_t validity_rules() const;
   bool execute();
 
 public:
@@ -56,6 +57,8 @@ private:
   unsigned cut_size = 16u;
   unsigned lut_count = 0u;
   std::string esopscript = "def";
+  unsigned area_iters_init = 2u;
+  unsigned flow_iters_init = 1u;
   unsigned area_iters = 2u;
   unsigned flow_iters = 1u;
   std::string dumpesop;

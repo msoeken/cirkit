@@ -394,7 +394,7 @@ private:
  ******************************************************************************/
 
 void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vector<unsigned>& line_map,
-                             bool progress, bool optimize_esop, bool optimize_postesop, exorcism_script script, const std::string& dumpesop, bool dry,
+                             bool progress, bool optimize_esop, bool optimize_postesop, exorcism_script script, const std::string& dumpesop,
                              double *cover_runtime, double *exorcism_runtime, unsigned *esopfile_counter )
 {
   auto esop = [&lut, cover_runtime]() {
@@ -416,8 +416,6 @@ void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vec
     write_esop( esop, lut.num_inputs(), lut.num_outputs(),
                 boost::str( boost::format( "%s/esop-%d.esop" ) % dumpesop % ( *esopfile_counter )++ ) );
   }
-
-  if ( dry ) return;
 
   // if ( optimize_postesop )
   // {
@@ -471,7 +469,6 @@ class exorcism_lut_partial_synthesizer : public lut_partial_synthesizer
 public:
   explicit exorcism_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
     : lut_partial_synthesizer( circ, gia, settings, statistics ),
-      dry( get( settings, "dry", false ) ),
       optimize_esop( get( settings, "optimize_esop", true ) ),
       optimize_postesop( get( settings, "optimize_postesop", false ) ),
       progress( get( settings, "progress", false ) ),
@@ -489,7 +486,7 @@ public:
     const auto lut = gia().extract_lut( index );
 
     esop_synthesis_wrapper( lut, circ(), line_map,
-                            progress, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop, dry,
+                            progress, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop,
                             cover_runtime, exorcism_runtime, esopfile_counter );
 
     return true;
@@ -497,7 +494,6 @@ public:
 
 private:
   /* settings */
-  bool dry               = false; /* dry run, do everything but do not add gates */
   bool optimize_esop     = true;  /* optimize ESOP cover */
   bool optimize_postesop = false; /* optimize ESOP synthesized circuit */
   bool progress          = false; /* show progress line */
@@ -522,7 +518,6 @@ public:
       flow_iters( get( settings, "flow_iters", 1u ) ),
       optimize_esop( get( settings, "optimize_esop", true ) ),
       optimize_postesop( get( settings, "optimize_postesop", false ) ),
-      dry( get( settings, "dry", false ) ),
       progress( get( settings, "progress", false ) ),
       dumpesop( get( settings, "dumpesop", std::string() ) ),
       mapping_runtime( settings->get<double*>( "mapping_runtime" ) ),
@@ -551,8 +546,6 @@ public:
     {
       const auto tt_spec = gia().lut_truth_table( index );
       const auto affine_class = classify( tt_spec, num_inputs );
-
-      if ( dry ) return true;
 
       append_stg_from_line_map( circ(), affine_class, line_map );
     }
@@ -648,12 +641,10 @@ public:
         else if ( num_inputs == 1 )
         {
           assert( sub_lut.lut_truth_table( index ) == 1 );
-          if ( dry ) continue;
           append_cnot( circ(), make_var( local_line_map[0], false ), local_line_map[1] );
         }
         else if ( num_inputs < 5 )
         {
-          if ( dry ) continue;
           auto& g = append_stg_from_line_map( circ(), aff_class[index], local_line_map );
         }
         else
@@ -665,7 +656,7 @@ public:
           const auto lut = sub_lut.extract_lut( index );
 
           esop_synthesis_wrapper( lut, circ(), local_line_map,
-                                  progress, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop, dry,
+                                  progress, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop,
                                   cover_runtime, exorcism_runtime, esopfile_counter );
 
           if ( progress )
@@ -712,7 +703,6 @@ private: /* statistics */
   unsigned flow_iters    = 1u;    /* number of area flow recovery iterations */
   bool optimize_esop     = true;  /* optimize ESOP cover */
   bool optimize_postesop = false; /* optimize ESOP synthesized circuit */
-  bool dry               = false; /* dry run, do everything but do not add gates */
   bool progress          = false; /* show progress line */
   std::string dumpesop;  /* dump ESOP file for each ESP cover */
 
@@ -752,6 +742,7 @@ public:
                                                        std::make_pair( "cover_runtime", &cover_runtime ),
                                                        std::make_pair( "esopfile_counter", &esopfile_counter ) ) ),
                           statistics ),
+      onlylines( get( settings, "onlylines", false ) ),
       verbose( get( settings, "verbose", false ) ),
       progress( get( settings, "progress", false ) ),
       lutdecomp( get( settings, "lutdecomp", false ) ),
@@ -802,14 +793,17 @@ public:
           garbage.push_back( false );
 
           const auto pol = orig_step_type[step.target] == step.type ? true : false;
-          append_cnot( circ, make_var( step.target, pol ), circ.lines() - 1 );
+          if ( !onlylines )
+          {
+            append_cnot( circ, make_var( step.target, pol ), circ.lines() - 1 );
+          }
         }
         else
         {
           outputs[step.target] = gia.output_name( abc::Gia_ManIdToCioId( gia, step.node ) );
           garbage[step.target] = false;
 
-          if ( step.type == lut_order_heuristic::inv_po )
+          if ( step.type == lut_order_heuristic::inv_po && !onlylines )
           {
             append_not( circ, step.target );
           }
@@ -818,11 +812,17 @@ public:
         break;
 
       case lut_order_heuristic::compute:
-        synthesize_node( step.node, false, step.clean_ancilla );
+        if ( !onlylines )
+        {
+          synthesize_node( step.node, false, step.clean_ancilla );
+        }
         break;
 
       case lut_order_heuristic::uncompute:
-        synthesize_node( step.node, true, step.clean_ancilla );
+        if ( !onlylines )
+        {
+          synthesize_node( step.node, true, step.clean_ancilla );
+        }
         break;
       }
     }
@@ -883,6 +883,7 @@ private:
   lutdecomp_lut_partial_synthesizer decomp_synthesizer;
 
   /* settings (other settings are passed to decomposition classes directly and parsed there) */
+  bool onlylines = false;  /* do not compute gates */
   bool verbose = false;    /* be verbose */
   bool progress = false;   /* show progress line */
   bool lutdecomp = false;  /* enable LUT-based decomposition */
