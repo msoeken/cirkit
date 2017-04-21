@@ -303,6 +303,14 @@ class package_skizzo:
     install     = [ "mv sKizzo-v0.12 skizzo", "chmod a+x skizzo", "cp -v skizzo %s" ]
     makedir     = True
 
+class package_gcc:
+    description = "GCC, the GNU Compiler Collection"
+    subdir      = "gcc-6.3.0"
+    url         = "ftp://ftp.gwdg.de/pub/misc/gcc/releases/gcc-6.3.0/gcc-6.3.0.tar.gz"
+    fmt         = "tgz"
+    build       = ["./contrib/download_prerequisites", "mkdir build; cd build; ../configure --enable-languages=c,c++ --disable-multilib --prefix=../../../../ext; make -j%d" % multiprocessing.cpu_count()]
+    install     = ["make install"]
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
