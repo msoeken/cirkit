@@ -30,8 +30,6 @@
 
 #include <core/utils/timer.hpp>
 
-#include <cuddObj.hh>
-
 namespace cirkit
 {
 
@@ -47,10 +45,8 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-bdd_function_t gia_to_bdd( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+bdd_function_t gia_to_bdd( const gia_graph& gia, Cudd& mgr, const properties::ptr& settings, const properties::ptr& statistics )
 {
-  Cudd mgr;
-
   /* timing */
   properties_timer t( statistics );
 

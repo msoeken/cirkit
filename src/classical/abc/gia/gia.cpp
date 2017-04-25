@@ -286,7 +286,12 @@ gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method ) co
     } break;
   case esop_cover_method::bdd:
     {
-      const auto bdd = gia_to_bdd( *this );
+      if ( !p_cudd_mgr )
+      {
+        p_cudd_mgr = std::make_shared<Cudd>();
+      }
+
+      const auto bdd = gia_to_bdd( *this, *p_cudd_mgr );
 
       /* get initial cover using exact PSDKRO optimization */
       exp_cache_t exp_cache;

@@ -40,10 +40,12 @@
 #include <core/utils/bdd_utils.hpp>
 #include <classical/abc/gia/gia.hpp>
 
+#include <cuddObj.hh>
+
 namespace cirkit
 {
 
-bdd_function_t gia_to_bdd( const gia_graph& gia, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+bdd_function_t gia_to_bdd( const gia_graph& gia, Cudd& mgr, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }
 

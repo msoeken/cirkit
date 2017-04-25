@@ -44,6 +44,8 @@
 #include <aig/gia/gia.h>
 #include <misc/vec/vecWec.h>
 
+#include <cuddObj.hh>
+
 namespace cirkit
 {
 
@@ -175,6 +177,7 @@ private:
   abc::Gia_Man_t* p_gia = nullptr;
 
   mutable abc::Vec_Wrd_t* p_truths = nullptr;
+  mutable std::shared_ptr<Cudd> p_cudd_mgr;
 };
 
 }
