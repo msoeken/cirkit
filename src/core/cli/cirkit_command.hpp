@@ -52,6 +52,8 @@ public:
 
   virtual bool run( const std::vector<std::string>& args );
 
+  log_opt_t log() const;
+
 protected:
   /* pre-defined options */
   inline void be_verbose() { opts.add_options()( "verbose,v", "be verbose" ); }

@@ -48,6 +48,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/any.hpp>
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
 #include <boost/program_options.hpp>
@@ -435,6 +436,27 @@ protected:
 
 public:
   virtual log_opt_t log() const { return boost::none; }
+
+protected:
+  template<typename... Args>
+  typename std::enable_if<sizeof...(Args) == 0>::type
+  add_to_log_from_any( log_map_t& map, const std::string& key, const boost::any& val ) const
+  {
+  }
+
+  template<typename T, typename... Args>
+  void add_to_log_from_any( log_map_t& map, const std::string& key, const boost::any& val ) const
+  {
+    try
+    {
+      T v = boost::any_cast<T>( val );
+      map[key] = v;
+    }
+    catch (...)
+    {
+      add_to_log_from_any<std::string, int, unsigned, uint64_t, double, bool, std::vector<std::string>, std::vector<int>, std::vector<unsigned>, std::vector<uint64_t>, std::vector<std::vector<int>>, std::vector<std::vector<unsigned>>>( map, key, val );
+    }
+  }
 
 protected:
   /* positional arguments */

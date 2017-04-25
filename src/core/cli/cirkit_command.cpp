@@ -57,6 +57,18 @@ bool cirkit_command::run( const std::vector<std::string>& args )
   return command::run( args );
 }
 
+command::log_opt_t cirkit_command::log() const
+{
+  log_map_t map;
+
+  for ( const auto& p : *statistics )
+  {
+    add_to_log_from_any<int, unsigned>( map, p.first, p.second );
+  }
+
+  return map;
+}
+
 properties::ptr cirkit_command::make_settings() const
 {
   auto settings = std::make_shared<properties>();
