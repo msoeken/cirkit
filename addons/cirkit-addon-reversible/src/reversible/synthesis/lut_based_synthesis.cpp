@@ -394,12 +394,12 @@ private:
  ******************************************************************************/
 
 void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vector<unsigned>& line_map,
-                             bool progress, bool optimize_esop, bool optimize_postesop, exorcism_script script, const std::string& dumpesop,
+                             bool progress, gia_graph::esop_cover_method cover_method, bool optimize_esop, bool optimize_postesop, exorcism_script script, const std::string& dumpesop,
                              double *cover_runtime, double *exorcism_runtime, unsigned *esopfile_counter )
 {
-  auto esop = [&lut, cover_runtime]() {
+  auto esop = [&lut, cover_runtime, cover_method]() {
     increment_timer t( cover_runtime );
-    return lut.compute_esop_cover();
+    return lut.compute_esop_cover( cover_method );
   }();
 
   if ( optimize_esop )
@@ -469,6 +469,7 @@ class exorcism_lut_partial_synthesizer : public lut_partial_synthesizer
 public:
   explicit exorcism_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
     : lut_partial_synthesizer( circ, gia, settings, statistics ),
+      cover_method( get( settings, "cover_method", gia_graph::esop_cover_method::aig ) ),
       optimize_esop( get( settings, "optimize_esop", true ) ),
       optimize_postesop( get( settings, "optimize_postesop", false ) ),
       progress( get( settings, "progress", false ) ),
@@ -486,7 +487,7 @@ public:
     const auto lut = gia().extract_lut( index );
 
     esop_synthesis_wrapper( lut, circ(), line_map,
-                            progress, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop,
+                            progress, cover_method, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop,
                             cover_runtime, exorcism_runtime, esopfile_counter );
 
     return true;
@@ -494,10 +495,11 @@ public:
 
 private:
   /* settings */
-  bool optimize_esop     = true;  /* optimize ESOP cover */
-  bool optimize_postesop = false; /* optimize ESOP synthesized circuit */
-  bool progress          = false; /* show progress line */
-  bool verbose           = false; /* be verbose */
+  gia_graph::esop_cover_method cover_method = gia_graph::esop_cover_method::aig; /* method to extract initial ESOP cover */
+  bool optimize_esop                        = true;                              /* optimize ESOP cover */
+  bool optimize_postesop                    = false;                             /* optimize ESOP synthesized circuit */
+  bool progress                             = false;                             /* show progress line */
+  bool verbose                              = false;                             /* be verbose */
   std::string dumpesop;  /* dump ESOP file for each ESP cover */
 
   double*   cover_runtime;
@@ -516,6 +518,7 @@ public:
       satlut( get( settings, "satlut", false ) ),
       area_iters( get( settings, "area_iters", 2u ) ),
       flow_iters( get( settings, "flow_iters", 1u ) ),
+      cover_method( get( settings, "cover_method", gia_graph::esop_cover_method::aig ) ),
       optimize_esop( get( settings, "optimize_esop", true ) ),
       optimize_postesop( get( settings, "optimize_postesop", false ) ),
       progress( get( settings, "progress", false ) ),
@@ -656,7 +659,7 @@ public:
           const auto lut = sub_lut.extract_lut( index );
 
           esop_synthesis_wrapper( lut, circ(), local_line_map,
-                                  progress, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop,
+                                  progress, cover_method, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop,
                                   cover_runtime, exorcism_runtime, esopfile_counter );
 
           if ( progress )
@@ -698,12 +701,13 @@ private: /* statistics */
 
   int lut_size_max = 0;
 
-  bool satlut            = false; /* perform SAT-based LUT mapping as post-processing step to decrease mapping size */
-  unsigned area_iters    = 2u;    /* number of exact area recovery iterations */
-  unsigned flow_iters    = 1u;    /* number of area flow recovery iterations */
-  bool optimize_esop     = true;  /* optimize ESOP cover */
-  bool optimize_postesop = false; /* optimize ESOP synthesized circuit */
-  bool progress          = false; /* show progress line */
+  bool satlut                               = false;                             /* perform SAT-based LUT mapping as post-processing step to decrease mapping size */
+  unsigned area_iters                       = 2u;                                /* number of exact area recovery iterations */
+  unsigned flow_iters                       = 1u;                                /* number of area flow recovery iterations */
+  gia_graph::esop_cover_method cover_method = gia_graph::esop_cover_method::aig; /* method to extract initial ESOP cover */
+  bool optimize_esop                        = true;                              /* optimize ESOP cover */
+  bool optimize_postesop                    = false;                             /* optimize ESOP synthesized circuit */
+  bool progress                             = false;                             /* show progress line */
   std::string dumpesop;  /* dump ESOP file for each ESP cover */
 
   double*   mapping_runtime;
