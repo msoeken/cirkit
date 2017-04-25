@@ -33,6 +33,7 @@
 
 #include <core/utils/program_options.hpp>
 #include <core/utils/temporary_filename.hpp>
+#include <classical/abc/gia/gia_utils.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
 #include <classical/io/read_blif.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
@@ -76,6 +77,7 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   debug_options.add_options()
     ( "legacy",                       "run the old version" )
     ( "dumpesop", value( &dumpesop ), "name of existing directory to dump ESOP files after exorcism minimization" )
+    ( "bounds",                       "compute lower and upper bounds for qubits" )
     ;
   opts.add( debug_options );
 
@@ -133,6 +135,15 @@ bool lhrs_command::execute()
     const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ) ) );
     lut_based_synthesis( circuits.current(), lut, settings, statistics );
     lut_count = lut.lut_count();
+
+    debug_lb = 0;
+    if ( is_set( "bounds" ) )
+    {
+      lut.foreach_output( [&lut, this]( int index, int e ) {
+        const auto driver = abc::Gia_ObjFaninId0p( lut, abc::Gia_ManCo( lut, e ) );
+        debug_lb = std::max<unsigned>( debug_lb, abc::Gia_LutTFISize( lut, driver ) );
+      } );
+    }
   }
 
   print_runtime();
@@ -155,10 +166,14 @@ command::log_opt_t lhrs_command::log() const
       {"area_iters", area_iters},
       {"flow_iters", flow_iters},
       {"num_decomp_default", statistics->get<unsigned>( "num_decomp_default" )},
-      {"num_decomp_lut", statistics->get<unsigned>( "num_decomp_lut" )},
-      {"exorcism_runtime", statistics->get<double>( "exorcism_runtime" )},
-      {"cover_runtime", statistics->get<double>( "cover_runtime" )}
+      {"num_decomp_lut", statistics->get<unsigned>( "num_decomp_lut" )}
     });
+
+  if ( !is_set( "legacy" ) )
+  {
+    map["exorcism_runtime"] = statistics->get<double>( "exorcism_runtime" );
+    map["cover_runtime"] = statistics->get<double>( "cover_runtime" );
+  }
 
   if ( is_set( "lutdecomp" ) )
   {
@@ -170,6 +185,12 @@ command::log_opt_t lhrs_command::log() const
   {
     map["class_runtime"] = 0.0;
     map["mapping_runtime"] = 0.0;
+  }
+
+  if ( is_set( "bounds" ) )
+  {
+    map["debug_lb"] = debug_lb;
+    map["debug_ub"] = lut_count;
   }
 
   return map;

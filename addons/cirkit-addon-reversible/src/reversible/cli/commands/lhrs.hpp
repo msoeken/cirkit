@@ -62,6 +62,9 @@ private:
   unsigned area_iters = 2u;
   unsigned flow_iters = 1u;
   std::string dumpesop;
+
+private:
+  unsigned debug_lb = 0;
 };
 
 }
