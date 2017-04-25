@@ -101,6 +101,36 @@ int Gia_ManMergeTopLuts( Gia_Man_t * p )
   return 1;
 }
 
+void Gia_LutTFISize_rec( Gia_Man_t * p, int index, int* ctr )
+{
+  int iFan, k;
+  Gia_Obj_t * obj = Gia_ManObj( p, index );
+
+  /* already visited */
+  if ( obj->fMark0 || obj->fTerm ) return;
+
+  /* increment counter */
+  ( *ctr )++;
+  obj->fMark0 = 1;
+
+  Gia_LutForEachFanin( p, index, iFan, k ) {
+    Gia_LutTFISize_rec( p, iFan, ctr );
+  }
+}
+
+int Gia_LutTFISize( Gia_Man_t * p, int index )
+{
+  int ctr = 0;
+
+  Gia_ManCleanMark0( p );
+
+  Gia_LutTFISize_rec( p, index, &ctr );
+
+  Gia_ManCleanMark0( p );
+
+  return ctr;
+}
+
 }
 
 // Local Variables:

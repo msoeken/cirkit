@@ -43,6 +43,7 @@ namespace abc
 {
 
 int Gia_ManMergeTopLuts( Gia_Man_t * p );
+int Gia_LutTFISize( Gia_Man_t * p, int index );
 
 }
 
