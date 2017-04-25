@@ -53,6 +53,7 @@
 #include <classical/cli/commands/demo.hpp>
 #include <classical/cli/commands/depth.hpp>
 #include <classical/cli/commands/dsop.hpp>
+#include <classical/cli/commands/exorcism.hpp>
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/feather.hpp>
 #include <classical/cli/commands/gen_npn_circuit.hpp>
@@ -145,6 +146,9 @@ int main( int argc, char ** argv )
 
   cli.set_category( "Synthesis" );
   ADD_COMMAND( isop );
+
+  cli.set_category( "Optimization" );
+  ADD_COMMAND( exorcism );
 
   cli.set_category( "Reverse engineering" );
   ADD_COMMAND( contrinv );

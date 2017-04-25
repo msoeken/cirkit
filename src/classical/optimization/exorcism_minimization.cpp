@@ -429,33 +429,6 @@ void exorcism_minimization( const cube_vec_t& cubes,
   }
 }
 
-void exorcism_minimization( const aig_graph& aig, const properties::ptr& settings, const properties::ptr& statistics )
-{
-  const auto verbose      = get( settings, "verbose",      false );
-  const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
-  const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
-  const auto skip_parsing = get( settings, "skip_parsing", false );
-
-  properties_timer t( statistics );
-
-  abc::Vec_Wec_t * esop = nullptr;
-  auto* gia = cirkit_to_gia( aig );
-
-  abc::Eso_ManCompute( gia, verbose, &esop );
-  abc::Abc_ExorcismMain( esop, abc::Gia_ManCiNum( gia ), abc::Gia_ManCoNum( gia ), const_cast<char*>( esopname.c_str() ), 2, verbose, 20000, 0 );
-  abc::Vec_WecFree( esop );
-
-  /* Parse */
-  if ( !skip_parsing )
-  {
-    exorcism_processor p( on_cube );
-    pla_parser( esopname, p );
-
-    set( statistics, "cube_count", p.cube_count() );
-    set( statistics, "literal_count", p.literal_count() );
-  }
-}
-
 void exorcism_minimization_blif( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
 {
   const auto verbose      = get( settings, "verbose",      false );
@@ -604,7 +577,8 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
 
 gia_graph::esop_ptr exorcism_minimization( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
 {
-  const auto& esop = gia.compute_esop_cover();
+  const auto cover_method = get( settings, "cover_method", gia_graph::esop_cover_method::aig );
+  const auto& esop = gia.compute_esop_cover( cover_method );
   return exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
 }
 

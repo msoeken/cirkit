@@ -75,10 +75,6 @@ void exorcism_minimization( const cube_vec_t& cubes,
                             const properties::ptr& settings = properties::ptr(),
                             const properties::ptr& statistics = properties::ptr() );
 
-void exorcism_minimization( const aig_graph& aig,
-                            const properties::ptr& settings = properties::ptr(),
-                            const properties::ptr& statistics = properties::ptr() );
-
 void exorcism_minimization_blif( const std::string& filename,
                                  const properties::ptr& settings = properties::ptr(),
                                  const properties::ptr& statistics = properties::ptr() );

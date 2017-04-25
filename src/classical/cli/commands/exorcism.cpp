@@ -30,6 +30,7 @@
 
 #include <alice/rules.hpp>
 #include <core/utils/program_options.hpp>
+#include <classical/abc/gia/gia.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/optimization/exorcismq.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
@@ -46,6 +47,7 @@ exorcism_command::exorcism_command( const environment::ptr& env )
     ( "filename", value( &filename ), "ESOP filename for output" )
     ( "blif,b",   value( &blifname ), "read from BLIF" )
     ( "aig,a",                        "read from AIG" )
+    ( "psdkro,p",                     "extract cover with PSDKROs (only for AIGs)" )
     ;
   add_positional_option( "filename" );
   be_verbose();
@@ -64,6 +66,10 @@ bool exorcism_command::execute()
   const auto settings = make_settings();
   settings->set( "esopname", filename );
   settings->set( "skip_parsing", true );
+  if ( is_set( "psdkro" ) )
+  {
+    settings->set( "cover_method", gia_graph::esop_cover_method::bdd );
+  }
 
   if ( is_set( "blif" ) )
   {
@@ -72,7 +78,9 @@ bool exorcism_command::execute()
   else
   {
     const auto& aigs = env->store<aig_graph>();
-    exorcism_minimization( aigs.current(), settings, statistics );
+    gia_graph gia( aigs.current() );
+    const auto esop = exorcism_minimization( gia, settings, statistics );
+    write_esop( esop, gia.num_inputs(), gia.num_outputs(), filename );
   }
 
   print_runtime();
