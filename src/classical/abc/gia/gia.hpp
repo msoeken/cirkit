@@ -112,7 +112,9 @@ public:
   /// OTHER LOGIC REPRESENTATIONS
 
   using esop_ptr = std::unique_ptr<abc::Vec_Wec_t, decltype(&abc::Vec_WecFree)>;
-  esop_ptr compute_esop_cover() const;
+
+  enum class esop_cover_method { aig, bdd };
+  esop_ptr compute_esop_cover( esop_cover_method method = esop_cover_method::aig ) const;
 
   /// ITERATORS
 
@@ -135,6 +137,17 @@ public:
     Gia_ManForEachPo( p_gia, obj, i )
     {
       f( abc::Gia_ManCoIdToId( p_gia, i ), i );
+    }
+  }
+
+  template<typename Fn>
+  void foreach_and( Fn&& f ) const
+  {
+    abc::Gia_Obj_t* obj{};
+    int i{};
+    Gia_ManForEachAnd( p_gia, obj, i )
+    {
+      f( i, obj );
     }
   }
 

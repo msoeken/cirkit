@@ -31,6 +31,8 @@
 #include <boost/format.hpp>
 
 #include <classical/abc/functions/cirkit_to_gia.hpp>
+#include <classical/abc/gia/gia_bdd.hpp>
+#include <classical/optimization/esop_minimization.hpp>
 
 #include <map/if/if.h>
 #include <misc/util/utilTruth.h>
@@ -272,11 +274,43 @@ void gia_graph::write_aiger( const std::string& filename ) const
  * Other logic representations                                                *
  ******************************************************************************/
 
-gia_graph::esop_ptr gia_graph::compute_esop_cover() const
+gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method ) const
 {
-  abc::Vec_Wec_t* esop = nullptr;
-  abc::Eso_ManCompute( p_gia, 0, &esop );
-  return esop_ptr( esop, &abc::Vec_WecFree );
+  switch ( method )
+  {
+  case esop_cover_method::aig:
+    {
+      abc::Vec_Wec_t* esop = nullptr;
+      abc::Eso_ManCompute( p_gia, 0, &esop );
+      return esop_ptr( esop, &abc::Vec_WecFree );
+    } break;
+  case esop_cover_method::bdd:
+    {
+      const auto bdd = gia_to_bdd( *this );
+
+      /* get initial cover using exact PSDKRO optimization */
+      exp_cache_t exp_cache;
+      count_cubes_in_exact_psdkro( bdd.first.getManager(), bdd.second.front().getNode(), exp_cache );
+
+      char * var_values = new char[bdd.first.ReadSize()];
+      std::fill( var_values, var_values + bdd.first.ReadSize(), 2 );
+
+      abc::Vec_Wec_t *esop = abc::Vec_WecAlloc( 0u );
+      generate_exact_psdkro( bdd.first.getManager(), bdd.second.front().getNode(), var_values, -1, exp_cache, [&bdd, &esop, &var_values]() {
+          auto * level = abc::Vec_WecPushLevel( esop );
+          for ( auto i = 0; i < bdd.first.ReadSize(); ++i )
+          {
+            if ( var_values[i] == 2 ) continue;
+            abc::Vec_IntPush( level, ( i << 1u ) | !var_values[i] );
+          }
+          abc::Vec_IntPush( level, -1 );
+        } );
+
+      delete[] var_values;
+
+      return esop_ptr( esop, &abc::Vec_WecFree );
+    } break;
+  }
 }
 
 }
