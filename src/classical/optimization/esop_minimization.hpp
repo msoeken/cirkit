@@ -37,6 +37,7 @@
 #define ESOP_MINIMIZATION_HPP
 
 #include <functional>
+#include <map>
 #include <string>
 
 #include <boost/dynamic_bitset.hpp>
@@ -48,6 +49,16 @@
 
 namespace cirkit
 {
+
+/**
+ * For PSDKRO generation
+ */
+
+typedef std::pair<unsigned, unsigned> exp_cost_t;
+typedef std::map<DdNode*, exp_cost_t> exp_cache_t;
+
+exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_t& exp_cache );
+void generate_exact_psdkro( DdManager * cudd, DdNode * f, char * var_values, int last_index, const exp_cache_t& exp_cache, const std::function<void()>& on_cube );
 
 /**
  * @brief ESOP minimization
