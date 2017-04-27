@@ -28,7 +28,7 @@
 
 #include <cstdint>
 
-#include <boost/format.hpp>
+#include <core/utils/flat_2d_vector.hpp>
 
 namespace cirkit
 {
@@ -130,63 +130,6 @@ public:
   };
 };
 
-template<typename T>
-class flat_2d_vector
-{
-public:
-  using vec_t = std::vector<T>;
-  using size_type = typename vec_t::size_type;
-  using size_vec_t = std::vector<size_type>;
-
-public:
-  flat_2d_vector( unsigned num_elements )
-    : indexes( num_elements ),
-      sizes( num_elements )
-  {
-  }
-
-  void append_empty( unsigned index )
-  {
-    indexes[index] = vec.size();
-    sizes[index] = 0u;
-  }
-
-  void append_singleton( unsigned index, const T& e )
-  {
-    indexes[index] = vec.size();
-    sizes[index] = 1u;
-    vec.push_back( e );
-  }
-
-  void append_vector( unsigned index, const vec_t& v )
-  {
-    indexes[index] = vec.size();
-    sizes[index] = v.size();
-    std::copy( v.begin(), v.end(), std::back_inserter( vec ) );
-  }
-
-  void copy_to( unsigned index, vec_t& v, size_type offset = 0 ) const
-  {
-    const auto it = vec.begin() + indexes[index];
-    std::copy( it + offset, it + sizes[index], std::back_inserter( v ) );
-  }
-
-  size_type size( unsigned index ) const
-  {
-    return sizes[index];
-  }
-
-  const T& at( unsigned index, unsigned element ) const
-  {
-    return vec[indexes[index] + element];
-  }
-
-private:
-  vec_t vec;
-  size_vec_t indexes;
-  size_vec_t sizes;
-};
-
 class gia_extract_cover_manager
 {
 public:
@@ -202,33 +145,11 @@ public:
     gia.foreach_input( [this]( int index, int i ) {
         const auto c = cube::elementary_cube( i );
         cubes.append_singleton( index, c );
-        // std::cout << "[i] cubes for input " << i << " with index " << index << std::endl;
-        // c.print( gia.num_inputs() );
-        // std::cout << std::endl;
       } );
 
     gia.foreach_and( [this]( int index, abc::Gia_Obj_t* obj ) {
         prepare_child( abc::Gia_ObjFaninId0( obj, index ), abc::Gia_ObjFaninC0( obj ), cubes1 );
         prepare_child( abc::Gia_ObjFaninId1( obj, index ), abc::Gia_ObjFaninC1( obj ), cubes2 );
-
-        // std::cout << boost::format( "[i] compute cubes for %d based on children %d(%d) and %d(%d)" ) % index
-        //   % abc::Gia_ObjFaninId0( obj, index ) % abc::Gia_ObjFaninC0( obj )
-        //   % abc::Gia_ObjFaninId1( obj, index ) % abc::Gia_ObjFaninC1( obj ) << std::endl;
-
-        // std::cout << "[i] cubes1:" << std::endl;
-        // for ( const auto& c : cubes1 )
-        // {
-        //   c.print( gia.num_inputs() );
-        //   std::cout << std::endl;
-        // }
-
-        // std::cout << "[i] cubes2:" << std::endl;
-        // for ( const auto& c : cubes2 )
-        // {
-        //   c.print( gia.num_inputs() );
-        //   std::cout << std::endl;
-        // }
-
         compute_and( index );
       } );
 
@@ -357,7 +278,6 @@ private:
 
     if ( c == cube::one_cube() )
     {
-      //assert( levels[0u].empty() );
       levels[0u].push_back( c );
       return;
     }
@@ -390,9 +310,6 @@ private:
         }
       }
     }
-
-
-    //assert( level > 0 );
 
     if ( minimize && level > 0 )
     {
