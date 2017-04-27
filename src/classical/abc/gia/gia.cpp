@@ -32,6 +32,7 @@
 
 #include <classical/abc/functions/cirkit_to_gia.hpp>
 #include <classical/abc/gia/gia_bdd.hpp>
+#include <classical/abc/gia/gia_esop.hpp>
 #include <classical/optimization/esop_minimization.hpp>
 
 #include <map/if/if.h>
@@ -283,6 +284,10 @@ gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method ) co
       abc::Vec_Wec_t* esop = nullptr;
       abc::Eso_ManCompute( p_gia, 0, &esop );
       return esop_ptr( esop, &abc::Vec_WecFree );
+    } break;
+  case esop_cover_method::aig_new:
+    {
+      return gia_extract_cover( *this );
     } break;
   case esop_cover_method::bdd:
     {

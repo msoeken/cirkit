@@ -115,7 +115,7 @@ public:
 
   using esop_ptr = std::unique_ptr<abc::Vec_Wec_t, decltype(&abc::Vec_WecFree)>;
 
-  enum class esop_cover_method { aig, bdd };
+  enum class esop_cover_method { aig, aig_new, bdd };
   esop_ptr compute_esop_cover( esop_cover_method method = esop_cover_method::aig ) const;
 
   /// ITERATORS
