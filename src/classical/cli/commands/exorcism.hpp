@@ -51,7 +51,6 @@ protected:
   bool execute();
 
 private:
-  std::string blifname;
   std::string filename = "/tmp/exorcism.esop";
 };
 

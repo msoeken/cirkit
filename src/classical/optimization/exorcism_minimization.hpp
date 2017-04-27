@@ -62,22 +62,9 @@ void exorcism_minimization( DdManager * cudd, DdNode * f,
                             const properties::ptr& settings = properties::ptr(),
                             const properties::ptr& statistics = properties::ptr() );
 
-/**
- * @brief ESOP minimization with EXORCISM-4
- *
- * @author Mathias Soeken
- */
-void exorcism_minimization( const std::string& filename,
-                            const properties::ptr& settings = properties::ptr(),
-                            const properties::ptr& statistics = properties::ptr() );
-
 void exorcism_minimization( const cube_vec_t& cubes,
                             const properties::ptr& settings = properties::ptr(),
                             const properties::ptr& statistics = properties::ptr() );
-
-void exorcism_minimization_blif( const std::string& filename,
-                                 const properties::ptr& settings = properties::ptr(),
-                                 const properties::ptr& statistics = properties::ptr() );
 
 /******************************************************************************
  * New exorcism optimization                                                  *
@@ -106,9 +93,6 @@ void write_esop( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned nou
 
 dd_based_esop_optimization_func dd_based_exorcism_minimization_func( properties::ptr settings = std::make_shared<properties>(),
                                                                      properties::ptr statistics = std::make_shared<properties>() );
-
-pla_based_esop_optimization_func pla_based_exorcism_minimization_func( properties::ptr settings = std::make_shared<properties>(),
-                                                                       properties::ptr statistics = std::make_shared<properties>() );
 
 }
 

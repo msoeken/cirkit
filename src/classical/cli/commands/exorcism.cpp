@@ -45,7 +45,6 @@ exorcism_command::exorcism_command( const environment::ptr& env )
 {
   opts.add_options()
     ( "filename", value( &filename ), "ESOP filename for output" )
-    ( "blif,b",   value( &blifname ), "read from BLIF" )
     ( "aig,a",                        "read from AIG" )
     ( "psdkro,p",                     "extract cover with PSDKROs (only for AIGs)" )
     ;
@@ -56,7 +55,6 @@ exorcism_command::exorcism_command( const environment::ptr& env )
 command::rules_t exorcism_command::validity_rules() const
 {
   return {
-    file_exists_if_set( *this, blifname, "blif" ),
     has_store_element_if_set<aig_graph>( *this, env, "aig" )
   };
 }
@@ -71,17 +69,10 @@ bool exorcism_command::execute()
     settings->set( "cover_method", gia_graph::esop_cover_method::bdd );
   }
 
-  if ( is_set( "blif" ) )
-  {
-    exorcism_minimization_blif( blifname, settings, statistics );
-  }
-  else
-  {
-    const auto& aigs = env->store<aig_graph>();
-    gia_graph gia( aigs.current() );
-    const auto esop = exorcism_minimization( gia, settings, statistics );
-    write_esop( esop, gia.num_inputs(), gia.num_outputs(), filename );
-  }
+  const auto& aigs = env->store<aig_graph>();
+  gia_graph gia( aigs.current() );
+  const auto esop = exorcism_minimization( gia, settings, statistics );
+  write_esop( esop, gia.num_inputs(), gia.num_outputs(), filename );
 
   print_runtime();
 

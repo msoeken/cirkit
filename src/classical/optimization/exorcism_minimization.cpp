@@ -325,61 +325,9 @@ void reduce_cover( bool progress, exorcism_script script )
 void exorcism_minimization( DdManager * cudd, DdNode * f, const properties::ptr& settings, const properties::ptr& statistics )
 {
   return exorcism_minimization( bdd_to_cubes( cudd, f ), settings, statistics );
-
-  // /* Settings */
-  // std::string tmpfile = get( settings, "tmpfile", std::string( "/tmp/test.pla" ) );
-
-  // /* Re-route stdout of Cudd */
-  // FILE * old = Cudd_ReadStdout( cudd );
-
-  // /* Print cover to file */
-  // FILE * fd = fopen( tmpfile.c_str(), "w" );
-  // Cudd_SetStdout( cudd, fd );
-
-  // fprintf( fd, ".i %d\n.o 1\n", Cudd_ReadSize( cudd ) );
-  // Cudd_PrintMinterm( cudd, f );
-  // fprintf( fd, ".e\n" );
-
-  // fclose( fd );
-
-  // /* Re-set stdout of Cudd */
-  // Cudd_SetStdout( cudd, old );
-
-  // /* Run exorcism based on the file */
-  // exorcism_minimization( tmpfile, settings, statistics );
 }
 
-void exorcism_minimization( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
-{
-  /* Settings */
-  bool            verbose  = get( settings, "verbose",  false                     );
-  std::string     exorcism = get( settings, "exorcism", std::string( "exorcism" ) );
-  cube_function_t on_cube  = get( settings, "on_cube",  cube_function_t()         );
-
-  properties_timer t( statistics );
-
-  /* Call */
-  std::string hide_output = verbose ? "" : " > /dev/null 2>&1";
-  system( boost::str( boost::format( "(%s %s%s; echo > /dev/null)" ) % exorcism % filename % hide_output ).c_str() );
-
-  /* Get ESOP filename */
-  boost::filesystem::path path( filename );
-  std::string esopname = boost::str( boost::format( "%s/%s.esop" ) % path.parent_path().string() % path.stem().string() );
-
-  /* Parse */
-  exorcism_processor p( on_cube );
-  pla_parser( esopname, p );
-
-  if ( statistics )
-  {
-    statistics->set( "cube_count", p.cube_count() );
-    statistics->set( "literal_count", p.literal_count() );
-  }
-}
-
-void exorcism_minimization( const cube_vec_t& cubes,
-                            const properties::ptr& settings,
-                            const properties::ptr& statistics )
+void exorcism_minimization( const cube_vec_t& cubes, const properties::ptr& settings, const properties::ptr& statistics )
 {
   const auto verbose      = get( settings, "verbose",      false );
   const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
@@ -427,52 +375,6 @@ void exorcism_minimization( const cube_vec_t& cubes,
     set( statistics, "cube_count", p.cube_count() );
     set( statistics, "literal_count", p.literal_count() );
   }
-}
-
-void exorcism_minimization_blif( const std::string& filename, const properties::ptr& settings, const properties::ptr& statistics )
-{
-  const auto verbose      = get( settings, "verbose",      false );
-  const auto very_verbose = get( settings, "very_verbose", false );
-  const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
-  const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
-  const auto skip_parsing = get( settings, "skip_parsing", false );
-
-  properties_timer t( statistics );
-
-  abc_manager::get();
-  abc::Abc_FrameGetGlobalFrame();
-
-  auto ntk = abc::Io_Read( const_cast<char*>( filename.c_str() ), abc::IO_FILE_BLIF, 0, 0 );
-  auto strash = abc::Abc_NtkStrash( ntk, 0, 1, 0 );
-  auto aig = abc::Abc_NtkToDar( strash, 0, 0 );
-  abc::Abc_NtkDelete( strash );
-  auto gia = abc::Gia_ManFromAig( aig );
-  abc::Aig_ManStop( aig );
-  auto inits = abc::Abc_NtkCollectLatchValuesStr( ntk );
-  abc::Abc_NtkDelete( ntk );
-  auto tmp = gia;
-  gia = Gia_ManDupZeroUndc( tmp, inits, 0, 0 );
-  abc::Gia_ManStop( tmp );
-  ABC_FREE( inits );
-
-  abc::Vec_Wec_t * esop = nullptr;
-  {
-    properties_timer t( statistics, "exorcism_cover_time" );
-    abc::Eso_ManCompute( gia, 0, &esop );
-  }
-  abc::Abc_ExorcismMain( esop, abc::Gia_ManCiNum( gia ), abc::Gia_ManCoNum( gia ), const_cast<char*>( esopname.c_str() ), 2, very_verbose ? 2 : ( verbose ? 1 : 0 ), 20000, 0 );
-  abc::Vec_WecFree( esop );
-
-  /* Parse */
-  if ( !skip_parsing )
-  {
-    exorcism_processor p( on_cube );
-    pla_parser( esopname, p );
-
-    set( statistics, "cube_count", p.cube_count() );
-    set( statistics, "literal_count", p.literal_count() );
-  }
-  set( statistics, "exorcism_opt_time", static_cast<double>( TICKS_TO_SECONDS( abc::g_CoverInfo.TimeMin ) ) );
 }
 
 gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs,
@@ -630,15 +532,6 @@ dd_based_esop_optimization_func dd_based_exorcism_minimization_func(properties::
 {
   dd_based_esop_optimization_func f = [&settings, &statistics]( DdManager * cudd, DdNode * f ) {
     return exorcism_minimization( cudd, f, settings, statistics );
-  };
-  f.init( settings, statistics );
-  return f;
-}
-
-pla_based_esop_optimization_func pla_based_exorcism_minimization_func(properties::ptr settings, properties::ptr statistics)
-{
-  pla_based_esop_optimization_func f = [&settings, &statistics]( const std::string& filename ) {
-    return exorcism_minimization( filename, settings, statistics );
   };
   f.init( settings, statistics );
   return f;

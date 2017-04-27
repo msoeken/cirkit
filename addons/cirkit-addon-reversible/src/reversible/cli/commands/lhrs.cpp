@@ -39,7 +39,6 @@
 #include <classical/optimization/exorcism_minimization.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/synthesis/lut_based_synthesis.hpp>
-#include <reversible/synthesis/lhrs/legacy.hpp>
 
 using boost::program_options::value;
 
@@ -76,7 +75,6 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description debug_options( "Debug options" );
   debug_options.add_options()
-    ( "legacy",                       "run the old version" )
     ( "dumpesop", value( &dumpesop ), "name of existing directory to dump ESOP files after exorcism minimization" )
     ( "bounds",                       "compute lower and upper bounds for qubits" )
     ;
@@ -103,7 +101,7 @@ bool lhrs_command::execute()
   settings->set( "lutdecomp", is_set( "lutdecomp" ) );
   settings->set( "progress", is_set( "progress" ) );
   settings->set( "onlylines", is_set( "onlylines" ) );
-  settings->set( "cover_method", esopcovermethod == "aig" ? gia_graph::esop_cover_method::aig : gia_graph::esop_cover_method::bdd );
+  settings->set( "cover_method", esopcovermethod == "aig" ? gia_graph::esop_cover_method::aig_new : gia_graph::esop_cover_method::bdd );
   settings->set( "optimize_esop", esopscript != "none" );
   settings->set( "optimize_postesop", is_set( "esoppostopt" ) );
   settings->set( "script", script_from_string( esopscript ) );
@@ -118,35 +116,18 @@ bool lhrs_command::execute()
 
   circuit circ;
 
-  if ( is_set( "legacy" ) )
+  const auto gia = gia_graph( aig() );
+  const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ) ) );
+  lut_based_synthesis( circuits.current(), lut, settings, statistics );
+  lut_count = lut.lut_count();
+
+  debug_lb = 0;
+  if ( is_set( "bounds" ) )
   {
-    lut_graph_t lut;
-    {
-      temporary_filename blifname( "/tmp/lhrs-%d.blif" );
-
-      abc_run_command_no_output( aig(), boost::str( boost::format( "&if -K %d -a; &put; write_blif %s" ) % cut_size % blifname.name() ) );
-
-      lut = read_blif( blifname.name(), true );
-      lut_count = lut_graph_lut_count( lut );
-    }
-
-    version1::lut_based_synthesis( circuits.current(), lut, settings, statistics );
-  }
-  else
-  {
-    const auto gia = gia_graph( aig() );
-    const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ) ) );
-    lut_based_synthesis( circuits.current(), lut, settings, statistics );
-    lut_count = lut.lut_count();
-
-    debug_lb = 0;
-    if ( is_set( "bounds" ) )
-    {
-      lut.foreach_output( [&lut, this]( int index, int e ) {
+    lut.foreach_output( [&lut, this]( int index, int e ) {
         const auto driver = abc::Gia_ObjFaninId0p( lut, abc::Gia_ManCo( lut, e ) );
         debug_lb = std::max<unsigned>( debug_lb, abc::Gia_LutTFISize( lut, driver ) );
       } );
-    }
   }
 
   print_runtime();
