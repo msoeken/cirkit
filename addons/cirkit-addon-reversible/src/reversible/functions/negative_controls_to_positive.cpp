@@ -33,8 +33,9 @@
 namespace cirkit
 {
 
-void negative_controls_to_positive( const circuit& src, circuit& dest )
+circuit negative_controls_to_positive( const circuit& src )
 {
+  circuit dest;
   copy_metadata( src, dest );
 
   for ( const auto& g : src )
@@ -60,6 +61,8 @@ void negative_controls_to_positive( const circuit& src, circuit& dest )
       }
     }
   }
+
+  return dest;
 }
 
 }

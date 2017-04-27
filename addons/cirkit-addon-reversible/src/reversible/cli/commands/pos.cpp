@@ -61,8 +61,7 @@ bool pos_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
-  circuit circ_new;
-  negative_controls_to_positive( circuits.current(), circ_new );
+  const auto circ_new = negative_controls_to_positive( circuits.current() );
 
   extend_if_new( circuits );
   circuits.current() = circ_new;
