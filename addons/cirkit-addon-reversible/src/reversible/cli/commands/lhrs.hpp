@@ -56,7 +56,7 @@ public:
 private:
   unsigned cut_size = 16u;
   unsigned lut_count = 0u;
-  std::string esopscript = "def";
+  std::string esopscript = "def_wo4";
   std::string esopcovermethod = "aig";
   unsigned area_iters_init = 2u;
   unsigned flow_iters_init = 1u;
