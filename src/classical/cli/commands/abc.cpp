@@ -57,15 +57,16 @@ abc_command::abc_command( const environment::ptr& env )
   opts.add_options()
     ( "command,c", value_with_default( &commands ), "Process semicolon-separated list of commands" )
     ( "empty,e",                                    "Don't load current AIG into abc" )
-    ( "new,n",                                      "Write abc's resulting AIG into a new AIG in the store" )
+    ( "nowarning",                                  "Don't warn about experimental status" )
     ;
+  add_new_option();
 }
 
 bool abc_command::execute()
 {
   auto& aigs = env->store<aig_graph>();
 
-  if ( warn_once )
+  if ( warn_once && !is_set( "nowarning" ) )
   {
     std::cout << "[w] ATTENTION" << std::endl
               << "[w] abc_command is very experimental in its current state" << std::endl
@@ -132,10 +133,7 @@ bool abc_command::execute()
   abc::Gia_Man_t *result_gia = abc::Abc_FrameGetGia( frame );
   if ( result_gia )
   {
-    if ( aigs.empty() || is_set( "new" ) )
-    {
-      aigs.extend();
-    }
+    extend_if_new( aigs );
 
     const auto& result_aig = gia_to_cirkit( result_gia );
     aigs.current() = result_aig;
