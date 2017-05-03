@@ -81,6 +81,11 @@ public:
     return ( it == vecs[bucket].end() ) ? -1 : static_cast<int>( std::distance( vecs[bucket].begin(), it ) );
   }
 
+  inline const T& get( unsigned bucket, unsigned index ) const
+  {
+    return vecs[bucket][index];
+  }
+
   inline void clear( unsigned index )
   {
     num_elements -= vecs[index].size();
@@ -137,6 +142,11 @@ public:
   {
     const auto it = hash[bucket].find( v );
     return ( it == hash[bucket].end() ) ? -1 : static_cast<int>( it->second );
+  }
+
+  inline const T& get( unsigned bucket, unsigned index ) const
+  {
+    return vecs[bucket][index];
   }
 
   inline void clear( unsigned index )

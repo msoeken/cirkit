@@ -66,6 +66,16 @@ public:
 
   /* modify operations */
   void invert_all();
+  void rotate( unsigned bit ); /* x -> ~x -> * -> x -> ... */
+
+  //
+  // bm  bm'
+  // 11  01 *
+  // 01  00  *
+  // 00  11 **
+  //
+  // b changes if b <-> m
+  // m changes if !b
 
   /* construction */
   static cube2 one_cube();

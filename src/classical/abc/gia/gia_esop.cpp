@@ -220,50 +220,25 @@ private:
       return;
     }
 
-    if ( minimize && level < gia.num_inputs() )
-    {
-      const auto end = levels.end( level + 1 );
-      for ( auto it = levels.begin( level + 1 ); it != end; ++it )
-      {
-        if ( c.distance( *it ) == 1 )
-        {
-          const auto new_cube = c.merge( *it );
-          levels.remove_at( level + 1, std::distance( levels.begin( level + 1 ), it ) );
-          //vl2.erase( it );
-          add_to_levels( new_cube );
-          return;
-        }
-      }
-    }
-
     if ( minimize )
     {
-      const auto end = levels.end( level );
-      for ( auto it = levels.begin( level ); it != end; ++it )
+      /* change one bit and hash cubes */
+      for ( auto i = 0; i < gia.num_inputs(); ++i )
       {
-        if ( c.distance( *it ) == 1 )
-        {
-          const auto new_cube = c.merge( *it );
-          levels.remove_at( level, std::distance( levels.begin( level ), it ) );
-          //vl.erase( it );
-          add_to_levels( new_cube );
-          return;
-        }
-      }
-    }
+        auto c2 = c;
 
-    if ( minimize && level > 0 )
-    {
-      const auto end = levels.end( level - 1 );
-      for ( auto it = levels.begin( level - 1 ); it != end; ++it )
-      {
-        if ( c.distance( *it ) == 1 )
+        for ( auto a = 0; a < 2; ++a )
         {
-          const auto new_cube = c.merge( *it );
-          levels.remove_at( level - 1, std::distance( levels.begin( level - 1 ), it ) );
-          //vl2.erase( it );
-          add_to_levels( new_cube );
-          return;
+          c2.rotate( i );
+          const auto level2 = c2.num_literals();
+          auto index2 = levels.find( level2, c2 );
+          if ( index2 != -1 )
+          {
+            const auto new_cube = c.merge( levels.get( level2, index2 ) );
+            levels.remove_at( level2, index2 );
+            add_to_levels( new_cube );
+            return;
+          }
         }
       }
     }
