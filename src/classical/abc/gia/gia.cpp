@@ -321,6 +321,8 @@ gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method, con
       return esop_ptr( esop, &abc::Vec_WecFree );
     } break;
   }
+
+  return esop_ptr( nullptr, &abc::Vec_WecFree );
 }
 
 }
