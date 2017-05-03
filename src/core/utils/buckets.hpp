@@ -36,6 +36,7 @@
 #ifndef BUCKETS_HPP
 #define BUCKETS_HPP
 
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 
