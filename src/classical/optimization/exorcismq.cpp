@@ -104,7 +104,7 @@ struct exorcismq_cube
 
   inline std::array<exorcismq_cube, 4> exorlink( const exorcismq_cube& that, int distance, uint32_t pos, unsigned* group ) const
   {
-  	uint32_t tbits, tmask;
+    uint32_t tbits, tmask;
     uint32_t tpos;
 
     std::array<exorcismq_cube, 4> res;
