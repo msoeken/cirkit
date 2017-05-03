@@ -397,9 +397,9 @@ void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vec
                              bool progress, gia_graph::esop_cover_method cover_method, bool optimize_esop, bool optimize_postesop, exorcism_script script, const std::string& dumpesop,
                              double *cover_runtime, double *exorcism_runtime, unsigned *esopfile_counter )
 {
-  auto esop = [&lut, cover_runtime, cover_method]() {
+  auto esop = [&lut, cover_runtime, cover_method, progress]() {
     increment_timer t( cover_runtime );
-    return lut.compute_esop_cover( cover_method );
+    return lut.compute_esop_cover( cover_method, make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "minimize", true ) ) );
   }();
 
   if ( optimize_esop )

@@ -275,7 +275,7 @@ void gia_graph::write_aiger( const std::string& filename ) const
  * Other logic representations                                                *
  ******************************************************************************/
 
-gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method ) const
+gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method, const properties::ptr& settings ) const
 {
   switch ( method )
   {
@@ -287,7 +287,7 @@ gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method ) co
     } break;
   case esop_cover_method::aig_new:
     {
-      return gia_extract_cover( *this );
+      return gia_extract_cover( *this, settings );
     } break;
   case esop_cover_method::bdd:
     {

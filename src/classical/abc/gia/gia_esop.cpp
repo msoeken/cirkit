@@ -28,7 +28,11 @@
 
 #include <cstdint>
 
+#include <core/utils/buckets.hpp>
 #include <core/utils/flat_2d_vector.hpp>
+#include <core/utils/terminal.hpp>
+#include <core/utils/timer.hpp>
+#include <classical/utils/cube2.hpp>
 
 namespace cirkit
 {
@@ -37,120 +41,34 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
-class cube
-{
-public:
-  cube()
-    : value( 0 )
-  {
-  }
-
-  cube( uint32_t bits, uint32_t mask )
-    : bits( bits ), mask( mask )
-  {
-  }
-
-  inline int distance( const cube& that ) const
-  {
-    return __builtin_popcount( ( bits ^ that.bits ) | ( mask ^ that.mask ) );
-  }
-
-  inline int num_literals() const
-  {
-    return __builtin_popcount( mask );
-  }
-
-  inline bool operator==( const cube& that ) const
-  {
-    return value == that.value;
-  }
-
-  inline bool operator!=( const cube& that ) const
-  {
-    return value != that.value;
-  }
-
-  inline cube operator&( const cube& that ) const
-  {
-    /* literals must agree on intersection */
-    const auto int_mask = mask & that.mask;
-    if ( ( bits ^ that.bits ) & int_mask )
-    {
-      return zero_cube();
-    }
-
-    return cube( bits | that.bits, mask | that.mask );
-  }
-
-  /* it is assumed that this and that have distance 1 */
-  inline cube merge( const cube& that ) const
-  {
-    const auto d = ( bits ^ that.bits ) | ( mask ^ that.mask );
-    return cube( bits ^ ( ~that.bits & d ), mask ^ ( that.mask & d ) );
-  }
-
-  /* invert all literals */
-  inline void invert_all()
-  {
-    bits ^= mask;
-  }
-
-  static inline cube elementary_cube( unsigned index )
-  {
-    const auto bits = 1 << index;
-    return cube( bits, bits );
-  }
-
-  void print( unsigned length = 32, std::ostream& os = std::cout ) const
-  {
-    for ( auto i = 0u; i < length; ++i )
-    {
-      os << ( ( ( mask >> i ) & 1 ) ? ( ( ( bits >> i ) & 1 ) ? '1' : '0' ) : '-' );
-    }
-  }
-
-  static inline cube one_cube()
-  {
-    return cube( 0, 0 );
-  }
-
-  static inline cube zero_cube()
-  {
-    return cube( ~0, 0 );
-  }
-
-  union
-  {
-    struct
-    {
-      uint32_t bits;
-      uint32_t mask;
-    };
-    uint64_t value;
-  };
-};
-
 class gia_extract_cover_manager
 {
 public:
-  gia_extract_cover_manager( const gia_graph& gia )
+  gia_extract_cover_manager( const gia_graph& gia, const properties::ptr& settings )
     : gia( gia ),
       cubes( gia.size() ),
-      levels( gia.num_inputs() + 1 )
+      levels( gia.num_inputs() + 1 ),
+      minimize( get( settings, "minimize", true ) ),
+      progress( get( settings, "progress", false ) )
   {
   }
 
   gia_graph::esop_ptr run()
   {
     gia.foreach_input( [this]( int index, int i ) {
-        const auto c = cube::elementary_cube( i );
+        const auto c = cube2::elementary_cube( i );
         cubes.append_singleton( index, c );
       } );
 
-    gia.foreach_and( [this]( int index, abc::Gia_Obj_t* obj ) {
+    progress_line pline( boost::str( boost::format( "[i] gates = %%5d / %5d   last size = %%7d   total size = %%7d    runtime = %%7.2f secs" ) % ( gia.size() - gia.num_inputs() - gia.num_outputs() ) ), progress );
+    auto counter = 0u;
+    gia.foreach_and( [this, &counter, &pline]( int index, abc::Gia_Obj_t* obj ) {
+        increment_timer t( &runtime );
         prepare_child( abc::Gia_ObjFaninId0( obj, index ), abc::Gia_ObjFaninC0( obj ), cubes1 );
         prepare_child( abc::Gia_ObjFaninId1( obj, index ), abc::Gia_ObjFaninC1( obj ), cubes2 );
         compute_and( index );
+
+        pline( ++counter, cubes.size( index ), cubes.size(), runtime );
       } );
 
     abc::Vec_Wec_t *esop = abc::Vec_WecAlloc( 0u );
@@ -177,8 +95,29 @@ public:
     return gia_graph::esop_ptr( esop, &abc::Vec_WecFree );
   }
 
+  std::vector<cube2> run2()
+  {
+    gia.foreach_input( [this]( int index, int i ) {
+        const auto c = cube2::elementary_cube( i );
+        cubes.append_singleton( index, c );
+      } );
+
+    gia.foreach_and( [this]( int index, abc::Gia_Obj_t* obj ) {
+        prepare_child( abc::Gia_ObjFaninId0( obj, index ), abc::Gia_ObjFaninC0( obj ), cubes1 );
+        prepare_child( abc::Gia_ObjFaninId1( obj, index ), abc::Gia_ObjFaninC1( obj ), cubes2 );
+        compute_and( index );
+      } );
+
+    gia.foreach_output( [this]( int id, int i ) {
+      const auto obj = abc::Gia_ManObj( gia, id );
+      prepare_child( abc::Gia_ObjFaninId0p( gia, obj ), abc::Gia_ObjFaninC0( obj ), cubes1 );
+    } );
+
+    return cubes1;
+  }
+
 private:
-  using cube_vec_t = std::vector<cube>;
+  using cube_vec_t = std::vector<cube2>;
 
   void prepare_child( int index, bool cpl, cube_vec_t& v )
   {
@@ -191,13 +130,13 @@ private:
     {
       if ( cubes.size( index ) == 0u )
       {
-        v.push_back( cube::one_cube() );
+        v.push_back( cube2::one_cube() );
       }
       else
       {
         auto first = cubes.at( index, 0u );
         auto offset = 0u;
-        if ( first == cube::one_cube() )
+        if ( first == cube2::one_cube() )
         {
           offset = 1u;
         }
@@ -209,7 +148,7 @@ private:
         }
         else
         {
-          v.push_back( cube::one_cube() );
+          v.push_back( cube2::one_cube() );
         }
         cubes.copy_to( index, v, offset );
       }
@@ -228,7 +167,7 @@ private:
     for ( const auto& c1 : cubes1 )
     {
       /* left child is 1 function */
-      if ( c1 == cube::one_cube() )
+      if ( c1 == cube2::one_cube() )
       {
         for ( const auto& c2 : cubes2 )
         {
@@ -239,14 +178,14 @@ private:
 
       for ( const auto& c2 : cubes2 )
       {
-        if ( c2 == cube::one_cube() )
+        if ( c2 == cube2::one_cube() )
         {
           add_to_levels( c1 );
           continue;
         }
 
         auto p = c1 & c2;
-        if ( p != cube::zero_cube() )
+        if ( p != cube2::zero_cube() )
         {
           add_to_levels( p );
         }
@@ -255,42 +194,42 @@ private:
 
     /* add from levels */
     cube_vec_t res;
-    for ( auto& v : levels )
+    for ( auto i = 0; i < gia.num_inputs() + 1; ++i )
     {
-      std::copy( v.begin(), v.end(), std::back_inserter( res ) );
-      v.clear();
+      std::copy( levels.begin( i ), levels.end( i ), std::back_inserter( res ) );
+      levels.clear( i );
     }
     cubes.append_vector( index, res );
   }
 
-  void add_to_levels( const cube& c )
+  void add_to_levels( const cube2& c )
   {
     const auto level = c.num_literals();
 
     /* cancel? */
-    auto& vl = levels[level];
-    const auto it = std::find( vl.begin(), vl.end(), c );
-    if ( it != vl.end() )
+    auto index = levels.find( level, c );
+    if ( index >= 0 )
     {
-      vl.erase( it );
+      levels.remove_at( level, index );
       return;
     }
 
-    if ( c == cube::one_cube() )
+    if ( c == cube2::one_cube() )
     {
-      levels[0u].push_back( c );
+      levels.add( 0u, c );
       return;
     }
 
     if ( minimize && level < gia.num_inputs() )
     {
-      auto& vl2 = levels[level + 1];
-      for ( auto it = vl2.begin(); it != vl2.end(); ++it )
+      const auto end = levels.end( level + 1 );
+      for ( auto it = levels.begin( level + 1 ); it != end; ++it )
       {
         if ( c.distance( *it ) == 1 )
         {
           const auto new_cube = c.merge( *it );
-          vl2.erase( it );
+          levels.remove_at( level + 1, std::distance( levels.begin( level + 1 ), it ) );
+          //vl2.erase( it );
           add_to_levels( new_cube );
           return;
         }
@@ -299,12 +238,14 @@ private:
 
     if ( minimize )
     {
-      for ( auto it = vl.begin(); it != vl.end(); ++it )
+      const auto end = levels.end( level );
+      for ( auto it = levels.begin( level ); it != end; ++it )
       {
         if ( c.distance( *it ) == 1 )
         {
           const auto new_cube = c.merge( *it );
-          vl.erase( it );
+          levels.remove_at( level, std::distance( levels.begin( level ), it ) );
+          //vl.erase( it );
           add_to_levels( new_cube );
           return;
         }
@@ -313,30 +254,34 @@ private:
 
     if ( minimize && level > 0 )
     {
-      auto& vl2 = levels[level - 1];
-      for ( auto it = vl2.begin(); it != vl2.end(); ++it )
+      const auto end = levels.end( level - 1 );
+      for ( auto it = levels.begin( level - 1 ); it != end; ++it )
       {
         if ( c.distance( *it ) == 1 )
         {
           const auto new_cube = c.merge( *it );
-          vl2.erase( it );
+          levels.remove_at( level - 1, std::distance( levels.begin( level - 1 ), it ) );
+          //vl2.erase( it );
           add_to_levels( new_cube );
           return;
         }
       }
     }
 
-    levels[level].push_back( c );
+    levels.add( level, c );
   }
 
 private:
   const gia_graph& gia;
-  flat_2d_vector<cube> cubes;
+  flat_2d_vector<cube2> cubes;
   cube_vec_t cubes1;
   cube_vec_t cubes2;
-  std::vector<cube_vec_t> levels;
+  hash_buckets<cube2> levels;
 
   bool minimize = true;
+  bool progress = false;
+
+  double runtime = 0.0;
 };
 
 /******************************************************************************
@@ -349,8 +294,14 @@ private:
 
 gia_graph::esop_ptr gia_extract_cover( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
 {
-  gia_extract_cover_manager mgr( gia );
+  gia_extract_cover_manager mgr( gia, settings );
   return mgr.run();
+}
+
+std::vector<cube2> gia_extract_cover2( const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+{
+  gia_extract_cover_manager mgr( gia, settings );
+  return mgr.run2();
 }
 
 }

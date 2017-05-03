@@ -25,80 +25,82 @@
  */
 
 /**
- * @file flat_2d_vector.hpp
+ * @file cube2.hpp
  *
- * @brief Flat 2d-access vector
+ * @brief A (new) efficient cube data structure for up to 32 inputs
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef FLAT_2D_VECTOR_HPP
-#define FLAT_2D_VECTOR_HPP
+#ifndef CUBE2_HPP
+#define CUBE2_HPP
+
+#include <array>
+#include <cstdint>
+#include <iostream>
 
 namespace cirkit
 {
 
-template<typename T>
-class flat_2d_vector
+class cube2
 {
 public:
-  using vec_t = std::vector<T>;
-  using size_type = typename vec_t::size_type;
-  using size_vec_t = std::vector<size_type>;
+  /* constructors */
+  cube2();
+  cube2( uint32_t bits, uint32_t mask );
 
-public:
-  flat_2d_vector( unsigned num_elements )
-    : indexes( num_elements ),
-      sizes( num_elements )
+  /* query operations (unary) */
+  int num_literals() const;
+
+  /* query operations (binary) */
+  int distance( const cube2& that ) const;
+  uint32_t differences( const cube2& that ) const;
+  bool operator==( const cube2& that ) const;
+  bool operator!=( const cube2& that ) const;
+
+  /* operators (binary) */
+  cube2 operator&( const cube2& that ) const;
+  cube2 merge( const cube2& that ) const;
+  std::array<cube2, 4> exorlink( const cube2& that, int distance, uint32_t differences, unsigned* group ) const;
+
+  /* modify operations */
+  void invert_all();
+
+  /* construction */
+  static cube2 one_cube();
+  static cube2 zero_cube();
+  static cube2 elementary_cube( unsigned index );
+
+  /* printing / debugging */
+  void print( unsigned length = 32, std::ostream& os = std::cout ) const;
+
+
+
+  /* cube data */
+  union
   {
-  }
+    struct
+    {
+      uint32_t bits;
+      uint32_t mask;
+    };
+    uint64_t value;
+  };
+};
 
-  void append_empty( unsigned index )
+}
+
+namespace std
+{
+
+template<>
+struct hash<cirkit::cube2>
+{
+  std::size_t operator()( cirkit::cube2 const& c ) const
   {
-    indexes[index] = vec.size();
-    sizes[index] = 0u;
+    return c.value;
   }
-
-  void append_singleton( unsigned index, const T& e )
-  {
-    indexes[index] = vec.size();
-    sizes[index] = 1u;
-    vec.push_back( e );
-  }
-
-  void append_vector( unsigned index, const vec_t& v )
-  {
-    indexes[index] = vec.size();
-    sizes[index] = v.size();
-    std::copy( v.begin(), v.end(), std::back_inserter( vec ) );
-  }
-
-  void copy_to( unsigned index, vec_t& v, size_type offset = 0 ) const
-  {
-    const auto it = vec.begin() + indexes[index];
-    std::copy( it + offset, it + sizes[index], std::back_inserter( v ) );
-  }
-
-  size_type size() const
-  {
-    return vec.size();
-  }
-
-  size_type size( unsigned index ) const
-  {
-    return sizes[index];
-  }
-
-  const T& at( unsigned index, unsigned element ) const
-  {
-    return vec[indexes[index] + element];
-  }
-
-private:
-  vec_t vec;
-  size_vec_t indexes;
-  size_vec_t sizes;
 };
 
 }

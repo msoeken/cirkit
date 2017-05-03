@@ -40,11 +40,13 @@
 
 #include <core/properties.hpp>
 #include <classical/abc/gia/gia.hpp>
+#include <classical/utils/cube2.hpp>
 
 namespace cirkit
 {
 
 gia_graph::esop_ptr gia_extract_cover( const gia_graph& gia, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+std::vector<cube2> gia_extract_cover2( const gia_graph& gia, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }
 
