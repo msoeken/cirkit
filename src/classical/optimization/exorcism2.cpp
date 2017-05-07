@@ -30,6 +30,7 @@
 #include <boost/format.hpp>
 
 #include <core/utils/buckets.hpp>
+#include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 
 namespace cirkit
@@ -67,6 +68,7 @@ public:
   exorcism2_manager( const std::vector<cube2>& original, int num_vars )
     : cubes( num_vars + 1 ),
       num_vars( num_vars ),
+      init_cubes_size( original.size() ),
 
       pairs( 2u ),
       pairs_tmp( 5u )
@@ -81,34 +83,79 @@ public:
       add_cube( c );
     }
 
-    for ( auto i = 2; i <= 4; ++i )
-    {
-      std::cout << boost::format( "[i] distance %d cubes: %d" ) % i % pairs[i].size() << std::endl;
-    }
-    std::cout << boost::format( "[i] number of cubes: %d\n" ) % cubes.size() << std::endl;
+    print_stats();
   }
 
   std::vector<cube2> run()
   {
-    bool improv{};
+    unsigned gain{};
     unsigned rounds = 0u;
+
+    max_dist = 3u;
+
+    unsigned iteration = 0;
+    double runtime = 0.0;
+
+    progress_line p( "[i] exorcism   iter = %3d   i/o = %2d/1   cubes = %6d/%6d   total = %6.2f", progress );
 
     do
     {
-      improv = exorlink2();
-      improv = exorlink3() || improv;
-      improv = exorlink2();
-      improv = exorlink3() || improv;
-      improv = exorlink2();
-      improv = exorlink3() || improv;
-      improv = exorlink2();
-      improv = exorlink3() || improv;
-      improv = exorlink2();
-      improv = exorlink3() || improv;
-      improv = exorlink2();
-      improv = exorlink3() || improv;
+      increment_timer t( &runtime );
+      p( ++iteration, num_vars, cubes.size(), init_cubes_size, runtime );
 
-      if ( improv )
+      do
+      {
+        gain  = exorlink2();
+        gain += exorlink3();
+        gain += exorlink2();
+        gain += exorlink3();
+        gain += exorlink2();
+        if ( !( gain += exorlink3() ) ) break;
+        if ( !( gain += exorlink2() ) ) break;
+        if ( !( gain += exorlink3() ) ) break;
+        if ( !( gain += exorlink2() ) ) break;
+        if ( !( gain += exorlink3() ) ) break;
+        if ( !( gain += exorlink2() ) ) break;
+        if ( !( gain += exorlink3() ) ) break;
+      } while ( false );
+
+      while ( rounds == 1u && !gain )
+      {
+        improv_lits = true;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        improv_lits = false; break;
+      }
+
+      while ( rounds == 2u && !gain )
+      {
+        reshape = true;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        if ( gain += exorlink2() ) break;
+        if ( gain += exorlink3() ) break;
+        reshape = false; break;
+      }
+
+      if ( gain > 0 )
       {
         rounds = 0u;
       }
@@ -118,27 +165,22 @@ public:
       }
     } while ( rounds <= 2u );
 
-    improv_lits = true;
+    // improv_lits = true;
 
-    do
-    {
-      improv = exorlink2();
-      improv = exorlink3() || improv;
+    // do
+    // {
+    //   improv = exorlink2();
+    //   improv = exorlink3() || improv;
 
-      if ( improv )
-      {
-        rounds = 0u;
-      }
-      else
-      {
-        ++rounds;
-      }
-    } while ( rounds < 2u );
-
-    for ( auto i = 2; i <= 4; ++i )
-    {
-      std::cout << boost::format( "[i] distance %d cubes: %d" ) % i % pairs[i].size() << std::endl;
-    }
+    //   if ( improv )
+    //   {
+    //     rounds = 0u;
+    //   }
+    //   else
+    //   {
+    //     ++rounds;
+    //   }
+    // } while ( rounds < 2u );
 
     std::vector<cube2> res;
 
@@ -170,19 +212,16 @@ private:
     }
 
     /* 2. check for 1-distance cubes and prepare pairs */
-    int imp;
-    if ( ( imp = pair_with_others( c, lits ) ) >= 0 ) return imp + 1;
-    for ( auto d = 1; d <= 3; ++d )
+    int imp{};
+    for ( auto i = std::max( lits - max_dist, 0 ); i <= std::min( num_vars, lits + max_dist ); ++i )
     {
-      if ( lits >= d && ( ( imp = pair_with_others( c, lits - d ) ) >= 0 ) ) return imp + 1;
-      if ( lits <= num_vars - d && ( ( imp = pair_with_others( c, lits + d ) ) >= 0 ) ) return imp + 1;
+      if ( ( imp = pair_with_others( c, i ) ) >= 0 ) return imp + 1;
     }
 
     /* 3. no 1-distance cube found, insert cube and copy pairs */
     if ( cubes.is_dry() ) return 0;
-
     cubes.add( lits, c );
-    for ( auto d = 2; d <= 4; ++d )
+    for ( auto d = 2; d <= max_dist; ++d )
     {
       std::copy( pairs_tmp[d].begin(), pairs_tmp[d].end(), std::back_inserter( pairs[d] ) );
     }
@@ -210,7 +249,7 @@ private:
         return add_cube( new_cube );
       }
 
-      if ( d <= 3 )
+      if ( d <= max_dist )
       {
         pairs_tmp[d].push_back( std::make_pair( c, *it ) );
       }
@@ -219,15 +258,11 @@ private:
     return -1;
   }
 
-  bool exorlink2()
+  unsigned exorlink2()
   {
-    auto improv = false;
+    const auto old_size = cubes.size();
 
     auto& ps = pairs[2u];
-
-    // std::sort( ps.begin(), ps.end(), []( const std::pair<cube2, cube2>& a, const std::pair<cube2, cube2>& b ) {
-    //     return a.first.num_literals() + a.second.num_literals() < b.first.num_literals() + b.second.num_literals();
-    //   } );
 
     const auto num_pairs = ps.size();
 
@@ -247,26 +282,24 @@ private:
       cubes.remove( c1_size, p.first );
       cubes.remove( c2_size, p.second );
 
-      auto n = p.first.exorlink( p.second, 2, p.first.differences( p.second ), &cube_groups2[0u] );
+      const auto diff = p.first.differences( p.second );
+      auto n = p.first.exorlink( p.second, 2, diff, &cube_groups2[0u] );
 
       if ( add_cube_dry( n[0] ) || add_cube_dry( n[1] ) )
       {
         add_cube( n[0] );
         add_cube( n[1] );
-
-        improv = true;
       }
       else
       {
-        n = p.first.exorlink( p.second, 2, p.first.differences( p.second ), &cube_groups2[4u] );
+        n = p.first.exorlink( p.second, 2, diff, &cube_groups2[4u] );
 
         if ( add_cube_dry( n[0] ) || add_cube_dry( n[1] ) ||
-             ( improv_lits && ( ( n[0].num_literals() + n[1].num_literals() ) < ( c1_size + c2_size ) ) ) )
+             ( improv_lits && ( ( n[0].num_literals() + n[1].num_literals() ) < ( c1_size + c2_size ) ) ) ||
+             ( reshape && ( ( n[0].num_literals() + n[1].num_literals() ) == ( c1_size + c2_size ) ) ) )
         {
           add_cube( n[0] );
           add_cube( n[1] );
-
-          improv = true;
         }
         else
         {
@@ -277,12 +310,12 @@ private:
       }
     }
 
-    return improv;
+    return old_size - cubes.size();
   }
 
-  bool exorlink3()
+  unsigned exorlink3()
   {
-    auto improv = false;
+    const auto old_size = cubes.size();
 
     auto& ps = pairs[3u];
     const auto num_pairs = ps.size();
@@ -307,22 +340,22 @@ private:
       cubes.remove( c1_size, p.first );
       cubes.remove( c2_size, p.second );
 
+      const auto diff = p.first.differences( p.second );
       auto found = false;
       for ( auto g = 0u; g < 54u; g += 9u )
       {
-        const auto n = p.first.exorlink( p.second, 3, p.first.differences( p.second ), &cube_groups3[g] );
+        const auto n = p.first.exorlink( p.second, 3, diff, &cube_groups3[g] );
         auto gain = 0u;
 
         for ( auto j = 0u; j < 3u; ++j )
         {
           gain += add_cube_dry( n[j] );
-          if ( gain > 1 )
+          if ( gain > 1 || ( reshape && gain == 1 ) )
           {
             for ( auto k = 0u; k < 3u; ++k )
             {
               add_cube( n[k] );
             }
-            improv = true;
             found = true;
             break;
           }
@@ -339,17 +372,32 @@ private:
       }
     }
 
-    return improv;
+    return old_size - cubes.size();
+  }
+
+private:
+  void print_stats() const
+  {
+    for ( auto i = 2; i <= 4; ++i )
+    {
+      std::cout << boost::format( "[i] distance %d cubes: %d" ) % i % pairs[i].size() << std::endl;
+    }
+    std::cout << boost::format( "[i] number of cubes: %d\n" ) % cubes.size() << std::endl;
   }
 
 private:
   hash_backtrack_buckets<cube2> cubes;
   int num_vars;
+  int init_cubes_size;
 
   std::vector<boost::circular_buffer<std::pair<cube2, cube2>>> pairs;
   std::vector<std::vector<std::pair<cube2, cube2>>> pairs_tmp;
 
+  int max_dist = 2;
   bool improv_lits = false;
+  bool reshape = false;
+
+  bool progress = true;
 
   unsigned cube_groups2[8] = {2, 0, 1, 2,
                               0, 2, 2, 1};
