@@ -102,10 +102,14 @@ public:
         cubes.append_singleton( index, c );
       } );
 
-    gia.foreach_and( [this]( int index, abc::Gia_Obj_t* obj ) {
+    progress_line pline( boost::str( boost::format( "[i] gates = %%5d / %5d   last size = %%7d   total size = %%7d    runtime = %%7.2f secs" ) % ( gia.size() - gia.num_inputs() - gia.num_outputs() ) ), progress );
+    auto counter = 0u;
+    gia.foreach_and( [this, &pline, &counter]( int index, abc::Gia_Obj_t* obj ) {
         prepare_child( abc::Gia_ObjFaninId0( obj, index ), abc::Gia_ObjFaninC0( obj ), cubes1 );
         prepare_child( abc::Gia_ObjFaninId1( obj, index ), abc::Gia_ObjFaninC1( obj ), cubes2 );
         compute_and( index );
+
+        pline( ++counter, cubes.size( index ), cubes.size(), runtime );
       } );
 
     gia.foreach_output( [this]( int id, int i ) {
