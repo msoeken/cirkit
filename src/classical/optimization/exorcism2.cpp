@@ -65,13 +65,15 @@ public:
 class exorcism2_manager
 {
 public:
-  exorcism2_manager( const std::vector<cube2>& original, int num_vars )
+  exorcism2_manager( const std::vector<cube2>& original, int num_vars, const properties::ptr& settings )
     : cubes( num_vars + 1 ),
       num_vars( num_vars ),
       init_cubes_size( original.size() ),
 
       pairs( 2u ),
-      pairs_tmp( 5u )
+      pairs_tmp( 5u ),
+
+      progress( get( settings, "progress", false ) )
   {
     for ( auto i = 2; i <= 4; ++i )
     {
@@ -165,23 +167,6 @@ public:
       }
     } while ( rounds <= 2u );
 
-    // improv_lits = true;
-
-    // do
-    // {
-    //   improv = exorlink2();
-    //   improv = exorlink3() || improv;
-
-    //   if ( improv )
-    //   {
-    //     rounds = 0u;
-    //   }
-    //   else
-    //   {
-    //     ++rounds;
-    //   }
-    // } while ( rounds < 2u );
-
     std::vector<cube2> res;
 
     for ( auto i = 0; i <= num_vars; ++i )
@@ -220,7 +205,7 @@ private:
 
     /* 3. no 1-distance cube found, insert cube and copy pairs */
     if ( cubes.is_dry() ) return 0;
-    cubes.add( lits, c );
+    cubes.add( lits, last_added = c );
     for ( auto d = 2; d <= max_dist; ++d )
     {
       std::copy( pairs_tmp[d].begin(), pairs_tmp[d].end(), std::back_inserter( pairs[d] ) );
@@ -246,6 +231,8 @@ private:
       {
         const auto new_cube = c.merge( *it );
         cubes.remove_at( level, std::distance( cubes.begin( level ), it ) );
+        last_removed = *it;
+        saved_lits = c.num_literals() == static_cast<int>( level ) ? 1 : 0;
         return add_cube( new_cube );
       }
 
@@ -393,11 +380,17 @@ private:
   std::vector<boost::circular_buffer<std::pair<cube2, cube2>>> pairs;
   std::vector<std::vector<std::pair<cube2, cube2>>> pairs_tmp;
 
+  /* bookkeeping */
+  cube2 last_added;
+  cube2 last_removed;
+  int saved_lits = 0;
+
+  /* control algorithm */
   int max_dist = 2;
   bool improv_lits = false;
   bool reshape = false;
 
-  bool progress = true;
+  bool progress = false;
 
   unsigned cube_groups2[8] = {2, 0, 1, 2,
                               0, 2, 2, 1};
@@ -418,7 +411,7 @@ std::vector<cube2> exorcism2( const std::vector<cube2>& cubes, int num_vars, con
 {
   properties_timer t( statistics );
 
-  exorcism2_manager mgr( cubes, num_vars );
+  exorcism2_manager mgr( cubes, num_vars, settings );
   return mgr.run();
 }
 
