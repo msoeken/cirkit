@@ -394,9 +394,15 @@ private:
  ******************************************************************************/
 
 void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vector<unsigned>& line_map,
-                             bool progress, gia_graph::esop_cover_method cover_method, bool optimize_esop, bool optimize_postesop, exorcism_script script, const std::string& dumpesop,
-                             double *cover_runtime, double *exorcism_runtime, unsigned *esopfile_counter )
+                             bool progress, gia_graph::esop_cover_method cover_method, bool optimize_esop, bool optimize_postesop, exorcism_script script,
+                             const std::string& dumpfile,
+                             double *cover_runtime, double *exorcism_runtime, unsigned *dumpfile_counter )
 {
+  if ( !dumpfile.empty() )
+  {
+    lut.write_aiger( boost::str( boost::format( "%s/lut-%d.aig" ) % dumpfile % *dumpfile_counter ) );
+  }
+
   auto esop = [&lut, cover_runtime, cover_method, progress]() {
     increment_timer t( cover_runtime );
     return lut.compute_esop_cover( cover_method, make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "minimize", true ) ) );
@@ -411,10 +417,10 @@ void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vec
     }();
   }
 
-  if ( !dumpesop.empty() )
+  if ( !dumpfile.empty() )
   {
     write_esop( esop, lut.num_inputs(), lut.num_outputs(),
-                boost::str( boost::format( "%s/esop-%d.esop" ) % dumpesop % ( *esopfile_counter )++ ) );
+                boost::str( boost::format( "%s/esop-%d.esop" ) % dumpfile % ( *dumpfile_counter )++ ) );
   }
 
   // if ( optimize_postesop )
@@ -474,10 +480,10 @@ public:
       optimize_postesop( get( settings, "optimize_postesop", false ) ),
       progress( get( settings, "progress", false ) ),
       verbose( get( settings, "verbose", false ) ),
-      dumpesop( get( settings, "dumpesop", std::string() ) ),
+      dumpfile( get( settings, "dumpfile", std::string() ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
       cover_runtime( settings->get<double*>( "cover_runtime" ) ),
-      esopfile_counter( settings->get<unsigned*>( "esopfile_counter" ) )
+      dumpfile_counter( settings->get<unsigned*>( "dumpfile_counter" ) )
   {
   }
 
@@ -487,8 +493,8 @@ public:
     const auto lut = gia().extract_lut( index );
 
     esop_synthesis_wrapper( lut, circ(), line_map,
-                            progress, cover_method, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop,
-                            cover_runtime, exorcism_runtime, esopfile_counter );
+                            progress, cover_method, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpfile,
+                            cover_runtime, exorcism_runtime, dumpfile_counter );
 
     return true;
   }
@@ -500,11 +506,11 @@ private:
   bool optimize_postesop                    = false;                             /* optimize ESOP synthesized circuit */
   bool progress                             = false;                             /* show progress line */
   bool verbose                              = false;                             /* be verbose */
-  std::string dumpesop;  /* dump ESOP file for each ESP cover */
+  std::string dumpfile;  /* dump ESOP file for each ESP cover */
 
   double*   cover_runtime;
   double*   exorcism_runtime;
-  unsigned* esopfile_counter;
+  unsigned* dumpfile_counter;
 };
 
 class lutdecomp_lut_partial_synthesizer : public lut_partial_synthesizer
@@ -522,12 +528,12 @@ public:
       optimize_esop( get( settings, "optimize_esop", true ) ),
       optimize_postesop( get( settings, "optimize_postesop", false ) ),
       progress( get( settings, "progress", false ) ),
-      dumpesop( get( settings, "dumpesop", std::string() ) ),
+      dumpfile( get( settings, "dumpfile", std::string() ) ),
       mapping_runtime( settings->get<double*>( "mapping_runtime" ) ),
       class_runtime( settings->get<double*>( "class_runtime" ) ),
       exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
       cover_runtime( settings->get<double*>( "cover_runtime" ) ),
-      esopfile_counter( settings->get<unsigned*>( "esopfile_counter" ) )
+      dumpfile_counter( settings->get<unsigned*>( "dumpfile_counter" ) )
   {
     class_counter[0u].resize( 3u );
     class_counter[1u].resize( 6u );
@@ -659,8 +665,8 @@ public:
           const auto lut = sub_lut.extract_lut( index );
 
           esop_synthesis_wrapper( lut, circ(), local_line_map,
-                                  progress, cover_method, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpesop,
-                                  cover_runtime, exorcism_runtime, esopfile_counter );
+                                  progress, cover_method, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpfile,
+                                  cover_runtime, exorcism_runtime, dumpfile_counter );
 
           if ( progress )
           {
@@ -708,13 +714,13 @@ private: /* statistics */
   bool optimize_esop                        = true;                              /* optimize ESOP cover */
   bool optimize_postesop                    = false;                             /* optimize ESOP synthesized circuit */
   bool progress                             = false;                             /* show progress line */
-  std::string dumpesop;  /* dump ESOP file for each ESP cover */
+  std::string dumpfile;  /* dump ESOP file for each ESP cover */
 
   double*   mapping_runtime;
   double*   class_runtime;
   double*   cover_runtime;
   double*   exorcism_runtime;
-  unsigned* esopfile_counter;
+  unsigned* dumpfile_counter;
 };
 
 /******************************************************************************
@@ -735,7 +741,7 @@ public:
                                     make_settings_from(
                                                        std::make_pair( "exorcism_runtime", &exorcism_runtime ),
                                                        std::make_pair( "cover_runtime", &cover_runtime ),
-                                                       std::make_pair( "esopfile_counter", &esopfile_counter ) ) ),
+                                                       std::make_pair( "dumpfile_counter", &dumpfile_counter ) ) ),
                    statistics ),
       decomp_synthesizer( circ, gia, merge_properties(
                                     settings,
@@ -744,7 +750,7 @@ public:
                                                        std::make_pair( "class_runtime", &class_runtime ),
                                                        std::make_pair( "exorcism_runtime", &exorcism_runtime ),
                                                        std::make_pair( "cover_runtime", &cover_runtime ),
-                                                       std::make_pair( "esopfile_counter", &esopfile_counter ) ) ),
+                                                       std::make_pair( "dumpfile_counter", &dumpfile_counter ) ) ),
                           statistics ),
       onlylines( get( settings, "onlylines", false ) ),
       verbose( get( settings, "verbose", false ) ),
@@ -880,7 +886,7 @@ private:
   double   class_runtime      = 0.0;
   unsigned num_decomp_default = 0u;
   unsigned num_decomp_lut     = 0u;
-  unsigned esopfile_counter   = 0u; /* if ESOP files should be dumbed, this counter is increased */
+  unsigned dumpfile_counter   = 0u; /* if ESOP files should be dumbed, this counter is increased */
 
   std::shared_ptr<lut_order_heuristic> order_heuristic;
   exorcism_lut_partial_synthesizer synthesizer;

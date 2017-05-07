@@ -75,7 +75,7 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description debug_options( "Debug options" );
   debug_options.add_options()
-    ( "dumpesop", value( &dumpesop ), "name of existing directory to dump ESOP files after exorcism minimization" )
+    ( "dumpfile", value( &dumpfile ), "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
     ( "bounds",                       "compute lower and upper bounds for qubits" )
     ;
   opts.add( debug_options );
@@ -109,9 +109,9 @@ bool lhrs_command::execute()
   settings->set( "area_iters", area_iters );
   settings->set( "flow_iters", flow_iters );
 
-  if ( is_set( "dumpesop" ) )
+  if ( is_set( "dumpfile" ) )
   {
-    settings->set( "dumpesop", dumpesop );
+    settings->set( "dumpfile", dumpfile );
   }
 
   circuit circ;

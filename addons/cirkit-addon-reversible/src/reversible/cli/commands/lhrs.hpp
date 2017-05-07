@@ -62,7 +62,7 @@ private:
   unsigned flow_iters_init = 1u;
   unsigned area_iters = 2u;
   unsigned flow_iters = 1u;
-  std::string dumpesop;
+  std::string dumpfile;
 
 private:
   unsigned debug_lb = 0;
