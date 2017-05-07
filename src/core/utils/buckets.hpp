@@ -37,8 +37,13 @@
 #define BUCKETS_HPP
 
 #include <algorithm>
+#include <iostream>
 #include <unordered_map>
 #include <vector>
+
+#include <core/utils/range_utils.hpp>
+
+#include <boost/format.hpp>
 
 namespace cirkit
 {
@@ -97,6 +102,11 @@ public:
     return vecs[index].size();
   }
 
+  inline unsigned size() const
+  {
+    return num_elements;
+  }
+
   inline typename std::vector<T>::const_iterator begin( unsigned index ) const
   {
     return vecs[index].begin();
@@ -141,7 +151,14 @@ public:
   inline int find( unsigned bucket, const T& v ) const
   {
     const auto it = hash[bucket].find( v );
-    return ( it == hash[bucket].end() ) ? -1 : static_cast<int>( it->second );
+    if ( it == hash[bucket].end() )
+    {
+      return -1;
+    }
+    else
+    {
+      return it->second;
+    }
   }
 
   inline const T& get( unsigned bucket, unsigned index ) const
@@ -161,6 +178,11 @@ public:
     return vecs[index].size();
   }
 
+  inline unsigned size() const
+  {
+    return num_elements;
+  }
+
   inline typename std::vector<T>::const_iterator begin( unsigned index ) const
   {
     return vecs[index].begin();
@@ -171,10 +193,154 @@ public:
     return vecs[index].end();
   }
 
+  friend std::ostream& operator<<( std::ostream& os, const hash_buckets<T>& bucket )
+  {
+    for ( const auto& v : index( bucket.vecs ) )
+    {
+      os << boost::format( "==== bucket %d ====" ) % v.index << std::endl;
+      for ( const auto& p : index( v.value ) )
+      {
+        os << boost::format( "%4d: " ) % p.index << p.value << " @ " << bucket.hash[v.index].at( p.value ) << std::endl;
+      }
+    }
+    return os;
+  }
+
 private:
   std::vector<std::vector<T>> vecs;
   std::vector<std::unordered_map<T, typename std::vector<T>::size_type>> hash;
   unsigned num_elements = 0u;
+};
+
+template<typename T>
+class hash_backtrack_buckets
+{
+public:
+  hash_backtrack_buckets( unsigned num_buckets ) : vecs( num_buckets ), sizes( num_buckets ), hash( num_buckets ) {}
+
+  inline void add( unsigned bucket, const T& v )
+  {
+    /* no adding on dry */
+    if ( _dry ) return;
+
+    hash[bucket][v] = vecs[bucket].size();
+    vecs[bucket].push_back( v );
+    ++num_elements;
+  }
+
+  inline void remove_at( unsigned bucket, unsigned index )
+  {
+    const auto v = vecs[bucket][index];
+    if ( _dry )
+    {
+      const auto v2 = vecs[bucket][sizes[bucket] - 1];
+      std::swap( vecs[bucket][index], vecs[bucket][sizes[bucket] - 1] );
+      hash[bucket][v] = sizes[bucket] - 1;
+      hash[bucket][v2] = index;
+      sizes[bucket]--;
+    }
+    else
+    {
+      const auto v2 = vecs[bucket].back();
+      swap_remove( vecs[bucket], index );
+      hash[bucket].erase( v );
+      if ( v != v2 )
+      {
+        hash[bucket][v2] = index;
+      }
+    }
+    --num_elements;
+  }
+
+  inline void remove( unsigned bucket, const T& v )
+  {
+    remove_at( bucket, hash[bucket][v] );
+  }
+
+  inline int find( unsigned bucket, const T& v ) const
+  {
+    const auto it = hash[bucket].find( v );
+    if ( it == hash[bucket].end() || ( _dry && it->second >= sizes[bucket] ) )
+    {
+      return -1;
+    }
+    else
+    {
+      return it->second;
+    }
+  }
+
+  inline const T& get( unsigned bucket, unsigned index ) const
+  {
+    return vecs[bucket][index];
+  }
+
+  inline void clear( unsigned index )
+  {
+    num_elements -= vecs[index].size();
+    vecs[index].clear();
+    hash[index].clear();
+  }
+
+  inline typename std::vector<T>::size_type size( unsigned index ) const
+  {
+    return _dry ? sizes[index] : vecs[index].size();
+  }
+
+  inline unsigned size() const
+  {
+    return num_elements;
+  }
+
+  inline typename std::vector<T>::const_iterator begin( unsigned index ) const
+  {
+    return vecs[index].begin();
+  }
+
+  inline typename std::vector<T>::const_iterator end( unsigned index ) const
+  {
+    return vecs[index].begin() + size( index );
+  }
+
+  friend std::ostream& operator<<( std::ostream& os, const hash_backtrack_buckets<T>& bucket )
+  {
+    for ( const auto& v : index( bucket.vecs ) )
+    {
+      os << boost::format( "==== bucket %d ====" ) % v.index << std::endl;
+      for ( const auto& p : index( v.value ) )
+      {
+        os << boost::format( "%4d: " ) % p.index << p.value << " @ " << bucket.hash[v.index].at( p.value ) << std::endl;
+      }
+    }
+    return os;
+  }
+
+  inline void start_dry()
+  {
+    _dry = true;
+    for ( auto i = 0u; i < vecs.size(); ++i )
+    {
+      sizes[i] = vecs[i].size();
+    }
+  }
+
+  inline void stop_dry()
+  {
+    _dry = false;
+  }
+
+  inline bool is_dry() const
+  {
+    return _dry;
+  }
+
+private:
+  std::vector<std::vector<T>> vecs;
+  std::vector<typename std::vector<T>::size_type> sizes;
+  std::vector<std::unordered_map<T, typename std::vector<T>::size_type>> hash;
+  unsigned num_elements = 0u;
+
+  bool _dry = false;
 };
 
 }
