@@ -148,6 +148,11 @@ public:
     --num_elements;
   }
 
+  inline void remove( unsigned bucket, const T& v )
+  {
+    remove_at( bucket, hash[bucket][v] );
+  }
+
   inline int find( unsigned bucket, const T& v ) const
   {
     const auto it = hash[bucket].find( v );
@@ -248,8 +253,8 @@ public:
       {
         hash[bucket][v2] = index;
       }
+      --num_elements;
     }
-    --num_elements;
   }
 
   inline void remove( unsigned bucket, const T& v )
