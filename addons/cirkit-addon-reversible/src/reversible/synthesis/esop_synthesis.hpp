@@ -39,6 +39,7 @@
 #include <vector>
 
 #include <core/properties.hpp>
+#include <classical/utils/cube2.hpp>
 #include <classical/abc/abc_api.hpp>
 #include <classical/abc/gia/gia.hpp>
 #include <reversible/circuit.hpp>
@@ -208,6 +209,8 @@ bool esop_synthesis( circuit& circ, const std::string& filename, properties::ptr
 bool esop_synthesis( circuit& circ, const gia_graph::esop_ptr& esop_cover, unsigned ninputs, unsigned noutputs, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 bool esop_synthesis( circuit& circ, const gia_graph& gia, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+
+bool esop_synthesis( circuit& circ, const std::vector<cube2>& cubes, unsigned ninputs, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 /**
  * @brief Functor for the \ref revkit::esop_synthesis "esop_synthesis" algorithm

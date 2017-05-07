@@ -390,11 +390,14 @@ bool esop_synthesis( circuit& circ, const gia_graph::esop_ptr& esop_cover, unsig
     circ.set_lines( ninputs + noutputs );
 
     auto constants = circ.constants();
+    std::vector<bool> garbage( circ.lines(), true );
     for ( auto i = ninputs; i < circ.lines(); ++i )
     {
       constants[i] = false;
+      garbage[i] = false;
     }
     circ.set_constants( constants );
+    circ.set_garbage( garbage );
   }
 
   /* cubes */
@@ -438,6 +441,46 @@ bool esop_synthesis( circuit& circ, const gia_graph& gia, const properties::ptr&
 {
   const auto esop = gia.compute_esop_cover();
   return esop_synthesis( circ, esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
+}
+
+bool esop_synthesis( circuit& circ, const std::vector<cube2>& cubes, unsigned ninputs, const properties::ptr& settings, const properties::ptr& statistics )
+{
+  const auto line_map = get( settings, "line_map", std::vector<unsigned>() );
+
+  properties_timer t( statistics );
+
+  /* meta data */
+  const auto noutputs = 1u;
+  if ( line_map.empty() )
+  {
+    clear_circuit( circ );
+    circ.set_lines( ninputs + noutputs );
+
+    auto constants = circ.constants();
+    std::vector<bool> garbage( circ.lines(), true );
+    for ( auto i = ninputs; i < circ.lines(); ++i )
+    {
+      constants[i] = false;
+      garbage[i] = false;
+    }
+    circ.set_constants( constants );
+    circ.set_garbage( garbage );
+  }
+
+  for ( const auto& cube : cubes )
+  {
+    gate::control_container controls;
+    for ( auto i = 0u; i < ninputs; ++i )
+    {
+      if ( ( cube.mask >> i ) & 1 )
+      {
+        controls.push_back( make_var( line_map.empty() ? i : line_map[i], ( cube.bits >> i ) & 1 ) );
+      }
+    }
+    append_toffoli( circ, controls, ninputs );
+  }
+
+  return true;
 }
 
 pla_blif_synthesis_func esop_synthesis_func( properties::ptr settings, properties::ptr statistics )

@@ -30,8 +30,11 @@
 #include <boost/program_options.hpp>
 
 #include <alice/rules.hpp>
+#include <classical/abc/gia/gia.hpp>
+#include <classical/abc/gia/gia_esop.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
+#include <classical/optimization/exorcism2.hpp>
 
 #include <reversible/circuit.hpp>
 #include <reversible/cli/stores.hpp>
@@ -64,6 +67,8 @@ esopbs_command::esopbs_command( const environment::ptr& env )
     ( "no_shared_target",             "no shared target" )
     ( "aig,a",                        "read from AIG" )
     ( "exorcism,e",                   "use exorcism to optimize ESOP cover (only for --aig)" )
+    ( "progress,p",                   "show progress" )
+    ( "experimental",                 "experimental method for single-output AIGs" )
     ;
   add_new_option();
   be_verbose();
@@ -84,6 +89,8 @@ bool esopbs_command::execute()
   extend_if_new( circuits );
 
   auto settings = make_settings();
+  settings->set( "progress", is_set( "progress" ) );
+
   if ( is_set( "filename" ) )
   {
     settings->set( "negative_control_lines", !is_set( "mct" ) );
@@ -97,12 +104,26 @@ bool esopbs_command::execute()
     const auto& aigs = env->store<aig_graph>();
 
     gia_graph gia( aigs.current() );
-    auto esop = gia.compute_esop_cover();
+    auto esop = gia.compute_esop_cover( gia_graph::esop_cover_method::aig_new, settings );
     if ( is_set( "exorcism" ) )
     {
-      esop = exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs() );
+      esop = exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
+      print_runtime( "runtime", "exorcism" );
     }
     esop_synthesis( circuits.current(), esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
+
+    print_runtime();
+  }
+  else if ( is_set( "experimental" ) )
+  {
+    const auto& aigs = env->store<aig_graph>();
+
+    gia_graph gia( aigs.current() );
+    const auto cubes = gia_extract_cover2( gia, settings );
+    const auto cubes_opt = exorcism2( cubes, gia.num_inputs(), settings, statistics );
+    print_runtime( "runtime", "exorcism" );
+
+    esop_synthesis( circuits.current(), cubes_opt, gia.num_inputs(), settings, statistics );
 
     print_runtime();
   }
