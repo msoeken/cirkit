@@ -192,6 +192,11 @@ void cube2::print( unsigned length, std::ostream& os ) const
   }
 }
 
+std::ostream& operator<<( std::ostream& os, const cube2& cube )
+{
+  cube.print( 32u, os );
+  return os;
+}
 
 }
 

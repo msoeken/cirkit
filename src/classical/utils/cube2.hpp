@@ -83,7 +83,7 @@ public:
   static cube2 elementary_cube( unsigned index );
 
   /* printing / debugging */
-  void print( unsigned length = 32, std::ostream& os = std::cout ) const;
+  void print( unsigned length = 32u, std::ostream& os = std::cout ) const;
 
 
 
@@ -98,6 +98,8 @@ public:
     uint64_t value;
   };
 };
+
+std::ostream& operator<<( std::ostream& os, const cube2& cube );
 
 }
 
