@@ -63,6 +63,7 @@ struct io_bench_tag_t {};
 struct io_verilog_tag_t {};
 struct io_edgelist_tag_t {};
 struct io_smt_tag_t {};
+struct io_yig_tag_t {};
 
 /******************************************************************************
  * aig_graph                                                                  *
@@ -421,6 +422,12 @@ bool store_can_write_io_type<xmg_graph, io_verilog_tag_t>( command& cmd );
 
 template<>
 void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd );
+
+template<>
+inline bool store_can_read_io_type<xmg_graph, io_yig_tag_t>( command& cmd ) { return true; }
+
+template<>
+xmg_graph store_read_io_type<xmg_graph, io_yig_tag_t>( const std::string& filename, const command& cmd );
 
 template<>
 bool store_can_write_io_type<xmg_graph, io_smt_tag_t>( command& cmd );

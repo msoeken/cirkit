@@ -485,6 +485,92 @@ xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enabl
   return xmg;
 }
 
+xmg_function xmg_create_y( xmg_graph& xmg, unsigned size, const std::vector<xmg_function>& fs )
+{
+  if ( size == 0u )
+  {
+    assert( fs.size() == 1u );
+
+    return fs.front();
+  }
+  else if ( size == 1u )
+  {
+    assert( fs.size() == 3u );
+
+    return xmg.create_maj( fs[0u], fs[1u], fs[2u] );
+  }
+  else
+  {
+    auto index = 0u;
+    std::vector<xmg_function> nfs;
+
+    for ( auto i = 1u; i <= size; ++i )
+    {
+      for ( auto j = 0u; j < i; ++j )
+      {
+        nfs.push_back( xmg.create_maj( fs[index], fs[index + i], fs[index + i + 1] ) );
+        ++index;
+      }
+    }
+
+    assert( nfs.size() + size + 1u == fs.size() );
+
+    return xmg_create_y( xmg, size - 1u, nfs );
+  }
+}
+
+xmg_graph xmg_read_yig( const std::string& filename )
+{
+  xmg_graph xmg;
+  std::unordered_map<std::string, xmg_function> name_to_node;
+  unsigned num_outputs{}, num_wires{};
+
+  name_to_node["0"] = xmg.get_constant( false );
+  name_to_node["1"] = xmg.get_constant( true );
+
+  line_parser( filename, {
+      {std::regex( "^\\.i (\\d+)$" ), [&xmg, &name_to_node]( const std::smatch& m ) {
+          for ( auto i = 1u; i <= boost::lexical_cast<unsigned>( std::string( m[1u] ) ); ++i )
+          {
+            const auto name = boost::str( boost::format( "i%d" ) % i );
+            name_to_node.insert( {name, xmg.create_pi( name )} );
+          }
+        }},
+      {std::regex( "^\\.o (\\d+)$" ), [&num_outputs]( const std::smatch& m ) {
+          num_outputs = boost::lexical_cast<unsigned>( std::string( m[1u] ) );
+        }},
+      {std::regex( "^\\.e$" ), []( const std::smatch& m ) {
+          /* do nothing right now */
+        }},
+      {std::regex( "^\\.w (\\d+)$" ), [&num_wires]( const std::smatch& m ) {
+          num_wires = boost::lexical_cast<unsigned>( std::string( m[1u] ) );
+        }},
+      {std::regex( "([ow]\\d+) = Y(\\d+)\\((.*)\\);?" ), [&xmg, &name_to_node]( const std::smatch& m ) {
+          const auto size = boost::lexical_cast<unsigned>( std::string( m[2u] ) );
+
+          std::vector<std::string> arguments;
+          split_string( arguments, std::string( m[3u] ), ", " );
+
+          std::vector<xmg_function> fs;
+
+          for ( const auto& arg : arguments )
+          {
+            fs.push_back( name_to_node.at( make_regular( arg ) ) ^ ( arg.front() == '~' ) );
+          }
+
+          name_to_node.insert( {std::string( m[1u] ), xmg_create_y( xmg, size, fs )} );
+        }}
+    }, true );
+
+  for ( auto i = 1u; i <= num_outputs; ++i )
+  {
+    const auto name = boost::str( boost::format( "o%d" ) % i );
+    xmg.create_po( name_to_node[name], name );
+  }
+
+  return xmg;
+}
+
 void write_bench( const xmg_graph& xmg, const std::string& filename )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );

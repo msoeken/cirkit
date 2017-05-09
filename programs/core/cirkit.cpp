@@ -106,6 +106,7 @@ int main( int argc, char ** argv )
   ADD_READ_COMMAND( bench, "Bench" );
   ADD_READ_COMMAND( pla, "PLA" );
   ADD_READ_COMMAND( verilog, "Verilog" );
+  ADD_READ_COMMAND( yig, "YIG" );
   ADD_WRITE_COMMAND( aiger, "Aiger" );
   ADD_WRITE_COMMAND( edgelist, "Edge list" );
   ADD_WRITE_COMMAND( pla, "PLA" );

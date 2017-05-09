@@ -705,6 +705,12 @@ void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, con
 }
 
 template<>
+xmg_graph store_read_io_type<xmg_graph, io_yig_tag_t>( const std::string& filename, const command& cmd )
+{
+  return xmg_read_yig( filename );
+}
+
+template<>
 bool store_can_write_io_type<xmg_graph, io_smt_tag_t>( command& cmd )
 {
   boost::program_options::options_description xmg_options( "XMG options" );
