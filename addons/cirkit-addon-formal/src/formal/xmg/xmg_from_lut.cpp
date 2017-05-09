@@ -317,13 +317,13 @@ private:
           t_npn = npn_canonization_lucky( t, phase, perm );
         }
 
-        os << tt_to_hex( t_npn ) << std::endl;
+        os << t_npn << std::endl;
 
         assert( tt_num_vars( t ) <= tt_num_vars( t_npn ) );
       }
       else
       {
-        os << tt_to_hex( t ) << std::endl;
+        os << t << std::endl;
       }
     }
 
