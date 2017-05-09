@@ -296,7 +296,7 @@ private:
     for ( const auto& v : boost::make_iterator_range( vertices( lut ) ) )
     {
       if ( types[v] != lut_type_t::internal ) { continue; }
-      if ( boost::out_degree( v, lut ) <= 4u ) { continue; }
+      if ( boost::out_degree( v, lut ) <= 2u ) { continue; }
 
       tt t( convert_hex2bin( tts[v] ) );
 
@@ -317,13 +317,13 @@ private:
           t_npn = npn_canonization_lucky( t, phase, perm );
         }
 
-        os << t_npn << std::endl;
+        os << tt_to_hex( t_npn ) << std::endl;
 
-        assert( tt_num_vars( t ) == tt_num_vars( t_npn ) );
+        assert( tt_num_vars( t ) <= tt_num_vars( t_npn ) );
       }
       else
       {
-        os << t << std::endl;
+        os << tt_to_hex( t ) << std::endl;
       }
     }
 

@@ -98,6 +98,7 @@ bool xmglut_command::execute()
   settings->set( "progress", is_set( "progress" ) );
   if ( is_set( "dump_luts" ) )
   {
+    settings->set( "npn", false );
     settings->set( "dump_luts", dump_luts );
   }
   if ( is_set( "timeout" ) )
