@@ -60,7 +60,7 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   boost::program_options::options_description esopdecomp_options( "ESOP decomposition options" );
   esopdecomp_options.add_options()
     ( "esopscript",      value_with_default( &esopscript ),      "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nnone: do not optimize ESOP cover" )
-    ( "esopcovermethod", value_with_default( &esopcovermethod ), "ESOP cover method\naig: directly from AIG\nbdd: using PSDKRO method from BDD" )
+    ( "esopcovermethod", value_with_default( &esopcovermethod ), "ESOP cover method\naig: directly from AIG\nbdd: using PSDKRO method from BDD\naignew: new AIG-based method" )
     ( "esoppostopt",                                             "Post-optimize network derived from ESOP synthesis" )
     ;
   opts.add( esopdecomp_options );
@@ -88,7 +88,7 @@ command::rules_t lhrs_command::validity_rules() const
 {
   return {
     {[this]() { return esopscript == "def" || esopscript == "def_wo4" || esopscript == "none"; }, "unknown exorcism script"},
-    {[this]() { return esopcovermethod == "aig" || esopcovermethod == "bdd"; }, "unknown cover extraction method"}
+    {[this]() { return esopcovermethod == "aig" || esopcovermethod == "bdd" || esopcovermethod == "aignew"; }, "unknown cover extraction method"}
   };
 }
 
@@ -101,7 +101,18 @@ bool lhrs_command::execute()
   settings->set( "lutdecomp", is_set( "lutdecomp" ) );
   settings->set( "progress", is_set( "progress" ) );
   settings->set( "onlylines", is_set( "onlylines" ) );
-  settings->set( "cover_method", esopcovermethod == "aig" ? gia_graph::esop_cover_method::aig_new : gia_graph::esop_cover_method::bdd );
+  if ( esopcovermethod == "aig" )
+  {
+    settings->set( "cover_method", gia_graph::esop_cover_method::aig );
+  }
+  else if ( esopcovermethod == "bdd" )
+  {
+    settings->set( "cover_method", gia_graph::esop_cover_method::bdd );
+  }
+  else
+  {
+    settings->set( "cover_method", gia_graph::esop_cover_method::aig_new );
+  }
   settings->set( "optimize_esop", esopscript != "none" );
   settings->set( "optimize_postesop", is_set( "esoppostopt" ) );
   settings->set( "script", script_from_string( esopscript ) );
