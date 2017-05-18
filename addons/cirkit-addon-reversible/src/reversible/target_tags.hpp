@@ -110,6 +110,9 @@ struct module_tag
  */
 struct stg_tag
 {
+  stg_tag() {}
+  stg_tag( const boost::dynamic_bitset<>& function ) : function( function ) {}
+
   boost::dynamic_bitset<> function;
 };
 

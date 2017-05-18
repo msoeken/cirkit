@@ -30,8 +30,10 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <core/utils/conversion_utils.hpp>
 #include <core/utils/string_utils.hpp>
 
 #include <reversible/pauli_tags.hpp>
@@ -73,7 +75,16 @@ circuit circuit_from_string( const std::string& description, const std::string& 
     }
 
     const auto tc = lines[0][0]; /* target char */
-    assert( tc == 't' || tc == 'f' || tc == 'X' || tc == 'Y' || tc == 'Z' || tc == 'H' );
+    assert( tc == 't' || tc == 'f' || tc == 's' || tc == 'X' || tc == 'Y' || tc == 'Z' || tc == 'H' );
+
+    /* single target gate comes with function */
+    boost::dynamic_bitset<> func;
+    if ( tc == 's' )
+    {
+      assert( lines[0].size() > 3u );
+      const auto fstr = lines[0].substr( 2u, lines[0].size() - 3u );
+      func = boost::dynamic_bitset<>( convert_hex2bin( fstr ) );
+    }
 
     /* check if there is a root */
     bool adjoint = false;
@@ -83,7 +94,7 @@ circuit circuit_from_string( const std::string& description, const std::string& 
       adjoint = true;
       adj_offset = 1u;
     }
-    
+
     auto root = 1u;
     if ( ( tc == 'X' || tc == 'Y' || tc == 'Z' ) && lines[0].size() >= 4 + adj_offset && lines[0][1 + adj_offset] == '[' && lines[0].back() == ']' )
     {
@@ -101,6 +112,9 @@ circuit circuit_from_string( const std::string& description, const std::string& 
     case 'f':
       num_targets = 2u;
       _gate.set_type( fredkin_tag() );
+      break;
+    case 's':
+      _gate.set_type( stg_tag( func ) );
       break;
     case 'X':
       num_targets = 1u;
