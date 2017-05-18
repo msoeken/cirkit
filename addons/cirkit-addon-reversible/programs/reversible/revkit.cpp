@@ -73,6 +73,7 @@
 #include <reversible/cli/commands/revsim.hpp>
 #include <reversible/cli/commands/revsimp.hpp>
 #include <reversible/cli/commands/rms.hpp>
+#include <reversible/cli/commands/stg4.hpp>
 #include <reversible/cli/commands/tbs.hpp>
 #include <reversible/cli/commands/tof.hpp>
 #include <reversible/cli/commands/unique_names.hpp>
@@ -140,6 +141,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( mitm );
   ADD_COMMAND( nct );
   ADD_COMMAND( pos );
+  ADD_COMMAND( stg4 );
   ADD_COMMAND( tof );
   ADD_COMMAND( unique_names );
 

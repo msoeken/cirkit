@@ -73,6 +73,7 @@
 #include <reversible/cli/commands/revsim.hpp>
 #include <reversible/cli/commands/revsimp.hpp>
 #include <reversible/cli/commands/rms.hpp>
+#include <reversible/cli/commands/stg4.hpp>
 #include <reversible/cli/commands/tbs.hpp>
 #include <reversible/cli/commands/tof.hpp>
 #include <reversible/cli/commands/unique_names.hpp>
@@ -154,6 +155,7 @@ public:
       entry<mitm_command>( "mitm"s, env ),
       entry<nct_command>( "nct"s, env ),
       entry<pos_command>( "pos"s, env ),
+      entry<stg4_command>( "stg4"s, env ),
       entry<tof_command>( "tof"s, env ),
       entry<unique_names_command>( "unique_names"s, env ),
 
