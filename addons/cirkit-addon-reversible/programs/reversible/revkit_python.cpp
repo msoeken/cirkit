@@ -42,6 +42,7 @@
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/cone.hpp>
 #include <classical/cli/commands/exorcism.hpp>
+#include <classical/cli/commands/print_io.hpp>
 #include <classical/cli/commands/simulate.hpp>
 #include <classical/cli/commands/tt.hpp>
 #include <classical/utils/expression_parser.hpp>
@@ -172,6 +173,7 @@ public:
       entry<bdd_command>( "bdd"s, env ),
       entry<enumerate_command>( "enumerate"s, env ),
       entry<expr_command>( "expr"s, env ),
+      entry<print_io_command>( "print_io"s, env ),
       entry<random_circuit_command>( "random_circuit"s, env ),
       entry<tt_command>( "tt"s, env )
     );

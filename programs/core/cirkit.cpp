@@ -66,6 +66,7 @@
 #include <classical/cli/commands/output_noise.hpp>
 #include <classical/cli/commands/permmask.hpp>
 #include <classical/cli/commands/plim.hpp>
+#include <classical/cli/commands/print_io.hpp>
 #include <classical/cli/commands/propagate.hpp>
 #include <classical/cli/commands/read_sym.hpp>
 #include <classical/cli/commands/rename.hpp>
@@ -174,6 +175,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( dsop );
   ADD_COMMAND( expr );
   ADD_COMMAND( output_noise );
+  ADD_COMMAND( print_io );
 
 #include <addon_defines.hpp>
 

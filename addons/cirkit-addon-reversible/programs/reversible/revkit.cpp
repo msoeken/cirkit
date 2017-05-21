@@ -41,6 +41,7 @@
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/cone.hpp>
 #include <classical/cli/commands/exorcism.hpp>
+#include <classical/cli/commands/print_io.hpp>
 #include <classical/cli/commands/simulate.hpp>
 #include <classical/cli/commands/tt.hpp>
 #include <classical/utils/expression_parser.hpp>
@@ -167,6 +168,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( bdd );
   ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
+  ADD_COMMAND( print_io );
   ADD_COMMAND( random_circuit );
   ADD_COMMAND( tt );
 
