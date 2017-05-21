@@ -236,6 +236,7 @@ bool parse_annotations( const std::string& line, std::vector<std::pair<std::stri
         value += c;
         break;
       }
+      break;
 
     case parse_state::quoted:
       switch ( c )
