@@ -11,7 +11,7 @@ alias "(\\w+) > (\\w+) > (\\w+)" "convert --%1%_to_%2%; convert --%2%_to_%3%"
 alias "abc_verilog (.*)" "abc -c \"%%read %1%; %%blast\""
 
 # Read a file that ABC can read into AIG
-alias "abc_read ([^\\s]+)" "abc -c \"%1%; strash; &get\""
+alias "abc_read ([^\\s]+)" "abc -c \"%1%; strash; &get -n\""
 
 # An expression simulator
 alias "exprsim ([^\\s]+)" "expr %1%; expr > tt; print -t"
