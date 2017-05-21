@@ -39,6 +39,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/variant.hpp>
 
+#include <classical/utils/truth_table_utils.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/io/revlib_parser.hpp>
@@ -196,6 +197,14 @@ namespace cirkit
       for ( it = p.begin(); it != p.end(); ++it )
       {
         d->circs.top()->annotate( *added_gate, it->first, boost::any_cast<std::string>( it->second ) );
+
+        /* special (active) annotations */
+        if ( is_type<stg_tag>( target_type ) && it->first == "affine" )
+        {
+          auto stg = boost::any_cast<stg_tag>( added_gate->type() );
+          stg.affine_class = tt_from_hex( boost::any_cast<std::string>( it->second ) );
+          added_gate->set_type( stg );
+        }
       }
     }
   }

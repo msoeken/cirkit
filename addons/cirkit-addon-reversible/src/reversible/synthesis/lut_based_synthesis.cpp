@@ -79,6 +79,7 @@ gate& append_stg_from_line_map( circuit& circ, uint64_t func, uint64_t affine_cl
   stg.function = boost::dynamic_bitset<>( 1 << num_vars, func );
   stg.affine_class = boost::dynamic_bitset<>( 1 << num_vars, affine_class );
   g.set_type( stg );
+  circ.annotate( g, "affine", tt_to_hex( stg.affine_class ) );
 
   return g;
 }
