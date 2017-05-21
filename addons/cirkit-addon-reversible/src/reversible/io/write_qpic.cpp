@@ -30,6 +30,7 @@
 #include <vector>
 
 #include <classical/utils/truth_table_utils.hpp>
+#include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
 
 #include <boost/algorithm/string/join.hpp>
@@ -109,6 +110,49 @@ void write_qpic( const circuit& circ, std::ostream& os, const properties::ptr& s
       for ( const auto& t : g.targets() )
       {
         items.push_back( format_target( t, "+" ) );
+      }
+    }
+    else if ( is_hadamard( g ) )
+    {
+      items.push_back( format_target( g.targets().front(), "" ) );
+      items.push_back( "H" );
+    }
+    else if ( is_pauli( g ) )
+    {
+      const auto& pauli = boost::any_cast<pauli_tag>( g.type() );
+
+      if ( pauli.axis == pauli_axis::Z )
+      {
+        items.push_back( format_target( g.targets().front(), "" ) );
+
+        std::string gate = "G {$";
+        if ( pauli.root == 1u )
+        {
+          gate += "Z";
+        }
+        else if ( pauli.root == 2u )
+        {
+          gate += "S";
+        }
+        else if ( pauli.root == 4u )
+        {
+          gate += "T";
+        }
+        else
+        {
+          assert( false );
+        }
+        if ( pauli.adjoint )
+        {
+          gate += "^\\dagger";
+        }
+        gate += "$}";
+
+        items.push_back( gate );
+      }
+      else
+      {
+        assert( false );
       }
     }
     else

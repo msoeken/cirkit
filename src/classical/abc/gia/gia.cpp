@@ -1,3 +1,4 @@
+
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
  * Copyright (C) 2015-2017  EPFL
@@ -288,6 +289,19 @@ gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method, con
   case esop_cover_method::aig_new:
     {
       return gia_extract_cover( *this, settings );
+    } break;
+  case esop_cover_method::aig_threshold:
+    {
+      if ( num_inputs() <= 10 )
+      {
+        abc::Vec_Wec_t* esop = nullptr;
+        abc::Eso_ManCompute( p_gia, 0, &esop );
+        return esop_ptr( esop, &abc::Vec_WecFree );
+      }
+      else
+      {
+        return gia_extract_cover( *this, settings );
+      }
     } break;
   case esop_cover_method::bdd:
     {

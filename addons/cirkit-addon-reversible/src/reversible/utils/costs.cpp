@@ -216,11 +216,12 @@ namespace cirkit
     else if ( is_stg( g ) )
     {
       const auto& tag = boost::any_cast<stg_tag>( g.type() );
-      const auto num_vars = boost::integer_log2( tag.function.size() );
+      const auto spec = tag.affine_class.size() ? tag.affine_class : tag.function;
+      const auto num_vars = boost::integer_log2( spec.size() );
       if ( num_vars >= 2 && num_vars <= 4 )
       {
         const auto& idx_map = optimal_quantum_circuits::affine_classification_index[num_vars - 2u];
-        const auto it = idx_map.find( tag.function.to_ulong() );
+        const auto it = idx_map.find( spec.to_ulong() );
         if ( it == idx_map.end() )
         {
           return 0ull; /* UNKNOWN */

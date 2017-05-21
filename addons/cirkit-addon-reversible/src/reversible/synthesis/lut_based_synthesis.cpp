@@ -63,7 +63,7 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-gate& append_stg_from_line_map( circuit& circ, uint64_t spec, const std::vector<unsigned>& line_map )
+gate& append_stg_from_line_map( circuit& circ, uint64_t func, uint64_t affine_class, const std::vector<unsigned>& line_map )
 {
   auto& g = circ.append_gate();
 
@@ -76,7 +76,8 @@ gate& append_stg_from_line_map( circuit& circ, uint64_t spec, const std::vector<
   g.add_target( line_map.back() );
 
   stg_tag stg;
-  stg.function = boost::dynamic_bitset<>( 1 << num_vars, spec );
+  stg.function = boost::dynamic_bitset<>( 1 << num_vars, func );
+  stg.affine_class = boost::dynamic_bitset<>( 1 << num_vars, affine_class );
   g.set_type( stg );
 
   return g;
@@ -556,7 +557,7 @@ public:
       const auto tt_spec = gia().lut_truth_table( index );
       const auto affine_class = classify( tt_spec, num_inputs );
 
-      append_stg_from_line_map( circ(), affine_class, line_map );
+      append_stg_from_line_map( circ(), tt_spec, affine_class, line_map );
     }
     else
     {
@@ -654,7 +655,7 @@ public:
         }
         else if ( num_inputs < 5 )
         {
-          auto& g = append_stg_from_line_map( circ(), aff_class[index], local_line_map );
+          auto& g = append_stg_from_line_map( circ(), sub_lut.lut_truth_table( index ), aff_class[index], local_line_map );
         }
         else
         {

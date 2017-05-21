@@ -32,6 +32,7 @@
 #include <reversible/target_tags.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/functions/add_circuit.hpp>
+#include <reversible/functions/add_line_to_circuit.hpp>
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/rewrite_circuit.hpp>
 #include <reversible/synthesis/optimal_quantum_circuits.hpp>
@@ -54,8 +55,10 @@ bool stg4_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
+  auto ancilla = -1;
+
   const auto circ = rewrite_circuit( circuits.current(), {
-      []( const gate& g, circuit& circ ) {
+      [&ancilla]( const gate& g, circuit& circ ) {
         if ( is_stg( g ) )
         {
           const auto& stg = boost::any_cast<stg_tag>( g.type() );
@@ -74,6 +77,16 @@ bool stg4_command::execute()
                 line_mapping.push_back( c.line() );
               }
               line_mapping.push_back( g.targets().front() );
+
+              if ( subcirc.lines() > g.size() )
+              {
+                if ( ancilla == -1 )
+                {
+                  ancilla = circ.lines();
+                  add_line_to_circuit( circ, "h", "h" );
+                }
+                line_mapping.push_back( ancilla );
+              }
 
               append_circuit( circ, subcirc, {}, line_mapping );
               return true;

@@ -159,13 +159,17 @@ void write_qcode( const circuit& circ, std::ostream& os )
         {
           os << "z q" << g.targets().front() << std::endl;
         }
+        else if ( pauli.root == 2 )
+        {
+          os << boost::format( "s q%d" ) % g.targets().front() << std::endl;
+        }
         else if ( pauli.root == 4 )
         {
           os << boost::format( "t%s q%d" ) % ( pauli.adjoint ? "dag" : "" ) % g.targets().front() << std::endl;
         }
         else
         {
-          os << boost::format( "[w] only fourth root of Pauli-Z supported, skipping" ) << std::endl;
+          os << boost::format( "[w] only first, second, and fourth root of Pauli-Z supported, skipping" ) << std::endl;
         }
         break;
       }
