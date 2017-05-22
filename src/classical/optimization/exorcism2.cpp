@@ -178,7 +178,7 @@ public:
   }
 
 private:
-  int add_cube( const cube2& c )
+  int add_cube( const cube2& c, bool add = true )
   {
     const auto lits = c.num_literals();
 
@@ -204,7 +204,7 @@ private:
     }
 
     /* 3. no 1-distance cube found, insert cube and copy pairs */
-    if ( cubes.is_dry() ) return 0;
+    if ( !add ) return 0;
     cubes.add( lits, last_added = c );
     for ( auto d = 2; d <= max_dist; ++d )
     {
@@ -212,14 +212,6 @@ private:
     }
 
     return 0;
-  }
-
-  int add_cube_dry( const cube2& c )
-  {
-    cubes.start_dry();
-    const auto r = add_cube( c );
-    cubes.stop_dry();
-    return r;
   }
 
   int pair_with_others( const cube2& c, unsigned level )
@@ -230,8 +222,8 @@ private:
       if ( d == 1 )
       {
         const auto new_cube = c.merge( *it );
-        cubes.remove_at( level, std::distance( cubes.begin( level ), it ) );
         last_removed = *it;
+        cubes.remove_at( level, std::distance( cubes.begin( level ), it ) );
         saved_lits = c.num_literals() == static_cast<int>( level ) ? 1 : 0;
         return add_cube( new_cube );
       }
@@ -272,18 +264,28 @@ private:
       const auto diff = p.first.differences( p.second );
       auto n = p.first.exorlink( p.second, 2, diff, &cube_groups2[0u] );
 
-      if ( add_cube_dry( n[0] ) || add_cube_dry( n[1] ) )
+      if ( add_cube( n[0], false ) )
+      {
+        add_cube( n[1] );
+      }
+      else if ( add_cube( n[1], false ) )
       {
         add_cube( n[0] );
-        add_cube( n[1] );
       }
       else
       {
         n = p.first.exorlink( p.second, 2, diff, &cube_groups2[4u] );
 
-        if ( add_cube_dry( n[0] ) || add_cube_dry( n[1] ) ||
-             ( improv_lits && ( ( n[0].num_literals() + n[1].num_literals() ) < ( c1_size + c2_size ) ) ) ||
-             ( reshape && ( ( n[0].num_literals() + n[1].num_literals() ) == ( c1_size + c2_size ) ) ) )
+        if ( add_cube( n[0], false ) )
+        {
+          add_cube( n[1] );
+        }
+        else if ( add_cube( n[1], false ) )
+        {
+          add_cube( n[0] );
+        }
+        else if ( ( improv_lits && ( ( n[0].num_literals() + n[1].num_literals() ) < ( c1_size + c2_size ) ) ) ||
+                  ( reshape && ( ( n[0].num_literals() + n[1].num_literals() ) == ( c1_size + c2_size ) ) ) )
         {
           add_cube( n[0] );
           add_cube( n[1] );
@@ -332,19 +334,54 @@ private:
       for ( auto g = 0u; g < 54u; g += 9u )
       {
         const auto n = p.first.exorlink( p.second, 3, diff, &cube_groups3[g] );
-        auto gain = 0u;
 
         for ( auto j = 0u; j < 3u; ++j )
         {
-          gain += add_cube_dry( n[j] );
-          if ( gain > 1 || ( reshape && gain == 1 ) )
+          const auto gain = add_cube( n[j], false );
+
+          if ( gain > 1 )
           {
             for ( auto k = 0u; k < 3u; ++k )
             {
-              add_cube( n[k] );
+              if ( j != k ) add_cube( n[k] );
             }
             found = true;
             break;
+          }
+          else if ( gain == 1 )
+          {
+            const auto n1 = j == 0 ? n[1] : n[0];
+            const auto n2 = j == 2 ? n[1] : n[2];
+
+            const auto _last_added = last_added;
+            const auto _last_removed = last_removed;
+            const auto _saved_lits = saved_lits;
+
+            if ( add_cube( n1, false ) )
+            {
+              add_cube( n2 );
+              found = true;
+              break;
+            }
+            else if ( add_cube( n2, false ) )
+            {
+              add_cube( n1 );
+              found = true;
+              break;
+            }
+            else if ( ( improv_lits && ( ( n1.num_literals() + n2.num_literals() - _saved_lits ) < ( c1_size + c2_size ) ) ) ||
+                      ( reshape && ( ( n1.num_literals() + n2.num_literals() - _saved_lits ) == ( c1_size + c2_size ) ) ) )
+            {
+              add_cube( n1 );
+              add_cube( n2 );
+              found = true;
+              break;
+            }
+            else
+            {
+              cubes.remove( _last_added.num_literals(), _last_added );
+              cubes.add( _last_removed.num_literals(), _last_removed );
+            }
           }
         }
 
@@ -373,7 +410,7 @@ private:
   }
 
 private:
-  hash_backtrack_buckets<cube2> cubes;
+  hash_buckets<cube2> cubes;
   int num_vars;
   int init_cubes_size;
 
