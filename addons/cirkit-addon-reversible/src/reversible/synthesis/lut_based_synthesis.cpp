@@ -91,13 +91,19 @@ gate& append_stg_from_line_map( circuit& circ, uint64_t func, uint64_t affine_cl
 properties::ptr merge_properties( const properties::ptr& p1, const properties::ptr& p2 )
 {
   const auto p = std::make_shared<properties>();
-  for ( const auto& kv : *p1 )
+  if ( p1 )
   {
-    set( p, kv.first, kv.second );
+    for ( const auto& kv : *p1 )
+    {
+      set( p, kv.first, kv.second );
+    }
   }
-  for ( const auto& kv : *p2 )
+  if ( p2 )
   {
-    set( p, kv.first, kv.second );
+    for ( const auto& kv : *p2 )
+    {
+      set( p, kv.first, kv.second );
+    }
   }
   return p;
 }
@@ -495,7 +501,7 @@ public:
     const auto lut = gia().extract_lut( index );
 
     esop_synthesis_wrapper( lut, circ(), line_map,
-                            progress, cover_method, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpfile,
+                            progress, cover_method, optimize_esop, optimize_postesop, get( settings, "script", exorcism_script::def_wo4 ), dumpfile,
                             cover_runtime, exorcism_runtime, dumpfile_counter );
 
     return true;
@@ -667,7 +673,7 @@ public:
           const auto lut = sub_lut.extract_lut( index );
 
           esop_synthesis_wrapper( lut, circ(), local_line_map,
-                                  progress, cover_method, optimize_esop, optimize_postesop, settings->get<exorcism_script>( "script" ), dumpfile,
+                                  progress, cover_method, optimize_esop, optimize_postesop, get( settings, "script", exorcism_script::def_wo4 ), dumpfile,
                                   cover_runtime, exorcism_runtime, dumpfile_counter );
 
           if ( progress )
