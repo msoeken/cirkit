@@ -43,6 +43,7 @@ namespace cirkit
 {
 
 aig_graph read_verilog_with_abc( const std::string& filename, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
+aig_graph read_verilog_string_with_abc( const std::string& str, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }
 
