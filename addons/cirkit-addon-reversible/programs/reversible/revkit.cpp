@@ -53,6 +53,7 @@
 #include <reversible/cli/stores.hpp>
 #include <reversible/cli/commands/adding_lines.hpp>
 #include <reversible/cli/commands/cbs.hpp>
+#include <reversible/cli/commands/d1s.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/dxs.hpp>
 #include <reversible/cli/commands/embed.hpp>
@@ -121,6 +122,7 @@ int main( int argc, char ** argv )
   cli.set_category( "Synthesis" );
 
   ADD_COMMAND( cbs );
+  ADD_COMMAND( d1s );
   ADD_COMMAND( dbs );
   ADD_COMMAND( dxs );
   ADD_COMMAND( esopbs );
