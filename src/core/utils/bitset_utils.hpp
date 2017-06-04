@@ -49,6 +49,7 @@ namespace cirkit
 {
 
 boost::dynamic_bitset<>& inc( boost::dynamic_bitset<>& bitset );
+boost::dynamic_bitset<>& inc_pos( boost::dynamic_bitset<>& bitset, const boost::dynamic_bitset<>& mask );
 
 template<typename Fn>
 void foreach_bitset( unsigned num_bits, const Fn&& func )

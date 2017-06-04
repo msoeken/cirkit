@@ -45,6 +45,18 @@ boost::dynamic_bitset<>& inc( boost::dynamic_bitset<>& bitset )
   return bitset;
 }
 
+boost::dynamic_bitset<>& inc_pos( boost::dynamic_bitset<>& bitset, const boost::dynamic_bitset<>& mask )
+{
+  auto pos = mask.find_first();
+  while ( pos != boost::dynamic_bitset<>::npos )
+  {
+    bitset.flip( pos );
+    if ( bitset.test( pos ) ) break;
+    pos = mask.find_next( pos );
+  }
+  return bitset;
+}
+
 std::vector<boost::dynamic_bitset<>> transpose( const std::vector<boost::dynamic_bitset<>>& vs )
 {
   std::vector<boost::dynamic_bitset<>> ts( vs.front().size(), boost::dynamic_bitset<>( vs.size() ) );
