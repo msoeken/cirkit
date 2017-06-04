@@ -285,6 +285,8 @@ tt tt_from_expression( const expression_t::ptr& expr );
 
 tt tt_from_sop_spec( const std::string& spec );
 
+std::vector<int> walsh_spectrum( const tt& func );
+
 }
 
 #endif

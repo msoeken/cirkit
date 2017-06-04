@@ -48,38 +48,6 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-std::vector<int> walsh_spectrum( const tt& func )
-{
-  const auto n = tt_num_vars( func );
-
-  std::vector<int> spectra( func.size(), 0u );
-  foreach_bit( func, [&spectra]( unsigned pos ) { spectra[pos] = 1u; } );
-
-  /* butterfly loops */
-  for ( auto i = 0u; i < n; ++i )
-  {
-    auto i1 = 0u;
-
-    const unsigned d = ( 1 << ( n - 1 - i ) );
-    /* blocks? */
-    for ( auto b = 0u; b < ( 1 << i ); ++b, i1 += d )
-    {
-      /* block elements */
-      for ( auto e = 0u; e < d; ++e, ++i1 )
-      {
-        const auto i2 = i1 + d;
-
-        const auto v1 = spectra[i1] + spectra[i2];
-        const auto v2 = spectra[i1] - spectra[i2];
-        spectra[i1] = v1;
-        spectra[i2] = v2;
-      }
-    }
-  }
-
-  return spectra;
-}
-
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
