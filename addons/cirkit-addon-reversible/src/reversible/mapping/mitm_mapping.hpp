@@ -42,6 +42,7 @@
 namespace cirkit
 {
 
+void append_mitm( circuit& circ, unsigned control1, unsigned control2, unsigned target );
 circuit mitm_mapping( const circuit& src, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }

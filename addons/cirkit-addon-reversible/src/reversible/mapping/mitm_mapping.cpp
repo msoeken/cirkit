@@ -47,10 +47,30 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
+void append_mitm( circuit& circ, unsigned control1, unsigned control2, unsigned target )
+{
+  append_hadamard( circ, target );
+  append_pauli( circ, control1, pauli_axis::Z, 4u );
+  append_pauli( circ, control2, pauli_axis::Z, 4u );
+  append_pauli( circ, target, pauli_axis::Z, 4u );
+  append_cnot( circ, control2, control1 );
+  append_cnot( circ, target, control2 );
+  append_cnot( circ, control1, target );
+  append_pauli( circ, control2, pauli_axis::Z, 4u, true );
+  append_cnot( circ, control1, control2 );
+  append_pauli( circ, control1, pauli_axis::Z, 4u, true );
+  append_pauli( circ, control2, pauli_axis::Z, 4u, true );
+  append_pauli( circ, target, pauli_axis::Z, 4u );
+  append_cnot( circ, target, control2 );
+  append_cnot( circ, control1, target );
+  append_cnot( circ, control2, control1 );
+  append_hadamard( circ, target );
+}
+
 circuit mitm_mapping( const circuit& src, const properties::ptr& settings, const properties::ptr& statistics )
 {
   properties_timer t( statistics );
-  
+
   circuit dest( src.lines() );
   copy_metadata( src, dest );
 
@@ -76,26 +96,11 @@ circuit mitm_mapping( const circuit& src, const properties::ptr& settings, const
       const auto c1 = g.controls()[0u].line();
       const auto c2 = g.controls()[1u].line();
 
-      append_hadamard( dest, target );
-      append_pauli( dest, c1, pauli_axis::Z, 4u );
-      append_pauli( dest, c2, pauli_axis::Z, 4u );
-      append_pauli( dest, target, pauli_axis::Z, 4u );
-      append_cnot( dest, c2, c1 );
-      append_cnot( dest, target, c2 );
-      append_cnot( dest, c1, target );
-      append_pauli( dest, c2, pauli_axis::Z, 4u, true );
-      append_cnot( dest, c1, c2 );
-      append_pauli( dest, c1, pauli_axis::Z, 4u, true );
-      append_pauli( dest, c2, pauli_axis::Z, 4u, true );
-      append_pauli( dest, target, pauli_axis::Z, 4u );
-      append_cnot( dest, target, c2 );
-      append_cnot( dest, c1, target );
-      append_cnot( dest, c2, c1 );
-      append_hadamard( dest, target );
+      append_mitm( dest, c1, c2, target );
       break;
     }
   }
-  
+
   return dest;
 }
 
