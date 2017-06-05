@@ -261,14 +261,14 @@ void minimize_order( std::vector<int>& spectrum, tt& func )
     const auto row = 1u << var;
     /* sweep through the other ones */
     auto best_row = row;
-    auto best_val = abs( spectrum[row] );
+    auto best_val = spectrum[row];
     for ( auto row2 = row + 1u; row2 < spectrum.size(); ++row2 )
     {
       if ( ( row & row2 ) != row ) continue;
 
-      if ( abs( spectrum[row2] ) > best_val )
+      if ( compare_abs( spectrum[row2], best_val ) == 1 )
       {
-        best_val = abs( spectrum[row2] );
+        best_val = spectrum[row2];
         best_row = row2;
       }
     }
