@@ -445,7 +445,7 @@ unsigned get_spectral_class( const tt& func )
   assert( nvars >= 2u && nvars <= 4u );
 
   auto spectrum = rademacher_walsh_spectrum( func );
-  std::transform( spectrum.begin(), spectrum.end(), spectrum.begin(), abs );
+  std::transform( spectrum.begin(), spectrum.end(), spectrum.begin(), []( int i ) { return abs( i ); } );
   std::sort( spectrum.begin(), spectrum.end(), std::not2( std::less<int>() ) );
 
   switch ( nvars )
