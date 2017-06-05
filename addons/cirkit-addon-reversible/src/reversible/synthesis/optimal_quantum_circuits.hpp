@@ -94,6 +94,24 @@ const std::vector<std::unordered_map<uint64_t, unsigned>> affine_classification_
     {{0x0000, 0},{0x0001, 1},{0x0003, 2},{0x0007, 3},{0x000f, 4},{0x0017, 5},{0x001f, 6},{0x003f, 7},{0x007f, 8},{0x00ff, 9},{0x0117, 10},{0x011f, 11},{0x013f, 12},{0x017f, 13},{0x033f, 14},{0x0356, 15},{0x0357, 16},{0x035f, 17}}
 };
 
+const std::vector<std::vector<unsigned>> spectral_classification_tcount = {
+  {0, 7},
+  {0, 16, 7},
+  {0, 24, 16, 31, 7, 15, 36, 12}
+};
+
+const std::vector<std::vector<unsigned>> spectral_classification_representative = {
+  {0x0, 0x8},
+  {0x00, 0x80, 0x88},
+  {0x0000, 0x8000, 0x8080, 0x0888, 0x8888, 0x7080, 0x7880, 0x7888}
+};
+
+const std::vector<std::unordered_map<uint64_t, unsigned>> spectral_classification_index = {
+  {{0x0, 0}, {0x8, 1}},
+  {{0x00, 0}, {0x80, 1}, {0x88, 2}},
+  {{0x0000, 0}, {0x8000, 1}, {0x8080, 2}, {0x0888, 3}, {0x8888, 4}, {0x7080, 5}, {0x7880, 6}, {0x7888, 7}}
+};
+
 }
 
 }

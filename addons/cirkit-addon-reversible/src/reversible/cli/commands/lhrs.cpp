@@ -67,9 +67,10 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description lutdecomp_options( "LUT decomposition options" );
   lutdecomp_options.add_options()
-    ( "satlut,s",                                      "optimize mapping with SAT where possible" )
-    ( "area_iters", value_with_default( &area_iters ), "number of exact area recovery iterations" )
-    ( "flow_iters", value_with_default( &flow_iters ), "number of area flow recovery iterations" )
+    ( "satlut,s",                                          "optimize mapping with SAT where possible" )
+    ( "area_iters",   value_with_default( &area_iters ),   "number of exact area recovery iterations" )
+    ( "flow_iters",   value_with_default( &flow_iters ),   "number of area flow recovery iterations" )
+    ( "class_method", value_with_default( &class_method ), "classification method\n0: spectral classification\n1: affine classificiation" )
     ;
   opts.add( lutdecomp_options );
 
@@ -123,6 +124,7 @@ bool lhrs_command::execute()
   settings->set( "satlut", is_set( "satlut" ) );
   settings->set( "area_iters", area_iters );
   settings->set( "flow_iters", flow_iters );
+  settings->set( "class_method", class_method );
 
   if ( is_set( "dumpfile" ) )
   {

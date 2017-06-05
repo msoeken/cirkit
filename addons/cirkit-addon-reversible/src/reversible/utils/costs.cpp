@@ -220,15 +220,24 @@ namespace cirkit
       const auto num_vars = boost::integer_log2( spec.size() );
       if ( num_vars >= 2 && num_vars <= 4 )
       {
-        const auto& idx_map = optimal_quantum_circuits::affine_classification_index[num_vars - 2u];
+        const auto& idx_map = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u];
         const auto it = idx_map.find( spec.to_ulong() );
         if ( it == idx_map.end() )
         {
-          return 0ull; /* UNKNOWN */
+          const auto& idx_map = optimal_quantum_circuits::affine_classification_index[num_vars - 2u];
+          const auto it = idx_map.find( spec.to_ulong() );
+          if ( it == idx_map.end() )
+          {
+            return 0ull; /* UNKNOWN */
+          }
+          else
+          {
+            return optimal_quantum_circuits::affine_classification_tcount[num_vars - 2u][it->second];
+          }
         }
         else
         {
-          return optimal_quantum_circuits::affine_classification_tcount[num_vars - 2u][it->second];
+          return optimal_quantum_circuits::spectral_classification_tcount[num_vars - 2u][it->second];
         }
       }
       else

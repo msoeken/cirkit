@@ -42,6 +42,7 @@
 #include <classical/abc/gia/gia_utils.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
 #include <classical/functions/linear_classification.hpp>
+#include <classical/functions/spectral_canonization.hpp>
 #include <classical/io/read_blif.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
 #include <classical/utils/truth_table_utils.hpp>
@@ -535,6 +536,7 @@ public:
       cover_method( get( settings, "cover_method", gia_graph::esop_cover_method::aig ) ),
       optimize_esop( get( settings, "optimize_esop", true ) ),
       optimize_postesop( get( settings, "optimize_postesop", false ) ),
+      class_method( get( settings, "class_method", 0u ) ),
       progress( get( settings, "progress", false ) ),
       dumpfile( get( settings, "dumpfile", std::string() ) ),
       mapping_runtime( settings->get<double*>( "mapping_runtime" ) ),
@@ -688,7 +690,7 @@ public:
   }
 
 private:
-  inline uint64_t classify( uint64_t func, unsigned num_vars ) const
+  inline uint64_t classify_affine( uint64_t func, unsigned num_vars ) const
   {
     increment_timer t( class_runtime );
 
@@ -707,6 +709,31 @@ private:
     return afunc;
   }
 
+  inline uint64_t classify_spectral( uint64_t func, unsigned num_vars ) const
+  {
+    increment_timer t( class_runtime );
+
+    uint64_t sfunc{};
+    const auto it = class_hash[num_vars - 2u].find( func );
+    if ( it == class_hash[num_vars - 2u].end() )
+    {
+      const auto idx = get_spectral_class( tt( 1 << num_vars, func ) );
+      sfunc = optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx];
+      class_hash[num_vars - 2u].insert( std::make_pair( func, sfunc ) );
+    }
+    else
+    {
+      sfunc = it->second;
+    }
+    ++class_counter[num_vars - 2u][optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].at( sfunc )];
+    return sfunc;
+  }
+
+  inline uint64_t classify( uint64_t func, unsigned num_vars ) const
+  {
+    return class_method == 0u ? classify_spectral( func, num_vars ) : classify_affine( func, num_vars );
+  }
+
 private:
   mutable std::vector<std::unordered_map<uint64_t, uint64_t>> class_hash;
 
@@ -721,6 +748,7 @@ private: /* statistics */
   gia_graph::esop_cover_method cover_method = gia_graph::esop_cover_method::aig; /* method to extract initial ESOP cover */
   bool optimize_esop                        = true;                              /* optimize ESOP cover */
   bool optimize_postesop                    = false;                             /* optimize ESOP synthesized circuit */
+  unsigned class_method                     = 0u;                                /* classification method: 0u: spectral, 1u: affine */
   bool progress                             = false;                             /* show progress line */
   std::string dumpfile;  /* dump ESOP file for each ESP cover */
 
