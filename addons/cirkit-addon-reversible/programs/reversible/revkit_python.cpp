@@ -64,6 +64,7 @@
 #include <reversible/cli/commands/hdbs.hpp>
 #include <reversible/cli/commands/is_identity.hpp>
 #include <reversible/cli/commands/lhrs.hpp>
+#include <reversible/cli/commands/maslov234.hpp>
 #include <reversible/cli/commands/mitm.hpp>
 #include <reversible/cli/commands/nct.hpp>
 #include <reversible/cli/commands/pos.hpp>
@@ -77,6 +78,7 @@
 #include <reversible/cli/commands/stg4.hpp>
 #include <reversible/cli/commands/tbs.hpp>
 #include <reversible/cli/commands/tof.hpp>
+#include <reversible/cli/commands/tpar.hpp>
 #include <reversible/cli/commands/unique_names.hpp>
 
 using namespace cirkit;
@@ -151,8 +153,10 @@ public:
       entry<adding_lines_command>( "adding_lines"s, env ),
       entry<exorcism_command>( "exorcism"s, env ),
       entry<revsimp_command>( "revsimp"s, env ),
+      entry<tpar_command>( "tpar"s, env ),
 
       entry<filter_command>( "filter"s, env ),
+      entry<maslov234_command>( "mitm"s, env ),
       entry<mitm_command>( "mitm"s, env ),
       entry<nct_command>( "nct"s, env ),
       entry<pos_command>( "pos"s, env ),

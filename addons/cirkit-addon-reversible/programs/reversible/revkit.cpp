@@ -65,6 +65,7 @@
 #include <reversible/cli/commands/hdbs.hpp>
 #include <reversible/cli/commands/is_identity.hpp>
 #include <reversible/cli/commands/lhrs.hpp>
+#include <reversible/cli/commands/maslov234.hpp>
 #include <reversible/cli/commands/mitm.hpp>
 #include <reversible/cli/commands/nct.hpp>
 #include <reversible/cli/commands/pos.hpp>
@@ -79,6 +80,7 @@
 #include <reversible/cli/commands/stg4.hpp>
 #include <reversible/cli/commands/tbs.hpp>
 #include <reversible/cli/commands/tof.hpp>
+#include <reversible/cli/commands/tpar.hpp>
 #include <reversible/cli/commands/unique_names.hpp>
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
@@ -138,10 +140,12 @@ int main( int argc, char ** argv )
   ADD_COMMAND( adding_lines );
   ADD_COMMAND( exorcism );
   ADD_COMMAND( revsimp );
+  ADD_COMMAND( tpar );
 
   cli.set_category( "Mapping and rewriting" );
 
   ADD_COMMAND( filter );
+  ADD_COMMAND( maslov234 );
   ADD_COMMAND( mitm );
   ADD_COMMAND( nct );
   ADD_COMMAND( pos );
