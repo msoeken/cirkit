@@ -369,6 +369,7 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
 
   const auto nvars = tt_num_vars( func );
   auto spectrum = rademacher_walsh_spectrum( func );
+  set( statistics, "spectrum_init", spectrum );
   auto cfunc = func;
 
   if ( verbose )
@@ -418,6 +419,8 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
     std::cout << cfunc << std::endl;
   }
 
+  set( statistics, "spectrum_final", spectrum );
+
   // if ( !( ( spectrum == std::vector<int>( {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} ) ) ||
   //         ( spectrum == std::vector<int>( {14, 2, 2, -2, 2, -2, -2, 2, 2, -2, -2, 2, -2, 2, 2, -2} ) ) ||
   //         ( spectrum == std::vector<int>( {12, 4, 4, -4, 4, -4, -4, 4, 0, 0, 0, 0, 0, 0, 0, 0} ) ) ||
@@ -433,6 +436,43 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
   // }
 
   return cfunc;
+}
+
+unsigned get_spectral_class( const tt& func )
+{
+  const auto nvars = tt_num_vars( func );
+
+  assert( nvars >= 2u && nvars <= 4u );
+
+  auto spectrum = rademacher_walsh_spectrum( func );
+  std::transform( spectrum.begin(), spectrum.end(), spectrum.begin(), abs );
+  std::sort( spectrum.begin(), spectrum.end(), std::not2( std::less<int>() ) );
+
+  switch ( nvars )
+  {
+  case 2u:
+    return spectrum.front() == 4 ? 0u : 1u;
+  case 3u:
+    switch ( spectrum.front() )
+    {
+    case 8: return 0u;
+    case 6: return 1u;
+    case 4: return 2u;
+    } break;
+  case 4u:
+    switch ( spectrum.front() )
+    {
+    case 16: return 0u;
+    case 14: return 1u;
+    case 12: return 2u;
+    case 10: return 3u;
+    case 8: return spectrum[2u] == 8 ? 4u : 5u;
+    case 6: return 6u;
+    case 4: return 7u;
+    } break;
+  }
+
+  return 0u;
 }
 
 }

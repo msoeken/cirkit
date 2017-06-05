@@ -44,6 +44,8 @@ namespace cirkit
 
 tt spectral_canonization( const tt& func, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
+unsigned get_spectral_class( const tt& func );
+
 }
 
 #endif
