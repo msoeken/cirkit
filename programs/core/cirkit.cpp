@@ -74,6 +74,7 @@
 #include <classical/cli/commands/shuffle.hpp>
 #include <classical/cli/commands/simgraph.hpp>
 #include <classical/cli/commands/simulate.hpp>
+#include <classical/cli/commands/spectral.hpp>
 #include <classical/cli/commands/strash.hpp>
 #include <classical/cli/commands/support.hpp>
 #include <classical/cli/commands/tt.hpp>
@@ -144,6 +145,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( dectest );
   ADD_COMMAND( npn );
   ADD_COMMAND( permmask );
+  ADD_COMMAND( spectral );
   ADD_COMMAND( tt );
 
   cli.set_category( "Synthesis" );
