@@ -311,6 +311,14 @@ class package_gcc:
     build       = ["./contrib/download_prerequisites", "mkdir build; cd build; ../configure --enable-languages=c,c++ --disable-multilib --prefix=../../../../ext; make -j%d" % multiprocessing.cpu_count()]
     install     = ["make install"]
 
+class package_tpar:
+    description = "A quantum circuit optimizer based on sum-over-paths representations"
+    subdir      = "t-par"
+    url         = "https://github.com/meamy/t-par.git"
+    fmt         = "git"
+    build       = [ "make -j%d" % multiprocessing.cpu_count() ]
+    install     = [ "cp -v t-par %s" ]
+
 ################################################################################
 # Foreign packages                                                             #
 ################################################################################
