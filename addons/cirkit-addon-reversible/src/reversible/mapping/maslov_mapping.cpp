@@ -39,11 +39,9 @@
 namespace cirkit
 {
 
-bool has_negative_control( const gate& g )
-{
-  return std::find_if( g.controls().begin(), g.controls().end(),
-                       []( const variable& v ) { return !v.polarity(); } ) != g.controls().end();
-}
+/******************************************************************************
+ * private functions                                                          *
+ ******************************************************************************/
 
 unsigned find_first_empty_line( const gate& g )
 {
@@ -57,6 +55,98 @@ unsigned find_first_empty_line( const gate& g )
   while ( line < lines.size() && lines[line] == line ) ++line;
   return line;
 }
+
+void append_srts( circuit& circ, unsigned a, unsigned b, unsigned c )
+{
+  append_hadamard( circ, c );
+  append_cnot( circ, c, b );
+  append_pauli( circ, b, pauli_axis::Z, 4u, true );
+  append_cnot( circ, a, b );
+  append_pauli( circ, b, pauli_axis::Z, 4u );
+  append_cnot( circ, c, b );
+  append_pauli( circ, b, pauli_axis::Z, 4u, true );
+  append_cnot( circ, a, b );
+  append_pauli( circ, b, pauli_axis::Z, 4u );
+}
+
+void append_srts_inv( circuit& circ, unsigned a, unsigned b, unsigned c )
+{
+  append_pauli( circ, b, pauli_axis::Z, 4u, true );
+  append_cnot( circ, a, b );
+  append_pauli( circ, b, pauli_axis::Z, 4u );
+  append_cnot( circ, c, b );
+  append_pauli( circ, b, pauli_axis::Z, 4u, true );
+  append_cnot( circ, a, b );
+  append_pauli( circ, b, pauli_axis::Z, 4u );
+  append_cnot( circ, c, b );
+  append_hadamard( circ, c );
+}
+
+void append_rts( circuit& circ, unsigned a, unsigned b, unsigned c )
+{
+  append_hadamard( circ, c );
+  append_pauli( circ, c, pauli_axis::Z, 4u );
+  append_cnot( circ, b, c );
+  append_pauli( circ, c, pauli_axis::Z, 4u, true );
+  append_cnot( circ, a, c );
+}
+
+void append_rts_inv( circuit& circ, unsigned a, unsigned b, unsigned c )
+{
+  append_cnot( circ, a, c );
+  append_pauli( circ, c, pauli_axis::Z, 4u );
+  append_cnot( circ, b, c );
+  append_pauli( circ, c, pauli_axis::Z, 4u, true );
+  append_hadamard( circ, c );
+}
+
+void append_rtl4( circuit& circ, unsigned a, unsigned b, unsigned c, unsigned d )
+{
+  append_hadamard( circ, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u );
+  append_cnot( circ, c, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u, true );
+  append_hadamard( circ, d );
+  append_cnot( circ, a, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u );
+  append_cnot( circ, b, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u, true );
+  append_cnot( circ, a, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u );
+  append_cnot( circ, b, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u, true );
+  append_hadamard( circ, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u );
+  append_cnot( circ, c, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u, true );
+  append_hadamard( circ, d );
+}
+
+void append_rtl4_inv( circuit& circ, unsigned a, unsigned b, unsigned c, unsigned d )
+{
+  append_hadamard( circ, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u );
+  append_cnot( circ, c, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u, true );
+  append_hadamard( circ, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u );
+  append_cnot( circ, b, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u, true );
+  append_cnot( circ, a, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u );
+  append_cnot( circ, b, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u, true );
+  append_cnot( circ, a, d );
+  append_hadamard( circ, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u );
+  append_cnot( circ, c, d );
+  append_pauli( circ, d, pauli_axis::Z, 4u, true );
+  append_hadamard( circ, d );
+}
+
+/******************************************************************************
+ * public functions                                                           *
+ ******************************************************************************/
 
 circuit maslov_mapping( const circuit& src, const properties::ptr& settings, const properties::ptr& statistics )
 {
@@ -104,15 +194,7 @@ circuit maslov_mapping( const circuit& src, const properties::ptr& settings, con
             append_hadamard( dest, hl );
 
             // S-R2-TOF(c3, hl, target)
-            append_hadamard( dest, target );
-            append_cnot( dest, target, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c3, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, target, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c3, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
+            append_srts( dest, c3, hl, target );
 
             // R1-TOF^-1(c1, c2, hl)
             append_hadamard( dest, hl );
@@ -126,15 +208,7 @@ circuit maslov_mapping( const circuit& src, const properties::ptr& settings, con
             append_hadamard( dest, hl );
 
             // S-R2-TOF^-1(c3, hl, target)
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c3, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, target, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c3, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, target, hl );
-            append_hadamard( dest, target );
+            append_srts_inv( dest, c3, hl, target );
           } break;
 
         case 4u:
@@ -145,65 +219,31 @@ circuit maslov_mapping( const circuit& src, const properties::ptr& settings, con
             const auto c4 = g.controls()[3u].line();
             const auto hl = find_first_empty_line( g );
 
-            append_hadamard( dest, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, c3, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_hadamard( dest, hl );
-            append_cnot( dest, c1, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, c2, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c1, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, c2, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_hadamard( dest, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, c3, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_hadamard( dest, hl );
+            append_rtl4( dest, c1, c2, c3, hl );
+            append_srts( dest, c4, hl, target );
+            append_rtl4_inv( dest, c1, c2, c3, hl );
+            append_srts_inv( dest, c4, hl, target );
+          } break;
 
-            // S-R2-TOF(c4, hl, target)
-            append_hadamard( dest, target );
-            append_cnot( dest, target, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c4, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, target, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c4, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
+        case 5u:
+          {
+            const auto c1 = g.controls()[0u].line();
+            const auto c2 = g.controls()[1u].line();
+            const auto c3 = g.controls()[2u].line();
+            const auto c4 = g.controls()[3u].line();
+            const auto c5 = g.controls()[4u].line();
+            const auto hl1 = find_first_empty_line( g );
+            const auto hl2 = hl1 + 1u; // TODO
 
-            append_hadamard( dest, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, c3, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_hadamard( dest, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, c2, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c1, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, c2, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c1, hl );
-            append_hadamard( dest, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, c3, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_hadamard( dest, hl );
+            append_srts( dest, c5, hl2, target );
+            append_rts( dest, hl1, c4, hl2 );
+            append_rtl4( dest, c1, c2, c3, hl1 );
+            append_rts_inv( dest, hl1, c4, hl2 );
 
-            // S-R2-TOF^-1(c4, hl, target)
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c4, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, target, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u, true );
-            append_cnot( dest, c4, hl );
-            append_pauli( dest, hl, pauli_axis::Z, 4u );
-            append_cnot( dest, target, hl );
-            append_hadamard( dest, target );
+            append_srts_inv( dest, c5, hl2, target );
+            append_rts( dest, hl1, c4, hl2 );
+            append_rtl4_inv( dest, c1, c2, c3, hl1 );
+            append_rts_inv( dest, hl1, c4, hl2 );
           } break;
         }
 
@@ -211,9 +251,14 @@ circuit maslov_mapping( const circuit& src, const properties::ptr& settings, con
       }
     } );
 
-  if ( has_fully_controlled_gate( src ) )
+  if ( has_fully_controlled_gate( src ) && src.lines() > 3u )
   {
     add_line_to_circuit( circ, "h", "h", false, true );
+
+    if ( src.lines() == 6u ) /* TODO */
+    {
+      add_line_to_circuit( circ, "h", "h", false, true );
+    }
   }
 
   return circ;
