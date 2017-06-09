@@ -68,6 +68,7 @@
 #include <reversible/cli/commands/maslov234.hpp>
 #include <reversible/cli/commands/mitm.hpp>
 #include <reversible/cli/commands/nct.hpp>
+#include <reversible/cli/commands/perm.hpp>
 #include <reversible/cli/commands/pos.hpp>
 #include <reversible/cli/commands/qbs.hpp>
 #include <reversible/cli/commands/random_circuit.hpp>
@@ -178,6 +179,7 @@ int main( int argc, char ** argv )
   ADD_COMMAND( bdd );
   ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
+  ADD_COMMAND( perm );
   ADD_COMMAND( print_io );
   ADD_COMMAND( random_circuit );
   ADD_COMMAND( tt );
