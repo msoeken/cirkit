@@ -46,7 +46,9 @@
 #include <reversible/io/read_realization.hpp>
 #include <reversible/io/read_specification.hpp>
 #include <reversible/io/write_liquid.hpp>
+#include <reversible/io/write_numpy.hpp>
 #include <reversible/io/write_pla.hpp>
+#include <reversible/io/write_projectq.hpp>
 #include <reversible/io/write_qc.hpp>
 #include <reversible/io/write_qcode.hpp>
 #include <reversible/io/write_qpic.hpp>
@@ -306,6 +308,18 @@ template<>
 void store_write_io_type<circuit, io_qcode_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   write_qcode( circ, filename );
+}
+
+template<>
+void store_write_io_type<circuit, io_numpy_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
+{
+  write_numpy( circ, filename );
+}
+
+template<>
+void store_write_io_type<circuit, io_projectq_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
+{
+  write_projectq( circ, filename );
 }
 
 /******************************************************************************

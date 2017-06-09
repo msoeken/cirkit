@@ -56,6 +56,8 @@ struct io_spec_tag_t {};
 struct io_quipper_tag_t {};
 struct io_liquid_tag_t {};
 struct io_tikz_tag_t {};
+struct io_numpy_tag_t {};
+struct io_projectq_tag_t {};
 struct io_qpic_tag_t {};
 struct io_qc_tag_t {};
 struct io_qcode_tag_t {};
@@ -155,6 +157,18 @@ inline bool store_can_write_io_type<circuit, io_qcode_tag_t>( command& cmd ) { r
 
 template<>
 void store_write_io_type<circuit, io_qcode_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
+
+template<>
+inline bool store_can_write_io_type<circuit, io_numpy_tag_t>( command& cmd ) { return true; }
+
+template<>
+void store_write_io_type<circuit, io_numpy_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
+
+template<>
+inline bool store_can_write_io_type<circuit, io_projectq_tag_t>( command& cmd ) { return true; }
+
+template<>
+void store_write_io_type<circuit, io_projectq_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
 
 /******************************************************************************
  * binary_truth_table                                                         *

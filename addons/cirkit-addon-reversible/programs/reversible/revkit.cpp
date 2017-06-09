@@ -106,7 +106,9 @@ int main( int argc, char ** argv )
   ADD_READ_COMMAND( verilog, "Verilog" );
   ADD_WRITE_COMMAND( aiger, "Aiger" );
   ADD_WRITE_COMMAND( liquid, "LIQUi|>" );
+  ADD_WRITE_COMMAND( numpy, "NumPy" );
   ADD_WRITE_COMMAND( pla, "PLA" );
+  ADD_WRITE_COMMAND( projectq, "ProjectQ" );
   ADD_WRITE_COMMAND( qc, "QC" );
   ADD_WRITE_COMMAND( qcode, "QCode" );
   ADD_WRITE_COMMAND( qpic, "qpic" );
