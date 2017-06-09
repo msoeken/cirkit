@@ -218,7 +218,7 @@ namespace cirkit
       const auto& tag = boost::any_cast<stg_tag>( g.type() );
       const auto spec = tag.affine_class.size() ? tag.affine_class : tag.function;
       const auto num_vars = boost::integer_log2( spec.size() );
-      if ( num_vars >= 2 && num_vars <= 4 )
+      if ( num_vars >= 2 && num_vars <= 5 )
       {
         const auto& idx_map = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u];
         const auto it = idx_map.find( spec.to_ulong() );
@@ -228,6 +228,7 @@ namespace cirkit
           const auto it = idx_map.find( spec.to_ulong() );
           if ( it == idx_map.end() )
           {
+            std::cout << "[e] unknown cost for STG" << std::endl;
             return 0ull; /* UNKNOWN */
           }
           else
@@ -242,6 +243,7 @@ namespace cirkit
       }
       else
       {
+        std::cout << "[e] unknown cost for STG" << std::endl;
         return 0ull; /* UNKNOWN */
       }
     }
