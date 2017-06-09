@@ -116,7 +116,7 @@ properties::ptr merge_properties( const properties::ptr& p1, const properties::p
 class lut_order_heuristic
 {
 public:
-  enum step_type { pi, po, inv_po, compute, uncompute };
+  enum step_type { pi, po, inv_po, zero_po, one_po, compute, uncompute };
 
   /* describes a single computation step */
   struct step
@@ -185,7 +185,14 @@ protected:
   {
     _gia.foreach_output( [this]( int index, int e ) {
         const auto driver = abc::Gia_ObjFaninLit0p( _gia, abc::Gia_ManCo( _gia, e ) );
-        add_step( index, node_to_line( abc::Abc_Lit2Var( driver ) ), abc::Abc_LitIsCompl( driver ) ? step_type::inv_po : step_type::po );
+        if ( abc::Abc_Lit2Var( driver ) == 0 )
+        {
+          add_step( index, 0, abc::Abc_LitIsCompl( driver ) ? step_type::one_po : step_type::zero_po );
+        }
+        else
+        {
+          add_step( index, node_to_line( abc::Abc_Lit2Var( driver ) ), abc::Abc_LitIsCompl( driver ) ? step_type::inv_po : step_type::po );
+        }
       } );
   }
 
@@ -266,6 +273,8 @@ std::ostream& operator<<( std::ostream& os, const lut_order_heuristic::step& s )
   case lut_order_heuristic::pi:        os << "PI"; break;
   case lut_order_heuristic::po:        os << "PO"; break;
   case lut_order_heuristic::inv_po:    os << "PO'"; break;
+  case lut_order_heuristic::zero_po:   os << "ZERO"; break;
+  case lut_order_heuristic::one_po:    os << "ONE"; break;
   case lut_order_heuristic::compute:   os << "COMPUTE"; break;
   case lut_order_heuristic::uncompute: os << "UNCOMPUTE"; break;
   }
@@ -527,8 +536,8 @@ class lutdecomp_lut_partial_synthesizer : public lut_partial_synthesizer
 public:
   explicit lutdecomp_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
     : lut_partial_synthesizer( circ, gia, settings, statistics ),
-      class_counter( 3u ),
-      class_hash( 3u ),
+      class_counter( 4u ),
+      class_hash( 4u ),
       lut_size_max( gia.max_lut_size() ),
       satlut( get( settings, "satlut", false ) ),
       area_iters( get( settings, "area_iters", 2u ) ),
@@ -548,6 +557,7 @@ public:
     class_counter[0u].resize( 3u );
     class_counter[1u].resize( 6u );
     class_counter[2u].resize( 18u );
+    class_counter[3u].resize( 48u );
 
     gia.init_truth_tables();
   }
@@ -557,23 +567,15 @@ public:
     set( statistics, "class_counter", class_counter );
   }
 
-  bool compute( int index, const std::vector<unsigned>& line_map, const std::vector<unsigned>& ancillas ) const
+  gia_graph compute_sub_lut( int index, const std::vector<unsigned>& ancillas ) const
   {
-    const auto num_inputs = gia().lut_size( index );
-
-    if ( num_inputs < 5 )
+    const auto max_cut_size = class_method == 0u ? 4 : 4;
+    for ( auto k = max_cut_size; k <= max_cut_size; ++k )
     {
-      const auto tt_spec = gia().lut_truth_table( index );
-      const auto affine_class = classify( tt_spec, num_inputs );
-
-      append_stg_from_line_map( circ(), tt_spec, affine_class, line_map );
-    }
-    else
-    {
-      const auto sub_lut = [this, index]() {
+      const auto sub_lut = [this, index, max_cut_size]() {
         increment_timer t( mapping_runtime );
         const auto lut = gia().extract_lut( index );
-        const auto sub_lut = lut.if_mapping( make_settings_from( std::make_pair( "lut_size", 4u ),
+        const auto sub_lut = lut.if_mapping( make_settings_from( std::make_pair( "lut_size", static_cast<unsigned>( max_cut_size ) ),
                                                                  "area_mapping",
                                                                  std::make_pair( "area_iters", area_iters ),
                                                                  std::make_pair( "flow_iters", flow_iters ) ) );
@@ -583,6 +585,33 @@ public:
         }
         return sub_lut;
       }();
+
+      if ( ( k == max_cut_size ) ||
+           ( sub_lut.lut_count() - 1 <= static_cast<int>( ancillas.size() ) ) )
+      {
+        return sub_lut;
+      }
+    }
+
+    assert( false );
+  }
+
+  bool compute( int index, const std::vector<unsigned>& line_map, const std::vector<unsigned>& ancillas ) const
+  {
+    const auto num_inputs = gia().lut_size( index );
+
+    const auto max_cut_size = class_method == 0u ? 5 : 4;
+
+    if ( num_inputs <= max_cut_size )
+    {
+      const auto tt_spec = gia().lut_truth_table( index );
+      const auto affine_class = classify( tt_spec, num_inputs );
+
+      append_stg_from_line_map( circ(), tt_spec, affine_class, line_map );
+    }
+    else
+    {
+      const auto sub_lut = compute_sub_lut( index, ancillas );
       sub_lut.init_truth_tables();
 
       std::vector<unsigned> lut_to_line( sub_lut.size() );
@@ -636,7 +665,7 @@ public:
             ++ins_index;
           }
 
-          if ( sub_lut.lut_size( index ) >= 2 && sub_lut.lut_size( index ) < 5 )
+          if ( sub_lut.lut_size( index ) >= 2 && sub_lut.lut_size( index ) <= max_cut_size )
           {
             aff_class[index] = classify( sub_lut.lut_truth_table( index ), sub_lut.lut_size( index ) );
           }
@@ -662,7 +691,7 @@ public:
           assert( sub_lut.lut_truth_table( index ) == 1 );
           append_cnot( circ(), make_var( local_line_map[0], false ), local_line_map[1] );
         }
-        else if ( num_inputs < 5 )
+        else if ( num_inputs <= max_cut_size )
         {
           auto& g = append_stg_from_line_map( circ(), sub_lut.lut_truth_table( index ), aff_class[index], local_line_map );
         }
@@ -826,6 +855,16 @@ public:
       case lut_order_heuristic::pi:
         inputs[step.target] = outputs[step.target] = gia.input_name( abc::Gia_ManIdToCioId( gia, step.node ) );
         constants[step.target] = boost::none;
+        orig_step_type[step.target] = lut_order_heuristic::po;
+        break;
+
+      case lut_order_heuristic::zero_po:
+      case lut_order_heuristic::one_po:
+        circ.set_lines( circ.lines() + 1 );
+        inputs.push_back( step.type == lut_order_heuristic::zero_po ? "0" : "1" );
+        constants.push_back( step.type == lut_order_heuristic::zero_po ? false : true );
+        outputs.push_back( gia.output_name( abc::Gia_ManIdToCioId( gia, step.node ) ) );
+        garbage.push_back( false );
         break;
 
       case lut_order_heuristic::po:

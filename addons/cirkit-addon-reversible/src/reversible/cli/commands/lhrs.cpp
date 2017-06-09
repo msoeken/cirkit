@@ -120,7 +120,10 @@ bool lhrs_command::execute()
   }
   settings->set( "optimize_esop", esopscript != "none" );
   settings->set( "optimize_postesop", is_set( "esoppostopt" ) );
-  settings->set( "script", script_from_string( esopscript ) );
+  if ( esopscript != "none" )
+  {
+    settings->set( "script", script_from_string( esopscript ) );
+  }
   settings->set( "satlut", is_set( "satlut" ) );
   settings->set( "area_iters", area_iters );
   settings->set( "flow_iters", flow_iters );
