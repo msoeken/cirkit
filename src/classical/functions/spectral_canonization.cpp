@@ -72,6 +72,28 @@ std::vector<int> rademacher_walsh_spectrum( const tt& func )
   return spectrum;
 }
 
+std::vector<int> autocorrelation_spectrum( const tt& func )
+{
+  const auto n = tt_num_vars( func );
+  std::vector<int> spectrum;
+
+  foreach_bitset( n, [n, &func, &spectrum]( const boost::dynamic_bitset<>& bs ) {
+      if ( bs.none() )
+      {
+        spectrum.push_back( 1 << n );
+      }
+      else
+      {
+        boost::dynamic_bitset<> fs( func.size() );
+        foreach_bitset( n, [&bs, &fs, &func]( const boost::dynamic_bitset<>& bs2 ) {
+            fs.set( bs2.to_ulong(), func.test( ( bs2 ^ bs ).to_ulong() ) );
+          } );
+        spectrum.push_back( ( 1 << n ) - 2 * ( fs ^ func ).count() );
+      }
+    } );
+  return spectrum;
+}
+
 void print_spectrum( const std::vector<int>& spectrum, unsigned nvars )
 {
   for ( auto i = 0u; i < spectrum.size(); ++i )
@@ -80,20 +102,27 @@ void print_spectrum( const std::vector<int>& spectrum, unsigned nvars )
   }
 }
 
-void print_spectrum4_ordered( const std::vector<int>& spectrum )
+void print_spectrum_ordered( const std::vector<int>& spectrum, unsigned nvars )
 {
-  for ( auto i : {0u,16u,1u,2u,4u,8u,16u,3u,5u,9u,6u,10u,12u,16u,7u,11u,13u,14u,16u,15u} )
+  if ( nvars == 4u )
   {
-    if ( i == 16u )
+    for ( auto i : {0u,16u,1u,2u,4u,8u,16u,3u,5u,9u,6u,10u,12u,16u,7u,11u,13u,14u,16u,15u} )
     {
-      std::cout << " |";
+      if ( i == 16u )
+      {
+        std::cout << " |";
+      }
+      else
+      {
+        std::cout << " " << spectrum[i];
+      }
     }
-    else
-    {
-      std::cout << " " << spectrum[i];
-    }
+    std::cout << std::endl;
   }
-  std::cout << std::endl;
+  else
+  {
+    std::cout << any_join( spectrum, " " ) << std::endl;
+  }
 }
 
 int compare_abs( int a, int b )
@@ -374,9 +403,10 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
 
   if ( verbose )
   {
+    std::cout << "AC " << any_join( autocorrelation_spectrum( func ), " " ) << std::endl;
     std::cout << "before" << std::endl;
     if ( very_verbose ) print_spectrum( spectrum, nvars );
-    print_spectrum4_ordered( spectrum );
+    print_spectrum_ordered( spectrum, nvars );
   }
 
   maximize_zero_coefficient( spectrum, cfunc );
@@ -385,7 +415,7 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
   {
     std::cout << "after step 1" << std::endl;
     if ( very_verbose ) print_spectrum( spectrum, nvars );
-    print_spectrum4_ordered( spectrum );
+    print_spectrum_ordered( spectrum, nvars );
     std::cout << cfunc << std::endl;
   }
 
@@ -395,7 +425,7 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
   {
     std::cout << "after step 2" << std::endl;
     if ( very_verbose ) print_spectrum( spectrum, nvars );
-    print_spectrum4_ordered( spectrum );
+    print_spectrum_ordered( spectrum, nvars );
     std::cout << cfunc << std::endl;
   }
 
@@ -405,7 +435,7 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
   {
     std::cout << "after step 3" << std::endl;
     if ( very_verbose ) print_spectrum( spectrum, nvars );
-    print_spectrum4_ordered( spectrum );
+    print_spectrum_ordered( spectrum, nvars );
     std::cout << cfunc << std::endl;
   }
 
@@ -415,11 +445,12 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
   {
     std::cout << "after step 4" << std::endl;
     if ( very_verbose ) print_spectrum( spectrum, nvars );
-    print_spectrum4_ordered( spectrum );
+    print_spectrum_ordered( spectrum, nvars );
     std::cout << cfunc << std::endl;
   }
 
   set( statistics, "spectrum_final", spectrum );
+  set( statistics, "class", get_spectral_class( func ) );
 
   // if ( !( ( spectrum == std::vector<int>( {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} ) ) ||
   //         ( spectrum == std::vector<int>( {14, 2, 2, -2, 2, -2, -2, 2, 2, -2, -2, 2, -2, 2, 2, -2} ) ) ||
@@ -431,7 +462,7 @@ tt spectral_canonization( const tt& func, const properties::ptr& settings, const
   //         ( spectrum == std::vector<int>( {4, 4, 4, 4, 4, 4, -4, -4, 4, -4, 4, -4, -4, 4, 4, -4} ) ) ) )
   // {
   //   std::cout << "[w] wrongly classified " << func << std::endl;
-  //   print_spectrum4_ordered( spectrum );
+  //   print_spectrum_ordered( spectrum );
   //   print_spectrum( spectrum, nvars );
   // }
 
@@ -442,11 +473,11 @@ unsigned get_spectral_class( const tt& func )
 {
   const auto nvars = tt_num_vars( func );
 
-  assert( nvars >= 2u && nvars <= 4u );
+  assert( nvars >= 2u && nvars <= 5u );
 
   auto spectrum = rademacher_walsh_spectrum( func );
   std::transform( spectrum.begin(), spectrum.end(), spectrum.begin(), []( int i ) { return abs( i ); } );
-  std::sort( spectrum.begin(), spectrum.end(), std::not2( std::less<int>() ) );
+  std::stable_sort( spectrum.begin(), spectrum.end(), std::not2( std::less<int>() ) );
 
   switch ( nvars )
   {
@@ -469,6 +500,98 @@ unsigned get_spectral_class( const tt& func )
     case 8: return spectrum[2u] == 8 ? 4u : 5u;
     case 6: return 6u;
     case 4: return 7u;
+    } break;
+  case 5u:
+    switch ( spectrum.front() )
+    {
+    case 32: return 0u;
+    case 30: return 1u;
+    case 28: return 2u;
+    case 26: return 3u;
+    case 24: return spectrum[4u] == 8 ? 4u : 5u;
+    case 22: return spectrum[2u] == 6 ? 6u : 7u;
+    case 20:
+      if ( spectrum[1u] == 12 && spectrum[2u] == 4 ) return 8u;
+      else if ( spectrum[1u] == 8 ) return 9u;
+      else if ( spectrum[1u] == 12 && spectrum[2u] == 8 ) return 10u;
+      else if ( spectrum[1u] == 12 && spectrum[2u] == 12 ) return 11u;
+      else assert( false ); break;
+    case 18:
+      if ( spectrum[1u] == 10 && spectrum[2u] == 6 ) return 12u;
+      else if ( spectrum[1u] == 14 && spectrum[2u] == 6 ) return 13u;
+      else if ( spectrum[1u] == 10 && spectrum[2u] == 10 ) return 14u;
+      else if ( spectrum[1u] == 14 && spectrum[2u] == 10 ) return 15u;
+      else if ( spectrum[1u] == 14 && spectrum[2u] == 14 ) return 16u;
+      else assert( false ); break;
+    case 16:
+      if ( spectrum[1u] == 16 && spectrum[2u] == 16 ) return 17u;
+      else if ( spectrum[1u] == 8 && spectrum[9u] == 8 ) return 18u;
+      else if ( spectrum[1u] == 16 && spectrum[2u] == 8 && spectrum[6] == 8) return 19u;
+      else if ( spectrum[1u] == 8 && spectrum[9u] == 4 ) return 20u;
+      else if ( spectrum[1u] == 12 && spectrum[2u] == 8 ) return 21u;
+      else if ( spectrum[1u] == 16 && spectrum[2u] == 8 && spectrum[6] == 4 ) return 22u;
+      else if ( spectrum[1u] == 12 && spectrum[2u] == 12 ) return 23u;
+      else if ( spectrum[1u] == 16 && spectrum[2u] == 12 ) return 24u;
+      else assert( false ); break;
+    case 14:
+      if ( spectrum[1u] == 10 && spectrum[2u] == 10 && spectrum[5u] == 6 )
+      {
+        auto ac = autocorrelation_spectrum( func );
+        std::transform( ac.begin(), ac.end(), ac.begin(), []( int i ) { return abs( i ); } );
+        std::stable_sort( ac.begin(), ac.end(), std::not2( std::less<int>() ) );
+        return ac[1u] == 12 ? 25u : 26u;
+      }
+      else if ( spectrum[1u] == 14 && spectrum[2u] == 10 && spectrum[4u] == 6 ) return 27u;
+      else if ( spectrum[1u] == 10 && spectrum[2u] == 10 && spectrum[5u] == 10 ) return 28u;
+      else if ( spectrum[1u] == 14 && spectrum[2u] == 14 ) return 29u;
+      else if ( spectrum[1u] == 14 && spectrum[2u] == 10 && spectrum[4u] == 10 ) return 30;
+      else assert( false ); break;
+    case 12:
+      if ( spectrum[1u] == 8 ) return 33u;
+      else if ( spectrum[1u] == 12 && spectrum[2u] == 8 )
+      {
+        auto ac = autocorrelation_spectrum( func );
+        std::transform( ac.begin(), ac.end(), ac.begin(), []( int i ) { return abs( i ); } );
+        std::stable_sort( ac.begin(), ac.end(), std::not2( std::less<int>() ) );
+        return ac[1u] == 16 ? 34u : 35u;
+      }
+      else if ( spectrum[1u] == 12 && spectrum[2u] == 12 && spectrum[3u] == 8 ) return 36;
+      else if ( spectrum[4u] == 4 )
+      {
+        auto ac = autocorrelation_spectrum( func );
+        std::transform( ac.begin(), ac.end(), ac.begin(), []( int i ) { return abs( i ); } );
+        std::stable_sort( ac.begin(), ac.end(), std::not2( std::less<int>() ) );
+        return ac[4u] == 8 ? 31u : 32u;
+      }
+      else if ( spectrum[4u] == 8 )
+      {
+        auto ac = autocorrelation_spectrum( func );
+        std::transform( ac.begin(), ac.end(), ac.begin(), []( int i ) { return abs( i ); } );
+        std::stable_sort( ac.begin(), ac.end(), std::not2( std::less<int>() ) );
+        return ac[1u] == 16 ? 37u : 38u;
+      }
+      else if ( spectrum[4u] == 12 ) return 39u;
+      else assert( false ); break;
+    case 10:
+      if ( spectrum[4u] == 6 ) return 40u;
+      else if ( spectrum[4u] == 10 )
+      {
+        auto ac = autocorrelation_spectrum( func );
+        std::transform( ac.begin(), ac.end(), ac.begin(), []( int i ) { return abs( i ); } );
+        std::stable_sort( ac.begin(), ac.end(), std::not2( std::less<int>() ) );
+        return ac[1u] == 12 ? 41u : ( ac[1u] == 20 ? 42u : 43u );
+      }
+      else assert( false ); break;
+    case 8:
+      if ( spectrum[12u] == 8 )
+      {
+        auto ac = autocorrelation_spectrum( func );
+        std::transform( ac.begin(), ac.end(), ac.begin(), []( int i ) { return abs( i ); } );
+        std::stable_sort( ac.begin(), ac.end(), std::not2( std::less<int>() ) );
+        return ac[1u] == 32 ? 44u : ( ac[1u] == 8 ? 45u : 46u );
+      }
+      else if ( spectrum[12u] == 4 ) return 47u;
+      else assert( false ); break;
     } break;
   }
 

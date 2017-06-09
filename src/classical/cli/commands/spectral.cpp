@@ -66,7 +66,8 @@ command::log_opt_t spectral_command::log() const
       {"runtime", statistics->get<double>( "runtime" )},
       {"tt", to_string( specf )},
       {"spectrum_init", statistics->get<std::vector<int>>( "spectrum_init" )},
-      {"spectrum_final", statistics->get<std::vector<int>>( "spectrum_final" )}
+      {"spectrum_final", statistics->get<std::vector<int>>( "spectrum_final" )},
+      {"class", statistics->get<unsigned>( "class" )}
     } );
 }
 
