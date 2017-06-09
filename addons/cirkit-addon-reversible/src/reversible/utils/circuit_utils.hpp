@@ -44,6 +44,8 @@ namespace cirkit
 bool has_fully_controlled_gate( const circuit& circ );
 unsigned number_of_qubits( const circuit& circ );
 
+bool has_negative_control( const gate& g );
+
 }
 
 #endif

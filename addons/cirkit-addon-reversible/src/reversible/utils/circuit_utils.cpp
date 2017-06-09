@@ -60,6 +60,12 @@ unsigned number_of_qubits( const circuit& circ )
   return has_fully_controlled_gate( circ ) ? n + 1 : n;
 }
 
+bool has_negative_control( const gate& g )
+{
+  return std::find_if( g.controls().begin(), g.controls().end(),
+                       []( const variable& v ) { return !v.polarity(); } ) != g.controls().end();
+}
+
 }
 
 // Local Variables:
