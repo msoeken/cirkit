@@ -64,7 +64,7 @@ void create_possible_inverter( std::ostream& os, const aig_function& f, std::vec
 {
   if ( f.complemented && boost::find( inverter_created, f.node ) == inverter_created.end() )
   {
-    os << format( "not %1%_inv( %1%_inv, %1%" ) % get_node_name_processed( f.node, aig, &remove_brackets ) << std::endl;
+    os << format( "not %1%_inv( %1%_inv, %1% );" ) % get_node_name_processed( f.node, aig, &remove_brackets ) << std::endl;
     inverter_created += f.node;
   }
 }
@@ -106,7 +106,7 @@ void write_verilog( const aig_graph& aig, std::ostream& os )
     create_possible_inverter( os, operands.first, inverter_created, aig );
     create_possible_inverter( os, operands.second, inverter_created, aig );
 
-    os << format( "and %1%( %1%, %2%%3%, %4%%5% )" ) % get_node_name_processed( v, aig, &remove_brackets )
+    os << format( "and %1%( %1%, %2%%3%, %4%%5% );" ) % get_node_name_processed( v, aig, &remove_brackets )
       % get_node_name_processed( operands.first.node, aig, &remove_brackets ) % ( operands.first.complemented ? "_inv" : "" )
       % get_node_name_processed( operands.second.node, aig, &remove_brackets ) % ( operands.second.complemented ? "_inv" : "" ) << std::endl;
   }
@@ -114,9 +114,9 @@ void write_verilog( const aig_graph& aig, std::ostream& os )
   /* Output functions */
   for ( const auto& v : aig_info.outputs )
   {
-    os << format( "%1% %2%( %2%, %3% )" ) % ( v.first.complemented ? "not" : "buf" )
-                                          % remove_brackets( v.second )
-                                          % get_node_name_processed( v.first.node, aig, &remove_brackets )
+    os << format( "%1% %2%( %2%, %3% );" ) % ( v.first.complemented ? "not" : "buf" )
+                                           % remove_brackets( v.second )
+                                           % get_node_name_processed( v.first.node, aig, &remove_brackets )
        << std::endl;
   }
 
