@@ -67,6 +67,7 @@
 #include <reversible/cli/commands/maslov234.hpp>
 #include <reversible/cli/commands/mitm.hpp>
 #include <reversible/cli/commands/nct.hpp>
+#include <reversible/cli/commands/perm.hpp>
 #include <reversible/cli/commands/pos.hpp>
 #include <reversible/cli/commands/qbs.hpp>
 #include <reversible/cli/commands/random_circuit.hpp>
@@ -126,6 +127,7 @@ public:
       read_entry<io_verilog_tag_t, S...>( "verilog"s, env ),
       write_entry<io_aiger_tag_t, S...>( "aiger"s, env ),
       write_entry<io_liquid_tag_t, S...>( "liquid"s, env ),
+      write_entry<io_numpy_tag_t, S...>( "numpy"s, env ),
       write_entry<io_pla_tag_t, S...>( "pla"s, env ),
       write_entry<io_qc_tag_t, S...>( "qc"s, env ),
       write_entry<io_qcode_tag_t, S...>( "qcode"s, env ),
@@ -177,6 +179,7 @@ public:
       entry<bdd_command>( "bdd"s, env ),
       entry<enumerate_command>( "enumerate"s, env ),
       entry<expr_command>( "expr"s, env ),
+      entry<perm_command>( "perm"s, env ),
       entry<print_io_command>( "print_io"s, env ),
       entry<random_circuit_command>( "random_circuit"s, env ),
       entry<tt_command>( "tt"s, env )
