@@ -53,6 +53,7 @@
 #include <reversible/cli/stores.hpp>
 #include <reversible/cli/commands/adding_lines.hpp>
 #include <reversible/cli/commands/cbs.hpp>
+#include <reversible/cli/commands/concat.hpp>
 #include <reversible/cli/commands/d1s.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/dxs.hpp>
@@ -177,6 +178,7 @@ int main( int argc, char ** argv )
 
   ADD_COMMAND( abc );
   ADD_COMMAND( bdd );
+  ADD_COMMAND( concat );
   ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
   ADD_COMMAND( perm );

@@ -53,6 +53,7 @@
 #include <reversible/cli/stores.hpp>
 #include <reversible/cli/commands/adding_lines.hpp>
 #include <reversible/cli/commands/cbs.hpp>
+#include <reversible/cli/commands/concat.hpp>
 #include <reversible/cli/commands/dbs.hpp>
 #include <reversible/cli/commands/dxs.hpp>
 #include <reversible/cli/commands/embed.hpp>
@@ -177,6 +178,7 @@ public:
 
       entry<abc_command>( "abc"s, env ),
       entry<bdd_command>( "bdd"s, env ),
+      entry<concat_command>( "concat"s, env ),
       entry<enumerate_command>( "enumerate"s, env ),
       entry<expr_command>( "expr"s, env ),
       entry<perm_command>( "perm"s, env ),
