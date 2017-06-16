@@ -27,7 +27,7 @@
 /**
  * @file functor.hpp
  *
- * @brief Generic Functor Implementation based on <a href="// http://www.boost.org/doc/libs/1_43_0/doc/html/function.html" target="_blank">Boost.Function</a>.
+ * @brief Functor with properties
  *
  * @author Mathias Soeken
  * @since  1.0
@@ -36,7 +36,7 @@
 #ifndef FUNCTOR_HPP
 #define FUNCTOR_HPP
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <core/properties.hpp>
 
@@ -50,14 +50,14 @@ namespace cirkit
    * the settings and the statistics. That is, a user can still
    * provide settings from outside, but another algorithm
    * can change settings of a functor as well. Therewith,
-   * this class extends the boost::function object by adding
+   * this class extends the std::function object by adding
    * methods to access the corresponding settings and statistics
    * data from the respective algorithm.
    *
    * @since  1.0
    */
   template<typename T>
-  class functor : public boost::function<T>
+  class functor : public std::function<T>
   {
   public:
     /**
@@ -68,13 +68,13 @@ namespace cirkit
      * @since  1.0
      */
     functor()
-      : boost::function<T>() {}
+      : std::function<T>() {}
 
     /**
      * @brief Copy constructor
      *
      * This copy constructor allows for example, the assignment
-     * of other boost::function objects. Note, that the settings
+     * of other std::function objects. Note, that the settings
      * and statistics are not set with this constructor, but
      * have to be assigned explicitly using init().
      *
@@ -83,7 +83,7 @@ namespace cirkit
      * @since  1.0
      */
     template<typename F>
-    functor( F f ) : boost::function<T>( f ) {}
+    functor( F f ) : std::function<T>( f ) {}
 
     /**
      * @brief Initializes the settings and statistics fields.
