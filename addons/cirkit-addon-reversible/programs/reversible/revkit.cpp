@@ -75,6 +75,7 @@
 #include <reversible/cli/commands/random_circuit.hpp>
 #include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
+#include <reversible/cli/commands/reverse.hpp>
 #include <reversible/cli/commands/revgen.hpp>
 #include <reversible/cli/commands/revsim.hpp>
 #include <reversible/cli/commands/revsimp.hpp>
@@ -148,11 +149,13 @@ ALICE_BEGIN(revkit)
 
   cli.set_category( "Mapping and rewriting" );
 
+  ADD_COMMAND( concat );
   ADD_COMMAND( filter );
   ADD_COMMAND( maslov234 );
   ADD_COMMAND( mitm );
   ADD_COMMAND( nct );
   ADD_COMMAND( pos );
+  ADD_COMMAND( reverse );
   ADD_COMMAND( stg4 );
   ADD_COMMAND( tof );
   ADD_COMMAND( unique_names );
@@ -178,7 +181,6 @@ ALICE_BEGIN(revkit)
 
   ADD_COMMAND( abc );
   ADD_COMMAND( bdd );
-  ADD_COMMAND( concat );
   ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
   ADD_COMMAND( perm );
