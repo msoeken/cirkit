@@ -186,7 +186,7 @@ int add_store_helper( const environment::ptr& env )
 }
 
 #ifdef ALICE_PYTHON
-struct log_var_python_visitor2 : public boost::static_visitor<py::object>
+struct log_var_python_visitor : public boost::static_visitor<py::object>
 {
 public:
   py::object operator()( const std::string& s ) const
@@ -524,7 +524,7 @@ public:
 
           if ( log )
           {
-            log_var_python_visitor2 vis;
+            log_var_python_visitor vis;
             for ( const auto& lp : *log )
             {
               const auto value = boost::apply_visitor( vis, lp.second );
