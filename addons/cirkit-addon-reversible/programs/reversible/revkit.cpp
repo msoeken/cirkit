@@ -93,8 +93,8 @@ using namespace cirkit;
 
 #define STORES circuit, binary_truth_table, tt, expression_t::ptr, bdd_function_t, rcbdd, aig_graph, xmg_graph
 
-int main( int argc, char ** argv )
-{
+ALICE_BEGIN(revkit)
+
   cli_main<STORES> cli( "revkit" );
 
   cli.set_category ("I/O" );
@@ -190,8 +190,7 @@ int main( int argc, char ** argv )
   EXPERIMENTAL_REVERSIBLE_COMMANDS
 #endif
 
-  return cli.run( argc, argv );
-}
+ALICE_END
 
 // Local Variables:
 // c-basic-offset: 2

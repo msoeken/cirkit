@@ -69,6 +69,11 @@
 #include <alice/commands/store.hpp>
 #include <alice/commands/write_io.hpp>
 
+#ifdef ALICE_PYTHON
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
+#endif
+
 namespace po = boost::program_options;
 
 namespace alice
@@ -179,6 +184,55 @@ int add_store_helper( const environment::ptr& env )
 
   return 0;
 }
+
+#ifdef ALICE_PYTHON
+struct log_var_python_visitor2 : public boost::static_visitor<py::object>
+{
+public:
+  py::object operator()( const std::string& s ) const
+  {
+    return py::str( s );
+  }
+
+  py::object operator()( int i ) const
+  {
+    return py::int_( i );
+  }
+
+  py::object operator()( unsigned i ) const
+  {
+    return py::int_( static_cast<int>( i ) );
+  }
+
+  py::object operator()( uint64_t i ) const
+  {
+    return py::int_( i );
+  }
+
+  py::object operator()( double d ) const
+  {
+    return py::float_( d );
+  }
+
+  py::object operator()( bool b ) const
+  {
+    return py::bool_( b );
+  }
+
+  template<typename T>
+  py::object operator()( const std::vector<T>& v ) const
+  {
+    py::list value;
+
+    for ( const auto& element : v )
+    {
+      value.append( operator()( element ) );
+    }
+
+    return value;
+  }
+};
+#endif
 
 template<class... S>
 class cli_main
@@ -426,6 +480,66 @@ private:
     }
   }
 
+#ifdef ALICE_PYTHON
+  py::module pymodule()
+  {
+    py::module m( prefix.c_str(), "Python bindings" );
+
+    for ( const auto& p : env->commands )
+    {
+      m.def( p.first.c_str(), [p]( py::kwargs kwargs ) {
+          std::vector<std::string> pargs = {p.first};
+
+          for ( const auto& kp : kwargs )
+          {
+            auto key = kp.first.ptr();
+            auto value = kp.second.ptr();
+
+            const auto skey = std::string( PyUnicode_AsUTF8( key ) );
+
+            if ( PyBool_Check( value ) )
+            {
+              if ( value == Py_True )
+              {
+                pargs.push_back( "--" + skey );
+              }
+            }
+            else if ( PyLong_Check( value ) )
+            {
+              pargs.push_back( "--" + skey );
+              pargs.push_back( std::to_string( PyLong_AsLong( value ) ) );
+            }
+            else
+            {
+              pargs.push_back( "--" + skey );
+              pargs.push_back( std::string( PyUnicode_AsUTF8( value ) ) );
+            }
+          }
+          p.second->run( pargs );
+
+          const auto log = p.second->log();
+
+          py::dict dict;
+
+          if ( log )
+          {
+            log_var_python_visitor2 vis;
+            for ( const auto& lp : *log )
+            {
+              const auto value = boost::apply_visitor( vis, lp.second );
+              dict[py::str( lp.first )] = value;
+            }
+          }
+
+          return dict;
+        }, p.second->caption().c_str() );
+    }
+
+    return m;
+  }
+#endif
+
+private:
   /**
    * @param filename filename with commands
    * @param echo     true, if command should be echoed before execution
@@ -533,6 +647,14 @@ private:
 #define ADD_COMMAND( name ) cli.insert_command( #name, std::make_shared<name##_command>( cli.env ) );
 #define ADD_READ_COMMAND( name, label ) cli.insert_read_command<io_##name##_tag_t>( "read_" ALICE_SX(name), label );
 #define ADD_WRITE_COMMAND( name, label ) cli.insert_write_command<io_##name##_tag_t>( "write_" ALICE_SX(name), label );
+
+#ifndef ALICE_PYTHON
+#define ALICE_BEGIN(name) int main( int argc, char ** argv ) {
+#define ALICE_END return cli.run( argc, argv ); }
+#else
+#define ALICE_BEGIN(name) PYBIND11_PLUGIN(name) {
+#define ALICE_END return cli.pymodule().ptr(); }
+#endif
 
 }
 

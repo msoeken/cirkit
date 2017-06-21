@@ -98,8 +98,9 @@ struct extend_cli_main<cli_main<Ts...>, T>
 };
 using cli_t = boost::mpl::fold<STORE_TYPES, cli_main<>, extend_cli_main<boost::mpl::_1, boost::mpl::_2>>::type;
 
-int main( int argc, char ** argv )
-{
+
+ALICE_BEGIN(cirkit)
+
   cli_t cli( "cirkit" );
 
   cli.set_category( "I/O" );
@@ -181,8 +182,7 @@ int main( int argc, char ** argv )
 
 #include <addon_defines.hpp>
 
-  return cli.run( argc, argv );
-}
+ALICE_END
 
 // Local Variables:
 // c-basic-offset: 2
