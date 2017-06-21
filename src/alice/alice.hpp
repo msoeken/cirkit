@@ -481,6 +481,7 @@ private:
   }
 
 #ifdef ALICE_PYTHON
+public:
   py::module pymodule()
   {
     py::module m( prefix.c_str(), "Python bindings" );
