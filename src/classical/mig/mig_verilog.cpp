@@ -172,13 +172,9 @@ mig_graph read_mighty_verilog( const std::string& filename,
                      }
                      else if ( std::regex_search( expr, match, std::regex( "^\\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\)$" ) ) )
                      {
-                       //assert( match[1] == match[3] );
-                       //assert( match[2] == match[5] );
-                       //assert( match[4] == match[6] );
-
-                       auto sm0 = std::string( match[1] );
-                       auto sm1 = std::string( match[2] );
-                       auto sm2 = std::string( match[4] );
+                       /* no assertions here, we assume that operands are used in the correct way */
+                       std::string sm0 = match[1], sm1 = match[2];
+                       std::string sm2 = ( match[3] == sm0 || match[3] == sm1 ) ? match[4] : match[3];
 
                        f.operation = mighty_operation_t::opcode::_maj;
                        f.operands += get_operand( sm0 ),get_operand( sm1 ),get_operand( sm2 );
