@@ -56,6 +56,8 @@ bool revgen_command::execute()
 
     boost::dynamic_bitset<> b( hwb );
 
+    spec.add_entry( number_to_truth_table_cube( 0u, hwb ), number_to_truth_table_cube( 0u, hwb ) );
+
     do {
       if ( b.any() )
       {
