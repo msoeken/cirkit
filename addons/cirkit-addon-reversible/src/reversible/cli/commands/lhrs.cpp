@@ -49,12 +49,13 @@ lhrs_command::lhrs_command( const environment::ptr& env )
   : aig_base_command( env, "LUT-based hierarchical reversible synthesis" )
 {
   opts.add_options()
-    ( "cut_size,k",      value_with_default( &cut_size ),        "cut size" )
-    ( "lutdecomp,l",                                             "apply LUT decomposition technique where possible" )
-    ( "progress,p",                                              "show progress" )
-    ( "onlylines",                                               "do not create gates (useful for qubit estimation)" )
-    ( "area_iters_init", value_with_default( &area_iters_init ), "number of exact area recovery iterations (in initial mapping)" )
-    ( "flow_iters_init", value_with_default( &flow_iters_init ), "number of area flow recovery iterations (in initial mapping)" )
+    ( "cut_size,k",         value_with_default( &cut_size ),                  "cut size" )
+    ( "lutdecomp,l",                                                          "apply LUT decomposition technique where possible" )
+    ( "additional_ancilla", value_with_default( &params.additional_ancilla ), "number of additional ancilla to add to circuit" )
+    ( "progress,p",                                                           "show progress" )
+    ( "onlylines",                                                            "do not create gates (useful for qubit estimation)" )
+    ( "area_iters_init",    value_with_default( &area_iters_init ),           "number of exact area recovery iterations (in initial mapping)" )
+    ( "flow_iters_init",    value_with_default( &flow_iters_init ),           "number of area flow recovery iterations (in initial mapping)" )
     ;
 
   boost::program_options::options_description esopdecomp_options( "ESOP decomposition options" );
@@ -67,17 +68,17 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description lutdecomp_options( "LUT decomposition options" );
   lutdecomp_options.add_options()
-    ( "satlut,s",                                          "optimize mapping with SAT where possible" )
-    ( "area_iters",   value_with_default( &area_iters ),   "number of exact area recovery iterations" )
-    ( "flow_iters",   value_with_default( &flow_iters ),   "number of area flow recovery iterations" )
-    ( "class_method", value_with_default( &class_method ), "classification method\n0: spectral classification\n1: affine classificiation" )
+    ( "satlut,s",                                                 "optimize mapping with SAT where possible" )
+    ( "area_iters",   value_with_default( &params.area_iters ),   "number of exact area recovery iterations" )
+    ( "flow_iters",   value_with_default( &params.flow_iters ),   "number of area flow recovery iterations" )
+    ( "class_method", value_with_default( &params.class_method ), "classification method\n0: spectral classification\n1: affine classificiation" )
     ;
   opts.add( lutdecomp_options );
 
   boost::program_options::options_description debug_options( "Debug options" );
   debug_options.add_options()
-    ( "dumpfile", value( &dumpfile ), "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
-    ( "bounds",                       "compute lower and upper bounds for qubits" )
+    ( "dumpfile", value( &params.dumpfile ), "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
+    ( "bounds",                              "compute lower and upper bounds for qubits" )
     ;
   opts.add( debug_options );
 
@@ -99,46 +100,39 @@ bool lhrs_command::execute()
   extend_if_new( circuits );
 
   const auto settings = make_settings();
-  settings->set( "lutdecomp", is_set( "lutdecomp" ) );
-  settings->set( "progress", is_set( "progress" ) );
-  settings->set( "onlylines", is_set( "onlylines" ) );
+  params.verbose = is_verbose();
+  params.lutdecomp = is_set( "lutdecomp" );
+  params.progress = is_set( "progress" );
+  params.onlylines = is_set( "onlylines" );
   if ( esopcovermethod == "aig" )
   {
-    settings->set( "cover_method", gia_graph::esop_cover_method::aig );
+    params.cover_method = gia_graph::esop_cover_method::aig;
   }
   else if ( esopcovermethod == "bdd" )
   {
-    settings->set( "cover_method", gia_graph::esop_cover_method::bdd );
+    params.cover_method = gia_graph::esop_cover_method::bdd;
   }
   else if ( esopcovermethod == "aignew" )
   {
-    settings->set( "cover_method", gia_graph::esop_cover_method::aig_new );
+    params.cover_method = gia_graph::esop_cover_method::aig_new;
   }
   else
   {
-    settings->set( "cover_method", gia_graph::esop_cover_method::aig_threshold );
+    params.cover_method = gia_graph::esop_cover_method::aig_threshold;
   }
-  settings->set( "optimize_esop", esopscript != "none" );
-  settings->set( "optimize_postesop", is_set( "esoppostopt" ) );
+  params.optimize_esop = esopscript != "none";
+  params.optimize_postesop = is_set( "esoppostopt" );
   if ( esopscript != "none" )
   {
-    settings->set( "script", script_from_string( esopscript ) );
+    params.script = script_from_string( esopscript );
   }
-  settings->set( "satlut", is_set( "satlut" ) );
-  settings->set( "area_iters", area_iters );
-  settings->set( "flow_iters", flow_iters );
-  settings->set( "class_method", class_method );
-
-  if ( is_set( "dumpfile" ) )
-  {
-    settings->set( "dumpfile", dumpfile );
-  }
+  params.satlut = is_set( "satlut" );
 
   circuit circ;
 
   const auto gia = gia_graph( aig() );
   const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ) ) );
-  lut_based_synthesis( circuits.current(), lut, settings, statistics );
+  lut_based_synthesis( circuits.current(), lut, params, stats );
   lut_count = lut.lut_count();
 
   debug_lb = 0;
@@ -150,7 +144,7 @@ bool lhrs_command::execute()
       } );
   }
 
-  print_runtime();
+  print_runtime( stats.runtime );
 
   return true;
 }
@@ -158,7 +152,7 @@ bool lhrs_command::execute()
 command::log_opt_t lhrs_command::log() const
 {
   log_map_t map({
-      {"runtime", statistics->get<double>( "runtime" )},
+      {"runtime", stats.runtime},
       {"cut_size", cut_size},
       {"lut_count", lut_count},
       {"onlylines", is_set( "onlylines" )},
@@ -167,29 +161,17 @@ command::log_opt_t lhrs_command::log() const
       {"esopscript", esopscript},
       {"esoppostopt", is_set( "esoppostopt" )},
       {"satlut", is_set( "satlut" )},
-      {"area_iters", area_iters},
-      {"flow_iters", flow_iters},
-      {"num_decomp_default", statistics->get<unsigned>( "num_decomp_default" )},
-      {"num_decomp_lut", statistics->get<unsigned>( "num_decomp_lut" )}
+      {"area_iters", params.area_iters},
+      {"flow_iters", params.flow_iters},
+      {"class_method", params.class_method},
+      {"num_decomp_default", stats.num_decomp_default},
+      {"num_decomp_lut", stats.num_decomp_lut},
+      {"exorcism_runtime", stats.exorcism_runtime},
+      {"cover_runtime", stats.cover_runtime},
+      {"class_counter", stats.class_counter},
+      {"class_runtime", stats.class_runtime},
+      {"mapping_runtime", stats.mapping_runtime}
     });
-
-  if ( !is_set( "legacy" ) )
-  {
-    map["exorcism_runtime"] = statistics->get<double>( "exorcism_runtime" );
-    map["cover_runtime"] = statistics->get<double>( "cover_runtime" );
-  }
-
-  if ( is_set( "lutdecomp" ) )
-  {
-    map["class_counter"] = statistics->get<std::vector<std::vector<unsigned>>>( "class_counter" );
-    map["class_runtime"] = statistics->get<double>( "class_runtime" );
-    map["mapping_runtime"] = statistics->get<double>( "mapping_runtime" );
-  }
-  else
-  {
-    map["class_runtime"] = 0.0;
-    map["mapping_runtime"] = 0.0;
-  }
 
   if ( is_set( "bounds" ) )
   {

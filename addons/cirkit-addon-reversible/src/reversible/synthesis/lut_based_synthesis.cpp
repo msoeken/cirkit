@@ -130,8 +130,8 @@ public:
   using step_vec = std::vector<step>;
 
 public:
-  explicit lut_order_heuristic( const gia_graph& gia )
-    : _gia( gia )
+  explicit lut_order_heuristic( const gia_graph& gia, unsigned additional_ancilla = 0u )
+    : _gia( gia ), _additional_ancilla( additional_ancilla )
   {
   }
 
@@ -230,6 +230,7 @@ protected:
   }
 
   inline const gia_graph& gia() const { return _gia; }
+  inline unsigned additional_ancilla() const { return _additional_ancilla; }
 
   inline unsigned next_free() const { return _next_free; }
 
@@ -252,6 +253,8 @@ protected:
 
 private:
   const gia_graph& _gia;
+  unsigned _additional_ancilla;
+
   step_vec _steps;
   std::unordered_map<int, unsigned> _node_to_line;
   std::vector<unsigned> _constants;
@@ -285,8 +288,8 @@ std::ostream& operator<<( std::ostream& os, const lut_order_heuristic::step& s )
 class defer_lut_order_heuristic : public lut_order_heuristic
 {
 public:
-  defer_lut_order_heuristic( const gia_graph& gia )
-    : lut_order_heuristic( gia )
+  defer_lut_order_heuristic( const gia_graph& gia, unsigned additional_ancilla )
+    : lut_order_heuristic( gia, additional_ancilla )
   {
   }
 
@@ -299,7 +302,7 @@ public:
     set_dry_run( false );
     return_to_mem_point();
 
-    return compute_steps_int( next_free );
+    return compute_steps_int( next_free + additional_ancilla() );
   }
 
 private:
@@ -411,34 +414,31 @@ private:
  * Partial synthesizers                                                       *
  ******************************************************************************/
 
-void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vector<unsigned>& line_map,
-                             bool progress, gia_graph::esop_cover_method cover_method, bool optimize_esop, bool optimize_postesop, exorcism_script script,
-                             const std::string& dumpfile,
-                             double *cover_runtime, double *exorcism_runtime, unsigned *dumpfile_counter )
+void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vector<unsigned>& line_map, const lhrs_params& params, lhrs_stats& stats )
 {
-  if ( !dumpfile.empty() )
+  if ( !params.dumpfile.empty() )
   {
-    lut.write_aiger( boost::str( boost::format( "%s/lut-%d.aig" ) % dumpfile % *dumpfile_counter ) );
+    lut.write_aiger( boost::str( boost::format( "%s/lut-%d.aig" ) % params.dumpfile % stats.dumpfile_counter ) );
   }
 
-  auto esop = [&lut, cover_runtime, cover_method, progress]() {
-    increment_timer t( cover_runtime );
-    return lut.compute_esop_cover( cover_method, make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "minimize", true ) ) );
+  auto esop = [&lut, &params, &stats]() {
+    increment_timer t( &stats.cover_runtime );
+    return lut.compute_esop_cover( params.cover_method, make_settings_from( std::make_pair( "progress", params.progress ), std::make_pair( "minimize", true ) ) );
   }();
 
-  if ( optimize_esop )
+  if ( params.optimize_esop )
   {
-    esop = [&esop, &lut, exorcism_runtime, progress, script]() {
-      increment_timer t( exorcism_runtime );
-      const auto em_settings = make_settings_from( std::make_pair( "progress", progress ), std::make_pair( "script", script ) );
+    esop = [&esop, &lut, &params, &stats]() {
+      increment_timer t( &stats.exorcism_runtime );
+      const auto em_settings = make_settings_from( std::make_pair( "progress", params.progress ), std::make_pair( "script", params.script ) );
       return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
     }();
   }
 
-  if ( !dumpfile.empty() )
+  if ( !params.dumpfile.empty() )
   {
     write_esop( esop, lut.num_inputs(), lut.num_outputs(),
-                boost::str( boost::format( "%s/esop-%d.esop" ) % dumpfile % ( *dumpfile_counter )++ ) );
+                boost::str( boost::format( "%s/esop-%d.esop" ) % params.dumpfile % stats.dumpfile_counter++ ) );
   }
 
   // if ( optimize_postesop )
@@ -458,11 +458,11 @@ void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vec
 class lut_partial_synthesizer
 {
 public:
-  explicit lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+  explicit lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats )
     : _circ( circ ),
       _gia( gia ),
-      settings( settings ),
-      statistics( statistics )
+      params( params ),
+      stats( stats )
   {
   }
 
@@ -484,102 +484,53 @@ private:
   const gia_graph& _gia;
 
 protected:
-  properties::ptr settings;
-  properties::ptr statistics;
+  const lhrs_params& params;
+  lhrs_stats&        stats;
 };
 
 class exorcism_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
-  explicit exorcism_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
-    : lut_partial_synthesizer( circ, gia, settings, statistics ),
-      cover_method( get( settings, "cover_method", gia_graph::esop_cover_method::aig ) ),
-      optimize_esop( get( settings, "optimize_esop", true ) ),
-      optimize_postesop( get( settings, "optimize_postesop", false ) ),
-      progress( get( settings, "progress", false ) ),
-      verbose( get( settings, "verbose", false ) ),
-      dumpfile( get( settings, "dumpfile", std::string() ) ),
-      exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
-      cover_runtime( settings->get<double*>( "cover_runtime" ) ),
-      dumpfile_counter( settings->get<unsigned*>( "dumpfile_counter" ) )
+  explicit exorcism_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats )
+    : lut_partial_synthesizer( circ, gia, params, stats )
   {
   }
 
 public:
-  bool compute( int index, const std::vector<unsigned>& line_map, const std::vector<unsigned>& ancilas ) const
+  bool compute( int index, const std::vector<unsigned>& line_map, const std::vector<unsigned>& ancillas ) const
   {
     const auto lut = gia().extract_lut( index );
 
-    esop_synthesis_wrapper( lut, circ(), line_map,
-                            progress, cover_method, optimize_esop, optimize_postesop, get( settings, "script", exorcism_script::def_wo4 ), dumpfile,
-                            cover_runtime, exorcism_runtime, dumpfile_counter );
+    esop_synthesis_wrapper( lut, circ(), line_map, params, stats );
 
     return true;
   }
-
-private:
-  /* settings */
-  gia_graph::esop_cover_method cover_method = gia_graph::esop_cover_method::aig; /* method to extract initial ESOP cover */
-  bool optimize_esop                        = true;                              /* optimize ESOP cover */
-  bool optimize_postesop                    = false;                             /* optimize ESOP synthesized circuit */
-  bool progress                             = false;                             /* show progress line */
-  bool verbose                              = false;                             /* be verbose */
-  std::string dumpfile;  /* dump ESOP file for each ESP cover */
-
-  double*   cover_runtime;
-  double*   exorcism_runtime;
-  unsigned* dumpfile_counter;
 };
 
 class lutdecomp_lut_partial_synthesizer : public lut_partial_synthesizer
 {
 public:
-  explicit lutdecomp_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
-    : lut_partial_synthesizer( circ, gia, settings, statistics ),
-      class_counter( 4u ),
+  explicit lutdecomp_lut_partial_synthesizer( circuit& circ, const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats )
+    : lut_partial_synthesizer( circ, gia, params, stats ),
       class_hash( 4u ),
-      lut_size_max( gia.max_lut_size() ),
-      satlut( get( settings, "satlut", false ) ),
-      area_iters( get( settings, "area_iters", 2u ) ),
-      flow_iters( get( settings, "flow_iters", 1u ) ),
-      cover_method( get( settings, "cover_method", gia_graph::esop_cover_method::aig ) ),
-      optimize_esop( get( settings, "optimize_esop", true ) ),
-      optimize_postesop( get( settings, "optimize_postesop", false ) ),
-      class_method( get( settings, "class_method", 0u ) ),
-      progress( get( settings, "progress", false ) ),
-      dumpfile( get( settings, "dumpfile", std::string() ) ),
-      mapping_runtime( settings->get<double*>( "mapping_runtime" ) ),
-      class_runtime( settings->get<double*>( "class_runtime" ) ),
-      exorcism_runtime( settings->get<double*>( "exorcism_runtime" ) ),
-      cover_runtime( settings->get<double*>( "cover_runtime" ) ),
-      dumpfile_counter( settings->get<unsigned*>( "dumpfile_counter" ) )
+      lut_size_max( gia.max_lut_size() )
   {
-    class_counter[0u].resize( 3u );
-    class_counter[1u].resize( 6u );
-    class_counter[2u].resize( 18u );
-    class_counter[3u].resize( 48u );
-
     gia.init_truth_tables();
-  }
-
-  virtual ~lutdecomp_lut_partial_synthesizer()
-  {
-    set( statistics, "class_counter", class_counter );
   }
 
   gia_graph compute_sub_lut( int index, const std::vector<unsigned>& ancillas ) const
   {
-    const auto max_cut_size = class_method == 0u ? 4 : 4;
-    for ( auto k = max_cut_size; k <= max_cut_size; ++k )
+    const auto max_cut_size = params.class_method == 0u ? 4 : 4;
+    for ( auto k = 3; k <= max_cut_size; ++k )
     {
       const auto sub_lut = [this, index, max_cut_size]() {
-        increment_timer t( mapping_runtime );
+        increment_timer t( &stats.mapping_runtime );
         const auto lut = gia().extract_lut( index );
         const auto sub_lut = lut.if_mapping( make_settings_from( std::make_pair( "lut_size", static_cast<unsigned>( max_cut_size ) ),
                                                                  "area_mapping",
-                                                                 std::make_pair( "area_iters", area_iters ),
-                                                                 std::make_pair( "flow_iters", flow_iters ) ) );
-        if ( satlut )
+                                                                 std::make_pair( "area_iters", params.area_iters ),
+                                                                 std::make_pair( "flow_iters", params.flow_iters ) ) );
+        if ( params.satlut )
         {
           sub_lut.satlut_mapping();
         }
@@ -600,7 +551,7 @@ public:
   {
     const auto num_inputs = gia().lut_size( index );
 
-    const auto max_cut_size = class_method == 0u ? 5 : 4;
+    const auto max_cut_size = params.class_method == 0u ? 4 : 4;
 
     if ( num_inputs <= max_cut_size )
     {
@@ -665,6 +616,7 @@ public:
             ++ins_index;
           }
 
+          /* the LUT node is small enough to be in the database, precompute class */
           if ( sub_lut.lut_size( index ) >= 2 && sub_lut.lut_size( index ) <= max_cut_size )
           {
             aff_class[index] = classify( sub_lut.lut_truth_table( index ), sub_lut.lut_size( index ) );
@@ -697,17 +649,15 @@ public:
         }
         else
         {
-          if ( progress )
+          if ( params.progress )
           {
             std::cout << "\n";
           }
           const auto lut = sub_lut.extract_lut( index );
 
-          esop_synthesis_wrapper( lut, circ(), local_line_map,
-                                  progress, cover_method, optimize_esop, optimize_postesop, get( settings, "script", exorcism_script::def_wo4 ), dumpfile,
-                                  cover_runtime, exorcism_runtime, dumpfile_counter );
+          esop_synthesis_wrapper( lut, circ(), local_line_map, params, stats );
 
-          if ( progress )
+          if ( params.progress )
           {
             std::cout << "\e[A";
           }
@@ -721,7 +671,7 @@ public:
 private:
   inline uint64_t classify_affine( uint64_t func, unsigned num_vars ) const
   {
-    increment_timer t( class_runtime );
+    increment_timer t( &stats.class_runtime );
 
     uint64_t afunc{};
     const auto it = class_hash[num_vars - 2u].find( func );
@@ -734,13 +684,13 @@ private:
     {
       afunc = it->second;
     }
-    ++class_counter[num_vars - 2u][optimal_quantum_circuits::affine_classification_index[num_vars - 2u].at( afunc )];
+    ++stats.class_counter[num_vars - 2u][optimal_quantum_circuits::affine_classification_index[num_vars - 2u].at( afunc )];
     return afunc;
   }
 
   inline uint64_t classify_spectral( uint64_t func, unsigned num_vars ) const
   {
-    increment_timer t( class_runtime );
+    increment_timer t( &stats.class_runtime );
 
     uint64_t sfunc{};
     const auto it = class_hash[num_vars - 2u].find( func );
@@ -754,38 +704,20 @@ private:
     {
       sfunc = it->second;
     }
-    ++class_counter[num_vars - 2u][optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].at( sfunc )];
+    ++stats.class_counter[num_vars - 2u][optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].at( sfunc )];
     return sfunc;
   }
 
   inline uint64_t classify( uint64_t func, unsigned num_vars ) const
   {
-    return class_method == 0u ? classify_spectral( func, num_vars ) : classify_affine( func, num_vars );
+    return params.class_method == 0u ? classify_spectral( func, num_vars ) : classify_affine( func, num_vars );
   }
 
 private:
   mutable std::vector<std::unordered_map<uint64_t, uint64_t>> class_hash;
 
-private: /* statistics */
-  mutable std::vector<std::vector<unsigned>> class_counter;
-
+private:
   int lut_size_max = 0;
-
-  bool satlut                               = false;                             /* perform SAT-based LUT mapping as post-processing step to decrease mapping size */
-  unsigned area_iters                       = 2u;                                /* number of exact area recovery iterations */
-  unsigned flow_iters                       = 1u;                                /* number of area flow recovery iterations */
-  gia_graph::esop_cover_method cover_method = gia_graph::esop_cover_method::aig; /* method to extract initial ESOP cover */
-  bool optimize_esop                        = true;                              /* optimize ESOP cover */
-  bool optimize_postesop                    = false;                             /* optimize ESOP synthesized circuit */
-  unsigned class_method                     = 0u;                                /* classification method: 0u: spectral, 1u: affine */
-  bool progress                             = false;                             /* show progress line */
-  std::string dumpfile;  /* dump ESOP file for each ESP cover */
-
-  double*   mapping_runtime;
-  double*   class_runtime;
-  double*   cover_runtime;
-  double*   exorcism_runtime;
-  unsigned* dumpfile_counter;
 };
 
 /******************************************************************************
@@ -795,33 +727,15 @@ private: /* statistics */
 class lut_based_synthesis_manager
 {
 public:
-  lut_based_synthesis_manager( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+  lut_based_synthesis_manager( circuit& circ, const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats )
     : circ( circ ),
       gia( gia ),
-      statistics( statistics ),
-      order_heuristic( std::make_shared<defer_lut_order_heuristic>( gia ) ),
-      synthesizer( circ, gia,
-                   merge_properties(
-                                    settings,
-                                    make_settings_from(
-                                                       std::make_pair( "exorcism_runtime", &exorcism_runtime ),
-                                                       std::make_pair( "cover_runtime", &cover_runtime ),
-                                                       std::make_pair( "dumpfile_counter", &dumpfile_counter ) ) ),
-                   statistics ),
-      decomp_synthesizer( circ, gia, merge_properties(
-                                    settings,
-                                    make_settings_from(
-                                                       std::make_pair( "mapping_runtime", &mapping_runtime ),
-                                                       std::make_pair( "class_runtime", &class_runtime ),
-                                                       std::make_pair( "exorcism_runtime", &exorcism_runtime ),
-                                                       std::make_pair( "cover_runtime", &cover_runtime ),
-                                                       std::make_pair( "dumpfile_counter", &dumpfile_counter ) ) ),
-                          statistics ),
-      onlylines( get( settings, "onlylines", false ) ),
-      verbose( get( settings, "verbose", false ) ),
-      progress( get( settings, "progress", false ) ),
-      lutdecomp( get( settings, "lutdecomp", false ) ),
-      pbar( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f", progress )
+      params( params ),
+      stats( stats ),
+      order_heuristic( std::make_shared<defer_lut_order_heuristic>( gia, params.additional_ancilla ) ),
+      synthesizer( circ, gia, params, stats ),
+      decomp_synthesizer( circ, gia, params, stats ),
+      pbar( "[i] step %5d/%5d   dd = %5d   ld = %5d   cvr = %6.2f   esop = %6.2f   map = %6.2f   clsfy = %6.2f   total = %6.2f", params.progress )
   {
   }
 
@@ -843,12 +757,12 @@ public:
     pbar.keep_last();
     for ( const auto& step : order_heuristic->steps() )
     {
-      if ( verbose )
+      if ( params.verbose )
       {
         std::cout << step << std::endl;
       }
-      pbar( ++step_index, order_heuristic->steps().size(), num_decomp_default, num_decomp_lut, cover_runtime, exorcism_runtime, mapping_runtime, class_runtime, synthesis_runtime );
-      increment_timer t( &synthesis_runtime );
+      pbar( ++step_index, order_heuristic->steps().size(), stats.num_decomp_default, stats.num_decomp_lut, stats.cover_runtime, stats.exorcism_runtime, stats.mapping_runtime, stats.class_runtime, stats.synthesis_runtime );
+      increment_timer t( &stats.synthesis_runtime );
 
       switch ( step.type )
       {
@@ -878,7 +792,7 @@ public:
           garbage.push_back( false );
 
           const auto pol = orig_step_type[step.target] == step.type ? true : false;
-          if ( !onlylines )
+          if ( !params.onlylines )
           {
             append_cnot( circ, make_var( step.target, pol ), circ.lines() - 1 );
           }
@@ -888,7 +802,7 @@ public:
           outputs[step.target] = gia.output_name( abc::Gia_ManIdToCioId( gia, step.node ) );
           garbage[step.target] = false;
 
-          if ( step.type == lut_order_heuristic::inv_po && !onlylines )
+          if ( step.type == lut_order_heuristic::inv_po && !params.onlylines )
           {
             append_not( circ, step.target );
           }
@@ -897,14 +811,14 @@ public:
         break;
 
       case lut_order_heuristic::compute:
-        if ( !onlylines )
+        if ( !params.onlylines )
         {
           synthesize_node( step.node, false, step.clean_ancilla );
         }
         break;
 
       case lut_order_heuristic::uncompute:
-        if ( !onlylines )
+        if ( !params.onlylines )
         {
           synthesize_node( step.node, true, step.clean_ancilla );
         }
@@ -917,12 +831,6 @@ public:
     circ.set_constants( constants );
     circ.set_garbage( garbage );
 
-    set( statistics, "num_decomp_default", num_decomp_default );
-    set( statistics, "num_decomp_lut", num_decomp_lut );
-    set( statistics, "exorcism_runtime", exorcism_runtime );
-    set( statistics, "cover_runtime", cover_runtime );
-    set( statistics, "class_runtime", class_runtime );
-    set( statistics, "mapping_runtime", mapping_runtime );
     return true;
   }
 
@@ -932,16 +840,16 @@ private:
     /* map circuit */
     const auto line_map = order_heuristic->compute_line_map( index );
 
-    if ( lutdecomp && decomp_synthesizer.compute( index, line_map, clean_ancilla ) )
+    if ( params.lutdecomp && decomp_synthesizer.compute( index, line_map, clean_ancilla ) )
     {
-      ++num_decomp_lut;
+      ++stats.num_decomp_lut;
       return;
     }
 
     {
       const auto sp = pbar.subprogress();
       synthesizer.compute( index, line_map, clean_ancilla );
-      ++num_decomp_default;
+      ++stats.num_decomp_default;
     }
   }
 
@@ -949,29 +857,14 @@ private:
   circuit& circ;
   const gia_graph& gia;
 
-  const properties::ptr& statistics;
+  const lhrs_params& params;
+  lhrs_stats& stats;
 
   std::unordered_map<unsigned, circuit> computed_circuits;
-
-  /* statistics */
-  double   synthesis_runtime  = 0.0;
-  double   exorcism_runtime   = 0.0;
-  double   cover_runtime      = 0.0;
-  double   mapping_runtime    = 0.0;
-  double   class_runtime      = 0.0;
-  unsigned num_decomp_default = 0u;
-  unsigned num_decomp_lut     = 0u;
-  unsigned dumpfile_counter   = 0u; /* if ESOP files should be dumbed, this counter is increased */
 
   std::shared_ptr<lut_order_heuristic> order_heuristic;
   exorcism_lut_partial_synthesizer synthesizer;
   lutdecomp_lut_partial_synthesizer decomp_synthesizer;
-
-  /* settings (other settings are passed to decomposition classes directly and parsed there) */
-  bool onlylines = false;  /* do not compute gates */
-  bool verbose = false;    /* be verbose */
-  bool progress = false;   /* show progress line */
-  bool lutdecomp = false;  /* enable LUT-based decomposition */
 
   progress_line pbar;
 };
@@ -980,12 +873,12 @@ private:
  * Public functions                                                           *
  ******************************************************************************/
 
-bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const properties::ptr& settings, const properties::ptr& statistics )
+bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats )
 {
   /* timing */
-  properties_timer t( statistics );
+  reference_timer t( &stats.runtime );
 
-  lut_based_synthesis_manager mgr( circ, gia, settings, statistics );
+  lut_based_synthesis_manager mgr( circ, gia, params, stats );
   const auto result = mgr.run();
 
   return result;

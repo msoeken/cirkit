@@ -37,6 +37,7 @@
 #define CLI_LHRS_COMMAND_HPP
 
 #include <classical/cli/aig_command.hpp>
+#include <reversible/synthesis/lhrs/lhrs_params.hpp>
 
 namespace cirkit
 {
@@ -54,16 +55,16 @@ public:
   log_opt_t log() const;
 
 private:
+  lhrs_params params;
+  lhrs_stats  stats;
+
   unsigned cut_size = 16u;
   unsigned lut_count = 0u;
-  std::string esopscript = "def_wo4";
-  std::string esopcovermethod = "auto";
   unsigned area_iters_init = 2u;
   unsigned flow_iters_init = 1u;
-  unsigned area_iters = 2u;
-  unsigned flow_iters = 1u;
-  unsigned class_method = 0u;
-  std::string dumpfile;
+
+  std::string esopscript = "def_wo4";
+  std::string esopcovermethod = "auto";
 
 private:
   unsigned debug_lb = 0;

@@ -24,32 +24,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @file lut_based_synthesis.hpp
- *
- * @brief LUT based synthesis algorithm
- *
- * @author Mathias Soeken
- * @since  2.3
- */
-
-#ifndef LUT_BASED_SYNTHESIS_HPP
-#define LUT_BASED_SYNTHESIS_HPP
-
-#include <core/properties.hpp>
-#include <classical/abc/gia/gia.hpp>
-#include <classical/lut/lut_graph.hpp>
-#include <reversible/circuit.hpp>
-#include <reversible/synthesis/lhrs/lhrs_params.hpp>
+#include "lhrs_params.hpp"
 
 namespace cirkit
 {
 
-bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats );
+/******************************************************************************
+ * Types                                                                      *
+ ******************************************************************************/
+
+/******************************************************************************
+ * Private functions                                                          *
+ ******************************************************************************/
+
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
 
 }
-
-#endif
 
 // Local Variables:
 // c-basic-offset: 2
