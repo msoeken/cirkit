@@ -60,7 +60,7 @@ public:
         cubes.append_singleton( index, c );
       } );
 
-    progress_line pline( boost::str( boost::format( "[i] gates = %%5d / %5d   last size = %%7d   total size = %%7d    runtime = %%7.2f secs" ) % ( gia.size() - gia.num_inputs() - gia.num_outputs() ) ), progress );
+    progress_line pline( boost::str( boost::format( "[i] inputs = %5d   gates = %%5d / %5d   last size = %%7d   total size = %%7d    runtime = %%7.2f secs" ) % gia.num_inputs() % ( gia.size() - gia.num_inputs() - gia.num_outputs() ) ), progress );
     auto counter = 0u;
     gia.foreach_and( [this, &counter, &pline]( int index, abc::Gia_Obj_t* obj ) {
         increment_timer t( &runtime );
