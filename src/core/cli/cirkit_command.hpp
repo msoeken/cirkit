@@ -82,6 +82,7 @@ protected:
   properties::ptr make_settings() const;
 
   void print_runtime( const std::string& key = "runtime", const std::string& label = std::string() ) const;
+  void print_runtime( double runtime, const std::string& label = std::string() ) const;
 
 protected:
   properties::ptr statistics;
