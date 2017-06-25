@@ -114,3 +114,29 @@ print -c
 write_quipper /dev/stdout
 write_quipper -a /dev/stdout
 store --clear -ebrc
+
+#----------------------------------------------------------------------------#
+# Create circuit from permutation with TBS and DBS and check for equivalence #
+#----------------------------------------------------------------------------#
+# 1. Create reversible truth table from permutation                          #
+# 2. Find circuit with transformation-based synthesis                        #
+# 3. Find circuit with decomposition-based synthesis                         #
+# 4. Show circuit store                                                      #
+# 5. Perform reversible equivalence checking                                 #
+# 6. Revert second circuit                                                   #
+# 7. Concat both circuits                                                    #
+# 8. Check whether new circuit represents identity                           #
+# 9. Clear everything in the store                                           #
+#----------------------------------------------------------------------------#
+
+read_spec -p "7 2 3 6 1 4 5 0"
+tbs
+dbs -n
+store -c
+rec
+reverse
+concat -n
+is_identity
+store --clear -cs
+
+quit
