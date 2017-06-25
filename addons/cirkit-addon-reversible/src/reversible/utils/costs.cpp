@@ -131,56 +131,11 @@ namespace cirkit
 
   cost_t t_depth_costs::operator()( const gate& g, unsigned lines ) const
   {
-    unsigned ac;
-    if ( is_toffoli( g ) )
-    {
-      ac = g.controls().size();
-    }
-    else if ( is_fredkin( g ) )
-    {
-      ac = g.controls().size() + 1u;
-    }
-    else if ( is_hadamard( g ) )
-    {
-      return 0ull;
-    }
-    else if ( is_pauli( g ) )
-    {
-      const auto& tag = boost::any_cast<pauli_tag>( g.type() );
-      return ( tag.axis == pauli_axis::Z && tag.root == 4u ) ? 1ull : 0ull;
-    }
-    return 3ull * toffoli_gates( ac, lines );
+    return cost_invalid();
   }
 
   cost_t t_costs::operator()( const gate& g, unsigned lines ) const
   {
-    /* the following computation is based on
-     * [N. Abdessaied, M. Amy, M. Soeken, and R. Drechsler, ISMVL, 2016, http://msoeken.github.io/papers/2016_ismvl_2.pdf]
-     */
-    // auto ac = g.controls().size();
-
-    // switch ( ac )
-    // {
-    // case 0u:
-    // case 1u:
-    //   return 0;
-    // case 2u:
-    //   return 7;
-    // case 3u:
-    //   return 22;
-    // case 4u:
-    //   return lines >= 7 ? 28 : 52;
-    // default:
-    //   if ( ( lines + 1 ) / 2 >= ac )
-    //   {
-    //     return 12 * ( ac - 2 ) + 4;
-    //   }
-    //   else
-    //   {
-    //     return 24 * ( ac - 3 ) + 8;
-    //   }
-    // }
-
     /* the following computation is based on
      * [D. Maslov, Phys Rev A 93, 022311, 2016.
      */
@@ -228,8 +183,7 @@ namespace cirkit
           const auto it = idx_map.find( spec.to_ulong() );
           if ( it == idx_map.end() )
           {
-            std::cout << "[e] unknown cost for STG" << std::endl;
-            return 0ull; /* UNKNOWN */
+            return cost_invalid();
           }
           else
           {
@@ -243,13 +197,12 @@ namespace cirkit
       }
       else
       {
-        std::cout << "[e] unknown cost for STG" << std::endl;
-        return 0ull; /* UNKNOWN */
+        return cost_invalid();
       }
     }
     else
     {
-      return 0ull;
+      return cost_invalid();
     }
   }
 
@@ -281,17 +234,26 @@ namespace cirkit
 
     cost_t operator()( const costs_by_gate_func& f ) const
     {
-      cost_t sum = 0ull;
+      cost_t sum = 0ull, tmp{};
       for ( const auto& g : circ )
       {
         // respect modules
         if ( is_module( g ) )
         {
-          sum += costs( *boost::any_cast<module_tag>( g.type() ).reference.get(), f );
+          tmp = costs( *boost::any_cast<module_tag>( g.type() ).reference.get(), f );
         }
         else
         {
-          ( circ.lines() == g.controls().size() + 1 ) ? sum += f( g, circ.lines() + 1 ) : sum += f( g, circ.lines() ) ;
+          tmp = ( circ.lines() == g.controls().size() + 1 ) ? f( g, circ.lines() + 1 ) : f( g, circ.lines() ) ;
+        }
+
+        if ( tmp == cost_invalid() )
+        {
+          return tmp;
+        }
+        else
+        {
+          sum += tmp;
         }
       }
       return sum;

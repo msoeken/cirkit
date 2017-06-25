@@ -36,44 +36,54 @@
 namespace cirkit
 {
 
-  void print_statistics( std::ostream& os, const circuit& circ, double runtime, const print_statistics_settings& settings )
+std::string format_costs( cost_t cost )
+{
+  if ( cost == cost_invalid() )
   {
-    std::string runtime_string;
+    return "N/A";
+  }
+  else
+  {
+    return std::to_string( cost );
+  }
+}
 
-    if ( runtime != -1 )
-    {
-      runtime_string = boost::str( boost::format( settings.runtime_template ) % runtime );
-    }
+void print_statistics( std::ostream& os, const circuit& circ, double runtime, const print_statistics_settings& settings )
+{
+  std::string runtime_string;
 
-    boost::format fmt( settings.main_template );
-    fmt.exceptions( boost::io::all_error_bits ^ ( boost::io::too_many_args_bit | boost::io::too_few_args_bit ) );
-
-    os << fmt
-      % runtime_string
-      % circ.lines()
-      % circ.num_gates()
-      % costs( circ, costs_by_gate_func( ncv_quantum_costs() ) )
-      % costs( circ, costs_by_gate_func( t_depth_costs() ) )
-      % costs( circ, costs_by_gate_func( t_costs() ) )
-      % costs( circ, costs_by_gate_func( h_costs() ) )
-      % number_of_qubits( circ )
-      % costs( circ, costs_by_gate_func( transistor_costs() ) )
-      % costs( circ, costs_by_gate_func( sk2013_quantum_costs() ) );
+  if ( runtime != -1 )
+  {
+    runtime_string = boost::str( boost::format( settings.runtime_template ) % runtime );
   }
 
-  void print_statistics( const std::string& filename, const circuit& circ, double runtime, const print_statistics_settings& settings )
-  {
-    std::filebuf fb;
-    fb.open( filename.c_str(), std::ios::out );
-    std::ostream os( &fb );
-    print_statistics( os, circ, runtime, settings );
-    fb.close();
-  }
+  boost::format fmt( settings.main_template );
+  fmt.exceptions( boost::io::all_error_bits ^ ( boost::io::too_many_args_bit | boost::io::too_few_args_bit ) );
 
-  void print_statistics( const circuit& circ, double runtime, const print_statistics_settings& settings )
-  {
-    print_statistics( std::cout, circ, runtime, settings );
-  }
+  os << fmt
+    % runtime_string
+    % circ.lines()
+    % circ.num_gates()
+    % format_costs( costs( circ, costs_by_gate_func( ncv_quantum_costs() ) ) )
+    % format_costs( costs( circ, costs_by_gate_func( t_depth_costs() ) ) )
+    % format_costs( costs( circ, costs_by_gate_func( t_costs() ) ) )
+    % format_costs( costs( circ, costs_by_gate_func( h_costs() ) ) )
+    % number_of_qubits( circ )
+    % format_costs( costs( circ, costs_by_gate_func( transistor_costs() ) ) )
+    % format_costs( costs( circ, costs_by_gate_func( sk2013_quantum_costs() ) ) );
+}
+
+void print_statistics( const std::string& filename, const circuit& circ, double runtime, const print_statistics_settings& settings )
+{
+  std::fstream os( filename.c_str(), std::fstream::out );
+  print_statistics( os, circ, runtime, settings );
+  os.close();
+}
+
+void print_statistics( const circuit& circ, double runtime, const print_statistics_settings& settings )
+{
+  print_statistics( std::cout, circ, runtime, settings );
+}
 
 }
 

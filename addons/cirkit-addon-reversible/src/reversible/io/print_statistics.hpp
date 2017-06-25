@@ -66,7 +66,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    std::string main_template = "%1$sLines:        %2$d\nGates:        %3$d\nNCV QCosts:   %4$d\nT-depth:      %5$d\nT-count:      %6$d\nH-count:      %7$d\nQubits:       %8$d\nTransistor:   %9$d\nSK2013 costs: %10$d\n";
+    std::string main_template = "%1$sLines:        %2$d\nGates:        %3$d\nNCV QCosts:   %4$s\nT-depth:      %5$s\nT-count:      %6$s\nH-count:      %7$s\nQubits:       %8$d\nTransistor:   %9$s\nSK2013 costs: %10$s\n";
 
 
     /**
