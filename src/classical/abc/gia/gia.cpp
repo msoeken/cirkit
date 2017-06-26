@@ -44,6 +44,7 @@ namespace abc
 {
 Gia_Man_t * Eso_ManCompute( Gia_Man_t * pGia, int fVerbose, Vec_Wec_t ** pvRes );
 void Gia_ManLutSat( Gia_Man_t * p, int LutSize, int nNumber, int nImproves, int nBTLimit, int DelayMax, int nEdges, int fDelay, int fReverse, int fVerbose, int fVeryVerbose );
+void Gia_WriteDotAigSimple( Gia_Man_t * p, char * pFileName, Vec_Int_t * vBold );
 }
 
 /******************************************************************************
@@ -270,6 +271,27 @@ void gia_graph::print_stats() const
 void gia_graph::write_aiger( const std::string& filename ) const
 {
   abc::Gia_AigerWrite( p_gia, const_cast<char*>( filename.c_str() ), 0, 0 );
+}
+
+void gia_graph::write_dot( const std::string& filename, const std::vector<int>& highlight ) const
+{
+  if ( highlight.empty() )
+  {
+    abc::Gia_WriteDotAigSimple( p_gia, const_cast<char*>( filename.c_str() ), nullptr );
+  }
+  else
+  {
+    auto vec = abc::Vec_IntAllocArray( const_cast<int*>( &highlight[0] ), highlight.size() );
+    abc::Gia_WriteDotAigSimple( p_gia, const_cast<char*>( filename.c_str() ), vec );
+    ABC_FREE( vec ); /* do not erase the array, since it's owned by highlight */
+  }
+}
+
+void gia_graph::write_dot_with_luts( const std::string& filename ) const
+{
+  std::vector<int> highlight;
+  foreach_lut( [&highlight]( int index ) { highlight.push_back( index ); } );
+  write_dot( filename, highlight );
 }
 
 /******************************************************************************

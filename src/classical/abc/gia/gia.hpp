@@ -36,6 +36,9 @@
 #ifndef ABC_GIA_HPP
 #define ABC_GIA_HPP
 
+#include <string>
+#include <vector>
+
 #include <core/properties.hpp>
 #include <classical/aig.hpp>
 
@@ -110,6 +113,8 @@ public:
   /// I/O
 
   void write_aiger( const std::string& filename ) const;
+  void write_dot( const std::string& filename, const std::vector<int>& highlight ) const;
+  void write_dot_with_luts( const std::string& filename ) const;
 
   /// OTHER LOGIC REPRESENTATIONS
 
