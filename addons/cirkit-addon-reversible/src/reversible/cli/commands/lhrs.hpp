@@ -66,6 +66,8 @@ private:
   std::string esopscript = "def_wo4";
   std::string esopcovermethod = "auto";
 
+  std::string dotname_mapped;
+
 private:
   unsigned debug_lb = 0;
 };

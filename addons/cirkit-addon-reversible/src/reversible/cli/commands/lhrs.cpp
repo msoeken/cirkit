@@ -77,8 +77,9 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description debug_options( "Debug options" );
   debug_options.add_options()
-    ( "dumpfile", value( &params.dumpfile ), "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
-    ( "bounds",                              "compute lower and upper bounds for qubits" )
+    ( "dumpfile",       value( &params.dumpfile ), "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
+    ( "bounds",                                    "compute lower and upper bounds for qubits" )
+    ( "dotname_mapped", value( &dotname_mapped ),  "filename to dump DOT representation of initial mapped network" )
     ;
   opts.add( debug_options );
 
@@ -134,6 +135,11 @@ bool lhrs_command::execute()
   const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ) ) );
   lut_based_synthesis( circuits.current(), lut, params, stats );
   lut_count = lut.lut_count();
+
+  if ( is_set( "dotname_mapped" ) )
+  {
+    lut.write_dot_with_luts( dotname_mapped );
+  }
 
   debug_lb = 0;
   if ( is_set( "bounds" ) )
