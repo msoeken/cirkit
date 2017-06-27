@@ -90,6 +90,7 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 command::rules_t lhrs_command::validity_rules() const
 {
   return {
+    {has_store_element<aig_graph>( env )},
     {[this]() { return esopscript == "def" || esopscript == "def_wo4" || esopscript == "none"; }, "unknown exorcism script"},
     {[this]() { return esopcovermethod == "aig" || esopcovermethod == "bdd" || esopcovermethod == "aignew" || esopcovermethod == "auto"; }, "unknown cover extraction method"}
   };

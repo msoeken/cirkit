@@ -61,6 +61,7 @@ struct lhrs_params
   unsigned                     area_iters         = 2u;                                          /* number of exact area recovery iterations */
   unsigned                     flow_iters         = 1u;                                          /* number of area flow recovery iterations */
   unsigned                     class_method       = 0u;                                          /* classification method: 0u: spectral, 1u: affine */
+  unsigned                     max_func_size      = 0u;                                          /* max function size for DB lookup, 0u: automatic based on class_method */
 
   bool                         progress           = false;                                       /* show progress line */
   bool                         verbose            = false;                                       /* be verbose */
