@@ -70,10 +70,8 @@ namespace cirkit
   {
     if ( this != &other )
     {
-      d->controls.clear();
-      boost::copy( other.controls(), std::back_inserter( d->controls ) );
-      d->targets.clear();
-      boost::copy( other.targets(), std::back_inserter( d->targets ) );
+      d->controls = other.controls();
+      d->targets = other.targets();
       d->target_type = other.type();
     }
     return *this;
