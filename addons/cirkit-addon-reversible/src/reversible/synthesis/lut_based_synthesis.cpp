@@ -55,6 +55,7 @@
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/clear_circuit.hpp>
 #include <reversible/io/print_circuit.hpp>
+#include <reversible/optimization/esop_post_optimization.hpp>
 #include <reversible/synthesis/esop_synthesis.hpp>
 #include <reversible/synthesis/optimal_quantum_circuits.hpp>
 #include <reversible/utils/costs.hpp>
@@ -428,7 +429,7 @@ void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vec
     return lut.compute_esop_cover( params.cover_method, make_settings_from( std::make_pair( "progress", params.progress ), std::make_pair( "minimize", true ) ) );
   }();
 
-  if ( params.optimize_esop )
+  if ( params.script != exorcism_script::none )
   {
     esop = [&esop, &lut, &params, &stats]() {
       increment_timer t( &stats.exorcism_runtime );
@@ -443,18 +444,18 @@ void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vec
                 boost::str( boost::format( "%s/esop-%d.esop" ) % params.dumpfile % stats.dumpfile_counter++ ) );
   }
 
-  // if ( optimize_postesop )
-  // {
-  //   circuit circ_local;
-  //   esop_synthesis( circ_local, esop, lut.num_inputs(), lut.num_outputs() );
-  //   auto circ_opt = pair_combination( circ_local );
-  //   append_circuit( circ, circ_opt, gate::control_container(), line_map );
-  // }
-  // else
-  // {
+  if ( params.optimize_postesop )
+  {
+    circuit circ_local;
+    esop_synthesis( circ_local, esop, lut.num_inputs(), lut.num_outputs() );
+    auto circ_opt = esop_post_optimization( circ_local );
+    append_circuit( circ, circ_opt, gate::control_container(), line_map );
+  }
+  else
+  {
     const auto es_settings = make_settings_from( std::make_pair( "line_map", line_map ) );
     esop_synthesis( circ, esop, lut.num_inputs(), lut.num_outputs(), es_settings );
-  // }
+  }
 }
 
 class lut_partial_synthesizer
@@ -507,17 +508,18 @@ class lutdecomp_lut_partial_synthesizer : public lut_partial_synthesizer
 public:
   explicit lutdecomp_lut_partial_synthesizer( const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats )
     : lut_partial_synthesizer( gia, params, stats ),
+      strategy( params.mapping_strategy ),
       class_hash( 4u ),
       lut_size_max( gia.max_lut_size() )
   {
     gia.init_truth_tables();
   }
 
-  gia_graph compute_sub_lut( int index, int max_cut_size, const std::vector<unsigned>& ancillas ) const
+  gia_graph compute_sub_lut_db( int index, const std::vector<unsigned>& ancillas ) const
   {
     for ( auto k = 3; k <= max_cut_size; ++k )
     {
-      const auto sub_lut = [this, index, max_cut_size]() {
+      const auto sub_lut = [this, index]() {
         increment_timer t( &stats.mapping_runtime );
         const auto lut = gia().extract_lut( index );
         const auto sub_lut = lut.if_mapping( make_settings_from( std::make_pair( "lut_size", static_cast<unsigned>( max_cut_size ) ),
@@ -541,6 +543,48 @@ public:
     assert( false );
   }
 
+  gia_graph compute_sub_lut_best_fit( int index, const std::vector<unsigned>& ancillas, const unsigned num_inputs ) const
+  {
+    const auto max_cut_size = 4 ;
+    for ( auto k = static_cast<unsigned>( max_cut_size ); k <= num_inputs; ++k )
+    {
+      const auto sub_lut = [this, index, max_cut_size, k]() {
+        increment_timer t( &stats.mapping_runtime );
+        const auto lut = gia().extract_lut( index );
+        const auto sub_lut = lut.if_mapping( make_settings_from( std::make_pair( "lut_size", k  ),
+                                                                 "area_mapping",
+                                                                 std::make_pair( "area_iters", params.area_iters ),
+                                                                 std::make_pair( "flow_iters", params.flow_iters ) ) );
+        if ( k <= 6u && params.satlut )
+        {
+          sub_lut.satlut_mapping();
+        }
+        return sub_lut;
+      }();
+
+      /* The condition imposes that it a*/
+      if ( sub_lut.lut_count() - 1 <= static_cast<int>( ancillas.size() )  )
+      {
+        return sub_lut;
+      }
+    }
+
+    assert( false );
+  }
+
+  gia_graph compute_sub_lut_switch( int index, const std::vector<unsigned>& ancillas, int num_inputs ) const
+  {
+    switch ( strategy )
+    {
+    case lhrs_mapping_strategy::lut_based_min_db: return compute_sub_lut_db( index, ancillas );
+    case lhrs_mapping_strategy::lut_based_best_fit: return compute_sub_lut_best_fit( index, ancillas, num_inputs );
+
+    case lhrs_mapping_strategy::direct:
+    default:
+      assert( false );
+    }
+  }
+
   bool compute( circuit& circ, int index, const std::vector<unsigned>& line_map, const std::vector<unsigned>& ancillas ) const
   {
     const auto num_inputs = gia().lut_size( index );
@@ -554,7 +598,7 @@ public:
     }
     else
     {
-      const auto sub_lut = compute_sub_lut( index, max_cut_size, ancillas );
+      const auto sub_lut = compute_sub_lut_switch( index, ancillas, num_inputs );
       sub_lut.init_truth_tables();
 
       std::vector<unsigned> lut_to_line( sub_lut.size() );
@@ -562,7 +606,8 @@ public:
       /* count ancillas and determine root gate */
       auto num_ancilla = sub_lut.lut_count() - 1; /* no need to store the output LUT */
 
-      if ( num_ancilla > static_cast<int>( ancillas.size() ) )
+      if ( strategy == lhrs_mapping_strategy::lut_based_min_db &&
+           num_ancilla > static_cast<int>( ancillas.size() ) )
       {
         if ( ancillas.empty() )
         {
@@ -707,6 +752,7 @@ private:
 
 public:
   int max_cut_size = 4;
+  lhrs_mapping_strategy strategy;
 
 private:
   mutable std::vector<std::unordered_map<uint64_t, uint64_t>> class_hash;
@@ -832,10 +878,34 @@ public:
 private:
   inline void synthesize_node( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
   {
-    synthesize_node_default( index, lookup, clean_ancilla );
+    switch ( params.mapping_strategy )
+    {
+    case lhrs_mapping_strategy::direct:
+      synthesize_node_direct( index, lookup, clean_ancilla );
+      break;
+    case lhrs_mapping_strategy::lut_based_min_db:
+    case lhrs_mapping_strategy::lut_based_best_fit:
+      synthesize_node_lut_based( index, lookup, clean_ancilla );
+      break;
+    case lhrs_mapping_strategy::lut_based_pick_best:
+      synthesize_node_pick_best( index, lookup, clean_ancilla );
+      break;
+    }
   }
 
-  void synthesize_node_default( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
+  void synthesize_node_direct( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
+  {
+    /* map circuit */
+    const auto line_map = order_heuristic->compute_line_map( index );
+
+    {
+      const auto sp = pbar.subprogress();
+      synthesizer.compute( circ, index, line_map, clean_ancilla );
+      ++stats.num_decomp_default;
+    }
+  }
+
+  void synthesize_node_lut_based( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
   {
     if ( params.max_func_size == 0u )
     {
@@ -849,7 +919,7 @@ private:
     /* map circuit */
     const auto line_map = order_heuristic->compute_line_map( index );
 
-    if ( params.lutdecomp && decomp_synthesizer.compute( circ, index, line_map, clean_ancilla ) )
+    if ( decomp_synthesizer.compute( circ, index, line_map, clean_ancilla ) )
     {
       ++stats.num_decomp_lut;
       return;
@@ -862,7 +932,7 @@ private:
     }
   }
 
-  void append_circuit_fast( const circuit& src )
+  inline void append_circuit_fast( const circuit& src )
   {
     auto& dest_s = boost::get<standard_circuit>( static_cast<circuit_variant&>( circ ) );
     const auto& src_s = boost::get<standard_circuit>( static_cast<const circuit_variant&>( src ) );
@@ -870,46 +940,56 @@ private:
     boost::push_back( dest_s.gates, src_s.gates );
   }
 
+  inline circuit get_fast_circuit() const
+  {
+    standard_circuit c;
+    c.lines = circ.lines();
+    return c;
+  }
+
   void synthesize_node_pick_best( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
   {
     /* map circuit */
     const auto line_map = order_heuristic->compute_line_map( index );
 
-    while ( params.lutdecomp ) /* while is used as if */
+    using candidate_t = std::pair<circuit, cost_t>;
+    std::vector<candidate_t> candidates;
+
+    for ( const auto& strategy : {lhrs_mapping_strategy::lut_based_min_db, lhrs_mapping_strategy::lut_based_best_fit} )
     {
-      circuit circ_decomp4( circ.lines() ), circ_decomp5( circ.lines() );
+      /* cut size 4 */
+      decomp_synthesizer.strategy = strategy;
+      {
+        auto lcirc = get_fast_circuit();
+        decomp_synthesizer.max_cut_size = 4;
+        if ( decomp_synthesizer.compute( lcirc, index, line_map, clean_ancilla ) )
+        {
+          candidates.push_back( {lcirc, costs( lcirc, costs_by_gate_func( t_costs() ) )} );
+        }
+      }
 
-      decomp_synthesizer.max_cut_size = 4;
-      bool ok4 = decomp_synthesizer.compute( circ_decomp4, index, line_map, clean_ancilla ), ok5 = false;
-
+      /* cut size 5 */
       if ( params.class_method == 0u )
       {
+        auto lcirc = get_fast_circuit();
         decomp_synthesizer.max_cut_size = 5;
-        ok5 = decomp_synthesizer.compute( circ_decomp5, index, line_map, clean_ancilla );
-      }
-
-      if ( !ok4 && !ok5 ) break;
-
-      if ( ok4 && ok5 )
-      {
-        if ( costs( circ_decomp4, costs_by_gate_func( t_costs() ) ) < costs( circ_decomp5, costs_by_gate_func( t_costs() ) ) )
+        if ( decomp_synthesizer.compute( lcirc, index, line_map, clean_ancilla ) )
         {
-          append_circuit_fast( circ_decomp4 );
-        }
-        else
-        {
-          append_circuit_fast( circ_decomp5 );
+          candidates.push_back( {lcirc, costs( lcirc, costs_by_gate_func( t_costs() ) )} );
         }
       }
-      else if ( ok4 )
-      {
-        append_circuit_fast( circ_decomp4 );
-      }
-      else
-      {
-        append_circuit_fast( circ_decomp5 );
-      }
+    }
 
+    decomp_synthesizer.strategy = params.mapping_strategy;
+
+    if ( !candidates.empty() )
+    {
+      const auto best_candidate = std::min_element( candidates.begin(), candidates.end(),
+                                                    []( const candidate_t& c1, const candidate_t& c2 ) {
+                                                      return c1.second < c2.second;
+                                                    } );
+
+      append_circuit_fast( best_candidate->first );
       ++stats.num_decomp_lut;
       return;
     }

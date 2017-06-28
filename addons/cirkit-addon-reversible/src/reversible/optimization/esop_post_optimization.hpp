@@ -25,49 +25,26 @@
  */
 
 /**
- * @file lhrs.hpp
+ * @file esop_post_optimization.hpp
  *
- * @brief LUT-based hierarchical reversible synthesis
+ * @brief Post-optimization for circuits with same target line
  *
- * @author Mathias Soeken
+ * @author Giula Meuli
  * @since  2.3
  */
 
-#ifndef CLI_LHRS_COMMAND_HPP
-#define CLI_LHRS_COMMAND_HPP
+#ifndef ESOP_POST_OPTIMIZATION_HPP
+#define ESOP_POST_OPTIMIZATION_HPP
 
-#include <classical/cli/aig_command.hpp>
-#include <reversible/synthesis/lhrs/lhrs_params.hpp>
+
+#include <core/properties.hpp>
+
+#include <reversible/circuit.hpp>
 
 namespace cirkit
 {
 
-class lhrs_command : public aig_base_command
-{
-public:
-  lhrs_command( const environment::ptr& env );
-
-protected:
-  rules_t validity_rules() const;
-  bool execute();
-
-public:
-  log_opt_t log() const;
-
-private:
-  lhrs_params params;
-  lhrs_stats  stats;
-
-  unsigned cut_size = 16u;
-  unsigned lut_count = 0u;
-  unsigned area_iters_init = 2u;
-  unsigned flow_iters_init = 1u;
-
-  std::string dotname_mapped;
-
-private:
-  unsigned debug_lb = 0;
-};
+circuit esop_post_optimization( const circuit& c, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() );
 
 }
 

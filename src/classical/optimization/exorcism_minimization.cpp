@@ -118,23 +118,6 @@ private:
   unsigned _literal_count = 0u;
 };
 
-exorcism_script script_from_string( const std::string& s )
-{
-  if ( s == "def" )
-  {
-    return exorcism_script::def;
-  }
-  else if ( s == "def_wo4" )
-  {
-    return exorcism_script::def_wo4;
-  }
-  else
-  {
-    std::cout << "[e] unknown exorcism script" << std::endl;
-    assert( false );
-  }
-}
-
 void reduce_cover_script_def( bool progress )
 {
   int gain_total{};
@@ -309,6 +292,8 @@ void reduce_cover( bool progress, exorcism_script script )
 {
   switch ( script )
   {
+  case exorcism_script::none:
+    break;
   case exorcism_script::def:
     reduce_cover_script_def( progress );
     break;

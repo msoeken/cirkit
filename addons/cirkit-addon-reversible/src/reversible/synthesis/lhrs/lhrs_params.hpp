@@ -36,6 +36,7 @@
 #ifndef LHRS_PARAMS_HPP
 #define LHRS_PARAMS_HPP
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -46,17 +47,33 @@
 namespace cirkit
 {
 
+enum class lhrs_mapping_strategy
+{
+  direct,
+  lut_based_min_db,
+  lut_based_best_fit,
+  lut_based_pick_best
+};
+
+std::istream& operator>>( std::istream& in, lhrs_mapping_strategy& mapping_strategy );
+std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mapping_strategy );
+
+std::istream& operator>>( std::istream& in, gia_graph::esop_cover_method& cover_method );
+std::ostream& operator<<( std::ostream& out, const gia_graph::esop_cover_method& cover_method );
+
+std::istream& operator>>( std::istream& in, exorcism_script& script );
+std::ostream& operator<<( std::ostream& out, const exorcism_script& script );
+
 struct lhrs_params
 {
   unsigned                     additional_ancilla = 0u;
   bool                         onlylines          = false;                                       /* do not compute gates */
 
   gia_graph::esop_cover_method cover_method       = gia_graph::esop_cover_method::aig_threshold; /* method to extract initial ESOP cover */
-  bool                         optimize_esop      = true;                                        /* optimize ESOP cover */
   bool                         optimize_postesop  = false;                                       /* post-optimize ESOP cover */
   exorcism_script              script             = exorcism_script::def_wo4;                    /* optimize ESOP synthesized circuit */
 
-  bool                         lutdecomp          = false;                                       /* LUT-based mapping */
+  lhrs_mapping_strategy        mapping_strategy   = lhrs_mapping_strategy::direct;               /* mapping strategy */
   bool                         satlut             = false;                                       /* perform SAT-based LUT mapping as post-processing step */
   unsigned                     area_iters         = 2u;                                          /* number of exact area recovery iterations */
   unsigned                     flow_iters         = 1u;                                          /* number of area flow recovery iterations */

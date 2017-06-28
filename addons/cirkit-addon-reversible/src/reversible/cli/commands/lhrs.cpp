@@ -40,6 +40,7 @@
 #include <reversible/cli/stores.hpp>
 #include <reversible/synthesis/lut_based_synthesis.hpp>
 
+using boost::program_options::bool_switch;
 using boost::program_options::value;
 
 namespace cirkit
@@ -50,25 +51,25 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 {
   opts.add_options()
     ( "cut_size,k",         value_with_default( &cut_size ),                  "cut size" )
-    ( "lutdecomp,l",                                                          "apply LUT decomposition technique where possible" )
+    ( "mapping_strategy,m", value_with_default( &params.mapping_strategy ),   "mapping strategy\ndirect (0): direct\nmin_db (1): LUT-based min DB\nbest_fit (2): LUT-based best fit\npick_best (3): LUT-based pick best" )
     ( "additional_ancilla", value_with_default( &params.additional_ancilla ), "number of additional ancilla to add to circuit" )
-    ( "progress,p",                                                           "show progress" )
-    ( "onlylines",                                                            "do not create gates (useful for qubit estimation)" )
+    ( "progress,p",         bool_switch( &params.progress ),                  "show progress" )
+    ( "onlylines",          bool_switch( &params.onlylines ),                 "do not create gates (useful for qubit estimation)" )
     ( "area_iters_init",    value_with_default( &area_iters_init ),           "number of exact area recovery iterations (in initial mapping)" )
     ( "flow_iters_init",    value_with_default( &flow_iters_init ),           "number of area flow recovery iterations (in initial mapping)" )
     ;
 
   boost::program_options::options_description esopdecomp_options( "ESOP decomposition options" );
   esopdecomp_options.add_options()
-    ( "esopscript",      value_with_default( &esopscript ),      "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nnone: do not optimize ESOP cover" )
-    ( "esopcovermethod", value_with_default( &esopcovermethod ), "ESOP cover method\naig: directly from AIG\nbdd: using PSDKRO method from BDD\naignew: new AIG-based method\nauto: tries to estimate the best method for each LUT" )
-    ( "esoppostopt",                                             "Post-optimize network derived from ESOP synthesis" )
+    ( "esopscript",      value_with_default( &params.script ),       "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nnone: do not optimize ESOP cover" )
+    ( "esopcovermethod", value_with_default( &params.cover_method ), "ESOP cover method\naig (0): directly from AIG\nbdd (1): using PSDKRO method from BDD\naignew (2): new AIG-based method\nauto (3): tries to estimate the best method for each LUT" )
+    ( "esoppostopt",     bool_switch( &params.optimize_postesop ),   "post-optimize network derived from ESOP synthesis" )
     ;
   opts.add( esopdecomp_options );
 
   boost::program_options::options_description lutdecomp_options( "LUT decomposition options" );
   lutdecomp_options.add_options()
-    ( "satlut,s",                                                 "optimize mapping with SAT where possible" )
+    ( "satlut,s",     bool_switch( &params.satlut ),              "optimize mapping with SAT where possible" )
     ( "area_iters",   value_with_default( &params.area_iters ),   "number of exact area recovery iterations" )
     ( "flow_iters",   value_with_default( &params.flow_iters ),   "number of area flow recovery iterations" )
     ( "class_method", value_with_default( &params.class_method ), "classification method\n0: spectral classification\n1: affine classificiation" )
@@ -83,16 +84,14 @@ lhrs_command::lhrs_command( const environment::ptr& env )
     ;
   opts.add( debug_options );
 
-  be_verbose();
+  be_verbose( &params.verbose );
   add_new_option();
 }
 
 command::rules_t lhrs_command::validity_rules() const
 {
   return {
-    {has_store_element<aig_graph>( env )},
-    {[this]() { return esopscript == "def" || esopscript == "def_wo4" || esopscript == "none"; }, "unknown exorcism script"},
-    {[this]() { return esopcovermethod == "aig" || esopcovermethod == "bdd" || esopcovermethod == "aignew" || esopcovermethod == "auto"; }, "unknown cover extraction method"}
+    {has_store_element<aig_graph>( env )}
   };
 }
 
@@ -100,35 +99,6 @@ bool lhrs_command::execute()
 {
   auto& circuits = env->store<circuit>();
   extend_if_new( circuits );
-
-  const auto settings = make_settings();
-  params.verbose = is_verbose();
-  params.lutdecomp = is_set( "lutdecomp" );
-  params.progress = is_set( "progress" );
-  params.onlylines = is_set( "onlylines" );
-  if ( esopcovermethod == "aig" )
-  {
-    params.cover_method = gia_graph::esop_cover_method::aig;
-  }
-  else if ( esopcovermethod == "bdd" )
-  {
-    params.cover_method = gia_graph::esop_cover_method::bdd;
-  }
-  else if ( esopcovermethod == "aignew" )
-  {
-    params.cover_method = gia_graph::esop_cover_method::aig_new;
-  }
-  else
-  {
-    params.cover_method = gia_graph::esop_cover_method::aig_threshold;
-  }
-  params.optimize_esop = esopscript != "none";
-  params.optimize_postesop = is_set( "esoppostopt" );
-  if ( esopscript != "none" )
-  {
-    params.script = script_from_string( esopscript );
-  }
-  params.satlut = is_set( "satlut" );
 
   circuit circ;
 
@@ -165,7 +135,6 @@ command::log_opt_t lhrs_command::log() const
       {"onlylines", is_set( "onlylines" )},
       {"area_iters_init", area_iters_init},
       {"flow_iters_init", flow_iters_init},
-      {"esopscript", esopscript},
       {"esoppostopt", is_set( "esoppostopt" )},
       {"satlut", is_set( "satlut" )},
       {"area_iters", params.area_iters},

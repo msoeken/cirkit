@@ -57,6 +57,7 @@ public:
 protected:
   /* pre-defined options */
   inline void be_verbose() { opts.add_options()( "verbose,v", "be verbose" ); }
+  inline void be_verbose( bool* v ) { opts.add_options()( "verbose,v", boost::program_options::bool_switch( v ), "be verbose" ); }
   inline bool is_verbose() const { return is_set( "verbose" ); }
 
   inline void add_new_option( bool with_short = true )

@@ -72,12 +72,10 @@ void exorcism_minimization( const cube_vec_t& cubes,
 
 enum class exorcism_script
 {
+  none,
   def,
   def_wo4
 };
-
-exorcism_script script_from_string( const std::string& s );
-
 
 gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs,
                                            const properties::ptr& settings = properties::ptr(),
