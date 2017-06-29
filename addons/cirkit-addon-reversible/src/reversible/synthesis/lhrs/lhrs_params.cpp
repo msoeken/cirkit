@@ -81,6 +81,8 @@ std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mappin
   case lhrs_mapping_strategy::lut_based_pick_best:
     return out << "pick_best";
   }
+
+  return out;
 }
 
 std::istream& operator>>( std::istream& in, gia_graph::esop_cover_method& cover_method )
@@ -123,6 +125,8 @@ std::ostream& operator<<( std::ostream& out, const gia_graph::esop_cover_method&
   case gia_graph::esop_cover_method::aig_threshold:
     return out << "auto";
   }
+
+  return out;
 }
 
 std::istream& operator>>( std::istream& in, exorcism_script& script )
@@ -159,6 +163,8 @@ std::ostream& operator<<( std::ostream& out, const exorcism_script& script )
   case exorcism_script::def_wo4:
     return out << "def_wo4";
   }
+
+  return out;
 }
 
 }
