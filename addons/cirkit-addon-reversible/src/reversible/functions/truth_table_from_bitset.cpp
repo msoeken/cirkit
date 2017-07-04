@@ -31,17 +31,21 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
+binary_truth_table truth_table_from_bitset_direct( const boost::dynamic_bitset<>& bs )
+{
+  const auto bw = tt_num_vars( bs );
 
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
+  binary_truth_table spec;
 
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
+  for ( auto i = 0u; i < ( 1u << bw ); ++i )
+  {
+    auto in = number_to_truth_table_cube( i, bw );
+    binary_truth_table::cube_type out( 1u, boost::optional<bool>( bs.test( i ) ) );
+    spec.add_entry( in, out );
+  }
+
+  return spec;
+}
 
 binary_truth_table truth_table_from_bitset( const boost::dynamic_bitset<>& bs )
 {

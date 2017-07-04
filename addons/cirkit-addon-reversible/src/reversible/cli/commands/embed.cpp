@@ -32,10 +32,11 @@
 
 #include <core/properties.hpp>
 #include <core/cli/stores.hpp>
-
+#include <classical/cli/stores.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/functions/calculate_additional_lines.hpp>
 #include <reversible/synthesis/embed_bdd.hpp>
+#include <reversible/synthesis/embed_truth_table.hpp>
 
 namespace cirkit
 {
@@ -58,23 +59,25 @@ embed_command::embed_command( const environment::ptr& env )
   opts.add_options()
     ( "bdd,b",      "Embed from BDDs" )
     ( "only_lines", "Only calculate additional lines" )
-    ( "new,n",      "Add a new entry to the store; if not set, the current entry is overriden" )
     ;
+  add_new_option();
   be_verbose();
 }
 
 command::rules_t embed_command::validity_rules() const
 {
-  return { has_store_element<bdd_function_t>( env ) };
+  return {
+    has_store_element_if_set<bdd_function_t>( *this, env, "bdd" ),
+    has_store_element_if_set<bdd_function_t>( *this, env, "only_lines" ),
+    {[this]() { return is_set( "bdd" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available"}
+  };
 }
 
 bool embed_command::execute()
 {
   const auto& bdds = env->store<bdd_function_t>();
-  auto& rcbdds = env->store<rcbdd>();
 
   const auto settings = make_settings();
-  const auto statistics = std::make_shared<properties>();
 
   if ( is_set( "only_lines" ) )
   {
@@ -82,17 +85,23 @@ bool embed_command::execute()
 
     std::cout << boost::format( "[i] required lines: %d" ) % lines << std::endl;
   }
-  else
+  else if ( is_set( "bdd" ) )
   {
-    if ( rcbdds.empty() || is_set( "new" ) )
-    {
-      rcbdds.extend();
-    }
+    auto& rcbdds = env->store<rcbdd>();
 
+    extend_if_new( rcbdds );
     embed_bdd( rcbdds.current(), bdds.current(), settings, statistics );
   }
+  else
+  {
+    auto& specs = env->store<binary_truth_table>();
+    const auto& tts = env->store<tt>();
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+    extend_if_new( specs );
+    embed_truth_table( specs.current(), tts.current(), settings, statistics );
+  }
+
+  print_runtime();
 
   return true;
 }
