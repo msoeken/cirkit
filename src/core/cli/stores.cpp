@@ -34,6 +34,7 @@
 #include <boost/range/algorithm.hpp>
 
 #include <core/io/read_pla.hpp>
+#include <core/io/write_pla.hpp>
 #include <core/utils/range_utils.hpp>
 
 namespace alice
@@ -152,6 +153,13 @@ bdd_function_t store_read_io_type<bdd_function_t, io_pla_tag_t>( const std::stri
 {
   return read_pla( filename );
 }
+
+template<>
+void store_write_io_type<bdd_function_t, io_pla_tag_t>( const bdd_function_t& bdd, const std::string& filename, const command& cmd )
+{
+  write_pla( bdd, filename );
+}
+
 
 }
 

@@ -92,6 +92,12 @@ inline bool store_can_read_io_type<bdd_function_t, io_pla_tag_t>( command& cmd )
 template<>
 bdd_function_t store_read_io_type<bdd_function_t, io_pla_tag_t>( const std::string& filename, const command& cmd );
 
+template<>
+inline bool store_can_write_io_type<bdd_function_t, io_pla_tag_t>( command& cmd ) { return true; }
+
+template<>
+void store_write_io_type<bdd_function_t, io_pla_tag_t>( const bdd_function_t& bdd, const std::string& filename, const command& cmd );
+
 }
 
 #endif
