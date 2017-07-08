@@ -26,41 +26,37 @@
 
 #include "bdd.hpp"
 
+#include <iostream>
 #include <vector>
+
+#include <boost/lexical_cast.hpp>
+
+#include <cuddObj.hh>
 
 #include <alice/rules.hpp>
 
 #include <core/cli/stores.hpp>
+#include <core/utils/range_utils.hpp>
+#include <core/utils/string_utils.hpp>
 
 using namespace boost::program_options;
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 bdd_command::bdd_command( const environment::ptr& env )
   : cirkit_command( env, "BDD manipulation" )
 {
   opts.add_options()
     ( "characteristic,c", value( &characteristic ), "Compute characteristic function (x: inputs first, y: outputs first)" )
+    ( "clique",           value( &clique ),         "Computes clique(n,k) function, give n,k as string" )
     ( "new,n",                                      "Add a new entry to the store; if not set, the current entry is overriden" )
     ;
 }
 
 command::rules_t bdd_command::validity_rules() const
 {
-  return { has_store_element<bdd_function_t>( env ) };
+  return { has_store_element_if_set<bdd_function_t>( *this, env, "characteristic" ) };
 }
 
 bool bdd_command::execute()
@@ -71,12 +67,39 @@ bool bdd_command::execute()
   {
     auto bdd = bdds.current();
 
-    if ( is_set( "new" ) )
-    {
-      bdds.extend();
-    }
+    extend_if_new( bdds );
 
     bdds.current() = compute_characteristic( bdd, characteristic == "x" );
+  }
+
+  else if ( is_set( "clique" ) )
+  {
+    const auto nk = split_string_pair( clique, "," );
+    const auto n = boost::lexical_cast<unsigned>( nk.first );
+    const auto k = boost::lexical_cast<unsigned>( nk.second );
+
+    Cudd mgr;
+    auto func = mgr.bddZero();
+
+    lexicographic_combinations( n, k, [&mgr, &func, k]( const std::vector<unsigned>& v ) {
+        auto term = mgr.bddOne();
+        lexicographic_combinations( k, 2u, [&mgr, &term, &v]( const std::vector<unsigned>& idxs ) {
+            const auto v0 = v[idxs[0u]];
+            const auto v1 = v[idxs[1u]];
+            const auto edge_idx = v0 + ( v1 * ( v1 - 1 ) ) / 2;
+
+            term &= mgr.bddVar( edge_idx );
+
+            return false;
+          } );
+
+        func |= term;
+
+        return false;
+      } );
+
+    extend_if_new( bdds );
+    bdds.current() = {mgr, {func}};
   }
 
   return true;

@@ -26,6 +26,7 @@
 
 #include "range_utils.hpp"
 
+#include <numeric>
 #include <boost/format.hpp>
 
 namespace cirkit
@@ -45,6 +46,74 @@ void mixed_radix( std::vector<unsigned>& a, const std::vector<unsigned>& m, cons
     if ( !j ) { break; }
 
     a[j]++;
+  }
+}
+
+void lexicographic_combinations( unsigned n, unsigned t, const std::function<bool(const std::vector<unsigned>&)>&& func )
+{
+  /* special cases */
+  if ( t > n )
+  {
+    assert( false );
+  }
+  else if ( t == n )
+  {
+    std::vector<unsigned> v( n );
+    std::iota( v.begin(), v.end(), 0u );
+    func( v );
+    return;
+  }
+  else if ( t == 0u )
+  {
+    func( {} );
+    return;
+  }
+
+  /* regular case */
+
+  /* step T1. [Initialize.] */
+  std::vector<unsigned> c( t );
+  std::iota( c.begin(), c.end(), 0u );
+  c.push_back( n );
+  c.push_back( 0u );
+  const auto sentinel = c.begin() + t;
+  auto j = t;
+  unsigned x{};
+
+  while ( true )
+  {
+    /* step T2. [Visit.] */
+    if ( func( std::vector<unsigned>( c.begin(), sentinel ) ) ) return;
+
+    if ( j > 0 )
+    {
+      x = j;
+    }
+    else
+    {
+      /* step T3. [Easy case?] */
+      if ( c[0] + 1 < c[1] )
+      {
+        ++c[0];
+        continue;
+      }
+      j = 2u;
+
+      /* step T4. [Find j.] */
+      while ( true )
+      {
+        c[j - 2] = j - 2;
+        x = c[j - 1] + 1;
+        if ( x != c[j] ) break;
+        ++j;
+      }
+
+      /* step T5. [Done?] */
+      if ( j > t ) break;
+    }
+
+    /* step T6. [Increase c_j.] */
+    c[--j] = x;
   }
 }
 

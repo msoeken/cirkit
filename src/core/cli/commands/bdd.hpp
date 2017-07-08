@@ -53,6 +53,7 @@ protected:
 
 private:
   std::string characteristic;
+  std::string clique;
 };
 
 }
