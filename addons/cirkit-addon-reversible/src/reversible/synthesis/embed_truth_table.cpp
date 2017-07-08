@@ -89,7 +89,7 @@ private:
   unsigned compare_to;
 };
 
-bool embed_truth_table( binary_truth_table& spec, const binary_truth_table& base, properties::ptr settings, properties::ptr statistics )
+bool embed_truth_table( binary_truth_table& spec, const binary_truth_table& base, const properties::ptr& settings, const properties::ptr& statistics )
 {
   std::string garbage_name           = get<std::string>( settings, "garbage_name", "g" );
   std::vector<unsigned> output_order = get<std::vector<unsigned> >( settings, "output_order", std::vector<unsigned>() );
@@ -232,13 +232,13 @@ bool embed_truth_table( binary_truth_table& spec, const binary_truth_table& base
   return true;
 }
 
-bool embed_truth_table( binary_truth_table& spec, const tt& base, properties::ptr settings, properties::ptr statistics )
+bool embed_truth_table( binary_truth_table& spec, const tt& base, const properties::ptr& settings, const properties::ptr& statistics )
 {
   const auto rbase = truth_table_from_bitset_direct( base );
   return embed_truth_table( spec, rbase, settings, statistics );
 }
 
-embedding_func embed_truth_table_func( properties::ptr settings, properties::ptr statistics )
+embedding_func embed_truth_table_func( const properties::ptr& settings, const properties::ptr& statistics )
 {
   embedding_func f = [&settings, &statistics]( binary_truth_table& spec, const binary_truth_table& base ) {
     return embed_truth_table( spec, base, settings, statistics );

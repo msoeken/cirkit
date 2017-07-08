@@ -102,12 +102,12 @@ namespace cirkit
  * @since  1.0
  */
 bool embed_truth_table( binary_truth_table& spec, const binary_truth_table& base,
-                        properties::ptr settings = properties::ptr(),
-                        properties::ptr statistics = properties::ptr() );
+                        const properties::ptr& settings = properties::ptr(),
+                        const properties::ptr& statistics = properties::ptr() );
 
 bool embed_truth_table( binary_truth_table& spec, const tt& base,
-                        properties::ptr settings = properties::ptr(),
-                        properties::ptr statistics = properties::ptr() );
+                        const properties::ptr& settings = properties::ptr(),
+                        const properties::ptr& statistics = properties::ptr() );
 
 /**
  * @brief Functor for the \ref revkit::embed_truth_table "embed_truth_table" algorithm
@@ -119,7 +119,8 @@ bool embed_truth_table( binary_truth_table& spec, const tt& base,
  *
  * @since  1.0
  */
-embedding_func embed_truth_table_func( properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>() );
+embedding_func embed_truth_table_func( const properties::ptr& settings = std::make_shared<properties>(),
+                                       const properties::ptr& statistics = std::make_shared<properties>() );
 
 }
 

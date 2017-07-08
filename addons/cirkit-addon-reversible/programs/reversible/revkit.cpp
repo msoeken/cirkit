@@ -74,6 +74,7 @@
 #include <reversible/cli/commands/qbs.hpp>
 #include <reversible/cli/commands/random_circuit.hpp>
 #include <reversible/cli/commands/rec.hpp>
+#include <reversible/cli/commands/reduce_lines.hpp>
 #include <reversible/cli/commands/required_lines.hpp>
 #include <reversible/cli/commands/reverse.hpp>
 #include <reversible/cli/commands/revgen.hpp>
@@ -144,6 +145,7 @@ ALICE_BEGIN(revkit)
 
   ADD_COMMAND( adding_lines );
   ADD_COMMAND( exorcism );
+  ADD_COMMAND( reduce_lines );
   ADD_COMMAND( revsimp );
   ADD_COMMAND( tpar );
 

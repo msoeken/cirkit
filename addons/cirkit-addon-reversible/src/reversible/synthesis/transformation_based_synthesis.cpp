@@ -252,8 +252,8 @@ void print_current_state( unsigned index, const circuit& circ, const bitset_pair
  ******************************************************************************/
 
 bool transformation_based_synthesis( circuit& circ, const binary_truth_table& spec,
-                                     properties::ptr settings,
-                                     properties::ptr statistics )
+                                     const properties::ptr& settings,
+                                     const properties::ptr& statistics )
 {
   /* Settings */
   const auto bidirectional    = get( settings, "bidirectional",    true  );
@@ -342,8 +342,8 @@ bool transformation_based_synthesis( circuit& circ, const binary_truth_table& sp
   return true;
 }
 
-truth_table_synthesis_func transformation_based_synthesis_func( properties::ptr settings,
-                                                                properties::ptr statistics )
+truth_table_synthesis_func transformation_based_synthesis_func( const properties::ptr& settings,
+                                                                const properties::ptr& statistics )
 {
   truth_table_synthesis_func f = [&settings, &statistics]( circuit& circ, const binary_truth_table& spec ) {
     return transformation_based_synthesis( circ, spec, settings, statistics );

@@ -477,18 +477,18 @@ namespace cirkit
   bool line_reduction( circuit& circ, const circuit& base, properties::ptr settings, properties::ptr statistics )
   {
     /* settings */
-    unsigned max_window_lines              = get<unsigned>( settings, "max_window_lines", 6u );
-    unsigned max_grow_up_window_lines      = get<unsigned>( settings, "max_grow_up_window_lines", 9u );
-    unsigned window_variables_threshold    = get<unsigned>( settings, "window_variables_threshold", 17u );
-    simulation_func simulation             = get<simulation_func>( settings, "simulation", simple_simulation_func() );
-    window_synthesis_func window_synthesis = get<window_synthesis_func>( settings, "window_synthesis", embed_and_synthesize() );
+    const auto max_window_lines           = get( settings, "max_window_lines", 6u );
+    const auto max_grow_up_window_lines   = get( settings, "max_grow_up_window_lines", 9u );
+    const auto window_variables_threshold = get( settings, "window_variables_threshold", 17u );
+    const auto simulation                 = get<simulation_func>( settings, "simulation", simple_simulation_func() );
+    const auto window_synthesis           = get<window_synthesis_func>( settings, "window_synthesis", embed_and_synthesize() );
 
     /* statistics */
-    unsigned num_considered_windows   = 0u;
-    unsigned skipped_max_window_lines = 0u;
-    unsigned skipped_ambiguous_line   = 0u;
-    unsigned skipped_no_constant_line = 0u;
-    unsigned skipped_synthesis_failed = 0u;
+    auto num_considered_windows   = 0u;
+    auto skipped_max_window_lines = 0u;
+    auto skipped_ambiguous_line   = 0u;
+    auto skipped_no_constant_line = 0u;
+    auto skipped_synthesis_failed = 0u;
 
     properties_timer t( statistics );
 

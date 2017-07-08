@@ -45,60 +45,61 @@
 namespace cirkit
 {
 
-  /**
-   * @brief Synthesizes a circuit using the Transformation Based approach
-   *
-   * This function implements the algorithm published in [\ref MMD03].
-   *
-   * @param circ       Empty Circuit
-   * @param spec       Function Specification (has to be fully specified)
-   * @param settings <table border="0" width="100%">
-   *   <tr>
-   *     <td class="indexkey">Setting</td>
-   *     <td class="indexkey">Type</td>
-   *     <td class="indexkey">Default Value</td>
-   *   </tr>
-   *   <tr>
-   *     <td rowspan="2" class="indexvalue">bidirectional</td>
-   *     <td class="indexvalue">bool</td>
-   *     <td class="indexvalue">true</td>
-   *   </tr>
-   *   <tr>
-   *     <td colspan="2" class="indexvalue">Use the bidirectional approach as described in [\ref MMD03].</td>
-   *   </tr>
-   * </table>
-   * @param statistics <table border="0" width="100%">
-   *   <tr>
-   *     <td class="indexkey">Information</td>
-   *     <td class="indexkey">Type</td>
-   *     <td class="indexkey">Description</td>
-   *   </tr>
-   *   <tr>
-   *     <td class="indexvalue">runtime</td>
-   *     <td class="indexvalue">double</td>
-   *     <td class="indexvalue">Run-time consumed by the algorithm in CPU seconds.</td>
-   *   </tr>
-   * </table>
-   *
-   * @return true if successful, false otherwise
-   *
-   * @since  1.0
-   */
-  bool transformation_based_synthesis( circuit& circ, const binary_truth_table& spec,
-                                       properties::ptr settings = properties::ptr(),
-                                       properties::ptr statistics = properties::ptr() );
+/**
+ * @brief Synthesizes a circuit using the Transformation Based approach
+ *
+ * This function implements the algorithm published in [\ref MMD03].
+ *
+ * @param circ       Empty Circuit
+ * @param spec       Function Specification (has to be fully specified)
+ * @param settings <table border="0" width="100%">
+ *   <tr>
+ *     <td class="indexkey">Setting</td>
+ *     <td class="indexkey">Type</td>
+ *     <td class="indexkey">Default Value</td>
+ *   </tr>
+ *   <tr>
+ *     <td rowspan="2" class="indexvalue">bidirectional</td>
+ *     <td class="indexvalue">bool</td>
+ *     <td class="indexvalue">true</td>
+ *   </tr>
+ *   <tr>
+ *     <td colspan="2" class="indexvalue">Use the bidirectional approach as described in [\ref MMD03].</td>
+ *   </tr>
+ * </table>
+ * @param statistics <table border="0" width="100%">
+ *   <tr>
+ *     <td class="indexkey">Information</td>
+ *     <td class="indexkey">Type</td>
+ *     <td class="indexkey">Description</td>
+ *   </tr>
+ *   <tr>
+ *     <td class="indexvalue">runtime</td>
+ *     <td class="indexvalue">double</td>
+ *     <td class="indexvalue">Run-time consumed by the algorithm in CPU seconds.</td>
+ *   </tr>
+ * </table>
+ *
+ * @return true if successful, false otherwise
+ *
+ * @since  1.0
+ */
+bool transformation_based_synthesis( circuit& circ, const binary_truth_table& spec,
+                                     const properties::ptr& settings = properties::ptr(),
+                                     const properties::ptr& statistics = properties::ptr() );
 
-  /**
-   * @brief Functor for the \ref revkit::transformation_based_synthesis "transformation_based_synthesis" algorithm
-   *
-   * @param settings Settings (see \ref revkit::transformation_based_synthesis "transformation_based_synthesis")
-   * @param statistics Statistics (see \ref revkit::transformation_based_synthesis "transformation_based_synthesis")
-   *
-   * @return A functor which complies with the \ref revkit::truth_table_synthesis_func "truth_table_based_synthesis_func" interface
-   *
-   * @since  1.0
-   */
-  truth_table_synthesis_func transformation_based_synthesis_func( properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>() );
+/**
+ * @brief Functor for the \ref revkit::transformation_based_synthesis "transformation_based_synthesis" algorithm
+ *
+ * @param settings Settings (see \ref revkit::transformation_based_synthesis "transformation_based_synthesis")
+ * @param statistics Statistics (see \ref revkit::transformation_based_synthesis "transformation_based_synthesis")
+ *
+ * @return A functor which complies with the \ref revkit::truth_table_synthesis_func "truth_table_based_synthesis_func" interface
+ *
+ * @since  1.0
+ */
+truth_table_synthesis_func transformation_based_synthesis_func( const properties::ptr& settings = std::make_shared<properties>(),
+                                                                const properties::ptr& statistics = std::make_shared<properties>() );
 
 }
 
