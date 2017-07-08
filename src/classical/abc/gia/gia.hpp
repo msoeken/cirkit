@@ -87,6 +87,15 @@ public:
   inline int num_inputs() const { return abc::Gia_ManPiNum( p_gia ); }
   inline int num_outputs() const { return abc::Gia_ManPoNum( p_gia ); }
 
+  /* number of XORs */
+  int num_xors() const;
+
+  /// OPERATIONS
+  gia_graph cofactor( int var, bool value ) const;
+  gia_graph select_outputs( const std::vector<int>& indexes ) const;
+  gia_graph syn3() const;
+  gia_graph syn4() const;
+
   /// MAPPING
 
   gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;

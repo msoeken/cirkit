@@ -82,7 +82,9 @@ struct lhrs_params
 
   bool                         progress           = false;                                       /* show progress line */
   bool                         verbose            = false;                                       /* be verbose */
-  std::string                  dumpfile;                                                         /* dump ESOP and AIG files for each ESOP cover and LUT */
+
+  bool                         nocollapse         = false;                                       /* DEBUG: do not collapse (useful with dumpfile parameter) */
+  std::string                  dumpfile;                                                         /* DEBUG: dump ESOP and AIG files for each ESOP cover and LUT */
 };
 
 struct lhrs_stats

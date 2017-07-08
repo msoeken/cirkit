@@ -78,9 +78,10 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description debug_options( "Debug options" );
   debug_options.add_options()
-    ( "dumpfile",       value( &params.dumpfile ), "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
-    ( "bounds",                                    "compute lower and upper bounds for qubits" )
-    ( "dotname_mapped", value( &dotname_mapped ),  "filename to dump DOT representation of initial mapped network" )
+    ( "dumpfile",       value( &params.dumpfile ),         "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
+    ( "nocollapse",     bool_switch( &params.nocollapse ), "do not collapse LUTs (useful with dumpfile to only write AIGs)" )
+    ( "bounds",                                            "compute lower and upper bounds for qubits" )
+    ( "dotname_mapped", value( &dotname_mapped ),          "filename to dump DOT representation of initial mapped network" )
     ;
   opts.add( debug_options );
 

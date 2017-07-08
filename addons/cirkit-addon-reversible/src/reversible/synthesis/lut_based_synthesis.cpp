@@ -424,6 +424,12 @@ void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vec
     lut.write_aiger( boost::str( boost::format( "%s/lut-%d.aig" ) % params.dumpfile % stats.dumpfile_counter ) );
   }
 
+  if ( params.nocollapse )
+  {
+    stats.dumpfile_counter++;
+    return;
+  }
+
   auto esop = [&lut, &params, &stats]() {
     increment_timer t( &stats.cover_runtime );
     return lut.compute_esop_cover( params.cover_method, make_settings_from( std::make_pair( "progress", params.progress ), std::make_pair( "minimize", true ) ) );

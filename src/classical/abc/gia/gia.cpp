@@ -1,4 +1,3 @@
-
 /* CirKit: A circuit toolkit
  * Copyright (C) 2009-2015  University of Bremen
  * Copyright (C) 2015-2017  EPFL
@@ -183,6 +182,48 @@ std::string gia_graph::output_name( int output_index ) const
   {
     return boost::str( boost::format( "output_%d" ) % output_index );
   }
+}
+
+int gia_graph::num_xors() const
+{
+  int _num_xors = 0;
+  abc::Gia_Obj_t * fan0, * fan1;
+
+  foreach_and( [&_num_xors, &fan0, &fan1]( int index, abc::Gia_Obj_t * obj ) {
+      if ( abc::Gia_ObjIsMuxType( obj ) && abc::Gia_ObjRecognizeExor( obj, &fan0, &fan1 ) )
+      {
+        ++_num_xors;
+      }
+    } );
+
+  return _num_xors;
+}
+
+/******************************************************************************
+ * Operations                                                                 *
+ ******************************************************************************/
+
+gia_graph gia_graph::cofactor( int var, bool value ) const
+{
+  return gia_graph( abc::Gia_ManDupCofactorVar( p_gia, var, value ? 1 : 0 ) );
+}
+
+gia_graph gia_graph::select_outputs( const std::vector<int>& indexes ) const
+{
+  auto vec = abc::Vec_IntAllocArray( const_cast<int*>( &indexes[0] ), indexes.size() );
+  auto* g = abc::Gia_ManDupSelectedOutputs( p_gia, vec );
+  ABC_FREE( vec ); /* do not erase the array, since it's owned by indexes */
+  return gia_graph( g );
+}
+
+gia_graph gia_graph::syn3() const
+{
+  return gia_graph( abc::Gia_ManAigSyn3( p_gia, 0, 0 ) );
+}
+
+gia_graph gia_graph::syn4() const
+{
+  return gia_graph( abc::Gia_ManAigSyn4( p_gia, 0, 0 ) );
 }
 
 /******************************************************************************
