@@ -30,7 +30,6 @@
 
 #include <core/utils/program_options.hpp>
 #include <classical/mig/mig_rewriting.hpp>
-#include <classical/mig/mig_mighty_rewriting.hpp>
 
 using namespace boost::program_options;
 
@@ -52,7 +51,7 @@ namespace cirkit
 mig_rewrite_command::mig_rewrite_command( const environment::ptr& env ) : mig_base_command( env, "MIG rewriting" )
 {
   opts.add_options()
-    ( "metric",   value_with_default( &metric ),   "Cost metric for optimization\n0: depth\n1: area\n2: memristor\n3: MIGhty" )
+    ( "metric",   value_with_default( &metric ),   "Cost metric for optimization\n0: depth\n1: area\n2: memristor" )
     ( "nodist",                                    "Don't use distributivity rule" )
     ( "noassoc",                                   "Don't use associativity rule" )
     ( "nocassoc",                                  "Don't use complementary associativity rule" )
@@ -81,9 +80,6 @@ bool mig_rewrite_command::execute()
     break;
   case 2u:
     mig() = mig_memristor_rewriting( mig(), settings, statistics );
-    break;
-  case 3u:
-    mig() = mig_mighty_depth_rewriting( mig(), settings, statistics );
     break;
   }
 
