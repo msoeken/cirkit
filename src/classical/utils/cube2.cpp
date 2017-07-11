@@ -156,7 +156,7 @@ void cube2::invert_all()
 
 void cube2::rotate( unsigned bit )
 {
-  bits ^= bits & mask & ( 1 << bit );
+  bits ^= ( ~bits ^ mask ) & ( 1 << bit );
   mask ^= ~bits & ( 1 << bit );
 }
 
