@@ -42,7 +42,7 @@ esop_command::esop_command( const environment::ptr& env )
 {
   opts.add_options()
     ( "filename",   value( &filename ),              "ESOP filename" )
-    ( "collapse,c", value_with_default( &collapse ), "collapsing method:\naig (0): ABC's AIG collapsing\naignew (1): CirKit's AIG collapsing\n2: PSDKRO collapsing" )
+    ( "collapse,c", value_with_default( &collapse ), "collapsing method:\naig (0): ABC's AIG collapsing\nbdd (1): PSDKRO collapsing\naignew (2): CirKit's AIG collapsing" )
     ( "minimize,m", value_with_default( &minimize ), "minimization method:\n0: none\n1: exorcism" )
     ( "progress,p",                                  "show progress" )
     ;
@@ -56,7 +56,7 @@ command::rules_t esop_command::validity_rules() const
     has_store_element<aig_graph>( env ),
     {[this]() { return is_set( "filename" ); }, "filename must be set"},
     {[this]() { return minimize <= 2u; }, "invalid value for minimize"},
-    {[this]() { return ( collapse == gia_graph::esop_cover_method::aig ) || ( info().outputs.size() == 1u ); }, "selected collapsing method can only be applied to single-output functions"}
+    {[this]() { return ( collapse != gia_graph::esop_cover_method::bdd ) || ( info().outputs.size() == 1u ); }, "selected collapsing method can only be applied to single-output functions"}
   };
 }
 
@@ -67,7 +67,14 @@ bool esop_command::execute()
 
   gia_graph gia( aig() );
 
-  const auto esop = gia.compute_esop_cover( collapse, settings );
+  auto esop = gia.compute_esop_cover( collapse, settings );
+
+  switch ( minimize )
+  {
+  case 1u:
+    esop = exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs(), settings );
+    break;
+  }
 
   write_esop( esop, gia.num_inputs(), gia.num_outputs(), filename );
 

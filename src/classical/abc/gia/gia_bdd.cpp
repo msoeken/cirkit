@@ -28,6 +28,7 @@
 
 #include <vector>
 
+#include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 
 namespace cirkit
@@ -47,6 +48,9 @@ namespace cirkit
 
 bdd_function_t gia_to_bdd( const gia_graph& gia, Cudd& mgr, const properties::ptr& settings, const properties::ptr& statistics )
 {
+  /* settings */
+  const auto progress = get( settings, "progress", false );
+
   /* timing */
   properties_timer t( statistics );
 
@@ -57,14 +61,21 @@ bdd_function_t gia_to_bdd( const gia_graph& gia, Cudd& mgr, const properties::pt
       node_to_bdd[id] = mgr.bddVar( i );
     } );
 
+  progress_line pline( boost::str( boost::format( "[i] (gia_to_bdd) inputs = %5d   gates = %%5d / %5d   BDD nodes = %%9d   runtime = %%7.2f secs" ) % gia.num_inputs() % ( gia.size() - gia.num_inputs() - gia.num_outputs() ) ), progress );
+  double runtime = 0.0;
+  auto counter = 0u;
+
   /* create BDD for each AND gate */
-  gia.foreach_and( [&node_to_bdd]( int id, abc::Gia_Obj_t* obj ) {
+  gia.foreach_and( [&runtime, &pline, &counter, &mgr, &node_to_bdd]( int id, abc::Gia_Obj_t* obj ) {
+      increment_timer t( &runtime );
       const auto b1 = node_to_bdd[abc::Gia_ObjFaninId0( obj, id )];
       const auto b2 = node_to_bdd[abc::Gia_ObjFaninId1( obj, id )];
       const auto c1 = abc::Gia_ObjFaninC0( obj );
       const auto c2 = abc::Gia_ObjFaninC1( obj );
 
       node_to_bdd[id] = ( c1 ? !b1 : b1 ) & ( c2 ? !b2 : b2 );
+
+      pline( ++counter, mgr.ReadKeys(), runtime );
     } );
 
   /* create BDD for each output */
