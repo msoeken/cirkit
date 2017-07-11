@@ -53,6 +53,7 @@
 #include <classical/cli/commands/demo.hpp>
 #include <classical/cli/commands/depth.hpp>
 #include <classical/cli/commands/dsop.hpp>
+#include <classical/cli/commands/esop.hpp>
 #include <classical/cli/commands/exorcism.hpp>
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/feather.hpp>
@@ -153,6 +154,7 @@ ALICE_BEGIN(cirkit)
   ADD_COMMAND( isop );
 
   cli.set_category( "Optimization" );
+  ADD_COMMAND( esop );
   ADD_COMMAND( exorcism );
 
   cli.set_category( "Reverse engineering" );

@@ -36,6 +36,7 @@
 #ifndef ABC_GIA_HPP
 #define ABC_GIA_HPP
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -193,6 +194,9 @@ private:
   mutable abc::Vec_Wrd_t* p_truths = nullptr;
   mutable std::shared_ptr<Cudd> p_cudd_mgr;
 };
+
+std::istream& operator>>( std::istream& in, gia_graph::esop_cover_method& cover_method );
+std::ostream& operator<<( std::ostream& out, const gia_graph::esop_cover_method& cover_method );
 
 }
 

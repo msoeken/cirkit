@@ -24,62 +24,64 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "exorcism.hpp"
+#include "esop.hpp"
 
+#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
-#include <alice/rules.hpp>
 #include <core/utils/program_options.hpp>
-#include <classical/abc/gia/gia.hpp>
-#include <classical/cli/stores.hpp>
-#include <classical/optimization/exorcismq.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
-
-using boost::program_options::value;
 
 namespace cirkit
 {
 
-exorcism_command::exorcism_command( const environment::ptr& env )
-  : cirkit_command( env, "Exorcism ESOP minimization" )
+using boost::program_options::value;
+
+esop_command::esop_command( const environment::ptr& env )
+  : aig_base_command( env, "Generate ESOPs from AIGs" )
 {
   opts.add_options()
-    ( "filename", value( &filename ), "ESOP filename for output" )
-    ( "aig,a",                        "read from AIG" )
-    ( "psdkro,p",                     "extract cover with PSDKROs (only for AIGs)" )
+    ( "filename",   value( &filename ),              "ESOP filename" )
+    ( "collapse,c", value_with_default( &collapse ), "collapsing method:\naig (0): ABC's AIG collapsing\naignew (1): CirKit's AIG collapsing\n2: PSDKRO collapsing" )
+    ( "minimize,m", value_with_default( &minimize ), "minimization method:\n0: none\n1: exorcism" )
+    ( "progress,p",                                  "show progress" )
     ;
+  add_new_option();
   add_positional_option( "filename" );
-  be_verbose();
 }
 
-command::rules_t exorcism_command::validity_rules() const
+command::rules_t esop_command::validity_rules() const
 {
   return {
-    has_store_element_if_set<aig_graph>( *this, env, "aig" )
+    has_store_element<aig_graph>( env ),
+    {[this]() { return is_set( "filename" ); }, "filename must be set"},
+    {[this]() { return minimize <= 2u; }, "invalid value for minimize"},
+    {[this]() { return ( collapse == gia_graph::esop_cover_method::aig ) || ( info().outputs.size() == 1u ); }, "selected collapsing method can only be applied to single-output functions"}
   };
 }
 
-bool exorcism_command::execute()
+bool esop_command::execute()
 {
-  std::cout << "[w] deprecated: use command `esop' instead" << std::endl;
-
   const auto settings = make_settings();
-  settings->set( "esopname", filename );
-  settings->set( "skip_parsing", true );
-  if ( is_set( "psdkro" ) )
-  {
-    settings->set( "cover_method", gia_graph::esop_cover_method::bdd );
-  }
+  settings->set( "progress", is_set( "progress" ) );
 
-  const auto& aigs = env->store<aig_graph>();
-  gia_graph gia( aigs.current() );
-  const auto esop = exorcism_minimization( gia, settings, statistics );
+  gia_graph gia( aig() );
+
+  const auto esop = gia.compute_esop_cover( collapse, settings );
+
   write_esop( esop, gia.num_inputs(), gia.num_outputs(), filename );
-
-  print_runtime();
 
   return true;
 }
+
+command::log_opt_t esop_command::log() const
+{
+  return log_map_t({
+      {"collapse", boost::lexical_cast<std::string>( collapse )},
+      {"minimize", minimize}
+    });
+}
+
 
 }
 

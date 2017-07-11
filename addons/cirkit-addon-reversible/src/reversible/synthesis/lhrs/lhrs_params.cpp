@@ -85,50 +85,6 @@ std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mappin
   return out;
 }
 
-std::istream& operator>>( std::istream& in, gia_graph::esop_cover_method& cover_method )
-{
-  std::string token;
-  in >> token;
-  if ( token == "aig" || token == "0" )
-  {
-    cover_method = gia_graph::esop_cover_method::aig;
-  }
-  else if ( token == "bdd" || token == "1" )
-  {
-    cover_method = gia_graph::esop_cover_method::bdd;
-  }
-  else if ( token == "aignew" || token == "2" )
-  {
-    cover_method = gia_graph::esop_cover_method::aig_new;
-  }
-  else if ( token == "auto" || token == "3" )
-  {
-    cover_method = gia_graph::esop_cover_method::aig_threshold;
-  }
-  else
-  {
-    in.setstate( std::ios_base::failbit );
-  }
-  return in;
-}
-
-std::ostream& operator<<( std::ostream& out, const gia_graph::esop_cover_method& cover_method )
-{
-  switch ( cover_method )
-  {
-  case gia_graph::esop_cover_method::aig:
-    return out << "aig";
-  case gia_graph::esop_cover_method::bdd:
-    return out << "bdd";
-  case gia_graph::esop_cover_method::aig_new:
-    return out << "aignew";
-  case gia_graph::esop_cover_method::aig_threshold:
-    return out << "auto";
-  }
-
-  return out;
-}
-
 std::istream& operator>>( std::istream& in, exorcism_script& script )
 {
   std::string token;

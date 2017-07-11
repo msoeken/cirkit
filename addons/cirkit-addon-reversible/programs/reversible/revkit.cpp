@@ -40,6 +40,7 @@
 #include <classical/cli/commands/expr.hpp>
 #include <classical/cli/commands/abc.hpp>
 #include <classical/cli/commands/cone.hpp>
+#include <classical/cli/commands/esop.hpp>
 #include <classical/cli/commands/exorcism.hpp>
 #include <classical/cli/commands/print_io.hpp>
 #include <classical/cli/commands/simulate.hpp>
@@ -144,6 +145,7 @@ ALICE_BEGIN(revkit)
   cli.set_category( "Optimization" );
 
   ADD_COMMAND( adding_lines );
+  ADD_COMMAND( esop );
   ADD_COMMAND( exorcism );
   ADD_COMMAND( reduce_lines );
   ADD_COMMAND( revsimp );

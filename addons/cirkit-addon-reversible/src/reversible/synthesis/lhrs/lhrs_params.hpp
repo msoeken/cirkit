@@ -58,9 +58,6 @@ enum class lhrs_mapping_strategy
 std::istream& operator>>( std::istream& in, lhrs_mapping_strategy& mapping_strategy );
 std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mapping_strategy );
 
-std::istream& operator>>( std::istream& in, gia_graph::esop_cover_method& cover_method );
-std::ostream& operator<<( std::ostream& out, const gia_graph::esop_cover_method& cover_method );
-
 std::istream& operator>>( std::istream& in, exorcism_script& script );
 std::ostream& operator<<( std::ostream& out, const exorcism_script& script );
 
