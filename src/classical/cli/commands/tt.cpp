@@ -46,6 +46,27 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
+static constexpr unsigned primes[] = {
+  2,      3,      5,      7,      11,     13,     17,     19,     23,     29,
+  31,     37,     41,     43,     47,     53,     59,     61,     67,     71,
+  73,     79,     83,     89,     97,     101,    103,    107,    109,    113,
+  127,    131,    137,    139,    149,    151,    157,    163,    167,    173,
+  179,    181,    191,    193,    197,    199,    211,    223,    227,    229,
+  233,    239,    241,    251,    257,    263,    269,    271,    277,    281,
+  283,    293,    307,    311,    313,    317,    331,    337,    347,    349,
+  353,    359,    367,    373,    379,    383,    389,    397,    401,    409,
+  419,    421,    431,    433,    439,    443,    449,    457,    461,    463,
+  467,    479,    487,    491,    499,    503,    509,    521,    523,    541,
+  547,    557,    563,    569,    571,    577,    587,    593,    599,    601,
+  607,    613,    617,    619,    631,    641,    643,    647,    653,    659,
+  661,    673,    677,    683,    691,    701,    709,    719,    727,    733,
+  739,    743,    751,    757,    761,    769,    773,    787,    797,    809,
+  811,    821,    823,    827,    829,    839,    853,    857,    859,    863,
+  877,    881,    883,    887,    907,    911,    919,    929,    937,    941,
+  947,    953,    967,    971,    977,    983,    991,    997,    1009,   1013,
+  1019,   1021,   1024 /* last element is sentinel */
+};
+
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
@@ -63,6 +84,7 @@ tt_command::tt_command( const environment::ptr& env )
     ( "random,r", value( &random ), "create random truth table for number of variables" )
     ( "hwb",      value( &hwb ),    "create hwb function for number of bits" )
     ( "maj",      value( &maj ),    "create maj function for number of odd bits" )
+    ( "prime",    value( &prime ),  "create prime function that is true, whenever the input assignment is prime (for up to 10 bits)" )
     ( "extend,e", value( &extend ), "extend to bits" )
     ( "swap,s",   value( &swap ),   "swaps to variables (seperated with comma, e.g., 2,3)" )
     ;
@@ -71,14 +93,16 @@ tt_command::tt_command( const environment::ptr& env )
 command::rules_t tt_command::validity_rules() const
 {
   return {
-    { [this]() { return is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || is_set( "maj" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },
+    { [this]() { return is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || is_set( "maj" ) || is_set( "prime" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },
     { [this]() { return !is_set( "maj" ) || maj % 2 == 1; }, "argument to maj must be odd" },
+    { [this]() { return !is_set( "prime" ) || prime <= 10u; }, "argument to prime cannot be larger than 10" },
     { [this]() { return static_cast<int>( is_set( "load" ) ) +
                         static_cast<int>( is_set( "extend" ) ) +
                         static_cast<int>( is_set( "swap" ) ) +
                         static_cast<int>( is_set( "random" ) ) +
                         static_cast<int>( is_set( "hwb" ) ) +
-                        static_cast<int>( is_set( "maj" ) ) == 1; }, "only one option at a time" }
+                        static_cast<int>( is_set( "maj" ) ) +
+                        static_cast<int>( is_set( "prime" ) ) == 1; }, "only one option at a time" }
   };
 }
 
@@ -146,6 +170,20 @@ bool tt_command::execute()
 
     tts.extend();
     tts.current() = m;
+  }
+  else if ( is_set( "prime" ) )
+  {
+    tt p( 1u << prime );
+    auto pt = primes;
+    auto max = p.size();
+
+    while ( *pt < max )
+    {
+      p.set( *pt++ );
+    }
+
+    tts.extend();
+    tts.current() = p;
   }
   else if ( is_set( "swap" ) )
   {

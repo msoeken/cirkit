@@ -62,6 +62,7 @@ private:
   unsigned    random;
   unsigned    hwb;
   unsigned    maj;
+  unsigned    prime;
   std::string swap;
 };
 
