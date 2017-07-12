@@ -145,31 +145,3 @@ set(MINISAT_LIBRARIES
 
   PARENT_SCOPE
 )
-
-################################################################################
-# CryptoMiniSat                                                                #
-################################################################################
-if(APPLE)
-  set(cryptominisat_LIBNAME libcryptominisat5.5.0.dylib)
-else()
-  set(cryptominisat_LIBNAME libcryptominisat5.so.5.0)
-endif()
-
-set(cryptominisat_SRC ${CMAKE_BINARY_DIR}/ext/cryptominisat-prefix/src/cryptominisat)
-externalProject_add(cryptominisat
-  DOWNLOAD_DIR .
-  URL "http://msoeken.github.io/tools/cryptominisat-5.0.1.zip"
-  CONFIGURE_COMMAND cmake -DENABLE_TESTING=OFF .
-  BUILD_COMMAND make -j4
-  BUILD_IN_SOURCE 1
-  INSTALL_COMMAND cp lib/${cryptominisat_LIBNAME} ${ext_LIB}/${cryptominisat_LIBNAME} COMMAND cp -R include/cryptominisat5 ${ext_INCLUDE}
-  LOG_DOWNLOAD 1
-  LOG_BUILD 1
-  LOG_INSTALL 1)
-add_dependencies(external cryptominisat)
-
-set(CRYPTOMINISAT_LIBRARIES
-  ${ext_LIB}/${cryptominisat_LIBNAME}
-  PARENT_SCOPE
-)
-

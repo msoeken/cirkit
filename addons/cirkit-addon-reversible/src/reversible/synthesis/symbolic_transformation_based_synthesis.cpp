@@ -45,7 +45,6 @@
 #include <classical/io/write_aiger.hpp>
 #include <classical/utils/aig_from_bdd.hpp>
 #include <classical/sat/abcsat.hpp>
-#include <classical/sat/cryptominisat.hpp>
 #include <classical/sat/minisat.hpp>
 #include <classical/sat/sat_solver.hpp>
 #include <classical/sat/operations/cardinality.hpp>
