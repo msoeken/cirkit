@@ -72,10 +72,14 @@ void exorcism_minimization( const cube_vec_t& cubes,
 
 enum class exorcism_script
 {
-  none,
-  def,
-  def_wo4
+  none,     /* no optimization */
+  def,      /* default (original) exorcism script */
+  def_wo4,  /* default without EXORLINK-4 */
+  j2r       /* just two rounds */
 };
+
+std::istream& operator>>( std::istream& in, exorcism_script& script );
+std::ostream& operator<<( std::ostream& out, const exorcism_script& script );
 
 gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsigned ninputs, unsigned noutputs,
                                            const properties::ptr& settings = properties::ptr(),

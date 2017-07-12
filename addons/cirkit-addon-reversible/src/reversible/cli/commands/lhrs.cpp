@@ -61,7 +61,7 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description esopdecomp_options( "ESOP decomposition options" );
   esopdecomp_options.add_options()
-    ( "esopscript",      value_with_default( &params.script ),       "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nnone: do not optimize ESOP cover" )
+    ( "esopscript",      value_with_default( &params.script ),       "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nj2r: just two rounds\nnone: do not optimize ESOP cover" )
     ( "esopcovermethod", value_with_default( &params.cover_method ), "ESOP cover method\naig (0): directly from AIG\nbdd (1): using PSDKRO method from BDD\naignew (2): new AIG-based method\nauto (3): tries to estimate the best method for each LUT" )
     ( "esoppostopt",     bool_switch( &params.optimize_postesop ),   "post-optimize network derived from ESOP synthesis" )
     ;

@@ -85,44 +85,6 @@ std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mappin
   return out;
 }
 
-std::istream& operator>>( std::istream& in, exorcism_script& script )
-{
-  std::string token;
-  in >> token;
-  if ( token == "none" || token == "0" )
-  {
-    script = exorcism_script::none;
-  }
-  else if ( token == "def" || token == "1" )
-  {
-    script = exorcism_script::def;
-  }
-  else if ( token == "def_wo4" || token == "2" )
-  {
-    script = exorcism_script::def_wo4;
-  }
-  else
-  {
-    in.setstate( std::ios_base::failbit );
-  }
-  return in;
-}
-
-std::ostream& operator<<( std::ostream& out, const exorcism_script& script )
-{
-  switch ( script )
-  {
-  case exorcism_script::none:
-    return out << "none";
-  case exorcism_script::def:
-    return out << "def";
-  case exorcism_script::def_wo4:
-    return out << "def_wo4";
-  }
-
-  return out;
-}
-
 }
 
 // Local Variables:

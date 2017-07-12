@@ -58,9 +58,6 @@ enum class lhrs_mapping_strategy
 std::istream& operator>>( std::istream& in, lhrs_mapping_strategy& mapping_strategy );
 std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mapping_strategy );
 
-std::istream& operator>>( std::istream& in, exorcism_script& script );
-std::ostream& operator<<( std::ostream& out, const exorcism_script& script );
-
 struct lhrs_params
 {
   unsigned                     additional_ancilla = 0u;

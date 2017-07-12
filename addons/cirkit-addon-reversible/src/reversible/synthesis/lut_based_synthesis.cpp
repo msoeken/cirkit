@@ -666,6 +666,8 @@ public:
           }
         } );
 
+      std::unordered_map<unsigned, std::pair<unsigned, unsigned>> esop_circ_cache;
+
       for ( auto index : synth_order )
       {
         const auto num_inputs = sub_lut.lut_size( index );
@@ -692,17 +694,30 @@ public:
         }
         else
         {
-          if ( params.progress )
+          const auto it = esop_circ_cache.find( index );
+          if ( it == esop_circ_cache.end() )
           {
-            std::cout << "\n";
+            if ( params.progress )
+            {
+              std::cout << "\n";
+            }
+            const auto lut = sub_lut.extract_lut( index );
+
+            const auto begin = circ.num_gates();
+            esop_synthesis_wrapper( lut, circ, local_line_map, params, stats );
+            esop_circ_cache.insert( {index, {begin, circ.num_gates()}} );
+
+            if ( params.progress )
+            {
+              std::cout << "\e[A";
+            }
           }
-          const auto lut = sub_lut.extract_lut( index );
-
-          esop_synthesis_wrapper( lut, circ, local_line_map, params, stats );
-
-          if ( params.progress )
+          else
           {
-            std::cout << "\e[A";
+            for ( auto i = it->second.first; i < it->second.second; ++i )
+            {
+              circ.append_gate() = circ[i];
+            }
           }
         }
       }

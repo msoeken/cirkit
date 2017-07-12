@@ -118,6 +118,54 @@ private:
   unsigned _literal_count = 0u;
 };
 
+/******************************************************************************
+ * Exorcism optimization scripts                                              *
+ ******************************************************************************/
+
+std::istream& operator>>( std::istream& in, exorcism_script& script )
+{
+  std::string token;
+  in >> token;
+  if ( token == "none" || token == "0" )
+  {
+    script = exorcism_script::none;
+  }
+  else if ( token == "def" || token == "1" )
+  {
+    script = exorcism_script::def;
+  }
+  else if ( token == "def_wo4" || token == "2" )
+  {
+    script = exorcism_script::def_wo4;
+  }
+  else if ( token == "j2r" || token == "3" )
+  {
+    script = exorcism_script::j2r;
+  }
+  else
+  {
+    in.setstate( std::ios_base::failbit );
+  }
+  return in;
+}
+
+std::ostream& operator<<( std::ostream& out, const exorcism_script& script )
+{
+  switch ( script )
+  {
+  case exorcism_script::none:
+    return out << "none";
+  case exorcism_script::def:
+    return out << "def";
+  case exorcism_script::def_wo4:
+    return out << "def_wo4";
+  case exorcism_script::j2r:
+    return out << "j2r";
+  }
+
+  return out;
+}
+
 void reduce_cover_script_def( bool progress )
 {
   int gain_total{};
@@ -288,6 +336,76 @@ void reduce_cover_script_def_wo4( bool progress )
   }
 }
 
+void reduce_cover_script_j2r( bool progress )
+{
+  int gain_total{};
+
+  unsigned iteration = 0;
+  double runtime = 0.0;
+
+  progress_line p( "[i] exorcism   iter = %3d   i/o = %2d/%2d   cubes = %6d/%6d   total = %6.2f", progress );
+
+  while ( iteration < 2u )
+  {
+    increment_timer t( &runtime );
+    p( ++iteration, abc::g_CoverInfo.nVarsIn, abc::g_CoverInfo.nVarsOut, abc::g_CoverInfo.nCubesInUse, abc::g_CoverInfo.nCubesBefore, runtime );
+
+    gain_total = 0;
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|4 );
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|4 );
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|4 );
+  }
+
+  abc::s_fDecreaseLiterals = 1;
+  for ( auto z = 0; z < 1; z++ )
+  {
+    gain_total  = 0;
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+
+    gain_total += abc::IterativelyApplyExorLink2( 1|2|0 );
+    gain_total += abc::IterativelyApplyExorLink3( 1|2|0 );
+  }
+}
+
 void reduce_cover( bool progress, exorcism_script script )
 {
   switch ( script )
@@ -299,6 +417,9 @@ void reduce_cover( bool progress, exorcism_script script )
     break;
   case exorcism_script::def_wo4:
     reduce_cover_script_def_wo4( progress );
+    break;
+  case exorcism_script::j2r:
+    reduce_cover_script_j2r( progress );
     break;
   }
 }
