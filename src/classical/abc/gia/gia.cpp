@@ -129,17 +129,17 @@ namespace cirkit
  ******************************************************************************/
 
 gia_graph::gia_graph( abc::Gia_Man_t* gia )
-  : p_gia( gia )
+  : p_gia( gia, &abc::Gia_ManStop )
 {
 }
 
 gia_graph::gia_graph( const std::string& filename )
-  : p_gia( abc::Gia_AigerRead( const_cast<char*>( filename.c_str() ), 0, 0, 0 ) )
+  : p_gia( abc::Gia_AigerRead( const_cast<char*>( filename.c_str() ), 0, 0, 0 ), &abc::Gia_ManStop )
 {
 }
 
 gia_graph::gia_graph( const aig_graph& aig )
-  : p_gia( cirkit_to_gia( aig ) )
+  : p_gia( cirkit_to_gia( aig ), &abc::Gia_ManStop )
 {
 }
 
@@ -148,11 +148,6 @@ gia_graph::~gia_graph()
   if ( p_truths )
   {
     abc::Vec_WrdFree( p_truths );
-  }
-  if ( p_gia )
-  {
-    abc::Gia_ManStop( p_gia );
-    p_gia = nullptr;
   }
 }
 
@@ -205,25 +200,25 @@ int gia_graph::num_xors() const
 
 gia_graph gia_graph::cofactor( int var, bool value ) const
 {
-  return gia_graph( abc::Gia_ManDupCofactorVar( p_gia, var, value ? 1 : 0 ) );
+  return gia_graph( abc::Gia_ManDupCofactorVar( p_gia.get(), var, value ? 1 : 0 ) );
 }
 
 gia_graph gia_graph::select_outputs( const std::vector<int>& indexes ) const
 {
   auto vec = abc::Vec_IntAllocArray( const_cast<int*>( &indexes[0] ), indexes.size() );
-  auto* g = abc::Gia_ManDupSelectedOutputs( p_gia, vec );
+  auto* g = abc::Gia_ManDupSelectedOutputs( p_gia.get(), vec );
   ABC_FREE( vec ); /* do not erase the array, since it's owned by indexes */
   return gia_graph( g );
 }
 
 gia_graph gia_graph::syn3() const
 {
-  return gia_graph( abc::Gia_ManAigSyn3( p_gia, 0, 0 ) );
+  return gia_graph( abc::Gia_ManAigSyn3( p_gia.get(), 0, 0 ) );
 }
 
 gia_graph gia_graph::syn4() const
 {
-  return gia_graph( abc::Gia_ManAigSyn4( p_gia, 0, 0 ) );
+  return gia_graph( abc::Gia_ManAigSyn4( p_gia.get(), 0, 0 ) );
 }
 
 /******************************************************************************
@@ -249,7 +244,7 @@ gia_graph gia_graph::if_mapping( const properties::ptr& settings, const properti
   params.nFlowIters = flow_iters;
   params.nAreaIters = area_iters;
 
-  auto mapped_gia = abc::Gia_ManPerformMapping( p_gia, &params );
+  auto mapped_gia = abc::Gia_ManPerformMapping( p_gia.get(), &params );
 
   return gia_graph( mapped_gia );
 }
@@ -268,30 +263,30 @@ void gia_graph::satlut_mapping( const properties::ptr& settings, const propertie
   const auto opt_delay = false;
   const auto reverse   = false;
 
-  abc::Gia_ManLutSat( p_gia, lut_size, window_size, improves, conflict_limit, delay_max, edges_max, opt_delay, reverse, verbose, very_verbose );
+  abc::Gia_ManLutSat( p_gia.get(), lut_size, window_size, improves, conflict_limit, delay_max, edges_max, opt_delay, reverse, verbose, very_verbose );
 }
 
 void gia_graph::init_lut_refs() const
 {
-  abc::Gia_ManSetLutRefs( p_gia );
+  abc::Gia_ManSetLutRefs( p_gia.get() );
 }
 
 gia_graph gia_graph::extract_lut( int index ) const
 {
-  return gia_graph( abc::Gia_ManDupLUT( p_gia, index ) );
+  return gia_graph( abc::Gia_ManDupLUT( p_gia.get(), index ) );
 }
 
 void gia_graph::init_truth_tables() const
 {
   if ( !p_truths )
   {
-    p_truths = abc::Vec_WrdStart( abc::Gia_ManObjNum( p_gia ) );
+    p_truths = abc::Vec_WrdStart( abc::Gia_ManObjNum( p_gia.get() ) );
   }
 }
 
 uint64_t gia_graph::lut_truth_table( int index ) const
 {
-  const auto t = abc::Gia_ObjComputeTruthTable6Lut( p_gia, index, p_truths );
+  const auto t = abc::Gia_ObjComputeTruthTable6Lut( p_gia.get(), index, p_truths );
   return t & abc::Abc_Tt6Mask( 1 << lut_size( index ) );
 }
 
@@ -302,7 +297,7 @@ uint64_t gia_graph::lut_truth_table( int index ) const
 void gia_graph::print_stats() const
 {
   abc::Gps_Par_t params{};
-  abc::Gia_ManPrintStats( p_gia, &params );
+  abc::Gia_ManPrintStats( p_gia.get(), &params );
 }
 
 /******************************************************************************
@@ -311,19 +306,19 @@ void gia_graph::print_stats() const
 
 void gia_graph::write_aiger( const std::string& filename ) const
 {
-  abc::Gia_AigerWrite( p_gia, const_cast<char*>( filename.c_str() ), 0, 0 );
+  abc::Gia_AigerWrite( p_gia.get(), const_cast<char*>( filename.c_str() ), 0, 0 );
 }
 
 void gia_graph::write_dot( const std::string& filename, const std::vector<int>& highlight ) const
 {
   if ( highlight.empty() )
   {
-    abc::Gia_WriteDotAigSimple( p_gia, const_cast<char*>( filename.c_str() ), nullptr );
+    abc::Gia_WriteDotAigSimple( p_gia.get(), const_cast<char*>( filename.c_str() ), nullptr );
   }
   else
   {
     auto vec = abc::Vec_IntAllocArray( const_cast<int*>( &highlight[0] ), highlight.size() );
-    abc::Gia_WriteDotAigSimple( p_gia, const_cast<char*>( filename.c_str() ), vec );
+    abc::Gia_WriteDotAigSimple( p_gia.get(), const_cast<char*>( filename.c_str() ), vec );
     ABC_FREE( vec ); /* do not erase the array, since it's owned by highlight */
   }
 }
@@ -346,7 +341,7 @@ gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method, con
   case esop_cover_method::aig:
     {
       abc::Vec_Wec_t* esop = nullptr;
-      abc::Eso_ManCompute( p_gia, 0, &esop );
+      abc::Eso_ManCompute( p_gia.get(), 0, &esop );
       return esop_ptr( esop, &abc::Vec_WecFree );
     } break;
   case esop_cover_method::aig_new:
@@ -358,7 +353,7 @@ gia_graph::esop_ptr gia_graph::compute_esop_cover( esop_cover_method method, con
       if ( num_inputs() <= 10 )
       {
         abc::Vec_Wec_t* esop = nullptr;
-        abc::Eso_ManCompute( p_gia, 0, &esop );
+        abc::Eso_ManCompute( p_gia.get(), 0, &esop );
         return esop_ptr( esop, &abc::Vec_WecFree );
       }
       else

@@ -70,23 +70,23 @@ public:
   /// CONSISTENCY AND CONVERSION
 
   /** checks if graph is okay */
-  inline bool okay() const { return p_gia != nullptr; }
+  inline bool okay() const { return p_gia.get() != nullptr; }
 
   /** implicit conversion to ABC type */
-  inline operator abc::Gia_Man_t*() const { return p_gia; }
+  inline operator abc::Gia_Man_t*() const { return p_gia.get(); }
 
   /** GIA properties */
-  inline int size() const { return abc::Gia_ManObjNum( p_gia ); }
+  inline int size() const { return abc::Gia_ManObjNum( p_gia.get() ); }
   std::string input_name( int input_index ) const;
   std::string output_name( int output_index ) const;
 
   /** access GIA object */
-  inline abc::Gia_Obj_t* object( int index ) const { return abc::Gia_ManObj( p_gia, index ); }
-  inline unsigned& value( int index ) const { return abc::Gia_ManObj( p_gia, index )->Value; }
+  inline abc::Gia_Obj_t* object( int index ) const { return abc::Gia_ManObj( p_gia.get(), index ); }
+  inline unsigned& value( int index ) const { return abc::Gia_ManObj( p_gia.get(), index )->Value; }
 
   /** number of inputs */
-  inline int num_inputs() const { return abc::Gia_ManPiNum( p_gia ); }
-  inline int num_outputs() const { return abc::Gia_ManPoNum( p_gia ); }
+  inline int num_inputs() const { return abc::Gia_ManPiNum( p_gia.get() ); }
+  inline int num_outputs() const { return abc::Gia_ManPoNum( p_gia.get() ); }
 
   /* number of XORs */
   int num_xors() const;
@@ -102,13 +102,13 @@ public:
   gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
   void satlut_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
 
-  inline int lut_count() const { return abc::Gia_ManLutNum( p_gia ); }
-  inline int max_lut_size() const { return abc::Gia_ManLutSizeMax( p_gia ); }
-  inline bool is_lut( int index ) const { return abc::Gia_ObjIsLut( p_gia, index ); }
-  inline int lut_size( int index ) const { return abc::Gia_ObjLutSize( p_gia, index ); }
-  inline int lut_ref_num( int index ) const { return Gia_ObjLutRefNumId( p_gia, index ); }
-  inline int lut_ref_dec( int index ) const { return Gia_ObjLutRefDecId( p_gia, index ); }
-  inline int lut_ref_inc( int index ) const { return Gia_ObjLutRefIncId( p_gia, index ); }
+  inline int lut_count() const { return abc::Gia_ManLutNum( p_gia.get() ); }
+  inline int max_lut_size() const { return abc::Gia_ManLutSizeMax( p_gia.get() ); }
+  inline bool is_lut( int index ) const { return abc::Gia_ObjIsLut( p_gia.get(), index ); }
+  inline int lut_size( int index ) const { return abc::Gia_ObjLutSize( p_gia.get(), index ); }
+  inline int lut_ref_num( int index ) const { return Gia_ObjLutRefNumId( p_gia.get(), index ); }
+  inline int lut_ref_dec( int index ) const { return Gia_ObjLutRefDecId( p_gia.get(), index ); }
+  inline int lut_ref_inc( int index ) const { return Gia_ObjLutRefIncId( p_gia.get(), index ); }
 
   void init_lut_refs() const;
   gia_graph extract_lut( int index ) const;
@@ -140,9 +140,9 @@ public:
   {
     abc::Gia_Obj_t* obj{};
     int i{};
-    Gia_ManForEachPi( p_gia, obj, i )
+    Gia_ManForEachPi( p_gia.get(), obj, i )
     {
-      f( abc::Gia_ManCiIdToId( p_gia, i ), i );
+      f( abc::Gia_ManCiIdToId( p_gia.get(), i ), i );
     }
   }
 
@@ -151,9 +151,9 @@ public:
   {
     abc::Gia_Obj_t* obj{};
     int i{};
-    Gia_ManForEachPo( p_gia, obj, i )
+    Gia_ManForEachPo( p_gia.get(), obj, i )
     {
-      f( abc::Gia_ManCoIdToId( p_gia, i ), i );
+      f( abc::Gia_ManCoIdToId( p_gia.get(), i ), i );
     }
   }
 
@@ -162,7 +162,7 @@ public:
   {
     abc::Gia_Obj_t* obj{};
     int i{};
-    Gia_ManForEachAnd( p_gia, obj, i )
+    Gia_ManForEachAnd( p_gia.get(), obj, i )
     {
       f( i, obj );
     }
@@ -172,7 +172,7 @@ public:
   void foreach_lut( Fn&& f ) const
   {
     int i{};
-    Gia_ManForEachLut( p_gia, i )
+    Gia_ManForEachLut( p_gia.get(), i )
     {
       f( i );
     }
@@ -182,14 +182,15 @@ public:
   void foreach_lut_fanin( int index, Fn&& f ) const
   {
     int i{}, k{};
-    Gia_LutForEachFanin( p_gia, index, i, k )
+    Gia_LutForEachFanin( p_gia.get(), index, i, k )
     {
       f( i );
     }
   }
 
 private:
-  abc::Gia_Man_t* p_gia = nullptr;
+  using gia_ptr = std::shared_ptr<abc::Gia_Man_t>;
+  gia_ptr p_gia;
 
   mutable abc::Vec_Wrd_t* p_truths = nullptr;
   mutable std::shared_ptr<Cudd> p_cudd_mgr;
