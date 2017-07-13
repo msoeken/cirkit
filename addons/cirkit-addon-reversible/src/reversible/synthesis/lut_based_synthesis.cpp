@@ -899,34 +899,42 @@ public:
 private:
   inline void synthesize_node( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
   {
+    /* track costs */
+    const auto begin = circ.num_gates();
+    const auto line_map = order_heuristic->compute_line_map( index );
+
     switch ( params.mapping_strategy )
     {
     case lhrs_mapping_strategy::direct:
-      synthesize_node_direct( index, lookup, clean_ancilla );
+      synthesize_node_direct( index, lookup, line_map, clean_ancilla );
       break;
     case lhrs_mapping_strategy::lut_based_min_db:
     case lhrs_mapping_strategy::lut_based_best_fit:
-      synthesize_node_lut_based( index, lookup, clean_ancilla );
+      synthesize_node_lut_based( index, lookup, line_map, clean_ancilla );
       break;
     case lhrs_mapping_strategy::lut_based_pick_best:
-      synthesize_node_pick_best( index, lookup, clean_ancilla );
+      synthesize_node_pick_best( index, lookup, line_map, clean_ancilla );
       break;
     }
-  }
 
-  void synthesize_node_direct( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
-  {
-    /* map circuit */
-    const auto line_map = order_heuristic->compute_line_map( index );
-
+    /* track costs */
+    if ( params.count_costs )
     {
-      const auto sp = pbar.subprogress();
-      synthesizer.compute( circ, index, line_map, clean_ancilla );
-      ++stats.num_decomp_default;
+      const auto end = circ.num_gates();
+      stats.gate_costs.push_back( costs( circ, begin, end, costs_by_gate_func( t_costs() ) ) );
+      stats.line_maps.push_back( line_map );
+      stats.clean_ancillas.push_back( clean_ancilla );
     }
   }
 
-  void synthesize_node_lut_based( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
+  void synthesize_node_direct( int index, bool lookup, const std::vector<unsigned>& line_map, const std::vector<unsigned>& clean_ancilla )
+  {
+    const auto sp = pbar.subprogress();
+    synthesizer.compute( circ, index, line_map, clean_ancilla );
+    ++stats.num_decomp_default;
+  }
+
+  void synthesize_node_lut_based( int index, bool lookup, const std::vector<unsigned>& line_map, const std::vector<unsigned>& clean_ancilla )
   {
     if ( params.max_func_size == 0u )
     {
@@ -936,9 +944,6 @@ private:
     {
       decomp_synthesizer.max_cut_size = params.max_func_size;
     }
-
-    /* map circuit */
-    const auto line_map = order_heuristic->compute_line_map( index );
 
     if ( decomp_synthesizer.compute( circ, index, line_map, clean_ancilla ) )
     {
@@ -968,11 +973,8 @@ private:
     return c;
   }
 
-  void synthesize_node_pick_best( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
+  void synthesize_node_pick_best( int index, bool lookup, const std::vector<unsigned>& line_map, const std::vector<unsigned>& clean_ancilla )
   {
-    /* map circuit */
-    const auto line_map = order_heuristic->compute_line_map( index );
-
     using candidate_t = std::pair<circuit, cost_t>;
     std::vector<candidate_t> candidates;
 

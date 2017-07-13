@@ -43,6 +43,7 @@
 #include <classical/abc/gia/gia.hpp>
 #include <classical/abc/gia/gia_esop.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
+#include <reversible/utils/costs.hpp>
 
 namespace cirkit
 {
@@ -78,6 +79,7 @@ struct lhrs_params
   bool                         verbose            = false;                                       /* be verbose */
 
   bool                         nocollapse         = false;                                       /* DEBUG: do not collapse (useful with dumpfile parameter) */
+  bool                         count_costs        = false;                                       /* DEBUG: count costs and affected lines (for visualization) */
   std::string                  dumpfile;                                                         /* DEBUG: dump ESOP and AIG files for each ESOP cover and LUT */
 };
 
@@ -104,6 +106,9 @@ struct lhrs_stats
   unsigned num_decomp_lut     = 0u;
 
   std::vector<std::vector<unsigned>> class_counter;
+  std::vector<cost_t>                gate_costs;
+  std::vector<std::vector<unsigned>> clean_ancillas;
+  std::vector<std::vector<unsigned>> line_maps;
 };
 
 }

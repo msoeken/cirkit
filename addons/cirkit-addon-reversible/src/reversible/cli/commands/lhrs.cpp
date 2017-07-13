@@ -78,10 +78,11 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description debug_options( "Debug options" );
   debug_options.add_options()
-    ( "dumpfile",       value( &params.dumpfile ),         "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
-    ( "nocollapse",     bool_switch( &params.nocollapse ), "do not collapse LUTs (useful with dumpfile to only write AIGs)" )
-    ( "bounds",                                            "compute lower and upper bounds for qubits" )
-    ( "dotname_mapped", value( &dotname_mapped ),          "filename to dump DOT representation of initial mapped network" )
+    ( "dumpfile",       value( &params.dumpfile ),          "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
+    ( "nocollapse",     bool_switch( &params.nocollapse ),  "do not collapse LUTs (useful with dumpfile to only write AIGs)" )
+    ( "count_costs",    bool_switch( &params.count_costs ), "count costs and affected lines per single-target gate" )
+    ( "bounds",                                             "compute lower and upper bounds for qubits" )
+    ( "dotname_mapped", value( &dotname_mapped ),           "filename to dump DOT representation of initial mapped network" )
     ;
   opts.add( debug_options );
 
@@ -154,6 +155,13 @@ command::log_opt_t lhrs_command::log() const
   {
     map["debug_lb"] = debug_lb;
     map["debug_ub"] = lut_count;
+  }
+
+  if ( is_set( "count_costs" ) )
+  {
+    map["gate_costs"] = stats.gate_costs;
+    map["clean_ancillas"] = stats.clean_ancillas;
+    map["line_maps"] = stats.line_maps;
   }
 
   return map;

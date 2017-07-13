@@ -271,6 +271,11 @@ struct h_costs {
  */
 cost_t costs( const circuit& circ, const cost_function& f );
 
+/**
+ * @brief Computes the costs  in a given range [begin, end)
+ */
+cost_t costs( const circuit& circ, unsigned begin, unsigned end, const costs_by_gate_func& f );
+
 }
 
 #endif /* COSTS_HPP */
