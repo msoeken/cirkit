@@ -534,7 +534,7 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
 
   abc::AllocateCubeSets( abc::g_CoverInfo.nVarsIn, abc::g_CoverInfo.nVarsOut );
 
-  if ( !abc::AllocateQueques( abc::g_CoverInfo.nCubesAlloc * abc::g_CoverInfo.nCubesAlloc / CUBE_PAIR_FACTOR ) )
+  if ( !abc::AllocateQueques( ( abc::g_CoverInfo.nCubesAlloc * abc::g_CoverInfo.nCubesAlloc ) / CUBE_PAIR_FACTOR ) )
   {
     std::cout << "[e] not enough memory to allocate queques" << std::endl;
     return gia_graph::esop_ptr( nullptr, &abc::Vec_WecFree );
