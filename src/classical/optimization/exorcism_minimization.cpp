@@ -526,11 +526,17 @@ gia_graph::esop_ptr exorcism_minimization( const gia_graph::esop_ptr& esop, unsi
 
   /* prepare internal data structures */
   abc::g_CoverInfo.nCubesAlloc = abc::g_CoverInfo.nCubesBefore + ADDITIONAL_CUBES;
-  if ( !abc::AllocateCover( abc::g_CoverInfo.nCubesAlloc, abc::g_CoverInfo.nWordsIn, abc::g_CoverInfo.nWordsOut ) ||
-       !abc::AllocateCubeSets( abc::g_CoverInfo.nVarsIn, abc::g_CoverInfo.nVarsOut ) ||
-       !abc::AllocateQueques( abc::g_CoverInfo.nCubesAlloc * abc::g_CoverInfo.nCubesAlloc / CUBE_PAIR_FACTOR ) )
+  if ( !abc::AllocateCover( abc::g_CoverInfo.nCubesAlloc, abc::g_CoverInfo.nWordsIn, abc::g_CoverInfo.nWordsOut ) )
   {
-    std::cout << "[e] not enough memory" << std::endl;
+    std::cout << "[e] not enough memory to allocate cover" << std::endl;
+    return gia_graph::esop_ptr( nullptr, &abc::Vec_WecFree );
+  }
+
+  abc::AllocateCubeSets( abc::g_CoverInfo.nVarsIn, abc::g_CoverInfo.nVarsOut );
+
+  if ( !abc::AllocateQueques( abc::g_CoverInfo.nCubesAlloc * abc::g_CoverInfo.nCubesAlloc / CUBE_PAIR_FACTOR ) )
+  {
+    std::cout << "[e] not enough memory to allocate queques" << std::endl;
     return gia_graph::esop_ptr( nullptr, &abc::Vec_WecFree );
   }
 
