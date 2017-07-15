@@ -29,10 +29,12 @@
 #include <fstream>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/variant.hpp>
 
+#include <core/utils/bitset_utils.hpp>
 #include <core/utils/conversion_utils.hpp>
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/range_utils.hpp>
@@ -58,6 +60,7 @@
 #include <reversible/optimization/esop_post_optimization.hpp>
 #include <reversible/synthesis/esop_synthesis.hpp>
 #include <reversible/synthesis/optimal_quantum_circuits.hpp>
+#include <reversible/utils/circuit_utils.hpp>
 #include <reversible/utils/costs.hpp>
 
 namespace cirkit
@@ -897,6 +900,18 @@ public:
   }
 
 private:
+  boost::dynamic_bitset<> get_affected_lines( unsigned begin, unsigned end )
+  {
+    boost::dynamic_bitset<> mask( circ.lines() );
+
+    while ( begin != end )
+    {
+      mask |= get_line_mask( circ[begin++], circ.lines() );
+    }
+
+    return mask;
+  }
+
   inline void synthesize_node( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
   {
     /* track costs */
@@ -923,6 +938,7 @@ private:
       const auto end = circ.num_gates();
       stats.gate_costs.push_back( costs( circ, begin, end, costs_by_gate_func( t_costs() ) ) );
       stats.line_maps.push_back( line_map );
+      stats.affected_lines.push_back( get_index_vector( get_affected_lines( begin, end ) ) );
       stats.clean_ancillas.push_back( clean_ancilla );
     }
   }

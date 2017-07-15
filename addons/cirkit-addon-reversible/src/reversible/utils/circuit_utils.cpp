@@ -66,6 +66,16 @@ bool has_negative_control( const gate& g )
                        []( const variable& v ) { return !v.polarity(); } ) != g.controls().end();
 }
 
+boost::dynamic_bitset<> get_line_mask( const gate& g, unsigned lines )
+{
+  boost::dynamic_bitset<> mask( lines );
+  std::for_each( std::begin( g.controls() ), std::end( g.controls() ),
+                 [&mask]( const variable& v ) { mask.set( v.line() ); } );
+  std::for_each( std::begin( g.targets() ), std::end( g.targets() ),
+                 [&mask]( unsigned t ) { mask.set( t ); } );
+  return mask;
+}
+
 }
 
 // Local Variables:

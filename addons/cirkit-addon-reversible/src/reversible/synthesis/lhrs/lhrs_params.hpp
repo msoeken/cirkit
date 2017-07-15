@@ -107,8 +107,9 @@ struct lhrs_stats
 
   std::vector<std::vector<unsigned>> class_counter;
   std::vector<cost_t>                gate_costs;
-  std::vector<std::vector<unsigned>> clean_ancillas;
   std::vector<std::vector<unsigned>> line_maps;
+  std::vector<std::vector<unsigned>> affected_lines;
+  std::vector<std::vector<unsigned>> clean_ancillas;
 };
 
 }

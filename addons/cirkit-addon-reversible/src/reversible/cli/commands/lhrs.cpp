@@ -160,8 +160,9 @@ command::log_opt_t lhrs_command::log() const
   if ( is_set( "count_costs" ) )
   {
     map["gate_costs"] = stats.gate_costs;
-    map["clean_ancillas"] = stats.clean_ancillas;
     map["line_maps"] = stats.line_maps;
+    map["affected_lines"] = stats.affected_lines;
+    map["clean_ancillas"] = stats.clean_ancillas;
   }
 
   return map;
