@@ -193,7 +193,6 @@ private:
   gia_ptr p_gia;
 
   mutable abc::Vec_Wrd_t* p_truths = nullptr;
-  mutable std::shared_ptr<Cudd> p_cudd_mgr;
 };
 
 std::istream& operator>>( std::istream& in, gia_graph::esop_cover_method& cover_method );
