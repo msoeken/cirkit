@@ -196,7 +196,7 @@ bool tt_command::execute()
 
 command::log_opt_t tt_command::log() const
 {
-  if ( is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || is_set( "maj" ) )
+  if ( is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || is_set( "maj" ) || is_set( "prime" ) )
   {
     return log_opt_t( {{"tt", to_string( env->store<tt>().current() )}} );
   }
