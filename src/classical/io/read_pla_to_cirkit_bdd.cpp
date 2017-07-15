@@ -97,12 +97,12 @@ public:
       assert( m_inputNames.size() <= m_inputs );
       assert( m_outputNames.size() <= m_outputs );
 
-      for ( auto i : boost::counting_range( 0ul, m_inputNames.size() ) )
+      for ( auto i : boost::counting_range<unsigned>( 0u, m_inputNames.size() ) )
       {
         m_function->setInputName ( i, m_inputNames.at ( i ) );
       }
 
-      for ( auto i : boost::counting_range ( 0ul, m_outputNames.size() ) )
+      for ( auto i : boost::counting_range<unsigned>( 0u, m_outputNames.size() ) )
       {
         m_function->setOutputName ( i, m_outputNames.at ( i ) );
       }
@@ -110,7 +110,7 @@ public:
 
     void initializeInputPorts()
     {
-      for ( auto i : boost::counting_range ( 0u, m_inputs ) ) {
+      for ( auto i : boost::counting_range<unsigned>( 0u, m_inputs ) ) {
         m_function->pushInput ( i );
       }
     }
@@ -119,7 +119,7 @@ public:
     {
       auto falseNode = manager->bdd_bot ();
       std::cout << falseNode << std::endl;
-      for ( auto i : boost::counting_range ( 0u, m_outputs ) ) {
+      for ( auto i : boost::counting_range<unsigned>( 0u, m_outputs ) ) {
         m_function->setOutputVar ( i, falseNode );
       }
     }
