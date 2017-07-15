@@ -45,6 +45,7 @@ include_directories(SYSTEM /usr/include ${Boost_INCLUDE_DIR} ${GMP_INCLUDE_DIR} 
 add_subdirectory(ext)
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs )
 
 # Options
 option(cirkit_ENABLE_PROGRAMS "build programs" on)
