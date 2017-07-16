@@ -37,6 +37,7 @@
 #define LUT_GRAPH_HPP
 
 #include <iostream>
+#include <unordered_map>
 
 #include <core/utils/dirty.hpp>
 #include <core/utils/graph_utils.hpp>
