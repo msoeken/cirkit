@@ -29,9 +29,11 @@
 #include <cstdlib>
 #include <vector>
 
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <core/utils/string_utils.hpp>
+#include <core/utils/system_utils.hpp>
 #include <core/utils/temporary_filename.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <reversible/functions/circuit_from_string.hpp>
@@ -320,6 +322,49 @@ template<>
 void store_write_io_type<circuit, io_projectq_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   write_projectq( circ, filename );
+}
+
+template<>
+std::string store_repr_html<circuit>( const circuit& circ )
+{
+  temporary_filename filename( "circuit_pic_%d.qpic" );
+  std::string basename( filename.name().begin(), filename.name().end() - 5 );
+
+  write_qpic( circ, filename.name() );
+
+  execute_and_omit( boost::str( boost::format( "qpic -f tex %s" ) % filename.name() ) );
+
+  // modify the TeX code
+  std::string new_tex_code;
+  line_parser( basename + ".tex", {
+      {std::regex( "\\\\documentclass\\{article\\}" ), [&new_tex_code]( const std::smatch& s ) {
+          new_tex_code += "\\documentclass[dvisvgm]{standalone}\n";
+        }},
+      {std::regex( "\\\\usepackage\\[pdftex,active,tightpage\\]\\{preview\\}" ), []( const std::smatch& s ) {}},
+      {std::regex( "\\\\begin\\{preview\\}" ), []( const std::smatch& s ) {}},
+      {std::regex( "\\\\end\\{preview\\}" ), []( const std::smatch& s ) {}},
+      {std::regex( "(.*)" ), [&new_tex_code]( const std::smatch& s ) {
+          new_tex_code += std::string( s[0u] ) + "\n";
+        }}} );
+
+  std::ofstream os( ( basename + ".tex" ).c_str(), std::ofstream::out );
+  os << new_tex_code << std::endl;
+  os.close();
+
+  execute_and_omit( boost::str( boost::format( "latex %s.tex" ) % basename ) );
+  execute_and_omit( boost::str( boost::format( "dvisvgm -b papersize %s.dvi" ) % basename ) );
+
+  boost::filesystem::remove( basename + ".tex" );
+  boost::filesystem::remove( basename + ".dvi" );
+  boost::filesystem::remove( basename + ".out" );
+  boost::filesystem::remove( basename + ".log" );
+
+  std::ifstream in( ( basename + ".svg" ).c_str(), std::ifstream::in );
+  std::string svg( (std::istreambuf_iterator<char>( in )), std::istreambuf_iterator<char>() );
+  in.close();
+  boost::filesystem::remove( basename + ".svg" );
+
+  return svg;
 }
 
 /******************************************************************************
