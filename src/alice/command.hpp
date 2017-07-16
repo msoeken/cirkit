@@ -565,6 +565,18 @@ T store_read_io_type( const std::string& filename, const command& cmd )
   return T();
 }
 
+template<typename T>
+bool store_has_repr_html()
+{
+  return false;
+}
+
+template<typename T>
+std::string store_repr_html( const T& element )
+{
+  return std::string();
+}
+
 /* for the use in commands */
 template<typename S>
 int add_option_helper( po::options_description& opts )

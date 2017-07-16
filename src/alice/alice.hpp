@@ -232,6 +232,72 @@ public:
     return value;
   }
 };
+
+class return_value_dict
+{
+public:
+  return_value_dict( const command::log_map_t& map )
+  {
+    log_var_python_visitor vis;
+
+    for ( const auto& lp : map )
+    {
+      if ( lp.first == "__repr__" )
+      {
+        repr = boost::get<std::string>( lp.second );
+      }
+      else if ( lp.first == "_repr_html_" )
+      {
+        repr_html = boost::get<std::string>( lp.second );
+      }
+      else
+      {
+        const auto value = boost::apply_visitor( vis, lp.second );
+        _dict[py::str( lp.first )] = value;
+      }
+    }
+  }
+
+  py::object __getitem__( const std::string& key ) const
+  {
+    return _dict.attr( "__getitem__" )( py::str( key ) );
+  }
+
+  std::string __repr__() const
+  {
+    if ( repr.empty() )
+    {
+      return py::str( _dict.attr( "__repr__" )() );
+    }
+    else
+    {
+      return repr;
+    }
+  }
+
+  std::string _repr_html_() const
+  {
+    if ( repr_html.empty() )
+    {
+      return boost::str( boost::format( "<pre>%s</pre>" ) % __repr__() );
+    }
+    else
+    {
+      return repr_html;
+    }
+  }
+
+  const py::dict& dict() const
+  {
+    return _dict;
+  }
+
+private:
+  py::dict    _dict;
+
+  std::string repr;
+  std::string repr_html;
+};
 #endif
 
 template<class... S>
@@ -486,9 +552,17 @@ public:
   {
     py::module m( prefix.c_str(), "Python bindings" );
 
+    py::class_<return_value_dict> representer( m, "ReturnValueDict" );
+    representer
+      .def( "__getitem__", &return_value_dict::__getitem__ )
+      .def( "__repr__", &return_value_dict::__repr__ )
+      .def( "_repr_html_", &return_value_dict::_repr_html_ )
+      .def( "dict", &return_value_dict::dict )
+      ;
+
     for ( const auto& p : env->commands )
     {
-      m.def( p.first.c_str(), [p]( py::kwargs kwargs ) {
+      m.def( p.first.c_str(), [p]( py::kwargs kwargs ) -> py::object {
           std::vector<std::string> pargs = {p.first};
 
           for ( const auto& kp : kwargs )
@@ -520,19 +594,38 @@ public:
 
           const auto log = p.second->log();
 
-          py::dict dict;
-
           if ( log )
           {
-            log_var_python_visitor vis;
-            for ( const auto& lp : *log )
-            {
-              const auto value = boost::apply_visitor( vis, lp.second );
-              dict[py::str( lp.first )] = value;
-            }
+            return py::cast( return_value_dict( *log ) );
+          }
+          else
+          {
+            return py::none();
           }
 
-          return dict;
+//             log_var_python_visitor vis;
+
+//             /* Python API */
+// #ifdef ALICE_PYTHON
+//             const auto it = log->find( "__repr__" );
+//             if ( it != log->end() )
+//             {
+//               std::string repr = boost::get<std::string>( it->second );
+//               std::string repr_html;
+//               const auto it2 = log->find( "_repr_html_" );
+//               if ( it2 != log->end() )
+//               {
+//                 repr_html = boost::get<std::string>( it2->second );
+//               }
+//               return py::cast( python_representer( repr, repr_html ) );
+//             }
+// #endif
+
+//             for ( const auto& lp : *log )
+//             {
+//               const auto value = boost::apply_visitor( vis, lp.second );
+//               dict[py::str( lp.first )] = value;
+//             }
         }, p.second->caption().c_str() );
     }
 

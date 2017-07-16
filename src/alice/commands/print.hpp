@@ -35,6 +35,10 @@
 
 #pragma once
 
+#include <sstream>
+
+#include <boost/format.hpp>
+
 #include <alice/command.hpp>
 
 namespace alice
@@ -60,6 +64,33 @@ int print_helper( const command& cmd, const environment::ptr& env )
   return 0;
 }
 
+template<typename S>
+int print_log_helper( const command& cmd, const environment::ptr& env, command::log_map_t& map )
+{
+  constexpr auto option = store_info<S>::option;
+  constexpr auto name   = store_info<S>::name;
+
+  if ( cmd.is_set( option ) )
+  {
+    if ( env->store<S>().current_index() == -1 )
+    {
+      map["__repr__"] = boost::str( boost::format( "[w] no %s in store" ) % name );
+    }
+    else
+    {
+      std::stringstream strs;
+      print_store_entry<S>( strs, env->store<S>().current() );
+      map["__repr__"] = strs.str();
+
+      if ( store_has_repr_html<S>() )
+      {
+        map["_repr_html_"] = store_repr_html<S>( env->store<S>().current() );
+      }
+    }
+  }
+  return 0;
+}
+
 template<class... S>
 class print_command : public command
 {
@@ -79,9 +110,22 @@ protected:
 
   bool execute()
   {
+#ifndef ALICE_PYTHON
     [](...){}( print_helper<S>( *this, env )... );
+#endif
 
     return true;
+  }
+
+  log_opt_t log() const
+  {
+#ifdef ALICE_PYTHON
+    log_map_t map;
+    [](...){}( print_log_helper<S>( *this, env, map )... );
+    return map;
+#else
+    return boost::none;
+#endif
   }
 };
 

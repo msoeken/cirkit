@@ -87,6 +87,18 @@ int clear_helper( const command& cmd, const environment::ptr& env )
   return 0;
 }
 
+template<typename S>
+int log_helper( const command& cmd, const environment::ptr& env, command::log_map_t& map )
+{
+  constexpr auto option = store_info<S>::option;
+
+  if ( cmd.is_set( option ) )
+  {
+    map[option] = env->store<S>().current_index();
+  }
+  return 0;
+}
+
 template<class... S>
 class store_command : public command
 {
@@ -123,6 +135,13 @@ protected:
     }
 
     return true;
+  }
+
+  log_opt_t log() const
+  {
+    log_map_t map;
+    [](...){}( log_helper<S>( *this, env, map )... );
+    return map;
   }
 };
 
