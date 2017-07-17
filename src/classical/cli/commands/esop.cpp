@@ -30,6 +30,7 @@
 #include <boost/program_options.hpp>
 
 #include <core/utils/program_options.hpp>
+#include <core/utils/timer.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
 
 namespace cirkit
@@ -67,7 +68,10 @@ bool esop_command::execute()
 
   gia_graph gia( aig() );
 
-  auto esop = gia.compute_esop_cover( collapse, settings );
+  auto esop = [&]() {
+    reference_timer t( &collapse_runtime );
+    return gia.compute_esop_cover( collapse, settings );
+  }();
 
   switch ( minimize )
   {
@@ -85,6 +89,7 @@ command::log_opt_t esop_command::log() const
 {
   return log_map_t({
       {"collapse", boost::lexical_cast<std::string>( collapse )},
+      {"collapse_runtime", collapse_runtime},
       {"minimize", minimize}
     });
 }

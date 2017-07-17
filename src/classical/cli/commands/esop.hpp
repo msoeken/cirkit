@@ -58,6 +58,8 @@ private:
   std::string filename;
   gia_graph::esop_cover_method collapse = gia_graph::esop_cover_method::aig_new;
   unsigned minimize = 1u;
+
+  double collapse_runtime = 0.0;
 };
 
 
