@@ -57,39 +57,13 @@
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/clear_circuit.hpp>
 #include <reversible/io/print_circuit.hpp>
-#include <reversible/optimization/esop_post_optimization.hpp>
-#include <reversible/synthesis/esop_synthesis.hpp>
-#include <reversible/synthesis/optimal_quantum_circuits.hpp>
+#include <reversible/synthesis/lhrs/stg_map_esop.hpp>
+#include <reversible/synthesis/lhrs/stg_map_precomp.hpp>
 #include <reversible/utils/circuit_utils.hpp>
 #include <reversible/utils/costs.hpp>
 
 namespace cirkit
 {
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-gate& append_stg_from_line_map( circuit& circ, uint64_t func, uint64_t affine_class, const std::vector<unsigned>& line_map )
-{
-  auto& g = circ.append_gate();
-
-  const auto num_vars = line_map.size() - 1;
-
-  for ( auto i = 0u; i < num_vars; ++i )
-  {
-    g.add_control( make_var( line_map[i], true ) );
-  }
-  g.add_target( line_map.back() );
-
-  stg_tag stg;
-  stg.function = boost::dynamic_bitset<>( 1 << num_vars, func );
-  stg.affine_class = boost::dynamic_bitset<>( 1 << num_vars, affine_class );
-  g.set_type( stg );
-  circ.annotate( g, "affine", tt_to_hex( stg.affine_class ) );
-
-  return g;
-}
 
 /******************************************************************************
  * Merge properties                                                           *
@@ -420,53 +394,6 @@ private:
  * Partial synthesizers                                                       *
  ******************************************************************************/
 
-void esop_synthesis_wrapper( const gia_graph& lut, circuit& circ, const std::vector<unsigned>& line_map, const lhrs_params& params, lhrs_stats& stats )
-{
-  if ( !params.dumpfile.empty() )
-  {
-    lut.write_aiger( boost::str( boost::format( "%s/lut-%d.aig" ) % params.dumpfile % stats.dumpfile_counter ) );
-  }
-
-  if ( params.nocollapse )
-  {
-    stats.dumpfile_counter++;
-    return;
-  }
-
-  auto esop = [&lut, &params, &stats]() {
-    increment_timer t( &stats.cover_runtime );
-    return lut.compute_esop_cover( params.cover_method, make_settings_from( std::make_pair( "progress", params.progress ), std::make_pair( "minimize", true ) ) );
-  }();
-
-  if ( params.script != exorcism_script::none )
-  {
-    esop = [&esop, &lut, &params, &stats]() {
-      increment_timer t( &stats.exorcism_runtime );
-      const auto em_settings = make_settings_from( std::make_pair( "progress", params.progress ), std::make_pair( "script", params.script ) );
-      return exorcism_minimization( esop, lut.num_inputs(), lut.num_outputs(), em_settings );
-    }();
-  }
-
-  if ( !params.dumpfile.empty() )
-  {
-    write_esop( esop, lut.num_inputs(), lut.num_outputs(),
-                boost::str( boost::format( "%s/esop-%d.esop" ) % params.dumpfile % stats.dumpfile_counter++ ) );
-  }
-
-  if ( params.optimize_postesop )
-  {
-    circuit circ_local;
-    esop_synthesis( circ_local, esop, lut.num_inputs(), lut.num_outputs() );
-    auto circ_opt = esop_post_optimization( circ_local );
-    append_circuit( circ, circ_opt, gate::control_container(), line_map );
-  }
-  else
-  {
-    const auto es_settings = make_settings_from( std::make_pair( "line_map", line_map ) );
-    esop_synthesis( circ, esop, lut.num_inputs(), lut.num_outputs(), es_settings );
-  }
-}
-
 class lut_partial_synthesizer
 {
 public:
@@ -506,7 +433,7 @@ public:
   {
     const auto lut = gia().extract_lut( index );
 
-    esop_synthesis_wrapper( lut, circ, line_map, params, stats );
+    stg_map_esop( circ, lut, line_map, params.map_esop_params, stats.map_esop_stats );
 
     return true;
   }
@@ -518,7 +445,6 @@ public:
   explicit lutdecomp_lut_partial_synthesizer( const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats )
     : lut_partial_synthesizer( gia, params, stats ),
       strategy( params.mapping_strategy ),
-      class_hash( 4u ),
       lut_size_max( gia.max_lut_size() )
   {
     gia.init_truth_tables();
@@ -601,9 +527,8 @@ public:
     if ( num_inputs <= max_cut_size )
     {
       const auto tt_spec = gia().lut_truth_table( index );
-      const auto affine_class = classify( tt_spec, num_inputs );
 
-      append_stg_from_line_map( circ, tt_spec, affine_class, line_map );
+      stg_map_precomp( circ, tt_spec, num_inputs, line_map, params.map_precomp_params, stats.map_precomp_stats );
     }
     else
     {
@@ -643,7 +568,6 @@ public:
       auto anc_index = 0u;
       auto ins_index = 0u;
       std::vector<unsigned> synth_order( 2 * num_ancilla + 1, 99 );
-      std::vector<uint64_t> aff_class( sub_lut.size() );
 
       sub_lut.foreach_input( [&lut_to_line, &pi_index, line_map]( int index, int e ) {
           lut_to_line[index] = line_map[pi_index++];
@@ -660,12 +584,6 @@ public:
             lut_to_line[index] = ancillas[anc_index++];
             synth_order[ins_index] = synth_order[synth_order.size() - 1 - ins_index] = index;
             ++ins_index;
-          }
-
-          /* the LUT node is small enough to be in the database, precompute class */
-          if ( sub_lut.lut_size( index ) >= 2 && sub_lut.lut_size( index ) <= max_cut_size )
-          {
-            aff_class[index] = classify( sub_lut.lut_truth_table( index ), sub_lut.lut_size( index ) );
           }
         } );
 
@@ -693,7 +611,7 @@ public:
         }
         else if ( num_inputs <= max_cut_size )
         {
-          auto& g = append_stg_from_line_map( circ, sub_lut.lut_truth_table( index ), aff_class[index], local_line_map );
+          stg_map_precomp( circ, sub_lut.lut_truth_table( index ), num_inputs, local_line_map, params.map_precomp_params, stats.map_precomp_stats );
         }
         else
         {
@@ -707,7 +625,7 @@ public:
             const auto lut = sub_lut.extract_lut( index );
 
             const auto begin = circ.num_gates();
-            esop_synthesis_wrapper( lut, circ, local_line_map, params, stats );
+            stg_map_esop( circ, lut, local_line_map, params.map_esop_params, stats.map_esop_stats );
             esop_circ_cache.insert( {index, {begin, circ.num_gates()}} );
 
             if ( params.progress )
@@ -729,57 +647,9 @@ public:
     return true;
   }
 
-private:
-  inline uint64_t classify_affine( uint64_t func, unsigned num_vars ) const
-  {
-    increment_timer t( &stats.class_runtime );
-
-    uint64_t afunc{};
-    const auto it = class_hash[num_vars - 2u].find( func );
-    if ( it == class_hash[num_vars - 2u].end() )
-    {
-      afunc = exact_affine_classification_output( func, num_vars );
-      class_hash[num_vars - 2u].insert( std::make_pair( func, afunc ) );
-    }
-    else
-    {
-      afunc = it->second;
-    }
-    ++stats.class_counter[num_vars - 2u][optimal_quantum_circuits::affine_classification_index[num_vars - 2u].at( afunc )];
-    return afunc;
-  }
-
-  inline uint64_t classify_spectral( uint64_t func, unsigned num_vars ) const
-  {
-    increment_timer t( &stats.class_runtime );
-
-    uint64_t sfunc{};
-    const auto it = class_hash[num_vars - 2u].find( func );
-    if ( it == class_hash[num_vars - 2u].end() )
-    {
-      const auto idx = get_spectral_class( tt( 1 << num_vars, func ) );
-      sfunc = optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx];
-      class_hash[num_vars - 2u].insert( std::make_pair( func, sfunc ) );
-    }
-    else
-    {
-      sfunc = it->second;
-    }
-    ++stats.class_counter[num_vars - 2u][optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].at( sfunc )];
-    return sfunc;
-  }
-
-  inline uint64_t classify( uint64_t func, unsigned num_vars ) const
-  {
-    return params.class_method == 0u ? classify_spectral( func, num_vars ) : classify_affine( func, num_vars );
-  }
-
 public:
   int max_cut_size = 4;
   lhrs_mapping_strategy strategy;
-
-private:
-  mutable std::vector<std::unordered_map<uint64_t, uint64_t>> class_hash;
 
 private:
   int lut_size_max = 0;
@@ -826,7 +696,7 @@ public:
       {
         std::cout << step << std::endl;
       }
-      pbar( ++step_index, order_heuristic->steps().size(), stats.num_decomp_default, stats.num_decomp_lut, stats.cover_runtime, stats.exorcism_runtime, stats.mapping_runtime, stats.class_runtime, stats.synthesis_runtime );
+      pbar( ++step_index, order_heuristic->steps().size(), stats.num_decomp_default, stats.num_decomp_lut, stats.map_esop_stats.cover_runtime, stats.map_esop_stats.exorcism_runtime, stats.mapping_runtime, stats.map_precomp_stats.class_runtime, stats.synthesis_runtime );
       increment_timer t( &stats.synthesis_runtime );
 
       switch ( step.type )
@@ -954,7 +824,7 @@ private:
   {
     if ( params.max_func_size == 0u )
     {
-      decomp_synthesizer.max_cut_size = params.class_method == 0u ? 5 : 4;
+      decomp_synthesizer.max_cut_size = params.map_precomp_params.class_method == 0u ? 5 : 4;
     }
     else
     {
@@ -1008,7 +878,7 @@ private:
       }
 
       /* cut size 5 */
-      if ( params.class_method == 0u )
+      if ( params.map_precomp_params.class_method == 0u )
       {
         auto lcirc = get_fast_circuit();
         decomp_synthesizer.max_cut_size = 5;

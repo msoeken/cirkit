@@ -40,10 +40,10 @@
 #include <string>
 #include <vector>
 
-#include <classical/abc/gia/gia.hpp>
-#include <classical/abc/gia/gia_esop.hpp>
-#include <classical/optimization/exorcism_minimization.hpp>
 #include <reversible/utils/costs.hpp>
+#include <reversible/synthesis/lhrs/stg_map_esop.hpp>
+#include <reversible/synthesis/lhrs/stg_map_luts.hpp>
+#include <reversible/synthesis/lhrs/stg_map_precomp.hpp>
 
 namespace cirkit
 {
@@ -61,51 +61,47 @@ std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mappin
 
 struct lhrs_params
 {
-  unsigned                     additional_ancilla = 0u;
-  bool                         onlylines          = false;                                       /* do not compute gates */
+  lhrs_params()
+    : map_luts_params( map_esop_params, map_precomp_params )
+  {
+  }
 
-  gia_graph::esop_cover_method cover_method       = gia_graph::esop_cover_method::aig_threshold; /* method to extract initial ESOP cover */
-  bool                         optimize_postesop  = false;                                       /* post-optimize ESOP cover */
-  exorcism_script              script             = exorcism_script::def_wo4;                    /* optimize ESOP synthesized circuit */
+  unsigned               additional_ancilla = 0u;
+  bool                   onlylines          = false;                                       /* do not compute gates */
 
-  lhrs_mapping_strategy        mapping_strategy   = lhrs_mapping_strategy::direct;               /* mapping strategy */
-  bool                         satlut             = false;                                       /* perform SAT-based LUT mapping as post-processing step */
-  unsigned                     area_iters         = 2u;                                          /* number of exact area recovery iterations */
-  unsigned                     flow_iters         = 1u;                                          /* number of area flow recovery iterations */
-  unsigned                     class_method       = 0u;                                          /* classification method: 0u: spectral, 1u: affine */
-  unsigned                     max_func_size      = 0u;                                          /* max function size for DB lookup, 0u: automatic based on class_method */
+  lhrs_mapping_strategy  mapping_strategy   = lhrs_mapping_strategy::direct;               /* mapping strategy */
+  bool                   satlut             = false;                                       /* perform SAT-based LUT mapping as post-processing step */
+  unsigned               area_iters         = 2u;                                          /* number of exact area recovery iterations */
+  unsigned               flow_iters         = 1u;                                          /* number of area flow recovery iterations */
+  unsigned               max_func_size      = 0u;                                          /* max function size for DB lookup, 0u: automatic based on class_method */
 
-  bool                         progress           = false;                                       /* show progress line */
-  bool                         verbose            = false;                                       /* be verbose */
+  stg_map_esop_params    map_esop_params;
+  stg_map_precomp_params map_precomp_params;
+  stg_map_luts_params    map_luts_params;
 
-  bool                         nocollapse         = false;                                       /* DEBUG: do not collapse (useful with dumpfile parameter) */
-  bool                         count_costs        = false;                                       /* DEBUG: count costs and affected lines (for visualization) */
-  std::string                  dumpfile;                                                         /* DEBUG: dump ESOP and AIG files for each ESOP cover and LUT */
+  bool                   progress           = false;                                       /* show progress line */
+  bool                   verbose            = false;                                       /* be verbose */
+
+  bool                   count_costs        = false;                                       /* DEBUG: count costs and affected lines (for visualization) */
+
+  void sync()
+  {
+    map_esop_params.progress = progress;
+  }
 };
 
 struct lhrs_stats
 {
-  lhrs_stats()
-    : class_counter( 4u )
-  {
-    class_counter[0u].resize( 3u );
-    class_counter[1u].resize( 6u );
-    class_counter[2u].resize( 18u );
-    class_counter[3u].resize( 48u );
-  }
-
   double   runtime           = 0.0;
   double   synthesis_runtime = 0.0;
-  double   exorcism_runtime  = 0.0;
-  double   cover_runtime     = 0.0;
   double   mapping_runtime   = 0.0;
-  double   class_runtime     = 0.0;
-  unsigned dumpfile_counter  = 0u;
 
   unsigned num_decomp_default = 0u;
   unsigned num_decomp_lut     = 0u;
 
-  std::vector<std::vector<unsigned>> class_counter;
+  stg_map_esop_stats    map_esop_stats;
+  stg_map_precomp_stats map_precomp_stats;
+
   std::vector<cost_t>                gate_costs;
   std::vector<std::vector<unsigned>> line_maps;
   std::vector<std::vector<unsigned>> affected_lines;

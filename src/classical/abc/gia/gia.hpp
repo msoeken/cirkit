@@ -102,6 +102,7 @@ public:
   gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
   void satlut_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
 
+  inline bool has_mapping() const { return abc::Gia_ManHasMapping( p_gia.get() ) == 1; }
   inline int lut_count() const { return abc::Gia_ManLutNum( p_gia.get() ); }
   inline int max_lut_size() const { return abc::Gia_ManLutSizeMax( p_gia.get() ); }
   inline bool is_lut( int index ) const { return abc::Gia_ObjIsLut( p_gia.get(), index ); }
