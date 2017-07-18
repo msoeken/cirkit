@@ -37,14 +37,14 @@ namespace cirkit
  * Types                                                                      *
  ******************************************************************************/
 
-class stg_map_lut_impl
+class stg_map_luts_impl
 {
 public:
-  stg_map_lut_impl( circuit& circ, const gia_graph& function,
-                    const std::vector<unsigned>& line_map,
-                    const std::vector<unsigned>& ancillas,
-                    const stg_map_luts_params& params,
-                    stg_map_luts_stats& stats )
+  stg_map_luts_impl( circuit& circ, const gia_graph& function,
+                     const std::vector<unsigned>& line_map,
+                     const std::vector<unsigned>& ancillas,
+                     const stg_map_luts_params& params,
+                     stg_map_luts_stats& stats )
     : circ( circ ),
       function( function ),
       line_map( line_map ),
@@ -63,9 +63,8 @@ public:
     /* if very small fall back to precomputed database */
     if ( num_inputs <= params.max_cut_size )
     {
-      // auto tt = function.truth_table();
-      // stg_map_precomp( circ, tt, num_inputs, line_map, *params.map_precomp_params, *params.map_precomp_stats );
-      assert( false );
+      auto tt = function.truth_table( 0 ).to_ulong();
+      stg_map_precomp( circ, tt, num_inputs, line_map, *params.map_precomp_params, *stats.map_precomp_stats );
       return;
     }
 
@@ -76,6 +75,8 @@ public:
       stg_map_esop( circ, mapping, line_map, *params.map_esop_params, *stats.map_esop_stats );
       return;
     }
+
+    mapping.init_truth_tables();
 
     /* LUT based mapping */
     auto pi_index = 0u;
@@ -278,13 +279,13 @@ private:
  * Public functions                                                           *
  ******************************************************************************/
 
-void stg_map_lut( circuit& circ, const gia_graph& function,
-                  const std::vector<unsigned>& line_map,
-                  const std::vector<unsigned>& ancillas,
-                  const stg_map_luts_params& params,
-                  stg_map_luts_stats& stats )
+void stg_map_luts( circuit& circ, const gia_graph& function,
+                   const std::vector<unsigned>& line_map,
+                   const std::vector<unsigned>& ancillas,
+                   const stg_map_luts_params& params,
+                   stg_map_luts_stats& stats )
 {
-  stg_map_lut_impl impl( circ, function, line_map, ancillas, params, stats );
+  stg_map_luts_impl impl( circ, function, line_map, ancillas, params, stats );
   impl.run();
 }
 

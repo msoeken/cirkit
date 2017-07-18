@@ -69,9 +69,9 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 
   boost::program_options::options_description lutdecomp_options( "LUT decomposition options" );
   lutdecomp_options.add_options()
-    ( "satlut,s",     bool_switch( &params.satlut ),                                 "optimize mapping with SAT where possible" )
-    ( "area_iters",   value_with_default( &params.area_iters ),                      "number of exact area recovery iterations" )
-    ( "flow_iters",   value_with_default( &params.flow_iters ),                      "number of area flow recovery iterations" )
+    ( "satlut,s",     bool_switch( &params.map_luts_params.satlut ),                 "optimize mapping with SAT where possible" )
+    ( "area_iters",   value_with_default( &params.map_luts_params.area_iters ),      "number of exact area recovery iterations" )
+    ( "flow_iters",   value_with_default( &params.map_luts_params.flow_iters ),      "number of area flow recovery iterations" )
     ( "class_method", value_with_default( &params.map_precomp_params.class_method ), "classification method\n0: spectral classification\n1: affine classificiation" )
     ;
   opts.add( lutdecomp_options );
@@ -141,8 +141,8 @@ command::log_opt_t lhrs_command::log() const
       {"flow_iters_init", flow_iters_init},
       {"esoppostopt", is_set( "esoppostopt" )},
       {"satlut", is_set( "satlut" )},
-      {"area_iters", params.area_iters},
-      {"flow_iters", params.flow_iters},
+      {"area_iters", params.map_luts_params.area_iters},
+      {"flow_iters", params.map_luts_params.flow_iters},
       {"class_method", params.map_precomp_params.class_method},
       {"num_decomp_default", stats.num_decomp_default},
       {"num_decomp_lut", stats.num_decomp_lut},
@@ -150,7 +150,7 @@ command::log_opt_t lhrs_command::log() const
       {"cover_runtime", stats.map_esop_stats.cover_runtime},
       {"class_counter", stats.map_precomp_stats.class_counter},
       {"class_runtime", stats.map_precomp_stats.class_runtime},
-      {"mapping_runtime", stats.mapping_runtime}
+      {"mapping_runtime", stats.map_luts_stats.mapping_runtime}
     });
 
   if ( is_set( "bounds" ) )

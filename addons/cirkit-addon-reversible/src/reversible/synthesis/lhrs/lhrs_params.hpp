@@ -70,23 +70,33 @@ struct lhrs_params
   bool                   onlylines          = false;                                       /* do not compute gates */
 
   lhrs_mapping_strategy  mapping_strategy   = lhrs_mapping_strategy::direct;               /* mapping strategy */
-  bool                   satlut             = false;                                       /* perform SAT-based LUT mapping as post-processing step */
-  unsigned               area_iters         = 2u;                                          /* number of exact area recovery iterations */
-  unsigned               flow_iters         = 1u;                                          /* number of area flow recovery iterations */
   unsigned               max_func_size      = 0u;                                          /* max function size for DB lookup, 0u: automatic based on class_method */
 
-  stg_map_esop_params    map_esop_params;
-  stg_map_precomp_params map_precomp_params;
-  stg_map_luts_params    map_luts_params;
+  stg_map_esop_params         map_esop_params;
+  stg_map_precomp_params      map_precomp_params;
+  mutable stg_map_luts_params map_luts_params;
 
   bool                   progress           = false;                                       /* show progress line */
   bool                   verbose            = false;                                       /* be verbose */
 
   bool                   count_costs        = false;                                       /* DEBUG: count costs and affected lines (for visualization) */
 
-  void sync()
+  inline void sync()
   {
     map_esop_params.progress = progress;
+
+    switch ( mapping_strategy )
+    {
+    default: break;
+
+    case lhrs_mapping_strategy::lut_based_min_db:
+      map_luts_params.strategy = stg_map_luts_params::mapping_strategy::mindb;
+      break;
+
+    case lhrs_mapping_strategy::lut_based_best_fit:
+      map_luts_params.strategy = stg_map_luts_params::mapping_strategy::bestfit;
+      break;
+    }
   }
 };
 
@@ -94,13 +104,13 @@ struct lhrs_stats
 {
   double   runtime           = 0.0;
   double   synthesis_runtime = 0.0;
-  double   mapping_runtime   = 0.0;
 
   unsigned num_decomp_default = 0u;
   unsigned num_decomp_lut     = 0u;
 
   stg_map_esop_stats    map_esop_stats;
   stg_map_precomp_stats map_precomp_stats;
+  stg_map_luts_stats    map_luts_stats;
 
   std::vector<cost_t>                gate_costs;
   std::vector<std::vector<unsigned>> line_maps;

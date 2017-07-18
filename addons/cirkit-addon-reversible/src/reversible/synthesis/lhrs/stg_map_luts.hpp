@@ -74,7 +74,7 @@ struct stg_map_luts_params
     }
   }
 
-  mutable int      max_cut_size = 4;
+  int              max_cut_size = 4;
   mapping_strategy strategy     = mapping_strategy::bestfit;
   bool             satlut       = false;                     /* perform SAT-based LUT mapping as post-processing step */
   unsigned         area_iters   = 2u;                        /* number of exact area recovery iterations */
@@ -120,11 +120,11 @@ struct stg_map_luts_stats
   stg_map_precomp_stats * map_precomp_stats = nullptr;
 };
 
-void stg_map_lut( circuit& circ, const gia_graph& function,
-                  const std::vector<unsigned>& line_map,
-                  const std::vector<unsigned>& ancillas,
-                  const stg_map_luts_params& params,
-                  stg_map_luts_stats& stats );
+void stg_map_luts( circuit& circ, const gia_graph& function,
+                   const std::vector<unsigned>& line_map,
+                   const std::vector<unsigned>& ancillas,
+                   const stg_map_luts_params& params,
+                   stg_map_luts_stats& stats );
 
 }
 
