@@ -42,6 +42,7 @@
 
 #include <core/properties.hpp>
 #include <classical/aig.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 
 #define LIN64
 #include <base/main/main.h>
@@ -116,6 +117,8 @@ public:
 
   void init_truth_tables() const;
   uint64_t lut_truth_table( int index ) const;
+
+  tt truth_table( int output_index ) const;
 
   /// PRINTING
 
