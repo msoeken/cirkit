@@ -61,6 +61,10 @@ std::istream& operator>>( std::istream& in, lhrs_mapping_strategy& mapping_strat
   {
     mapping_strategy = lhrs_mapping_strategy::lut_based_pick_best;
   }
+  else if ( token == "shannon" || token == "4" )
+  {
+    mapping_strategy = lhrs_mapping_strategy::shannon;
+  }
   else
   {
     in.setstate( std::ios_base::failbit );
@@ -80,6 +84,8 @@ std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mappin
     return out << "best_fit";
   case lhrs_mapping_strategy::lut_based_pick_best:
     return out << "pick_best";
+  case lhrs_mapping_strategy::shannon:
+    return out << "shannon";
   }
 
   return out;

@@ -533,6 +533,9 @@ private:
     case lhrs_mapping_strategy::lut_based_pick_best:
       synthesize_node_pick_best( index, lookup, line_map, clean_ancilla );
       break;
+    case lhrs_mapping_strategy::shannon:
+      synthesize_node_shannon( index, lookup, line_map, clean_ancilla );
+      break;
     }
 
     /* track costs */
@@ -639,6 +642,15 @@ private:
 
     stg_map_esop( circ, lut, line_map, params.map_esop_params, stats.map_esop_stats );
   }
+
+  void synthesize_node_shannon( int index, bool lookup, const std::vector<unsigned>& line_map, const std::vector<unsigned>& clean_ancilla )
+  {
+    const auto lut = gia.extract_lut( index );
+
+    const auto sp = pbar.subprogress();
+    stg_map_shannon( circ, lut, line_map, clean_ancilla, params.map_shannon_params, stats.map_shannon_stats );
+  }
+
 
 private:
   circuit& circ;

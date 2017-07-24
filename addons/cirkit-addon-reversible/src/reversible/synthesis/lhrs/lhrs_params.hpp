@@ -44,6 +44,7 @@
 #include <reversible/synthesis/lhrs/stg_map_esop.hpp>
 #include <reversible/synthesis/lhrs/stg_map_luts.hpp>
 #include <reversible/synthesis/lhrs/stg_map_precomp.hpp>
+#include <reversible/synthesis/lhrs/stg_map_shannon.hpp>
 
 namespace cirkit
 {
@@ -53,7 +54,8 @@ enum class lhrs_mapping_strategy
   direct,
   lut_based_min_db,
   lut_based_best_fit,
-  lut_based_pick_best
+  lut_based_pick_best,
+  shannon
 };
 
 std::istream& operator>>( std::istream& in, lhrs_mapping_strategy& mapping_strategy );
@@ -62,7 +64,8 @@ std::ostream& operator<<( std::ostream& out, const lhrs_mapping_strategy& mappin
 struct lhrs_params
 {
   lhrs_params()
-    : map_luts_params( map_esop_params, map_precomp_params )
+    : map_luts_params( map_esop_params, map_precomp_params ),
+      map_shannon_params( map_luts_params )
   {
   }
 
@@ -75,6 +78,7 @@ struct lhrs_params
   stg_map_esop_params         map_esop_params;
   stg_map_precomp_params      map_precomp_params;
   mutable stg_map_luts_params map_luts_params;
+  stg_map_shannon_params      map_shannon_params;
 
   bool                   progress           = false;                                       /* show progress line */
   bool                   verbose            = false;                                       /* be verbose */
@@ -102,6 +106,12 @@ struct lhrs_params
 
 struct lhrs_stats
 {
+  lhrs_stats()
+    : map_luts_stats( map_esop_stats, map_precomp_stats ),
+      map_shannon_stats( map_luts_stats )
+  {
+  }
+
   double   runtime           = 0.0;
   double   synthesis_runtime = 0.0;
 
@@ -111,6 +121,7 @@ struct lhrs_stats
   stg_map_esop_stats    map_esop_stats;
   stg_map_precomp_stats map_precomp_stats;
   stg_map_luts_stats    map_luts_stats;
+  stg_map_shannon_stats map_shannon_stats;
 
   std::vector<cost_t>                gate_costs;
   std::vector<std::vector<unsigned>> line_maps;
