@@ -163,6 +163,10 @@ cost_t t_costs::operator()( const gate& g, unsigned lines ) const
       }
     }
   }
+  else if ( is_hadamard( g ) )
+  {
+    return 0ull;
+  }
   else if ( is_pauli( g ) )
   {
     const auto& tag = boost::any_cast<pauli_tag>( g.type() );
