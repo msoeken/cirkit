@@ -43,7 +43,9 @@
 #include <classical/cli/commands/esop.hpp>
 #include <classical/cli/commands/exorcism.hpp>
 #include <classical/cli/commands/print_io.hpp>
+#include <classical/cli/commands/propagate.hpp>
 #include <classical/cli/commands/simulate.hpp>
+#include <classical/cli/commands/spectral.hpp>
 #include <classical/cli/commands/tt.hpp>
 #include <classical/utils/expression_parser.hpp>
 #include <classical/utils/truth_table_utils.hpp>
@@ -167,6 +169,7 @@ ALICE_BEGIN(revkit)
   cli.set_category( "AIG and XMG synthesis" );
 
   ADD_COMMAND( cone );
+  ADD_COMMAND( propagate );
   ADD_COMMAND( xmglut );
 
   cli.set_category( "Verification" );
@@ -190,6 +193,7 @@ ALICE_BEGIN(revkit)
   ADD_COMMAND( perm );
   ADD_COMMAND( print_io );
   ADD_COMMAND( random_circuit );
+  ADD_COMMAND( spectral );
   ADD_COMMAND( tt );
 
 #ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
