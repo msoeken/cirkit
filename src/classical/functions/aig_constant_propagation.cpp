@@ -52,7 +52,7 @@ using filter_graph_t = boost::filtered_graph<aig_graph, boost::is_not_in_subset<
 class aig_constant_propagation_simulator : public aig_simulator<aig_function>
 {
 public:
-  aig_constant_propagation_simulator( aig_graph& aig_new, const std::map<std::string, bool>& values )
+  aig_constant_propagation_simulator( aig_graph& aig_new, const std::map<std::string, aig_function>& values )
     : aig_new( aig_new ),
       values( values )
   {
@@ -60,15 +60,7 @@ public:
 
   aig_function get_input( const aig_node& node, const std::string& name, unsigned pos, const aig_graph& aig ) const
   {
-    const auto it = values.find( name );
-    if ( it == values.end() )
-    {
-      return aig_create_pi( aig_new, name );
-    }
-    else
-    {
-      return aig_get_constant( aig_new, it->second );
-    }
+    return values.at( name );
   }
 
   aig_function get_constant() const
@@ -88,7 +80,7 @@ public:
 
 private:
   aig_graph& aig_new;
-  const std::map<std::string, bool>& values;
+  const std::map<std::string, aig_function>& values;
 };
 
 /******************************************************************************
@@ -109,10 +101,26 @@ aig_graph aig_constant_propagation( const aig_graph& aig, const std::map<std::st
   auto& info_new   = aig_info( aig_new );
   const auto& info = aig_info( aig );
 
+  /* copy original PIs (except for those with constants) */
+  std::map<std::string, aig_function> name_to_pi;
+  for ( auto pi : info.inputs )
+  {
+    const auto& name = info.node_names.at( pi );
+    const auto it = values.find( name );
+    if ( it == values.end() )
+    {
+      name_to_pi[name] = aig_create_pi( aig_new, name );
+    }
+    else
+    {
+      name_to_pi[name] = aig_get_constant( aig_new, it->second );
+    }
+  }
+
   /* copy other info */
   info_new.model_name = info.model_name;
 
-  auto result = simulate_aig( aig, aig_constant_propagation_simulator( aig_new, values ) );
+  auto result = simulate_aig( aig, aig_constant_propagation_simulator( aig_new, name_to_pi ) );
 
   for ( const auto& output : info.outputs )
   {
