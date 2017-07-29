@@ -86,6 +86,7 @@ tt_command::tt_command( const environment::ptr& env )
     ( "maj",      value( &maj ),    "create maj function for number of odd bits" )
     ( "prime",    value( &prime ),  "create prime function that is true, whenever the input assignment is prime (for up to 10 bits)" )
     ( "extend,e", value( &extend ), "extend to bits" )
+    ( "shrink",   value( &shrink ), "shrink to bits" )
     ( "swap,s",   value( &swap ),   "swaps to variables (seperated with comma, e.g., 2,3)" )
     ;
 }
@@ -98,6 +99,7 @@ command::rules_t tt_command::validity_rules() const
     { [this]() { return !is_set( "prime" ) || prime <= 10u; }, "argument to prime cannot be larger than 10" },
     { [this]() { return static_cast<int>( is_set( "load" ) ) +
                         static_cast<int>( is_set( "extend" ) ) +
+                        static_cast<int>( is_set( "shrink" ) ) +
                         static_cast<int>( is_set( "swap" ) ) +
                         static_cast<int>( is_set( "random" ) ) +
                         static_cast<int>( is_set( "hwb" ) ) +
@@ -137,6 +139,10 @@ bool tt_command::execute()
   else if ( is_set( "extend" ) )
   {
     tt_extend( tts.current(), extend );
+  }
+  else if ( is_set( "shrink" ) )
+  {
+    tt_shrink( tts.current(), shrink );
   }
   else if ( is_set( "random" ) )
   {
@@ -196,7 +202,7 @@ bool tt_command::execute()
 
 command::log_opt_t tt_command::log() const
 {
-  if ( is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || is_set( "maj" ) || is_set( "prime" ) )
+  if ( env->store<tt>().current_index() != -1 )
   {
     return log_opt_t( {{"tt", to_string( env->store<tt>().current() )}} );
   }

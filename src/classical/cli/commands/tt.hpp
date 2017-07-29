@@ -59,6 +59,7 @@ public:
 private:
   std::string load;
   unsigned    extend;
+  unsigned    shrink;
   unsigned    random;
   unsigned    hwb;
   unsigned    maj;
