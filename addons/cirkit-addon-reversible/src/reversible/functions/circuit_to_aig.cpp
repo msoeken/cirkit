@@ -87,6 +87,27 @@ aig_graph circuit_to_aig( const circuit& circ )
         fs[target] = aig_create_xor( aig, fs[target], aig_create_nary_and( aig, operands ) );
       }
     }
+    else if ( is_fredkin( g ) )
+    {
+      const auto target1 = g.targets()[0u];
+      const auto target2 = g.targets()[1u];
+
+      if ( g.controls().empty() )
+      {
+        std::swap( fs[target1], fs[target2] );
+      }
+      else
+      {
+        std::vector<aig_function> operands;
+        for ( const auto& c : g.controls() )
+        {
+          operands += make_function( fs[c.line()], !c.polarity() );
+        }
+        const auto cond = aig_create_nary_and( aig, operands );
+        fs[target1] = aig_create_ite( aig, cond, fs[target2], fs[target1] );
+        fs[target2] = aig_create_ite( aig, cond, fs[target1], fs[target2] );
+      }
+    }
     else if ( is_stg( g ) )
     {
       const auto& stg = boost::any_cast<stg_tag>( g.type() );
