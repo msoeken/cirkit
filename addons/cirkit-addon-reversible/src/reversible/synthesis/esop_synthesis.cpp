@@ -379,7 +379,8 @@ bool esop_synthesis( circuit& circ, const std::string& filename, properties::ptr
 
 bool esop_synthesis( circuit& circ, const gia_graph::esop_ptr& esop_cover, unsigned ninputs, unsigned noutputs, const properties::ptr& settings, const properties::ptr& statistics )
 {
-  const auto line_map = get( settings, "line_map", std::vector<unsigned>() );
+  const auto line_map     = get( settings, "line_map",     std::vector<unsigned>() );
+  const auto no_constants = get( settings, "no_constants", false );                   /* if true, also output lines have PIs */
 
   properties_timer t( statistics );
 
@@ -389,15 +390,18 @@ bool esop_synthesis( circuit& circ, const gia_graph::esop_ptr& esop_cover, unsig
     clear_circuit( circ );
     circ.set_lines( ninputs + noutputs );
 
-    auto constants = circ.constants();
-    std::vector<bool> garbage( circ.lines(), true );
-    for ( auto i = ninputs; i < circ.lines(); ++i )
+    if ( !no_constants )
     {
-      constants[i] = false;
-      garbage[i] = false;
+      auto constants = circ.constants();
+      std::vector<bool> garbage( circ.lines(), true );
+      for ( auto i = ninputs; i < circ.lines(); ++i )
+      {
+        constants[i] = false;
+        garbage[i] = false;
+      }
+      circ.set_constants( constants );
+      circ.set_garbage( garbage );
     }
-    circ.set_constants( constants );
-    circ.set_garbage( garbage );
   }
 
   /* cubes */

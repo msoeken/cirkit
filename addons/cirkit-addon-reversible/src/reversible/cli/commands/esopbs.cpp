@@ -65,6 +65,7 @@ esopbs_command::esopbs_command( const environment::ptr& env )
     ( "filename", value( &filename ), "filename to the ESOP file" )
     ( "mct",                          "no negative controls" )
     ( "no_shared_target",             "no shared target" )
+    ( "no_constants",                 "no constant lines (but use PI for outputs)" )
     ( "aig,a",                        "read from AIG" )
     ( "exorcism,e",                   "use exorcism to optimize ESOP cover (only for --aig)" )
     ( "progress,p",                   "show progress" )
@@ -102,6 +103,8 @@ bool esopbs_command::execute()
   else if ( is_set( "aig" ) )
   {
     const auto& aigs = env->store<aig_graph>();
+
+    settings->set( "no_constants", is_set( "no_constants" ) );
 
     gia_graph gia( aigs.current() );
     auto esop = gia.compute_esop_cover( gia_graph::esop_cover_method::aig_new, settings );
