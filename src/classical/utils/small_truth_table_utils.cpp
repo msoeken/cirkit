@@ -190,7 +190,7 @@ std::vector<uint64_t> stt_compute_mask_sequence( const std::vector<unsigned>& pe
   //           << "[i] right = " << any_join( right, " " ) << std::endl;
 
   /* compute middle mask */
-  for ( auto i = 0u; i < ( 1 << ( n - 1 ) ); ++i )
+  for ( auto i = 0u; i < ( 1u << ( n - 1 ) ); ++i )
   {
     if ( left[i] != right[i] )
     {
