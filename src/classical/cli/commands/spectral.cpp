@@ -30,6 +30,7 @@
 #include <core/cli/stores.hpp>
 #include <classical/cli/stores.hpp>
 #include <classical/functions/spectral_canonization.hpp>
+#include <classical/functions/spectral_canonization2.hpp>
 
 namespace cirkit
 {
@@ -37,6 +38,9 @@ namespace cirkit
 spectral_command::spectral_command( const environment::ptr& env )
   : cirkit_command( env, "Spectral classification" )
 {
+  opts.add_options()
+    ( "verify", "verify spectral transformation (for debugging)" )
+    ;
   be_verbose();
   add_new_option();
 }
@@ -50,9 +54,20 @@ bool spectral_command::execute()
 {
   auto& tts = env->store<tt>();
 
-  auto settings = make_settings();
-  specf = spectral_canonization( tts.current(), settings, statistics );
-  print_runtime();
+  spectral_class = get_spectral_class( tts.current() );
+
+  if ( is_verbose() )
+  {
+    std::cout << "[i] class: " << spectral_class << std::endl;
+  }
+
+  spectral_normalization_params params;
+  spectral_normalization_stats stats;
+
+  params.verbose = is_verbose();
+  params.verify = is_set( "verify" );
+
+  specf = spectral_normalization( tts.current(), params, stats );
 
   extend_if_new( tts );
   tts.current() = specf;
@@ -63,11 +78,8 @@ bool spectral_command::execute()
 command::log_opt_t spectral_command::log() const
 {
   return log_map_t( {
-      {"runtime", statistics->get<double>( "runtime" )},
       {"tt", to_string( specf )},
-      {"spectrum_init", statistics->get<std::vector<int>>( "spectrum_init" )},
-      {"spectrum_final", statistics->get<std::vector<int>>( "spectrum_final" )},
-      {"class", statistics->get<unsigned>( "class" )}
+      {"class", spectral_class}
     } );
 }
 

@@ -56,6 +56,7 @@ public:
 
 private:
   tt specf;
+  unsigned spectral_class;
 };
 
 }
