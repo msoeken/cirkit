@@ -85,6 +85,7 @@
 #include <reversible/cli/commands/revsimp.hpp>
 #include <reversible/cli/commands/rms.hpp>
 #include <reversible/cli/commands/stg4.hpp>
+#include <reversible/cli/commands/stg_as.hpp>
 #include <reversible/cli/commands/tbs.hpp>
 #include <reversible/cli/commands/tof.hpp>
 #include <reversible/cli/commands/tpar.hpp>
@@ -183,6 +184,7 @@ ALICE_BEGIN(revkit)
 
   ADD_COMMAND( gen_reciprocal );
   ADD_COMMAND( revgen );
+  ADD_COMMAND( stg_as );
 
   cli.set_category( "Various" );
 
