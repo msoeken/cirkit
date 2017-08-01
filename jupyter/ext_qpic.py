@@ -4,7 +4,7 @@ import os
 import subprocess
 
 from IPython.core.magic import Magics, magics_class, cell_magic
-from IPython.display import display_png, Image
+from IPython.display import display, Image
 from tempfile import NamedTemporaryFile
 
 @magics_class
