@@ -560,7 +560,7 @@ tt tt_from_sop_spec( const std::string& spec )
           cube |= v;
         }
       }
-      
+
       if ( pla_type == pla_type_t::on )
       {
         f |= cube;
@@ -588,7 +588,7 @@ std::vector<int> walsh_spectrum( const tt& func )
 
     const unsigned d = ( 1 << ( n - 1 - i ) );
     /* blocks? */
-    for ( auto b = 0u; b < ( 1 << i ); ++b, i1 += d )
+    for ( auto b = 0u; b < ( 1u << i ); ++b, i1 += d )
     {
       /* block elements */
       for ( auto e = 0u; e < d; ++e, ++i1 )
