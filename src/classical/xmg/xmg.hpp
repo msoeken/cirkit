@@ -172,10 +172,11 @@ public:
 
   /* marking */
   void init_marks();
-  bool is_marked( xmg_node n) const;
+  bool is_marked( xmg_node n ) const;
   void mark( xmg_node n );
 
   void mark_as_modified();
+  void invert_marks();
 
 public: /* properties */
   inline void set_native_xor( bool native_xor ) { _native_xor = native_xor; }
