@@ -57,6 +57,9 @@ bool xmg_mffc_contains( const xmg_graph& xmg, xmg_node root, const std::vector<x
 /* compute the number of nodes of the subcone (within mffcs) rooted by curr */
 unsigned xmg_mffc_tipsize( const xmg_graph& xmg, const std::map<xmg_node, std::vector<xmg_node>> mffcs, xmg_node curr );
 
+/* mark all nodes of a mffc defined by the pair (root,support) on xmg */
+void xmg_mffc_mark( xmg_graph& xmg, xmg_node root, const std::vector<xmg_node>& support );
+
 }
 
 #endif

@@ -182,6 +182,24 @@ void xmg_mffc_node_collect( xmg_graph& xmg, xmg_node n, std::vector<xmg_node>& s
   }
 }
 
+void xmg_mffc_mark_recurse( xmg_graph& xmg, xmg_node curr, const std::vector<xmg_node>& support )
+{
+  if ( xmg.is_marked( curr ) ) return;
+  xmg.mark( curr );
+  for (const auto& c : xmg.children(curr))
+  {
+    if ( std::find( support.begin(), support.end(), c.node ) == support.end() )
+    {
+      xmg_mffc_mark_recurse( xmg, c.node, support );
+    }
+    else
+    {
+      /* last node to mark on this path */
+      xmg.mark( c.node );
+    }
+  }
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -285,6 +303,12 @@ unsigned xmg_mffc_tipsize( const xmg_graph& xmg, const std::map<xmg_node, std::v
     }
   }
   return 0u; /* not contained in any mffc */
+}
+
+void xmg_mffc_mark( xmg_graph& xmg, xmg_node root, const std::vector<xmg_node>& support )
+{
+  xmg.init_marks();
+  xmg_mffc_mark_recurse( xmg, root, support );
 }
 
 }
