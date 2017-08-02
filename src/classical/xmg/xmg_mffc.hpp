@@ -52,6 +52,11 @@ unsigned xmg_mffc_size( const xmg_graph& xmg, xmg_node n, const std::vector<xmg_
 /* returns nodes including the root, but excluding the leafs */
 std::vector<xmg_node> xmg_mffc_cone( const xmg_graph& xmg, xmg_node n, const std::vector<xmg_node>& support );
 
+/* check if curr is contained in the mffc defined by the pair (root,support) */
+bool xmg_mffc_contains( const xmg_graph& xmg, xmg_node root, const std::vector<xmg_node>& support, xmg_node curr );
+/* compute the number of nodes of the subcone (within mffcs) rooted by curr */
+unsigned xmg_mffc_tipsize( const xmg_graph& xmg, const std::map<xmg_node, std::vector<xmg_node>> mffcs, xmg_node curr );
+
 }
 
 #endif

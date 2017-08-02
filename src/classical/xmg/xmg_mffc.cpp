@@ -258,6 +258,35 @@ std::vector<xmg_node> xmg_mffc_cone( const xmg_graph& xmg, xmg_node n, const std
   return cone;
 }
 
+bool xmg_mffc_contains( const xmg_graph& xmg, xmg_node root, const std::vector<xmg_node>& support, xmg_node curr )
+{
+  if ( root == curr ) return true;
+  for ( const auto& c : xmg.children(root) )
+  {
+    if (std::find(support.begin(), support.end(), c.node) != support.end())
+    {
+      continue;
+    }
+    if (xmg_mffc_contains(xmg, c.node, support, curr))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+unsigned xmg_mffc_tipsize( const xmg_graph& xmg, const std::map<xmg_node, std::vector<xmg_node>> mffcs, xmg_node curr )
+{
+  for ( const auto& mffc : mffcs )
+  {
+    if ( xmg_mffc_contains(xmg, mffc.first, mffc.second, curr ) )
+    {
+      return xmg_mffc_size(xmg, curr, mffc.second );
+    }
+  }
+  return 0u; /* not contained in any mffc */
+}
+
 }
 
 // Local Variables:
