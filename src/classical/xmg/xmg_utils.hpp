@@ -57,6 +57,8 @@ unsigned compute_pure_maj_count( const xmg_graph& xmg );
 
 std::vector<unsigned> xmg_compute_levels( const xmg_graph& xmg );
 
+std::vector< std::vector<xmg_node> > xmg_levelize( xmg_graph& xmg );
+
 std::stack<xmg_node> xmg_output_stack( const xmg_graph& xmg );
 
 std::deque<xmg_node> xmg_output_deque( const xmg_graph& xmg );
