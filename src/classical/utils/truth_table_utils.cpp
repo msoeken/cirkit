@@ -606,6 +606,22 @@ std::vector<int> walsh_spectrum( const tt& func )
   return spectra;
 }
 
+tt tt_maj(tt a, tt b, tt c)
+{
+  auto max_num_vars = tt_num_vars( a );
+
+  auto tmp = tt_num_vars( b );
+  if ( max_num_vars < tmp ) max_num_vars = tmp;
+  tmp = tt_num_vars( c );
+  if ( max_num_vars < tmp ) max_num_vars = tmp;
+
+  tt_extend( a, max_num_vars );
+  tt_extend( b, max_num_vars );
+  tt_extend( c, max_num_vars );
+
+  return (a & b) | (b & c) | (a & c);
+}
+
 }
 
 // Local Variables:
