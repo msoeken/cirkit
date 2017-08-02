@@ -136,6 +136,21 @@ std::vector<unsigned> xmg_compute_levels( const xmg_graph& xmg )
   return levels;
 }
 
+std::vector< std::vector<xmg_node> > xmg_levelize( xmg_graph& xmg )
+{
+  auto depth = compute_depth( xmg );
+  xmg.compute_levels();
+
+  std::vector< std::vector<xmg_node> > levels( depth+1u );
+  for ( const auto& n : xmg.nodes() )
+  {
+    levels[xmg.level(n)] += n;
+  }
+
+  return levels;
+}
+
+
 std::stack<xmg_node> xmg_output_stack( const xmg_graph& xmg )
 {
   std::stack<xmg_node> stack;

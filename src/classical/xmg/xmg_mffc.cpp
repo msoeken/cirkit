@@ -182,6 +182,24 @@ void xmg_mffc_node_collect( xmg_graph& xmg, xmg_node n, std::vector<xmg_node>& s
   }
 }
 
+void xmg_mffc_mark_recurse( xmg_graph& xmg, xmg_node curr, const std::vector<xmg_node>& support )
+{
+  if ( xmg.is_marked( curr ) ) return;
+  xmg.mark( curr );
+  for (const auto& c : xmg.children(curr))
+  {
+    if ( std::find( support.begin(), support.end(), c.node ) == support.end() )
+    {
+      xmg_mffc_mark_recurse( xmg, c.node, support );
+    }
+    else
+    {
+      /* last node to mark on this path */
+      xmg.mark( c.node );
+    }
+  }
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -256,6 +274,41 @@ std::vector<xmg_node> xmg_mffc_cone( const xmg_graph& xmg, xmg_node n, const std
                             [&support]( const xmg_node& node, const xmg_graph::graph_t& g ) { return boost::find( support, node ) != support.end(); } );
 
   return cone;
+}
+
+bool xmg_mffc_contains( const xmg_graph& xmg, xmg_node root, const std::vector<xmg_node>& support, xmg_node curr )
+{
+  if ( root == curr ) return true;
+  for ( const auto& c : xmg.children(root) )
+  {
+    if (std::find(support.begin(), support.end(), c.node) != support.end())
+    {
+      continue;
+    }
+    if (xmg_mffc_contains(xmg, c.node, support, curr))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+unsigned xmg_mffc_tipsize( const xmg_graph& xmg, const std::map<xmg_node, std::vector<xmg_node>> mffcs, xmg_node curr )
+{
+  for ( const auto& mffc : mffcs )
+  {
+    if ( xmg_mffc_contains(xmg, mffc.first, mffc.second, curr ) )
+    {
+      return xmg_mffc_size(xmg, curr, mffc.second );
+    }
+  }
+  return 0u; /* not contained in any mffc */
+}
+
+void xmg_mffc_mark( xmg_graph& xmg, xmg_node root, const std::vector<xmg_node>& support )
+{
+  xmg.init_marks();
+  xmg_mffc_mark_recurse( xmg, root, support );
 }
 
 }
