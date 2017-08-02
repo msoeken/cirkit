@@ -26,6 +26,7 @@
 
 #include "xmg_io.hpp"
 
+#include <sys/stat.h>
 #include <fstream>
 #include <unordered_map>
 
@@ -343,6 +344,15 @@ std::string make_regular( const std::string& name )
 
 xmg_graph read_verilog( const std::string& filename, bool native_xor, bool enable_structural_hashing, bool enable_inverter_propagation )
 {
+  {
+    /* check if file exists */
+    struct stat buffer;
+    if ( stat(filename.c_str(), &buffer) != 0 )
+    {
+      std::cout << (boost::format("[w] file '%s' does not exists\n") % filename);
+    }
+  }
+
   std::unordered_map<std::string, xmg_function> name_to_function;
   std::vector<std::string> output_names;
 
