@@ -287,7 +287,7 @@ tt tt_from_sop_spec( const std::string& spec );
 
 std::vector<int> walsh_spectrum( const tt& func );
 
-tt tt_maj(tt a, tt b, tt c);
+tt tt_maj( tt a, tt b, tt c );
 
 }
 
