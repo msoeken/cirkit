@@ -32,7 +32,6 @@
 
 #include <boost/format.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/range/counting_range.hpp>
 #include <boost/timer.hpp>
 
 namespace cirkit
@@ -97,12 +96,12 @@ public:
       assert( m_inputNames.size() <= m_inputs );
       assert( m_outputNames.size() <= m_outputs );
 
-      for ( auto i : boost::counting_range<unsigned>( 0u, m_inputNames.size() ) )
+      for ( auto i = 0u; i < m_inputNames.size(); ++i )
       {
         m_function->setInputName ( i, m_inputNames.at ( i ) );
       }
 
-      for ( auto i : boost::counting_range<unsigned>( 0u, m_outputNames.size() ) )
+      for ( auto i = 0u; i < m_outputNames.size(); ++i )
       {
         m_function->setOutputName ( i, m_outputNames.at ( i ) );
       }
@@ -110,7 +109,8 @@ public:
 
     void initializeInputPorts()
     {
-      for ( auto i : boost::counting_range<unsigned>( 0u, m_inputs ) ) {
+      for ( auto i = 0u; i < m_inputs; ++i )
+      {
         m_function->pushInput ( i );
       }
     }
@@ -119,7 +119,8 @@ public:
     {
       auto falseNode = manager->bdd_bot ();
       std::cout << falseNode << std::endl;
-      for ( auto i : boost::counting_range<unsigned>( 0u, m_outputs ) ) {
+      for ( auto i = 0u; i < m_outputs; ++i )
+      {
         m_function->setOutputVar ( i, falseNode );
       }
     }

@@ -38,6 +38,9 @@
 
 #include <functional>
 #include <map>
+#include <unordered_map>
+
+#include <boost/optional.hpp>
 
 #include <core/properties.hpp>
 #include <classical/xmg/xmg.hpp>
@@ -45,10 +48,11 @@
 namespace cirkit
 {
 
-using maj_rewrite_func_t = std::function<xmg_function(xmg_graph&, const xmg_function&, const xmg_function&, const xmg_function&)>;
-using xor_rewrite_func_t = std::function<xmg_function(xmg_graph&, const xmg_function&, const xmg_function&)>;
-using prefill_func_t     = std::function<void(xmg_graph&, std::map<xmg_node, xmg_function>&)>;
-using xmg_init_func_t    = std::function<void(xmg_graph&)>;
+using maj_rewrite_func_t    = std::function<xmg_function(xmg_graph&, const xmg_function&, const xmg_function&, const xmg_function&)>;
+using xor_rewrite_func_t    = std::function<xmg_function(xmg_graph&, const xmg_function&, const xmg_function&)>;
+using prefill_func_t        = std::function<void(xmg_graph&, std::map<xmg_node, xmg_function>&)>;
+using xmg_init_func_t       = std::function<void(xmg_graph&)>;
+using xmg_substitutes_map_t = boost::optional<std::unordered_map<xmg_node, xmg_function>>;
 
 xmg_function rewrite_default_maj( xmg_graph& xmg_new, const xmg_function& a, const xmg_function& b, const xmg_function& c );
 xmg_function rewrite_default_xor( xmg_graph& xmg_new, const xmg_function& a, const xmg_function& b );

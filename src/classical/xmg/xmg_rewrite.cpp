@@ -57,8 +57,18 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
                                        xmg_graph& xmg_new,
                                        const maj_rewrite_func_t& on_maj,
                                        const xor_rewrite_func_t& on_xor,
-                                       std::map<xmg_node, xmg_function>& old_to_new )
+                                       std::map<xmg_node, xmg_function>& old_to_new,
+                                       const xmg_substitutes_map_t& substitutes )
 {
+  /* reroute node if it is in substutitutes */
+  auto complement = false;
+  xmg_substitutes_map_t::value_type::const_iterator it_s{};
+  if ( substitutes && ( it_s = substitutes->find( node ) ) != substitutes->end() )
+  {
+    node = it_s->second.node;
+    complement = it_s->second.complemented;
+  }
+
   /* visited */
   const auto it = old_to_new.find( node );
   if ( it != old_to_new.end() )
@@ -71,16 +81,16 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
   {
     const auto c = xmg.children( node );
     f = on_maj( xmg_new,
-                xmg_rewrite_top_down_rec( xmg, c[0].node, xmg_new, on_maj, on_xor, old_to_new ) ^ c[0].complemented,
-                xmg_rewrite_top_down_rec( xmg, c[1].node, xmg_new, on_maj, on_xor, old_to_new ) ^ c[1].complemented,
-                xmg_rewrite_top_down_rec( xmg, c[2].node, xmg_new, on_maj, on_xor, old_to_new ) ^ c[2].complemented );
+                xmg_rewrite_top_down_rec( xmg, c[0].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[0].complemented,
+                xmg_rewrite_top_down_rec( xmg, c[1].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[1].complemented,
+                xmg_rewrite_top_down_rec( xmg, c[2].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[2].complemented );
   }
   else if ( xmg.is_xor( node ) )
   {
     const auto c = xmg.children( node );
     f = on_xor( xmg_new,
-                xmg_rewrite_top_down_rec( xmg, c[0].node, xmg_new, on_maj, on_xor, old_to_new ) ^ c[0].complemented,
-                xmg_rewrite_top_down_rec( xmg, c[1].node, xmg_new, on_maj, on_xor, old_to_new ) ^ c[1].complemented );
+                xmg_rewrite_top_down_rec( xmg, c[0].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[0].complemented,
+                xmg_rewrite_top_down_rec( xmg, c[1].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[1].complemented );
   }
   else
   {
@@ -88,6 +98,7 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
     assert( false );
   }
 
+  f.complemented = ( f.complemented != complement ); /* Boolean XOR */
   old_to_new.insert( {node, f} );
   return f;
 }
@@ -113,8 +124,9 @@ xmg_graph xmg_rewrite_top_down( const xmg_graph& xmg,
                                 const properties::ptr& statistics )
 {
   /* settings */
-  const auto prefill = get( settings, "prefill", prefill_func_t() );
-  const auto init    = get( settings, "init",    xmg_init_func_t() );
+  const auto prefill     = get( settings, "prefill",     prefill_func_t() );
+  const auto init        = get( settings, "init",        xmg_init_func_t() );
+  const auto substitutes = get( settings, "substitutes", xmg_substitutes_map_t() );
 
   /* statistics */
   properties_timer t( statistics );
@@ -139,7 +151,7 @@ xmg_graph xmg_rewrite_top_down( const xmg_graph& xmg,
   /* map nodes */
   for ( const auto& po : xmg.outputs() )
   {
-    xmg_new.create_po( xmg_rewrite_top_down_rec( xmg, po.first.node, xmg_new, on_maj, on_xor, old_to_new ) ^ po.first.complemented, po.second );
+    xmg_new.create_po( xmg_rewrite_top_down_rec( xmg, po.first.node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ po.first.complemented, po.second );
   }
 
   return xmg_new;
@@ -178,7 +190,7 @@ std::vector<xmg_function> xmg_rewrite_top_down_inplace( xmg_graph& dest,
   std::vector<xmg_function> outputs;
   for ( const auto& po : xmg.outputs() )
   {
-    outputs.push_back( xmg_rewrite_top_down_rec( xmg, po.first.node, dest, on_maj, on_xor, old_to_new ) ^ po.first.complemented );
+    outputs.push_back( xmg_rewrite_top_down_rec( xmg, po.first.node, dest, on_maj, on_xor, old_to_new, boost::none ) ^ po.first.complemented );
   }
 
   return outputs;
