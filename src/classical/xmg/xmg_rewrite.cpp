@@ -60,13 +60,6 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
                                        std::map<xmg_node, xmg_function>& old_to_new,
                                        const xmg_substitutes_map_t& substitutes )
 {
-  /* visited */
-  const auto it = old_to_new.find( node );
-  if ( it != old_to_new.end() )
-  {
-    return it->second;
-  }
-
   /* reroute node if it is in substutitutes */
   auto complement = false;
   xmg_substitutes_map_t::value_type::const_iterator it_s{};
@@ -74,6 +67,13 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
   {
     node = it_s->second.node;
     complement = it_s->second.complemented;
+  }
+
+  /* visited */
+  const auto it = old_to_new.find( node );
+  if ( it != old_to_new.end() )
+  {
+    return it->second;
   }
 
   xmg_function f;
