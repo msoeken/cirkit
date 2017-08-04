@@ -582,7 +582,7 @@ exp_cost_t count_cubes_in_exact_psdkro( DdManager * cudd, DdNode * f, exp_cache_
   else if ( nmax == n1 ) r = std::make_pair( PositiveDavio, n0 + n2 );
   else                   r = std::make_pair( Shannon,       n0 + n1 );
 
-  Cudd_RecursiveDeref( cudd, f2 );
+  //Cudd_RecursiveDeref( cudd, f2 );
 
   // cache and return result
   return exp_cache[f] = r;
