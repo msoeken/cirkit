@@ -199,7 +199,10 @@ bool simulate_command::execute_aig()
     {
       auto tt = values[o.first];
 
-      std::cout << boost::format( "[i] %s : " ) % o.second << tt << " (" << tt_to_hex( tt ) << ")" << std::endl;
+      if ( !is_set( "quiet" ) )
+      {
+        std::cout << boost::format( "[i] %s : " ) % o.second << tt << " (" << tt_to_hex( tt ) << ")" << std::endl;
+      }
       store( tt );
 
       tts.push_back( to_string( tt ) );
@@ -236,7 +239,7 @@ bool simulate_command::execute_aig()
 
   if ( statistics->has_key( "runtime" ) )
   {
-    std::cout << boost::format( "[i] runtime: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+    print_runtime( statistics->get<double>( "runtime" ) );
   }
 
   return true;

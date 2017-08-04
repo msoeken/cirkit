@@ -75,7 +75,7 @@ bool propagate_command::execute()
       propagation_values.insert( {name, value} );
     });
   aig() = aig_constant_propagation( aig(), propagation_values, settings, statistics );
-  std::cout << boost::format( "[i] Run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime( statistics->get<double>( "runtime" ) );
   return true;
 }
 
