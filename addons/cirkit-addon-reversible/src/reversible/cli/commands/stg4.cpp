@@ -64,12 +64,12 @@ bool stg4_command::execute()
           const auto& stg = boost::any_cast<stg_tag>( g.type() );
           const auto& f = stg.function;
           const auto num_vars = tt_num_vars( f );
-          if ( num_vars >= 2u && num_vars <= 4u )
+          if ( num_vars >= 2u && num_vars <= 5u )
           {
-            const auto it = optimal_quantum_circuits::affine_classification_index[num_vars - 2u].find( f.to_ulong() );
-            if ( it != optimal_quantum_circuits::affine_classification_index[num_vars - 2u].end() )
+            const auto it = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].find( f.to_ulong() );
+            if ( it != optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].end() )
             {
-              const auto subcirc = circuit_from_string( optimal_quantum_circuits::affine_classification[num_vars - 2u][it->second] );
+              const auto subcirc = circuit_from_string( optimal_quantum_circuits::spectral_classification[num_vars - 2u][it->second] );
 
               std::vector<unsigned> line_mapping;
               for ( const auto& c : g.controls() )
