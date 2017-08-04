@@ -26,10 +26,14 @@
 
 #include "stg_as.hpp"
 
+#include <alice/rules.hpp>
 #include <core/utils/program_options.hpp>
 #include <classical/cli/stores.hpp>
+#include <reversible/target_tags.hpp>
 #include <reversible/cli/stores.hpp>
 #include <reversible/functions/add_stg.hpp>
+#include <reversible/functions/rewrite_circuit.hpp>
+#include <reversible/utils/circuit_utils.hpp>
 
 namespace cirkit
 {
@@ -38,16 +42,19 @@ stg_as_command::stg_as_command( const environment::ptr& env )
   : cirkit_command( env, "Realize single-target from truth table" )
 {
   opts.add_options()
-    ( "func,f", value_with_default( &func ), "id of truth table to realize" )
-    ( "as,a",   value_with_default( &real ), "id of truth table to use in gate" )
+    ( "func,f",    value_with_default( &func ), "id of truth table to realize" )
+    ( "as,a",      value_with_default( &real ), "id of truth table to use in gate" )
+    ( "circuit,c",                              "perform on single-target gates with affine annotations in circuit" )
     ;
+  add_new_option();
 }
 
 command::rules_t stg_as_command::validity_rules() const
 {
   return {
-    {[this]() { return func < env->store<tt>().size(); }, "func id is invalid"},
-    {[this]() { return real < env->store<tt>().size(); }, "as id is invalid"}
+    {[this]() { return is_set( "circuit" ) || func < env->store<tt>().size(); }, "func id is invalid"},
+    {[this]() { return is_set( "circuit" ) || real < env->store<tt>().size(); }, "as id is invalid"},
+    has_store_element_if_set<circuit>( *this, env, "circuit" )
   };
 }
 
@@ -56,11 +63,35 @@ bool stg_as_command::execute()
   const auto& tts = env->store<tt>();
   auto& circuits = env->store<circuit>();
 
-  circuits.extend();
+  if ( is_set( "circuit" ) )
+  {
+    const auto circ = rewrite_circuit( circuits.current(), {
+        []( const gate& g, circuit& circ ) {
+          std::string affine;
 
-  circuit circ( tt_num_vars( tts[func] ) + 1u );
-  add_stg_as_other( circ, tts[func], tts[real] );
-  circuits.current() = circ;
+          if ( is_stg( g ) )
+          {
+            const auto& stg = boost::any_cast<stg_tag>( g.type() );
+
+            if ( stg.affine_class.empty() ) return false;
+
+            add_stg_as_other( circ, stg.function, stg.affine_class, get_line_map( g ) );
+            return true;
+          }
+          return false;
+        }
+      } );
+    extend_if_new( circuits );
+    circuits.current() = circ;
+  }
+  else
+  {
+    extend_if_new( circuits );
+
+    circuit circ( tt_num_vars( tts[func] ) + 1u );
+    add_stg_as_other( circ, tts[func], tts[real] );
+    circuits.current() = circ;
+  }
 
   return true;
 }

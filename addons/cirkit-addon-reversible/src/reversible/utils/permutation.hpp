@@ -47,6 +47,7 @@ namespace cirkit
 using permutation_t = std::vector<unsigned>;
 using cycles_t      = std::vector<std::vector<unsigned>>;
 
+permutation_t identity_permutation( unsigned size );
 permutation_t truth_table_to_permutation( const binary_truth_table& spec );
 permutation_t circuit_to_permutation( const circuit& circ );
 cycles_t permutation_to_cycles( const permutation_t& perm, bool sort = true );

@@ -26,6 +26,8 @@
 
 #include "permutation.hpp"
 
+#include <numeric>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -43,6 +45,13 @@ using boost::adaptors::transformed;
 
 namespace cirkit
 {
+
+permutation_t identity_permutation( unsigned size )
+{
+  permutation_t perm( size );
+  std::iota( perm.begin(), perm.end(), 0u );
+  return perm;
+}
 
 permutation_t truth_table_to_permutation( const binary_truth_table& spec )
 {
@@ -106,7 +115,7 @@ std::vector<std::pair<unsigned, unsigned>> permutation_to_transpositions( const 
   auto perm_copy = perm;
   std::vector<std::pair<unsigned, unsigned>> transpositions;
 
-  for ( int i = perm_copy.size() - 1; i > 1; --i )
+  for ( int i = perm_copy.size() - 1; i > 0; --i )
   {
     if ( static_cast<int>( perm_copy[i] ) == i ) { continue; }
 

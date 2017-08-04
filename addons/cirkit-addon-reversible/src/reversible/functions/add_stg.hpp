@@ -45,7 +45,7 @@ namespace cirkit
 /* realize a circuit that represents a single-target gate with control function func,
    but instead of using func, func_real is used (which must be in the same spectral class)
    and the necessary transformations are added */
-void add_stg_as_other( circuit& circ, const tt& func, const tt& func_real );
+void add_stg_as_other( circuit& circ, const tt& func, const tt& func_real, const std::vector<unsigned>& line_map = std::vector<unsigned>() );
 
 }
 

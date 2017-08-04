@@ -36,6 +36,8 @@
 #ifndef CIRCUIT_UTILS_HPP
 #define CIRCUIT_UTILS_HPP
 
+#include <vector>
+
 #include <boost/dynamic_bitset.hpp>
 
 #include <reversible/circuit.hpp>
@@ -48,6 +50,7 @@ unsigned number_of_qubits( const circuit& circ );
 
 bool has_negative_control( const gate& g );
 boost::dynamic_bitset<> get_line_mask( const gate& g, unsigned lines );
+std::vector<unsigned> get_line_map( const gate& g );
 
 }
 

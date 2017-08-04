@@ -76,6 +76,16 @@ boost::dynamic_bitset<> get_line_mask( const gate& g, unsigned lines )
   return mask;
 }
 
+std::vector<unsigned> get_line_map( const gate& g )
+{
+  std::vector<unsigned> line;
+  std::for_each( std::begin( g.controls() ), std::end( g.controls() ),
+                 [&line]( const variable& v ) { line.push_back( v.line() ); } );
+  std::for_each( std::begin( g.targets() ), std::end( g.targets() ),
+                 [&line]( unsigned t ) { line.push_back( t ); } );
+  return line;
+}
+
 }
 
 // Local Variables:
