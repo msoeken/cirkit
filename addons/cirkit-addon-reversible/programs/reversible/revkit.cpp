@@ -56,6 +56,7 @@
 #include <reversible/cli/stores.hpp>
 #include <reversible/cli/commands/adding_lines.hpp>
 #include <reversible/cli/commands/cbs.hpp>
+#include <reversible/cli/commands/circuit_matrix.hpp>
 #include <reversible/cli/commands/circuit_str.hpp>
 #include <reversible/cli/commands/concat.hpp>
 #include <reversible/cli/commands/d1s.hpp>
@@ -76,6 +77,7 @@
 #include <reversible/cli/commands/perm.hpp>
 #include <reversible/cli/commands/pos.hpp>
 #include <reversible/cli/commands/qbs.hpp>
+#include <reversible/cli/commands/qec.hpp>
 #include <reversible/cli/commands/random_circuit.hpp>
 #include <reversible/cli/commands/rec.hpp>
 #include <reversible/cli/commands/reduce_lines.hpp>
@@ -177,6 +179,7 @@ ALICE_BEGIN(revkit)
   cli.set_category( "Verification" );
 
   ADD_COMMAND( is_identity );
+  ADD_COMMAND( qec );
   ADD_COMMAND( rec );
   ADD_COMMAND( revsim );
   ADD_COMMAND( simulate );
@@ -191,6 +194,7 @@ ALICE_BEGIN(revkit)
 
   ADD_COMMAND( abc );
   ADD_COMMAND( bdd );
+  ADD_COMMAND( circuit_matrix );
   ADD_COMMAND( circuit_str );
   ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
