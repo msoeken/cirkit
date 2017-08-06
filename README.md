@@ -17,15 +17,15 @@ The following software is required in order to build CirKit
 
 In *Ubuntu* the packages can be installed with
 
-    sudo apt-get install build-essential git g++ cmake libboost-all-dev libgmp3-dev libxml2-dev zlib1g-dev
+    sudo apt-get install build-essential git g++ cmake libboost-all-dev libgmp3-dev libxml2-dev zlib1g-dev lapack openblas
 
 In *arch* the packages can be installed with
 
-    sudo pacman -S base-devel git g++ cmake boost boost-libs gmp libxml2 zlib
+    sudo pacman -S base-devel git g++ cmake boost boost-libs gmp libxml2 zlib lapack
 
 In *Mac* it's recommended to use [Homebrew](http://brew.sh/) to install the required packages:
 
-    brew install boost cmake gmp readline git
+    brew install boost cmake gmp readline git lapack openblas
 
 ## Build and Run CirKit
 
