@@ -32,6 +32,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 
+#include <classical/xmg/xmg_bitmarks.hpp>
+
 namespace cirkit
 {
 
@@ -85,7 +87,7 @@ void xmg_cover_write_dot_rec( const xmg_graph& xmg, std::ostream& os, xmg_node n
 
   visited.set( n );
 
-  os << boost::format( "%d[shape=box,fillcolor=%s,style=filled];" ) % n % ( xmg.is_marked( n ) ? "red" : "lightgray" ) << std::endl;
+  os << boost::format( "%d[shape=box,fillcolor=%s,style=filled];" ) % n % ( xmg.bitmarks().is_marked( n ) ? "red" : "lightgray" ) << std::endl;
 
   for ( auto child : xmg.cover().cut( n ) )
   {
@@ -107,7 +109,7 @@ void xmg_cover_write_dot( const xmg_graph& xmg, std::ostream& os )
   /* inputs */
   for ( const auto& input : xmg.inputs() )
   {
-    os << format( "%d[shape=house,label=\"%s\"%s];" ) % input.first % input.second % ( xmg.is_marked( input.first ) ? ",fillcolor=red,style=filled" : "" ) << std::endl;
+    os << format( "%d[shape=house,label=\"%s\"%s];" ) % input.first % input.second % ( xmg.bitmarks().is_marked( input.first ) ? ",fillcolor=red,style=filled" : "" ) << std::endl;
   }
 
   /* outputs and nodes */
