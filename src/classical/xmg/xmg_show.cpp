@@ -39,6 +39,7 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
+#include <classical/xmg/xmg_bitmarks.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_template.hpp>
 #include <core/utils/string_utils.hpp>
@@ -121,7 +122,7 @@ public:
       }
     }
 
-    if ( xmg.is_marked( n ) )
+    if ( xmg.bitmarks().is_marked( n ) )
     {
       properties["fillcolor"] = "red";
       properties["style"] = "filled";

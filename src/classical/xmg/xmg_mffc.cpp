@@ -31,6 +31,7 @@
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/range/algorithm.hpp>
 
+#include <classical/xmg/xmg_bitmarks.hpp>
 #include <classical/xmg/xmg_dfs.hpp>
 #include <classical/xmg/xmg_utils.hpp>
 
@@ -167,8 +168,8 @@ unsigned xmg_mffc_node_ref( xmg_graph& xmg, xmg_node n )
 
 void xmg_mffc_node_collect( xmg_graph& xmg, xmg_node n, std::vector<xmg_node>& support )
 {
-  if ( xmg.is_marked( n ) ) return;
-  xmg.mark( n );
+  if ( xmg.bitmarks().is_marked( n ) ) return;
+  xmg.bitmarks().mark( n );
 
   if ( xmg.get_ref( n ) > 0u || xmg.is_input( n ) )
   {
@@ -184,8 +185,8 @@ void xmg_mffc_node_collect( xmg_graph& xmg, xmg_node n, std::vector<xmg_node>& s
 
 void xmg_mffc_mark_recurse( xmg_graph& xmg, xmg_node curr, const std::vector<xmg_node>& support )
 {
-  if ( xmg.is_marked( curr ) ) return;
-  xmg.mark( curr );
+  if ( xmg.bitmarks().is_marked( curr ) ) return;
+  xmg.bitmarks().mark( curr );
   for (const auto& c : xmg.children(curr))
   {
     if ( std::find( support.begin(), support.end(), c.node ) == support.end() )
@@ -195,7 +196,7 @@ void xmg_mffc_mark_recurse( xmg_graph& xmg, xmg_node curr, const std::vector<xmg
     else
     {
       /* last node to mark on this path */
-      xmg.mark( c.node );
+      xmg.bitmarks().mark( c.node );
     }
   }
 }
@@ -210,7 +211,7 @@ unsigned xmg_compute_mffc( xmg_graph& xmg, xmg_node n, std::vector<xmg_node>& su
 
   xmg.init_refs();
   xmg.inc_output_refs();
-  xmg.init_marks();
+  xmg.bitmarks().init_marks( xmg.size() );
 
   const auto size1 = xmg_mffc_node_deref( xmg, n );
   for ( const auto& child : xmg.children( n ) )
@@ -307,7 +308,7 @@ unsigned xmg_mffc_tipsize( const xmg_graph& xmg, const std::map<xmg_node, std::v
 
 void xmg_mffc_mark( xmg_graph& xmg, xmg_node root, const std::vector<xmg_node>& support )
 {
-  xmg.init_marks();
+  xmg.bitmarks().init_marks( xmg.size() );
   xmg_mffc_mark_recurse( xmg, root, support );
 }
 
