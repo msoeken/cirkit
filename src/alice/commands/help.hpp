@@ -39,11 +39,14 @@
 #include <iostream>
 
 #include <boost/format.hpp>
+#include <boost/program_options.hpp>
 
 #include <alice/command.hpp>
 
 namespace alice
 {
+
+using boost::program_options::value;
 
 class help_command : public command
 {
@@ -51,12 +54,60 @@ public:
   help_command( const environment::ptr& env )  : command( env, "Shows help" )
   {
     opts.add_options()
-      ( "detailed,d", "show command descriptions" )
+      ( "detailed,d",                   "show command descriptions" )
+      ( "search,s",   value( &search ), "search for commands in help descriptions" )
       ;
   }
 
 protected:
   bool execute()
+  {
+    if ( is_set( "search" ) )
+    {
+      search_command();
+    }
+    else
+    {
+      print_commands();
+    }
+
+    return true;
+  }
+
+private:
+  void search_command()
+  {
+    for ( const auto& command : env->commands )
+    {
+      std::stringstream ss;
+      ss << command.second->opts;
+
+      auto text = ss.str();
+      auto matched = false;
+      std::string::iterator it;
+      std::string::size_type pos = 0;
+
+      const auto pred = []( char ch1, char ch2 ) {
+        return std::toupper( ch1 ) == std::toupper( ch2 );
+      };
+
+      while ( ( it = std::search( text.begin() + pos, text.end(), search.begin(), search.end(), pred ) ) != text.end() )
+      {
+        matched = true;
+        pos = std::distance( text.begin(), it );
+
+        text.replace( pos, search.size(), "\033[1;32m" + search + "\033[0m" );
+        pos += 15 + search.size();
+      }
+
+      if ( matched )
+      {
+        std::cout << "[i] found match in command \033[1;34m" << command.first << "\033[0m" << std::endl << text << std::endl << std::endl;
+      }
+    }
+  }
+
+  void print_commands()
   {
     for ( auto& p : env->categories )
     {
@@ -89,9 +140,10 @@ protected:
         std::cout << std::endl << std::endl;
       }
     }
-
-    return true;
   }
+
+private:
+  std::string search;
 };
 
 }
