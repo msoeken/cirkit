@@ -48,13 +48,21 @@ namespace cirkit
 class xmg_bitmarks
 {
 public:
-  void init_marks( unsigned size );
-  bool is_marked( xmg_node n ) const;
-  void mark( xmg_node n );
-  void invert();
+  void init_marks( unsigned size, unsigned num_colors = 1u );
+  bool is_marked( xmg_node n, unsigned color = 0u ) const;
+  void mark( xmg_node n, unsigned color = 0u );
+  void unmark( xmg_node n, unsigned color = 0u );
+  void invert( unsigned color = 0u );
+
+  unsigned alloc();
+  void free( unsigned color );
+
+  unsigned num_layers() const;
+  unsigned num_used_layers() const;
 
 private:
-  boost::dynamic_bitset<> marks;
+  std::vector<boost::dynamic_bitset<>> marks;
+  boost::dynamic_bitset<> used;
 }; /* xmg_bitmarks */
 
 }

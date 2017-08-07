@@ -35,28 +35,92 @@ namespace cirkit
  * xmg_bitmarks                                                               *
  ******************************************************************************/
 
-void xmg_bitmarks::init_marks( unsigned size )
+void xmg_bitmarks::init_marks( unsigned size, unsigned num_colors )
 {
-  marks.resize( size );
-  marks.reset();
-}
+  assert( num_colors > 0u );
 
-bool xmg_bitmarks::is_marked( xmg_node n ) const
-{
-  return n < marks.size() && marks[n];
-}
-
-void xmg_bitmarks::mark( xmg_node n )
-{
-  if ( n < marks.size() )
+  marks.resize( num_colors );
+  for ( auto& layer : marks )
   {
-    marks.set( n );
+    layer.resize( size );
+    layer.reset();
+  }
+
+  used.resize( num_colors );
+  used = ~used;
+}
+
+bool xmg_bitmarks::is_marked( xmg_node n, unsigned color ) const
+{
+  assert( marks.size() > color );
+  return n < marks[color].size() && marks[color][n];
+}
+
+void xmg_bitmarks::mark( xmg_node n, unsigned color )
+{
+  assert( marks.size() > color );
+  if ( n < marks[color].size() )
+  {
+    marks[color].set( n );
   }
 }
 
-void xmg_bitmarks::invert()
+void xmg_bitmarks::unmark( xmg_node n, unsigned color )
 {
-  marks = ~marks;
+  assert( marks.size() > color );
+  if ( n < marks[color].size() )
+  {
+    marks[color].reset( n );
+  }
+}
+
+void xmg_bitmarks::invert( unsigned color )
+{
+  assert( marks.size() > color );
+  marks[color] = ~marks[color];
+}
+
+unsigned xmg_bitmarks::alloc()
+{
+  const auto current_size = marks.size();
+
+  if ( used.count() == used.size() )
+  {
+    const auto new_size = (current_size+1u)*2u;
+    marks.resize( new_size );
+    used.resize( new_size );
+    used.set(current_size);
+    return current_size;
+  }
+
+  for ( auto i = 0u; i < used.size(); ++i )
+  {
+    if ( !used[i] )
+    {
+      used.set(i);
+      return i;
+    }
+  }
+
+  assert( false && "unreachable" );
+}
+
+void xmg_bitmarks::free( unsigned color )
+{
+  assert( marks.size() > color );
+  assert( used[color] );
+  marks[color].reset();
+  used.reset(color);
+}
+
+unsigned xmg_bitmarks::num_layers() const
+{
+  return marks.size();
+}
+
+unsigned xmg_bitmarks::num_used_layers() const
+{
+  return used.count();
 }
 
 /******************************************************************************
