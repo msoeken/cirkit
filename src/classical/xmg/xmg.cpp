@@ -28,9 +28,10 @@
 
 #include <range/v3/iterator_range.hpp>
 
-#include <core/utils/range_utils.hpp>
+#include <classical/xmg/xmg_bitmarks.hpp>
 #include <classical/xmg/xmg_cover.hpp>
 #include <classical/xmg/xmg_utils.hpp>
+#include <core/utils/range_utils.hpp>
 
 namespace cirkit
 {
@@ -54,7 +55,8 @@ namespace cirkit
 xmg_graph::xmg_graph( const std::string& name )
   : constant( add_vertex( g ) ),
     _name( name ),
-    _complement( boost::get( boost::edge_complement, g ) )
+    _complement( boost::get( boost::edge_complement, g ) ),
+    _bitmarks( std::make_shared<xmg_bitmarks>() )
 {
   assert( constant == 0 );
 }
@@ -412,23 +414,14 @@ void xmg_graph::inc_output_refs()
   }
 }
 
-void xmg_graph::init_marks()
+xmg_bitmarks& xmg_graph::bitmarks()
 {
-  marks.resize( size() );
-  marks.reset();
+  return *_bitmarks;
 }
 
-bool xmg_graph::is_marked( xmg_node n ) const
+const xmg_bitmarks& xmg_graph::bitmarks() const
 {
-  return n < marks.size() && marks[n];
-}
-
-void xmg_graph::mark( xmg_node n )
-{
-  if ( n < marks.size() )
-  {
-    marks.set( n );
-  }
+  return *_bitmarks;
 }
 
 void xmg_graph::mark_as_modified()
@@ -436,11 +429,6 @@ void xmg_graph::mark_as_modified()
   fanout.make_dirty();
   parentss.make_dirty();
   levels.make_dirty();
-}
-
-void xmg_graph::invert_marks()
-{
-  marks = ~marks;
 }
 
 /******************************************************************************

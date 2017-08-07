@@ -33,6 +33,8 @@
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/topological_sort.hpp>
 
+#include <classical/xmg/xmg_bitmarks.hpp>
+
 namespace cirkit
 {
 
@@ -46,12 +48,12 @@ namespace cirkit
 
 void xmg_compute_coi_rec( xmg_graph& xmg, xmg_node node, std::vector<xmg_node>* primary_inputs, unsigned& count )
 {
-  if ( xmg.is_marked( node ) )
+  if ( xmg.bitmarks().is_marked( node ) )
   {
     return;
   }
 
-  xmg.mark( node );
+  xmg.bitmarks().mark( node );
   ++count;
 
   if ( xmg.is_input( node ) )
@@ -76,7 +78,7 @@ void xmg_compute_coi_rec( xmg_graph& xmg, xmg_node node, std::vector<xmg_node>* 
 
 unsigned xmg_compute_coi( xmg_graph& xmg, xmg_node start_node, std::vector<xmg_node>* primary_inputs )
 {
-  xmg.init_marks();
+  xmg.bitmarks().init_marks( xmg.size() );
   auto count = 0u;
 
   xmg_compute_coi_rec( xmg, start_node, primary_inputs, count );
@@ -105,7 +107,7 @@ std::vector<xmg_node> xmg_coi_topological_nodes( xmg_graph& xmg )
                     } );
 
   /* for DFS */
-  xmg.init_marks();
+  xmg.bitmarks().init_marks( xmg.size() );
   std::vector<xmg_node> result;
 
   for ( const auto& p : output_cois )
@@ -124,8 +126,8 @@ std::vector<xmg_node> xmg_coi_topological_nodes( xmg_graph& xmg )
 
     for ( const auto& n : nodes )
     {
-      if ( xmg.is_marked( n ) ) { continue; }
-      xmg.mark( n );
+      if ( xmg.bitmarks().is_marked( n ) ) { continue; }
+      xmg.bitmarks().mark( n );
 
       result.push_back( n );
     }
