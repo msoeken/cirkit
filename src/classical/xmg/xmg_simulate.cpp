@@ -105,6 +105,35 @@ tt xmg_tt_simulator::maj_op( const xmg_node& node, const tt& v1, const tt& v2, c
 }
 
 /******************************************************************************
+ * BDD simulation                                                             *
+ ******************************************************************************/
+
+BDD xmg_bdd_simulator::get_input( const xmg_node& node, const xmg_graph& xmg ) const
+{
+  return mgr.bddVar( xmg.input_index( node ) );
+}
+
+BDD xmg_bdd_simulator::get_constant() const
+{
+  return mgr.bddZero();
+}
+
+BDD xmg_bdd_simulator::invert( const BDD& v ) const
+{
+  return !v;
+}
+
+BDD xmg_bdd_simulator::xor_op( const xmg_node& node, const BDD& v1, const BDD& v2 ) const
+{
+  return v1.Xor( v2 );
+}
+
+BDD xmg_bdd_simulator::maj_op( const xmg_node& node, const BDD& v1, const BDD& v2, const BDD& v3 ) const
+{
+  return ( v1 & v2 ) | ( v1 & v3 ) | ( v2 & v3 );
+}
+
+/******************************************************************************
  * Utility functions for simulation                                           *
  ******************************************************************************/
 
