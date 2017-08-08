@@ -37,7 +37,9 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
+#include <boost/algorithm/string/split.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
@@ -83,26 +85,41 @@ private:
       ss << command.second->opts;
 
       auto text = ss.str();
-      auto matched = false;
       std::string::iterator it;
       std::string::size_type pos = 0;
+
+      /* split text */
+      std::vector<std::string> lines;
+      boost::split( lines, text, boost::is_any_of( "\n" ), boost::algorithm::token_compress_on );
 
       const auto pred = []( char ch1, char ch2 ) {
         return std::toupper( ch1 ) == std::toupper( ch2 );
       };
 
-      while ( ( it = std::search( text.begin() + pos, text.end(), search.begin(), search.end(), pred ) ) != text.end() )
+      std::string output;
+      for ( auto& line : lines )
       {
-        matched = true;
-        pos = std::distance( text.begin(), it );
+        auto matched = false;
+        while ( ( it = std::search( line.begin() + pos, line.end(), search.begin(), search.end(), pred ) ) != line.end() )
+        {
+          matched = true;
+          pos = std::distance( line.begin(), it );
 
-        text.replace( pos, search.size(), "\033[1;32m" + search + "\033[0m" );
-        pos += 15 + search.size();
+          std::string found( it, it + search.size() );
+
+          line.replace( pos, search.size(), "\033[1;32m" + found + "\033[0m" );
+          pos += 15 + search.size();
+        }
+
+        if ( matched )
+        {
+          output += line + "\n";
+        }
       }
 
-      if ( matched )
+      if ( !output.empty() )
       {
-        std::cout << "[i] found match in command \033[1;34m" << command.first << "\033[0m" << std::endl << text << std::endl << std::endl;
+        std::cout << "[i] found match in command \033[1;34m" << command.first << "\033[0m" << std::endl << output << std::endl << std::endl;
       }
     }
   }
