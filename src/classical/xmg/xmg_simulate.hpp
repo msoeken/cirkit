@@ -47,6 +47,8 @@
 #include <classical/xmg/xmg.hpp>
 #include <classical/xmg/xmg_dfs.hpp>
 
+#include <cuddObj.hh>
+
 namespace cirkit
 {
 
@@ -105,6 +107,22 @@ public:
   tt invert( const tt& v ) const;
   tt xor_op( const xmg_node& node, const tt& v1, const tt& v2 ) const;
   tt maj_op( const xmg_node& node, const tt& v1, const tt& v2, const tt& v3 ) const;
+};
+
+class xmg_bdd_simulator : public xmg_simulator<BDD>
+{
+public:
+  xmg_bdd_simulator() : mgr( Cudd() ) {}
+  xmg_bdd_simulator( const Cudd& mgr ) : mgr( mgr ) {}
+
+  BDD get_input( const xmg_node& node, const xmg_graph& xmg ) const;
+  BDD get_constant() const;
+  BDD invert( const BDD& v ) const;
+  BDD xor_op( const xmg_node& node, const BDD& v1, const BDD& v2 ) const;
+  BDD maj_op( const xmg_node& node, const BDD& v1, const BDD& v2, const BDD& v3 ) const;
+
+protected:
+  Cudd mgr;
 };
 
 template<typename T>
