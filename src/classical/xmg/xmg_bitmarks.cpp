@@ -65,6 +65,18 @@ void xmg_bitmarks::mark( xmg_node n, unsigned color )
   }
 }
 
+void xmg_bitmarks::resize_marks( xmg_node n )
+{
+  assert( marks.size() > 0u );
+  if ( n >= marks[0u].size() )
+  {
+    for ( auto i = 0u; i < num_layers(); ++i )
+    {
+      marks[i].resize( n+1 );
+    }
+  }
+}
+
 void xmg_bitmarks::unmark( xmg_node n, unsigned color )
 {
   assert( marks.size() > color );
@@ -121,6 +133,38 @@ unsigned xmg_bitmarks::num_layers() const
 unsigned xmg_bitmarks::num_used_layers() const
 {
   return used.count();
+}
+
+void xmg_bitmarks::reset( unsigned color )
+{
+  assert( marks.size() > color );
+  marks[color].reset();
+}
+
+unsigned xmg_bitmarks::count( unsigned color ) const
+{
+  assert( marks.size() > color );
+  return marks[color].count();
+}
+
+unsigned xmg_bitmarks::size() const
+{
+  /* all layers are supposed to have the same size */
+  assert( marks.size() > 0u );
+  return marks[0u].size();
+}
+
+void xmg_bitmarks::move( unsigned dst, unsigned src )
+{
+  assert( marks.size() > dst );
+  assert( marks.size() > src );
+  assert( marks[dst].size() == marks[src].size() );
+  marks[dst] |= marks[src];
+}
+
+boost::dynamic_bitset<> xmg_bitmarks::get( unsigned color ) const
+{
+  return marks[color];
 }
 
 /******************************************************************************
