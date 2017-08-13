@@ -51,15 +51,22 @@ public:
   void init_marks( unsigned size, unsigned num_colors = 1u );
   bool is_marked( xmg_node n, unsigned color = 0u ) const;
   void mark( xmg_node n, unsigned color = 0u );
+  void resize_marks( xmg_node n );
   void unmark( xmg_node n, unsigned color = 0u );
   void invert( unsigned color = 0u );
-
+  void reset( unsigned color = 0u );
+  unsigned count( unsigned color = 0u ) const;
+  unsigned size() const;
+  void move( unsigned dst, unsigned src );
+  
   unsigned alloc();
   void free( unsigned color );
 
   unsigned num_layers() const;
   unsigned num_used_layers() const;
 
+  boost::dynamic_bitset<> get( unsigned color = 0u ) const;
+  
 private:
   std::vector<boost::dynamic_bitset<>> marks;
   boost::dynamic_bitset<> used;
