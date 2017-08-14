@@ -26,6 +26,8 @@
 
 #include "xmg_rewrite.hpp"
 
+#include <classical/xmg/xmg_bitmarks.hpp>
+
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
 
@@ -40,14 +42,35 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-std::map<xmg_node, xmg_function> init_visited_table( const xmg_graph& xmg, xmg_graph& xmg_new )
+void copy_bitmarks( const xmg_graph& xmg, xmg_node node, xmg_graph& xmg_new, xmg_node node_new )
+{
+  for ( auto i = 0u; i < xmg.bitmarks().num_layers(); ++i )
+  {
+    if ( xmg.bitmarks().is_marked(node, i) )
+    {
+      xmg_new.bitmarks().mark(node_new, i);
+    }
+  }
+}
+
+std::map<xmg_node, xmg_function> init_visited_table( const xmg_graph& xmg, xmg_graph& xmg_new, bool keep_bitmarks )
 {
   std::map<xmg_node, xmg_function> old_to_new;
-
-  old_to_new[0] = xmg_new.get_constant( false );
+  old_to_new[0u] = xmg_new.get_constant( false );
   for ( const auto& pi : xmg.inputs() )
   {
     old_to_new[pi.first] = xmg_new.create_pi( pi.second );
+  }
+
+  if ( keep_bitmarks && xmg.bitmarks().num_layers() > 0u )
+  {
+    xmg_new.bitmarks().resize_marks( xmg.inputs().size() );
+    copy_bitmarks( xmg, 0u, xmg_new, 0u );
+
+    for ( const auto& pi : xmg.inputs() )
+    {
+      copy_bitmarks( xmg, pi.first, xmg_new, old_to_new[pi.first].node );
+    }
   }
 
   return old_to_new;
@@ -58,7 +81,8 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
                                        const maj_rewrite_func_t& on_maj,
                                        const xor_rewrite_func_t& on_xor,
                                        std::map<xmg_node, xmg_function>& old_to_new,
-                                       const xmg_substitutes_map_t& substitutes )
+                                       const xmg_substitutes_map_t& substitutes,
+                                       bool keep_bitmarks )
 {
   /* reroute node if it is in substutitutes */
   auto complement = false;
@@ -81,16 +105,16 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
   {
     const auto c = xmg.children( node );
     f = on_maj( xmg_new,
-                xmg_rewrite_top_down_rec( xmg, c[0].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[0].complemented,
-                xmg_rewrite_top_down_rec( xmg, c[1].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[1].complemented,
-                xmg_rewrite_top_down_rec( xmg, c[2].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[2].complemented );
+                xmg_rewrite_top_down_rec( xmg, c[0].node, xmg_new, on_maj, on_xor, old_to_new, substitutes, keep_bitmarks ) ^ c[0].complemented,
+                xmg_rewrite_top_down_rec( xmg, c[1].node, xmg_new, on_maj, on_xor, old_to_new, substitutes, keep_bitmarks ) ^ c[1].complemented,
+                xmg_rewrite_top_down_rec( xmg, c[2].node, xmg_new, on_maj, on_xor, old_to_new, substitutes, keep_bitmarks ) ^ c[2].complemented );
   }
   else if ( xmg.is_xor( node ) )
   {
     const auto c = xmg.children( node );
     f = on_xor( xmg_new,
-                xmg_rewrite_top_down_rec( xmg, c[0].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[0].complemented,
-                xmg_rewrite_top_down_rec( xmg, c[1].node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ c[1].complemented );
+                xmg_rewrite_top_down_rec( xmg, c[0].node, xmg_new, on_maj, on_xor, old_to_new, substitutes, keep_bitmarks ) ^ c[0].complemented,
+                xmg_rewrite_top_down_rec( xmg, c[1].node, xmg_new, on_maj, on_xor, old_to_new, substitutes, keep_bitmarks ) ^ c[1].complemented );
   }
   else
   {
@@ -100,6 +124,13 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
 
   f.complemented = ( f.complemented != complement ); /* Boolean XOR */
   old_to_new.insert( {node, f} );
+
+  if ( keep_bitmarks )
+  {
+    xmg_new.bitmarks().resize_marks(f.node);
+    copy_bitmarks( xmg, node, xmg_new, f.node );
+  }
+
   return f;
 }
 
@@ -124,9 +155,10 @@ xmg_graph xmg_rewrite_top_down( const xmg_graph& xmg,
                                 const properties::ptr& statistics )
 {
   /* settings */
-  const auto prefill     = get( settings, "prefill",     prefill_func_t() );
-  const auto init        = get( settings, "init",        xmg_init_func_t() );
-  const auto substitutes = get( settings, "substitutes", xmg_substitutes_map_t() );
+  const auto prefill       = get( settings, "prefill",       prefill_func_t() );
+  const auto init          = get( settings, "init",          xmg_init_func_t() );
+  const auto substitutes   = get( settings, "substitutes",   xmg_substitutes_map_t() );
+  const auto keep_bitmarks = get( settings, "keep_bitmarks", true );
 
   /* statistics */
   properties_timer t( statistics );
@@ -139,8 +171,13 @@ xmg_graph xmg_rewrite_top_down( const xmg_graph& xmg,
     init( xmg_new );
   }
 
+  if ( keep_bitmarks && xmg.bitmarks().num_layers() > 0u )
+  {
+    xmg_new.bitmarks().init_marks( 0u, xmg.bitmarks().num_layers() );
+  }
+
   /* create constant and PIs */
-  auto old_to_new = init_visited_table( xmg, xmg_new );
+  auto old_to_new = init_visited_table( xmg, xmg_new, keep_bitmarks );
 
   /* prefill */
   if ( prefill )
@@ -151,7 +188,7 @@ xmg_graph xmg_rewrite_top_down( const xmg_graph& xmg,
   /* map nodes */
   for ( const auto& po : xmg.outputs() )
   {
-    xmg_new.create_po( xmg_rewrite_top_down_rec( xmg, po.first.node, xmg_new, on_maj, on_xor, old_to_new, substitutes ) ^ po.first.complemented, po.second );
+    xmg_new.create_po( xmg_rewrite_top_down_rec( xmg, po.first.node, xmg_new, on_maj, on_xor, old_to_new, substitutes, keep_bitmarks ) ^ po.first.complemented, po.second );
   }
 
   return xmg_new;
@@ -166,7 +203,8 @@ std::vector<xmg_function> xmg_rewrite_top_down_inplace( xmg_graph& dest,
                                                         const properties::ptr& statistics )
 {
   /* settings */
-  const auto prefill = get( settings, "prefill", prefill_func_t() );
+  const auto prefill =       get( settings, "prefill",       prefill_func_t() );
+  const auto keep_bitmarks = get( settings, "keep_bitmarks", true );
 
   /* statistics */
   properties_timer t( statistics );
@@ -190,7 +228,7 @@ std::vector<xmg_function> xmg_rewrite_top_down_inplace( xmg_graph& dest,
   std::vector<xmg_function> outputs;
   for ( const auto& po : xmg.outputs() )
   {
-    outputs.push_back( xmg_rewrite_top_down_rec( xmg, po.first.node, dest, on_maj, on_xor, old_to_new, boost::none ) ^ po.first.complemented );
+    outputs.push_back( xmg_rewrite_top_down_rec( xmg, po.first.node, dest, on_maj, on_xor, old_to_new, boost::none, keep_bitmarks ) ^ po.first.complemented );
   }
 
   return outputs;
@@ -203,7 +241,8 @@ xmg_graph xmg_rewrite_bottom_up( const xmg_graph& xmg,
                                  const properties::ptr& statistics )
 {
   /* settings */
-  const auto init    = get( settings, "init",    xmg_init_func_t() );
+  const auto init          = get( settings, "init",          xmg_init_func_t() );
+  const auto keep_bitmarks = get( settings, "keep_bitmarks", true );
 
   /* statistics */
   properties_timer t( statistics );
@@ -216,8 +255,13 @@ xmg_graph xmg_rewrite_bottom_up( const xmg_graph& xmg,
     init( xmg_new );
   }
 
+  if ( keep_bitmarks && xmg.bitmarks().num_layers() > 0u )
+  {
+    xmg_new.bitmarks().init_marks( 0u, xmg.bitmarks().num_layers() );
+  }
+
   /* create constant and PIs */
-  auto old_to_new = init_visited_table( xmg, xmg_new );
+  auto old_to_new = init_visited_table( xmg, xmg_new, keep_bitmarks );
 
   /* map nodes */
   for ( auto node : xmg.topological_nodes() )
