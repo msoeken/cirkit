@@ -125,7 +125,7 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
   f.complemented = ( f.complemented != complement ); /* Boolean XOR */
   old_to_new.insert( {node, f} );
 
-  if ( keep_bitmarks )
+  if ( keep_bitmarks && xmg.bitmarks().num_layers() > 0u )
   {
     xmg_new.bitmarks().resize_marks(f.node);
     copy_bitmarks( xmg, node, xmg_new, f.node );
