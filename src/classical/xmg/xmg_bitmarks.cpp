@@ -175,6 +175,15 @@ boost::dynamic_bitset<> xmg_bitmarks::get( unsigned color ) const
  * public functions                                                           *
  ******************************************************************************/
 
+void xmg_mark_inner_nodes( xmg_graph& xmg, const std::vector<xmg_node>& nodes, unsigned color )
+{
+  for ( const auto& node : nodes )
+  {
+    if ( xmg.is_input(node) || xmg.fanout_count(node) == 0u ) continue;
+    xmg.bitmarks().mark( node, color );
+  }
+}
+
 }
 
 // Local Variables:

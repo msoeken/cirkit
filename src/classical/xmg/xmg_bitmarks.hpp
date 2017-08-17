@@ -72,6 +72,9 @@ private:
   boost::dynamic_bitset<> used;
 }; /* xmg_bitmarks */
 
+
+void xmg_mark_inner_nodes( xmg_graph& xmg, const std::vector<xmg_node>& nodes, unsigned color );
+
 }
 
 #endif
