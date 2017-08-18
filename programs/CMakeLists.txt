@@ -36,7 +36,10 @@ add_cirkit_program(
     core/abc_cli.cpp
   USE
     ${abc_LIBRARIES}
-    lscli
+    ${Boost_SYSTEM_LIBRARIES}
+    ${Boost_FILESYSTEM_LIBRARIES}
+    ${Boost_PROGRAM_OPTIONS_LIBRARIES}
+    ${READLINE_LIBRARY}
   INCLUDE
    PUBLIC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc/src
 )
