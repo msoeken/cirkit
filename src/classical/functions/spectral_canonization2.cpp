@@ -280,6 +280,16 @@ private:
     return map;
   }
 
+  unsigned transformation_costs( const std::vector<trans_t>& transforms )
+  {
+    auto costs = 0u;
+    for ( const auto& t : transforms )
+    {
+      costs += ( t.kind == 1 ) ? 3u : 1u;
+    }
+    return costs;
+  }
+
   void closer( spectrum& lspec )
   {
     for ( auto i = 0u; i < lspec.size(); ++i )
@@ -298,6 +308,11 @@ private:
       {
         return;
       }
+    }
+
+    if ( transformation_costs( transforms ) < transformation_costs( best_transforms ) )
+    {
+      update_best( lspec );
     }
   }
 
