@@ -94,15 +94,13 @@ void xmg_bitmarks::invert( unsigned color )
 
 unsigned xmg_bitmarks::alloc()
 {
-  const auto current_size = marks.size();
-
   if ( used.count() == used.size() )
   {
-    const auto new_size = (current_size+1u)*2u;
-    marks.resize( new_size );
-    used.resize( new_size );
-    used.set(current_size);
-    return current_size;
+    const auto nlayers = num_layers();
+    marks.resize( nlayers + 1u );
+    used.resize( nlayers + 1u );
+    used.set( nlayers );
+    return nlayers;
   }
 
   for ( auto i = 0u; i < used.size(); ++i )
@@ -123,6 +121,16 @@ void xmg_bitmarks::free( unsigned color )
   assert( used[color] );
   marks[color].reset();
   used.reset(color);
+}
+
+boost::dynamic_bitset<> xmg_bitmarks::get_used() const
+{
+  return used;
+}
+
+void xmg_bitmarks::set_used( const boost::dynamic_bitset<>& used_ )
+{
+  used = used_;
 }
 
 unsigned xmg_bitmarks::num_layers() const

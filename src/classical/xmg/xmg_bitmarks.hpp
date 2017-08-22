@@ -66,6 +66,9 @@ public:
   unsigned num_used_layers() const;
 
   boost::dynamic_bitset<> get( unsigned color = 0u ) const;
+
+  boost::dynamic_bitset<> get_used() const;
+  void set_used( const boost::dynamic_bitset<>& used_ );
   
 private:
   std::vector<boost::dynamic_bitset<>> marks;
