@@ -53,6 +53,25 @@ trans_t::trans_t( uint16_t kind, uint16_t var1, uint16_t var2 )
 {
 }
 
+std::ostream& operator<<( std::ostream& os, const trans_t& t )
+{
+  switch ( t.kind )
+  {
+  case 1:
+    return os << boost::format( "x%d <-> x%d" ) % t.var1 % t.var2;
+  case 2:
+    return os << boost::format( "!x%d" ) % t.var1;
+  case 3:
+    return os << boost::format( "neg" );
+  case 4:
+    return os << boost::format( "x%d XOR x%d" ) % t.var1 % t.var2;
+  case 5:
+    return os << boost::format( "XOR x%d" ) % t.var1;
+  }
+
+  return os;
+}
+
 /******************************************************************************
  * spectrum                                                                   *
  ******************************************************************************/
