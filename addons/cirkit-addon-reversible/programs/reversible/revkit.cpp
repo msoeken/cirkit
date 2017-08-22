@@ -32,79 +32,73 @@
 
 #include <alice/alice.hpp>
 
-#include <core/cli/stores.hpp>
-#include <core/cli/commands/bdd.hpp>
+#include <cli/stores.hpp>
+#include <cli/reversible_stores.hpp>
+#include <cli/commands/abc.hpp>
+#include <cli/commands/adding_lines.hpp>
+#include <cli/commands/bdd.hpp>
+#include <cli/commands/cbs.hpp>
+#include <cli/commands/circuit_matrix.hpp>
+#include <cli/commands/circuit_str.hpp>
+#include <cli/commands/concat.hpp>
+#include <cli/commands/cone.hpp>
+#include <cli/commands/d1s.hpp>
+#include <cli/commands/dbs.hpp>
+#include <cli/commands/dxs.hpp>
+#include <cli/commands/embed.hpp>
+#include <cli/commands/enumerate.hpp>
+#include <cli/commands/esop.hpp>
+#include <cli/commands/esopbs.hpp>
+#include <cli/commands/exorcism.hpp>
+#include <cli/commands/expr.hpp>
+#include <cli/commands/exs.hpp>
+#include <cli/commands/filter.hpp>
+#include <cli/commands/gen_reciprocal.hpp>
+#include <cli/commands/hdbs.hpp>
+#include <cli/commands/is_identity.hpp>
+#include <cli/commands/lhrs.hpp>
+#include <cli/commands/maslov234.hpp>
+#include <cli/commands/mitm.hpp>
+#include <cli/commands/nct.hpp>
+#include <cli/commands/perm.hpp>
+#include <cli/commands/pos.hpp>
+#include <cli/commands/print_io.hpp>
+#include <cli/commands/propagate.hpp>
+#include <cli/commands/qbs.hpp>
+#include <cli/commands/qec.hpp>
+#include <cli/commands/random_circuit.hpp>
+#include <cli/commands/rec.hpp>
+#include <cli/commands/reduce_lines.hpp>
+#include <cli/commands/required_lines.hpp>
+#include <cli/commands/reverse.hpp>
+#include <cli/commands/revgen.hpp>
+#include <cli/commands/revsim.hpp>
+#include <cli/commands/revsimp.hpp>
+#include <cli/commands/rms.hpp>
+#include <cli/commands/simulate.hpp>
+#include <cli/commands/spectral.hpp>
+#include <cli/commands/stg4.hpp>
+#include <cli/commands/stg_as.hpp>
+#include <cli/commands/tbs.hpp>
+#include <cli/commands/tof.hpp>
+#include <cli/commands/tpar.hpp>
+#include <cli/commands/tt.hpp>
+#include <cli/commands/unique_names.hpp>
+#include <cli/commands/xmglut.hpp>
+
 #include <core/utils/bdd_utils.hpp>
 #include <classical/aig.hpp>
-#include <classical/cli/stores.hpp>
-#include <classical/cli/commands/expr.hpp>
-#include <classical/cli/commands/abc.hpp>
-#include <classical/cli/commands/cone.hpp>
-#include <classical/cli/commands/esop.hpp>
-#include <classical/cli/commands/exorcism.hpp>
-#include <classical/cli/commands/print_io.hpp>
-#include <classical/cli/commands/propagate.hpp>
-#include <classical/cli/commands/simulate.hpp>
-#include <classical/cli/commands/spectral.hpp>
-#include <classical/cli/commands/tt.hpp>
 #include <classical/utils/expression_parser.hpp>
 #include <classical/utils/truth_table_utils.hpp>
-#include <formal/cli/commands/xmglut.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/rcbdd.hpp>
 #include <reversible/truth_table.hpp>
-#include <reversible/cli/stores.hpp>
-#include <reversible/cli/commands/adding_lines.hpp>
-#include <reversible/cli/commands/cbs.hpp>
-#include <reversible/cli/commands/circuit_matrix.hpp>
-#include <reversible/cli/commands/circuit_str.hpp>
-#include <reversible/cli/commands/concat.hpp>
-#include <reversible/cli/commands/d1s.hpp>
-#include <reversible/cli/commands/dbs.hpp>
-#include <reversible/cli/commands/dxs.hpp>
-#include <reversible/cli/commands/embed.hpp>
-#include <reversible/cli/commands/enumerate.hpp>
-#include <reversible/cli/commands/esopbs.hpp>
-#include <reversible/cli/commands/exs.hpp>
-#include <reversible/cli/commands/filter.hpp>
-#include <reversible/cli/commands/gen_reciprocal.hpp>
-#include <reversible/cli/commands/hdbs.hpp>
-#include <reversible/cli/commands/is_identity.hpp>
-#include <reversible/cli/commands/lhrs.hpp>
-#include <reversible/cli/commands/maslov234.hpp>
-#include <reversible/cli/commands/mitm.hpp>
-#include <reversible/cli/commands/nct.hpp>
-#include <reversible/cli/commands/perm.hpp>
-#include <reversible/cli/commands/pos.hpp>
-#include <reversible/cli/commands/qbs.hpp>
-#include <reversible/cli/commands/qec.hpp>
-#include <reversible/cli/commands/random_circuit.hpp>
-#include <reversible/cli/commands/rec.hpp>
-#include <reversible/cli/commands/reduce_lines.hpp>
-#include <reversible/cli/commands/required_lines.hpp>
-#include <reversible/cli/commands/reverse.hpp>
-#include <reversible/cli/commands/revgen.hpp>
-#include <reversible/cli/commands/revsim.hpp>
-#include <reversible/cli/commands/revsimp.hpp>
-#include <reversible/cli/commands/rms.hpp>
-#include <reversible/cli/commands/stg4.hpp>
-#include <reversible/cli/commands/stg_as.hpp>
-#include <reversible/cli/commands/tbs.hpp>
-#include <reversible/cli/commands/tof.hpp>
-#include <reversible/cli/commands/tpar.hpp>
-#include <reversible/cli/commands/unique_names.hpp>
-
-#ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
-#include <reversible/cli/commands/commands.hpp>
-#endif
 
 using namespace cirkit;
 
-#define STORES circuit, binary_truth_table, tt, expression_t::ptr, bdd_function_t, rcbdd, aig_graph, xmg_graph
-
 ALICE_BEGIN(revkit)
 
-  cli_main<STORES> cli( "revkit" );
+  cli_main<circuit, binary_truth_table, tt, expression_t::ptr, bdd_function_t, rcbdd, aig_graph, xmg_graph> cli( "revkit" );
 
   cli.set_category ("I/O" );
 
@@ -203,10 +197,6 @@ ALICE_BEGIN(revkit)
   ADD_COMMAND( random_circuit );
   ADD_COMMAND( spectral );
   ADD_COMMAND( tt );
-
-#ifdef USE_EXPERIMENTAL_REVERSIBLE_COMMANDS
-  EXPERIMENTAL_REVERSIBLE_COMMANDS
-#endif
 
 ALICE_END
 

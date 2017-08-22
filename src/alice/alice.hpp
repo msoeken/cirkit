@@ -37,6 +37,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -567,27 +568,34 @@ public:
 
           for ( const auto& kp : kwargs )
           {
-            auto key = kp.first.ptr();
-            auto value = kp.second.ptr();
+            // get the key as string
+            const auto skey = kp.first.cast<std::string>();
+            const auto value = kp.second;
 
-            const auto skey = std::string( PyUnicode_AsUTF8( key ) );
-
-            if ( PyBool_Check( value ) )
-            {
-              if ( value == Py_True )
+            // TODO cast float to string?
+            try {
+              const auto bv = value.cast<bool>();
+              std::cout << "BOOL type" << std::endl;
+              if ( bv )
               {
                 pargs.push_back( "--" + skey );
               }
             }
-            else if ( PyLong_Check( value ) )
+            catch ( const py::cast_error& )
             {
-              pargs.push_back( "--" + skey );
-              pargs.push_back( std::to_string( PyLong_AsLong( value ) ) );
-            }
-            else
-            {
-              pargs.push_back( "--" + skey );
-              pargs.push_back( std::string( PyUnicode_AsUTF8( value ) ) );
+              try
+              {
+                const auto iv = value.cast<int>();
+                std::cout << "INT type" << std::endl;
+                pargs.push_back( "--" + skey );
+                pargs.push_back( std::to_string( iv ) );
+              }
+              catch ( const py::cast_error& )
+              {
+                std::cout << "STR type" << std::endl;
+                pargs.push_back( "--" + skey );
+                pargs.push_back( value.cast<std::string>() );
+              }
             }
           }
           p.second->run( pargs );
@@ -602,30 +610,6 @@ public:
           {
             return py::none();
           }
-
-//             log_var_python_visitor vis;
-
-//             /* Python API */
-// #ifdef ALICE_PYTHON
-//             const auto it = log->find( "__repr__" );
-//             if ( it != log->end() )
-//             {
-//               std::string repr = boost::get<std::string>( it->second );
-//               std::string repr_html;
-//               const auto it2 = log->find( "_repr_html_" );
-//               if ( it2 != log->end() )
-//               {
-//                 repr_html = boost::get<std::string>( it2->second );
-//               }
-//               return py::cast( python_representer( repr, repr_html ) );
-//             }
-// #endif
-
-//             for ( const auto& lp : *log )
-//             {
-//               const auto value = boost::apply_visitor( vis, lp.second );
-//               dict[py::str( lp.first )] = value;
-//             }
         }, p.second->caption().c_str() );
     }
 

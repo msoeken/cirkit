@@ -1,7 +1,45 @@
 RevKit
 ======
 
-This page lists some RevKit specific documentation.
+This page lists some RevKit specific documentation.  Many parts of
+this documentation were contributed from `Aldo
+Sayeg <https://github.com/choforito84>`_.
+
+Input and output
+----------------
+
+In general, in order to create an instance of a data structure in
+RevKit we need to load the data structure from a file in a format that
+describes the data structure. Expressions and truth tables are the
+only structure that can be created inside of Revkit by using the
+``expr`` and the ``tt`` command, respectively.
+
+The data structures can often also be written to the same file
+format. The following table lists all of the data structures' read and
+write commands used in RevKit along with a short decription.
+
++--------------------------+---------+---------------------+----------------------+-------------------------------------------------------------------------------------------------------+
+| Data structure           | Format  | Read command        | Write command        | Description                                                                                           |
++==========================+=========+=====================+======================+=======================================================================================================+
+| Reversible circuits      | REAL    | ``read_real``       | ``write_real``       | Reversible circuit representation using different gates as basis. Part of RevLib_ supported formats_. |
++--------------------------+---------+---------------------+----------------------+-------------------------------------------------------------------------------------------------------+
+| Reversible specification | SPEC    | ``read_spec``       | ``write_spec``       | Truth table of a reversible circuit. Part of RevLib_ supported formats_.                              |
++--------------------------+---------+---------------------+----------------------+-------------------------------------------------------------------------------------------------------+
+| Binary decision diagram  | PLA     | ``read_pla``        | ``write_pla``        | Sum of products representation of a Boolean function.                                                 |
++--------------------------+---------+---------------------+----------------------+-------------------------------------------------------------------------------------------------------+
+| AND-inverter graph       | AIGER   | ``read_aiger``      | ``write_aiger``      | Format developed for the AIGER_ utilities.                                                            |
++--------------------------+---------+---------------------+----------------------+-------------------------------------------------------------------------------------------------------+
+| AND-inverter graph       | Verilog | ``read_verilog -a`` | ``write_verilog -a`` | Parses whatever can be read with ABC_'s ``%read`` command.                                            |
++--------------------------+---------+---------------------+----------------------+-------------------------------------------------------------------------------------------------------+
+| AND-inverter graph       | Bench   | ``read_bench``      |                      | Format developed for traditional circuits as part of ABC_.                                            |
++--------------------------+---------+---------------------+----------------------+-------------------------------------------------------------------------------------------------------+
+| XOR-majority graph       | Verilog | ``read_verilog -x`` | ``write_verilog -x`` | Simple single-statement assignment Verilog file.                                                      |
++--------------------------+---------+---------------------+----------------------+-------------------------------------------------------------------------------------------------------+
+
+.. _RevLib: http://www.revlib.org/
+.. _formats: http://www.informatik.uni-bremen.de/rev_lib/doc/docu/revlib_2_0_1.pdf
+.. _AIGER: http://fmv.jku.at/aiger/
+.. _ABC: https://people.eecs.berkeley.edu/~alanmi/abc/abc.htm
 
 Adding a command to RevKit
 --------------------------

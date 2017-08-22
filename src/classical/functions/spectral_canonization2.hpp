@@ -38,6 +38,7 @@
 #define SPECTRAL_CANONIZATION2_HPP
 
 #include <cstdint>
+#include <iostream>
 #include <vector>
 
 #include <classical/utils/truth_table_utils.hpp>
@@ -61,6 +62,8 @@ struct trans_t
     uint16_t data;
   };
 };
+
+std::ostream& operator<<( std::ostream& os, const trans_t& t );
 
 class spectrum
 {

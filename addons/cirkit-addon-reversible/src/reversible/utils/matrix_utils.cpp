@@ -30,11 +30,13 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/format.hpp>
 
 #include <xtensor/xio.hpp>
 #include <xtensor-blas/xlinalg.hpp>
 
 #include <core/utils/bitset_utils.hpp>
+#include <core/utils/terminal.hpp>
 #include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
@@ -109,10 +111,13 @@ xt::xarray<complex_t> identity_padding( const xt::xarray<complex_t>& matrix, uns
  * Public functions                                                           *
  ******************************************************************************/
 
-xt::xarray<complex_t> matrix_from_clifford_t_circuit( const circuit& circ )
+xt::xarray<complex_t> matrix_from_clifford_t_circuit( const circuit& circ, bool progress )
 {
   xt::xarray<complex_t> matrix_X = get_2by2_matrix( 0.0, 1.0, 1.0, 0.0 );
   xt::xarray<complex_t> matrix_H = 1.0 / sqrt( 2.0 ) * get_2by2_matrix( 1.0, 1.0, 1.0, -1.0 );
+  xt::xarray<complex_t> matrix_Z = get_2by2_matrix( 1.0, 0.0, 0.0, -1.0 );
+  xt::xarray<complex_t> matrix_S = get_2by2_matrix( 1.0, 0.0, 0.0, 1i );
+  xt::xarray<complex_t> matrix_Sdag = get_2by2_matrix( 1.0, 0.0, 0.0, -1i );
   xt::xarray<complex_t> matrix_T = get_2by2_matrix( 1.0, 0.0, 0.0, exp( 1i * M_PI / 4.0 ) );
   xt::xarray<complex_t> matrix_Tdag = get_2by2_matrix( 1.0, 0.0, 0.0, exp( -1i * M_PI / 4.0 ) );
   xt::xarray<complex_t> matrix_zc = get_2by2_matrix( 1.0, 0.0, 0.0, 0.0 );
@@ -126,6 +131,10 @@ xt::xarray<complex_t> matrix_from_clifford_t_circuit( const circuit& circ )
   {
     const auto target = g.targets().front();
 
+    if ( is_toffoli( g ) && g.controls().size() == 0u )
+    {
+      gates.push_back( identity_padding( matrix_X, target, target, n ) );
+    }
     if ( is_toffoli( g ) && g.controls().size() == 1u && g.controls().front().polarity() )
     {
       const auto control = g.controls().front().line();
@@ -152,18 +161,36 @@ xt::xarray<complex_t> matrix_from_clifford_t_circuit( const circuit& circ )
       const auto pauli = boost::any_cast<pauli_tag>( g.type() );
       switch ( pauli.axis )
       {
+      case pauli_axis::X:
+        if ( pauli.root == 1u )
+        {
+          gates.push_back( identity_padding( matrix_X, target, target, n ) );
+        }
+        else
+        {
+          std::cout << "[w] unsupported X gate" << std::endl;
+        }
+        break;
       case pauli_axis::Z:
-        if ( pauli.root == 4u )
+        if ( pauli.root == 1u )
+        {
+          gates.push_back( identity_padding( matrix_Z, target, target, n ) );
+        }
+        else if ( pauli.root == 2u )
+        {
+          gates.push_back( identity_padding( pauli.adjoint ? matrix_Sdag : matrix_S, target, target, n ) );
+        }
+        else if ( pauli.root == 4u )
         {
           gates.push_back( identity_padding( pauli.adjoint ? matrix_Tdag : matrix_T, target, target, n ) );
         }
         else
         {
-          std::cout << "[w] unsupported gate" << std::endl;
+          std::cout << "[w] unsupported Z gate with root " << pauli.root << std::endl;
         }
         break;
       default:
-        std::cout << "[w] unsupported gate" << std::endl;
+        std::cout << "[w] unsupported Pauli gate" << std::endl;
         break;
       }
     }
@@ -179,9 +206,12 @@ xt::xarray<complex_t> matrix_from_clifford_t_circuit( const circuit& circ )
   }
   else
   {
+    progress_line pline( boost::str( boost::format( "[i] (matrix_from_clifford_t_circuit) gate %%d / %d" ) % gates.size() ), progress );
+
     auto r = gates.front();
     for ( auto i = 1u; i < gates.size(); ++i )
     {
+      pline( i + 1u );
       r = xt::linalg::dot( r, gates[i] );
     }
 

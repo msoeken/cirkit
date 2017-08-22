@@ -31,7 +31,7 @@
 
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/add_gates.hpp>
-#include <reversible/functions/copy_metadata.hpp>
+#include <reversible/functions/rewrite_circuit.hpp>
 
 using namespace boost::assign;
 
@@ -40,29 +40,23 @@ namespace cirkit
 
 void fredkin_gates_to_toffoli( const circuit& src, circuit& dest )
 {
-  copy_metadata( src, dest );
+  dest = rewrite_circuit( src, {
+      []( const gate& g, circuit& circ ) {
+        if ( is_fredkin( g ) )
+        {
+          gate::control_container controls;
+          boost::push_back( controls, g.controls() );
+          controls += make_var( g.targets()[0u], true );
 
-  for ( const auto& g : src )
-  {
-    if ( is_fredkin( g ) )
-    {
-      gate::control_container controls;
-      boost::push_back( controls, g.controls() );
-      controls += make_var( g.targets()[0u], true );
+          append_cnot( circ, g.targets()[1u], g.targets()[0u] );
+          append_toffoli( circ, controls, g.targets()[1u] );
+          append_cnot( circ, g.targets()[1u], g.targets()[0u] );
 
-      append_cnot( dest, g.targets()[1u], g.targets()[0u] );
-      append_toffoli( dest, controls, g.targets()[1u] );
-      append_cnot( dest, g.targets()[1u], g.targets()[0u] );
-    }
-    else if ( is_toffoli( g ) )
-    {
-      dest.append_gate() = g;
-    }
-    else
-    {
-      assert( false );
-    }
-  }
+          return true;
+        }
+        return false;
+      }
+    } );
 }
 
 }

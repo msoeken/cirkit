@@ -29,7 +29,7 @@ link_directories(${ext_LIB})
 
 add_cirkit_library(
   NAME cirkit_formal_z3
-  AUTO_DIRS src
+  AUTO_DIRS src/formal
   USE
     cirkit_classical
     ${Z3_LIBRARIES}
@@ -37,6 +37,14 @@ add_cirkit_library(
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
   DEFINE
     PUBLIC ADDON_FORMAL
+)
+
+add_cirkit_library(
+  NAME cirkit_formal_z3_cli
+  AUTO_DIRS src/cli
+  USE
+    cirkit_cli
+    cirkit_formal_z3
   COMMANDS
-    formal/cli/commands/commands.hpp
-  )
+    cli/commands/formal_commands.hpp
+)

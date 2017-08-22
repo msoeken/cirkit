@@ -10,6 +10,7 @@ Welcome to CirKit's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   installation
    getting_started
    data_structures
    integration
@@ -20,5 +21,4 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
