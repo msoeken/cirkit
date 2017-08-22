@@ -241,8 +241,8 @@ class package_cryptominisat:
     subdir      = "cryptominisat"
     url         = "https://github.com/msoos/cryptominisat"
     fmt         = "git"
-    build       = [ "mkdir build", "cd build; cmake ..; make -j%d cryptominisat4" % multiprocessing.cpu_count() ]
-    install     = [ "cp -v build/cryptominisat4 %s" ]
+    build       = [ "mkdir build", "cd build; cmake ..; make -j%d cryptominisat5" % multiprocessing.cpu_count() ]
+    install     = [ "cp -v build/cryptominisat5 %s" ]
 
 class package_bloqqer:
     description = "A preprocessor for quantified Boolean formulas"
