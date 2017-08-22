@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'CirKit'
-copyright = '2017, Mathias Soeken'
+copyright = 'for documentation 2017, Mathias Soeken and others (individually contributed parts are mentioned per section)'
 author = 'Mathias Soeken'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -98,6 +98,11 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+html_context = {
+    'css_files': [
+        '_static/theme_overrides.css', # overrides wide tables in RTD theme
+    ],
+}
 
 # -- Options for HTMLHelp output ------------------------------------------
 
