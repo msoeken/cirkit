@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/cirkit/badge/?version=latest)](http://cirkit.readthedocs.io/en/latest/?badge=latest)
+
 # CirKit
 
 CirKit is a software library and framework for logic synthesis.
