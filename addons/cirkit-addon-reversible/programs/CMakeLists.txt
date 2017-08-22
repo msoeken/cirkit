@@ -37,7 +37,7 @@ add_cirkit_program(
 target_compile_definitions( revkit PUBLIC USE_LINENOISE )
 
 # Python API
-find_package( PythonLibs 3 )
+find_package( PythonLibs 3.6 )
 if( PYTHONLIBS_FOUND AND cirkit_ENABLE_PYTHON_API )
   find_package(pybind11 REQUIRED)
   add_library( revkit_python SHARED reversible/revkit.cpp )

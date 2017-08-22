@@ -69,7 +69,7 @@ endforeach()
 target_include_directories( cirkit PUBLIC ${CMAKE_BINARY_DIR}/programs )
 
 # Python API
-find_package( PythonLibs 3 )
+find_package( PythonLibs 3.6 )
 if( PYTHONLIBS_FOUND AND cirkit_ENABLE_PYTHON_API )
   find_package(pybind11 REQUIRED)
   add_library( cirkit_python SHARED core/cirkit.cpp )
