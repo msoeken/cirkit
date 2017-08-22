@@ -95,7 +95,9 @@ inline auto complex_allclose( E1&& e1, E2&& e2, double rtol = 1e-05, double atol
 
 using complex_t = std::complex<double>;
 
-xt::xarray<complex_t> matrix_from_clifford_t_circuit( const circuit& circ );
+xt::xarray<complex_t> identity( unsigned dimension );
+
+xt::xarray<complex_t> matrix_from_clifford_t_circuit( const circuit& circ, bool progress = false );
 xt::xarray<complex_t> matrix_from_reversible_circuit( const circuit& circ );
 
 }
