@@ -174,6 +174,7 @@ xmg_graph xmg_rewrite_top_down( const xmg_graph& xmg,
   if ( keep_bitmarks && xmg.bitmarks().num_layers() > 0u )
   {
     xmg_new.bitmarks().init_marks( 0u, xmg.bitmarks().num_layers() );
+    xmg_new.bitmarks().set_used( xmg.bitmarks().get_used() );
   }
 
   /* create constant and PIs */
@@ -258,6 +259,7 @@ xmg_graph xmg_rewrite_bottom_up( const xmg_graph& xmg,
   if ( keep_bitmarks && xmg.bitmarks().num_layers() > 0u )
   {
     xmg_new.bitmarks().init_marks( 0u, xmg.bitmarks().num_layers() );
+    xmg_new.bitmarks().set_used( xmg.bitmarks().get_used() );
   }
 
   /* create constant and PIs */
