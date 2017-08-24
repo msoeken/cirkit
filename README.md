@@ -1,3 +1,4 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation Status](https://readthedocs.org/projects/cirkit/badge/?version=latest)](http://cirkit.readthedocs.io/en/latest/?badge=latest)
 
 # CirKit

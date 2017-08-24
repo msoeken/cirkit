@@ -66,11 +66,17 @@ public:
   unsigned num_used_layers() const;
 
   boost::dynamic_bitset<> get( unsigned color = 0u ) const;
+
+  boost::dynamic_bitset<> get_used() const;
+  void set_used( const boost::dynamic_bitset<>& used_ );
   
 private:
   std::vector<boost::dynamic_bitset<>> marks;
   boost::dynamic_bitset<> used;
 }; /* xmg_bitmarks */
+
+
+void xmg_mark_inner_nodes( xmg_graph& xmg, const std::vector<xmg_node>& nodes, unsigned color );
 
 }
 
