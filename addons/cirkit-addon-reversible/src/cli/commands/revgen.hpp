@@ -51,6 +51,7 @@ protected:
 
 private:
   unsigned hwb;
+  unsigned prime;
 };
 
 }

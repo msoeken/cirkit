@@ -31,9 +31,10 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/program_options.hpp>
 
-#include <core/utils/bitset_utils.hpp>
-#include <reversible/truth_table.hpp>
 #include <cli/reversible_stores.hpp>
+#include <core/utils/bitset_utils.hpp>
+#include <classical/utils/truth_table_utils.hpp>
+#include <reversible/truth_table.hpp>
 
 namespace cirkit
 {
@@ -44,7 +45,8 @@ revgen_command::revgen_command( const environment::ptr& env )
   : cirkit_command( env, "Generate reversible structures" )
 {
   opts.add_options()
-    ( "hwb", value( &hwb ), "Generate reversible HWB function" )
+    ( "hwb",   value( &hwb ),   "generate reversible HWB function" )
+    ( "prime", value( &prime ), "generate reversible nth-prime function" )
     ;
 }
 
@@ -72,6 +74,44 @@ bool revgen_command::execute()
 
       inc( b );
     } while ( b.any() );
+
+    auto& specs = env->store<binary_truth_table>();
+
+    if ( specs.empty() )
+    {
+      specs.extend();
+    }
+    specs.current() = spec;
+  }
+  else if ( is_set( "prime" ) )
+  {
+    binary_truth_table spec;
+
+    spec.add_entry( number_to_truth_table_cube( 0u, prime ),
+                    number_to_truth_table_cube( 0u, prime ) );
+
+    auto index = 1u;
+    auto pt = primes;
+
+    while ( *pt < ( 1u << prime ) )
+    {
+      spec.add_entry( number_to_truth_table_cube( index++, prime ),
+                      number_to_truth_table_cube( *pt++, prime ) );
+    }
+
+    pt = primes;
+    auto non_prime = 1u;
+
+    while ( index < ( 1u << prime ) )
+    {
+      while ( non_prime < *pt )
+      {
+        spec.add_entry( number_to_truth_table_cube( index++, prime ),
+                        number_to_truth_table_cube( non_prime++, prime ) );
+      }
+      ++non_prime;
+      ++pt;
+    }
 
     auto& specs = env->store<binary_truth_table>();
 
