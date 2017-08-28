@@ -56,7 +56,7 @@ public:
   log_opt_t log() const;
 
 private:
-  std::string methods = "mnaes";
+  std::string methods = "mnae";
 };
 
 }
