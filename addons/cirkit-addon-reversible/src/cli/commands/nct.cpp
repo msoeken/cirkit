@@ -28,33 +28,28 @@
 
 #include <alice/rules.hpp>
 #include <cli/reversible_stores.hpp>
+#include <core/utils/program_options.hpp>
 #include <reversible/mapping/nct_mapping.hpp>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 nct_command::nct_command( const environment::ptr& env )
   : cirkit_command( env, "NCT mapping" )
 {
+  opts.add_options()
+    ( "controls_threshold,t", value_with_default( &controls_threshold ), "do not decompose any gates with less controls" )
+    ;
   add_new_option();
   be_verbose();
 }
 
 command::rules_t nct_command::validity_rules() const
 {
-  return {has_store_element<circuit>( env )};
+  return {
+    has_store_element<circuit>( env ),
+    {[this]() { return controls_threshold >= 2u; }, "controls threshold must be at least 2"}
+  };
 }
 
 bool nct_command::execute()
@@ -62,6 +57,7 @@ bool nct_command::execute()
   auto& circuits = env->store<circuit>();
 
   auto settings = make_settings();
+  settings->set( "controls_threshold", controls_threshold );
   auto mapped = nct_mapping( circuits.current(), settings, statistics );
   print_runtime();
 

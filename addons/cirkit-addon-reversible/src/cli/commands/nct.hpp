@@ -52,6 +52,9 @@ protected:
 
 public:
   log_opt_t log() const;
+
+private:
+  unsigned controls_threshold = 2u;
 };
 
 }
