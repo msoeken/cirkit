@@ -53,6 +53,7 @@
 #include <cli/commands/expr.hpp>
 #include <cli/commands/exs.hpp>
 #include <cli/commands/filter.hpp>
+#include <cli/commands/gates.hpp>
 #include <cli/commands/gen_reciprocal.hpp>
 #include <cli/commands/hdbs.hpp>
 #include <cli/commands/is_identity.hpp>
@@ -192,6 +193,7 @@ ALICE_BEGIN(revkit)
   ADD_COMMAND( circuit_str );
   ADD_COMMAND( enumerate );
   ADD_COMMAND( expr );
+  ADD_COMMAND( gates );
   ADD_COMMAND( perm );
   ADD_COMMAND( print_io );
   ADD_COMMAND( random_circuit );
