@@ -37,11 +37,13 @@
 #include <core/utils/timer.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
 #include <reversible/target_tags.hpp>
+#include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/copy_circuit.hpp>
 #include <reversible/functions/copy_metadata.hpp>
 #include <reversible/functions/reverse_circuit.hpp>
 #include <reversible/io/print_circuit.hpp>
+#include <reversible/optimization/esop_post_optimization.hpp>
 #include <reversible/utils/permutation.hpp>
 
 namespace cirkit
@@ -57,7 +59,7 @@ namespace cirkit
 
 boost::dynamic_bitset<> get_optimization_vector( const std::string& methods )
 {
-  boost::dynamic_bitset<> v( 5u );
+  boost::dynamic_bitset<> v( 6u );
 
   for ( auto c : methods )
   {
@@ -67,7 +69,8 @@ boost::dynamic_bitset<> get_optimization_vector( const std::string& methods )
     case 'n': v.set( 1u ); break;
     case 'a': v.set( 2u ); break;
     case 'e': v.set( 3u ); break;
-    case 's': v.set( 4u ); break;
+    case 'p': v.set( 4u ); break;
+    case 's': v.set( 5u ); break;
     }
   }
 
@@ -454,6 +457,55 @@ circuit exorcism_merge_heuristic( const circuit& base )
   return circ;
 }
 
+circuit same_target_optimization_heuristic( const circuit& base )
+{
+  circuit circ;
+  circ.set_lines( base.lines() );
+  copy_metadata( base, circ );
+
+  auto current_target = -1;
+  circuit sub( base.lines() );
+
+  auto append_sub = [&circ, &sub]() {
+    if ( sub.num_gates() == 0u ) return;
+
+    append_circuit( circ, esop_post_optimization( sub ) );
+    while ( sub.num_gates() )
+    {
+      sub.remove_gate_at( 0u );
+    }
+  };
+
+  for ( const auto& gate : base )
+  {
+    /* works only for Toffoli gates for now */
+    if ( !is_toffoli( gate ) )
+    {
+      append_sub();
+      current_target = -1;
+      circ.append_gate() = gate;
+      continue;
+    }
+
+    const auto target = gate.targets().front();
+
+    /* apply current cubes */
+    if ( static_cast<int>( target ) != current_target )
+    {
+      append_sub();
+      current_target = target;
+    }
+
+    /* add gate to sub */
+    sub.append_gate() = gate;
+  }
+
+  /* leftovers? */
+  append_sub();
+
+  return circ;
+}
+
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -490,11 +542,12 @@ bool simplify( circuit& circ, const circuit& base, properties::ptr settings, pro
 
     vsize_out( boost::str( boost::format( "\033[1;31moptimization round %d\033[0m" ) % round ) );
 
-    if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp );   vsize_out( "simple merge" ); }
-    if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );       vsize_out( "not gates" ); }
-    if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );        vsize_out( "adjacent" ); }
-    if ( methods_vec[3u] ) { tmp = exorcism_merge_heuristic( tmp ); vsize_out( "exorcism" ); }
-    if ( methods_vec[4u] ) {
+    if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp );             vsize_out( "simple merge" ); }
+    if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );                 vsize_out( "not gates" ); }
+    if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );                  vsize_out( "adjacent" ); }
+    if ( methods_vec[3u] ) { tmp = exorcism_merge_heuristic( tmp );           vsize_out( "exorcism" ); }
+    if ( methods_vec[4u] ) { tmp = same_target_optimization_heuristic( tmp ); vsize_out( "same target" ); }
+    if ( methods_vec[5u] ) {
       tmp = simplify_swap_gates( tmp, perm ); vsize_out( "swap" );
       gperm = permutation_multiply( gperm, perm );
     }
@@ -502,17 +555,18 @@ bool simplify( circuit& circ, const circuit& base, properties::ptr settings, pro
     if ( reverse_opt )
     {
       reverse_circuit( tmp );
-      if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp );   vsize_out( "simple merge (r)" ); }
-      if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );       vsize_out( "not gates (r)" ); }
-      if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );        vsize_out( "adjacent (r)" ); }
-      if ( methods_vec[3u] ) { tmp = exorcism_merge_heuristic( tmp ); vsize_out( "exorcism (r)" ); }
-      if ( methods_vec[4u] ) {
+      if ( methods_vec[0u] ) { tmp = simple_merge_heuristic( tmp );             vsize_out( "simple merge (r)" ); }
+      if ( methods_vec[1u] ) { tmp = simplify_not_gates( tmp );                 vsize_out( "not gates (r)" ); }
+      if ( methods_vec[2u] ) { tmp = simplify_adjacent( tmp );                  vsize_out( "adjacent (r)" ); }
+      if ( methods_vec[3u] ) { tmp = exorcism_merge_heuristic( tmp );           vsize_out( "exorcism (r)" ); }
+      if ( methods_vec[4u] ) { tmp = same_target_optimization_heuristic( tmp ); vsize_out( "same target (r)" ); }
+      if ( methods_vec[5u] ) {
         //tmp = simplify_swap_gates( tmp, perm ); vsize_out( "swap (r)" );
       }
       reverse_circuit( tmp );
     }
 
-    improvement = size > tmp.num_gates();
+    improvement = size < tmp.num_gates();
 
     ++round;
   }
