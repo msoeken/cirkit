@@ -55,7 +55,7 @@ add_cirkit_program(
 )
 
 target_compile_definitions( cirkit PUBLIC USE_LINENOISE )
-target_link_libraries( cirkit ${cirkit_addon_command_libraries} )
+target_link_libraries( cirkit cirkit_cli ${cirkit_addon_command_libraries} )
 
 file( WRITE ${CMAKE_BINARY_DIR}/programs/addon_commands.hpp "" )
 foreach( inc ${cirkit_addon_command_includes} )
