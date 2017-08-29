@@ -566,7 +566,7 @@ bool simplify( circuit& circ, const circuit& base, properties::ptr settings, pro
       reverse_circuit( tmp );
     }
 
-    improvement = size < tmp.num_gates();
+    improvement = size > tmp.num_gates();
 
     ++round;
   }
