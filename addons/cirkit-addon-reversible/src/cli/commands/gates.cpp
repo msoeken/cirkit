@@ -97,23 +97,25 @@ bool gates_command::execute()
     }
   }
 
-  std::cout << "controls     ";
+  std::cout << "     controls";
   for ( auto i = 0u; i <= max_controls; ++i )
   {
-    std::cout << boost::format( " | %3d" ) % i;
+    std::cout << boost::format( " | %4d" ) % i;
   }
-  std::cout << std::endl;
+  std::cout << " | total" << std::endl;
 
   for ( auto i = 0u; i < gate_controls.size(); ++i )
   {
     std::cout << label[i] << std::string( 13u - label[i].size(), ' ' );
     gate_controls[i].resize( max_controls + 1u );
+    auto total = 0u;
 
     for ( auto c : gate_controls[i] )
     {
-      std::cout << boost::format( " | %3d" ) % c;
+      std::cout << boost::format( " | %4d" ) % c;
+      total += c;
     }
-    std::cout << std::endl;
+    std::cout << boost::format( " | %5d" ) % total << std::endl;
   }
 
   return true;
