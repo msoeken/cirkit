@@ -27,24 +27,24 @@
 /**
  * @file maslov234.hpp
  *
- * @brief Maslov reversible phase gate mapping up to 4 controls
+ * @brief Maslov reversible phase gate mapping up to 5 controls
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef CLI_MASLOV234_COMMAND_HPP
-#define CLI_MASLOV234_COMMAND_HPP
+#ifndef CLI_RPTM_COMMAND_HPP
+#define CLI_RPTM_COMMAND_HPP
 
 #include <cli/cirkit_command.hpp>
 
 namespace cirkit
 {
 
-class maslov234_command : public cirkit_command
+class rptm_command : public cirkit_command
 {
 public:
-  maslov234_command( const environment::ptr& env );
+  rptm_command( const environment::ptr& env );
 
 protected:
   rules_t validity_rules() const;

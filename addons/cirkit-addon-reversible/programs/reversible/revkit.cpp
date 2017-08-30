@@ -58,7 +58,6 @@
 #include <cli/commands/hdbs.hpp>
 #include <cli/commands/is_identity.hpp>
 #include <cli/commands/lhrs.hpp>
-#include <cli/commands/maslov234.hpp>
 #include <cli/commands/mitm.hpp>
 #include <cli/commands/nct.hpp>
 #include <cli/commands/perm.hpp>
@@ -76,6 +75,7 @@
 #include <cli/commands/revsim.hpp>
 #include <cli/commands/revsimp.hpp>
 #include <cli/commands/rms.hpp>
+#include <cli/commands/rptm.hpp>
 #include <cli/commands/simulate.hpp>
 #include <cli/commands/spectral.hpp>
 #include <cli/commands/stg4.hpp>
@@ -156,11 +156,11 @@ ALICE_BEGIN(revkit)
 
   ADD_COMMAND( concat );
   ADD_COMMAND( filter );
-  ADD_COMMAND( maslov234 );
   ADD_COMMAND( mitm );
   ADD_COMMAND( nct );
   ADD_COMMAND( pos );
   ADD_COMMAND( reverse );
+  ADD_COMMAND( rptm );
   ADD_COMMAND( stg4 );
   ADD_COMMAND( tof );
   ADD_COMMAND( unique_names );
