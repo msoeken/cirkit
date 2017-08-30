@@ -72,6 +72,9 @@ bool rename_command::execute()
 
   aig_rename( aig(), imap, omap );
 
+  inputs.clear();
+  outputs.clear();
+
   return true;
 }
 

@@ -133,6 +133,9 @@ bool qec_command::execute()
     std::cout << "[i] circuits are \033[1;31mnot equivalent\033[0m" << std::endl;
   }
 
+  qids.clear();
+  rids.clear();
+
   return true;
 }
 
