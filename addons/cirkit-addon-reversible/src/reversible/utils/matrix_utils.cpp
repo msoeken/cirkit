@@ -135,7 +135,7 @@ xt::xarray<complex_t> matrix_from_clifford_t_circuit( const circuit& circ, bool 
     {
       gates.push_back( identity_padding( matrix_X, target, target, n ) );
     }
-    if ( is_toffoli( g ) && g.controls().size() == 1u && g.controls().front().polarity() )
+    else if ( is_toffoli( g ) && g.controls().size() == 1u && g.controls().front().polarity() )
     {
       const auto control = g.controls().front().line();
 
