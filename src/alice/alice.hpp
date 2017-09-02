@@ -549,9 +549,9 @@ private:
 
 #ifdef ALICE_PYTHON
 public:
-  py::module pymodule()
+  void pymodule( py::module& m )
   {
-    py::module m( prefix.c_str(), "Python bindings" );
+    m.doc() = "Python bindings";
 
     py::class_<return_value_dict> representer( m, "ReturnValueDict" );
     representer
@@ -573,29 +573,22 @@ public:
             const auto value = kp.second;
 
             // TODO cast float to string?
-            try {
-              const auto bv = value.cast<bool>();
-              std::cout << "BOOL type" << std::endl;
-              if ( bv )
+            if ( py::isinstance<py::bool_>( value ) )
+            {
+              if ( value.cast<bool>() )
               {
                 pargs.push_back( "--" + skey );
               }
             }
-            catch ( const py::cast_error& )
+            else if ( py::isinstance<py::int_>( value ) )
             {
-              try
-              {
-                const auto iv = value.cast<int>();
-                std::cout << "INT type" << std::endl;
-                pargs.push_back( "--" + skey );
-                pargs.push_back( std::to_string( iv ) );
-              }
-              catch ( const py::cast_error& )
-              {
-                std::cout << "STR type" << std::endl;
-                pargs.push_back( "--" + skey );
-                pargs.push_back( value.cast<std::string>() );
-              }
+              pargs.push_back( "--" + skey );
+              pargs.push_back( std::to_string( value.cast<int>() ) );
+            }
+            else
+            {
+              pargs.push_back( "--" + skey );
+              pargs.push_back( value.cast<std::string>() );
             }
           }
           p.second->run( pargs );
@@ -612,8 +605,6 @@ public:
           }
         }, p.second->caption().c_str() );
     }
-
-    return m;
   }
 #endif
 
@@ -730,8 +721,8 @@ private:
 #define ALICE_BEGIN(name) int main( int argc, char ** argv ) {
 #define ALICE_END return cli.run( argc, argv ); }
 #else
-#define ALICE_BEGIN(name) PYBIND11_PLUGIN(name) {
-#define ALICE_END return cli.pymodule().ptr(); }
+#define ALICE_BEGIN(name) PYBIND11_MODULE(name, m) {
+#define ALICE_END cli.pymodule( m ); }
 #endif
 
 }
