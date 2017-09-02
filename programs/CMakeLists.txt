@@ -69,15 +69,13 @@ endforeach()
 target_include_directories( cirkit PUBLIC ${CMAKE_BINARY_DIR}/programs )
 
 # Python API
-find_package( PythonLibs 3.6 )
-if( PYTHONLIBS_FOUND AND cirkit_ENABLE_PYTHON_API )
+if( cirkit_ENABLE_PYTHON_API )
   find_package(pybind11 REQUIRED)
-  add_library( cirkit_python SHARED core/cirkit.cpp )
+  add_library( cirkit_python MODULE core/cirkit.cpp )
   target_compile_definitions( cirkit_python PUBLIC ALICE_PYTHON )
-  set_target_properties( cirkit_python PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED YES )
-  set_target_properties( cirkit_python PROPERTIES PREFIX "" )
-  set_target_properties( cirkit_python PROPERTIES SUFFIX "" )
-  set_target_properties( cirkit_python PROPERTIES OUTPUT_NAME "cirkit.so" )
-  target_include_directories( cirkit_python PUBLIC ${PYTHON_INCLUDE_DIRS} ${CMAKE_BINARY_DIR}/programs )
-  target_link_libraries( cirkit_python cirkit_core cirkit_classical ${cirkit_addon_command_libraries} ${PYTHON_LIBRARIES} pybind11::module )
+  set_target_properties(cirkit_python PROPERTIES PREFIX ""
+                                                 SUFFIX ""
+                                                 OUTPUT_NAME "cirkit.so")
+  target_include_directories( cirkit_python PUBLIC ${CMAKE_BINARY_DIR}/programs )
+  target_link_libraries( cirkit_python PUBLIC cirkit_cli ${cirkit_addon_command_libraries} PRIVATE pybind11::module )
 endif()
