@@ -63,6 +63,7 @@ bool circuit_matrix_command::execute()
     return true;
   }
 
+  xt::print_options::set_threshold( 10000 );
   xt::xarray<complex_t> matrix;
 
   if ( is_set( "reversible" ) )
