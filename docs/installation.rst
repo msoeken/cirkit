@@ -51,7 +51,7 @@ CirKit can be executed with::
 
   build/programs/cirkit
 
-Build and Run RevKit
+Build and run RevKit
 --------------------
 
 After extracting or cloning CirKit perform the following steps::
@@ -65,6 +65,33 @@ After extracting or cloning CirKit perform the following steps::
 RevKit can be executed with::
 
   build/programs/revkit
+
+Python interface
+----------------
+
+The CLI from CirKit and RevKit can be invoked using a Python
+interface.  The implementation is based on pybind11_ and can be
+enabled and compiled as follows::
+
+  cd build
+  cmake -Dcirkit_ENABLE_PYTHON_API=ON -DPYBIND11_PYTHON_VERSION=3.6 -DPYTHON_EXECUTABLE=/path/to/python ..
+  make cirkit_python
+
+Replace ``/path/to/python`` to the path of a Python3 executable on the
+system and replace ``cirkit_python`` by ``revkit_python`` to build the
+RevKit CLI Python API.
+
+Start Jupyter notebook
+``````````````````````
+
+The Python CLI can conveniently be used through a Jupyter notebooks
+and some notebooks are provided in the ``jupyter`` directory.  From
+the main directory in CirKit, one can do the following::
+
+  cd jupyter
+  PYTHONPATH=`pwd`/../build/programs jupyter notebook
+
+.. _pybind11: https://github.com/pybind/pybind11
 
 Troubleshooting
 ---------------
