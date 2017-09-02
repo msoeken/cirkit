@@ -39,4 +39,4 @@ RevKit can be executed with
 
 ## Detailed installation and documentation
 
-The documentation can be found at (cirkit.readthedocs.io)[https://cirkit.readthedocs.io/en/latest].
+The documentation can be found at [cirkit.readthedocs.io](https://cirkit.readthedocs.io/en/latest).
