@@ -608,12 +608,6 @@ std::vector<int> walsh_spectrum( const tt& func )
 
 tt tt_maj(tt a, tt b, tt c)
 {
-  auto max_num_vars = std::max( tt_num_vars( a ), std::max( tt_num_vars( b ), tt_num_vars( c ) ) );
-
-  tt_extend( a, max_num_vars );
-  tt_extend( b, max_num_vars );
-  tt_extend( c, max_num_vars );
-
   return (a & b) | (b & c) | (a & c);
 }
 
