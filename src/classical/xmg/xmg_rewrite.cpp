@@ -97,7 +97,7 @@ xmg_function xmg_rewrite_top_down_rec( const xmg_graph& xmg, xmg_node node,
   const auto it = old_to_new.find( node );
   if ( it != old_to_new.end() )
   {
-    return it->second;
+    return it->second ^ complement;
   }
 
   xmg_function f;
