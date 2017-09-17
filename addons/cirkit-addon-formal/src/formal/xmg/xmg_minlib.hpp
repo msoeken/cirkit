@@ -81,10 +81,10 @@ private:
   std::string find_or_create_xmg( const std::string& hex );
 
 private:
-  std::unordered_map<std::string, std::string> library;
-  npn_manager                                  npn;
-  boost::optional<unsigned>                    timeout;
-  bool                                         verbose;
+  std::unordered_map<std::string, std::vector<std::string>> library;
+  npn_manager                                               npn;
+  boost::optional<unsigned>                                 timeout;
+  bool                                                      verbose;
 
   bool auto_update = false;
   std::ofstream update_out;

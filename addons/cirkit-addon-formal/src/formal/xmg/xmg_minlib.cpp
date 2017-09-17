@@ -85,7 +85,7 @@ void xmg_minlib_manager::load_library( std::istream& in )
 
 void xmg_minlib_manager::add_to_library( const std::string& hex, const std::string& expr )
 {
-  library.insert( {hex, expr} );
+  library[hex].push_back( expr );
 }
 
 std::string xmg_minlib_manager::format_library_entry( const std::string& hex, const std::string& expr )
@@ -97,9 +97,11 @@ std::string xmg_minlib_manager::find_or_create_xmg( const std::string& hex )
 {
   const auto it = library.find( hex );
 
-  if ( it != library.end() )
+  /* if hex is found in library and corresponding array is not empty */
+  if ( it != library.end() && !it->second.empty() )
   {
-    return it->second;
+    /* TODO implement different strategies if there are more than one implementation */
+    return it->second.front();
   }
 
   auto exs_settings = std::make_shared<properties>();
@@ -233,7 +235,10 @@ void xmg_minlib_manager::write_library_file( const std::string& filename, unsign
       continue;
     }
 
-    os << format_library_entry( p.first, p.second ) << std::endl;
+    for ( const auto& circ : p.second )
+    {
+      os << format_library_entry( p.first, circ ) << std::endl;
+    }
   }
 
   os.close();
@@ -302,17 +307,21 @@ bool xmg_minlib_manager::verify()
   for ( const auto& p : library )
   {
     tt spec( convert_hex2bin( p.first ) );
-    tt spec_expr = tt_from_expression( parse_expression( p.second ) );
 
-    tt_align( spec, spec_expr );
-
-    if ( spec != spec_expr )
+    for ( const auto& circ : p.second )
     {
-      if ( verbose )
+      tt spec_expr = tt_from_expression( parse_expression( circ ) );
+
+      tt_align( spec, spec_expr );
+
+      if ( spec != spec_expr )
       {
-        std::cout << "[w] spec " << spec << " does not match with " << p.second << std::endl;
+        if ( verbose )
+        {
+          std::cout << "[w] spec " << spec << " does not match with " << circ << std::endl;
+        }
+        okay = false;
       }
-      okay = false;
     }
   }
   return okay;
