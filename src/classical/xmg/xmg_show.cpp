@@ -122,7 +122,7 @@ public:
       }
     }
 
-    if ( xmg.bitmarks().is_marked( n ) )
+    if ( xmg.bitmarks().num_used_layers() && xmg.bitmarks().is_marked( n ) )
     {
       properties["fillcolor"] = "red";
       properties["style"] = "filled";
