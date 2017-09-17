@@ -999,7 +999,7 @@ public:
     start               = get( settings, "start",               1u );
     start_depth         = get( settings, "start_depth",         1u );
     incremental         = get( settings, "incremental",         false );
-    all_solutions       = get( settings, "all_solutions",       false );
+    max_solutions       = get( settings, "max_solutions",       1u );
 
     /* encoding */
     breaking            = get( settings, "breaking",            std::string( "CIsalty" ) );
@@ -1325,22 +1325,17 @@ private:
 
   std::vector<T> extract_solutions( const std::shared_ptr<exact_mig_instance>& inst ) const
   {
-    if ( all_solutions )
-    {
-      std::vector<T> migs;
+    std::vector<T> migs;
 
-      do
-      {
-        migs.push_back( extract_solution<T>( inst ) );
-        inst->block_solution();
-      } while ( inst->solver.check() == z3::sat );
+    auto counter = 0u;
 
-      return migs;
-    }
-    else
+    do
     {
-      return {extract_solution<T>( inst )};
-    }
+      migs.push_back( extract_solution<T>( inst ) );
+      inst->block_solution();
+    } while ( inst->solver.check() == z3::sat && ++counter < max_solutions );
+
+    return migs;
   }
 
   struct constrain_visitor : public boost::static_visitor<void>
@@ -1408,7 +1403,7 @@ private:
   std::string output_name;
   unsigned objective;
   bool incremental;
-  bool all_solutions;
+  unsigned max_solutions;
   std::string breaking;
   bool enc_with_bitvectors;
   boost::optional<unsigned> timeout;
@@ -1451,15 +1446,10 @@ boost::optional<mig_graph> exact_mig_with_sat( const tt& spec,
 
   assert( !spec.empty() );
 
-#ifdef ADDON_FORMAL
-  const auto all_solutions = get( settings, "all_solutions", false );
   exact_mig_manager<mig_graph> mgr( spec_representation( spec ), settings );
 
   const auto migs = mgr.run();
-  if ( all_solutions )
-  {
-    set( statistics, "all_solutions", migs );
-  }
+  set( statistics, "all_solutions", migs );
   set( statistics, "last_size", mgr.last_size );
   set( statistics, "memory", mgr.memory );
 
@@ -1471,11 +1461,6 @@ boost::optional<mig_graph> exact_mig_with_sat( const tt& spec,
   {
     return migs.front();
   }
-
-#else
-  std::cout << "[e] z3 solver requires formal addon enabled" << std::endl;
-  return boost::none;
-#endif
 }
 
 boost::optional<mig_graph> exact_mig_with_sat( const mig_graph& spec,
@@ -1485,16 +1470,10 @@ boost::optional<mig_graph> exact_mig_with_sat( const mig_graph& spec,
   /* timing */
   properties_timer t( statistics );
 
-#ifdef ADDON_FORMAL
-  const auto all_solutions = get( settings, "all_solutions", false );
-
   exact_mig_manager<mig_graph> mgr( spec_representation( spec ), settings );
 
   const auto migs = mgr.run();
-  if ( all_solutions )
-  {
-    set( statistics, "all_solutions", migs );
-  }
+  set( statistics, "all_solutions", migs );
   set( statistics, "last_size", mgr.last_size );
   set( statistics, "memory", mgr.memory );
 
@@ -1506,11 +1485,6 @@ boost::optional<mig_graph> exact_mig_with_sat( const mig_graph& spec,
   {
     return migs.front();
   }
-
-#else
-  std::cout << "[e] z3 solver requires formal addon enabled" << std::endl;
-  return boost::none;
-#endif
 }
 
 boost::optional<xmg_graph> exact_xmg_with_sat( const tt& spec,
@@ -1522,16 +1496,10 @@ boost::optional<xmg_graph> exact_xmg_with_sat( const tt& spec,
 
   assert( !spec.empty() );
 
-#ifdef ADDON_FORMAL
-  const auto all_solutions = get( settings, "all_solutions", false );
-
   exact_mig_manager<xmg_graph> mgr( spec_representation( spec ), settings );
 
   const auto xmgs = mgr.run();
-  if ( all_solutions )
-  {
-    set( statistics, "all_solutions", xmgs );
-  }
+  set( statistics, "all_solutions", xmgs );
   set( statistics, "last_size", mgr.last_size );
   set( statistics, "memory", mgr.memory );
 
@@ -1543,11 +1511,6 @@ boost::optional<xmg_graph> exact_xmg_with_sat( const tt& spec,
   {
     return xmgs.front();
   }
-
-#else
-  std::cout << "[e] z3 solver requires formal addon enabled" << std::endl;
-  return boost::none;
-#endif
 }
 
 boost::optional<xmg_graph> exact_xmg_with_sat( const mig_graph& spec,
@@ -1557,16 +1520,10 @@ boost::optional<xmg_graph> exact_xmg_with_sat( const mig_graph& spec,
   /* timing */
   properties_timer t( statistics );
 
-#ifdef ADDON_FORMAL
-  const auto all_solutions = get( settings, "all_solutions", false );
-
   exact_mig_manager<xmg_graph> mgr( spec_representation( spec ), settings );
 
   const auto xmgs = mgr.run();
-  if ( all_solutions )
-  {
-    set( statistics, "all_solutions", xmgs );
-  }
+  set( statistics, "all_solutions", xmgs );
   set( statistics, "last_size", mgr.last_size );
   set( statistics, "memory", mgr.memory );
 
@@ -1578,11 +1535,6 @@ boost::optional<xmg_graph> exact_xmg_with_sat( const mig_graph& spec,
   {
     return xmgs.front();
   }
-
-#else
-  std::cout << "[e] z3 solver requires formal addon enabled" << std::endl;
-  return boost::none;
-#endif
 }
 
 boost::optional<mig_graph> exact_mig_with_bdds( const tt& spec,

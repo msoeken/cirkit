@@ -57,6 +57,7 @@ private:
   unsigned    start = 1u;
   unsigned    start_depth = 1u;
   unsigned    timeout;
+  unsigned    max_solutions = 1u;
   std::string breaking = "CIsalty";
 };
 

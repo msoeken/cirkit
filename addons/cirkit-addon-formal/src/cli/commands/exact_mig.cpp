@@ -58,18 +58,18 @@ exact_mig_command::exact_mig_command( const environment::ptr& env )
   : cirkit_command( env, "Exact MIG synthesis" )
 {
   opts.add_options()
-    ( "objective,o",       value_with_default( &objective ),   "optimization objective:\n0: size-optimum\n1: size/depth-optimum\n2: depth/size-optimum" )
-    ( "start,s",           value_with_default( &start ),       "start value for gate enumeration" )
-    ( "start_depth",       value_with_default( &start_depth ), "start value for depth enumeration" )
-    ( "mig,m",                                                 "load spec from MIG instead of truth table" )
-    ( "incremental,i",                                         "incremental SAT solving" )
-    ( "all_solutions,a",                                       "enumerate all solutions (only with non incremental)" )
-    ( "breaking",          value_with_default( &breaking ),    "symmetry breaking\ns: structural hashing\na: associativity\nl: co-lexicographic ordering\nt: support\ny: symmetric variables" )
-    ( "print_solutions",                                       "print solutions" )
-    ( "enc_int",                                               "encode numbers as integers (not bit-vectors)" )
-    ( "timeout",           value( &timeout ),                  "timeout (in seconds)" )
-    ( "timeout_heuristic",                                     "continue with next level on timeout" )
-    ( "very_verbose",                                          "be very verbose" )
+    ( "objective,o",       value_with_default( &objective ),     "optimization objective:\n0: size-optimum\n1: size/depth-optimum\n2: depth/size-optimum" )
+    ( "start,s",           value_with_default( &start ),         "start value for gate enumeration" )
+    ( "start_depth",       value_with_default( &start_depth ),   "start value for depth enumeration" )
+    ( "mig,m",                                                   "load spec from MIG instead of truth table" )
+    ( "incremental,i",                                           "incremental SAT solving" )
+    ( "max_solutions,m",   value_with_default( &max_solutions ), "enumerate as many solutions (only with non incremental)" )
+    ( "breaking",          value_with_default( &breaking ),      "symmetry breaking\ns: structural hashing\na: associativity\nl: co-lexicographic ordering\nt: support\ny: symmetric variables" )
+    ( "print_solutions",                                         "print solutions" )
+    ( "enc_int",                                                 "encode numbers as integers (not bit-vectors)" )
+    ( "timeout",           value( &timeout ),                    "timeout (in seconds)" )
+    ( "timeout_heuristic",                                       "continue with next level on timeout" )
+    ( "very_verbose",                                            "be very verbose" )
     ;
   be_verbose();
 }
@@ -83,7 +83,7 @@ bool exact_mig_command::execute()
   settings->set( "start",               start );
   settings->set( "start_depth",         start_depth );
   settings->set( "incremental",         is_set( "incremental" ) );
-  settings->set( "all_solutions",       is_set( "all_solutions" ) );
+  settings->set( "max_solutions",       max_solutions );
   settings->set( "breaking",            breaking );
   settings->set( "enc_with_bitvectors", !is_set( "enc_int" ) );
   settings->set( "very_verbose",        is_set( "very_verbose" ) );
@@ -123,19 +123,16 @@ bool exact_mig_command::execute()
     }
   }
 
-  if ( is_set( "all_solutions" ) )
+  if ( is_set( "print_solutions" ) )
   {
     const auto& solutions = statistics->get<std::vector<mig_graph>>( "all_solutions" );
 
     std::cout << format( "[i] found %d solutions" ) % solutions.size() << std::endl;
 
-    if ( is_set( "print_solutions" ) )
+    for ( const auto& smig : solutions )
     {
-      for ( const auto& smig : solutions )
-      {
-        auto expr = mig_to_expression( smig, mig_info( smig ).outputs.front().first );
-        std::cout << expr << std::endl;
-      }
+      auto expr = mig_to_expression( smig, mig_info( smig ).outputs.front().first );
+      std::cout << expr << std::endl;
     }
   }
 
