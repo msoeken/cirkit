@@ -27,12 +27,15 @@
 #include "stg_as.hpp"
 
 #include <alice/rules.hpp>
-#include <core/utils/program_options.hpp>
 #include <cli/stores.hpp>
-#include <reversible/target_tags.hpp>
 #include <cli/reversible_stores.hpp>
+
+#include <core/utils/program_options.hpp>
+#include <classical/functions/spectral_canonization.hpp>
+#include <reversible/target_tags.hpp>
 #include <reversible/functions/add_stg.hpp>
 #include <reversible/functions/rewrite_circuit.hpp>
+#include <reversible/synthesis/optimal_quantum_circuits.hpp>
 #include <reversible/utils/circuit_utils.hpp>
 
 namespace cirkit
@@ -45,6 +48,7 @@ stg_as_command::stg_as_command( const environment::ptr& env )
     ( "func,f",    value_with_default( &func ), "id of truth table to realize" )
     ( "as,a",      value_with_default( &real ), "id of truth table to use in gate" )
     ( "circuit,c",                              "perform on single-target gates with affine annotations in circuit" )
+    ( "class",                                  "automatically compute affine classes if not annotated (only with option circuit)" )
     ;
   add_new_option();
 }
@@ -66,16 +70,29 @@ bool stg_as_command::execute()
   if ( is_set( "circuit" ) )
   {
     const auto circ = rewrite_circuit( circuits.current(), {
-        []( const gate& g, circuit& circ ) {
+        [this]( const gate& g, circuit& circ ) {
           std::string affine;
 
           if ( is_stg( g ) )
           {
             const auto& stg = boost::any_cast<stg_tag>( g.type() );
+            const auto num_vars = g.controls().size();
 
-            if ( stg.affine_class.empty() ) return false;
+            boost::dynamic_bitset<> cls = stg.affine_class;
+            if ( cls.empty() )
+            {
+              if ( is_set( "class" ) && num_vars >= 2u && num_vars <= 5u )
+              {
+                const auto idx = get_spectral_class( stg.function );
+                cls = tt( 1 << num_vars, optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx] );
+              }
+              else
+              {
+                return false;
+              }
+            }
 
-            add_stg_as_other( circ, stg.function, stg.affine_class, get_line_map( g ) );
+            add_stg_as_other( circ, stg.function, cls, get_line_map( g ) );
             return true;
           }
           return false;
