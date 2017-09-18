@@ -34,6 +34,7 @@
 #include <boost/algorithm/string/find.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/assign/std/vector.hpp>
@@ -50,6 +51,8 @@
 
 #include <core/utils/conversion_utils.hpp>
 #include <core/utils/string_utils.hpp>
+#include <classical/utils/expression_parser.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/io/revlib_processor.hpp>
 
@@ -675,10 +678,29 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
         }
         else if ( boost::starts_with( command, "stg" ) )
         {
-          const auto p = split_string_pair( command.substr( 3u, command.size() - 4u ), "[" );
-          assert( line_indices.size() > 2 );
+          auto argument = command.substr( command.find( '[' ) + 1u );
+          argument.pop_back();
+
           stg_tag stg_t;
-          stg_t.function = boost::dynamic_bitset<>( convert_hex2bin( p.second ) );
+
+          if ( boost::starts_with( argument, "expr" ) )
+          {
+            auto expr = argument.substr( 5u );
+
+            for ( auto i = 0u; i < params.size() - 1u; ++i )
+            {
+              boost::replace_all( expr, boost::str( boost::format( "${%s}" ) % params[i] ), std::string( 1u, 'a' + i ) );
+            }
+
+            auto func = tt_from_expression( parse_expression( expr ) );
+            tt_extend( func, params.size() - 1u );
+
+            stg_t.function = func;
+          }
+          else
+          {
+            stg_t.function = boost::dynamic_bitset<>( convert_hex2bin( argument ) );
+          }
           gate_type = stg_t;
         }
         else
