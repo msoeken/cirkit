@@ -55,7 +55,8 @@ tt_command::tt_command( const environment::ptr& env )
     ( "prime",    value( &prime ),  "create prime function that is true, whenever the input assignment is prime (for up to 10 bits)" )
     ( "extend,e", value( &extend ), "extend to bits" )
     ( "shrink",   value( &shrink ), "shrink to bits" )
-    ( "swap,s",   value( &swap ),   "swaps to variables (seperated with comma, e.g., 2,3)" )
+    ( "swap,s",   value( &swap ),   "swaps two variables (seperated with comma, e.g., 2,3)" )
+    ( "flip,f",   value( &flip ),   "flips one variable" )
     ;
 }
 
@@ -69,6 +70,7 @@ command::rules_t tt_command::validity_rules() const
                         static_cast<int>( is_set( "extend" ) ) +
                         static_cast<int>( is_set( "shrink" ) ) +
                         static_cast<int>( is_set( "swap" ) ) +
+                        static_cast<int>( is_set( "flip" ) ) +
                         static_cast<int>( is_set( "random" ) ) +
                         static_cast<int>( is_set( "hwb" ) ) +
                         static_cast<int>( is_set( "maj" ) ) +
@@ -163,6 +165,10 @@ bool tt_command::execute()
   {
     const auto p = split_string_pair( swap, "," );
     tts.current() = tt_permute( tts.current(), boost::lexical_cast<unsigned>( p.first ), boost::lexical_cast<unsigned>( p.second ) );
+  }
+  else if ( is_set( "flip" ) )
+  {
+    tts.current() = tt_flip( tts.current(), flip );
   }
 
   return true;

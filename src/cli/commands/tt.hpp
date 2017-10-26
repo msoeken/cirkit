@@ -65,6 +65,7 @@ private:
   unsigned    maj;
   unsigned    prime;
   std::string swap;
+  unsigned    flip;
 };
 
 }
