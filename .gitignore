@@ -9,9 +9,12 @@ ext/bin
 ext/share
 tmp
 
+docs/_build
+
 scripts/
 .tags
 .idea/
+.dir-locals.el
 
 xmgmin.txt
 
