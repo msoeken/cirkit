@@ -40,7 +40,6 @@
 #include <classical/xmg/xmg_flow_map.hpp>
 #include <classical/xmg/xmg_lut.hpp>
 #include <formal/xmg/xmg_from_lut.hpp>
-#include <classical/abc/functions/abc_lut_mapping.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
 
 using boost::program_options::value;
@@ -121,7 +120,6 @@ bool xmglut_command::execute()
     abc_run_command_no_output( aigs.current(), boost::str( boost::format( map_cmd ) % lut_size ) + "; &put; short_names; write_bench /tmp/test2.bench" );
     read_bench( lut, "/tmp/test2.bench" );
     //write_bench( lut, "/tmp/test3.bench" );
-    //const auto lut = abc_lut_mapping( aig(), lut_size, settings );
   }
 
   const auto xmg = xmg_from_lut_mapping( lut, settings, statistics );
