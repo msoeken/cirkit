@@ -60,6 +60,7 @@ exact_mig_command::exact_mig_command( const environment::ptr& env )
   opts.add_options()
     ( "objective,o",       value_with_default( &objective ),     "optimization objective:\n0: size-optimum\n1: size/depth-optimum\n2: depth/size-optimum" )
     ( "start,s",           value_with_default( &start ),         "start value for gate enumeration" )
+    ( "stop",              value( &stop ),                       "stop value for gate enumeration (ignored for depth/size-optimum)" )
     ( "start_depth",       value_with_default( &start_depth ),   "start value for depth enumeration" )
     ( "mig,m",                                                   "load spec from MIG instead of truth table" )
     ( "incremental,i",                                           "incremental SAT solving" )
@@ -81,6 +82,10 @@ bool exact_mig_command::execute()
   auto settings = make_settings();
   settings->set( "objective",           objective );
   settings->set( "start",               start );
+  if ( is_set( "stop" ) )
+  {
+    settings->set( "stop",              stop );
+  }
   settings->set( "start_depth",         start_depth );
   settings->set( "incremental",         is_set( "incremental" ) );
   settings->set( "max_solutions",       max_solutions );

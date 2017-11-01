@@ -997,6 +997,7 @@ public:
     /* control algorithm */
     objective           = get( settings, "objective",           0u );   /* 0: size, 1: size/depth, 2: depth/size */
     start               = get( settings, "start",               1u );
+    stop                = get( settings, "stop",                1000u );
     start_depth         = get( settings, "start_depth",         1u );
     incremental         = get( settings, "incremental",         false );
     max_solutions       = get( settings, "max_solutions",       1u );
@@ -1091,7 +1092,7 @@ public:
         store_memory( inst );
         return extract_solutions( inst );
       }
-      else if ( result == z3::unknown && !timeout_heuristic )
+      else if ( ( result == z3::unknown && !timeout_heuristic ) || k == stop )
       {
         last_size = k;
         return std::vector<T>();
@@ -1158,7 +1159,7 @@ public:
         {
           d = start_depth;
         }
-        else if ( result == z3::unknown && !timeout_heuristic )
+        else if ( ( result == z3::unknown && !timeout_heuristic ) || k == stop )
         {
           return std::vector<T>();
         }
@@ -1239,7 +1240,7 @@ public:
         store_memory( inst );
         return extract_solutions( inst );
       }
-      else if ( result == z3::unknown && !timeout_heuristic )
+      else if ( ( result == z3::unknown && !timeout_heuristic ) || inst->gates.size() == stop )
       {
         last_size = inst->gates.size();
         return std::vector<T>();
@@ -1398,6 +1399,7 @@ private:
   spec_representation spec;
   bool normal;
   unsigned start;
+  unsigned stop;
   unsigned start_depth;
   std::string model_name;
   std::string output_name;

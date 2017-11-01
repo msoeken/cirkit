@@ -55,6 +55,7 @@ public:
 private:
   unsigned    objective = 0u;
   unsigned    start = 1u;
+  unsigned    stop;
   unsigned    start_depth = 1u;
   unsigned    timeout;
   unsigned    max_solutions = 1u;
