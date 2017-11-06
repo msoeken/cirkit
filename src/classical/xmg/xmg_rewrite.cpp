@@ -214,9 +214,12 @@ std::vector<xmg_function> xmg_rewrite_top_down_inplace( xmg_graph& dest,
   std::map<xmg_node, xmg_function> old_to_new;
 
   old_to_new[0] = dest.get_constant( false );
-  for ( const auto& pi : index( xmg.inputs() ) )
+  if ( !pi_mapping.empty() )
   {
-    old_to_new[pi.value.first] = pi_mapping[pi.index];
+    for ( const auto& pi : index( xmg.inputs() ) )
+    {
+      old_to_new[pi.value.first] = pi_mapping[pi.index];
+    }
   }
 
   /* prefill */
