@@ -63,6 +63,21 @@ void xmg_cover::add_cut( xmg_node n, const xmg_cuts_paged::cut& cut )
   ++count;
 }
 
+void xmg_cover::add_cut( xmg_node n, const std::vector<unsigned>& cut )
+{
+  assert( offset[n] == 0u );
+
+  offset[n] = leafs.size();
+  leafs.push_back( cut.size() );
+
+  for ( auto l : cut )
+  {
+    leafs.push_back( l );
+  }
+
+  ++count;
+}
+
 bool xmg_cover::has_cut( xmg_node n ) const
 {
   return offset[n] != 0u;
@@ -72,6 +87,42 @@ xmg_cover::index_range xmg_cover::cut( xmg_node n ) const
 {
   return boost::make_iterator_range( leafs.begin() + offset[n] + 1u,
                                      leafs.begin() + offset[n] + 1u + leafs[offset[n]] );
+}
+
+void xmg_cover::init_refs() const
+{
+  ref_count.resize( offset.size(), 0u );
+  std::fill( ref_count.begin(), ref_count.end(), 0u );
+
+  auto it = leafs.begin();
+
+  while ( it != leafs.end() )
+  {
+    /* retrieve size of cut */
+    const auto num_leafs = *it++;
+
+    /* increment ref counter of every leaf */
+    for ( auto i = 0u; i < num_leafs; ++i )
+    {
+      ++ref_count[*it++];
+    }
+  }
+}
+
+unsigned xmg_cover::get_ref( xmg_node n ) const
+{
+  return ref_count[n];
+}
+
+unsigned xmg_cover::inc_ref( xmg_node n ) const
+{
+  return ref_count[n]++;
+}
+
+unsigned xmg_cover::dec_ref( xmg_node n ) const
+{
+  assert( ref_count[n] > 0 );
+  return --ref_count[n];
 }
 
 /******************************************************************************

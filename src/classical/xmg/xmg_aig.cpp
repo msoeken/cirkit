@@ -27,8 +27,12 @@
 #include "xmg_aig.hpp"
 
 #include <unordered_map>
+#include <vector>
+
+#include <boost/format.hpp>
 
 #include <classical/utils/aig_utils.hpp>
+#include <classical/xmg/xmg_cover.hpp>
 
 namespace cirkit
 {
@@ -177,6 +181,45 @@ xmg_graph xmg_from_aig( const aig_graph& aig )
   for ( const auto& o : info.outputs )
   {
     xmg.create_po( node_to_function[o.first.node] ^ o.first.complemented, o.second );
+  }
+
+  return xmg;
+}
+
+xmg_graph xmg_from_gia( const gia_graph& gia )
+{
+  xmg_graph xmg( "gia" );
+  std::vector<xmg_function> node_to_function( gia.size() );
+
+  gia.foreach_input( [&xmg, &gia, &node_to_function]( auto id, auto input_id ) {
+      node_to_function[id] = xmg.create_pi( gia.input_name( input_id ) );
+    } );
+
+  gia.foreach_and( [&xmg, &node_to_function]( auto id, auto obj ) {
+      const auto f1 = node_to_function[abc::Gia_ObjFaninId0( obj, id )] ^ abc::Gia_ObjFaninC0( obj );
+      const auto f2 = node_to_function[abc::Gia_ObjFaninId1( obj, id )] ^ abc::Gia_ObjFaninC1( obj );
+
+      node_to_function[id] = xmg.create_and( f1, f2 );
+    } );
+
+  gia.foreach_output( [&xmg, &gia, &node_to_function]( auto id, auto output_id ) {
+      const auto obj = abc::Gia_ManObj( gia, id );
+      xmg.create_po( node_to_function[abc::Gia_ObjFaninId0( obj, id )] ^ abc::Gia_ObjFaninC0( obj ), gia.output_name( output_id ) );
+    } );
+
+  if ( gia.has_mapping() )
+  {
+    xmg_cover cover( gia.max_lut_size(), xmg );
+
+    gia.foreach_lut( [&gia, &node_to_function, &cover]( auto id ) {
+        std::vector<unsigned> leafs;
+        gia.foreach_lut_fanin( id, [&node_to_function, &leafs]( auto leaf_id ) {
+            leafs.push_back( node_to_function[leaf_id].node );
+          } );
+        cover.add_cut( node_to_function[id].node, leafs );
+      } );
+
+    xmg.set_cover( cover );
   }
 
   return xmg;

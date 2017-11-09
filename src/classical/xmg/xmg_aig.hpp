@@ -37,6 +37,7 @@
 #define XMG_AIG_HPP
 
 #include <classical/aig.hpp>
+#include <classical/abc/gia/gia.hpp>
 #include <classical/xmg/xmg.hpp>
 
 namespace cirkit
@@ -46,6 +47,8 @@ aig_graph xmg_create_aig_topological( const xmg_graph& circ );
 aig_graph xmg_create_aig_top_down( const xmg_graph& circ, const xmg_function& f );
 
 xmg_graph xmg_from_aig( const aig_graph& aig );
+
+xmg_graph xmg_from_gia( const gia_graph& gia );
 
 }
 
