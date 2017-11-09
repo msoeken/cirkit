@@ -36,6 +36,8 @@
 #ifndef CLI_LHRS_COMMAND_HPP
 #define CLI_LHRS_COMMAND_HPP
 
+#include <memory>
+
 #include <cli/aig_command.hpp>
 #include <reversible/synthesis/lhrs/lhrs_params.hpp>
 
@@ -56,7 +58,7 @@ public:
 
 private:
   lhrs_params params;
-  lhrs_stats  stats;
+  std::shared_ptr<lhrs_stats> stats;
 
   unsigned cut_size = 16u;
   unsigned lut_count = 0u;

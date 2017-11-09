@@ -106,9 +106,11 @@ bool lhrs_command::execute()
 
   circuit circ;
 
+  stats = std::make_shared<lhrs_stats>();
+
   const auto gia = gia_graph( aig() );
   const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ) ) );
-  lut_based_synthesis( circuits.current(), lut, params, stats );
+  lut_based_synthesis( circuits.current(), lut, params, *stats );
   lut_count = lut.lut_count();
 
   if ( is_set( "dotname_mapped" ) )
@@ -125,7 +127,7 @@ bool lhrs_command::execute()
       } );
   }
 
-  print_runtime( stats.runtime );
+  print_runtime( stats->runtime );
 
   return true;
 }
@@ -133,7 +135,7 @@ bool lhrs_command::execute()
 command::log_opt_t lhrs_command::log() const
 {
   log_map_t map({
-      {"runtime", stats.runtime},
+      {"runtime", stats->runtime},
       {"cut_size", cut_size},
       {"lut_count", lut_count},
       {"onlylines", is_set( "onlylines" )},
@@ -144,13 +146,13 @@ command::log_opt_t lhrs_command::log() const
       {"area_iters", params.map_luts_params.area_iters},
       {"flow_iters", params.map_luts_params.flow_iters},
       {"class_method", params.map_precomp_params.class_method},
-      {"num_decomp_default", stats.num_decomp_default},
-      {"num_decomp_lut", stats.num_decomp_lut},
-      {"exorcism_runtime", stats.map_esop_stats.exorcism_runtime},
-      {"cover_runtime", stats.map_esop_stats.cover_runtime},
-      {"class_counter", stats.map_precomp_stats.class_counter},
-      {"class_runtime", stats.map_precomp_stats.class_runtime},
-      {"mapping_runtime", stats.map_luts_stats.mapping_runtime}
+      {"num_decomp_default", stats->num_decomp_default},
+      {"num_decomp_lut", stats->num_decomp_lut},
+      {"exorcism_runtime", stats->map_esop_stats.exorcism_runtime},
+      {"cover_runtime", stats->map_esop_stats.cover_runtime},
+      {"class_counter", stats->map_precomp_stats.class_counter},
+      {"class_runtime", stats->map_precomp_stats.class_runtime},
+      {"mapping_runtime", stats->map_luts_stats.mapping_runtime}
     });
 
   if ( is_set( "bounds" ) )
@@ -161,10 +163,10 @@ command::log_opt_t lhrs_command::log() const
 
   if ( is_set( "count_costs" ) )
   {
-    map["gate_costs"] = stats.gate_costs;
-    map["line_maps"] = stats.line_maps;
-    map["affected_lines"] = stats.affected_lines;
-    map["clean_ancillas"] = stats.clean_ancillas;
+    map["gate_costs"] = stats->gate_costs;
+    map["line_maps"] = stats->line_maps;
+    map["affected_lines"] = stats->affected_lines;
+    map["clean_ancillas"] = stats->clean_ancillas;
   }
 
   return map;
