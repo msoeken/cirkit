@@ -646,24 +646,6 @@ command::log_opt_t log_store_entry_statistics<xmg_graph>( const xmg_graph& xmg )
       {"depth", compute_depth( xmg )},
     });
 
-  if ( false )
-  {
-    xmg_graph xmg_copy = xmg;
-    xmg_copy.compute_fanout();
-    xmg_copy.compute_levels();
-
-    std::vector<unsigned> fanouts( xmg.size() );
-    ranges::transform( xmg_copy.nodes(), fanouts.begin(), [&xmg_copy]( xmg_node n ) { return xmg_copy.fanout_count( n ); } );
-
-    std::vector<unsigned> level_diffs( ranges::size( xmg_copy.edges() ) );
-    ranges::transform( xmg_copy.edges(), level_diffs.begin(), [&xmg_copy]( const xmg_edge& e ) {
-        return xmg_copy.level( boost::source( e, xmg_copy.graph() ) ) - xmg_copy.level( boost::target( e, xmg_copy.graph() ) );
-      } );
-
-    log["fanouts"] = fanouts;
-    log["level_diffs"] = level_diffs;
-  }
-
   return log;
 }
 
