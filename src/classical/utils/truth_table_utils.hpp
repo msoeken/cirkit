@@ -41,6 +41,8 @@
 #include <core/utils/bitset_utils.hpp>
 #include <classical/utils/expression_parser.hpp>
 
+#include <kitty/kitty.hpp>
+
 namespace cirkit
 {
 
@@ -309,6 +311,8 @@ tt tt_from_sop_spec( const std::string& spec );
 std::vector<int> walsh_spectrum( const tt& func );
 
 tt tt_maj( tt a, tt b, tt c );
+
+kitty::dynamic_truth_table to_kitty( const tt& tt );
 
 }
 

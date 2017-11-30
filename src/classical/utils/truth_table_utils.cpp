@@ -611,6 +611,13 @@ tt tt_maj(tt a, tt b, tt c)
   return (a & b) | (b & c) | (a & c);
 }
 
+kitty::dynamic_truth_table to_kitty( const tt& tt )
+{
+  kitty::dynamic_truth_table ret( tt_num_vars( tt ) );
+  boost::to_block_range( tt, ret.begin() );
+  return ret;
+}
+
 }
 
 // Local Variables:
