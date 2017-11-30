@@ -121,7 +121,12 @@ void write_qpic( const circuit& circ, std::ostream& os, const properties::ptr& s
     {
       const auto& pauli = boost::any_cast<pauli_tag>( g.type() );
 
-      if ( pauli.axis == pauli_axis::Z )
+      if ( pauli.axis == pauli_axis::X )
+      {
+        items.push_back( format_target( g.targets().front(), "" ) );
+        items.push_back( "X" );
+      }
+      else if ( pauli.axis == pauli_axis::Z )
       {
         items.push_back( format_target( g.targets().front(), "" ) );
 

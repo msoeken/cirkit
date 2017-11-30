@@ -45,66 +45,97 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
+void write_controlled_gate( std::ostream& os, const std::string& indent, const gate& g, const std::string& gatename)
+{
+  const auto target = g.targets().front();
+
+  std::string neg, beg, mid, end;
+  for ( auto i = 0u; i < g.controls().size(); ++i )
+  {
+    if ( !g.controls()[i].polarity() )
+    {
+      neg += boost::str( boost::format( "%sX | qubits[%d]\n" ) % indent % g.controls()[i].line() );
+    }
+    beg += "C(";
+    mid += boost::str( boost::format( "qubits[%d], " ) % g.controls()[i].line() );
+    end += ")";
+  }
+  os << boost::format( "%s%s%s%s%s | (%squbits[%d])\n%s" ) % neg % indent % beg % gatename % end % mid % target % neg;
+}
+
 void write_projectq( const circuit& circ, std::ostream& os, const properties::ptr& settings )
 {
   const auto check_identity = get( settings, "check_identity", true );
+  const auto standalone = get( settings, "standalone", false );
 
   const auto n = circ.lines();
-  os << "import itertools" << std::endl;
-  os << "import sys" << std::endl << std::endl;
+  if ( standalone )
+  {
+    os << "import itertools" << std::endl;
+    os << "import sys" << std::endl << std::endl;
 
-  os << "#!/usr/bin/env python3" << std::endl << std::endl;
-  os << "import projectq" << std::endl;
-  os << "from projectq.cengines import MainEngine" << std::endl;
-  os << "from projectq.ops import H, C, CNOT, Toffoli, NOT, X, Measure, T, Tdag" << std::endl << std::endl;
+    os << "#!/usr/bin/env python3" << std::endl << std::endl;
+    os << "import projectq" << std::endl;
+    os << "from projectq.cengines import MainEngine" << std::endl;
+    os << "from projectq.ops import H, C, CNOT, Toffoli, NOT, X, Measure, T, Tdag" << std::endl << std::endl;
 
-  os << "import numpy as np" << std::endl << std::endl;
+    os << "import numpy as np" << std::endl << std::endl;
 
-  os << "num_qubits = " << n << std::endl << std::endl;
+    os << "num_qubits = " << n << std::endl << std::endl;
 
-  os << "def simulate(input):" << std::endl;
-  os << "    eng = MainEngine()" << std::endl;
-  os << "    qubits = eng.allocate_qureg(num_qubits)" << std::endl;
-  os << "    for i, v in enumerate(input):" << std::endl;
-  os << "        if v:" << std::endl;
-  os << "            X | qubits[i]" << std::endl << std::endl;
+    os << "def simulate(input):" << std::endl;
+    os << "    eng = MainEngine()" << std::endl;
+    os << "    qubits = eng.allocate_qureg(num_qubits)" << std::endl;
+    os << "    for i, v in enumerate(input):" << std::endl;
+    os << "        if v:" << std::endl;
+    os << "            X | qubits[i]" << std::endl << std::endl;
+  }
+
+  std::string indent( ' ', standalone ? 4 : 0 );
 
   for ( const auto& g : circ )
   {
     const auto target = g.targets().front();
 
-    if ( is_toffoli( g ) && !has_negative_control( g ) )
+    if ( is_toffoli( g ) )
     {
-      std::string beg, mid, end;
-      for ( auto i = 0u; i < g.controls().size(); ++i )
-      {
-        beg += "C(";
-        mid += boost::str( boost::format( "qubits[%d], " ) % g.controls()[i].line() );
-        end += ")";
-      }
-      os << boost::format( "    %sNOT%s | (%squbits[%d])" ) % beg % end % mid % target << std::endl;
+      write_controlled_gate( os, indent, g, "NOT" );
     }
     else if ( is_hadamard( g ) )
     {
-      os << boost::format( "    H | qubits[%d]" ) % target << std::endl;
+      os << boost::format( "%sH | qubits[%d]" ) % indent % target << std::endl;
     }
     else if ( is_pauli( g ) )
     {
       const auto pauli = boost::any_cast<pauli_tag>( g.type() );
       switch ( pauli.axis )
       {
-      case pauli_axis::Z:
-        if ( pauli.root == 4u )
+      case pauli_axis::X:
+        if ( pauli.root == 1u )
         {
-          os << boost::format( "    %s | qubits[%d]" ) % ( pauli.adjoint ? "Tdag" : "T" ) % target << std::endl;
+          write_controlled_gate( os, indent, g, "X" );
         }
         else
         {
-          os << "# unsupported gate" << std::endl;
+          os << "# unsupported X root" << std::endl;
+        }
+        break;
+      case pauli_axis::Z:
+        if ( pauli.root == 4u )
+        {
+          os << boost::format( "%s%s | qubits[%d]" ) % indent % ( pauli.adjoint ? "Tdag" : "T" ) % target << std::endl;
+        }
+        else if ( pauli.root == 1u )
+        {
+          write_controlled_gate( os, indent, g, "Z" );
+        }
+        else
+        {
+          os << "# unsupported Z root" << std::endl;
         }
         break;
       default:
-        os << "# unsupported gate" << std::endl;
+        os << "# unsupported Pauli axis" << std::endl;
         break;
       }
     }
@@ -114,25 +145,28 @@ void write_projectq( const circuit& circ, std::ostream& os, const properties::pt
     }
   }
 
-  os << "    eng.flush()" << std::endl << std::endl;
-
-  os << "    r = [[eng.backend.get_amplitude(p, qubits) for p in itertools.product('01', repeat = num_qubits)]]" << std::endl << std::endl;
-
-  os << "    Measure | qubits" << std::endl << std::endl;
-
-  os << "    return r" << std::endl << std::endl;
-
-  os << "M = np.concatenate([simulate(input) for input in itertools.product([False, True], repeat = num_qubits)], axis = 0)" << std::endl << std::endl;
-
-  os << "np.set_printoptions(linewidth = 200)" << std::endl;
-
-  if ( check_identity )
+  if ( standalone )
   {
-    os << boost::format( "print(np.array_equal(np.round(M), np.identity(%d)))" ) % ( 1 << n ) << std::endl;
-  }
-  else
-  {
-    os << "print(np.round(M))" << std::endl;
+    os << "    eng.flush()" << std::endl << std::endl;
+
+    os << "    r = [[eng.backend.get_amplitude(p, qubits) for p in itertools.product('01', repeat = num_qubits)]]" << std::endl << std::endl;
+
+    os << "    Measure | qubits" << std::endl << std::endl;
+
+    os << "    return r" << std::endl << std::endl;
+
+    os << "M = np.concatenate([simulate(input) for input in itertools.product([False, True], repeat = num_qubits)], axis = 0)" << std::endl << std::endl;
+
+    os << "np.set_printoptions(linewidth = 200)" << std::endl;
+
+    if ( check_identity )
+    {
+      os << boost::format( "print(np.array_equal(np.round(M), np.identity(%d)))" ) % ( 1 << n ) << std::endl;
+    }
+    else
+    {
+      os << "print(np.round(M))" << std::endl;
+    }
   }
 }
 
