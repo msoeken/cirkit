@@ -26,6 +26,8 @@
 
 #include "gia_utils.hpp"
 
+#include <unordered_map>
+
 #include <misc/vec/vecInt.h>
 
 namespace abc
@@ -129,6 +131,39 @@ int Gia_LutTFISize( Gia_Man_t * p, int index )
   Gia_ManCleanMark0( p );
 
   return ctr;
+}
+
+DdNode* If_CutComputeBDD_rec( DdManager * cudd, abc::If_Obj_t * pObj, std::unordered_map<int, DdNode*>& node_to_bdd )
+{
+  const auto it = node_to_bdd.find( pObj->Id );
+  if ( it != node_to_bdd.end() )
+  {
+    return it->second;
+  }
+
+  auto b0 = Cudd_NotCond( If_CutComputeBDD_rec( cudd, pObj->pFanin0, node_to_bdd ), pObj->fCompl0 );
+  Cudd_Ref( b0 );
+
+  auto b1 = Cudd_NotCond( If_CutComputeBDD_rec( cudd, pObj->pFanin1, node_to_bdd ), pObj->fCompl1 );
+  Cudd_Ref( b1 );
+
+  auto f = Cudd_bddAnd( cudd, b0, b1 );
+  Cudd_RecursiveDeref( cudd, b0 );
+  Cudd_RecursiveDeref( cudd, b1 );
+
+  return node_to_bdd[pObj->Id] = f;
+}
+
+DdNode* If_CutComputeBDD( DdManager * cudd, abc::If_Obj_t * pRoot, abc::If_Cut_t * pCut )
+{
+  std::unordered_map<int, DdNode*> node_to_bdd;
+
+  for ( auto i = 0; i < pCut->nLeaves; ++i )
+  {
+    node_to_bdd[pCut->pLeaves[i]] = Cudd_bddIthVar( cudd, i );
+  }
+
+  return If_CutComputeBDD_rec( cudd, pRoot, node_to_bdd );
 }
 
 }

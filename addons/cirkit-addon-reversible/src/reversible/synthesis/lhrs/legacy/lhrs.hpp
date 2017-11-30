@@ -25,62 +25,32 @@
  */
 
 /**
- * @file xmg_cover.hpp
+ * @file lut_based_synthesis.hpp
  *
- * @brief Store XMG covers
+ * @brief LUT based synthesis algorithm
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef XMG_COVER_HPP
-#define XMG_COVER_HPP
+#ifndef LUT_BASED_SYNTHESIS_HPP
+#define LUT_BASED_SYNTHESIS_HPP
 
-#include <string>
-#include <unordered_map>
-#include <vector>
-
-#include <boost/range/iterator_range.hpp>
-
-#include <classical/xmg/xmg.hpp>
-#include <classical/xmg/xmg_cuts_paged.hpp>
+#include <core/properties.hpp>
+#include <classical/abc/gia/gia.hpp>
+#include <classical/lut/lut_graph.hpp>
+#include <reversible/circuit.hpp>
+#include <reversible/synthesis/lhrs/legacy/lhrs_params.hpp>
 
 namespace cirkit
 {
 
-class xmg_cover
+namespace legacy
 {
-public:
-  using index_range = boost::iterator_range<std::vector<unsigned>::const_iterator>;
 
-  xmg_cover( unsigned cut_size, const xmg_graph& xmg );
+bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats );
 
-  void add_cut( xmg_node n, const xmg_cuts_paged::cut& cut );
-  void add_cut( xmg_node n, const std::vector<unsigned>& cut );
-  bool has_cut( xmg_node n ) const;
-  index_range cut( xmg_node n ) const;
-  unsigned num_leafs( xmg_node n ) const;
-
-  inline unsigned cut_size() const { return _cut_size; }
-  inline unsigned lut_count() const { return count; }
-
-  /* ref counting */
-  void init_refs() const;
-  unsigned get_ref( xmg_node n ) const;
-  unsigned inc_ref( xmg_node n ) const;
-  unsigned dec_ref( xmg_node n ) const;
-
-private:
-  unsigned              _cut_size; /* remember cut_size */
-
-  std::vector<unsigned> offset; /* address from node index to leafs, 0 if unused */
-  std::vector<unsigned> leafs;  /* first element is unused, then | #leafs | l_1 | l_2 | ... | l_k | */
-  unsigned              count = 0u;
-
-  mutable std::vector<unsigned> ref_count;
-};
-
-void xmg_cover_write_dot( const xmg_graph& xmg, const std::string& filename );
+}
 
 }
 

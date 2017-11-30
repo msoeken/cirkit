@@ -24,35 +24,57 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @file giaUtils.hpp
- *
- * @brief Some functions ABC does not have
- *
- * @author Mathias Soeken
- * @since  2.3
- */
+#include "xmg_extract.hpp"
 
-#ifndef ABC_GIA_GIAUTILS_HPP
-#define ABC_GIA_GIAUTILS_HPP
+#include <map>
 
-#include <classical/abc/abc_api.hpp>
-#include <aig/gia/gia.h>
-#include <map/if/if.h>
+#include <boost/format.hpp>
 
-#include <cudd.h>
+#include <core/properties.hpp>
+#include <classical/xmg/xmg_cover.hpp>
+#include <classical/xmg/xmg_rewrite.hpp>
 
-namespace abc
+namespace cirkit
 {
 
-int Gia_ManMergeTopLuts( Gia_Man_t * p );
-int Gia_LutTFISize( Gia_Man_t * p, int index );
+xmg_graph xmg_extract( const xmg_graph& xmg, xmg_node root, const std::vector<xmg_node>& leaves )
+{
+  auto xmg_copy = xmg;
 
-DdNode* If_CutComputeBDD( DdManager * cudd, abc::If_Obj_t * pRoot, abc::If_Cut_t * pCut );
+  /* remove all outputs from xmg_copy and add one to the root node of the cut */
+  xmg_copy.outputs().clear();
+  xmg_copy.create_po( xmg_function( root, false ), "outroot" );
 
+  xmg_graph xcut;
+
+  prefill_func_t prefill = [leaves]( xmg_graph& xcut, std::map<xmg_node, xmg_function>& old_to_new ) {
+    auto i = 0u;
+    for ( auto leaf : leaves ) {
+      old_to_new[leaf] = xcut.create_pi( boost::str( boost::format( "x%d" ) % i ) );
+      ++i;
+    }
+  };
+
+  auto settings = std::make_shared<properties>();
+  settings->set( "prefill", prefill );
+
+  const auto o = xmg_rewrite_top_down_inplace( xcut, xmg_copy, rewrite_default_maj, rewrite_default_xor, {}, settings ).front();
+  xcut.create_po( o, "o" );
+
+  return xcut;
 }
 
-#endif
+xmg_graph xmg_extract_lut( const xmg_graph& xmg, xmg_node root )
+{
+  assert( xmg.has_cover() && xmg.cover().has_cut( root ) );
+
+  const auto& cut = xmg.cover().cut( root );
+  std::vector<xmg_node> leaves( std::begin( cut ), std::end( cut ) );
+
+  return xmg_extract( xmg, root, leaves );
+}
+
+}
 
 // Local Variables:
 // c-basic-offset: 2

@@ -49,6 +49,7 @@
 #include <cli/commands/enumerate.hpp>
 #include <cli/commands/esop.hpp>
 #include <cli/commands/esopbs.hpp>
+#include <cli/commands/esopps.hpp>
 #include <cli/commands/exorcism.hpp>
 #include <cli/commands/expr.hpp>
 #include <cli/commands/exs.hpp>
@@ -136,6 +137,7 @@ ALICE_BEGIN(revkit)
   ADD_COMMAND( dbs );
   ADD_COMMAND( dxs );
   ADD_COMMAND( esopbs );
+  ADD_COMMAND( esopps );
   ADD_COMMAND( exs );
   ADD_COMMAND( hdbs );
   ADD_COMMAND( lhrs );

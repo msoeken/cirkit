@@ -89,6 +89,11 @@ xmg_cover::index_range xmg_cover::cut( xmg_node n ) const
                                      leafs.begin() + offset[n] + 1u + leafs[offset[n]] );
 }
 
+unsigned xmg_cover::num_leafs( xmg_node n ) const
+{
+  return leafs[offset[n]];
+}
+
 void xmg_cover::init_refs() const
 {
   ref_count.resize( offset.size(), 0u );

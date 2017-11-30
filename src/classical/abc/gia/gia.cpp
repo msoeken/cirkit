@@ -44,6 +44,7 @@ namespace abc
 Gia_Man_t * Eso_ManCompute( Gia_Man_t * pGia, int fVerbose, Vec_Wec_t ** pvRes );
 void Gia_ManLutSat( Gia_Man_t * p, int LutSize, int nNumber, int nImproves, int nBTLimit, int DelayMax, int nEdges, int fDelay, int fReverse, int fVerbose, int fVeryVerbose );
 void Gia_WriteDotAigSimple( Gia_Man_t * p, char * pFileName, Vec_Int_t * vBold );
+void Gia_ManSuperCollect( Gia_Man_t * p, Gia_Obj_t * pObj, int fStrict );
 }
 
 /******************************************************************************
@@ -221,6 +222,22 @@ gia_graph gia_graph::syn4() const
   return gia_graph( abc::Gia_ManAigSyn4( p_gia.get(), 0, 0 ) );
 }
 
+gia_graph gia_graph::detect_xors() const
+{
+  gia_graph gia( abc::Gia_ManDupMuxes( p_gia.get(), 1 ) );
+
+  abc::Gia_ManCreateRefs( gia );
+  gia.foreach_and( [&gia]( auto index, auto obj ) {
+      if ( abc::Gia_ObjIsXor( obj ) )
+      {
+        abc::Gia_ManSuperCollect( gia, obj, 0 );
+        std::cout << "Object " << index << " has XOR superblock of size " << abc::Vec_IntSize( gia.p_gia.get()->vSuper ) << std::endl;
+      }
+    } );
+
+  return gia;
+}
+
 /******************************************************************************
  * Mapping                                                                    *
  ******************************************************************************/
@@ -245,6 +262,30 @@ gia_graph gia_graph::if_mapping( const properties::ptr& settings, const properti
   params.nAreaIters = area_iters;
 
   auto mapped_gia = abc::Gia_ManPerformMapping( p_gia.get(), &params );
+  //auto mapped_gia = gia_if2( p_gia.get(), &params );
+
+  return gia_graph( mapped_gia );
+}
+
+gia_graph gia_graph::mf_mapping( const properties::ptr& settings, const properties::ptr& statistics ) const
+{
+  /* settings */
+  const auto lut_size     = get( settings, "lut_size",     6u );
+  const auto area_mapping = get( settings, "area_mapping", false );
+  const auto rounds       = get( settings, "rounds",       2u );
+  const auto rounds_ela   = get( settings, "rounds_ela",   1u );
+
+  abc::Jf_Par_t params;
+
+  abc::Mf_ManSetDefaultPars( &params );
+  params.nLutSize = lut_size;
+  params.fAreaOnly = area_mapping ? 1 : 0;
+  params.nRounds = rounds;
+  params.nRoundsEla = rounds_ela;
+  // params.fCoarsen = 1;
+  // params.nCoarseLimit = 1;
+
+  auto mapped_gia = abc::Mf_ManPerformMapping( p_gia.get(), &params );
 
   return gia_graph( mapped_gia );
 }

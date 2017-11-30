@@ -24,56 +24,78 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @file lhrs.hpp
- *
- * @brief LUT-based hierarchical reversible synthesis
- *
- * @author Mathias Soeken
- * @since  2.3
- */
-
-#ifndef CLI_LHRS_COMMAND_HPP
-#define CLI_LHRS_COMMAND_HPP
-
-#include <memory>
-
-#include <cli/aig_command.hpp>
-#include <reversible/synthesis/lhrs/legacy/lhrs_params.hpp>
+#include "stg_partners.hpp"
 
 namespace cirkit
 {
 
-class lhrs_command : public aig_base_command
+namespace legacy
 {
-public:
-  lhrs_command( const environment::ptr& env );
 
-protected:
-  rules_t validity_rules() const;
-  bool execute();
-
-public:
-  log_opt_t log() const;
-
-private:
-  legacy::lhrs_params params;
-  std::shared_ptr<legacy::lhrs_stats> stats;
-
-  unsigned cut_size = 16u;
-  unsigned lut_count = 0u;
-  unsigned area_iters_init = 2u;
-  unsigned flow_iters_init = 1u;
-
-  std::string dotname_mapped;
-
-private:
-  unsigned debug_lb = 0;
-};
-
+bool stg_partners::has_partners( int index ) const
+{
+  return _partner_index.find( index ) != _partner_index.end();
 }
 
-#endif
+const std::vector<int>& stg_partners::partners( int index ) const
+{
+  return _partner_vectors[_partner_index.at( index )];
+}
+
+void stg_partners::add_partners( const std::vector<int>& partners )
+{
+  auto index = _partner_vectors.size();
+  _partner_vectors.emplace_back( partners.begin(), partners.end() );
+
+  for ( auto p : partners )
+  {
+    _partner_index[p] = index;
+  }
+}
+
+stg_partners find_stg_partners( const gia_graph& gia )
+{
+  stg_partners partners;
+
+  auto* xors = static_cast<abc::Gia_Man_t*>( gia )->vXors;
+  if ( !xors )
+  {
+    return partners;
+  }
+
+  gia.init_lut_refs();
+
+  gia.foreach_lut( [&gia, &xors, &partners]( auto index ) {
+    if ( abc::Vec_IntFind( xors, index ) != -1 )
+    {
+      auto add = true;
+      std::vector<int> indexes;
+
+      gia.foreach_lut_fanin( index, [&gia, &add, &indexes]( auto fanin ) {
+        if ( add )
+        {
+          if ( gia.lut_ref_num( fanin ) == 1 )
+          {
+            indexes.push_back( fanin );
+          }
+          else
+          {
+            add = false;
+          }
+        }
+      } );
+
+      if ( add )
+      {
+        partners.add_partners( indexes );
+      }
+    }
+  } );
+
+  return partners;
+}
+}
+}
 
 // Local Variables:
 // c-basic-offset: 2

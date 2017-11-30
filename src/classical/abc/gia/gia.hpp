@@ -97,10 +97,12 @@ public:
   gia_graph select_outputs( const std::vector<int>& indexes ) const;
   gia_graph syn3() const;
   gia_graph syn4() const;
+  gia_graph detect_xors() const;
 
   /// MAPPING
 
   gia_graph if_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
+  gia_graph mf_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
   void satlut_mapping( const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr() ) const;
 
   inline bool has_mapping() const { return abc::Gia_ManHasMapping( p_gia.get() ) == 1; }

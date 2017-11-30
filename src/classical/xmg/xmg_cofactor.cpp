@@ -24,32 +24,43 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @file lut_based_synthesis.hpp
- *
- * @brief LUT based synthesis algorithm
- *
- * @author Mathias Soeken
- * @since  2.3
- */
+#include "xmg_cofactor.hpp"
 
-#ifndef LUT_BASED_SYNTHESIS_HPP
-#define LUT_BASED_SYNTHESIS_HPP
-
-#include <core/properties.hpp>
-#include <classical/abc/gia/gia.hpp>
-#include <classical/lut/lut_graph.hpp>
-#include <reversible/circuit.hpp>
-#include <reversible/synthesis/lhrs/lhrs_params.hpp>
+#include <classical/xmg/xmg_rewrite.hpp>
 
 namespace cirkit
 {
 
-bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const lhrs_params& params, lhrs_stats& stats );
+xmg_graph xmg_cofactor( const xmg_graph& xmg, unsigned input_index, bool value )
+{
+  xmg_graph dest( xmg.name() );
+  const auto n = xmg.inputs().size();
 
+  std::vector<xmg_function> pi_mapping( n );
+
+  for ( auto i = 0u; i < n; ++i )
+  {
+    if ( i == input_index )
+    {
+      pi_mapping[i] = dest.get_constant( value );
+    }
+    else
+    {
+      pi_mapping[i] = dest.create_pi( xmg.inputs()[i].second );
+    }
+  }
+
+  const auto fs = xmg_rewrite_top_down_inplace( dest, xmg, rewrite_default_maj, rewrite_default_xor, pi_mapping );
+
+  for ( auto i = 0u; i < xmg.outputs().size(); ++i )
+  {
+    dest.create_po( fs[i], xmg.outputs()[i].second );
+  }
+
+  return dest;
 }
 
-#endif
+}
 
 // Local Variables:
 // c-basic-offset: 2

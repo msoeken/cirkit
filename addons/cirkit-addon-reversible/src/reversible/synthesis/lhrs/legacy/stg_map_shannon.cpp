@@ -29,11 +29,12 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
-#include <classical/xmg/xmg_cofactor.hpp>
 #include <reversible/functions/add_gates.hpp>
-#include <reversible/synthesis/lhrs/stg_map_luts.hpp>
 
 namespace cirkit
+{
+
+namespace legacy
 {
 
 /******************************************************************************
@@ -43,7 +44,7 @@ namespace cirkit
 class stg_map_shannon_impl
 {
 public:
-  stg_map_shannon_impl( circuit& circ, const xmg_graph& function,
+  stg_map_shannon_impl( circuit& circ, const gia_graph& function,
                         const std::vector<unsigned>& line_map,
                         const std::vector<unsigned>& ancillas,
                         const stg_map_shannon_params& params,
@@ -60,7 +61,7 @@ public:
   void run()
   {
     /* check whether function should be mapped with LUTs based approach */
-    const auto num_inputs = function.inputs().size();
+    const auto num_inputs = function.num_inputs();
     if ( num_inputs <= params.map_luts_params->max_cut_size || /* function is small, use pre-computed approach */
          ( line_map.size() + ancillas.size() == circ.lines() ) ) /* there are no dirty ancillas */
     {
@@ -72,8 +73,8 @@ public:
     auto var = 0;
 
     /* compute cofactors */
-    const auto gia0 = xmg_cofactor( function, var, false );
-    const auto gia1 = xmg_cofactor( function, var, true );
+    const auto gia0 = function.cofactor( var, false );
+    const auto gia1 = function.cofactor( var, true );
 
     const auto dirty = get_dirty_ancilla();
 
@@ -130,7 +131,7 @@ private:
 
 private:
   circuit& circ;
-  const xmg_graph& function;
+  const gia_graph& function;
   const std::vector<unsigned>& line_map;
   const std::vector<unsigned>& ancillas;
   const stg_map_shannon_params& params;
@@ -145,7 +146,7 @@ private:
  * Public functions                                                           *
  ******************************************************************************/
 
-void stg_map_shannon( circuit& circ, const xmg_graph& function,
+void stg_map_shannon( circuit& circ, const gia_graph& function,
                       const std::vector<unsigned>& line_map,
                       const std::vector<unsigned>& ancillas,
                       const stg_map_shannon_params& params,
@@ -153,6 +154,8 @@ void stg_map_shannon( circuit& circ, const xmg_graph& function,
 {
   stg_map_shannon_impl impl( circ, function, line_map, ancillas, params, stats );
   impl.run();
+}
+
 }
 
 }

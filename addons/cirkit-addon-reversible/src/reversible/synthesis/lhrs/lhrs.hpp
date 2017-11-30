@@ -25,85 +25,26 @@
  */
 
 /**
- * @file stg_map_shannon.hpp
+ * @file lut_based_synthesis.hpp
  *
- * @brief Map single-target gate using Shannon decomposition
+ * @brief LUT based synthesis algorithm
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef STG_MAP_SHANNON_HPP
-#define STG_MAP_SHANNON_HPP
+#ifndef LUT_BASED_SYNTHESIS_HPP
+#define LUT_BASED_SYNTHESIS_HPP
 
-#include <vector>
-
+#include <core/properties.hpp>
 #include <classical/xmg/xmg.hpp>
 #include <reversible/circuit.hpp>
-#include <reversible/synthesis/lhrs/stg_map_luts.hpp>
+#include <reversible/synthesis/lhrs/lhrs_params.hpp>
 
 namespace cirkit
 {
 
-struct stg_map_shannon_params
-{
-  stg_map_shannon_params()
-    : own_sub_params( true ),
-      map_luts_params( new stg_map_luts_params() )
-  {
-  }
-
-  stg_map_shannon_params( const stg_map_luts_params& map_luts_params )
-    : own_sub_params( false ),
-      map_luts_params( &map_luts_params )
-  {
-  }
-
-  ~stg_map_shannon_params()
-  {
-    if ( own_sub_params )
-    {
-      delete map_luts_params;
-    }
-  }
-
-  bool own_sub_params = false;
-
-  stg_map_luts_params const* map_luts_params = nullptr;
-};
-
-struct stg_map_shannon_stats
-{
-  stg_map_shannon_stats()
-    : own_sub_stats( true ),
-      map_luts_stats( new stg_map_luts_stats() )
-  {
-  }
-
-  stg_map_shannon_stats( stg_map_luts_stats& map_luts_stats )
-    : own_sub_stats( false ),
-      map_luts_stats( &map_luts_stats )
-  {
-  }
-
-  ~stg_map_shannon_stats()
-  {
-    if ( own_sub_stats )
-    {
-      delete map_luts_stats;
-    }
-  }
-
-  bool own_sub_stats = false;
-
-  stg_map_luts_stats* map_luts_stats = nullptr;
-};
-
-void stg_map_shannon( circuit& circ, const xmg_graph& function,
-                      const std::vector<unsigned>& line_map,
-                      const std::vector<unsigned>& ancillas,
-                      const stg_map_shannon_params& params,
-                      stg_map_shannon_stats& stats );
+bool lut_based_synthesis( circuit& circ, const xmg_graph& xmg, const lhrs_params& params, lhrs_stats& stats );
 
 }
 

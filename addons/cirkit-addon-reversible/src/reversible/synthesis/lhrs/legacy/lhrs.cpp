@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "lut_based_synthesis.hpp"
+#include "lhrs.hpp"
 
 #include <fstream>
 #include <vector>
@@ -57,12 +57,16 @@
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/clear_circuit.hpp>
 #include <reversible/io/print_circuit.hpp>
-#include <reversible/synthesis/lhrs/stg_map_esop.hpp>
-#include <reversible/synthesis/lhrs/stg_map_precomp.hpp>
+#include <reversible/synthesis/lhrs/legacy/stg_map_esop.hpp>
+#include <reversible/synthesis/lhrs/legacy/stg_map_precomp.hpp>
+#include <reversible/synthesis/lhrs/legacy/stg_partners.hpp>
 #include <reversible/utils/circuit_utils.hpp>
 #include <reversible/utils/costs.hpp>
 
 namespace cirkit
+{
+
+namespace legacy
 {
 
 /******************************************************************************
@@ -271,6 +275,7 @@ public:
   defer_lut_order_heuristic( const gia_graph& gia, unsigned additional_ancilla )
     : lut_order_heuristic( gia, additional_ancilla )
   {
+    partners = find_stg_partners( gia );
   }
 
 public:
@@ -300,17 +305,32 @@ private:
     adjust_indegrees();
 
     gia().foreach_lut( [this]( int index ) {
-        const auto target = request_constant();
-        (*this)[index] = target;
+        const auto is_partners = partners.has_partners( index );
 
-        add_step( index, target, lut_order_heuristic::compute );
-
-        /* start uncomputing */
-        if ( gia().lut_ref_num( index ) == 0 )
+        if ( !is_partners || partners.partners( index ).front() == index )
         {
-          visited.clear();
-          decrease_children_indegrees( index );
-          uncompute_children( index );
+          const auto target = request_constant();
+          (*this)[index] = target;
+
+          if ( is_partners )
+          {
+            for ( auto p : partners.partners( index ) )
+            {
+              add_step( p, target, lut_order_heuristic::compute );
+            }
+          }
+          else
+          {
+            add_step( index, target, lut_order_heuristic::compute );
+          }
+
+          /* start uncomputing */
+          if ( gia().lut_ref_num( index ) == 0 )
+          {
+            visited.clear();
+            decrease_children_indegrees( index );
+            uncompute_children( index );
+          }
         }
       } );
 
@@ -356,8 +376,23 @@ private:
     if ( !is_output_lut( index ) )
     {
       const auto target = (*this)[index];
-      add_step( index, target, lut_order_heuristic::uncompute );
-      free_constant( target );
+
+      const auto is_partners = partners.has_partners( index );
+      if ( !is_partners || partners.partners( index ).front() == index )
+      {
+        if ( is_partners )
+        {
+          for ( auto p : partners.partners( index ) )
+          {
+            add_step( p, target, lut_order_heuristic::uncompute );
+          }
+        }
+        else
+        {
+          add_step( index, target, lut_order_heuristic::uncompute );
+        }
+        free_constant( target );
+      }
     }
 
     visited.push_back( index );
@@ -388,6 +423,8 @@ private:
 
   std::vector<int> visited;
   std::vector<int> output_luts;
+
+  stg_partners partners;
 };
 
 /******************************************************************************
@@ -679,6 +716,8 @@ bool lut_based_synthesis( circuit& circ, const gia_graph& gia, const lhrs_params
   const auto result = mgr.run();
 
   return result;
+}
+
 }
 
 }

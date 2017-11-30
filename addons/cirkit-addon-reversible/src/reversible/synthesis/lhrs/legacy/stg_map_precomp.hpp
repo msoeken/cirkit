@@ -25,85 +25,60 @@
  */
 
 /**
- * @file stg_map_shannon.hpp
+ * @file stg_map_precomp.hpp
  *
- * @brief Map single-target gate using Shannon decomposition
+ * @brief Map single-target gate using precomputed results
  *
  * @author Mathias Soeken
  * @since  2.3
  */
 
-#ifndef STG_MAP_SHANNON_HPP
-#define STG_MAP_SHANNON_HPP
+#ifndef STG_MAP_PRECOMP_HPP
+#define STG_MAP_PRECOMP_HPP
 
+#include <cinttypes>
+#include <unordered_map>
 #include <vector>
 
-#include <classical/xmg/xmg.hpp>
+#include <classical/utils/truth_table_utils.hpp>
 #include <reversible/circuit.hpp>
-#include <reversible/synthesis/lhrs/stg_map_luts.hpp>
 
 namespace cirkit
 {
 
-struct stg_map_shannon_params
+namespace legacy
 {
-  stg_map_shannon_params()
-    : own_sub_params( true ),
-      map_luts_params( new stg_map_luts_params() )
-  {
-  }
 
-  stg_map_shannon_params( const stg_map_luts_params& map_luts_params )
-    : own_sub_params( false ),
-      map_luts_params( &map_luts_params )
-  {
-  }
-
-  ~stg_map_shannon_params()
-  {
-    if ( own_sub_params )
-    {
-      delete map_luts_params;
-    }
-  }
-
-  bool own_sub_params = false;
-
-  stg_map_luts_params const* map_luts_params = nullptr;
+struct stg_map_precomp_params
+{
+  unsigned                     class_method       = 0u;                                          /* classification method: 0u: spectral, 1u: affine */
 };
 
-struct stg_map_shannon_stats
+struct stg_map_precomp_stats
 {
-  stg_map_shannon_stats()
-    : own_sub_stats( true ),
-      map_luts_stats( new stg_map_luts_stats() )
+  stg_map_precomp_stats()
+    : class_counter( 4u ),
+      class_hash( 4u )
   {
+    class_counter[0u].resize( 3u );
+    class_counter[1u].resize( 6u );
+    class_counter[2u].resize( 18u );
+    class_counter[3u].resize( 48u );
   }
 
-  stg_map_shannon_stats( stg_map_luts_stats& map_luts_stats )
-    : own_sub_stats( false ),
-      map_luts_stats( &map_luts_stats )
-  {
-  }
+  double   class_runtime     = 0.0;
 
-  ~stg_map_shannon_stats()
-  {
-    if ( own_sub_stats )
-    {
-      delete map_luts_stats;
-    }
-  }
+  std::vector<std::vector<unsigned>> class_counter;
 
-  bool own_sub_stats = false;
-
-  stg_map_luts_stats* map_luts_stats = nullptr;
+  std::vector<std::unordered_map<uint64_t, uint64_t>> class_hash;
 };
 
-void stg_map_shannon( circuit& circ, const xmg_graph& function,
+void stg_map_precomp( circuit& circ, uint64_t function, unsigned num_vars,
                       const std::vector<unsigned>& line_map,
-                      const std::vector<unsigned>& ancillas,
-                      const stg_map_shannon_params& params,
-                      stg_map_shannon_stats& stats );
+                      const stg_map_precomp_params& params,
+                      stg_map_precomp_stats& stats );
+
+}
 
 }
 

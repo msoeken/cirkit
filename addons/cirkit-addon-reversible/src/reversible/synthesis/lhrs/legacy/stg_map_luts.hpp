@@ -38,12 +38,15 @@
 
 #include <vector>
 
-#include <classical/xmg/xmg.hpp>
+#include <classical/abc/gia/gia.hpp>
 #include <reversible/circuit.hpp>
-#include <reversible/synthesis/lhrs/stg_map_esop.hpp>
-#include <reversible/synthesis/lhrs/stg_map_precomp.hpp>
+#include <reversible/synthesis/lhrs/legacy/stg_map_esop.hpp>
+#include <reversible/synthesis/lhrs/legacy/stg_map_precomp.hpp>
 
 namespace cirkit
+{
+
+namespace legacy
 {
 
 struct stg_map_luts_params
@@ -120,11 +123,13 @@ struct stg_map_luts_stats
   stg_map_precomp_stats * map_precomp_stats = nullptr;
 };
 
-void stg_map_luts( circuit& circ, const xmg_graph& function,
+void stg_map_luts( circuit& circ, const gia_graph& function,
                    const std::vector<unsigned>& line_map,
                    const std::vector<unsigned>& ancillas,
                    const stg_map_luts_params& params,
                    stg_map_luts_stats& stats );
+
+}
 
 }
 

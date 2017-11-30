@@ -37,8 +37,11 @@
 #include <classical/abc/utils/abc_run_command.hpp>
 #include <classical/io/read_blif.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
+#include <classical/xmg/xmg_aig.hpp>
+#include <classical/xmg/xmg_cover.hpp>
+#include <classical/xmg/xmg_mapping.hpp>
 #include <cli/reversible_stores.hpp>
-#include <reversible/synthesis/lut_based_synthesis.hpp>
+#include <reversible/synthesis/lhrs/legacy/lhrs.hpp>
 
 using boost::program_options::bool_switch;
 using boost::program_options::value;
@@ -106,11 +109,17 @@ bool lhrs_command::execute()
 
   circuit circ;
 
-  stats = std::make_shared<lhrs_stats>();
+  stats = std::make_shared<legacy::lhrs_stats>();
 
   const auto gia = gia_graph( aig() );
-  const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ) ) );
-  lut_based_synthesis( circuits.current(), lut, params, *stats );
+
+  const auto lut = gia.if_mapping( make_settings_from( std::make_pair( "lut_size", cut_size ), "area_mapping", std::make_pair( "area_iters", area_iters_init ), std::make_pair( "flow_iters", flow_iters_init ), std::make_pair( "rounds", 7u ), std::make_pair( "rounds_ela", 7u ) ) );
+  legacy::lut_based_synthesis( circuits.current(), /*xmg_from_gia( lut )*/ lut, params, *stats );
+
+  // auto& xmg = env->store<xmg_graph>().current();
+  // xmg_map( xmg, make_settings_from( std::make_pair( "cut_size", cut_size ) ) );
+  // lut_based_synthesis( circuits.current(), xmg, params, *stats );
+
   lut_count = lut.lut_count();
 
   if ( is_set( "dotname_mapped" ) )
