@@ -616,7 +616,7 @@ namespace cirkit
 
     boost::optional<const std::map<std::string, std::string>& > operator()( const subcircuit& circ ) const
     {
-      return operator()( circ );
+      return operator()( *circ.base );
     }
 
   private:
