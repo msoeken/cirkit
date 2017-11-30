@@ -1,3 +1,5 @@
+add_subdirectory(kitty)
+
 add_cirkit_library(
   NAME extra
   SOURCES

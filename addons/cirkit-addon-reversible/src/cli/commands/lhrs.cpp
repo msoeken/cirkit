@@ -39,7 +39,6 @@
 #include <classical/optimization/exorcism_minimization.hpp>
 #include <classical/xmg/xmg_aig.hpp>
 #include <classical/xmg/xmg_cover.hpp>
-#include <classical/xmg/xmg_mapping.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/synthesis/lhrs/legacy/lhrs.hpp>
 
