@@ -290,14 +290,19 @@ xmg_graph xmg_minlib_manager::find_xmg_no_npn( const tt& spec )
 
 void xmg_minlib_manager::add_to_library( const xmg_graph& xmg )
 {
-  const auto sim_res = simulate_xmg( xmg, xmg_tt_simulator() );
-  assert( sim_res.size() == 1u );
+  auto sim_res = simulate_xmg( xmg, xmg_tt_simulator() ).at( xmg.outputs().front().first );
+  //assert( sim_res.size() == 1u );
+
+  if ( xmg.inputs().size() < 6u )
+  {
+    tt_shrink( sim_res, xmg.inputs().size() );
+  }
 
   /* compute expression from XMG and add it to the library */
   const auto expr = xmg_to_expression( xmg, xmg.outputs().front().first );
   const auto str = expression_to_string( expr );
 
-  add_to_library( tt_to_hex( sim_res.at( xmg.outputs().front().first ) ), str );
+  add_to_library( tt_to_hex( sim_res ), str );
 }
 
 bool xmg_minlib_manager::verify()
