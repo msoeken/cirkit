@@ -55,7 +55,6 @@ class readline
 {
 public:
   readline( const environment::ptr& env )
-    : env( env )
   {
     instance = this;
 
@@ -125,8 +124,6 @@ private:
   }
 
 private:
-  const environment::ptr& env;
-
   static readline*         instance;
   std::vector<std::string> command_names;
 };
