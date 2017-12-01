@@ -44,7 +44,6 @@
 #include <classical/aig.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
-#define LIN64
 #include <base/main/main.h>
 #include <aig/gia/gia.h>
 #include <misc/vec/vecWec.h>

@@ -38,7 +38,6 @@
 #ifndef ABC_API_HPP
 #define ABC_API_HPP
 
-#define LIN64
 #include <base/main/main.h>
 #include <aig/aig/aig.h>
 #include <aig/gia/gia.h>

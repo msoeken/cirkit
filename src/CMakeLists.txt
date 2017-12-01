@@ -17,12 +17,12 @@ add_cirkit_library(
   AUTO_DIRS classical
   USE
     cirkit_core
-    ${abc_LIBRARIES}
+    libabc
     kitty
     #${abc_LIBRARIES}
     ${MINISAT_LIBRARIES}
-  INCLUDE
-    SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc/src
+  #INCLUDE
+  #  SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/ext/abc-prefix/src/abc/src
 )
 
 add_cirkit_library(

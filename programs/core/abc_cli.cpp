@@ -32,15 +32,13 @@
  * @author Mathias Soeken
  */
 
-#define LIN64
-
-#include <base/wlc/wlc.h>
-#include <aig/gia/gia.h>
-
 #include <boost/format.hpp>
 
 #include <alice/command.hpp>
 #include <alice/alice.hpp>
+
+#include <base/wlc/wlc.h>
+#include <aig/gia/gia.h>
 
 namespace alice
 {
@@ -181,7 +179,7 @@ inline bool store_can_convert<abc::Wlc_Ntk_t*, abc::Gia_Man_t*>()
 template<>
 abc::Gia_Man_t* store_convert<abc::Wlc_Ntk_t*, abc::Gia_Man_t*>( abc::Wlc_Ntk_t* const& wlc )
 {
-  return abc::Wlc_NtkBitBlast( wlc, nullptr, -1, 2, 0, 0, 0 );
+  return abc::Wlc_NtkBitBlast( wlc, nullptr, -1, 2, 0, 0, 0, 0, 0, 0 );
 }
 
 /******************************************************************************
