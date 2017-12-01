@@ -28,10 +28,6 @@
 
 #include <chrono>
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
-
 namespace cirkit
 {
 
@@ -118,7 +114,7 @@ std::vector<unsigned> get_index_vector( const boost::dynamic_bitset<> b )
   auto pos = b.find_first();
   while ( pos != boost::dynamic_bitset<>::npos )
   {
-    v += pos;
+    v.push_back( pos );
     pos = b.find_next( pos );
   }
 

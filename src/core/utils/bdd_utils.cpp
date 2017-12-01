@@ -30,7 +30,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/iota.hpp>
@@ -40,8 +39,6 @@
 #include <cuddInt.h>
 
 #include <core/utils/range_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -487,7 +484,7 @@ std::vector<DdNode*> bdd_copy( DdManager* mgr_from, const std::vector<DdNode*>& 
 
   for ( auto* node : from )
   {
-    ret += Cudd_NotCond( bdd_copy_rec( mgr_from, Cudd_Regular( node ), mgr_to, visited, index_map ), Cudd_IsComplement( node ) );
+    ret.push_back( Cudd_NotCond( bdd_copy_rec( mgr_from, Cudd_Regular( node ), mgr_to, visited, index_map ), Cudd_IsComplement( node ) ) );
   }
 
   return ret;
@@ -506,7 +503,7 @@ std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, c
 
   for ( auto* node : orig )
   {
-    ret += BDD( mgr_to, node );
+    ret.push_back( BDD( mgr_to, node ) );
   }
 
   return ret;

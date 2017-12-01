@@ -31,13 +31,10 @@
 #include <iostream>
 
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 
 #include <sys/wait.h>
 #include <unistd.h>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -53,7 +50,7 @@ result_t execute_and_return( const std::string& cmd, const std::string& pattern 
   while ( getline( is, line ) )
   {
     boost::trim( line );
-    result += line;
+    result.push_back( line );
   }
   is.close();
 

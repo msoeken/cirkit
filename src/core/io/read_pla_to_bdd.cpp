@@ -28,7 +28,6 @@
 
 #include <fstream>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm.hpp>
@@ -38,8 +37,6 @@
 #include <core/utils/timer.hpp>
 
 #include "pla_parser.hpp"
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -88,7 +85,7 @@ namespace cirkit
 
     void on_cube( const std::string& in, const std::string& out )
     {
-      pla.cubes += std::make_pair( in, out );
+      pla.cubes.push_back( std::make_pair( in, out ) );
     }
   private:
     pla_t& pla;
@@ -105,7 +102,7 @@ namespace cirkit
     {
       for ( unsigned i : boost::counting_range( 0u, *p.num_inputs ) )
       {
-        p.input_labels += boost::str( boost::format( "i%d" ) % i );
+        p.input_labels.push_back( boost::str( boost::format( "i%d" ) % i ) );
       }
     }
 
@@ -113,7 +110,7 @@ namespace cirkit
     {
       for ( unsigned i : boost::counting_range( 0u, *p.num_outputs ) )
       {
-        p.output_labels += boost::str( boost::format( "o%d" ) % i );
+        p.output_labels.push_back( boost::str( boost::format( "o%d" ) % i ) );
       }
     }
 
@@ -392,7 +389,7 @@ namespace cirkit
       f = tmp2;
     }
 
-    bdd.outputs += std::make_pair( "f", f );
+    bdd.outputs.push_back( std::make_pair( "f", f ) );
     bdd.num_real_outputs = *pla.num_outputs;
 
     Cudd_RecursiveDeref( bdd.cudd, ys );

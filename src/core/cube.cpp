@@ -29,13 +29,10 @@
 #include <cstdlib>
 #include <fstream>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 
 #include <core/io/pla_parser.hpp>
 #include <core/utils/range_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -120,7 +117,7 @@ std::vector<cube> cube::disjoint_sharp( const cube& other ) const
     auto _care = ( cpos & cposother & first_mask ) | ( cpos & ~first_mask );
     bposother.flip( i ); cposother.flip( i );
 
-    vec += cube( ~_bits, _bits ^ _care );
+    vec.push_back( cube( ~_bits, _bits ^ _care ) );
   }
 
   return vec;
@@ -174,7 +171,7 @@ public:
   {
     if ( out[output] == '1' )
     {
-      cubes += cube( in );
+      cubes.push_back( cube( in ) );
     }
   }
 
@@ -204,7 +201,7 @@ public:
     {
       if ( it.value == '1' )
       {
-        cubes[it.index] += c;
+        cubes[it.index].push_back( c );
       }
     }
   }

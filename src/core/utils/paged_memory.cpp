@@ -26,12 +26,9 @@
 
 #include "paged_memory.hpp"
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/numeric.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -187,7 +184,7 @@ void paged_memory::assign_empty( unsigned index, const std::vector<unsigned>& ex
 {
   _offset[index] = _data.size();
   _count[index] = 1u;
-  _data += 0u;
+  _data.push_back( 0u );
   boost::push_back( _data, extra );
 }
 
@@ -195,9 +192,9 @@ void paged_memory::assign_singleton( unsigned index, unsigned value, const std::
 {
   _offset[index] = _data.size();
   _count[index] = 1u;
-  _data += 1u;
+  _data.push_back( 1u );
   boost::push_back( _data, extra );
-  _data += value;
+  _data.push_back( value );
 }
 
 void paged_memory::append_begin( unsigned index )
@@ -208,15 +205,15 @@ void paged_memory::append_begin( unsigned index )
 void paged_memory::append_singleton( unsigned index, unsigned value, const std::vector<unsigned>& extra )
 {
   _count[index]++;
-  _data += 1u;
+  _data.push_back( 1u );
   boost::push_back( _data, extra );
-  _data += value;
+  _data.push_back( value );
 }
 
 void paged_memory::append_set( unsigned index, const std::vector<unsigned>& values, const std::vector<unsigned>& extra )
 {
   _count[index]++;
-  _data += values.size();
+  _data.push_back( values.size() );
   boost::push_back( _data, extra );
   boost::push_back( _data, values );
 }
