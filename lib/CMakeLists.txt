@@ -1,8 +1,5 @@
-set(CMAKE_CXX_FLAGS_TMP ${CMAKE_CXX_FLAGS})
-set(CMAKE_CXX_FLAGS "-Wno-unused-variable -Wno-macro-redefined -Wno-format")
 set(ABC_USE_NAMESPACE "abc")
 add_subdirectory( abc )
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_TMP})
 
 add_subdirectory(kitty)
 

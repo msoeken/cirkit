@@ -35,7 +35,7 @@ add_cirkit_program(
   SOURCES
     core/abc_cli.cpp
   USE
-    libabc
+    libabc-pic
     ${Boost_SYSTEM_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARIES}
     ${Boost_PROGRAM_OPTIONS_LIBRARIES}
