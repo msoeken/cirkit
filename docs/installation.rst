@@ -6,7 +6,7 @@ Requirements and dependencies
 
 The following software is required in order to build CirKit
 
-* git
+* git (at least version 1.6.5)
 * cmake (at least version 3.0.0)
 * g++ (at least version 4.9.0) or clang++ (at least version 3.5.0)
 * boost (at least version 1.56.0)
@@ -41,6 +41,8 @@ Build and run CirKit
 
 After extracting or cloning CirKit perform the following steps::
 
+  git clone --recursive https://github.com/msoeken/cirkit.git
+  cd cirkit
   mkdir build
   cd build
   cmake ..
@@ -56,6 +58,8 @@ Build and run RevKit
 
 After extracting or cloning CirKit perform the following steps::
 
+  git clone --recursive https://github.com/msoeken/cirkit.git
+  cd cirkit
   mkdir build
   cd build
   cmake -Denable_cirkit-addon-reversible=ON -Denable_cirkit-addon-formal=ON ..
