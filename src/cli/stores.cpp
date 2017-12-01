@@ -256,7 +256,7 @@ command::log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
   std::vector<aig_node> outputs;
   for ( const auto& output : info.outputs )
   {
-    outputs += output.first.node;
+    outputs.push_back( output.first.node );
   }
 
   std::vector<unsigned> depths;
@@ -444,7 +444,7 @@ command::log_opt_t log_store_entry_statistics<mig_graph>( const mig_graph& mig )
   std::vector<mig_node> outputs;
   for ( const auto& output : info.outputs )
   {
-    outputs += output.first.node;
+    outputs.push_back( output.first.node );
   }
 
   std::vector<unsigned> depths;

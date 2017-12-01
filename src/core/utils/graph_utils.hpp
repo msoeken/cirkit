@@ -39,14 +39,11 @@
 #include <map>
 #include <vector>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
-
-using namespace boost::assign;
 
 namespace boost
 {
@@ -117,7 +114,7 @@ inline std::map<vertex_t<G>, std::vector<edge_t<G>>> precompute_ingoing_edges( c
   std::map<vertex_t<G>, std::vector<edge_t<G>>> m;
   for ( const auto& e : boost::make_iterator_range( boost::edges( g ) ) )
   {
-    m[boost::target( e, g )] += e;
+    m[boost::target( e, g )].push_back( e );
   }
   return m;
 }

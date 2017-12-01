@@ -172,7 +172,7 @@ mig_function mig_create_pi( mig_graph& mig, const std::string& name )
 
   mig_node node = add_vertex( mig );
 
-  boost::get_property( mig, boost::graph_name ).inputs += node;
+  boost::get_property( mig, boost::graph_name ).inputs.push_back( node );
   boost::get_property( mig, boost::graph_name ).node_names[node] = name;
 
   return { node, false };
@@ -181,7 +181,7 @@ mig_function mig_create_pi( mig_graph& mig, const std::string& name )
 void mig_create_po( mig_graph& mig, const mig_function& f, const std::string& name )
 {
   assert( num_vertices( mig ) != 0u && "Uninitialized MIG" );
-  boost::get_property( mig, boost::graph_name ).outputs += std::make_pair( f, name );
+  boost::get_property( mig, boost::graph_name ).outputs.push_back( std::make_pair( f, name ) );
 }
 
 mig_function mig_create_maj( mig_graph& mig, const mig_function& a, const mig_function& b, const mig_function& c )

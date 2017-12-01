@@ -145,7 +145,7 @@ std::vector< std::vector<xmg_node> > xmg_levelize( xmg_graph& xmg )
   for ( const auto& n : xmg.nodes() )
   {
     assert(levels.size() > xmg.level(n));
-    levels[xmg.level(n)] += n;
+    levels[xmg.level(n)].push_back( n );
   }
 
   return levels;

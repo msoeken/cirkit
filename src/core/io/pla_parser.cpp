@@ -35,7 +35,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm.hpp>
 
 namespace cirkit
@@ -59,15 +58,15 @@ bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_
     }
     else if ( boost::starts_with( line, ".i " ) )
     {
-      reader.on_num_inputs( boost::lexical_cast<unsigned>( line.substr( 3 ) ) );
+      reader.on_num_inputs( std::stoul( line.substr( 3 ) ) );
     }
     else if ( boost::starts_with( line, ".o " ) )
     {
-      reader.on_num_outputs( boost::lexical_cast<unsigned>( line.substr( 3 ) ) );
+      reader.on_num_outputs( std::stoul( line.substr( 3 ) ) );
     }
     else if ( boost::starts_with( line, ".p " ) )
     {
-      reader.on_num_products( boost::lexical_cast<unsigned>( line.substr( 3 ) ) );
+      reader.on_num_products( std::stoul( line.substr( 3 ) ) );
     }
     else if ( boost::starts_with( line, ".ilb " ) )
     {

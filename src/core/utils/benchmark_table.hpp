@@ -40,7 +40,6 @@
 #include <iomanip>
 
 #include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
@@ -63,7 +62,7 @@ std::string print_cell<>( const std::string& value, const length_t& length )
 {
   if ( length )
   {
-    return boost::str( boost::format( "%-" + boost::lexical_cast<std::string>( *length ) + "s" ) % value );
+    return boost::str( boost::format( "%-" + std::to_string( *length ) + "s" ) % value );
   }
   else
   {
@@ -76,11 +75,11 @@ std::string print_cell<>( const int& value, const length_t& length )
 {
   if ( length )
   {
-    return boost::str( boost::format( "%" + boost::lexical_cast<std::string>( *length ) + "d" ) % value );
+    return boost::str( boost::format( "%" + std::to_string( *length ) + "d" ) % value );
   }
   else
   {
-    return boost::lexical_cast<std::string>( value );
+    return std::to_string( value );
   }
 }
 
@@ -89,11 +88,11 @@ std::string print_cell<>( const unsigned& value, const length_t& length )
 {
   if ( length )
   {
-    return boost::str( boost::format( "%" + boost::lexical_cast<std::string>( *length ) + "d" ) % value );
+    return boost::str( boost::format( "%" + std::to_string( *length ) + "d" ) % value );
   }
   else
   {
-    return boost::lexical_cast<std::string>( value );
+    return std::to_string( value );
   }
 }
 
@@ -102,7 +101,7 @@ std::string print_cell<>( const double& value, const length_t& length )
 {
   if ( length )
   {
-    return boost::str( boost::format( "%" + boost::lexical_cast<std::string>( *length ) + ".2f" ) % value );
+    return boost::str( boost::format( "%" + std::to_string( *length ) + ".2f" ) % value );
   }
   else
   {

@@ -36,7 +36,6 @@
 #include <classical/mig/mig_simulate.hpp>
 #include <classical/mig/mig_utils.hpp>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/topological_sort.hpp>
@@ -377,7 +376,7 @@ std::vector<std::tuple<boost::dynamic_bitset<>, unsigned, boost::dynamic_bitset<
 
         if ( add )
         {
-          local_cuts += std::make_tuple( new_cut, min_level, new_cone );
+          local_cuts.push_back( std::make_tuple( new_cut, min_level, new_cone ) );
         }
       }
     }

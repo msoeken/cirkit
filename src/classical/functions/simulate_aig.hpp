@@ -44,7 +44,6 @@
 #include <boost/property_map/property_map.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/assign/std/set.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/timer.hpp>
@@ -477,18 +476,18 @@ std::map<aig_function, T> simulate_aig_full( const aig_graph& aig, const aig_sim
 {
   auto in_degrees = precompute_in_degrees( aig );
 
-  std::vector< aig_function > fs;
+  std::vector<aig_function> fs;
 
-  std::set< aig_node > ignore_nodes;
-  ignore_nodes += 0;
+  std::set<aig_node> ignore_nodes;
+  ignore_nodes.insert( 0 );
   for ( const auto& i : aig_info( aig ).inputs )
   {
-    ignore_nodes += i;
+    ignore_nodes.insert( i );
   }
   for ( const auto& o : aig_info( aig ).outputs )
   {
-    ignore_nodes += o.first.node;
-    fs += o.first;
+    ignore_nodes.insert( o.first.node );
+    fs.push_back( o.first );
   }
 
   for ( const auto& node : boost::make_iterator_range( vertices( aig ) ) )
@@ -497,19 +496,12 @@ std::map<aig_function, T> simulate_aig_full( const aig_graph& aig, const aig_sim
     {
       continue;
     }
-    
+
     if ( in_degrees[ node ] == 0u )
     {
-      fs += aig_function( { node, false } );
+      fs.push_back( aig_function( { node, false } ) );
     }
   }
-
-  // std::cout << "{ ";
-  // for ( const auto& f : fs )
-  // {
-  //   std::cout << f << ' ';
-  // }
-  // std::cout << "}" << std::endl;
 
   return simulate_aig( aig, simulator, fs, settings, statistics );
 }

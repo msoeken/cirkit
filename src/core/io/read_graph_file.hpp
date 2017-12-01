@@ -39,7 +39,6 @@
 #include <fstream>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm.hpp>
 
 #include <core/utils/string_utils.hpp>
@@ -65,7 +64,7 @@ void read_graph_file( Graph& g, const std::string& filename, bool verbose = fals
 
   /* read number of vertices to read */
   assert( getline( is, line ) );
-  unsigned n = boost::lexical_cast<unsigned>( line );
+  unsigned n = std::stoul( line );
 
   std::vector<vertex_t> vertices( n );
   boost::generate( vertices, [&g]() { return boost::add_vertex( g ); } );

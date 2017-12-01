@@ -30,8 +30,6 @@
 
 #include <boost/format.hpp>
 
-using namespace boost::assign;
-
 namespace cirkit
 {
 

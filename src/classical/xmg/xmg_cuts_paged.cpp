@@ -39,7 +39,6 @@
 #include <classical/xmg/xmg_simulate.hpp>
 #include <classical/xmg/xmg_utils.hpp>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/topological_sort.hpp>
@@ -488,7 +487,7 @@ void xmg_cuts_paged::merge_cut( local_cut_vec_t& local_cuts, const boost::dynami
 
   if ( add )
   {
-    local_cuts += std::make_tuple( new_cut, min_level, new_cone );
+    local_cuts.push_back( std::make_tuple( new_cut, min_level, new_cone ) );
   }
 }
 

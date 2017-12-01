@@ -87,7 +87,7 @@ std::pair<bdd_manager_ptr, std::vector<bdd>> read_into_bdd( const std::string& f
 
     for ( const auto& m : map )
     {
-      fs += m.second;
+      fs.push_back( m.second );
     }
 
     if ( statistics )

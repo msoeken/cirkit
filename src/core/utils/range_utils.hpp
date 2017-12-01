@@ -40,14 +40,11 @@
 #include <vector>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -157,7 +154,7 @@ std::string indexed_join( const C& container, const std::string& delim, unsigned
   std::vector<std::string> v;
   for ( auto it : index( container ) )
   {
-    v += str( format( "%d: %s" ) % ( it.index + offset ) % boost::lexical_cast<std::string>( it.value ) );
+    v.push_back( str( format( "%d: %s" ) % ( it.index + offset ) % boost::lexical_cast<std::string>( it.value ) ) );
   }
   return boost::join( v, delim );
 }

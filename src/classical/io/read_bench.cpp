@@ -498,9 +498,9 @@ void read_bench( lut_graph& graph, const std::string& filename )
             std::cout << "[e] cannot find gate " << arg << " when constructing LUT for " << std::get<0>( gate ) << std::endl;
             assert( false );
           }
-          ops += gate_to_node[arg];
+          ops.push_back( gate_to_node[arg] );
         }
-        
+
         gate_to_node[std::get<0>( gate )] = graph.create_lut( std::get<1>( gate ), ops, std::get<0>( gate ) );
       }
     }
