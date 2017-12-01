@@ -57,11 +57,14 @@ bool spectral_command::execute()
 {
   auto& tts = env->store<tt>();
 
-  spectral_class = get_spectral_class( tts.current() );
-
-  if ( is_verbose() )
+  if ( tt_num_vars( tts.current() ) >= 2 && tt_num_vars( tts.current() ) <= 5 )
   {
-    std::cout << "[i] class: " << spectral_class << std::endl;
+    spectral_class = get_spectral_class( tts.current() );
+
+    if ( is_verbose() )
+    {
+      std::cout << "[i] class: " << spectral_class << std::endl;
+    }
   }
 
   spectral_normalization_params params;
