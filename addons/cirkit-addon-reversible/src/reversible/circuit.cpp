@@ -199,7 +199,7 @@ namespace cirkit
     }
   };
 
-  struct append_gate_visitor : public boost::static_visitor<gate&>
+  struct append_gate_visitor/* : public boost::static_visitor<gate&>*/
   {
     gate& operator()( standard_circuit& circ ) const
     {
@@ -217,7 +217,7 @@ namespace cirkit
     }
   };
 
-  struct prepend_gate_visitor : public boost::static_visitor<gate&>
+  struct prepend_gate_visitor/* : public boost::static_visitor<gate&>*/
   {
     gate& operator()( standard_circuit& circ ) const
     {
@@ -235,7 +235,7 @@ namespace cirkit
     }
   };
 
-  struct insert_gate_visitor : public boost::static_visitor<gate&>
+  struct insert_gate_visitor/* : public boost::static_visitor<gate&>*/
   {
     explicit insert_gate_visitor( unsigned _pos ) : pos( _pos ) {}
 
@@ -258,7 +258,7 @@ namespace cirkit
     unsigned pos;
   };
 
-  struct remove_gate_at_visitor : public boost::static_visitor<>
+  struct remove_gate_at_visitor/* : public boost::static_visitor<>*/
   {
     explicit remove_gate_at_visitor( unsigned _pos ) : pos( _pos ) {}
 
@@ -283,7 +283,7 @@ namespace cirkit
     unsigned pos;
   };
 
-  struct inputs_setter : public boost::static_visitor<>
+  struct inputs_setter/* : public boost::static_visitor<>*/
   {
     explicit inputs_setter( const std::vector<std::string>& _inputs ) : inputs( _inputs ) {}
 
@@ -305,7 +305,7 @@ namespace cirkit
     const std::vector<std::string>& inputs;
   };
 
-  struct inputs_visitor : public boost::static_visitor<const std::vector<std::string>& >
+  struct inputs_visitor/* : public boost::static_visitor<const std::vector<std::string>& >*/
   {
     const std::vector<std::string>& operator()( const standard_circuit& circ ) const
     {
@@ -318,7 +318,7 @@ namespace cirkit
     }
   };
 
-  struct outputs_setter : public boost::static_visitor<>
+  struct outputs_setter/* : public boost::static_visitor<>*/
   {
     explicit outputs_setter( const std::vector<std::string>& _outputs ) : outputs( _outputs ) {}
 
@@ -340,7 +340,7 @@ namespace cirkit
     const std::vector<std::string>& outputs;
   };
 
-  struct outputs_visitor : public boost::static_visitor<const std::vector<std::string>& >
+  struct outputs_visitor/* : public boost::static_visitor<const std::vector<std::string>& >*/
   {
     const std::vector<std::string>& operator()( const standard_circuit& circ ) const
     {
@@ -353,7 +353,7 @@ namespace cirkit
     }
   };
 
-  struct constants_setter : public boost::static_visitor<>
+  struct constants_setter/* : public boost::static_visitor<>*/
   {
     explicit constants_setter( const std::vector<constant>& _constants ) : constants( _constants ) {}
 
@@ -375,7 +375,7 @@ namespace cirkit
     const std::vector<constant>& constants;
   };
 
-  struct constants_visitor : public boost::static_visitor<const std::vector<constant>& >
+  struct constants_visitor/* : public boost::static_visitor<const std::vector<constant>& >*/
   {
     const std::vector<constant>& operator()( const standard_circuit& circ ) const
     {
@@ -388,7 +388,7 @@ namespace cirkit
     }
   };
 
-  struct garbage_setter : public boost::static_visitor<>
+  struct garbage_setter/* : public boost::static_visitor<>*/
   {
     explicit garbage_setter( const std::vector<bool>& _garbage ) : garbage( _garbage ) {}
 
@@ -410,7 +410,7 @@ namespace cirkit
     const std::vector<bool>& garbage;
   };
 
-  struct garbage_visitor : public boost::static_visitor<const std::vector<bool>& >
+  struct garbage_visitor/* : public boost::static_visitor<const std::vector<bool>& >*/
   {
     const std::vector<bool>& operator()( const standard_circuit& circ ) const
     {
@@ -423,7 +423,7 @@ namespace cirkit
     }
   };
 
-  struct circuit_name_setter : public boost::static_visitor<>
+  struct circuit_name_setter/* : public boost::static_visitor<>*/
   {
     explicit circuit_name_setter( const std::string& _name ) : name( _name ) {}
 
@@ -441,7 +441,7 @@ namespace cirkit
     const std::string& name;
   };
 
-  struct circuit_name_visitor : public boost::static_visitor<const std::string&>
+  struct circuit_name_visitor/* : public boost::static_visitor<const std::string&>*/
   {
     const std::string& operator()( const standard_circuit& circ ) const
     {
@@ -454,7 +454,7 @@ namespace cirkit
     }
   };
 
-  struct const_inputbuses_visitor : public boost::static_visitor<const bus_collection&>
+  struct const_inputbuses_visitor/* : public boost::static_visitor<const bus_collection&>*/
   {
     const bus_collection& operator()( const standard_circuit& circ ) const
     {
@@ -467,7 +467,7 @@ namespace cirkit
     }
   };
 
-  struct inputbuses_visitor : public boost::static_visitor<bus_collection&>
+  struct inputbuses_visitor/* : public boost::static_visitor<bus_collection&>*/
   {
     bus_collection& operator()( standard_circuit& circ ) const
     {
@@ -480,7 +480,7 @@ namespace cirkit
     }
   };
 
-  struct const_outputbuses_visitor : public boost::static_visitor<const bus_collection&>
+  struct const_outputbuses_visitor/* : public boost::static_visitor<const bus_collection&>*/
   {
     const bus_collection& operator()( const standard_circuit& circ ) const
     {
@@ -493,7 +493,7 @@ namespace cirkit
     }
   };
 
-  struct outputbuses_visitor : public boost::static_visitor<bus_collection&>
+  struct outputbuses_visitor/* : public boost::static_visitor<bus_collection&>*/
   {
     bus_collection& operator()( standard_circuit& circ ) const
     {
@@ -506,7 +506,7 @@ namespace cirkit
     }
   };
 
-  struct const_statesignals_visitor : public boost::static_visitor<const bus_collection&>
+  struct const_statesignals_visitor/* : public boost::static_visitor<const bus_collection&>*/
   {
     const bus_collection& operator()( const standard_circuit& circ ) const
     {
@@ -519,7 +519,7 @@ namespace cirkit
     }
   };
 
-  struct statesignals_visitor : public boost::static_visitor<bus_collection&>
+  struct statesignals_visitor/* : public boost::static_visitor<bus_collection&>*/
   {
     bus_collection& operator()( standard_circuit& circ ) const
     {
@@ -532,7 +532,7 @@ namespace cirkit
     }
   };
 
-  struct is_subcircuit_visitor : public boost::static_visitor<bool>
+  struct is_subcircuit_visitor/* : public boost::static_visitor<bool>*/
   {
     bool operator()( const standard_circuit& circ ) const
     {
@@ -545,7 +545,7 @@ namespace cirkit
     }
   };
 
-  struct offset_visitor : public boost::static_visitor<unsigned>
+  struct offset_visitor/* : public boost::static_visitor<unsigned>*/
   {
     unsigned operator()( const standard_circuit& circ ) const
     {
@@ -558,7 +558,7 @@ namespace cirkit
     }
   };
 
-  struct annotation_visitor : public boost::static_visitor<const std::string&>
+  struct annotation_visitor/* : public boost::static_visitor<const std::string&>*/
   {
     annotation_visitor( const gate& g, const std::string& key, const std::string& default_value )
       : g( g ), key( key ), default_value( default_value )
@@ -597,7 +597,7 @@ namespace cirkit
     const std::string& default_value;
   };
 
-  struct annotations_visitor : public boost::static_visitor<boost::optional<const std::map<std::string, std::string>& > >
+  struct annotations_visitor/* : public boost::static_visitor<boost::optional<const std::map<std::string, std::string>& > >*/
   {
     explicit annotations_visitor( const gate& g ) : g( g ) {}
 
@@ -623,7 +623,7 @@ namespace cirkit
     const gate& g;
   };
 
-  struct annotate_visitor : public boost::static_visitor<>
+  struct annotate_visitor/* : public boost::static_visitor<>*/
   {
     annotate_visitor( const gate& g, const std::string& key, const std::string& value )
       : g( g ), key( key ), value( value )
