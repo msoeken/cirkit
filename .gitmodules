@@ -4,3 +4,7 @@
 [submodule "lib/kitty"]
 	path = lib/kitty
 	url = https://github.com/msoeken/kitty
+[submodule "lib/cudd"]
+	path = lib/cudd
+	url = https://github.com/rakhimov/cudd.git
+	branch = cmake

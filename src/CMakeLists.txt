@@ -6,7 +6,8 @@ add_cirkit_library(
   AUTO_DIRS core
   USE
     ${Boost_TIMER_LIBRARIES}
-    ${CUDD_LIBRARIES}
+    cudd
+    obj
     ${Boost_PROGRAM_OPTIONS_LIBRARIES}
     ${Boost_SYSTEM_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARIES}

@@ -1,5 +1,15 @@
 set(ABC_USE_NAMESPACE "abc")
-add_subdirectory( abc )
+add_subdirectory(abc)
+
+set(CUDD_BUILD_TESTS OFF CACHE BOOL "Build the tests" FORCE)
+add_subdirectory(cudd)
+target_include_directories(cudd PUBLIC "cudd/cudd")
+target_include_directories(cudd PUBLIC ${CMAKE_BINARY_DIR}/lib/cudd/)
+target_include_directories(epd PUBLIC "cudd/epd")
+target_include_directories(mtr PUBLIC "cudd/mtr")
+target_include_directories(st PUBLIC "cudd/st")
+target_include_directories(util PUBLIC "cudd/util")
+target_include_directories(obj PUBLIC "cudd/cplusplus")
 
 add_subdirectory(kitty)
 
@@ -41,7 +51,7 @@ add_cirkit_library(
     extra/extraZddPermute.c
     extra/extraZddSubSup.c
   USE
-    ${CUDD_LIBRARIES}
+    cudd
   INCLUDE
     SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/extra
   OPTIONS

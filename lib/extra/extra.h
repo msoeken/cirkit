@@ -31,6 +31,8 @@
 /* Nested includes                                                           */
 /*---------------------------------------------------------------------------*/
 
+#include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include "util.h"
