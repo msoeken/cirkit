@@ -10,6 +10,9 @@ target_include_directories(mtr PUBLIC "cudd/mtr")
 target_include_directories(st PUBLIC "cudd/st")
 target_include_directories(util PUBLIC "cudd/util")
 target_include_directories(obj PUBLIC "cudd/cplusplus")
+foreach(target cudd epd mtr st util obj)
+set_property(TARGET ${target} PROPERTY POSITION_INDEPENDENT_CODE ON)
+endforeach()
 
 add_subdirectory(kitty)
 
