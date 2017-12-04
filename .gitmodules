@@ -6,5 +6,5 @@
 	url = https://github.com/msoeken/kitty
 [submodule "lib/cudd"]
 	path = lib/cudd
-	url = https://github.com/rakhimov/cudd.git
+	url = https://github.com/msoeken/cudd-1.git
 	branch = cmake
