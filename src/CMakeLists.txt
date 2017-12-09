@@ -8,6 +8,7 @@ add_cirkit_library(
     ${Boost_TIMER_LIBRARIES}
     cudd
     obj
+    fmt::fmt-header-only
     ${Boost_PROGRAM_OPTIONS_LIBRARIES}
     ${Boost_SYSTEM_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARIES}

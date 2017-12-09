@@ -30,14 +30,15 @@
 #include <unistd.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/format.hpp>
+
+#include <fmt/printf.h>
 
 namespace cirkit
 {
 
 temporary_filename::temporary_filename( const std::string& name_pattern )
 {
-  filename = boost::str( boost::format( name_pattern ) % getpid() );
+  filename = fmt::sprintf( name_pattern, getpid() );
 }
 
 temporary_filename::~temporary_filename()

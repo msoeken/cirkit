@@ -28,6 +28,8 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <fmt/format.h>
+
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/aig.hpp>
@@ -74,7 +76,7 @@ void write_from_bdd( const std::vector<bdd>& fs, const std::string& filename,
     assert ( functions.size() == fs.size() );
     for ( const auto& func : index( functions ) )
     {
-      aig_create_po( aig, func.value, func.index < output_labels.size() ? output_labels.at( func.index ) : boost::str( boost::format( "f%d" ) % func.index ) );
+      aig_create_po( aig, func.value, func.index < output_labels.size() ? output_labels.at( func.index ) : fmt::format( "f{}", func.index ) );
     }
     write_aiger( aig, filename );
   }

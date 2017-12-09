@@ -28,7 +28,7 @@
 
 #include <regex>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -56,7 +56,7 @@ std::string string_template::render( const std::unordered_map<std::string, std::
 
   for ( const auto& p : subst )
   {
-    ret = std::regex_replace( ret, std::regex( boost::str( boost::format( "\\{\\{ *%s *\\}\\}" ) % p.first ) ), p.second );
+    ret = std::regex_replace( ret, std::regex( fmt::format( "\\{{\\{{ *{} *\\}}\\}}", p.first ) ), p.second );
   }
 
   return ret;

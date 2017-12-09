@@ -46,6 +46,8 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
+#include <fmt/format.h>
+
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
@@ -271,7 +273,7 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions( con
 
       if ( verbose )
       {
-        std::cout << boost::format( "[i] found ffr region %d(%s)" ) % ffr_output % any_join( ffr_inputs, ", " ) << std::endl;
+        std::cout << fmt::format( "[i] found ffr region {}({})", ffr_output, any_join( ffr_inputs, ", " ) ) << std::endl;
       }
 
       result.insert( {ffr_output, ffr_inputs} );
@@ -348,7 +350,7 @@ std::map<vertex_t<Graph>, std::vector<vertex_t<Graph>>> fanout_free_regions_bfs(
 
     if ( verbose )
     {
-      std::cout << boost::format( "[i] found ffr region %d(%s)" ) % ffr_output % any_join( ffr_inputs, ", " ) << std::endl;
+      std::cout << fmt::format( "[i] found ffr region {}({})", ffr_output, any_join( ffr_inputs, ", " ) ) << std::endl;
     }
 
     result.insert( {ffr_output, ffr_inputs} );

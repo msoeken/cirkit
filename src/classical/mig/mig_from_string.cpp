@@ -32,6 +32,8 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/range/algorithm.hpp>
 
+#include <fmt/format.h>
+
 #include <core/utils/range_utils.hpp>
 #include <classical/mig/mig_utils.hpp>
 
@@ -253,7 +255,7 @@ mig_function mig_from_expression( mig_graph& mig, std::vector<mig_function>& pis
       {
         for ( auto i = pis.size(); i <= idx; ++i )
         {
-          pis.push_back( mig_create_pi( mig, boost::str( boost::format( "x%d" ) % i )  ) );
+          pis.push_back( mig_create_pi( mig, fmt::format( "x{}", i ) ) );
         }
       }
       return pis[idx];

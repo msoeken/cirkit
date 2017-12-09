@@ -27,7 +27,7 @@
 #include "range_utils.hpp"
 
 #include <numeric>
-#include <boost/format.hpp>
+#include <fmt/printf.h>
 
 namespace cirkit
 {
@@ -123,7 +123,7 @@ std::vector<std::string> create_name_list( const std::string& pattern, unsigned 
 
   for ( auto i = 0u; i < length; ++i )
   {
-    names[i] = boost::str( boost::format( pattern ) % ( i + start ) );
+    names[i] = fmt::sprintf( pattern, i + start );
   }
 
   return names;

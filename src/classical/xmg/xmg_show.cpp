@@ -29,6 +29,7 @@
 #include <fstream>
 #include <iostream>
 
+#include <boost/format.hpp>
 #include <boost/graph/graphviz.hpp>
 
 #include <range/v3/iterator_range.hpp>

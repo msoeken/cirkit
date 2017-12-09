@@ -45,7 +45,6 @@
 #include <stdarg.h>
 #include <sys/times.h>
 
-#include <boost/format.hpp>
 #include <boost/timer/timer.hpp>
 
 #include <core/properties.hpp>

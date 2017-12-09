@@ -31,7 +31,9 @@
 #include <iostream>
 
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/format.hpp>
+
+#include <fmt/format.h>
+#include <fmt/printf.h>
 
 #include <sys/wait.h>
 #include <unistd.h>
@@ -43,8 +45,8 @@ result_t execute_and_return( const std::string& cmd, const std::string& pattern 
 {
   std::vector<std::string> result;
 
-  const std::string filename = ( boost::format( "/tmp/er-%s.log" ) % getpid() ).str();
-  auto sresult = system( boost::str( boost::format( pattern ) % cmd % filename ).c_str() );
+  const std::string filename = fmt::format( "/tmp/er-{}.log", getpid() );
+  auto sresult = system( fmt::sprintf( pattern, cmd, filename ).c_str() );
   std::ifstream is( filename.c_str(), std::ifstream::in );
   std::string line;
   while ( getline( is, line ) )
@@ -59,7 +61,7 @@ result_t execute_and_return( const std::string& cmd, const std::string& pattern 
 
 result_t execute_and_omit( const std::string& cmd )
 {
-  auto sresult = system( boost::str( boost::format( "( %s ) > /dev/null" ) % cmd ).c_str() );
+  auto sresult = system( fmt::format( "( {} ) > /dev/null", cmd ).c_str() );
   return { WEXITSTATUS( sresult ), std::vector<std::string>() };
 }
 

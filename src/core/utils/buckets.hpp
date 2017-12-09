@@ -43,7 +43,7 @@
 
 #include <core/utils/range_utils.hpp>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -202,10 +202,10 @@ public:
   {
     for ( const auto& v : index( bucket.vecs ) )
     {
-      os << boost::format( "==== bucket %d ====" ) % v.index << std::endl;
+      os << fmt::format( "==== bucket {} ====", v.index ) << std::endl;
       for ( const auto& p : index( v.value ) )
       {
-        os << boost::format( "%4d: " ) % p.index << p.value << " @ " << bucket.hash[v.index].at( p.value ) << std::endl;
+        os << fmt::format( "{:>4}: ", p.index ) << p.value << " @ " << bucket.hash[v.index].at( p.value ) << std::endl;
       }
     }
     return os;
@@ -311,10 +311,10 @@ public:
   {
     for ( const auto& v : index( bucket.vecs ) )
     {
-      os << boost::format( "==== bucket %d ====" ) % v.index << std::endl;
+      os << fmt::format( "==== bucket {} ====", v.index ) << std::endl;
       for ( const auto& p : index( v.value ) )
       {
-        os << boost::format( "%4d: " ) % p.index << p.value << " @ " << bucket.hash[v.index].at( p.value ) << std::endl;
+        os << fmt::format( "{:>4}: ", p.index ) << p.value << " @ " << bucket.hash[v.index].at( p.value ) << std::endl;
       }
     }
     return os;
