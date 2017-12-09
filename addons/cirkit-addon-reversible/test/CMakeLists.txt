@@ -10,8 +10,7 @@ set(reversible_tests
   redundancy_functions
   restricted_growth_sequence
   synthesis
-  truth_table
-  truth_table_based_synthesis)
+  truth_table)
 
 foreach( test ${reversible_tests} )
   add_cirkit_test_program(
