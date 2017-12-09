@@ -8,3 +8,6 @@
 	path = lib/cudd
 	url = https://github.com/msoeken/cudd-1.git
 	branch = cmake
+[submodule "lib/fmt"]
+	path = lib/fmt
+	url = https://github.com/fmtlib/fmt.git

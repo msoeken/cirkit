@@ -15,6 +15,7 @@ set_property(TARGET ${target} PROPERTY POSITION_INDEPENDENT_CODE ON)
 endforeach()
 
 add_subdirectory(kitty)
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 add_cirkit_library(
   NAME extra
