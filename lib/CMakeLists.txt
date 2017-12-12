@@ -71,6 +71,7 @@ add_cirkit_library(
 
 set(CMAKE_MACOSX_RPATH 1)
 add_subdirectory(minisat EXCLUDE_FROM_ALL)
+set_property(TARGET minisat-lib-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_cirkit_library(
   NAME puma
