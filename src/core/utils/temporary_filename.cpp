@@ -26,10 +26,9 @@
 
 #include "temporary_filename.hpp"
 
+#include <cstdio>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include <boost/filesystem.hpp>
 
 #include <fmt/printf.h>
 
@@ -43,7 +42,7 @@ temporary_filename::temporary_filename( const std::string& name_pattern )
 
 temporary_filename::~temporary_filename()
 {
-  boost::filesystem::remove( filename );
+  remove( filename.c_str() );
 }
 
 const std::string& temporary_filename::name() const
