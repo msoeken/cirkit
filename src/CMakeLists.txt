@@ -11,13 +11,13 @@ add_cirkit_library(
     fmt::fmt-header-only
     ${Boost_PROGRAM_OPTIONS_LIBRARIES}
     ${Boost_SYSTEM_LIBRARIES}
-    ${Boost_FILESYSTEM_LIBRARIES}
 )
 
 add_cirkit_library(
   NAME cirkit_classical
   AUTO_DIRS classical
   USE
+    ${Boost_FILESYSTEM_LIBRARIES}  
     cirkit_core
     libabc-pic
     kitty
