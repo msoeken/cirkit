@@ -11,3 +11,6 @@
 [submodule "lib/fmt"]
 	path = lib/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "lib/minisat"]
+	path = lib/minisat
+	url = https://github.com/niklasso/minisat.git

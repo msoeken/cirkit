@@ -36,7 +36,7 @@
 #ifndef MINISAT_HPP
 #define MINISAT_HPP
 
-#include <core/Solver.h>
+#include <minisat/core/Solver.h>
 
 #include <classical/sat/sat_solver.hpp>
 

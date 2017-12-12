@@ -69,6 +69,9 @@ add_cirkit_library(
     SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/linenoise
 )
 
+set(CMAKE_MACOSX_RPATH 1)
+add_subdirectory(minisat EXCLUDE_FROM_ALL)
+
 add_cirkit_library(
   NAME puma
   SOURCES

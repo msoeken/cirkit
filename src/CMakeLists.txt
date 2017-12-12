@@ -21,7 +21,7 @@ add_cirkit_library(
     cirkit_core
     libabc-pic
     kitty
-    ${MINISAT_LIBRARIES}
+    minisat-lib-static
 )
 
 add_cirkit_library(

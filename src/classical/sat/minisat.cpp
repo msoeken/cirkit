@@ -125,8 +125,8 @@ solver_result_t solve<minisat_solver>( minisat_solver& solver, solver_execution_
       using Minisat::lbool; /* because of the macro in SolverTypes */
 
       auto v = solver.solver->modelValue( i );
-      bits[i] = ( v == l_True );
-      care[i] = ( v != l_Undef );
+      bits[i] = ( v == Minisat::l_True );
+      care[i] = ( v != Minisat::l_Undef );
     }
 
     return solver_result_t( {bits, care} );
