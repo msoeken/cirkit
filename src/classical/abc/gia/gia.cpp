@@ -331,18 +331,13 @@ uint64_t gia_graph::lut_truth_table( int index ) const
   return t & abc::Abc_Tt6Mask( 1 << lut_size( index ) );
 }
 
-tt gia_graph::truth_table( int output_index ) const
+kitty::dynamic_truth_table gia_graph::truth_table( int output_index ) const
 {
   const auto num_words = abc::Abc_Truth6WordNum( num_inputs() );
   const auto * words = abc::Gia_ObjComputeTruthTable( p_gia.get(), abc::Gia_ManCo( p_gia.get(), output_index ) );
 
-  tt func( words, words + num_words );
-
-  if ( num_inputs() < 6 )
-  {
-    tt_shrink( func, num_inputs() );
-  }
-
+  kitty::dynamic_truth_table func( num_inputs() );
+  kitty::create_from_words( func, words, words + num_words );
   return func;
 }
 

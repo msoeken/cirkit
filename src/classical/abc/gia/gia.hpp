@@ -42,7 +42,8 @@
 
 #include <core/properties.hpp>
 #include <classical/aig.hpp>
-#include <classical/utils/truth_table_utils.hpp>
+
+#include <kitty/kitty.hpp>
 
 #include <base/main/main.h>
 #include <aig/gia/gia.h>
@@ -119,7 +120,7 @@ public:
   void init_truth_tables() const;
   uint64_t lut_truth_table( int index ) const;
 
-  tt truth_table( int output_index ) const;
+  kitty::dynamic_truth_table truth_table( int output_index ) const;
 
   /// PRINTING
 
