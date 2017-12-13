@@ -28,9 +28,8 @@
 
 #include <iostream>
 
-#include <core/utils/bitset_utils.hpp>
-#include <core/utils/timer.hpp>
 #include <classical/dd/dd_depth_first.hpp>
+#include <core/utils/timer.hpp>
 
 using namespace std::placeholders;
 
@@ -45,48 +44,31 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-tt bdd_to_truth_table_dfs( const bdd& b )
+kitty::dynamic_truth_table bdd_to_truth_table_dfs( const bdd& b )
 {
   auto nvars = b.manager->num_vars();
-  std::map<unsigned, tt> tt_map = { { 0u, tt_const0() },
-                                    { 1u, tt_const1() } };
-  tt_extend( tt_map[0u], nvars );
-  tt_extend( tt_map[1u], nvars );
+  std::map<unsigned, kitty::dynamic_truth_table> tt_map = {{0u, kitty::dynamic_truth_table( nvars )},
+                                                           {1u, ~kitty::dynamic_truth_table( nvars )}};
 
   auto f = [&]( const bdd& n ) {
-    auto xi = tt_nth_var( n.var() );
-    tt_extend( xi, nvars );
+    kitty::dynamic_truth_table xi( nvars );
+    kitty::create_nth_var( xi, n.var() );
 
-    tt_map[n.index] = ( xi & tt_map[n.high().index] ) | ( ~xi & tt_map[n.low().index] );
+    tt_map.emplace( std::make_pair( n.index, ( xi & tt_map.at( n.high().index ) ) | ( ~xi & tt_map.at( n.low().index ) ) ) );
   };
 
   dd_depth_first( b, detail::node_func_t<bdd>( f ) );
 
-  return tt_map[b.index];
-}
-
-int bitset_to_signed( const boost::dynamic_bitset<>& b )
-{
-  assert( b.size() );
-
-  if ( b.test( b.size() - 1u ) )
-  {
-    auto bn = ~b;
-    return -( inc( bn ).to_ulong() );
-  }
-  else
-  {
-    return b.to_ulong();
-  }
+  return tt_map.at( b.index );
 }
 
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
 
-tt bdd_to_truth_table( const bdd& b,
-                       const properties::ptr& settings,
-                       const properties::ptr& statistics )
+kitty::dynamic_truth_table bdd_to_truth_table( const bdd& b,
+                                               const properties::ptr& settings,
+                                               const properties::ptr& statistics )
 {
   /* settings */
   auto method = get( settings, "method", bdd_to_truth_table_method::dfs );
@@ -106,7 +88,7 @@ tt bdd_to_truth_table( const bdd& b,
   std::cerr << "[e] invalid method selected" << std::endl;
   assert( false );
 
-  return tt();
+  return kitty::dynamic_truth_table( 0 );
 }
 
 std::vector<unsigned> bdds_to_truth_table_unsigned( const std::vector<bdd>& fs,
@@ -116,14 +98,19 @@ std::vector<unsigned> bdds_to_truth_table_unsigned( const std::vector<bdd>& fs,
   assert( !fs.empty() );
 
   /* TODO: run-time measurement is wrong */
-  std::vector<tt> tts( fs.size() );
-  boost::transform( fs, tts.begin(), std::bind( bdd_to_truth_table, _1, settings, statistics ) );
+  std::vector<kitty::dynamic_truth_table> tts;
+  std::transform( fs.begin(), fs.end(), std::back_inserter( tts ), std::bind( bdd_to_truth_table, _1, settings, statistics ) );
 
-  auto tts_t = transpose( tts );
-  std::vector<unsigned> result( tts_t.size() );
-  boost::transform( tts_t, result.begin(), std::bind( &boost::dynamic_bitset<>::to_ulong, _1 ) );
+  std::vector<unsigned> values( tts.front().num_bits() );
+  for ( auto i = 0u; i < tts.front().num_bits(); ++i )
+  {
+    for ( auto j = 0u; j < tts.size(); ++j )
+    {
+      values[i] |= kitty::get_bit( tts[i], j ) << j;
+    }
+  }
 
-  return result;
+  return values;
 }
 
 std::vector<int> bdds_to_truth_table_signed( const std::vector<bdd>& fs,
@@ -133,17 +120,25 @@ std::vector<int> bdds_to_truth_table_signed( const std::vector<bdd>& fs,
   assert( !fs.empty() );
 
   /* TODO: run-time measurement is wrong */
-  std::vector<tt> tts( fs.size() );
-  boost::transform( fs, tts.begin(), std::bind( bdd_to_truth_table, _1, settings, statistics ) );
+  std::vector<kitty::dynamic_truth_table> tts;
+  std::transform( fs.begin(), fs.end(), std::back_inserter( tts ), std::bind( bdd_to_truth_table, _1, settings, statistics ) );
 
-  auto tts_t = transpose( tts );
-  std::vector<int> result( tts_t.size() );
-  boost::transform( tts_t, result.begin(), std::bind( bitset_to_signed, _1 ) );
+  std::vector<int> values( tts.front().num_bits() );
+  for ( auto i = 0u; i < tts.front().num_bits(); ++i )
+  {
+    for ( auto j = 0u; j < tts.size(); ++j )
+    {
+      values[i] |= kitty::get_bit( tts[i], j ) << j;
+    }
 
-  return result;
+    if ( values[i] >> ( tts.size() - 1 ) & 1 )
+    {
+      values[i] = -( ~values[i] + 1 );
+    }
+  }
+
+  return values;
 }
-
-
 }
 
 // Local Variables:

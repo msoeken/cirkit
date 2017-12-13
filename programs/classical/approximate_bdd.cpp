@@ -44,6 +44,8 @@
 #include <classical/io/read_into_bdd.hpp>
 #include <classical/io/write_from_bdd.hpp>
 
+#include <kitty/kitty.hpp>
+
 using namespace cirkit;
 
 int main( int argc, char ** argv )
@@ -121,12 +123,14 @@ int main( int argc, char ** argv )
     std::cout << "[i] Original function:" << std::endl;
     for ( const auto& f : fs )
     {
-      std::cout << bdd_to_truth_table( f ) << std::endl;
+      kitty::print_binary( bdd_to_truth_table( f ) );
+      std::cout << std::endl;
     }
     std::cout << "[i] Approximated function:" << std::endl;
     for ( const auto& fhat : fshat )
     {
-      std::cout << bdd_to_truth_table( fhat ) << std::endl;
+      kitty::print_binary( bdd_to_truth_table( fhat ) );
+      std::cout << std::endl;
     }
 
     metric_settings->set( "print_truthtables", true );

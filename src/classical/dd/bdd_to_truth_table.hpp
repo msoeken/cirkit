@@ -40,16 +40,17 @@
 
 #include <core/properties.hpp>
 #include <classical/dd/bdd.hpp>
-#include <classical/utils/truth_table_utils.hpp>
+
+#include <kitty/kitty.hpp>
 
 namespace cirkit
 {
 
 enum class bdd_to_truth_table_method { dfs, visit };
 
-tt bdd_to_truth_table( const bdd& b,
-                       const properties::ptr& settings = properties::ptr(),
-                       const properties::ptr& statistics = properties::ptr() );
+kitty::dynamic_truth_table bdd_to_truth_table( const bdd& b,
+                                               const properties::ptr& settings = properties::ptr(),
+                                               const properties::ptr& statistics = properties::ptr() );
 
 std::vector<unsigned> bdds_to_truth_table_unsigned( const std::vector<bdd>& fs,
                                                     const properties::ptr& settings = properties::ptr(),
