@@ -15,7 +15,10 @@ scripts/
 .tags
 .idea/
 .dir-locals.el
+.vscode/
 
+abc.rc
+debug.cs
 xmgmin.txt
 
 **/.DS_Store
