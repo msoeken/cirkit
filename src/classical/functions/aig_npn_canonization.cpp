@@ -26,9 +26,9 @@
 
 #include "aig_npn_canonization.hpp"
 
-#include <boost/format.hpp>
-#include <boost/range/algorithm_ext/iota.hpp>
-#include <boost/range/algorithm_ext/copy_n.hpp>
+#include <boost/dynamic_bitset.hpp>
+
+#include <fmt/format.h>
 
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
@@ -39,7 +39,6 @@
 #include <classical/functions/strash.hpp>
 #include <classical/io/write_aiger.hpp>
 #include <classical/utils/aig_utils.hpp>
-#include <classical/utils/truth_table_utils.hpp>
 #include <classical/sat/sat_solver.hpp>
 #include <classical/sat/minisat.hpp>
 #include <classical/sat/utils/add_aig.hpp>
@@ -130,7 +129,7 @@ public:
     phase.resize( n + 1u );
     phase.reset();
     perm.resize( n );
-    boost::iota( perm, 0u );
+    std::iota( perm.begin(), perm.end(), 0u );
 
     phase_next = phase;
     perm_next  = perm;
@@ -148,7 +147,7 @@ public:
   {
     phase.reset();
     phase.set( info.inputs.size(), output_phase );
-    boost::iota( perm, 0u );
+    std::iota( perm.begin(), perm.end(), 0u );
 
     phase_next = phase;
     perm_next  = perm;
@@ -443,7 +442,6 @@ public:
   {
     const auto i1 = pos + offset;
     const auto i2 = pos + ( num_inputs << 1u ) + offset;
-    //std::cout << boost::format( "[i] xor for %d and %d" ) % i1 % i2 << std::endl;
     return aig_create_xor( miter, {miter_info.inputs[i1], false}, {miter_info.inputs[i2], false} );
   }
 
@@ -488,7 +486,7 @@ public:
     phase.resize( n + 1u );
     phase.reset();
     perm.resize( n );
-    boost::iota( perm, 0u );
+    std::iota( perm.begin(), perm.end(), 0u );
 
     phase_next = phase;
     perm_next  = perm;
@@ -501,7 +499,7 @@ public:
   {
     phase.reset();
     phase.set( info.inputs.size(), output_phase );
-    boost::iota( perm, 0u );
+    std::iota( perm.begin(), perm.end(), 0u );
 
     phase_next = phase;
     perm_next  = perm;
@@ -616,7 +614,7 @@ private:
 
     for ( auto i = 0u; i < ( n << 2u ); ++i )
     {
-      aig_create_pi( miter, boost::str( boost::format( "pi%d" ) % i ) );
+      aig_create_pi( miter, fmt::format( "pi{}", i ) );
     }
 
     const auto f1 = simulate_aig( aig, aig_npn_canonization_miter_simulator( miter, n, 0u ) ).at( info.outputs[0u].first );
@@ -629,11 +627,10 @@ private:
     {
       for ( auto j = 0u; j < n; ++j )
       {
-        //std::cout << boost::format( "[i] xnor for %d and %d" ) % i % j << std::endl;
         aig_create_po( miter,
                        !aig_create_xor( miter, {miter_info.inputs[i], false},
                                         {miter_info.inputs[n + j], false} ),
-                       boost::str( boost::format( "xnor-%d-%d" ) % i % j ) );
+                       fmt::format( "xor-{}-{}", i, j ) );
       }
     }
   }
@@ -658,7 +655,7 @@ private:
     }
 
     /* variables */
-    boost::copy_n( piids, n, vars.begin() );
+    std::copy_n( piids.begin(), n, vars.begin() );
 
     /* miter output */
     miter_output = poids.front();
