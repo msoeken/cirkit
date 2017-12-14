@@ -58,7 +58,7 @@ xmg_graph xmg_exact_heuristic( const tt& spec, const properties::ptr& settings, 
   properties_timer t( statistics );
 
   /* base line */
-  const auto aig = aig_from_truth_table( spec );
+  const auto aig = aig_from_truth_table( to_kitty( spec ) );
   auto xmg = xmg_from_aig( aig );
   unsigned start = xmg.size();
 

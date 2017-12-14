@@ -28,12 +28,12 @@
 
 #include <vector>
 
-#include <boost/format.hpp>
-
 #include <core/utils/bitset_utils.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
 #include <classical/abc/functions/gia_to_cirkit.hpp>
 #include <classical/utils/aig_utils.hpp>
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -50,12 +50,12 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-aig_graph aig_from_truth_table_naive( const tt& t, const std::vector<aig_function>& leafs )
+aig_graph aig_from_truth_table_naive( const kitty::dynamic_truth_table& t, const std::vector<aig_function>& leafs )
 {
   aig_graph aig;
   aig_initialize( aig );
 
-  const auto n = tt_num_vars( t );
+  const auto n = t.num_vars();
 
   std::vector<aig_function> inputs;
 
@@ -63,7 +63,7 @@ aig_graph aig_from_truth_table_naive( const tt& t, const std::vector<aig_functio
   {
     for ( auto i = 1u; i <= n; ++i )
     {
-      inputs.push_back( aig_create_pi( aig, boost::str( boost::format( "x%d" ) % i ) ) );
+      inputs.push_back( aig_create_pi( aig, fmt::format( "x{}", i ) ) );
     }
   }
   else
@@ -77,29 +77,32 @@ aig_graph aig_from_truth_table_naive( const tt& t, const std::vector<aig_functio
   return aig;
 }
 
-aig_function aig_from_truth_table_naive( aig_graph& aig, const tt& t, const std::vector<aig_function>& leafs )
+aig_function aig_from_truth_table_naive( aig_graph& aig, const kitty::dynamic_truth_table& t, const std::vector<aig_function>& leafs )
 {
-  const auto n = tt_num_vars( t );
+  const auto n = t.num_vars();
   assert( leafs.size() == n );
 
   std::vector<aig_function> minterms;
 
-  foreach_minterm( t, [&]( const boost::dynamic_bitset<>& minterm ) {
-      std::vector<aig_function> cube;
-      for ( auto i = 0u; i < n; ++i )
-      {
-        cube.push_back( leafs[i] ^ !minterm[i] );
-      }
+  kitty::for_each_one_bit( t, [&]( uint64_t minterm ) {
+    std::vector<aig_function> cubes;
+    for ( auto i = 0u; i < n; ++i )
+    {
+      cubes.push_back( leafs[i] ^ !( ( minterm >> i ) & 1 ) );
+    }
 
-      minterms.push_back( aig_create_nary_and( aig, cube ) );
-    } );
+    minterms.push_back( aig_create_nary_and( aig, cubes ) );
+  });
 
   return aig_create_nary_or( aig, minterms );
 }
 
-aig_graph aig_from_truth_table( const tt& t )
+aig_graph aig_from_truth_table( const kitty::dynamic_truth_table& t )
 {
-  return abc_run_command( boost::str( boost::format( "read_truth %s; strash; short_names; dc2; &get -n" ) % tt_to_hex( t )  ) );
+  std::stringstream s;
+  kitty::print_hex( t, s );
+
+  return abc_run_command( fmt::format( "read_truth {}; strash; short_names; dc2; &get -n", s.str() ) );
 }
 
 }

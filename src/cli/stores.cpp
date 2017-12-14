@@ -272,7 +272,7 @@ command::log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
 template<>
 aig_graph store_convert<tt, aig_graph>( const tt& t )
 {
-  return aig_from_truth_table( t );
+  return aig_from_truth_table( to_kitty( t ) );
 }
 
 template<>
