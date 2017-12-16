@@ -59,7 +59,7 @@ add_cirkit_library(
   INCLUDE
     SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/extra
   OPTIONS
-    PRIVATE -Wno-comment -Wno-parentheses -Wno-incompatible-pointer-types -Wno-implicit-int -Wno-int-to-pointer-cast
+    PRIVATE -w
 )
 add_cirkit_library(
   NAME linenoise
