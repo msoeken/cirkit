@@ -14,3 +14,6 @@
 [submodule "lib/minisat"]
 	path = lib/minisat
 	url = https://github.com/msoeken/minisat.git
+[submodule "lib/z3"]
+	path = lib/z3
+	url = https://github.com/Z3Prover/z3.git

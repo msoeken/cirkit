@@ -8,9 +8,9 @@ target_include_directories(cudd PUBLIC ${CMAKE_BINARY_DIR}/lib/cudd/)
 target_include_directories(epd PUBLIC "cudd/epd")
 target_include_directories(mtr PUBLIC "cudd/mtr")
 target_include_directories(st PUBLIC "cudd/st")
-target_include_directories(util PUBLIC "cudd/util")
+target_include_directories(cudd_util PUBLIC "cudd/util")
 target_include_directories(obj PUBLIC "cudd/cplusplus")
-foreach(target cudd epd mtr st util obj)
+foreach(target cudd epd mtr st cudd_util obj)
 set_property(TARGET ${target} PROPERTY POSITION_INDEPENDENT_CODE ON)
 endforeach()
 
@@ -83,3 +83,5 @@ add_cirkit_library(
   OPTIONS
     PRIVATE -Wno-sign-compare
 )
+
+add_subdirectory(z3 EXCLUDE_FROM_ALL)
