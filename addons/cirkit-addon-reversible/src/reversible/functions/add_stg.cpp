@@ -28,10 +28,11 @@
 
 #include <numeric>
 
+#include <boost/random/detail/integer_log2.hpp>
+
 #include <core/utils/range_utils.hpp>
-#include <classical/functions/spectral_canonization2.hpp>
-#include <reversible/target_tags.hpp>
 #include <reversible/functions/add_gates.hpp>
+#include <reversible/target_tags.hpp>
 #include <reversible/utils/permutation.hpp>
 
 namespace cirkit
@@ -53,15 +54,17 @@ void add_stg_as_other( circuit& circ, const tt& func, const tt& func_real, const
 {
   const auto num_vars = tt_num_vars( func );
 
-  std::vector<trans_t> trans;
+  std::vector<kitty::detail::spectral_operation> trans;
+  const auto func_norm = kitty::exact_spectral_canonization( to_kitty( func ),
+                                                             [&trans]( const std::vector<kitty::detail::spectral_operation>& ops ) {
+                                                               std::copy( ops.begin(), ops.end(), std::back_inserter( trans ) );
+                                                             } );
+  const auto func_real_norm = kitty::exact_spectral_canonization( to_kitty( func_real ),
+                                                                  [&trans]( const std::vector<kitty::detail::spectral_operation>& ops ) {
+                                                                    std::copy( ops.rbegin(), ops.rend(), std::back_inserter( trans ) );
+                                                                  } );
 
-  spectral_normalization_params params;
-  spectral_normalization_stats stats;
-
-  const auto func_norm = spectral_normalization( func, params, stats );
-  std::copy( stats.transforms.begin(), stats.transforms.end(), std::back_inserter( trans ) );
-  const auto func_real_norm = spectral_normalization( func_real, params, stats );
-  std::copy( stats.transforms.rbegin(), stats.transforms.rend(), std::back_inserter( trans ) );
+  assert( func_norm == func_real_norm );
 
   std::vector<unsigned> line( num_vars + 1u );
   if ( !line_map.empty() )
@@ -88,32 +91,41 @@ void add_stg_as_other( circuit& circ, const tt& func, const tt& func_real, const
 
   for ( const auto& t : trans )
   {
-    switch ( t.kind )
+    switch ( t._kind )
     {
-    default: assert( false );
-    case 1: { /* swap two inputs */
-      std::swap( perm[t.var1], perm[t.var2] );
-    } break;
-    case 2: /* invert input */
-      not_mask.flip( perm[t.var1] );
+    default:
+      assert( false );
+    case kitty::detail::spectral_operation::kind::permutation:
+      std::swap( perm[boost::integer_log2( t._var1 )], perm[boost::integer_log2( t._var2 )] );
       break;
-    case 3: /* invert output */
+    case kitty::detail::spectral_operation::kind::input_negation:
+      not_mask.flip( perm[boost::integer_log2( t._var1 )] );
+      break;
+    case kitty::detail::spectral_operation::kind::output_negation:
       not_mask.flip( num_vars );
       break;
-    case 4: /* linear transformation of inputs */
-      insert_cnot( circ, index, make_var( line[perm[t.var2]], !not_mask.test( perm[t.var2] ) ), line[perm[t.var1]] );
-      insert_cnot( circ, index, make_var( line[perm[t.var2]], !not_mask.test( perm[t.var2] ) ), line[perm[t.var1]] );
+    case kitty::detail::spectral_operation::kind::spectral_translation:
+    {
+      const auto v1 = perm[boost::integer_log2( t._var1 )];
+      const auto v2 = perm[boost::integer_log2( t._var2 )];
+      insert_cnot( circ, index, make_var( line[v2], !not_mask.test( v2 ) ), line[v1] );
+      insert_cnot( circ, index, make_var( line[v2], !not_mask.test( v2 ) ), line[v1] );
       ++index;
-      break;
-    case 5: { /* disjoint transformation of output */
-      auto pol = !not_mask.test( perm[t.var1] );
+    }
+    break;
+    case kitty::detail::spectral_operation::kind::disjoint_translation:
+    { /* disjoint transformation of output */
+      const auto v1 = perm[boost::integer_log2( t._var1 )];
+
+      auto pol = !not_mask.test( v1 );
       if ( not_mask.test( num_vars ) )
       {
         not_mask.reset( num_vars );
         pol = !pol;
       }
-      insert_cnot( circ, index, make_var( line[perm[t.var1]], pol ), line[num_vars] );
-    } break;
+      insert_cnot( circ, index, make_var( line[v1], pol ), line[num_vars] );
+    }
+    break;
     }
   }
 
@@ -150,7 +162,6 @@ void add_stg_as_other( circuit& circ, const tt& func, const tt& func_real, const
   }
   g.add_target( line[num_vars] );
 }
-
 }
 
 // Local Variables:

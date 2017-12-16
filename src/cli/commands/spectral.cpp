@@ -33,7 +33,6 @@
 #include <cli/stores.hpp>
 #include <cli/stores.hpp>
 #include <classical/functions/spectral_canonization.hpp>
-#include <classical/functions/spectral_canonization2.hpp>
 
 namespace cirkit
 {
@@ -41,9 +40,6 @@ namespace cirkit
 spectral_command::spectral_command( const environment::ptr& env )
   : cirkit_command( env, "Spectral classification" )
 {
-  opts.add_options()
-    ( "verify", "verify spectral transformation (for debugging)" )
-    ;
   be_verbose();
   add_new_option();
 }
@@ -67,19 +63,8 @@ bool spectral_command::execute()
     }
   }
 
-  spectral_normalization_params params;
-  spectral_normalization_stats stats;
-
-  params.verbose = is_verbose();
-  params.verify = is_set( "verify" );
-
-  specf = spectral_normalization( tts.current(), params, stats );
-
-  if ( is_verbose() )
-  {
-    std::copy( stats.transforms.begin(), stats.transforms.end(),
-               std::ostream_iterator<trans_t>( std::cout, "\n" ) );
-  }
+  auto tt = kitty::exact_spectral_canonization( to_kitty( tts.current() ) );
+  specf = from_kitty( tt );
 
   extend_if_new( tts );
   tts.current() = specf;

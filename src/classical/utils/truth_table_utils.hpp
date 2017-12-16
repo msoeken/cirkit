@@ -314,6 +314,14 @@ tt tt_maj( tt a, tt b, tt c );
 
 kitty::dynamic_truth_table to_kitty( const tt& tt );
 
+template<typename TT>
+tt from_kitty( const TT& f )
+{
+  tt res( f.num_bits() );
+  boost::from_block_range( f.begin(), f.end(), res );
+  return res;
+}
+
 }
 
 #endif
