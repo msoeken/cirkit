@@ -185,7 +185,13 @@ public:
 private:
   void add_structure_variables()
   {
-    for ( auto i = 0; i < NumGates; ++i )
+    /* first gate is <x1x2x3> */
+    for ( auto k = 0; k < 3; ++k )
+    {
+      select[0][k][k] = var_index++;
+    }
+
+    for ( auto i = 1; i < NumGates; ++i )
     {
       for ( auto k = 0; k < 3; ++k )
       {
@@ -193,7 +199,7 @@ private:
         for ( auto j = 0; j < NumVars + i; ++j )
         {
           select[i][k][j] = var_index;
-          if ( j >= NumVars )
+          if ( j >= NumVars && ( j - NumVars ) < NumGates - 2 )
           {
             output_lits[j - NumVars].push_back( abc::Abc_Var2Lit( var_index, 0 ) );
           }
@@ -255,8 +261,6 @@ private:
 
   bool add_minterm( uint32_t minterm, int expected_value )
   {
-    std::cout << "add minterm " << boost::dynamic_bitset<>( NumVars, minterm ) << " with expected value " << expected_value << std::endl;
-
     std::array<bool, NumVars> assignment;
 
     for ( auto i = 0; i < NumVars; ++i )
@@ -369,7 +373,7 @@ private:
 
 private:
   std::array<std::array<std::array<int, NumGates + NumVars - 1>, 3>, NumGates> select;
-  std::array<std::vector<int>, NumGates - 1> output_lits;
+  std::array<std::vector<int>, NumGates - 2> output_lits;
 
   abc::bmcg_sat_solver* solver;
 
