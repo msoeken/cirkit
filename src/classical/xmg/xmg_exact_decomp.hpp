@@ -42,9 +42,12 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include <classical/abc/abc_api.hpp>
-#include <sat/glucose/AbcGlucose.h>
+#include <classical/xmg/xmg.hpp>
 #include <fmt/format.h>
+#include <sat/glucose/AbcGlucose.h>
 
 namespace cirkit
 {
@@ -118,14 +121,14 @@ public:
     {
       return true;
     }
-    return true;
+    return false;
   }
 
   void print_solution( std::ostream& os = std::cout )
   {
     for ( auto i = 0; i < NumGates; ++i )
     {
-      os << fmt::format( "n{} = <", i + NumVars );
+      os << fmt::format( "n{} = <", i + NumVars + 1 );
 
       for ( auto k = 0; k < 3; ++k )
       {
@@ -133,13 +136,50 @@ public:
         {
           if ( select[i][k][j] && abc::bmcg_sat_solver_read_cex_varvalue( solver, select[i][k][j] ) )
           {
-            os << fmt::format( "{}{}", j < NumVars ? 'x' : 'n', j );
+            os << fmt::format( "{}{}", j < NumVars ? 'x' : 'n', j + 1 );
           }
         }
       }
 
       os << ">" << std::endl;
     }
+  }
+
+  xmg_graph extract_circuit()
+  {
+    xmg_graph g;
+
+    std::vector<xmg_function> functions;
+
+    for ( auto i = 0; i < NumVars; ++i )
+    {
+      functions.push_back( g.create_pi( fmt::format( "x{}", i + 1 ) ) );
+    }
+
+    for ( auto i = 0; i < NumGates; ++i )
+    {
+      std::vector<xmg_function> children;
+
+      for ( auto k = 0; k < 3; ++k )
+      {
+        for ( auto j = 0; j < NumVars + i; ++j )
+        {
+          if ( select[i][k][j] && abc::bmcg_sat_solver_read_cex_varvalue( solver, select[i][k][j] ) )
+          {
+            children.push_back( functions[j] );
+          }
+        }
+      }
+
+      assert( children.size() == 3u );
+
+      functions.push_back( g.create_maj( children[0], children[1], children[2] ) );
+    }
+
+    const auto out = g.create_maj( g.create_pi( fmt::format( "x{}", NumVars ) ), functions[functions.size() - 2], functions[functions.size() - 1] );
+    g.create_po( out, "f" );
+
+    return g;
   }
 
 private:
@@ -215,6 +255,8 @@ private:
 
   bool add_minterm( uint32_t minterm, int expected_value )
   {
+    std::cout << "add minterm " << boost::dynamic_bitset<>( NumVars, minterm ) << " with expected value " << expected_value << std::endl;
+
     std::array<bool, NumVars> assignment;
 
     for ( auto i = 0; i < NumVars; ++i )
@@ -306,8 +348,8 @@ private:
     if ( expected_value == 2 )
     {
       int pLits[2];
-      pLits[0] = abc::Abc_Var2Lit( var_index + 4 * ( NumGates - 2 ), 0 );
-      pLits[1] = abc::Abc_Var2Lit( var_index + 4 * ( NumGates - 1 ), 0 );
+      pLits[0] = abc::Abc_Var2Lit( var_index + 4 * ( NumGates - 2 ) + 3, 0 );
+      pLits[1] = abc::Abc_Var2Lit( var_index + 4 * ( NumGates - 1 ) + 3, 0 );
       if ( !abc::bmcg_sat_solver_addclause( solver, pLits, 2 ) )
       {
         return false;
@@ -336,12 +378,19 @@ private:
 }
 
 template<uint32_t NumVars, uint32_t NumGates>
-void xmg_exact_decomposition()
+boost::optional<xmg_graph> xmg_exact_decomposition()
 {
   detail::xmg_exact_decomposition_impl<NumVars, NumGates> impl;
   if ( impl.run() )
   {
     impl.print_solution();
+
+    return impl.extract_circuit();
+  }
+  else
+  {
+    std::cout << "[i] no circuit found" << std::endl;
+    return boost::none;
   }
 }
 }
