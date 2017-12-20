@@ -124,6 +124,16 @@ public:
     return false;
   }
 
+  void print_statistics( std::ostream& os = std::cout )
+  {
+    os << fmt::format( "[i] vars = {}   cls = {}   learnt = {}   conf = {}",
+                       abc::bmcg_sat_solver_varnum( solver ),
+                       abc::bmcg_sat_solver_clausenum( solver ),
+                       abc::bmcg_sat_solver_learntnum( solver ),
+                       abc::bmcg_sat_solver_conflictnum( solver ) )
+       << std::endl;
+  }
+
   void print_solution( std::ostream& os = std::cout )
   {
     for ( auto i = 0; i < NumGates; ++i )
@@ -195,8 +205,8 @@ private:
     {
       for ( auto k = 0; k < 3; ++k )
       {
-        /* TODO remove some select variables */
-        for ( auto j = 0; j < NumVars + i; ++j )
+        const auto max = ( k == 0 ) ? NumVars : ( ( i == NumGates - 1 ) ? NumVars + i - 1 : NumVars + i );
+        for ( auto j = 0; j < max; ++j )
         {
           select[i][k][j] = var_index;
           if ( j >= NumVars && ( j - NumVars ) < NumGates - 2 )
@@ -244,6 +254,24 @@ private:
         }
 
         /* TODO symmetry breaking */
+        if ( k == 2 )
+          break;
+
+        for ( auto l = 1; l < NumVars + i; ++l )
+        {
+          for ( auto m = 0; m < l; ++m )
+          {
+            // select[i][k][l] -> !select[i][k + 1][m]
+            if ( !select[i][k][l] || !select[i][k + 1][m] )
+              continue;
+
+            int plits[] = {abc::Abc_Var2Lit( select[i][k][l], 1 ), abc::Abc_Var2Lit( select[i][k + 1][m], 1 )};
+            if ( !abc::bmcg_sat_solver_addclause( solver, plits, 2 ) )
+            {
+              return false;
+            }
+          }
+        }
       }
     }
 
@@ -388,6 +416,7 @@ boost::optional<xmg_graph> xmg_exact_decomposition()
   if ( impl.run() )
   {
     impl.print_solution();
+    impl.print_statistics();
 
     return impl.extract_circuit();
   }
