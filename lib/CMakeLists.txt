@@ -1,5 +1,6 @@
 set(ABC_USE_NAMESPACE "abc")
 add_subdirectory(abc)
+target_compile_definitions(libabc-pic PUBLIC "LIN64")
 
 set(CUDD_BUILD_TESTS OFF CACHE BOOL "Build the tests" FORCE)
 add_subdirectory(cudd)
