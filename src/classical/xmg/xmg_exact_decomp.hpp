@@ -38,6 +38,7 @@
 #define XMG_EXACT_DECOMP_HPP
 
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <vector>
@@ -117,7 +118,14 @@ public:
       }
     }
 
-    if ( abc::bmcg_sat_solver_solve( solver, nullptr, 0 ) == GLUCOSE_SAT )
+    /* solving time */
+    const auto start = std::chrono::high_resolution_clock::now();
+    const auto result = abc::bmcg_sat_solver_solve( solver, nullptr, 0 );
+    const auto stop = std::chrono::high_resolution_clock::now();
+
+    solving_time = std::chrono::duration<double>{stop - start}.count();
+
+    if ( result == GLUCOSE_SAT )
     {
       return true;
     }
@@ -126,11 +134,12 @@ public:
 
   void print_statistics( std::ostream& os = std::cout )
   {
-    os << fmt::format( "[i] vars = {}   cls = {}   learnt = {}   conf = {}",
+    os << fmt::format( "[i] vars = {}   cls = {}   learnt = {}   conf = {}   time = {:.2f}",
                        abc::bmcg_sat_solver_varnum( solver ),
                        abc::bmcg_sat_solver_clausenum( solver ),
                        abc::bmcg_sat_solver_learntnum( solver ),
-                       abc::bmcg_sat_solver_conflictnum( solver ) )
+                       abc::bmcg_sat_solver_conflictnum( solver ),
+                       solving_time )
        << std::endl;
   }
 
@@ -253,7 +262,7 @@ private:
           }
         }
 
-        /* TODO symmetry breaking */
+        /* symmetry breaking */
         if ( k == 2 )
           break;
 
@@ -269,6 +278,29 @@ private:
             if ( !abc::bmcg_sat_solver_addclause( solver, plits, 2 ) )
             {
               return false;
+            }
+          }
+        }
+      }
+
+      /* no gate appears twice */
+      for ( auto ii = 0; ii < i; ++ii )
+      {
+        for ( auto l = 2; l < NumVars + ii; ++l )
+        {
+          for ( auto m = 1; m < l; ++m )
+          {
+            for ( auto n = 0; n < m; ++n )
+            {
+              if ( !select[i][0][n] || !select[i][1][m] || !select[i][2][l] || !select[ii][0][n] || !select[ii][1][m] || !select[ii][2][l] )
+                continue;
+
+              int plits[] = {abc::Abc_Var2Lit( select[i][0][n], 1 ), abc::Abc_Var2Lit( select[i][1][m], 1 ), abc::Abc_Var2Lit( select[i][2][l], 1 ),
+                             abc::Abc_Var2Lit( select[ii][0][n], 1 ), abc::Abc_Var2Lit( select[ii][1][m], 1 ), abc::Abc_Var2Lit( select[ii][2][l], 1 )};
+              if ( !abc::bmcg_sat_solver_addclause( solver, plits, 6 ) )
+              {
+                return false;
+              }
             }
           }
         }
@@ -406,6 +438,8 @@ private:
   abc::bmcg_sat_solver* solver;
 
   int var_index = 1;
+
+  double solving_time = 0.0;
 };
 }
 
@@ -413,10 +447,11 @@ template<uint32_t NumVars, uint32_t NumGates>
 boost::optional<xmg_graph> xmg_exact_decomposition()
 {
   detail::xmg_exact_decomposition_impl<NumVars, NumGates> impl;
-  if ( impl.run() )
+  const auto result = impl.run();
+  impl.print_statistics();
+  if ( result )
   {
     impl.print_solution();
-    impl.print_statistics();
 
     return impl.extract_circuit();
   }
