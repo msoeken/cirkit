@@ -54,6 +54,7 @@
 #include <reversible/io/write_qc.hpp>
 #include <reversible/io/write_qcode.hpp>
 #include <reversible/io/write_qpic.hpp>
+#include <reversible/io/write_qsharp.hpp>
 #include <reversible/io/write_quipper.hpp>
 #include <reversible/io/write_realization.hpp>
 #include <reversible/io/write_specification.hpp>
@@ -322,6 +323,25 @@ template<>
 void store_write_io_type<circuit, io_projectq_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   write_projectq( circ, filename );
+}
+
+template<>
+bool store_can_write_io_type<circuit, io_qsharp_tag_t>( command& cmd )
+{
+  cmd.opts.add_options()
+    ( "namespace", boost::program_options::value<std::string>()->default_value( "RevKit.Compilation" ), "name for the namespace" )
+    ( "operation", boost::program_options::value<std::string>()->default_value( "Oracle" ), "name for the operation" )
+    ;
+  return true;
+}
+
+template<>
+void store_write_io_type<circuit, io_qsharp_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
+{
+  auto settings = std::make_shared<properties>();
+  settings->set( "namespace_name", cmd.vm["namespace"].as<std::string>() );
+  settings->set( "operation_name", cmd.vm["operation"].as<std::string>() );
+  write_qsharp( circ, filename, settings );
 }
 
 template<>
