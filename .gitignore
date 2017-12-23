@@ -17,6 +17,8 @@ scripts/
 .dir-locals.el
 .vscode/
 
+jupyter/lhrs-notebooks/
+
 abc.rc
 debug.cs
 xmgmin.txt
