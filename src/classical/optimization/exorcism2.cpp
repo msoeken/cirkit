@@ -36,24 +36,6 @@
 namespace cirkit
 {
 
-class print_nano_timer : public boost::timer::cpu_timer
-{
-public:
-  print_nano_timer()
-  {
-    start();
-  }
-
-  ~print_nano_timer()
-  {
-    if ( !is_stopped() )
-    {
-      stop();
-      std::cout << elapsed().wall << std::endl;
-    }
-  }
-};
-
 /******************************************************************************
  * Types                                                                      *
  ******************************************************************************/

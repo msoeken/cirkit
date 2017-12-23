@@ -67,7 +67,7 @@ bool testbdd_command::execute()
 {
   if ( is_set( "cardinality" ) )
   {
-    print_timer t( "[i] run-time: %w secs\n", true );
+    print_timer t( "[i] run-time: {} secs\n", true );
 
     Cudd manager;
 

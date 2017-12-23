@@ -5,7 +5,6 @@ add_cirkit_library(
   NAME cirkit_core
   AUTO_DIRS core
   USE
-    ${Boost_TIMER_LIBRARIES}
     cudd
     obj
     fmt::fmt-header-only

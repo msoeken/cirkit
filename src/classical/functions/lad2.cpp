@@ -42,7 +42,6 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/counting_range.hpp>
-#include <boost/timer/timer.hpp>
 
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
@@ -67,17 +66,6 @@ namespace cirkit
  * Macros                                                                     *
  ******************************************************************************/
 
-/**
- * If LAD_TEX_LOGGER is defined, the algorithm creates a LaTeX document that
- * contains several internal statistics.
- */
-//#define LAD_TEX_LOGGER
-
-#ifdef LAD_TEX_LOGGER
-#define TL(x) x
-#else
-#define TL(x)
-#endif
 
 /******************************************************************************
  * Types                                                                      *
@@ -332,90 +320,6 @@ struct lad2_manager
       std::cout << format( "[i] target graph has %d vertices" ) % gt.size() << std::endl
                 << format( "[i] pattern graph has %d vertices" ) % gp.size() << std::endl;
     }
-
-#ifdef LAD_TEX_LOGGER
-    tl.open( texlogname.c_str(), std::ofstream::out );
-    tl << "\\documentclass[9pt]{scrartcl}" << std::endl
-       << "\\usepackage[utf8]{inputenc}" << std::endl
-       << "\\usepackage[T1]{fontenc}" << std::endl << std::endl
-       << "\\usepackage[left=1cm,right=1cm,top=1cm,bottom=1cm]{geometry}" << std::endl
-       << "\\usepackage{amsmath}" << std::endl
-       << "\\usepackage{amssymb}" << std::endl
-       << "\\usepackage{pgfplots}" << std::endl
-       << "\\allowdisplaybreaks[1]" << std::endl;
-
-    tl << "\\begin{document}" << std::endl;
-    tl << "\\subsubsection*{Input sizes}" << std::endl;
-
-    tl << format( "\\[ \\begin{aligned} \\#X_T &= %d \\\\ \\#S_T &= %d \\\\ \\#Y_T &= %d \\end{aligned}" ) % gt.num_inputs() % gt.num_vectors() % gt.num_outputs()
-       << std::endl << "   \\qquad" << std::endl
-       << format( "   \\begin{aligned} \\#X_P &= %d \\\\ \\#S_P &= %d \\\\ \\#Y_P &= %d \\end{aligned} \\]" ) % gp.num_inputs() % gp.num_vectors() % gp.num_outputs()
-       << std::endl;
-
-    tl << "\\subsubsection*{Initial domain}" << std::endl;
-    list_with_names( tl );
-    list_target_image( tl );
-#endif
-  }
-
-  ~lad2_manager()
-  {
-#ifdef LAD_TEX_LOGGER
-    /* domain size graph */
-    const double sec = 1000000000.0L;
-
-    std::vector<double>      branch_points;
-    std::vector<std::string> branch_labels;
-    for ( const auto& t : branch_at_time )
-    {
-      branch_points += std::get<0>( t ) / sec;
-      branch_labels += std::string();
-    }
-
-    tl << "\\subsubsection*{Domain size graph}" << std::endl;
-    tl << "\\begin{tikzpicture}" << std::endl
-       << format( "  \\begin{axis}[x tick label style={/pgf/number format/fixed},extra x ticks={%s},extra x tick labels={%s},extra x tick style={grid=major,tick label style={rotate=90,font=\\footnotesize,anchor=east}},legend entries={$D_X$,$D_S$,$D_Y$}]" )
-          % any_join( branch_points, "," )
-          % boost::join( branch_labels, "," ) << std::endl;
-    tl << "    \\addplot coordinates {";
-    for ( auto i = 0u; i < size_at_time.size(); ++i )
-    {
-      if ( i == 0u || i == size_at_time.size() - 1u ||
-           std::get<1>( size_at_time[i] ) != std::get<1>( size_at_time[i + 1] ) ||
-           std::get<1>( size_at_time[i] ) != std::get<1>( size_at_time[i - 1] ) )
-      {
-        tl << format( " (%.2f, %d)" ) % ( std::get<0>( size_at_time[i] ) / sec ) % std::get<1>( size_at_time[i] );
-      }
-    }
-    tl << " };" << std::endl;
-    tl << "    \\addplot coordinates {";
-    for ( auto i = 0u; i < size_at_time.size(); ++i )
-    {
-      if ( i == 0u || i == size_at_time.size() - 1u ||
-           std::get<2>( size_at_time[i] ) != std::get<2>( size_at_time[i + 1] ) ||
-           std::get<2>( size_at_time[i] ) != std::get<2>( size_at_time[i - 1] ) )
-      {
-        tl << format( " (%.2f, %d)" ) % ( std::get<0>( size_at_time[i] ) / sec ) % std::get<2>( size_at_time[i] );
-      }
-    }
-    tl << " };" << std::endl;
-    tl << "    \\addplot coordinates {";
-    for ( auto i = 0u; i < size_at_time.size(); ++i )
-    {
-      if ( i == 0u || i == size_at_time.size() - 1u ||
-           std::get<3>( size_at_time[i] ) != std::get<3>( size_at_time[i + 1] ) ||
-           std::get<3>( size_at_time[i] ) != std::get<3>( size_at_time[i - 1] ) )
-      {
-        tl << format( " (%.2f, %d)" ) % ( std::get<0>( size_at_time[i] ) / sec ) % std::get<3>( size_at_time[i] );
-      }
-    }
-    tl << " };" << std::endl;
-    tl << "  \\end{axis}" << std::endl
-       << "\\end{tikzpicture}" << std::endl << std::endl;
-
-    tl << "\\end{document}" << std::endl;
-    tl.close();
-#endif
   }
 
   inline bool are_compatible_edges( int u, int u2, int v, int v2 )
@@ -461,15 +365,7 @@ struct lad2_manager
   domain_hook_t on_filter;
 
   /* statistics */
-  boost::timer::cpu_timer timer;
-#ifdef LAD_TEX_LOGGER /* because of comma in type */
-  std::vector<std::tuple<boost::timer::nanosecond_type, unsigned, unsigned, unsigned>> size_at_time;
-  std::vector<std::tuple<boost::timer::nanosecond_type, unsigned, unsigned>> branch_at_time;
-#endif
   unsigned num_branches = 0u;
-
-  /* TeX logger */
-  TL( std::ofstream tl; );
 };
 
 /******************************************************************************
@@ -1079,9 +975,6 @@ bool lad2_manager::filter()
       /* If D_u is empty */
       if ( d.nb_val[u] == 0 ) { return false; }
 
-      TL( const auto image_size = target_image_size(); )
-      TL( size_at_time += std::make_tuple( timer.elapsed().wall, std::get<0>( image_size ), std::get<1>( image_size ), std::get<2>( image_size ) ); );
-
       if ( (bool)on_filter )
       {
         /* We better ignore the return value of the hook for now */
@@ -1141,8 +1034,6 @@ bool lad2_manager::solve( unsigned& nb_sol, std::vector<unsigned>& mapping )
         std::cout << format( " %d=%d" ) % u % d.val[d.first_val[u]];
       }
     }
-    TL( tl << "\\subsubsection*{Final domain}" << std::endl; );
-    TL( list_with_names( tl ); );
     d.reset_to_filter( gp.size() );
     return true;
   }
@@ -1152,10 +1043,6 @@ bool lad2_manager::solve( unsigned& nb_sol, std::vector<unsigned>& mapping )
 
   if ( num_branches == 0u )
   {
-    TL( tl << "\\subsubsection*{Before first branch}" << std::endl; );
-    TL( list_with_names( tl ); );
-    TL( list_target_image( tl ); );
-
     if ( (bool)on_before_first_branch )
     {
       if ( (*on_before_first_branch)( d ) )
@@ -1173,7 +1060,6 @@ bool lad2_manager::solve( unsigned& nb_sol, std::vector<unsigned>& mapping )
     {
       std::cout << format( "Branch on %d=%d\n" ) % min_dom % v << std::endl;
     }
-    TL( branch_at_time += std::make_tuple( timer.elapsed().wall, min_dom, v ); );
     if ( !remove_all_values_but_one( min_dom, v ) || !match_vertex( min_dom ) )
     {
       if ( verbose )

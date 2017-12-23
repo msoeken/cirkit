@@ -43,12 +43,12 @@ BOOST_AUTO_TEST_CASE(simple)
 
   output_test_stream o1, o2;
   {
-    print_timer pt( "This message should be visible after %w", true, o1 );
+    print_timer pt( "This message should be visible after {}", true, o1 );
   }
   BOOST_CHECK( !o1.is_empty() );
 
   {
-    print_timer pt( "This message should not be visible after %w", false, o2 );
+    print_timer pt( "This message should not be visible after {}", false, o2 );
   }
   BOOST_CHECK( o2.is_empty() );
 

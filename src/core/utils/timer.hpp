@@ -37,103 +37,97 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 
-#include <cassert>
+#include <chrono>
 #include <iostream>
-
-#include <unistd.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <sys/times.h>
-
-#include <boost/timer/timer.hpp>
 
 #include <core/properties.hpp>
 
-namespace cirkit {
+#include <fmt/format.h>
 
-/* this will soon replace the old print_timer */
-class print_timer : public boost::timer::cpu_timer
+namespace cirkit
+{
+
+class timer
 {
 public:
-  print_timer( const std::string& format = "[i] run-time: %w secs\n", bool verbose = false, std::ostream& os = std::cout )
-    : format( format ),
-      verbose( verbose ),
-      os( os )
+  timer() : start( std::chrono::high_resolution_clock::now() ) {}
+
+protected:
+  double stop()
   {
-    start();
+    auto _stop = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration<double>{_stop - start}.count();
+  }
+
+private:
+  std::chrono::time_point<std::chrono::high_resolution_clock> start;
+};
+
+class print_timer : public timer
+{
+public:
+  print_timer( const std::string& format = "[i] run-time: {} secs\n", bool verbose = false, std::ostream& os = std::cout )
+      : timer(),
+        format( format ),
+        verbose( verbose ),
+        os( os )
+  {
   }
 
   ~print_timer()
   {
-    if ( !is_stopped() )
+    const auto runtime = stop();
+    if ( verbose )
     {
-      stop();
-      if ( verbose )
-      {
-        os << cpu_timer::format( 2, format ) << std::endl;
-      }
+      os << fmt::format( format, runtime );
     }
   }
 
 private:
-  std::string   format;
-  bool          verbose;
+  std::string format;
+  bool verbose;
   std::ostream& os;
 };
 
 /* this will soon replace the old properties timer */
-class properties_timer : public boost::timer::cpu_timer
+class properties_timer : public timer
 {
 public:
   properties_timer( const properties::ptr& statistics, const std::string& key = "runtime" )
-    : statistics( statistics ), key( key )
+      : timer(),
+        statistics( statistics ), key( key )
   {
-    start();
   }
 
   ~properties_timer()
   {
-    if ( !is_stopped() )
+    const auto runtime = stop();
+    if ( statistics )
     {
-      stop();
-      if ( statistics )
-      {
-        const double sec = 1000000000.0L;
-        boost::timer::cpu_times const elapsed_times(elapsed());
-        double total_sec = ( elapsed_times.system + elapsed_times.user ) / sec;
-        statistics->set( key, total_sec );
-        statistics->set( key + "_user", elapsed_times.user / sec );
-        statistics->set( key + "_system", elapsed_times.system / sec );
-        statistics->set( key + "_wall", elapsed_times.wall / sec );
-      }
+      statistics->set( key, runtime );
     }
   }
 
 private:
   const properties::ptr& statistics;
-  std::string            key;
+  std::string key;
 };
 
-class reference_timer : public boost::timer::cpu_timer
+class reference_timer : public timer
 {
 public:
   reference_timer( double* runtime )
-    : runtime( runtime )
+      : timer(),
+        runtime( runtime )
   {
-    start();
   }
 
   ~reference_timer()
   {
-    if ( !is_stopped() )
+    const auto time = stop();
+    if ( runtime )
     {
-      stop();
-      if ( runtime )
-      {
-        const double sec = 1000000000.0L;
-        boost::timer::cpu_times const elapsed_times(elapsed());
-        *runtime = ( elapsed_times.system + elapsed_times.user ) / sec;
-      }
+      *runtime = time;
     }
   }
 
@@ -141,32 +135,27 @@ private:
   double* runtime = nullptr;
 };
 
-class increment_timer : public boost::timer::cpu_timer
+class increment_timer : public timer
 {
 public:
-  increment_timer( double* runtime ) : runtime( runtime )
+  increment_timer( double* runtime )
+      : timer(),
+        runtime( runtime )
   {
-    start();
-  };
+  }
 
   ~increment_timer()
   {
-    if ( !is_stopped() )
+    const auto time = stop();
+    if ( runtime )
     {
-      stop();
-      if ( runtime )
-      {
-        const double sec = 1000000000.0L;
-        boost::timer::cpu_times const elapsed_times(elapsed());
-        *runtime += ( elapsed_times.system + elapsed_times.user ) / sec;
-      }
+      *runtime += time;
     }
   }
 
 private:
   double* runtime;
 };
-
 }
 
 #endif
