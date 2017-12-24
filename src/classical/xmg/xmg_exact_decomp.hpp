@@ -28,6 +28,8 @@
  * @file xmg_exact_decomp.hpp
  *
  * @brief Exact MAJ decomposition
+ * 
+ * inspired by implementation of ABC majexact (Alan Mishchenko)
  *
  * @author Mathias Soeken
  * @author Eleonora Testa
