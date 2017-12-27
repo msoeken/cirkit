@@ -11,12 +11,12 @@ This is the quick installation guide for CirKit and RevKit assuming that [all re
 
 ### CirKit
 
-After extracting or cloning CirKit perform the following steps
+Use git to build CirKit with the following steps
 
+    git clone --recursive https://github.com/msoeken/cirkit.git
     mkdir build
     cd build
     cmake ..
-    make external
     make cirkit
 
 CirKit can be executed with
@@ -25,12 +25,12 @@ CirKit can be executed with
 
 ### RevKit
 
-After extracting or cloning CirKit perform the following steps
+Use git to build RevKit with the following steps
 
+    git clone --recursive https://github.com/msoeken/cirkit.git
     mkdir build
     cd build
     cmake -Denable_cirkit-addon-reversible=ON -Denable_cirkit-addon-formal=ON ..
-    make external
     make revkit
 
 RevKit can be executed with
