@@ -85,12 +85,10 @@ std::map<typename boost::graph_traits<G>::vertex_descriptor, unsigned> arriving_
 depth_command::depth_command( const environment::ptr& env )
   : aig_mig_command( env, "Various depth related operations", "Depth of %s" )
 {
-  opts.add_options()
-    ( "arriving,r", "Compute arriving time of PIs" )
-    ;
+  add_flag( "--arriving,-r", "compute arriving time of PIs" );
 }
 
-bool depth_command::execute_aig()
+void depth_command::execute_aig()
 {
   if ( is_set( "arriving" ) )
   {
@@ -117,11 +115,9 @@ bool depth_command::execute_aig()
       arriving.push_back( pis );
     }
   }
-
-  return true;
 }
 
-bool depth_command::execute_mig()
+void depth_command::execute_mig()
 {
   if ( is_set( "arriving" ) )
   {
@@ -148,19 +144,17 @@ bool depth_command::execute_mig()
       arriving.push_back( pis );
     }
   }
-
-  return true;
 }
 
-command::log_opt_t depth_command::log() const
+nlohmann::json depth_command::log() const
 {
   if ( is_set( "arriving" ) )
   {
-    return log_opt_t({{"arriving", arriving}});
+    return nlohmann::json({{"arriving", arriving}});
   }
   else
   {
-    return boost::none;
+    return nullptr;
   }
 }
 

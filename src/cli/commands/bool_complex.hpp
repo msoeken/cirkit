@@ -47,7 +47,7 @@ public:
   bool_complex_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 private:
   void compute( bool length );

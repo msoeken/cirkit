@@ -50,7 +50,7 @@ public:
 
 protected:
   rules_t validity_rules() const;
-  bool execute();
+  void execute();
 
 private:
   void write_pattern_file();

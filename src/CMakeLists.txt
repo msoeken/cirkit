@@ -27,6 +27,7 @@ add_cirkit_library(
   NAME cirkit_cli
   AUTO_DIRS cli
   USE
+    alice
     cirkit_core
     cirkit_classical
     ${READLINE_LIBRARY}

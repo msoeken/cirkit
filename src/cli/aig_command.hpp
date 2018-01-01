@@ -82,7 +82,7 @@ protected:
   }
 
 protected:
-  cli_store<aig_graph>& store;
+  alice::store_container<aig_graph>& store;
 };
 
 }

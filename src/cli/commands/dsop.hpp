@@ -49,8 +49,7 @@ public:
   dsop_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  void execute();
 
   std::string filename;
   std::string outname;

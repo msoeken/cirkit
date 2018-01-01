@@ -65,9 +65,7 @@ unsigned tt_is_decomposable( const tt& func, const tt& mask, unsigned var )
 dectest_command::dectest_command( const environment::ptr& env )
   : cirkit_command( env, "Checks truth tables for decomposability" )
 {
-  opts.add_options()
-    ( "staircase,s", value( &staircase ), "comma-separated list of ids: i,j,k,...\nchecks for decompositions f = g1(xi, g2(xj, g3(xk, others)))" )
-    ;
+  add_option( "staircase,s", staircase, "comma-separated list of ids: i,j,k,...\nchecks for decompositions f = g1(xi, g2(xj, g3(xk, others)))" );
 }
 
 command::rules_t dectest_command::validity_rules() const
@@ -75,7 +73,7 @@ command::rules_t dectest_command::validity_rules() const
   return {has_store_element<tt>( env )};
 }
 
-bool dectest_command::execute()
+void dectest_command::execute()
 {
   /* truth table in store */
   const auto& func = env->store<tt>().current();
@@ -124,8 +122,6 @@ bool dectest_command::execute()
       }
     }
   }
-
-  return true;
 }
 
 }

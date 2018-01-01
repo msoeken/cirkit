@@ -83,13 +83,13 @@ using namespace cirkit;
  ******************************************************************************/
 
 template<>
-std::string store_entry_to_string<bdd_function_t>( const bdd_function_t& bdd )
+std::string to_string<bdd_function_t>( const bdd_function_t& bdd )
 {
   return ( boost::format( "%d variables, %d functions, %d nodes" ) % bdd.first.ReadSize() % bdd.second.size() % bdd.first.ReadKeys() ).str();
 }
 
 template<>
-void print_store_entry<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd )
+void print<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd )
 {
   for ( const auto& f : index( bdd.second ) )
   {
@@ -99,48 +99,48 @@ void print_store_entry<bdd_function_t>( std::ostream& os, const bdd_function_t& 
   }
 }
 
-show_store_entry<bdd_function_t>::show_store_entry( command& cmd )
-{
-  boost::program_options::options_description bdd_options( "BDD options" );
+// show_store_entry<bdd_function_t>::show_store_entry( command& cmd )
+// {
+//   boost::program_options::options_description bdd_options( "BDD options" );
 
-  bdd_options.add_options()
-    ( "add", "Convert BDD to ADD to have no complemented edges" )
-    ;
+//   bdd_options.add_options()
+//     ( "add", "Convert BDD to ADD to have no complemented edges" )
+//     ;
 
-  cmd.opts.add( bdd_options );
-}
+//   cmd.opts.add( bdd_options );
+// }
 
-bool show_store_entry<bdd_function_t>::operator()( bdd_function_t& bdd,
-                                                   const std::string& dotname,
-                                                   const command& cmd )
-{
-  using namespace std::placeholders;
+// bool show_store_entry<bdd_function_t>::operator()( bdd_function_t& bdd,
+//                                                    const std::string& dotname,
+//                                                    const command& cmd )
+// {
+//   using namespace std::placeholders;
 
-  auto * fd = fopen( dotname.c_str(), "w" );
+//   auto * fd = fopen( dotname.c_str(), "w" );
 
-  if ( cmd.is_set( "add" ) )
-  {
-    std::vector<ADD> adds( bdd.second.size() );
-    boost::transform( bdd.second, adds.begin(), std::bind( &BDD::Add, _1 ) );
-    bdd.first.DumpDot( adds, 0, 0, fd );
-  }
-  else
-  {
-    bdd.first.DumpDot( bdd.second, 0, 0, fd );
-  }
+//   if ( cmd.is_set( "add" ) )
+//   {
+//     std::vector<ADD> adds( bdd.second.size() );
+//     boost::transform( bdd.second, adds.begin(), std::bind( &BDD::Add, _1 ) );
+//     bdd.first.DumpDot( adds, 0, 0, fd );
+//   }
+//   else
+//   {
+//     bdd.first.DumpDot( bdd.second, 0, 0, fd );
+//   }
 
-  fclose( fd );
+//   fclose( fd );
 
-  return true;
-}
+//   return true;
+// }
 
-command::log_opt_t show_store_entry<bdd_function_t>::log() const
-{
-  return boost::none;
-}
+// command::log_opt_t show_store_entry<bdd_function_t>::log() const
+// {
+//   return boost::none;
+// }
 
 template<>
-void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd )
+void print_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd )
 {
   std::vector<double> minterms;
 
@@ -168,22 +168,22 @@ void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_f
 }
 
 template<>
-command::log_opt_t log_store_entry_statistics<bdd_function_t>( const bdd_function_t& bdd )
+nlohmann::json log_statistics<bdd_function_t>( const bdd_function_t& bdd )
 {
-  return command::log_opt_t({
+  return nlohmann::json({
       {"inputs", bdd.first.ReadSize()},
       {"outputs", static_cast<unsigned>( bdd.second.size() )}
     });
 }
 
 template<>
-bdd_function_t store_read_io_type<bdd_function_t, io_pla_tag_t>( const std::string& filename, const command& cmd )
+bdd_function_t read<bdd_function_t, io_pla_tag_t>( const std::string& filename, const command& cmd )
 {
   return read_pla( filename );
 }
 
 template<>
-void store_write_io_type<bdd_function_t, io_pla_tag_t>( const bdd_function_t& bdd, const std::string& filename, const command& cmd )
+void write<bdd_function_t, io_pla_tag_t>( const bdd_function_t& bdd, const std::string& filename, const command& cmd )
 {
   write_pla( bdd, filename );
 }
@@ -193,63 +193,63 @@ void store_write_io_type<bdd_function_t, io_pla_tag_t>( const bdd_function_t& bd
  ******************************************************************************/
 
 template<>
-std::string store_entry_to_string<aig_graph>( const aig_graph& aig )
+std::string to_string<aig_graph>( const aig_graph& aig )
 {
   const auto& info = aig_info( aig );
   const auto& name = info.model_name;
   return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
 }
 
-show_store_entry<aig_graph>::show_store_entry( command& cmd )
-{
-  boost::program_options::options_description aig_options( "AIG options" );
+// show_store_entry<aig_graph>::show_store_entry( command& cmd )
+// {
+//   boost::program_options::options_description aig_options( "AIG options" );
 
-  aig_options.add_options()
-    ( "levels", boost::program_options::value<unsigned>()->default_value( 0u ), "Compute and annotate levels for dot\n0: don't compute\n1: push to inputs\n2: push to outputs" )
-    ;
+//   aig_options.add_options()
+//     ( "levels", boost::program_options::value<unsigned>()->default_value( 0u ), "Compute and annotate levels for dot\n0: don't compute\n1: push to inputs\n2: push to outputs" )
+//     ;
 
-  cmd.opts.add( aig_options );
-}
+//   cmd.opts.add( aig_options );
+// }
 
-bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const command& cmd )
-{
-  auto settings = std::make_shared<properties>();
-  settings->set( "verbose", cmd.is_set( "verbose" ) );
-  const auto levels = cmd.vm["levels"].as<unsigned>();
-  if ( levels > 0u )
-  {
-    auto cl_settings = std::make_shared<properties>();
-    cl_settings->set( "verbose", cmd.is_set( "verbose" ) );
-    cl_settings->set( "push_to_outputs", levels == 2u );
-    auto annotation = get( boost::vertex_annotation, aig );
+// bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const command& cmd )
+// {
+//   auto settings = std::make_shared<properties>();
+//   settings->set( "verbose", cmd.is_set( "verbose" ) );
+//   const auto levels = cmd.vm["levels"].as<unsigned>();
+//   if ( levels > 0u )
+//   {
+//     auto cl_settings = std::make_shared<properties>();
+//     cl_settings->set( "verbose", cmd.is_set( "verbose" ) );
+//     cl_settings->set( "push_to_outputs", levels == 2u );
+//     auto annotation = get( boost::vertex_annotation, aig );
 
-    const auto vertex_levels = compute_levels( aig, cl_settings );
-    for ( const auto& p : vertex_levels )
-    {
-      annotation[p.first]["level"] = std::to_string( p.second );
-    }
+//     const auto vertex_levels = compute_levels( aig, cl_settings );
+//     for ( const auto& p : vertex_levels )
+//     {
+//       annotation[p.first]["level"] = std::to_string( p.second );
+//     }
 
-    settings->set( "vertex_levels", boost::optional<std::map<aig_node, unsigned>>( vertex_levels ) );
-  }
+//     settings->set( "vertex_levels", boost::optional<std::map<aig_node, unsigned>>( vertex_levels ) );
+//   }
 
-  write_dot( aig, dotname, settings );
+//   write_dot( aig, dotname, settings );
 
-  return true;
-}
+//   return true;
+// }
 
-command::log_opt_t show_store_entry<aig_graph>::log() const
-{
-  return boost::none;
-}
+// command::log_opt_t show_store_entry<aig_graph>::log() const
+// {
+//   return boost::none;
+// }
 
 template<>
-void print_store_entry_statistics<aig_graph>( std::ostream& os, const aig_graph& aig )
+void print_statistics<aig_graph>( std::ostream& os, const aig_graph& aig )
 {
   aig_print_stats( aig );
 }
 
 template<>
-command::log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
+nlohmann::json log_statistics<aig_graph>( const aig_graph& aig )
 {
   const auto& info = aig_info( aig );
 
@@ -262,7 +262,7 @@ command::log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
   std::vector<unsigned> depths;
   const auto depth = compute_depth( aig, outputs, depths );
 
-  return command::log_opt_t({
+  return nlohmann::json({
       {"inputs", static_cast<int>( info.inputs.size() )},
       {"outputs", static_cast<int>( info.outputs.size() )},
       {"size", static_cast<int>( boost::num_vertices( aig ) - info.inputs.size() - 1u )},
@@ -270,13 +270,13 @@ command::log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig )
 }
 
 template<>
-aig_graph store_convert<tt, aig_graph>( const tt& t )
+aig_graph convert<tt, aig_graph>( const tt& t )
 {
   return aig_from_truth_table( to_kitty( t ) );
 }
 
 template<>
-bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
+bdd_function_t convert<aig_graph, bdd_function_t>( const aig_graph& aig )
 {
   Cudd mgr;
   bdd_simulator simulator( mgr );
@@ -293,7 +293,7 @@ bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig )
 }
 
 template<>
-bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( command& cmd )
+bool can_read<aig_graph, io_aiger_tag_t>( command& cmd )
 {
   cmd.opts.add_options()
     ( "nosym",    "do not read symmetry file if existing" )
@@ -304,7 +304,7 @@ bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( command& cmd )
 }
 
 template<>
-aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const command& cmd )
+aig_graph read<aig_graph, io_aiger_tag_t>( const std::string& filename, const command& cmd )
 {
   aig_graph aig;
 
@@ -347,7 +347,7 @@ aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& file
 }
 
 template<>
-aig_graph store_read_io_type<aig_graph, io_bench_tag_t>( const std::string& filename, const command& cmd )
+aig_graph read<aig_graph, io_bench_tag_t>( const std::string& filename, const command& cmd )
 {
   aig_graph aig;
   read_bench( aig, filename );
@@ -355,7 +355,7 @@ aig_graph store_read_io_type<aig_graph, io_bench_tag_t>( const std::string& file
 }
 
 template<>
-void store_write_io_type<aig_graph, io_aiger_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
+void write<aig_graph, io_aiger_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
 {
   if ( boost::ends_with( filename, "aag" ) )
   {
@@ -368,19 +368,19 @@ void store_write_io_type<aig_graph, io_aiger_tag_t>( const aig_graph& aig, const
 }
 
 template<>
-aig_graph store_read_io_type<aig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
+aig_graph read<aig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
 {
   return read_verilog_with_abc( filename );
 }
 
 template<>
-void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
+void write<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
 {
   write_verilog( aig, filename );
 }
 
 template<>
-void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
+void write<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
 
@@ -395,49 +395,49 @@ void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, co
  ******************************************************************************/
 
 template<>
-aig_graph store_convert<mig_graph, aig_graph>( const mig_graph& mig )
+aig_graph convert<mig_graph, aig_graph>( const mig_graph& mig )
 {
   return mig_to_aig( mig );
 }
 
 template<>
-mig_graph store_convert<aig_graph, mig_graph>( const aig_graph& aig )
+mig_graph convert<aig_graph, mig_graph>( const aig_graph& aig )
 {
   return aig_to_mig( aig );
 }
 
 template<>
-std::string store_entry_to_string<mig_graph>( const mig_graph& mig )
+std::string to_string<mig_graph>( const mig_graph& mig )
 {
   const auto& info = mig_info( mig );
   const auto& name = info.model_name;
   return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
 }
 
-show_store_entry<mig_graph>::show_store_entry( command& cmd )
-{
-}
+// show_store_entry<mig_graph>::show_store_entry( command& cmd )
+// {
+// }
 
-bool show_store_entry<mig_graph>::operator()( mig_graph& mig, const std::string& dotname, const command& cmd )
-{
-  write_dot( mig, dotname );
+// bool show_store_entry<mig_graph>::operator()( mig_graph& mig, const std::string& dotname, const command& cmd )
+// {
+//   write_dot( mig, dotname );
 
-  return true;
-}
+//   return true;
+// }
 
-command::log_opt_t show_store_entry<mig_graph>::log() const
-{
-  return boost::none;
-}
+// command::log_opt_t show_store_entry<mig_graph>::log() const
+// {
+//   return boost::none;
+// }
 
 template<>
-void print_store_entry_statistics<mig_graph>( std::ostream& os, const mig_graph& mig )
+void print_statistics<mig_graph>( std::ostream& os, const mig_graph& mig )
 {
   mig_print_stats( mig, os );
 }
 
 template<>
-command::log_opt_t log_store_entry_statistics<mig_graph>( const mig_graph& mig )
+nlohmann::json log_statistics<mig_graph>( const mig_graph& mig )
 {
   const auto& info = mig_info( mig );
 
@@ -450,7 +450,7 @@ command::log_opt_t log_store_entry_statistics<mig_graph>( const mig_graph& mig )
   std::vector<unsigned> depths;
   const auto depth = compute_depth( mig, outputs, depths );
 
-  return command::log_opt_t({
+  return nlohmann::json({
       {"inputs", static_cast<int>( info.inputs.size() )},
       {"outputs", static_cast<int>( info.outputs.size() )},
       {"size", static_cast<int>( boost::num_vertices( mig ) - info.inputs.size() - 1u )},
@@ -461,13 +461,13 @@ command::log_opt_t log_store_entry_statistics<mig_graph>( const mig_graph& mig )
 }
 
 template<>
-expression_t::ptr store_convert<mig_graph, expression_t::ptr>( const mig_graph& mig )
+expression_t::ptr convert<mig_graph, expression_t::ptr>( const mig_graph& mig )
 {
   return mig_to_expression( mig, mig_info( mig ).outputs.front().first );
 }
 
 template<>
-mig_graph store_convert<expression_t::ptr, mig_graph>( const expression_t::ptr& expr )
+mig_graph convert<expression_t::ptr, mig_graph>( const expression_t::ptr& expr )
 {
   mig_graph mig;
   mig_initialize( mig );
@@ -477,13 +477,13 @@ mig_graph store_convert<expression_t::ptr, mig_graph>( const expression_t::ptr& 
 }
 
 template<>
-void store_write_io_type<mig_graph, io_verilog_tag_t>( const mig_graph& mig, const std::string& filename, const command& cmd )
+void write<mig_graph, io_verilog_tag_t>( const mig_graph& mig, const std::string& filename, const command& cmd )
 {
   write_verilog( mig, filename );
 }
 
 template<>
-mig_graph store_read_io_type<mig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
+mig_graph read<mig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
 {
   return read_mighty_verilog( filename );
 }
@@ -493,7 +493,7 @@ mig_graph store_read_io_type<mig_graph, io_verilog_tag_t>( const std::string& fi
  ******************************************************************************/
 
 template<>
-std::string store_entry_to_string<counterexample_t>( const counterexample_t& cex )
+std::string to_string<counterexample_t>( const counterexample_t& cex )
 {
   std::stringstream os;
   os << cex;
@@ -505,7 +505,7 @@ std::string store_entry_to_string<counterexample_t>( const counterexample_t& cex
  ******************************************************************************/
 
 template<>
-std::string store_entry_to_string<simple_fanout_graph_t>( const simple_fanout_graph_t& nl )
+std::string to_string<simple_fanout_graph_t>( const simple_fanout_graph_t& nl )
 {
   return "";
 }
@@ -515,13 +515,13 @@ std::string store_entry_to_string<simple_fanout_graph_t>( const simple_fanout_gr
  ******************************************************************************/
 
 template<>
-std::string store_entry_to_string<std::vector<aig_node>>( const std::vector<aig_node>& g )
+std::string to_string<std::vector<aig_node>>( const std::vector<aig_node>& g )
 {
   return ( boost::format( "{ %s }" ) % any_join( g, ", " ) ).str();
 }
 
 template<>
-void print_store_entry<std::vector<aig_node>>( std::ostream& os, const std::vector<aig_node>& g )
+void print<std::vector<aig_node>>( std::ostream& os, const std::vector<aig_node>& g )
 {
   os << boost::format( "{ %s }" ) % any_join( g, ", " ) << std::endl;
 }
@@ -531,7 +531,7 @@ void print_store_entry<std::vector<aig_node>>( std::ostream& os, const std::vect
  ******************************************************************************/
 
 template<>
-std::string store_entry_to_string<tt>( const tt& t )
+std::string to_string<tt>( const tt& t )
 {
   std::stringstream os;
   os << t;
@@ -539,14 +539,14 @@ std::string store_entry_to_string<tt>( const tt& t )
 }
 
 template<>
-void print_store_entry<tt>( std::ostream& os, const tt& t )
+void print<tt>( std::ostream& os, const tt& t )
 {
   os << tt_to_hex( t ) << std::endl
      << t << std::endl;
 }
 
 template<>
-void store_write_io_type<tt, io_pla_tag_t>( const tt& t, const std::string& filename, const command& cmd )
+void write<tt, io_pla_tag_t>( const tt& t, const std::string& filename, const command& cmd )
 {
   const auto n = tt_num_vars( t );
   std::ofstream out( filename.c_str(), std::ofstream::out );
@@ -575,7 +575,7 @@ void store_write_io_type<tt, io_pla_tag_t>( const tt& t, const std::string& file
  ******************************************************************************/
 
 template<>
-std::string store_entry_to_string<expression_t::ptr>( const expression_t::ptr& expr )
+std::string to_string<expression_t::ptr>( const expression_t::ptr& expr )
 {
   std::stringstream s;
   s << expr;
@@ -583,34 +583,34 @@ std::string store_entry_to_string<expression_t::ptr>( const expression_t::ptr& e
 }
 
 template<>
-void print_store_entry_statistics<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr )
+void print_statistics<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr )
 {
   os << std::endl;
 }
 
 template<>
-command::log_opt_t log_store_entry_statistics<expression_t::ptr>( const expression_t::ptr& expr )
+nlohmann::json log_statistics<expression_t::ptr>( const expression_t::ptr& expr )
 {
-  return command::log_opt_t({
+  return nlohmann::json({
       {"expression", expression_to_string( expr )}
     });
 }
 
 
 template<>
-void print_store_entry<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr )
+void print<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr )
 {
   os << expr << std::endl;
 }
 
 template<>
-tt store_convert<expression_t::ptr, tt>( const expression_t::ptr& expr )
+tt convert<expression_t::ptr, tt>( const expression_t::ptr& expr )
 {
   return tt_from_expression( expr );
 }
 
 template<>
-bdd_function_t store_convert<expression_t::ptr, bdd_function_t>( const expression_t::ptr& expr )
+bdd_function_t convert<expression_t::ptr, bdd_function_t>( const expression_t::ptr& expr )
 {
   Cudd manager;
   return bdd_from_expression( manager, expr );
@@ -621,22 +621,22 @@ bdd_function_t store_convert<expression_t::ptr, bdd_function_t>( const expressio
  ******************************************************************************/
 
 template<>
-std::string store_entry_to_string<xmg_graph>( const xmg_graph& xmg )
+std::string to_string<xmg_graph>( const xmg_graph& xmg )
 {
   const auto name = xmg.name();
   return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % xmg.inputs().size() % xmg.outputs().size() );
 }
 
 template<>
-void print_store_entry_statistics<xmg_graph>( std::ostream& os, const xmg_graph& xmg )
+void print_statistics<xmg_graph>( std::ostream& os, const xmg_graph& xmg )
 {
   xmg_print_stats( xmg, os );
 }
 
 template<>
-command::log_opt_t log_store_entry_statistics<xmg_graph>( const xmg_graph& xmg )
+nlohmann::json log_statistics<xmg_graph>( const xmg_graph& xmg )
 {
-  auto log = command::log_map_t({
+  auto log = nlohmann::json({
       {"inputs", static_cast<unsigned>( xmg.inputs().size() )},
       {"outputs", static_cast<unsigned>( xmg.outputs().size() )},
       {"size", xmg.num_gates()},
@@ -649,71 +649,71 @@ command::log_opt_t log_store_entry_statistics<xmg_graph>( const xmg_graph& xmg )
   return log;
 }
 
-show_store_entry<xmg_graph>::show_store_entry( command& cmd )
-{
-  boost::program_options::options_description xmg_options( "XMG options" );
+// show_store_entry<xmg_graph>::show_store_entry( command& cmd )
+// {
+//   boost::program_options::options_description xmg_options( "XMG options" );
 
-  xmg_options.add_options()
-    ( "cover",                                                                          "dump LUT cover of XMG" )
-    ( "show_all_edges",                                                                 "also show edges of AND and OR gates" )
-    ( "show_node_ids",                                                                  "show node ids" )
-    ( "format",         boost::program_options::value<unsigned>()->default_value( 0u ), "output format\n0: dot, 1: cytoscape (JS)\n" )
-    ;
+//   xmg_options.add_options()
+//     ( "cover",                                                                          "dump LUT cover of XMG" )
+//     ( "show_all_edges",                                                                 "also show edges of AND and OR gates" )
+//     ( "show_node_ids",                                                                  "show node ids" )
+//     ( "format",         boost::program_options::value<unsigned>()->default_value( 0u ), "output format\n0: dot, 1: cytoscape (JS)\n" )
+//     ;
 
-  cmd.opts.add( xmg_options );
-}
+//   cmd.opts.add( xmg_options );
+// }
 
-bool show_store_entry<xmg_graph>::operator()( xmg_graph& xmg, const std::string& dotname, const command& cmd )
-{
-  switch ( cmd.vm["format"].as<unsigned>() )
-  {
-  case 0u:
-    if ( cmd.is_set( "cover" ) )
-    {
-      if ( !xmg.has_cover() )
-      {
-        std::cout << "[w] XMG has no cover" << std::endl;
-        return false;
-      }
+// bool show_store_entry<xmg_graph>::operator()( xmg_graph& xmg, const std::string& dotname, const command& cmd )
+// {
+//   switch ( cmd.vm["format"].as<unsigned>() )
+//   {
+//   case 0u:
+//     if ( cmd.is_set( "cover" ) )
+//     {
+//       if ( !xmg.has_cover() )
+//       {
+//         std::cout << "[w] XMG has no cover" << std::endl;
+//         return false;
+//       }
 
-      xmg_cover_write_dot( xmg, dotname );
-    }
-    else
-    {
-      auto settings = std::make_shared<properties>();
-      settings->set( "show_and_or_edges", cmd.is_set( "show_all_edges" ) );
-      settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
-      write_dot( xmg, dotname, settings );
-    }
-    return true;
+//       xmg_cover_write_dot( xmg, dotname );
+//     }
+//     else
+//     {
+//       auto settings = std::make_shared<properties>();
+//       settings->set( "show_and_or_edges", cmd.is_set( "show_all_edges" ) );
+//       settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
+//       write_dot( xmg, dotname, settings );
+//     }
+//     return true;
 
-  case 1u:
-    {
-      auto settings = std::make_shared<properties>();
-      settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
-      write_javascript_cytoscape( xmg, dotname, settings );
-    }
-    return true;
+//   case 1u:
+//     {
+//       auto settings = std::make_shared<properties>();
+//       settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
+//       write_javascript_cytoscape( xmg, dotname, settings );
+//     }
+//     return true;
 
-  default:
-    std::cout << "[w] unknown format" << std::endl;
-    return false;
-  }
-}
+//   default:
+//     std::cout << "[w] unknown format" << std::endl;
+//     return false;
+//   }
+// }
 
-command::log_opt_t show_store_entry<xmg_graph>::log() const
-{
-  return boost::none;
-}
+// command::log_opt_t show_store_entry<xmg_graph>::log() const
+// {
+//   return boost::none;
+// }
 
 template<>
-expression_t::ptr store_convert<xmg_graph, expression_t::ptr>( const xmg_graph& xmg )
+expression_t::ptr convert<xmg_graph, expression_t::ptr>( const xmg_graph& xmg )
 {
   return xmg_to_expression( xmg, xmg.outputs().front().first );
 }
 
 template<>
-xmg_graph store_convert<expression_t::ptr, xmg_graph>( const expression_t::ptr& expr )
+xmg_graph convert<expression_t::ptr, xmg_graph>( const expression_t::ptr& expr )
 {
   xmg_graph xmg;
   std::vector<xmg_function> pis;
@@ -722,31 +722,31 @@ xmg_graph store_convert<expression_t::ptr, xmg_graph>( const expression_t::ptr& 
 }
 
 template<>
-xmg_graph store_convert<aig_graph, xmg_graph>( const aig_graph& aig )
+xmg_graph convert<aig_graph, xmg_graph>( const aig_graph& aig )
 {
   return xmg_from_aig( aig );
 }
 
 template<>
-aig_graph store_convert<xmg_graph, aig_graph>( const xmg_graph& aig )
+aig_graph convert<xmg_graph, aig_graph>( const xmg_graph& aig )
 {
   return xmg_create_aig_topological( aig );
 }
 
 template<>
-xmg_graph store_convert<mig_graph, xmg_graph>( const mig_graph& mig )
+xmg_graph convert<mig_graph, xmg_graph>( const mig_graph& mig )
 {
   return xmg_from_mig( mig );
 }
 
 template<>
-mig_graph store_convert<xmg_graph, mig_graph>( const xmg_graph& mig )
+mig_graph convert<xmg_graph, mig_graph>( const xmg_graph& mig )
 {
   return xmg_create_mig_topological( mig );
 }
 
 template<>
-void store_write_io_type<xmg_graph, io_bench_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
+void write<xmg_graph, io_bench_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
 {
   if ( !xmg.has_cover() )
   {
@@ -759,7 +759,7 @@ void store_write_io_type<xmg_graph, io_bench_tag_t>( const xmg_graph& xmg, const
 }
 
 template<>
-bool store_can_read_io_type<xmg_graph, io_verilog_tag_t>( command& cmd )
+bool can_read<xmg_graph, io_verilog_tag_t>( command& cmd )
 {
   boost::program_options::options_description xmg_options( "XMG options" );
 
@@ -775,13 +775,13 @@ bool store_can_read_io_type<xmg_graph, io_verilog_tag_t>( command& cmd )
 }
 
 template<>
-xmg_graph store_read_io_type<xmg_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
+xmg_graph read<xmg_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
 {
   return read_verilog( filename, !cmd.is_set( "as_mig" ), !cmd.is_set( "no_strash" ), !cmd.is_set( "no_invprop" ) );
 }
 
 template<>
-bool store_can_write_io_type<xmg_graph, io_verilog_tag_t>( command& cmd )
+bool can_write<xmg_graph, io_verilog_tag_t>( command& cmd )
 {
   boost::program_options::options_description xmg_options( "XMG options" );
 
@@ -795,7 +795,7 @@ bool store_can_write_io_type<xmg_graph, io_verilog_tag_t>( command& cmd )
 }
 
 template<>
-void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
+void write<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
 {
   auto settings = std::make_shared<properties>();
   settings->set( "maj_module", cmd.is_set( "maj_module" ) );
@@ -803,13 +803,13 @@ void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, con
 }
 
 template<>
-xmg_graph store_read_io_type<xmg_graph, io_yig_tag_t>( const std::string& filename, const command& cmd )
+xmg_graph read<xmg_graph, io_yig_tag_t>( const std::string& filename, const command& cmd )
 {
   return xmg_read_yig( filename );
 }
 
 template<>
-bool store_can_write_io_type<xmg_graph, io_smt_tag_t>( command& cmd )
+bool can_write<xmg_graph, io_smt_tag_t>( command& cmd )
 {
   boost::program_options::options_description xmg_options( "XMG options" );
 
@@ -824,7 +824,7 @@ bool store_can_write_io_type<xmg_graph, io_smt_tag_t>( command& cmd )
 }
 
 template<>
-void store_write_io_type<xmg_graph, io_smt_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
+void write<xmg_graph, io_smt_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
 {
   auto settings = std::make_shared<properties>();
   settings->set( "xor_blocks", cmd.is_set( "xor_blocks" ) );

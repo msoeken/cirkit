@@ -27,28 +27,21 @@
 #include "esop.hpp"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/program_options.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
 
 namespace cirkit
 {
 
-using boost::program_options::value;
-
 esop_command::esop_command( const environment::ptr& env )
   : aig_base_command( env, "Generate ESOPs from AIGs" )
 {
-  opts.add_options()
-    ( "filename",   value( &filename ),              "ESOP filename" )
-    ( "collapse,c", value_with_default( &collapse ), "collapsing method:\naig (0): ABC's AIG collapsing\nbdd (1): PSDKRO collapsing\naignew (2): CirKit's AIG collapsing" )
-    ( "minimize,m", value_with_default( &minimize ), "minimization method:\n0: none\n1: exorcism" )
-    ( "progress,p",                                  "show progress" )
-    ;
+  add_option( "--filename,filename", filename, "ESOP filename" );
+  add_option( "--collapse,-c", collapse, "collapsing method:\naig (0): ABC's AIG collapsing\nbdd (1): PSDKRO collapsing\naignew (2): CirKit's AIG collapsing", true );
+  add_option( "--minimize,-m", minimize, "minimization method:\n0: none\n1: exorcism", true );
+  add_flag( "--progress,-p", "show progress" );
   add_new_option();
-  add_positional_option( "filename" );
 }
 
 command::rules_t esop_command::validity_rules() const
@@ -61,7 +54,7 @@ command::rules_t esop_command::validity_rules() const
   };
 }
 
-bool esop_command::execute()
+void esop_command::execute()
 {
   const auto settings = make_settings();
   settings->set( "progress", is_set( "progress" ) );
@@ -81,13 +74,11 @@ bool esop_command::execute()
   }
 
   write_esop( esop, gia.num_inputs(), gia.num_outputs(), filename );
-
-  return true;
 }
 
-command::log_opt_t esop_command::log() const
+nlohmann::json esop_command::log() const
 {
-  return log_map_t({
+  return nlohmann::json({
       {"collapse", boost::lexical_cast<std::string>( collapse )},
       {"collapse_runtime", collapse_runtime},
       {"minimize", minimize}

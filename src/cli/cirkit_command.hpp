@@ -48,26 +48,23 @@ using namespace alice;
 class cirkit_command : public command
 {
 public:
-  cirkit_command( const environment::ptr& env, const std::string& caption, const std::string& publications = std::string() );
+  cirkit_command( const environment::ptr& env, const std::string& caption );
 
   virtual bool run( const std::vector<std::string>& args );
 
-  log_opt_t log() const;
-
 protected:
   /* pre-defined options */
-  inline void be_verbose() { opts.add_options()( "verbose,v", "be verbose" ); }
-  inline void be_verbose( bool* v ) { opts.add_options()( "verbose,v", boost::program_options::bool_switch( v ), "be verbose" ); }
+  inline void be_verbose() { add_flag( "--verbose,-v", "be verbose" ); }
   inline bool is_verbose() const { return is_set( "verbose" ); }
 
   inline void add_new_option( bool with_short = true )
   {
-    auto option = std::string( "new" );
+    auto option = std::string( "--new" );
     if ( with_short )
     {
-      option += ",n";
+      option += ",-n";
     }
-    opts.add_options()( option.c_str(), "create new store entry" );
+    add_flag( option, "create new store entry" );
   }
 
   template<typename Store>

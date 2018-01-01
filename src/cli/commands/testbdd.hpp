@@ -47,7 +47,7 @@ public:
   testbdd_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 private:
   unsigned num_vars = 10u;

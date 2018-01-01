@@ -56,24 +56,21 @@ namespace cirkit
 gen_trans_arith_command::gen_trans_arith_command( const environment::ptr& env )
   : cirkit_command( env, "Generate transparent arithmetic circuits" )
 {
-  opts.add_options()
-    ( "filename",        value( &filename ),                     "filename" )
-    ( "seed,s",          value( &seed ),                         "random seed (default: current time)" )
-    ( "bitwidth,w",      value_with_default( &bitwidth ),        "bitwidth" )
-    ( "min_words",       value_with_default( &min_words ),       "minimum number of input words" )
-    ( "max_words",       value_with_default( &max_words ),       "maximum number of input words" )
-    ( "max_fanout",      value_with_default( &max_fanout ),      "maximum number of fanout for each word" )
-    ( "max_rounds",      value_with_default( &max_rounds ),      "maximum number of rounds, corresponds to levels" )
-    ( "operators",       value_with_default( &operators ),       "space separated list of Verilog infix operators" )
-    ( "mux_types",       value_with_default( &mux_types ),       "mux types (M: standard multiplexer, O: one-hot transparencies)" )
-    ( "mux_prob",        value_with_default( &mux_prob ),        "probability of using a mux instead of operator (between 0 and 100)" )
-    ( "new_ctrl_prob",   value_with_default( &new_ctrl_prob ),   "probability of creating a new control input instead of using an existing one (between 0 and 100)" )
-    ( "word_pattern",    value_with_default( &word_pattern ),    "formatting for words" )
-    ( "control_pattern", value_with_default( &control_pattern ), "formatting for control inputs" )
-    ( "module_name",     value_with_default( &module_name ),     "name for resulting module" )
-    ( "aig,a",                                                   "write into AIG directly (don't specify filename)" )
-    ;
-  add_positional_option( "filename" );
+  add_option( "--filename,filename", filename, "filename" );
+  add_option( "--seed,-s", seed, "random seed (default: current time)" );
+  add_option( "--bitwidth,-w",     bitwidth, "bitwidth", true );
+  add_option( "--min_words",       min_words, "minimum number of input words", true );
+  add_option( "--max_words",       max_words, "maximum number of input words", true );
+  add_option( "--max_fanout",      max_fanout, "maximum number of fanout for each word", true );
+  add_option( "--max_rounds",      max_rounds, "maximum number of rounds, corresponds to levels", true );
+  add_option( "--operators",       operators, "space separated list of Verilog infix operators", true );
+  add_option( "--mux_types",       mux_types, "mux types (M: standard multiplexer, O: one-hot transparencies)", true );
+  add_option( "--mux_prob",        mux_prob, "probability of using a mux instead of operator (between 0 and 100)", true );
+  add_option( "--new_ctrl_prob",   new_ctrl_prob, "probability of creating a new control input instead of using an existing one (between 0 and 100)", true );
+  add_option( "--word_pattern",    word_pattern, "formatting for words", true );
+  add_option( "--control_pattern", control_pattern, "formatting for control inputs", true );
+  add_option( "--module_name",     module_name, "name for resulting module", true );
+  add_flag( "--aig,-a", "write into AIG directly (don't specify filename)" );
   add_new_option();
 }
 
@@ -98,7 +95,7 @@ command::rules_t gen_trans_arith_command::validity_rules() const
   };
 }
 
-bool gen_trans_arith_command::execute()
+void gen_trans_arith_command::execute()
 {
   auto settings = make_settings();
 
@@ -142,13 +139,11 @@ bool gen_trans_arith_command::execute()
     extend_if_new( aigs );
     aigs.current() = read_verilog_with_abc( filename );
   }
-
-  return true;
 }
 
-command::log_opt_t gen_trans_arith_command::log() const
+nlohmann::json gen_trans_arith_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"seed", seed},
       {"min_words", min_words},
       {"max_words", max_words},

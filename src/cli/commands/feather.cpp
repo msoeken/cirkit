@@ -48,24 +48,21 @@ namespace cirkit
 
 feather_command::feather_command( const environment::ptr& env ) : aig_base_command( env, "Adds outputs to higher levels of a circuit" )
 {
-  opts.add_options()
-    ( "levels,l",        value_with_default( &levels ),        "Number of levels to feather" )
-    ( "respect_edges,r", value_with_default( &respect_edges ), "If true, then for each node within the feathering level, "
-                                                               "an output is added according to the polarities of outgoing"
-                                                               "edges.  Otherwise, always two outputs are created for each"
-                                                               "node, if not existing." )
-    ( "output_name,o",   value_with_default( &output_name ),   "Template for name of the new outputs" )
-    ;
+  add_option( "--levels,-l",        levels, "number of levels to feather", true );
+  add_option( "--respect_edges,-r", respect_edges, "if true, then for each node within the feathering level, "
+                                                   "an output is added according to the polarities of outgoing"
+                                                   "edges.  Otherwise, always two outputs are created for each"
+                                                   "node, if not existing.", true );
+  add_option( "--output_name,-o", output_name, "template for name of the new outputs", true );
   be_verbose();
 }
 
-bool feather_command::execute()
+void feather_command::execute()
 {
   auto settings = make_settings();
   settings->set( "respect_edges", respect_edges );
   settings->set( "output_name",   output_name );
   aig() = output_feathering( aig(), levels, settings );
-  return true;
 }
 
 }

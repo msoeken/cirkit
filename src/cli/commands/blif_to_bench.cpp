@@ -41,28 +41,21 @@ namespace cirkit
 blif_to_bench_command::blif_to_bench_command( const environment::ptr& env )
   : cirkit_command( env, "BLIF to BENCH converter" )
 {
-  add_positional_option( "blif_name" );
-  add_positional_option( "bench_name" );
-  opts.add_options()
-    ( "blif_name",  value( &blif_name ),  "filename for BLIF file" )
-    ( "bench_name", value( &bench_name ), "filename for BENCH file" )
-    ;
+  add_option( "blif_name,--blif_name",  blif_name,  "filename for BLIF file" )->check( CLI::ExistingFile );
+  add_option( "bench_name,--bench_name", bench_name, "filename for BENCH file" );
 }
 
 command::rules_t blif_to_bench_command::validity_rules() const
 {
   return {
-    {[this]() { return is_set( "blif_name" ) && is_set( "bench_name" ); }, "one must specify filenames for BLIF file and BENCH file"},
-    file_exists( blif_name, "blif_name" )
+    {[this]() { return is_set( "blif_name" ) && is_set( "bench_name" ); }, "one must specify filenames for BLIF file and BENCH file"}
   };
 }
 
-bool blif_to_bench_command::execute()
+void blif_to_bench_command::execute()
 {
   auto g = read_blif( blif_name );
   write_bench( g, bench_name );
-
-  return true;
 }
 
 }

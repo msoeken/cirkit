@@ -76,7 +76,7 @@ protected:
   }
 
 protected:
-  cli_store<xmg_graph>& store;
+  alice::store_container<xmg_graph>& store;
 };
 
 }

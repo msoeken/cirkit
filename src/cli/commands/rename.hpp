@@ -50,7 +50,7 @@ public:
   rename_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 private:
   std::vector<std::string> inputs, outputs;

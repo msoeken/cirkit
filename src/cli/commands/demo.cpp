@@ -157,23 +157,18 @@ demo_command::demo_command( const environment::ptr& env )
    *   And you don't need to check whether the variable is set before
    *   using it.
    */
-  opts.add_options()
-    ( "xmg,x", "demonstration of XMG features" )
-    ;
+  add_flag( "--xmg,-x", "demonstration of XMG features" );
 
   /* this adds a verbose option to the command */
   be_verbose();
 }
 
-bool demo_command::execute()
+void demo_command::execute()
 {
   if ( is_set( "xmg" ) )
   {
     xmg_demo( is_verbose() );
   }
-
-  /* command should always return true, false leads to program termination */
-  return true;
 }
 
 

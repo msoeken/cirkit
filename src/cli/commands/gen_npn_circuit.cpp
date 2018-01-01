@@ -37,11 +37,8 @@ namespace cirkit
 gen_npn_circuit_command::gen_npn_circuit_command( const environment::ptr& env )
   : cirkit_command( env, "Generates NPN classification circuits" )
 {
-  opts.add_options()
-    ( "filename",   value_with_default( &filename ), "Verilog filename for the result" )
-    ( "num_vars,n", value_with_default( &num_vars ), "number of variables (from 2 to 6) " )
-    ;
-  add_positional_option( "num_vars" );
+  add_option( "--filename", filename, "Verilog filename for the result", true );
+  add_option( "--num_vars,-n,num_vars", num_vars, "number of variables (from 2 to 6) ", true );
 }
 
 command::rules_t gen_npn_circuit_command::validity_rules() const
@@ -49,12 +46,10 @@ command::rules_t gen_npn_circuit_command::validity_rules() const
   return {{[this]() { return num_vars >= 2 && num_vars <= 6; }, "number of variables must be between 2 and 6"}};
 }
 
-bool gen_npn_circuit_command::execute()
+void gen_npn_circuit_command::execute()
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
   generate_npn_circuit( os, num_vars );
-
-  return true;
 }
 
 }

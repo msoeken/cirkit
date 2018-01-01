@@ -46,8 +46,8 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-cirkit_command::cirkit_command( const environment::ptr& env, const std::string& caption, const std::string& publications )
-  : command( env, caption, publications )
+cirkit_command::cirkit_command( const environment::ptr& env, const std::string& caption )
+  : command( env, caption )
 {
 }
 
@@ -57,25 +57,19 @@ bool cirkit_command::run( const std::vector<std::string>& args )
   return command::run( args );
 }
 
-command::log_opt_t cirkit_command::log() const
-{
-  log_map_t map;
-
-  for ( const auto& p : *statistics )
-  {
-    add_to_log_from_any<int, unsigned>( map, p.first, p.second );
-  }
-
-  return map;
-}
-
 properties::ptr cirkit_command::make_settings() const
 {
   auto settings = std::make_shared<properties>();
-  if ( opts.find_nothrow( "verbose", false ) )
+
+  try
   {
+    opts.count( "-v" );
     settings->set( "verbose", is_verbose() );
   }
+  catch (...)
+  {
+  }
+
   return settings;
 }
 
@@ -86,10 +80,10 @@ void cirkit_command::print_runtime( const std::string& key, const std::string& l
 
 void cirkit_command::print_runtime( double runtime, const std::string& label ) const
 {
-  if ( env->variable_value("omit_runtime", "0") != "0" )
-  {
-    return;
-  }
+  // if ( env->variable_value("omit_runtime", "0") != "0" )
+  // {
+  //   return;
+  // }
 
   if ( label.empty() )
   {

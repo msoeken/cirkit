@@ -54,7 +54,7 @@ public:
 
 protected:
   /* This method will execute the command */
-  bool execute();
+  void execute();
 };
 
 }

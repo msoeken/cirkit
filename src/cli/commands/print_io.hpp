@@ -47,7 +47,7 @@ public:
   print_io_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 };
 
 }

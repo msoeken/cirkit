@@ -17,3 +17,6 @@
 [submodule "lib/z3"]
 	path = lib/z3
 	url = https://github.com/msoeken/z3.git
+[submodule "lib/alice"]
+	path = lib/alice
+	url = https://github.com/msoeken/alice

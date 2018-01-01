@@ -49,11 +49,11 @@ public:
   depth_command( const environment::ptr& env );
 
 protected:
-  bool execute_aig();
-  bool execute_mig();
+  void execute_aig();
+  void execute_mig();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   std::vector<std::vector<int>> arriving;

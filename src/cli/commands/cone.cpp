@@ -51,10 +51,8 @@ namespace cirkit
 
 cone_command::cone_command( const environment::ptr& env ) : aig_base_command( env, "Extracts cone by outputs" )
 {
-  opts.add_options()
-    ( "output,o",      value( &outputs )->composing(),        "names of outputs that should be kept" )
-    ( "ouput_index,i", value( &output_indexes )->composing(), "indexes of outputs that should be kept" )
-    ;
+  add_option( "--output,-o", outputs, "names of outputs that should be kept" );
+  add_option( "--ouput_index,-i", output_indexes, "indexes of outputs that should be kept" );
   be_verbose();
 }
 
@@ -65,7 +63,7 @@ command::rules_t cone_command::validity_rules() const
   };
 }
 
-bool cone_command::execute()
+void cone_command::execute()
 {
   auto settings = make_settings();
   auto statistics = std::make_shared<properties>();
@@ -81,8 +79,6 @@ bool cone_command::execute()
 
   aig() = aig_cone( aig(), output_indexes, settings, statistics );
   std::cout << boost::format( "[i] Run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
 }
 
 }

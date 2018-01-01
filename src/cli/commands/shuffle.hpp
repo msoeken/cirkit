@@ -48,8 +48,8 @@ public:
 
 protected:
   bool before();
-  bool execute_aig();
-  bool execute_mig();
+  void execute_aig();
+  void execute_mig();
 
 private:
   unsigned seed;

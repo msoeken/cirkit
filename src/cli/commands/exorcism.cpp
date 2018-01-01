@@ -43,12 +43,9 @@ namespace cirkit
 exorcism_command::exorcism_command( const environment::ptr& env )
   : cirkit_command( env, "Exorcism ESOP minimization" )
 {
-  opts.add_options()
-    ( "filename", value( &filename ), "ESOP filename for output" )
-    ( "aig,a",                        "read from AIG" )
-    ( "psdkro,p",                     "extract cover with PSDKROs (only for AIGs)" )
-    ;
-  add_positional_option( "filename" );
+  add_option( "--filename,filename", filename, "ESOP filename for output" );
+  add_option( "--aig,-a", "read from AIG" );
+  add_option( "--psdkro,-p", "extract cover with PSDKROs (only for AIGs)" );
   be_verbose();
 }
 
@@ -59,7 +56,7 @@ command::rules_t exorcism_command::validity_rules() const
   };
 }
 
-bool exorcism_command::execute()
+void exorcism_command::execute()
 {
   std::cout << "[w] deprecated: use command `esop' instead" << std::endl;
 
@@ -77,8 +74,6 @@ bool exorcism_command::execute()
   write_esop( esop, gia.num_inputs(), gia.num_outputs(), filename );
 
   print_runtime();
-
-  return true;
 }
 
 }

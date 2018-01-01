@@ -60,17 +60,15 @@ namespace cirkit
 
 cuts_command::cuts_command( const environment::ptr& env ) : aig_mig_command( env, "Computes cuts of an AIG", "Enumerate cuts for %s" )
 {
-  opts.add_options()
-    ( "node_count,k", value_with_default( &node_count ), "Number of nodes in a cut" )
-    ( "truthtable,t",                                    "Prints truth tables when verbose" )
-    ( "cone_count,c",                                    "Prints nodes in cut cone when verbose" )
-    ( "depth,d",                                         "Prints depth of cut when verbose " )
-    ( "parallel",                                        "Parallel cut enumeration for AIGs" )
-    ;
+  add_option( "--node_count,-k", node_count, "number of nodes in a cut", true );
+  add_flag( "--truthtable,-t", "prints truth tables when verbose" );
+  add_flag( "--cone_count,-c", "prints nodes in cut cone when verbose" );
+  add_flag( "--depth,-d", "prints depth of cut when verbose " );
+  add_flag( "--parallel", "parallel cut enumeration for AIGs" );
   be_verbose();
 }
 
-bool cuts_command::execute_aig()
+void cuts_command::execute_aig()
 {
   paged_aig_cuts cuts( aig(), node_count, is_set( "parallel" ) );
   std::cout << boost::format( "[i] found %d cuts in %.2f secs (%d KB)" ) % cuts.total_cut_count() % cuts.enumeration_time() % ( cuts.memory() >> 10u ) << std::endl;
@@ -98,11 +96,9 @@ bool cuts_command::execute_aig()
       }
     }
   }
-
-  return true;
 }
 
-bool cuts_command::execute_mig()
+void cuts_command::execute_mig()
 {
   mig_cuts_paged cuts( mig(), node_count );
   std::cout << boost::format( "[i] found %d cuts in %.2f secs (%d KB)" ) % cuts.total_cut_count() % cuts.enumeration_time() % ( cuts.memory() >> 10u ) << std::endl;
@@ -135,8 +131,6 @@ bool cuts_command::execute_mig()
       }
     }
   }
-
-  return true;
 }
 
 }

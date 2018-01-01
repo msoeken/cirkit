@@ -81,7 +81,7 @@ protected:
   }
 
 protected:
-  cli_store<mig_graph>& store;
+  alice::store_container<mig_graph>& store;
 };
 
 }

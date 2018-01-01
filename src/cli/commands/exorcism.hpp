@@ -48,7 +48,7 @@ public:
 
 protected:
   rules_t validity_rules() const;
-  bool execute();
+  void execute();
 
 private:
   std::string filename = "/tmp/exorcism.esop";

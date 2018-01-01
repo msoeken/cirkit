@@ -55,19 +55,16 @@ namespace cirkit
 bool_complex_command::bool_complex_command( const environment::ptr& env )
   : cirkit_command( env, "Computes complexities of Boolean functions" )
 {
-  opts.add_options()
-    ( "numvars,n", value_with_default( &numvars ), "number of variables (n <= 4)" )
-    ( "count,c",                                   "compute upper bound on size" )
-    ( "lengths,l",                                 "compute normal lengths" )
-    ( "depths,d",                                  "compute depths" )
-    ( "lengths_maj",                               "compute normal lengths (MAJ)" )
-    ( "depths_maj",                                "compute depths (MAJ)" )
-    ( "npn",                                       "compute number of NPN classes" )
-    ;
-  add_positional_option( "numvars" );
+  add_option( "--numvars,-n,numvars", numvars, "number of variables (n <= 4)", true );
+  add_flag( "--count,-c", "compute upper bound on size" );
+  add_flag( "--lengths,-l", "compute normal lengths" );
+  add_flag( "--depths,-d", "compute depths" );
+  add_flag( "--lengths_maj", "compute normal lengths (MAJ)" );
+  add_flag( "--depths_maj", "compute depths (MAJ)" );
+  add_flag( "--npn", "compute number of NPN classes" );
 }
 
-bool bool_complex_command::execute()
+void bool_complex_command::execute()
 {
   if ( is_set( "count" ) )
   {
@@ -89,8 +86,6 @@ bool bool_complex_command::execute()
   {
     compute_maj( false, is_set( "npn" ) );
   }
-
-  return true;
 }
 
 void bool_complex_command::compute( bool length )

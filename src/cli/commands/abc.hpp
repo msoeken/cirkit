@@ -50,7 +50,7 @@ public:
   abc_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 private:
   bool warn_once = true;
