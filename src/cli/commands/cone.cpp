@@ -26,8 +26,6 @@
 
 #include "cone.hpp"
 
-#include <boost/format.hpp>
-
 #include <classical/functions/aig_cone.hpp>
 #include <classical/utils/aig_utils.hpp>
 
@@ -63,7 +61,6 @@ command::rules_t cone_command::validity_rules() const
 void cone_command::execute()
 {
   auto settings = make_settings();
-  auto statistics = std::make_shared<properties>();
 
   for ( const auto& name : outputs )
   {
@@ -75,7 +72,7 @@ void cone_command::execute()
   }
 
   aig() = aig_cone( aig(), output_indexes, settings, statistics );
-  std::cout << boost::format( "[i] Run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
 }
 
 }

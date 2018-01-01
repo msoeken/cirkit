@@ -28,25 +28,13 @@
 
 #include <iostream>
 
-#include <boost/format.hpp>
-
 #include <core/utils/bitset_utils.hpp>
 #include <classical/functions/aig_support.hpp>
 
+#include <fmt/format.h>
+
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 support_command::support_command( const environment::ptr& env ) : aig_base_command( env, "Computes the structural support of the AIG" )
 {
@@ -56,7 +44,6 @@ support_command::support_command( const environment::ptr& env ) : aig_base_comma
 void support_command::execute()
 {
   auto settings = make_settings();
-  auto statistics = std::make_shared<properties>();
 
   auto support = aig_structural_support( aig(), settings, statistics );
 
@@ -65,13 +52,13 @@ void support_command::execute()
   const auto& _info = info();
   for ( const auto& output : _info.outputs )
   {
-    std::cout << boost::format( "    %s :" ) % output.second;
+    std::cout << fmt::format( "    {} :", output.second );
     foreach_bit( support.at( output.first ), [&]( unsigned pos ) {
         std::cout << " " << _info.node_names.at( _info.inputs.at( pos ) );
       } );
     std::cout << std::endl;
   }
-  std::cout << boost::format( "[i] Run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
 }
 
 }

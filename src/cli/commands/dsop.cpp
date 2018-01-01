@@ -26,29 +26,15 @@
 
 #include "dsop.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
 #include <core/properties.hpp>
 #include <classical/optimization/compact_dsop.hpp>
 
-using boost::format;
+#include <fmt/format.h>
 
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 dsop_command::dsop_command( const environment::ptr& env ) : cirkit_command( env, "Computes disjoint SOP" )
 {
@@ -62,14 +48,13 @@ dsop_command::dsop_command( const environment::ptr& env ) : cirkit_command( env,
 void dsop_command::execute()
 {
   auto settings = make_settings();
-  auto statistics = std::make_shared<properties>();
 
   settings->set( "sortfunc", std::vector<sort_cube_meta_func_t>( {sort_by_dimension_first, sort_by_weight_first} )[sortfunc] );
   settings->set( "optfunc", std::vector<opt_cube_func_t>( {opt_dsop_1,opt_dsop_2,opt_dsop_3,opt_dsop_4,opt_dsop_5} )[optfunc - 1u] );
   compact_dsop( outname, filename, settings, statistics );
 
-  std::cout << format( "[i] cubes:    %d       " ) % statistics->get<unsigned>( "cube_count" ) << std::endl;
-  std::cout << format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  std::cout << fmt::format( "[i] cubes:    {}", statistics->get<unsigned>( "cube_count" ) ) << std::endl;
+  print_runtime();
 }
 
 }

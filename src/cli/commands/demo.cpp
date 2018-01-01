@@ -28,9 +28,9 @@
 
 #include <iostream>
 
-#include <boost/format.hpp>
-
 #include <classical/xmg/xmg.hpp>    /* XMG data structure */
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -105,7 +105,7 @@ void xmg_demo( bool verbose )
   {
     for ( auto node : xmg.nodes() )
     {
-      std::cout << boost::format( "[i] node %d is at level %d" ) % node % xmg.level( node ) << std::endl;
+      std::cout << fmt::format( "[i] node {} is at level {}", node, xmg.level( node ) ) << std::endl;
     }
   }
 }

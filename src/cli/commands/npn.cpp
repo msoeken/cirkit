@@ -31,7 +31,6 @@
 #include <unordered_map>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/format.hpp>
 
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
@@ -40,7 +39,7 @@
 #include <classical/functions/npn_canonization.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
-using boost::format;
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -119,7 +118,7 @@ void npn_command::execute()
       } while ( bs.any() );
     }
 
-    std::cout << format( "[i] found %d classes in %.2f secs" ) % classes.size() % runtime << std::endl;
+    std::cout << fmt::format( "[i] found {} classes in {:.2f} secs", classes.size(), runtime ) << std::endl;
 
     if ( is_set( "logname" ) )
     {
@@ -138,7 +137,7 @@ void npn_command::execute()
 
     npn = func( tts.current(), phase, perm, properties::ptr(), statistics );
 
-    std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+    print_runtime();
     std::cout << "[i] NPN class for " << tts.current() << " is " << npn << std::endl;
     std::cout << "[i] - phase: " << phase << " perm: " << any_join( perm, " " ) << std::endl;
 

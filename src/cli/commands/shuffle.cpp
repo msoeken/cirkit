@@ -26,10 +26,9 @@
 
 #include "shuffle.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <random>
-
-#include <boost/range/algorithm/random_shuffle.hpp>
 
 #include <classical/utils/aig_utils.hpp>
 #include <classical/mig/mig_utils.hpp>
@@ -64,9 +63,8 @@ private:
 template<class C>
 void shuffle( C& container, unsigned seed )
 {
-
   rng r( seed );
-  boost::random_shuffle( container, r );
+  std::random_shuffle( std::begin( container ), std::end( container ), r );
 }
 
 /******************************************************************************

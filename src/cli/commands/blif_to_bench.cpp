@@ -26,8 +26,6 @@
 
 #include "blif_to_bench.hpp"
 
-#include <alice/rules.hpp>
-
 #include <classical/io/read_blif.hpp>
 #include <classical/io/write_bench.hpp>
 

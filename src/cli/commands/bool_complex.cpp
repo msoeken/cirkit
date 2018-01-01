@@ -29,25 +29,14 @@
 #include <unordered_set>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/format.hpp>
 
 #include <core/utils/range_utils.hpp>
 #include <classical/functions/npn_canonization.hpp>
 
+#include <fmt/format.h>
+
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 bool_complex_command::bool_complex_command( const environment::ptr& env )
   : cirkit_command( env, "Computes complexities of Boolean functions" )
@@ -149,7 +138,7 @@ void bool_complex_command::compute( bool length )
 done:
   for ( const auto& entry : index( length_to_func ) )
   {
-    std::cout << boost::format( "[i] %s %3d: %12d" ) % ( length ? "length" : "depth" ) % entry.index % ( entry.value.size() << 1u ) << std::endl;
+    std::cout << fmt::format( "[i] {} {:>3}: {:>12}", length ? "length" : "depth", entry.index, entry.value.size() << 1u ) << std::endl;
   }
 }
 
@@ -277,7 +266,7 @@ void bool_complex_command::compute_ub()
 
   for ( const auto& entry : index( count_to_func ) )
   {
-    std::cout << boost::format( "[i] count %3d: %12d" ) % entry.index % ( entry.value.size() << 1u ) << std::endl;
+    std::cout << fmt::format( "[i] count {:>3} {:>12}", entry.index, entry.value.size() << 1 ) << std::endl;
   }
 }
 
@@ -403,7 +392,7 @@ void bool_complex_command::compute_ub_aig()
 
   for ( const auto& entry : index( count_to_func ) )
   {
-    std::cout << boost::format( "[i] count %3d: %12d" ) % entry.index % ( entry.value.size() << 1u ) << std::endl;
+    std::cout << fmt::format( "[i] count {:>3}: {:>12}", entry.index, entry.value.size() << 1u ) << std::endl;
   }
 }
 
@@ -531,11 +520,11 @@ void bool_complex_command::compute_maj( bool length, bool npn )
 done:
   for ( const auto& entry : index( length_to_func ) )
   {
-    std::cout << boost::format( "[i] %s %3d: %12d" ) % ( length ? "length" : "depth" ) % entry.index % ( entry.value.size() << 1u );
+    std::cout << fmt::format( "[i] {} {:>3}: {:>12}", length ? "length" : "depth", entry.index, entry.value.size() << 1u );
 
     if ( npn )
     {
-      std::cout << boost::format( ", npn classes: %5d" ) % length_to_npn[entry.index].size();
+      std::cout << fmt::format( ", npn classes: {:>5}", length_to_npn[entry.index].size() );
     }
 
     std::cout << std::endl;

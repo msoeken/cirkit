@@ -28,7 +28,6 @@
 
 #include <fstream>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
 #include <boost/range/algorithm.hpp>
@@ -38,8 +37,6 @@
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/functions/simulation_graph.hpp>
-
-using namespace boost::assign;
 
 using boost::format;
 
@@ -76,12 +73,12 @@ void simgraph_command::execute()
 {
   std::vector<unsigned> types;
   foreach_string( vectors, ",", [&]( const std::string& s ) {
-      if      ( s == "ah" ) types += 0u;
-      else if ( s == "1h" ) types += 3u;
-      else if ( s == "2h" ) types += 5u;
-      else if ( s == "ac" ) types += 1u;
-      else if ( s == "1c" ) types += 2u;
-      else if ( s == "2c" ) types += 4u;
+      if      ( s == "ah" ) types.push_back( 0u );
+      else if ( s == "1h" ) types.push_back( 3u );
+      else if ( s == "2h" ) types.push_back( 5u );
+      else if ( s == "ac" ) types.push_back( 1u );
+      else if ( s == "1c" ) types.push_back( 2u );
+      else if ( s == "2c" ) types.push_back( 4u );
     } );
 
   auto settings = make_settings();
@@ -130,7 +127,7 @@ void simgraph_command::write_pattern_file()
   std::vector<std::string> input_names;
   for ( const auto& input : info().inputs )
   {
-    input_names += info().node_names.at( input );
+    input_names.push_back( info().node_names.at( input ) );
   }
 
   os << any_join( input_names, " " ) << std::endl << std::endl;

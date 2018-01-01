@@ -29,8 +29,6 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
-
 #include <cuddObj.hh>
 
 #include <alice/rules.hpp>
@@ -71,8 +69,8 @@ void bdd_command::execute()
   else if ( is_set( "clique" ) )
   {
     const auto nk = split_string_pair( clique, "," );
-    const auto n = boost::lexical_cast<unsigned>( nk.first );
-    const auto k = boost::lexical_cast<unsigned>( nk.second );
+    const auto n = std::stoul( nk.first );
+    const auto k = std::stoul( nk.second );
 
     Cudd mgr;
     auto func = mgr.bddZero();

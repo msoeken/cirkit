@@ -26,34 +26,15 @@
 
 #include "read_sym.hpp"
 
-#include <boost/algorithm/string/trim.hpp>
-
-#include <alice/rules.hpp>
-
-#include <core/utils/range_utils.hpp>
-#include <core/utils/string_utils.hpp>
 #include <classical/io/read_symmetries.hpp>
-#include <classical/utils/aig_utils.hpp>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 read_sym_command::read_sym_command( const environment::ptr& env )
   : aig_base_command( env, "Read input symmetries" )
 {
-  add_option( "--filename,filename", filename, "Input symmetries filename" )->check( CLI::ExistingFile );
+  add_option( "--filename,filename", filename, "input symmetries filename" )->check( CLI::ExistingFile );
 }
 
 void read_sym_command::execute()

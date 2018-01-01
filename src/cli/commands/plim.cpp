@@ -26,25 +26,11 @@
 
 #include "plim.hpp"
 
-#include <boost/format.hpp>
-
 #include <core/utils/range_utils.hpp>
 #include <classical/plim/plim_compiler.hpp>
 
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 plim_command::plim_command( const environment::ptr& env )
   : mig_base_command( env, "PLiM compiler" )
@@ -74,7 +60,7 @@ void plim_command::execute()
     std::cout << program << std::endl;
   }
 
-  std::cout << boost::format( "[i] run-time:     %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
   std::cout << "[i] step count:   " << program.step_count() << std::endl
             << "[i] RRAM count:   " << program.rram_count() << std::endl
             << "[i] write counts: " << any_join( program.write_counts(), " " ) << std::endl;

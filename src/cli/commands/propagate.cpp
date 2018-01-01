@@ -28,25 +28,11 @@
 
 #include <map>
 
-#include <boost/format.hpp>
-
 #include <core/utils/string_utils.hpp>
 #include <classical/functions/aig_constant_propagation.hpp>
 
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 propagate_command::propagate_command( const environment::ptr& env )
   : aig_base_command( env, "Propagates constant inputs in an AIG" )
@@ -58,7 +44,6 @@ propagate_command::propagate_command( const environment::ptr& env )
 void propagate_command::execute()
 {
   auto settings = make_settings();
-  auto statistics = std::make_shared<properties>();
   std::map<std::string, bool> propagation_values;
   foreach_string( assignments, ",", [&]( const std::string& s ) {
       auto name = ( s[0] == '!' ) ? s.substr( 1u ) : s;
@@ -70,7 +55,7 @@ void propagate_command::execute()
       propagation_values.insert( {name, value} );
     });
   aig() = aig_constant_propagation( aig(), propagation_values, settings, statistics );
-  print_runtime( statistics->get<double>( "runtime" ) );
+  print_runtime();
 }
 
 }
