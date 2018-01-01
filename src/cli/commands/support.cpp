@@ -53,7 +53,7 @@ support_command::support_command( const environment::ptr& env ) : aig_base_comma
   be_verbose();
 }
 
-bool support_command::execute()
+void support_command::execute()
 {
   auto settings = make_settings();
   auto statistics = std::make_shared<properties>();
@@ -72,8 +72,6 @@ bool support_command::execute()
     std::cout << std::endl;
   }
   std::cout << boost::format( "[i] Run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
 }
 
 }

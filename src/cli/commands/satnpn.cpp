@@ -29,7 +29,6 @@
 #include <boost/format.hpp>
 
 #include <core/utils/bitset_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/functions/aig_npn_canonization.hpp>
 
@@ -52,17 +51,15 @@ namespace cirkit
 satnpn_command::satnpn_command( const environment::ptr& env )
   : aig_base_command( env, "Compute NPN class with SAT" )
 {
-  opts.add_options()
-    ( "new,n",                                        "Add result into new store entry" )
-    ( "progress,p",                                   "Show progress" )
-    ( "miter,m",    value_with_default( &miter ),     "Miter:\n0: single miter\n1: shared miter" )
-    ( "encoding,e", value_with_default( &encoding ),  "Encoding:\n0: Tseytin\n2: EMS" )
-    ( "heuristic",  value_with_default( &heuristic ), "Heuristic:\n0: flip-swap\n1: sifting" )
-    ;
+  add_flag( "--progress,-p", "show progress" );
+  add_option( "--miter,-m", miter, "miter:\n0: single miter\n1: shared miter", true );
+  add_option( "--encoding,-e", encoding, "encoding:\n0: Tseytin\n2: EMS", true );
+  add_option( "--heuristic", heuristic, "heuristic:\n0: flip-swap\n1: sifting", true );
   be_verbose();
+  add_new_option();
 }
 
-bool satnpn_command::execute()
+void satnpn_command::execute()
 {
   const auto aig_current = aig();
 
@@ -90,13 +87,11 @@ bool satnpn_command::execute()
                    statistics->get<unsigned long>( "sat_calls" ) %
                    statistics->get<unsigned long>( "lexsat_calls" )
             << std::endl;
-
-  return true;
 }
 
-command::log_opt_t satnpn_command::log() const
+nlohmann::json satnpn_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"miter", miter},
       {"encoding", encoding},
       {"heuristic", heuristic},
@@ -104,8 +99,8 @@ command::log_opt_t satnpn_command::log() const
       {"sat_runtime", statistics->get<double>( "sat_runtime" )},
       {"miter_runtime", statistics->get<double>( "miter_runtime" )},
       {"encoding_runtime", statistics->get<double>( "encoding_runtime" )},
-      {"lexsat_calls", static_cast<int>( statistics->get<unsigned long>( "lexsat_calls" ) )},
-      {"sat_calls", static_cast<int>( statistics->get<unsigned long>( "sat_calls" ) )},
+      {"lexsat_calls", statistics->get<unsigned long>( "lexsat_calls" )},
+      {"sat_calls", statistics->get<unsigned long>( "sat_calls" )},
       {"num_inputs", statistics->get<std::vector<unsigned>>( "num_inputs" )}
     });
 }

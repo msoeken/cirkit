@@ -33,10 +33,7 @@
 
 #include <cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/timer.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -55,15 +52,13 @@ namespace cirkit
 
 testbdd_command::testbdd_command( const environment::ptr& env ) : cirkit_command( env, "Tests some BDD routines" )
 {
-  opts.add_options()
-    ( "num_vars,n",    value_with_default( &num_vars ), "Number of variables" )
-    ( "cardinality,c", value( &cardinality ),           "Create cardinality constraint" )
-    ( "up",                                             "Performs up operation" )
-    ;
+  add_option( "--num_vars,-n", num_vars, "number of variables", true );
+  add_option( "--cardinality,-c", cardinality, "create cardinality constraint" );
+  add_flag( "--up", "performs up operation" );
   be_verbose();
 }
 
-bool testbdd_command::execute()
+void testbdd_command::execute()
 {
   if ( is_set( "cardinality" ) )
   {
@@ -91,8 +86,6 @@ bool testbdd_command::execute()
     std::cout << "m: " << is_monotone( bdd.first, bdd.second.front() ) << " " << is_monotone( bdd.first, f ) << std::endl;
     bdds.current().second.front() = f;
   }
-
-  return true;
 }
 
 }

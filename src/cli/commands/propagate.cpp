@@ -30,11 +30,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/functions/aig_constant_propagation.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -54,13 +51,11 @@ namespace cirkit
 propagate_command::propagate_command( const environment::ptr& env )
   : aig_base_command( env, "Propagates constant inputs in an AIG" )
 {
-  opts.add_options()
-    ( "assignments,a", value( &assignments ), "Propagate assignment (e.g. \"!a,b,c\")" )
-    ;
+  add_option( "--assignments,-a", assignments, "propagate assignment (e.g. \"!a,b,c\")" );
   be_verbose();
 }
 
-bool propagate_command::execute()
+void propagate_command::execute()
 {
   auto settings = make_settings();
   auto statistics = std::make_shared<properties>();
@@ -76,7 +71,6 @@ bool propagate_command::execute()
     });
   aig() = aig_constant_propagation( aig(), propagation_values, settings, statistics );
   print_runtime( statistics->get<double>( "runtime" ) );
-  return true;
 }
 
 }

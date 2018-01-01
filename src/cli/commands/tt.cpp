@@ -34,11 +34,8 @@
 #include <cli/stores.hpp>
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/conversion_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/utils/truth_table_utils.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -46,18 +43,15 @@ namespace cirkit
 tt_command::tt_command( const environment::ptr& env )
   : cirkit_command( env, "Truth table manipulation" )
 {
-  add_positional_option( "load" );
-  opts.add_options()
-    ( "load,l",   value( &load ),   "load a truth table into the store (default is binary format, use 0x prefix for hexadecimal format)" )
-    ( "random,r", value( &random ), "create random truth table for number of variables" )
-    ( "hwb",      value( &hwb ),    "create hwb function for number of bits" )
-    ( "maj",      value( &maj ),    "create maj function for number of odd bits" )
-    ( "prime",    value( &prime ),  "create prime function that is true, whenever the input assignment is prime (for up to 10 bits)" )
-    ( "extend,e", value( &extend ), "extend to bits" )
-    ( "shrink",   value( &shrink ), "shrink to bits" )
-    ( "swap,s",   value( &swap ),   "swaps two variables (seperated with comma, e.g., 2,3)" )
-    ( "flip,f",   value( &flip ),   "flips one variable" )
-    ;
+  add_option( "--load,-l,load", load, "load a truth table into the store (default is binary format, use 0x prefix for hexadecimal format)" );
+  add_option( "--random,-r", random, "create random truth table for number of variables" );
+  add_option( "--hwb", hwb, "create hwb function for number of bits" );
+  add_option( "--maj", maj, "create maj function for number of odd bits" );
+  add_option( "--prime", prime, "create prime function that is true, whenever the input assignment is prime (for up to 10 bits)" );
+  add_option( "--extend,-e", extend, "extend to bits" );
+  add_option( "--shrink", shrink, "shrink to bits" );
+  add_option( "--swap,-s", swap, "swaps two variables (seperated with comma, e.g., 2,3)" );
+  add_option( "--flip,-f", flip, "flips one variable" );
 }
 
 command::rules_t tt_command::validity_rules() const
@@ -78,7 +72,7 @@ command::rules_t tt_command::validity_rules() const
   };
 }
 
-bool tt_command::execute()
+void tt_command::execute()
 {
   auto& tts = env->store<tt>();
 
@@ -94,7 +88,7 @@ bool tt_command::execute()
       const auto col = load.find(':');
       if ( col == std::string::npos )
       {
-        return true;
+        return;
       }
 
       const auto num_vars = boost::lexical_cast<unsigned>( load.substr( 2u, col - 2u ) );
@@ -170,19 +164,17 @@ bool tt_command::execute()
   {
     tts.current() = tt_flip( tts.current(), flip );
   }
-
-  return true;
 }
 
-command::log_opt_t tt_command::log() const
+nlohmann::json tt_command::log() const
 {
   if ( env->store<tt>().current_index() != -1 )
   {
-    return log_opt_t( {{"tt", to_string( env->store<tt>().current() )}} );
+    return nlohmann::json( {{"tt", to_string( env->store<tt>().current() )}} );
   }
   else
   {
-    return boost::none;
+    return nullptr;
   }
 }
 

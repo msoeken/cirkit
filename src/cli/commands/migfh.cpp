@@ -28,10 +28,7 @@
 
 #include <boost/format.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <classical/mig/mig_functional_hashing.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -50,21 +47,19 @@ namespace cirkit
 
 migfh_command::migfh_command( const environment::ptr& env ) : mig_base_command( env, "Functional hashing for MIGs" )
 {
-  opts.add_options()
-    ( "mode",            value_with_default( &mode ),            "0: top-down\n1: bottom-up" )
-    ( "ffrs,f",                                                  "only optimize inside FFRs" )
-    ( "depth_heuristic",                                         "preserve depth locally" )
-    ( "hash",            value_with_default( &hash ),            "hash table size for NPN caching" )
-    ( "progress,p",                                              "show progress" )
-    ( "max_candidates",  value_with_default( &max_candidates ),  "max candidates (only bottom-up)" )
-    ( "allow_area_inc",                                          "allow area increase for candidates (only bottom-up)" )
-    ( "allow_depth_inc",                                         "allow depth increase for candidates (only bottom-up)" )
-    ( "sort_area_first", value_with_default( &sort_area_first ), "sort candidates by area, then depth (only bottom-up)" )
-    ;
+  add_option( "--mode", mode, "0: top-down\n1: bottom-up", true );
+  add_flag( "--ffrs,-f", "only optimize inside FFRs" );
+  add_flag( "--depth_heuristic", "preserve depth locally" );
+  add_option( "--hash", hash, "hash table size for NPN caching", true );
+  add_flag( "--progress,-p", "show progress" );
+  add_option( "--max_candidates", max_candidates,  "max candidates (only bottom-up)", true );
+  add_flag( "--allow_area_inc", "allow area increase for candidates (only bottom-up)" );
+  add_flag( "--allow_depth_inc", "allow depth increase for candidates (only bottom-up)" );
+  add_option( "--sort_area_first", sort_area_first, "sort candidates by area, then depth (only bottom-up)", true );
   be_verbose();
 }
 
-bool migfh_command::execute()
+void migfh_command::execute()
 {
   const auto settings = make_settings();
   settings->set( "top_down",            mode == 0u );
@@ -90,19 +85,17 @@ bool migfh_command::execute()
             << boost::format( "[i] run-time (ffrs): %.2f secs" ) % statistics->get<double>( "runtime_ffr" ) << std::endl
             << boost::format( "[i] cache hit:       %u (%.2f %%)" ) % cache_hit % ( hit_rate * 100.0) << std::endl
             << boost::format( "[i] cache miss:      %u (%.2f %%)" ) % cache_miss % ( miss_rate * 100.0 ) << std::endl;
-
-  return true;
 }
 
-command::log_opt_t migfh_command::log() const
+nlohmann::json migfh_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )},
       {"runtime_cuts", statistics->get<double>( "runtime_cut" )},
       {"runtime_npn", statistics->get<double>( "runtime_npn" )},
       {"runtime_ffr", statistics->get<double>( "runtime_ffr" )},
-      {"cache_hit", static_cast<unsigned>( statistics->get<unsigned long>( "cache_hit" ) )},
-      {"cache_miss", static_cast<unsigned>( statistics->get<unsigned long>( "cache_miss" ) )}
+      {"cache_hit", statistics->get<unsigned long>( "cache_hit" )},
+      {"cache_miss", statistics->get<unsigned long>( "cache_miss" )}
     });
 }
 

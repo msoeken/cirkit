@@ -31,11 +31,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <classical/utils/unateness.hpp>
 #include <classical/verification/unate.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -81,26 +78,23 @@ void print_unateness( std::ostream& os, const boost::dynamic_bitset<>& u, const 
 unate_command::unate_command( const environment::ptr& env )
   : aig_base_command( env, "Checks function for unateness" )
 {
-  opts.add_options()
-    ( "progress,p",                                                        "Show progress" )
-    ( "approach",   value_with_default( &approach ),                       "0: direct\n"
-                                                                           "1: via mapped based CNFization\n"
-                                                                           "2: Split outputs first\n"
-                                                                           "3: Split outputs first (parallel)\n"
-                                                                           "4: Split inputs first (parallel)\n" )
-    ( "skiplist,s",                                                        "Compute skip list to skip functional support checks (only with approach 1)" )
-    ( "matrix,m",   value( &matrixname )->implicit_value( std::string() ), "Prints unateness matrix:\n"
-                                                                           "  rows: POs, columns: PIs\n"
-                                                                           "  . = binate\n"
-                                                                           "  p = positive unate\n"
-                                                                           "  n = negative unate\n"
-                                                                           "If no arg is given, prints to stdout, otherwise takes arg as filename" )
-    ( "print",                                                             "Prints unateness matrix of current AIG without computing it" )
-    ;
+  add_flag( "--progress,-p", "show progress" );
+  add_option( "--approach", approach, "0: direct\n"
+                                      "1: via mapped based CNFization\n"
+                                      "2: Split outputs first\n"
+                                      "3: Split outputs first (parallel)\n"
+                                      "4: Split inputs first (parallel)\n", true );
+  add_flag( "--skiplist,-s", "compute skip list to skip functional support checks (only with approach 1)" );
+  add_option( "--matrix,-m", matrixname, "prints unateness matrix:\n"
+                                         "  rows: POs, columns: PIs\n"
+                                         "  . = binate\n"
+                                         "  p = positive unate\n"
+                                         "  n = negative unate\n" )->check( CLI::ExistingFile );
+  add_flag( "--print", "prints unateness matrix of current AIG without computing it" );
   be_verbose();
 }
 
-bool unate_command::execute()
+void unate_command::execute()
 {
   const auto settings = make_settings();
   settings->set( "progress", is_set( "progress" ) );
@@ -116,7 +110,7 @@ bool unate_command::execute()
     {
       print_unateness( std::cout, info().unateness, info() );
     }
-    return true;
+    return;
   }
 
   boost::dynamic_bitset<> u;
@@ -147,15 +141,8 @@ bool unate_command::execute()
     std::streambuf * buf;
     std::ofstream of;
 
-    if ( matrixname.empty() )
-    {
-      buf = std::cout.rdbuf();
-    }
-    else
-    {
-      of.open( matrixname.c_str(), std::ofstream::out );
-      buf = of.rdbuf();
-    }
+    of.open( matrixname.c_str(), std::ofstream::out );
+    buf = of.rdbuf();
     std::ostream os( buf );
 
     print_unateness( os, u, info() );
@@ -168,19 +155,17 @@ bool unate_command::execute()
   {
     std::cout << boost::format( "[i] run-time (SAT):   %.2f secs" ) % statistics->get<double>( "sat_runtime" ) << std::endl;
   }
-
-  return true;
 }
 
-command::log_opt_t unate_command::log() const
+nlohmann::json unate_command::log() const
 {
   if ( is_set( "print" ) )
   {
-    return boost::none;
+    return nullptr;
   }
   else
   {
-    return log_opt_t({
+    return nlohmann::json({
         {"approach", approach},
         {"runtime", statistics->get<double>( "runtime" )},
         {"runtime_wall", statistics->get<double>( "runtime_wall" )}

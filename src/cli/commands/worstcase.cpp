@@ -26,7 +26,6 @@
 
 #include "worstcase.hpp"
 
-#include <core/utils/program_options.hpp>
 #include <cli/stores.hpp>
 #include <classical/approximate/worst_case.hpp>
 
@@ -48,14 +47,12 @@ namespace cirkit
 worstcase_command::worstcase_command( const environment::ptr& env )
   : cirkit_command( env, "Computes worst-case error for AIGs" )
 {
-  opts.add_options()
-    ( "id1", value_with_default( &id1 ), "id of first circuit" )
-    ( "id2", value_with_default( &id2 ), "id of second circuit" )
-    ;
+  add_option( "--id1", id1, "id of first circuit", true );
+  add_option( "--id2", id2, "id of second circuit", true );
   be_verbose();
 }
 
-bool worstcase_command::execute()
+void worstcase_command::execute()
 {
   const auto& aigs = env->store<aig_graph>();
 
@@ -64,8 +61,6 @@ bool worstcase_command::execute()
   std::cout << worst_case( aigs[id1], aigs[id2], settings, statistics ) << std::endl;
 
   print_runtime();
-
-  return true;
 }
 
 }

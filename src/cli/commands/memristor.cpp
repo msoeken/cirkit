@@ -48,26 +48,22 @@ namespace cirkit
 memristor_command::memristor_command( const environment::ptr& env )
   : mig_base_command( env, "Memristor operations" )
 {
-  opts.add_options()
-    ( "costs,c", "Show memristor costs" )
-    ;
+  add_flag( "--costs,-c", "show memristor costs" );
 }
 
-bool memristor_command::execute()
+void memristor_command::execute()
 {
   if ( is_set( "costs" ) )
   {
     std::tie( memristors, operations ) = memristor_costs( mig() );
     std::cout << "[i] #memristors: " << memristors << " #operations: " << operations << std::endl;
   }
-
-  return true;
 }
 
-command::log_opt_t memristor_command::log() const
+nlohmann::json memristor_command::log() const
 {
-  return log_opt_t( {{"memristors", static_cast<int>( memristors )},
-                     {"operations", static_cast<int>( operations )}} );
+  return nlohmann::json( {{"memristors", memristors},
+                          {"operations", operations}} );
 }
 
 }

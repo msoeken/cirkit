@@ -34,14 +34,12 @@
 #include <boost/format.hpp>
 
 #include <core/utils/bitset_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <cli/stores.hpp>
 #include <classical/functions/npn_canonization.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
-using namespace boost::program_options;
 using boost::format;
 
 namespace cirkit
@@ -64,13 +62,11 @@ using npn_func_t = std::function<tt(const tt&, boost::dynamic_bitset<>&, std::ve
 npn_command::npn_command( const environment::ptr& env )
   : cirkit_command( env, "NPN classification" )
 {
-  opts.add_options()
-    ( "approach",     value( &approach ),   "0: Exact\n1: Heuristic (based on number of 1s)\n2: Heuristic (flip-swap)\n3: Heuristic (sifting)" )
-    ( "enumerate,m",  value( &enumerate ),  "Computes NPN classes for all functions with given number of variables" )
-    ( "truthtable,t",                       "Computes NPN class for the current truth table in the store" )
-    ( "logname,l",    value( &logname ),    "If enumerate is set, write all classes to this file" )
-    ( "store,n",                            "Copy the result to the store (only for truth tables)" )
-    ;
+  add_option( "--approach", approach, "0: Exact\n1: Heuristic (based on number of 1s)\n2: Heuristic (flip-swap)\n3: Heuristic (sifting)" );
+  add_option( "--enumerate,-m", enumerate, "computes NPN classes for all functions with given number of variables" );
+  add_flag( "--truthtable,-t", "computes NPN class for the current truth table in the store" );
+  add_option( "--logname,-l", logname, "if enumerate is set, write all classes to this file" );
+  add_flag( "--store,-n", "copy the result to the store (only for truth tables)" );
 }
 
 command::rules_t npn_command::validity_rules() const
@@ -85,7 +81,7 @@ command::rules_t npn_command::validity_rules() const
   };
 }
 
-bool npn_command::execute()
+void npn_command::execute()
 {
   std::vector<npn_func_t> approaches{ &exact_npn_canonization, &npn_canonization, &npn_canonization_flip_swap, &npn_canonization_sifting };
   const auto& func = approaches[approach];
@@ -152,15 +148,13 @@ bool npn_command::execute()
       tts.current() = npn;
     }
   }
-
-  return true;
 }
 
-command::log_opt_t npn_command::log() const
+nlohmann::json npn_command::log() const
 {
   if ( is_set( "truthtable" ) )
   {
-    return log_opt_t({
+    return nlohmann::json({
         {"runtime", statistics->get<double>( "runtime" )},
         {"phase", to_string( phase )},
         {"perm", any_join( perm, " " )},
@@ -169,7 +163,7 @@ command::log_opt_t npn_command::log() const
   }
   else
   {
-    return boost::none;
+    return nullptr;
   }
 }
 

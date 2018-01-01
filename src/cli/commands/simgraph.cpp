@@ -35,13 +35,11 @@
 
 #include <alice/rules.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/functions/simulation_graph.hpp>
 
 using namespace boost::assign;
-using namespace boost::program_options;
 
 using boost::format;
 
@@ -62,12 +60,10 @@ namespace cirkit
 
 simgraph_command::simgraph_command( const environment::ptr& env ) : aig_base_command( env, "Creates simulation graphs" )
 {
-  opts.add_options()
-    ( "vectors",      value_with_default( &vectors ),    "Simulation vectors (comma separated):\nah: all-hot\n1h: one-hot\n2h: two-hot\nac: all-cold\n1c: one-cold\n2c: two-cold" )
-    ( "dotname",      value( &dotname ),                 "If set, simulation file is written to DOT file" )
-    ( "signatures,s", value_with_default( &signatures ), "Maximum arity of simulation signatures" )
-    ( "patternname",  value( &patternname ),             "If filename is given, simulation vectors are written to this file" )
-    ;
+  add_option( "--vectors", vectors, "simulation vectors (comma separated):\nah: all-hot\n1h: one-hot\n2h: two-hot\nac: all-cold\n1c: one-cold\n2c: two-cold", true );
+  add_option( "--dotname", dotname, "if set, simulation file is written to DOT file" );
+  add_option( "--signatures,-s", signatures, "maximum arity of simulation signatures", true );
+  add_option( "--patternname", patternname, "if filename is given, simulation vectors are written to this file" );
   be_verbose();
 }
 
@@ -76,7 +72,7 @@ command::rules_t simgraph_command::validity_rules() const
   return { has_store_element<aig_graph>( env ), { [&]() { return !vectors.empty(); }, "no simulation vector specified" } };
 }
 
-bool simgraph_command::execute()
+void simgraph_command::execute()
 {
   std::vector<unsigned> types;
   foreach_string( vectors, ",", [&]( const std::string& s ) {
@@ -121,8 +117,6 @@ bool simgraph_command::execute()
   {
     write_pattern_file();
   }
-
-  return true;
 }
 
 void simgraph_command::write_pattern_file()

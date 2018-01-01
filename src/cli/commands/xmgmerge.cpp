@@ -26,7 +26,6 @@
 
 #include "xmgmerge.hpp"
 
-#include <core/utils/program_options.hpp>
 #include <cli/stores.hpp>
 #include <classical/xmg/xmg.hpp>
 #include <classical/xmg/xmg_rewrite.hpp>
@@ -37,10 +36,8 @@ namespace cirkit
 xmgmerge_command::xmgmerge_command( const environment::ptr& env )
   : cirkit_command( env, "Merges two XMGs into one" )
 {
-  opts.add_options()
-    ( "id1", value_with_default( &id1 ), "id of the first XMG" )
-    ( "id2", value_with_default( &id2 ), "id of the second XMG" )
-    ;
+  add_option( "--id1", id1, "id of the first XMG", true );
+  add_option( "--id2", id2, "id of the second XMG", true );
   add_new_option();
 }
 
@@ -52,7 +49,7 @@ command::rules_t xmgmerge_command::validity_rules() const
   };
 }
 
-bool xmgmerge_command::execute()
+void xmgmerge_command::execute()
 {
   auto& xmgs = env->store<xmg_graph>();
 
@@ -63,13 +60,11 @@ bool xmgmerge_command::execute()
 
   extend_if_new( xmgs );
   xmgs.current() = xmg;
-
-  return true;
 }
 
-command::log_opt_t xmgmerge_command::log() const
+nlohmann::json xmgmerge_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"id1", id1},
       {"id2", id2}
     });

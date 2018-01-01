@@ -49,7 +49,7 @@ command::rules_t spectral_command::validity_rules() const
   return {has_store_element<tt>( env )};
 }
 
-bool spectral_command::execute()
+void spectral_command::execute()
 {
   auto& tts = env->store<tt>();
 
@@ -68,13 +68,11 @@ bool spectral_command::execute()
 
   extend_if_new( tts );
   tts.current() = specf;
-
-  return true;
 }
 
-command::log_opt_t spectral_command::log() const
+nlohmann::json spectral_command::log() const
 {
-  return log_map_t( {
+  return nlohmann::json( {
       {"tt", to_string( specf )},
       {"class", spectral_class}
     } );

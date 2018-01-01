@@ -28,10 +28,7 @@
 
 #include <boost/format.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <classical/mig/mig_rewriting.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -50,18 +47,16 @@ namespace cirkit
 
 mig_rewrite_command::mig_rewrite_command( const environment::ptr& env ) : mig_base_command( env, "MIG rewriting" )
 {
-  opts.add_options()
-    ( "metric",   value_with_default( &metric ),   "Cost metric for optimization\n0: depth\n1: area\n2: memristor" )
-    ( "nodist",                                    "Don't use distributivity rule" )
-    ( "noassoc",                                   "Don't use associativity rule" )
-    ( "nocassoc",                                  "Don't use complementary associativity rule" )
-    ( "strategy", value_with_default( &strategy ), "Stategy for memristor optimized rewriting:\n0: multi-objective\n1: RRAM step\n2: PLiM\n3: only inverters" )
-    ( "effort,e", value_with_default( &effort ),   "Number of optimization cycles" )
-    ;
+  add_option( "--metric", metric, "cost metric for optimization\n0: depth\n1: area\n2: memristor", true );
+  add_flag( "--nodist", "don't use distributivity rule" );
+  add_flag( "--noassoc", "don't use associativity rule" );
+  add_flag( "--nocassoc", "don't use complementary associativity rule" );
+  add_option( "--strategy", strategy, "stategy for memristor optimized rewriting:\n0: multi-objective\n1: RRAM step\n2: PLiM\n3: only inverters", true );
+  add_option( "--effort,-e", effort, "number of optimization cycles", true );
   be_verbose();
 }
 
-bool mig_rewrite_command::execute()
+void mig_rewrite_command::execute()
 {
   const auto settings = make_settings();
   settings->set( "effort", effort );
@@ -91,20 +86,18 @@ bool mig_rewrite_command::execute()
               << boost::format( "[i] associativity: %d" ) % statistics->get<unsigned>( "associativity_count" ) << std::endl
               << boost::format( "[i] complementary associativity: %d" ) % statistics->get<unsigned>( "compl_associativity_count" ) << std::endl;
   }
-
-  return true;
 }
 
-command::log_opt_t mig_rewrite_command::log() const
+nlohmann::json mig_rewrite_command::log() const
 {
-  return log_opt_t({
-      {"metric", static_cast<int>( metric )},
-      {"strategy", static_cast<int>( strategy )},
-      {"effort", static_cast<int>( effort )},
+  return nlohmann::json({
+      {"metric", metric},
+      {"strategy", strategy},
+      {"effort", effort},
       {"runtime", statistics->get<double>( "runtime" )},
-      {"distributivity_count", static_cast<int>( statistics->get<unsigned>( "distributivity_count" ) )},
-      {"associativity_count", static_cast<int>( statistics->get<unsigned>( "associativity_count" ) )},
-      {"compl_associativity_count", static_cast<int>( statistics->get<unsigned>( "compl_associativity_count" ) )}
+      {"distributivity_count", statistics->get<unsigned>( "distributivity_count" )},
+      {"associativity_count", statistics->get<unsigned>( "associativity_count" )},
+      {"compl_associativity_count", statistics->get<unsigned>( "compl_associativity_count" )}
     });
 }
 

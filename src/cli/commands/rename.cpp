@@ -28,11 +28,8 @@
 
 #include <map>
 
-#include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/functions/aig_rename.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -52,13 +49,11 @@ namespace cirkit
 rename_command::rename_command( const environment::ptr& env )
   : aig_base_command( env, "Renames inputs and outputs of AIG" )
 {
-  opts.add_options()
-    ( "input,i",   value( &inputs )->composing(),  "Rename inputs, oldname=newname" )
-    ( "output,o",  value( &outputs )->composing(), "Rename outputs, oldname=newname" )
-    ;
+  add_option( "--input,-i", inputs, "rename inputs, oldname=newname" );
+  add_option( "--output,-o", outputs, "rename outputs, oldname=newname" );
 }
 
-bool rename_command::execute()
+void rename_command::execute()
 {
   std::map<std::string, std::string> imap, omap;
   for ( const auto& input : inputs )
@@ -74,8 +69,6 @@ bool rename_command::execute()
 
   inputs.clear();
   outputs.clear();
-
-  return true;
 }
 
 }

@@ -28,7 +28,6 @@
 
 #include <iostream>
 
-#include <core/utils/program_options.hpp>
 #include <classical/generators/npn_circuit.hpp>
 
 namespace cirkit

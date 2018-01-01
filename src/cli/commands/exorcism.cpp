@@ -26,16 +26,11 @@
 
 #include "exorcism.hpp"
 
-#include <boost/program_options.hpp>
-
 #include <alice/rules.hpp>
-#include <core/utils/program_options.hpp>
 #include <classical/abc/gia/gia.hpp>
 #include <cli/stores.hpp>
 #include <classical/optimization/exorcismq.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
-
-using boost::program_options::value;
 
 namespace cirkit
 {

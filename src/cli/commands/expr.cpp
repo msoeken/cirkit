@@ -26,12 +26,8 @@
 
 #include "expr.hpp"
 
-#include <boost/program_options.hpp>
-
 #include <cli/stores.hpp>
 #include <classical/utils/expression_parser.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {

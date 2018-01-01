@@ -28,20 +28,11 @@
 
 #include <iostream>
 
-#include <boost/program_options.hpp>
-
 #include <alice/rules.hpp>
 
-#include <range/v3/range_for.hpp>
-#include <range/v3/algorithm/for_each.hpp>
-#include <range/v3/view/split.hpp>
-#include <range/v3/view/transform.hpp>
-
 #include <cli/stores.hpp>
+#include <core/utils/string_utils.hpp>
 #include <classical/utils/truth_table_utils.hpp>
-
-using namespace ranges::v3;
-using boost::program_options::value;
 
 namespace cirkit
 {
@@ -65,7 +56,7 @@ unsigned tt_is_decomposable( const tt& func, const tt& mask, unsigned var )
 dectest_command::dectest_command( const environment::ptr& env )
   : cirkit_command( env, "Checks truth tables for decomposability" )
 {
-  add_option( "staircase,s", staircase, "comma-separated list of ids: i,j,k,...\nchecks for decompositions f = g1(xi, g2(xj, g3(xk, others)))" );
+  add_option( "--staircase,-s", staircase, "comma-separated list of ids: i,j,k,...\nchecks for decompositions f = g1(xi, g2(xj, g3(xk, others)))" );
 }
 
 command::rules_t dectest_command::validity_rules() const
@@ -84,10 +75,11 @@ void dectest_command::execute()
 
     auto mask = ~tt( func.size() );
 
+    std::vector<unsigned> ids;
+    parse_string_list( ids, staircase, "," );
+
     /* split ids into list of ints */
-    RANGES_FOR( auto i, staircase
-                | view::split( ',' )
-                | view::transform( []( const std::string& s ) { return boost::lexical_cast<unsigned>( s ); } ) )
+    for ( auto i : ids )
     {
       std::cout << " f  = " << func << std::endl;
       std::cout << " m  = " << mask << std::endl;

@@ -43,7 +43,7 @@ namespace cirkit
 isop_command::isop_command( const environment::ptr& env )
   : cirkit_command( env, "Compute ISOP" )
 {
-  add_flag( "tt,t", "computes ISOP from truth table" );
+  add_flag( "--tt,-t", "computes ISOP from truth table" );
 }
 
 command::rules_t isop_command::validity_rules() const

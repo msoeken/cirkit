@@ -47,7 +47,7 @@ public:
   shuffle_command( const environment::ptr& env );
 
 protected:
-  bool before();
+  void before();
   void execute_aig();
   void execute_mig();
 

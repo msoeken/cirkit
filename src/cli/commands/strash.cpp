@@ -45,12 +45,10 @@ namespace cirkit
 
 strash_command::strash_command( const environment::ptr& env ) : aig_base_command( env, "Strashes an AIG" )
 {
-  opts.add_options()
-    ( "new,n", "Stores result in a new AIG" )
-    ;
+  add_new_option();
 }
 
-bool strash_command::execute()
+void strash_command::execute()
 {
   if ( is_set( "new" ) )
   {
@@ -62,8 +60,6 @@ bool strash_command::execute()
   {
     aig() = strash( aig() );
   }
-
-  return true;
 }
 
 }

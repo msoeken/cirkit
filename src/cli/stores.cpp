@@ -41,8 +41,6 @@
 #include <range/v3/algorithm/transform.hpp>
 
 #include <core/graph/depth.hpp>
-#include <core/io/read_pla.hpp>
-#include <core/io/write_pla.hpp>
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
 
@@ -51,22 +49,12 @@
 #include <classical/functions/aig_to_mig.hpp>
 #include <classical/functions/compute_levels.hpp>
 #include <classical/functions/simulate_aig.hpp>
-#include <classical/io/read_aiger.hpp>
-#include <classical/io/read_bench.hpp>
-#include <classical/io/read_symmetries.hpp>
-#include <classical/io/read_unateness.hpp>
-#include <classical/io/read_verilog.hpp>
-#include <classical/io/write_aiger.hpp>
-#include <classical/io/write_bench.hpp>
-#include <classical/io/write_verilog.hpp>
 #include <classical/mig/mig_to_aig.hpp>
 #include <classical/mig/mig_from_string.hpp>
 #include <classical/mig/mig_utils.hpp>
-#include <classical/mig/mig_verilog.hpp>
 #include <classical/xmg/xmg_aig.hpp>
 #include <classical/xmg/xmg_cover.hpp>
 #include <classical/xmg/xmg_expr.hpp>
-#include <classical/xmg/xmg_io.hpp>
 #include <classical/xmg/xmg_lut.hpp>
 #include <classical/xmg/xmg_mig.hpp>
 #include <classical/xmg/xmg_show.hpp>
@@ -176,18 +164,6 @@ nlohmann::json log_statistics<bdd_function_t>( const bdd_function_t& bdd )
     });
 }
 
-template<>
-bdd_function_t read<bdd_function_t, io_pla_tag_t>( const std::string& filename, const command& cmd )
-{
-  return read_pla( filename );
-}
-
-template<>
-void write<bdd_function_t, io_pla_tag_t>( const bdd_function_t& bdd, const std::string& filename, const command& cmd )
-{
-  write_pla( bdd, filename );
-}
-
 /******************************************************************************
  * aig_graph                                                                  *
  ******************************************************************************/
@@ -292,104 +268,6 @@ bdd_function_t convert<aig_graph, bdd_function_t>( const aig_graph& aig )
   return {mgr, bdds};
 }
 
-template<>
-bool can_read<aig_graph, io_aiger_tag_t>( command& cmd )
-{
-  cmd.opts.add_options()
-    ( "nosym",    "do not read symmetry file if existing" )
-    ( "nounate",  "do not read unateness file if existing" )
-    ( "nostrash", "do not strash the AIG when reading (in binary AIGER format)" )
-    ;
-  return true;
-}
-
-template<>
-aig_graph read<aig_graph, io_aiger_tag_t>( const std::string& filename, const command& cmd )
-{
-  aig_graph aig;
-
-  try
-  {
-    if ( boost::ends_with( filename, "aag" ) )
-    {
-      read_aiger( aig, filename );
-    }
-    else
-    {
-      read_aiger_binary( aig, filename, cmd.is_set( "nostrash" ) );
-    }
-  }
-  catch ( const char *e )
-  {
-    std::cerr << e << std::endl;
-    assert( false );
-  }
-
-  /* auto-find symmetry file */
-  const auto symname = filename.substr( 0, filename.size() - 3 ) + "sym";
-  if ( !cmd.is_set( "nosym" ) && boost::filesystem::exists( symname ) )
-  {
-    /* read symmetries */
-    std::cout << "[i] found and read symmetries file" << std::endl;
-    read_symmetries( aig, symname );
-  }
-
-  /* auto-find unateness file */
-  const auto depname = filename.substr( 0, filename.size() - 3 ) + "dep";
-  if ( !cmd.is_set( "nounate" ) && boost::filesystem::exists( depname ) )
-  {
-    /* read unateness */
-    std::cout << "[i] found and read unateness dependency file" << std::endl;
-    read_unateness( aig, depname );
-  }
-
-  return aig;
-}
-
-template<>
-aig_graph read<aig_graph, io_bench_tag_t>( const std::string& filename, const command& cmd )
-{
-  aig_graph aig;
-  read_bench( aig, filename );
-  return aig;
-}
-
-template<>
-void write<aig_graph, io_aiger_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
-{
-  if ( boost::ends_with( filename, "aag" ) )
-  {
-    write_aiger( aig, filename );
-  }
-  else
-  {
-    abc_run_command_no_output( aig, boost::str( boost::format( "&w %s") % filename ) );
-  }
-}
-
-template<>
-aig_graph read<aig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
-{
-  return read_verilog_with_abc( filename );
-}
-
-template<>
-void write<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
-{
-  write_verilog( aig, filename );
-}
-
-template<>
-void write<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd )
-{
-  std::ofstream os( filename.c_str(), std::ofstream::out );
-
-  for ( const auto& e : boost::make_iterator_range( edges( aig ) ) )
-  {
-    os << source( e, aig ) << " " << target( e, aig ) << std::endl;
-  }
-}
-
 /******************************************************************************
  * mig_graph                                                                  *
  ******************************************************************************/
@@ -476,18 +354,6 @@ mig_graph convert<expression_t::ptr, mig_graph>( const expression_t::ptr& expr )
   return mig;
 }
 
-template<>
-void write<mig_graph, io_verilog_tag_t>( const mig_graph& mig, const std::string& filename, const command& cmd )
-{
-  write_verilog( mig, filename );
-}
-
-template<>
-mig_graph read<mig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
-{
-  return read_mighty_verilog( filename );
-}
-
 /******************************************************************************
  * counterexample_t                                                           *
  ******************************************************************************/
@@ -543,31 +409,6 @@ void print<tt>( std::ostream& os, const tt& t )
 {
   os << tt_to_hex( t ) << std::endl
      << t << std::endl;
-}
-
-template<>
-void write<tt, io_pla_tag_t>( const tt& t, const std::string& filename, const command& cmd )
-{
-  const auto n = tt_num_vars( t );
-  std::ofstream out( filename.c_str(), std::ofstream::out );
-
-  out << ".i " << n << std::endl
-      << ".o 1" << std::endl;
-
-  auto index = 0u;
-  boost::dynamic_bitset<> input( n );
-
-  do {
-    if ( t.test( index ) )
-    {
-      out << input << " 1" << std::endl;
-    }
-
-    inc( input );
-    ++index;
-  } while ( input.any() );
-
-  out << ".e" << std::endl;
 }
 
 /******************************************************************************
@@ -743,92 +584,6 @@ template<>
 mig_graph convert<xmg_graph, mig_graph>( const xmg_graph& mig )
 {
   return xmg_create_mig_topological( mig );
-}
-
-template<>
-void write<xmg_graph, io_bench_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
-{
-  if ( !xmg.has_cover() )
-  {
-    std::cout << "[w] XMG as no cover" << std::endl;
-    return;
-  }
-
-  auto lut = xmg_to_lut_graph( xmg );
-  write_bench( lut, filename );
-}
-
-template<>
-bool can_read<xmg_graph, io_verilog_tag_t>( command& cmd )
-{
-  boost::program_options::options_description xmg_options( "XMG options" );
-
-  xmg_options.add_options()
-    ( "as_mig", "read as MIG (translate XOR to MAJ)" )
-    ( "no_strash", "disable structural hashing when reading the XMG" )
-    ( "no_invprop", "disable inverter propagation when reading the XMG" )
-    ;
-
-  cmd.opts.add( xmg_options );
-
-  return true;
-}
-
-template<>
-xmg_graph read<xmg_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd )
-{
-  return read_verilog( filename, !cmd.is_set( "as_mig" ), !cmd.is_set( "no_strash" ), !cmd.is_set( "no_invprop" ) );
-}
-
-template<>
-bool can_write<xmg_graph, io_verilog_tag_t>( command& cmd )
-{
-  boost::program_options::options_description xmg_options( "XMG options" );
-
-  xmg_options.add_options()
-    ( "maj_module", "express MAJ gates as modules" )
-    ;
-
-  cmd.opts.add( xmg_options );
-
-  return true;
-}
-
-template<>
-void write<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
-{
-  auto settings = std::make_shared<properties>();
-  settings->set( "maj_module", cmd.is_set( "maj_module" ) );
-  write_verilog( xmg, filename, settings );
-}
-
-template<>
-xmg_graph read<xmg_graph, io_yig_tag_t>( const std::string& filename, const command& cmd )
-{
-  return xmg_read_yig( filename );
-}
-
-template<>
-bool can_write<xmg_graph, io_smt_tag_t>( command& cmd )
-{
-  boost::program_options::options_description xmg_options( "XMG options" );
-
-  xmg_options.add_options()
-    ( "xor_blocks", "write XOR blocks" )
-    ;
-
-  cmd.opts.add( xmg_options );
-
-  return true;
-
-}
-
-template<>
-void write<xmg_graph, io_smt_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd )
-{
-  auto settings = std::make_shared<properties>();
-  settings->set( "xor_blocks", cmd.is_set( "xor_blocks" ) );
-  write_smtlib2( xmg, filename, settings );
 }
 
 }

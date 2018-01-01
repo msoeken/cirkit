@@ -31,10 +31,8 @@
 #include <alice/rules.hpp>
 
 #include <core/properties.hpp>
-#include <core/utils/program_options.hpp>
 #include <classical/optimization/compact_dsop.hpp>
 
-using namespace boost::program_options;
 using boost::format;
 
 namespace cirkit

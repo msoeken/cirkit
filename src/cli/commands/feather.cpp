@@ -26,10 +26,7 @@
 
 #include "feather.hpp"
 
-#include <core/utils/program_options.hpp>
 #include <classical/functions/feathering.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {

@@ -32,7 +32,6 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <core/utils/bitset_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/functions/cuts/paged.hpp>
 #include <classical/mig/mig_cuts_paged.hpp>
@@ -40,7 +39,6 @@
 #include <classical/utils/cut_enumeration.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
-using namespace boost::program_options;
 using boost::format;
 
 namespace cirkit

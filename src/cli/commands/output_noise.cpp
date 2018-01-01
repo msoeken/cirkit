@@ -26,10 +26,7 @@
 
 #include "output_noise.hpp"
 
-#include <core/utils/program_options.hpp>
 #include <classical/functions/add_output_noise.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -48,15 +45,13 @@ namespace cirkit
 
 output_noise_command::output_noise_command( const environment::ptr& env ) : aig_base_command( env, "Adds random noise to the outputs of the circuit" )
 {
-  opts.add_options()
-    ( "levels,l", value_with_default( &levels ), "Number of levels" )
-    ( "keep,k",                                  "Keep old outputs" )
-    ( "seed",     value( &seed ),                "Random seed (current time, unless set)" )
-    ;
+  add_option( "--levels,-l", levels, "number of levels", true );
+  add_flag( "--keep,-k", "keep old outputs" );
+  add_option( "--seed", seed, "random seed (current time, unless set)" );
   be_verbose();
 }
 
-bool output_noise_command::execute()
+void output_noise_command::execute()
 {
   auto settings = make_settings();
   settings->set( "num_levels", levels );
@@ -66,7 +61,6 @@ bool output_noise_command::execute()
     settings->set( "seed", seed );
   }
   aig() = add_output_noise( aig(), settings );
-  return true;
 }
 
 }

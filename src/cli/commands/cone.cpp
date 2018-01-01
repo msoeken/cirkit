@@ -28,11 +28,8 @@
 
 #include <boost/format.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <classical/functions/aig_cone.hpp>
 #include <classical/utils/aig_utils.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {

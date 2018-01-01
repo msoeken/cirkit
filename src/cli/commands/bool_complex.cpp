@@ -31,11 +31,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/functions/npn_canonization.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {

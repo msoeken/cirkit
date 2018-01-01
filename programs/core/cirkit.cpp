@@ -34,6 +34,7 @@
 #include <alice/alice.hpp>
 
 #include <cli/stores.hpp>
+#include <cli/stores_io.hpp>
 #include <cli/commands/abc.hpp>
 #include <cli/commands/bdd.hpp>
 #include <cli/commands/blif_to_bench.hpp>
@@ -80,111 +81,69 @@
 
 #include <core/utils/bdd_utils.hpp>
 
-#include <boost/mpl/fold.hpp>
-#include <boost/mpl/vector.hpp>
-
-using namespace cirkit;
-
-using cirkit_store_types = boost::mpl::vector<aig_graph, mig_graph, xmg_graph, simple_fanout_graph_t, tt, bdd_function_t, expression_t::ptr, counterexample_t>;
-
-#define STORE_TYPES cirkit_store_types
-
-#include <addon_commands.hpp> // auto-generated file from CMake
-
-template<typename CLI, typename T> struct extend_cli_main;
-template<typename T, typename... Ts>
-struct extend_cli_main<cli_main<Ts...>, T>
+namespace alice
 {
-  using type = cli_main<Ts..., T>;
-};
-using cli_t = boost::mpl::fold<STORE_TYPES, cli_main<>, extend_cli_main<boost::mpl::_1, boost::mpl::_2>>::type;
 
+ALICE_ADD_COMMAND( read_sym, "I/O" );
+ALICE_ADD_COMMAND( blif_to_bench, "I/O" );
 
-ALICE_BEGIN(cirkit)
+ALICE_ADD_COMMAND( comb_approx, "Approximation" );
+ALICE_ADD_COMMAND( worstcase, "Approximation" );
 
-  cli_t cli( "cirkit" );
+ALICE_ADD_COMMAND( testbdd, "Experimental"  );
 
-  cli.set_category( "I/O" );
+ALICE_ADD_COMMAND( cone, "Rewriting" );
+ALICE_ADD_COMMAND( feather, "Rewriting" );
+ALICE_ADD_COMMAND( mig_rewrite, "Rewriting" );
+ALICE_ADD_COMMAND( migfh, "Rewriting" );
+ALICE_ADD_COMMAND( propagate, "Rewriting" );
+ALICE_ADD_COMMAND( rename, "Rewriting" );
+ALICE_ADD_COMMAND( shuffle, "Rewriting" );
+ALICE_ADD_COMMAND( strash, "Rewriting" );
+ALICE_ADD_COMMAND( xmgmerge, "Rewriting" );
 
-  ADD_READ_COMMAND( aiger, "Aiger" );
-  ADD_READ_COMMAND( bench, "Bench" );
-  ADD_READ_COMMAND( pla, "PLA" );
-  ADD_READ_COMMAND( verilog, "Verilog" );
-  ADD_READ_COMMAND( yig, "YIG" );
-  ADD_WRITE_COMMAND( aiger, "Aiger" );
-  ADD_WRITE_COMMAND( edgelist, "Edge list" );
-  ADD_WRITE_COMMAND( pla, "PLA" );
-  ADD_WRITE_COMMAND( smt, "SMT-LIB2" );
-  ADD_WRITE_COMMAND( verilog, "Verilog" );
-  ADD_COMMAND( read_sym );
-  ADD_COMMAND( blif_to_bench );
+ALICE_ADD_COMMAND( simulate, "Verification" );
+ALICE_ADD_COMMAND( support, "Verification" );
+ALICE_ADD_COMMAND( unate, "Verification" );
 
-  cli.set_category( "Approximation" );
-  ADD_COMMAND( comb_approx );
-  ADD_COMMAND( worstcase );
+ALICE_ADD_COMMAND( bool_complex, "Truth table" );
+ALICE_ADD_COMMAND( dectest, "Truth table" );
+ALICE_ADD_COMMAND( npn, "Truth table" );
+ALICE_ADD_COMMAND( permmask, "Truth table" );
+ALICE_ADD_COMMAND( spectral, "Truth table" );
+ALICE_ADD_COMMAND( tt, "Truth table" );
 
-  cli.set_category( "Experimental" );
-  ADD_COMMAND( testbdd );
+ALICE_ADD_COMMAND( isop, "Synthesis" );
 
-  cli.set_category( "Rewriting" );
-  ADD_COMMAND( cone );
-  ADD_COMMAND( feather );
-  ADD_COMMAND( mig_rewrite );
-  ADD_COMMAND( migfh );
-  ADD_COMMAND( propagate );
-  ADD_COMMAND( rename );
-  ADD_COMMAND( shuffle );
-  ADD_COMMAND( strash );
-  ADD_COMMAND( xmgmerge );
+ALICE_ADD_COMMAND( esop, "Optimization" );
+ALICE_ADD_COMMAND( exorcism, "Optimization" );
 
-  cli.set_category( "Verification" );
-  ADD_COMMAND( simulate );
-  ADD_COMMAND( support );
-  ADD_COMMAND( unate );
+ALICE_ADD_COMMAND( contrinv, "Reverse engineering" );
+ALICE_ADD_COMMAND( cuts, "Reverse engineering" );
+ALICE_ADD_COMMAND( satnpn, "Reverse engineering" );
+ALICE_ADD_COMMAND( simgraph, "Reverse engineering" );
 
-  cli.set_category( "Truth table" );
-  ADD_COMMAND( bool_complex );
-  ADD_COMMAND( dectest );
-  ADD_COMMAND( npn );
-  ADD_COMMAND( permmask );
-  ADD_COMMAND( spectral );
-  ADD_COMMAND( tt );
+ALICE_ADD_COMMAND( memristor, "RRAM" );
+ALICE_ADD_COMMAND( plim, "RRAM" );
 
-  cli.set_category( "Synthesis" );
-  ADD_COMMAND( isop );
+ALICE_ADD_COMMAND( gen_npn_circuit, "Generator" );
+ALICE_ADD_COMMAND( gen_trans_arith, "Generator" );
 
-  cli.set_category( "Optimization" );
-  ADD_COMMAND( esop );
-  ADD_COMMAND( exorcism );
+ALICE_ADD_COMMAND( abc, "Various" );
+ALICE_ADD_COMMAND( bdd, "Various" );
+ALICE_ADD_COMMAND( compress, "Various" );
+ALICE_ADD_COMMAND( demo, "Various" );
+ALICE_ADD_COMMAND( depth, "Various" );
+ALICE_ADD_COMMAND( dsop, "Various" );
+ALICE_ADD_COMMAND( expr, "Various" );
+ALICE_ADD_COMMAND( output_noise, "Various" );
+ALICE_ADD_COMMAND( print_io, "Various" );
 
-  cli.set_category( "Reverse engineering" );
-  ADD_COMMAND( contrinv );
-  ADD_COMMAND( cuts );
-  ADD_COMMAND( satnpn );
-  ADD_COMMAND( simgraph );
+}
 
-  cli.set_category( "RRAM" );
-  ADD_COMMAND( memristor );
-  ADD_COMMAND( plim );
+//#include <addon_defines.hpp>
 
-  cli.set_category( "Generator" );
-  ADD_COMMAND( gen_npn_circuit );
-  ADD_COMMAND( gen_trans_arith );
-
-  cli.set_category( "Various" );
-  ADD_COMMAND( abc );
-  ADD_COMMAND( bdd );
-  ADD_COMMAND( compress );
-  ADD_COMMAND( demo );
-  ADD_COMMAND( depth );
-  ADD_COMMAND( dsop );
-  ADD_COMMAND( expr );
-  ADD_COMMAND( output_noise );
-  ADD_COMMAND( print_io );
-
-#include <addon_defines.hpp>
-
-ALICE_END
+ALICE_MAIN( cirkit )
 
 // Local Variables:
 // c-basic-offset: 2

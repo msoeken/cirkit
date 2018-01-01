@@ -29,17 +29,12 @@
 #include <cmath>
 #include <iostream>
 
-#include <boost/program_options.hpp>
-
 #include <cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <core/utils/conversion_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 
 #include <cuddObj.hh>
-
-using boost::program_options::value;
 
 namespace cirkit
 {

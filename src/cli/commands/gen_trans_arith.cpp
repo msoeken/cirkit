@@ -28,15 +28,10 @@
 
 #include <fstream>
 
-#include <boost/program_options.hpp>
-
-#include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 #include <cli/stores.hpp>
 #include <classical/io/read_verilog.hpp>
 #include <classical/generators/transparent_arithmetic.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {

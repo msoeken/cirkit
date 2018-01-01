@@ -27,13 +27,10 @@
 #include "permmask.hpp"
 
 #include <boost/pending/integer_log2.hpp>
-#include <boost/program_options.hpp>
 
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/utils/small_truth_table_utils.hpp>
-
-using boost::program_options::value;
 
 namespace cirkit
 {
@@ -41,10 +38,7 @@ namespace cirkit
 permmask_command::permmask_command( const environment::ptr& env )
   : cirkit_command( env, "Compute permutation masks" )
 {
-  opts.add_options()
-    ( "permutation,p", value( &permutation ), "permutation, space separatd (put quotes around it)" )
-    ;
-  add_positional_option( "permutation" );
+  add_option( "--permutation,-p,permutation", permutation, "permutation, space separatd (put quotes around it)" );
 }
 
 command::rules_t permmask_command::validity_rules() const
@@ -54,7 +48,7 @@ command::rules_t permmask_command::validity_rules() const
   };
 }
 
-bool permmask_command::execute()
+void permmask_command::execute()
 {
   std::vector<unsigned> perm;
   parse_string_list( perm, permutation, " " );
@@ -62,13 +56,11 @@ bool permmask_command::execute()
   masks = stt_compute_mask_sequence( perm, boost::integer_log2( perm.size() ) );
 
   std::cout << "[i] masks: " << any_join( masks, " " ) << std::endl;
-
-  return true;
 }
 
-command::log_opt_t permmask_command::log() const
+nlohmann::json permmask_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"permutation", permutation},
       {"masks", masks}
     });

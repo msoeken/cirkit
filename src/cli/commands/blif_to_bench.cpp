@@ -26,14 +26,10 @@
 
 #include "blif_to_bench.hpp"
 
-#include <boost/program_options.hpp>
-
 #include <alice/rules.hpp>
 
 #include <classical/io/read_blif.hpp>
 #include <classical/io/write_bench.hpp>
-
-using boost::program_options::value;
 
 namespace cirkit
 {
