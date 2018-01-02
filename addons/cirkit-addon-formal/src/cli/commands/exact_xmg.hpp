@@ -47,16 +47,16 @@ public:
   exact_xmg_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
-  unsigned              objective = 0u;
-  unsigned              start = 1u;
-  unsigned              timeout;
-  std::string           breaking = "CIsalty";
+  unsigned    objective = 0u;
+  unsigned    start = 1u;
+  unsigned    timeout;
+  std::string breaking = "CIsalty";
 };
 
 }

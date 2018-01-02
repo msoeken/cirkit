@@ -81,6 +81,8 @@
 
 #include <core/utils/bdd_utils.hpp>
 
+#include <addon_commands.hpp> // auto-generated file from CMake
+
 namespace alice
 {
 
@@ -139,9 +141,9 @@ ALICE_ADD_COMMAND( expr, "Various" );
 ALICE_ADD_COMMAND( output_noise, "Various" );
 ALICE_ADD_COMMAND( print_io, "Various" );
 
-}
+#include <addon_defines.hpp>
 
-//#include <addon_defines.hpp>
+}
 
 ALICE_MAIN( cirkit )
 

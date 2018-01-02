@@ -48,10 +48,10 @@ public:
 
 protected:
   rules_t validity_rules() const;
-  bool execute();
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   unsigned lut_size    = 6u;

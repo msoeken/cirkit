@@ -27,11 +27,9 @@
 #include "xmglut.hpp"
 
 #include <boost/optional.hpp>
-#include <boost/program_options.hpp>
 
 #include <alice/rules.hpp>
 #include <cli/stores.hpp>
-#include <core/utils/program_options.hpp>
 #include <classical/netlist_graphs.hpp>
 #include <classical/io/read_bench.hpp>
 #include <classical/io/read_blif.hpp>
@@ -42,36 +40,22 @@
 #include <formal/xmg/xmg_from_lut.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
 
-using boost::program_options::value;
+#include <fmt/format.h>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 xmglut_command::xmglut_command( const environment::ptr& env )
   : cirkit_command( env, "Create XMG with LUT mapping" )
 {
-  opts.add_options()
-    ( "lut_size,k", value_with_default( &lut_size ), "LUT size" )
-    ( "map_cmd",    value_with_default( &map_cmd ),  "ABC map command in &space, use %d as placeholder for the LUT size" )
-    ( "timeout,t",  value( &timeout ),               "timeout in seconds (afterwards, heuristics are tried)" )
-    ( "xmg,x",                                       "create cover from XMG instead of AIG" )
-    ( "noxor",                                       "don't use XOR, only works with LUT sizes up to 4" )
-    ( "blif_name",  value( &blif_name ),             "read cover from BLIF instead of AIG" )
-    ( "dump_luts",  value( &dump_luts ),             "if not empty, all LUTs will be written to file without performing mapping" )
-    ( "progress,p",                                  "show progress" )
-    ;
+  add_option( "--lut_size,-k", lut_size, "LUT size", true );
+  add_option( "--map_cmd", map_cmd,  "ABC map command in &space, use {} as placeholder for the LUT size", true );
+  add_option( "--timeout,-t", timeout, "timeout in seconds (afterwards, heuristics are tried)" );
+  add_flag( "--xmg,-x", "create cover from XMG instead of AIG" );
+  add_flag( "--noxor", "don't use XOR, only works with LUT sizes up to 4" );
+  add_option( "--blif_name", blif_name, "read cover from BLIF instead of AIG" )->check( CLI::ExistingFile );
+  add_option( "--dump_luts", dump_luts, "if not empty, all LUTs will be written to file without performing mapping" );
+  add_flag( "--progress,-p", "show progress" );
   add_new_option();
   be_verbose();
 }
@@ -81,12 +65,11 @@ command::rules_t xmglut_command::validity_rules() const
   return {
     {[this]() { return is_set( "blif_name" ) || is_set( "xmg" ) || env->store<aig_graph>().current_index() != -1; }, "no AIG in store" },
     {[this]() { return !is_set( "xmg" ) || env->store<xmg_graph>().current_index() != -1; }, "no XMG in store" },
-    {[this]() { return !is_set( "noxor" ) || lut_size <= 4; }, "LUT size can be at most 4 if no XOR is allowed" },
-    file_exists_if_set( *this, blif_name, "blif_name" )
+    {[this]() { return !is_set( "noxor" ) || lut_size <= 4; }, "LUT size can be at most 4 if no XOR is allowed" }
   };
 }
 
-bool xmglut_command::execute()
+void xmglut_command::execute()
 {
   auto& aigs = env->store<aig_graph>();
   auto& xmgs = env->store<xmg_graph>();
@@ -117,7 +100,7 @@ bool xmglut_command::execute()
   }
   else
   {
-    abc_run_command_no_output( aigs.current(), boost::str( boost::format( map_cmd ) % lut_size ) + "; &put; short_names; write_bench /tmp/test2.bench" );
+    abc_run_command_no_output( aigs.current(), fmt::format( map_cmd, lut_size ) + "; &put; short_names; write_bench /tmp/test2.bench" );
     read_bench( lut, "/tmp/test2.bench" );
     //write_bench( lut, "/tmp/test3.bench" );
   }
@@ -136,13 +119,11 @@ bool xmglut_command::execute()
   }
 
   print_runtime();
-
-  return true;
 }
 
-command::log_opt_t xmglut_command::log() const
+nlohmann::json xmglut_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" ) },
       {"lut_size", lut_size}
     });

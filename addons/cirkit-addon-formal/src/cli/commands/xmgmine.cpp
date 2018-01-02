@@ -27,14 +27,13 @@
 #include "xmgmine.hpp"
 
 #include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
 
 #include <alice/rules.hpp>
 #include <cli/stores.hpp>
 #include <formal/xmg/xmg_mine.hpp>
 #include <formal/xmg/xmg_minlib.hpp>
 
-using namespace boost::program_options;
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -42,13 +41,11 @@ namespace cirkit
 xmgmine_command::xmgmine_command( const environment::ptr& env )
   : cirkit_command( env, "Mine optimum XMGs" )
 {
-  opts.add_options()
-    ( "lut_file",  value( &lut_file ), "filename with truth table in binary form in each line" )
-    ( "opt_file",  value( &opt_file ), "filename with optimum XMG database" )
-    ( "timeout,t", value( &timeout ),  "timeout in seconds (afterwards, heuristics are tried)" )
-    ( "add,a",                         "add current XMG to database" )
-    ( "verify",                        "verifies entries in optimum XMG database" )
-    ;
+  add_option( "--lut_file", lut_file, "filename with truth table in binary form in each line" );
+  add_option( "--opt_file", opt_file, "filename with optimum XMG database" )->check( CLI::ExistingFile );
+  add_option( "--timeout,-t", timeout, "timeout in seconds (afterwards, heuristics are tried)" );
+  add_flag( "--add,-a", "add current XMG to database" );
+  add_flag( "--verify", "verifies entries in optimum XMG database" );
   be_verbose();
 }
 
@@ -58,12 +55,11 @@ command::rules_t xmgmine_command::validity_rules() const
     {[this]() { return is_set( "verify" ) || is_set( "add" ) || is_set( "lut_file" ); }, "lut_file or verify needs to be set" },
     {[this]() { return is_set( "verify" ) || is_set( "add" ) || boost::filesystem::exists( lut_file ); }, "lut_file does not exist" },
     {[this]() { return !is_set( "add" ) || env->store<xmg_graph>().current_index() != -1; }, "no XMG in store" },
-    {[this]() { return !is_set( "add" ) || env->store<xmg_graph>().current().outputs().size() == 1u; }, "XMG can only have one output" },
-    file_exists_if_set( *this, opt_file, "opt_file" )
+    {[this]() { return !is_set( "add" ) || env->store<xmg_graph>().current().outputs().size() == 1u; }, "XMG can only have one output" }
   };
 }
 
-bool xmgmine_command::execute()
+void xmgmine_command::execute()
 {
   /* derive opt_file */
   if ( !is_set( "opt_file" ) )
@@ -71,7 +67,7 @@ bool xmgmine_command::execute()
     opt_file.clear();
     if ( const auto* path = std::getenv( "CIRKIT_HOME" ) )
     {
-      const auto filename = boost::str( boost::format( "%s/xmgmin.txt" ) % path );
+      const auto filename = fmt::format( "{}/xmgmin.txt", path );
       if ( boost::filesystem::exists( filename ) )
       {
         opt_file = filename;
@@ -117,8 +113,6 @@ bool xmgmine_command::execute()
     }
     xmg_mine( lut_file, opt_file, settings );
   }
-
-  return true;
 }
 
 }

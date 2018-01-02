@@ -42,11 +42,10 @@
 #include <cli/commands/xmgmine.hpp>
 
 #define CIRKIT_FORMAL_Z3_CLI_COMMANDS \
-  cli.set_category( "Synthesis" );    \
-  ADD_COMMAND( exact_mig );           \
-  ADD_COMMAND( exact_xmg );           \
-  ADD_COMMAND( xmglut );              \
-  ADD_COMMAND( xmgmine );
+  ALICE_ADD_COMMAND( exact_mig, "Synthesis" ); \
+  ALICE_ADD_COMMAND( exact_xmg, "Synthesis" ); \
+  ALICE_ADD_COMMAND( xmglut, "Synthesis" );    \
+  ALICE_ADD_COMMAND( xmgmine, "Synthesis" );
 
 #endif
 
