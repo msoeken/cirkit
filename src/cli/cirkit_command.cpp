@@ -80,10 +80,10 @@ void cirkit_command::print_runtime( const std::string& key, const std::string& l
 
 void cirkit_command::print_runtime( double runtime, const std::string& label ) const
 {
-  // if ( env->variable_value("omit_runtime", "0") != "0" )
-  // {
-  //   return;
-  // }
+  if ( env->variable( "omit_runtime", "0" ) != "0" )
+  {
+    return;
+  }
 
   if ( label.empty() )
   {
