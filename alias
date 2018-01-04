@@ -1,17 +1,17 @@
 # Set variables
-alias "(\\w+) = (\\w+)" "set %1% %2%"
+alias "(\w+) = (\w+)" "set {} {}"
 
 # Convert A into B, e.g., expr > tt
-alias "(\\w+) > (\\w+)" "convert --%1%_to_%2%"
+alias "(\w+) > (\w+)" "convert --{}_to_{}"
 
 # Convert A into B and B into C, e.g., expr > tt > aig
-alias "(\\w+) > (\\w+) > (\\w+)" "convert --%1%_to_%2%; convert --%2%_to_%3%"
+alias "(\w+) > (\w+) > (\w+)" "convert --{0}_to_{1}; convert --{1}_to_{2}"
 
 # A Verilog parser based on ABC's API (%read)
-alias "abc_verilog (.*)" "abc -c \"%%read %1%; %%blast\""
+alias "abc_verilog (.*)" "abc -c \"%read {}; %blast\""
 
 # Read a file that ABC can read into AIG
-alias "abc_read ([^\\s]+)" "abc -c \"%1%; strash; &get -n\""
+alias "abc_read ([^\s]+)" "abc -c \"{}; strash; &get -n\""
 
 # An expression simulator
-alias "exprsim ([^\\s]+)" "expr %1%; expr > tt; print -t"
+alias "exprsim ([^\s]+)" "expr {}; expr > tt; print -t"

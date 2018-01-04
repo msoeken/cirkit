@@ -31,5 +31,7 @@ add_cirkit_library(
     cirkit_core
     cirkit_classical
     ${READLINE_LIBRARY}
+  DEFINE
+    PUBLIC ALICE_ENV_HOME=CIRKIT_HOME
 )
 
