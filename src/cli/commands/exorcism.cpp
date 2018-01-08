@@ -44,7 +44,7 @@ exorcism_command::exorcism_command( const environment::ptr& env )
   be_verbose();
 }
 
-command::rules_t exorcism_command::validity_rules() const
+command::rules exorcism_command::validity_rules() const
 {
   return {
     has_store_element_if_set<aig_graph>( *this, env, "aig" )

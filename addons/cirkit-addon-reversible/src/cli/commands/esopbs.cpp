@@ -26,9 +26,6 @@
 
 #include "esopbs.hpp"
 
-#include <boost/format.hpp>
-#include <boost/program_options.hpp>
-
 #include <alice/rules.hpp>
 #include <classical/abc/gia/gia.hpp>
 #include <classical/abc/gia/gia_esop.hpp>
@@ -40,50 +37,32 @@
 #include <cli/reversible_stores.hpp>
 #include <reversible/synthesis/esop_synthesis.hpp>
 
-using namespace boost::program_options;
-
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 esopbs_command::esopbs_command( const environment::ptr& env )
   : cirkit_command( env, "ESOP based synthesis" )
 {
-  add_positional_option( "filename" );
-  opts.add_options()
-    ( "filename", value( &filename ), "filename to the ESOP file" )
-    ( "mct",                          "no negative controls" )
-    ( "no_shared_target",             "no shared target" )
-    ( "no_constants",                 "no constant lines (but use PI for outputs)" )
-    ( "aig,a",                        "read from AIG" )
-    ( "exorcism,e",                   "use exorcism to optimize ESOP cover (only for --aig)" )
-    ( "progress,p",                   "show progress" )
-    ( "experimental",                 "experimental method for single-output AIGs" )
-    ;
+  add_option( "--filename,filename", filename, "filename to the ESOP file" )->check( CLI::ExistingFile );
+  add_flag( "--mct", "no negative controls" );
+  add_flag( "--no_shared_target", "no shared target" );
+  add_flag( "--no_constants", "no constant lines (but use PI for outputs)" );
+  add_flag( "--aig,-a", "read from AIG" );
+  add_flag( "--exorcism,-e", "use exorcism to optimize ESOP cover (only for --aig)" );
+  add_flag( "--progress,-p", "show progress" );
+  add_flag( "--experimental", "experimental method for single-output AIGs" );
   add_new_option();
   be_verbose();
 }
 
-command::rules_t esopbs_command::validity_rules() const
+command::rules esopbs_command::validity_rules() const
 {
   return {
-    file_exists_if_set( *this, filename, "filename" ),
     has_store_element_if_set<aig_graph>( *this, env, "aig" )
   };
 }
 
-bool esopbs_command::execute()
+void esopbs_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -130,13 +109,11 @@ bool esopbs_command::execute()
 
     print_runtime();
   }
-
-  return true;
 }
 
-command::log_opt_t esopbs_command::log() const
+nlohmann::json esopbs_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"mct", is_set( "mct" )},
       {"no_shared_target", is_set( "no_shared_target" )},
       {"runtime", statistics->get<double>( "runtime" )}

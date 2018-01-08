@@ -33,7 +33,9 @@
 #include <alice/alice.hpp>
 
 #include <cli/stores.hpp>
+#include <cli/stores_io.hpp>
 #include <cli/reversible_stores.hpp>
+#include <cli/reversible_stores_io.hpp>
 #include <cli/commands/abc.hpp>
 #include <cli/commands/adding_lines.hpp>
 #include <cli/commands/bdd.hpp>
@@ -98,112 +100,73 @@
 
 using namespace cirkit;
 
-ALICE_BEGIN(revkit)
+namespace alice
+{
 
-  cli_main<circuit, binary_truth_table, tt, expression_t::ptr, bdd_function_t, rcbdd, aig_graph, xmg_graph> cli( "revkit" );
+ALICE_ADD_COMMAND( embed, "Embedding" )
+ALICE_ADD_COMMAND( required_lines, "Embedding" )
 
-  cli.set_category ("I/O" );
+ALICE_ADD_COMMAND( cbs, "Synthesis" )
+ALICE_ADD_COMMAND( d1s, "Synthesis" )
+ALICE_ADD_COMMAND( dbs, "Synthesis" )
+ALICE_ADD_COMMAND( dxs, "Synthesis" )
+ALICE_ADD_COMMAND( esopbs, "Synthesis" )
+ALICE_ADD_COMMAND( esopps, "Synthesis" )
+ALICE_ADD_COMMAND( exs, "Synthesis" )
+ALICE_ADD_COMMAND( hdbs, "Synthesis" )
+ALICE_ADD_COMMAND( lhrs, "Synthesis" )
+ALICE_ADD_COMMAND( qbs, "Synthesis" )
+ALICE_ADD_COMMAND( rms, "Synthesis" )
+ALICE_ADD_COMMAND( tbs, "Synthesis" )
 
-  ADD_READ_COMMAND( aiger, "Aiger" );
-  ADD_READ_COMMAND( bench, "Bench" );
-  ADD_READ_COMMAND( pla, "PLA" );
-  ADD_READ_COMMAND( qc, "QC" );
-  ADD_READ_COMMAND( real, "realization" );
-  ADD_READ_COMMAND( spec, "specification" );
-  ADD_READ_COMMAND( verilog, "Verilog" );
-  ADD_WRITE_COMMAND( aiger, "Aiger" );
-  ADD_WRITE_COMMAND( liquid, "LIQUi|>" );
-  ADD_WRITE_COMMAND( numpy, "NumPy" );
-  ADD_WRITE_COMMAND( pla, "PLA" );
-  ADD_WRITE_COMMAND( projectq, "ProjectQ" );
-  ADD_WRITE_COMMAND( qc, "QC" );
-  ADD_WRITE_COMMAND( qcode, "QCode" );
-  ADD_WRITE_COMMAND( qpic, "qpic" );
-  ADD_WRITE_COMMAND( qsharp, "Q#" );
-  ADD_WRITE_COMMAND( quipper, "Quipper" );
-  ADD_WRITE_COMMAND( real, "realization" );
-  ADD_WRITE_COMMAND( spec, "specification" );
-  ADD_WRITE_COMMAND( tikz, "TikZ" );
-  ADD_WRITE_COMMAND( verilog, "Verilog" );
+ALICE_ADD_COMMAND( adding_lines, "Optimization" )
+ALICE_ADD_COMMAND( esop, "Optimization" )
+ALICE_ADD_COMMAND( exorcism, "Optimization" )
+ALICE_ADD_COMMAND( reduce_lines, "Optimization" )
+ALICE_ADD_COMMAND( revsimp, "Optimization" )
+ALICE_ADD_COMMAND( tpar, "Optimization" )
 
-  cli.set_category ("Embedding" );
+ALICE_ADD_COMMAND( concat, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( filter, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( mitm, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( nct, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( pos, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( reverse, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( rptm, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( stg4, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( tof, "Mapping and rewriting" )
+ALICE_ADD_COMMAND( unique_names, "Mapping and rewriting" )
 
-  ADD_COMMAND( embed );
-  ADD_COMMAND( required_lines );
+ALICE_ADD_COMMAND( cone, "AIG and XMG synthesis" )
+ALICE_ADD_COMMAND( propagate, "AIG and XMG synthesis" )
+ALICE_ADD_COMMAND( xmglut, "AIG and XMG synthesis" )
 
-  cli.set_category( "Synthesis" );
+ALICE_ADD_COMMAND( is_identity, "Verification" )
+ALICE_ADD_COMMAND( qec, "Verification" )
+ALICE_ADD_COMMAND( rec, "Verification" )
+ALICE_ADD_COMMAND( revsim, "Verification" )
+ALICE_ADD_COMMAND( simulate, "Verification" )
 
-  ADD_COMMAND( cbs );
-  ADD_COMMAND( d1s );
-  ADD_COMMAND( dbs );
-  ADD_COMMAND( dxs );
-  ADD_COMMAND( esopbs );
-  ADD_COMMAND( esopps );
-  ADD_COMMAND( exs );
-  ADD_COMMAND( hdbs );
-  ADD_COMMAND( lhrs );
-  ADD_COMMAND( qbs );
-  ADD_COMMAND( rms );
-  ADD_COMMAND( tbs );
+ALICE_ADD_COMMAND( gen_reciprocal, "Generator" )
+ALICE_ADD_COMMAND( revgen, "Generator" )
+ALICE_ADD_COMMAND( stg_as, "Generator" )
 
-  cli.set_category( "Optimization" );
+ALICE_ADD_COMMAND( abc, "Various" )
+ALICE_ADD_COMMAND( bdd, "Various" )
+ALICE_ADD_COMMAND( circuit_matrix, "Various" )
+ALICE_ADD_COMMAND( circuit_str, "Various" )
+ALICE_ADD_COMMAND( enumerate, "Various" )
+ALICE_ADD_COMMAND( expr, "Various" )
+ALICE_ADD_COMMAND( gates, "Various" )
+ALICE_ADD_COMMAND( perm, "Various" )
+ALICE_ADD_COMMAND( print_io, "Various" )
+ALICE_ADD_COMMAND( random_circuit, "Various" )
+ALICE_ADD_COMMAND( spectral, "Various" )
+ALICE_ADD_COMMAND( tt, "Various" )
 
-  ADD_COMMAND( adding_lines );
-  ADD_COMMAND( esop );
-  ADD_COMMAND( exorcism );
-  ADD_COMMAND( reduce_lines );
-  ADD_COMMAND( revsimp );
-  ADD_COMMAND( tpar );
+}
 
-  cli.set_category( "Mapping and rewriting" );
-
-  ADD_COMMAND( concat );
-  ADD_COMMAND( filter );
-  ADD_COMMAND( mitm );
-  ADD_COMMAND( nct );
-  ADD_COMMAND( pos );
-  ADD_COMMAND( reverse );
-  ADD_COMMAND( rptm );
-  ADD_COMMAND( stg4 );
-  ADD_COMMAND( tof );
-  ADD_COMMAND( unique_names );
-
-  cli.set_category( "AIG and XMG synthesis" );
-
-  ADD_COMMAND( cone );
-  ADD_COMMAND( propagate );
-  ADD_COMMAND( xmglut );
-
-  cli.set_category( "Verification" );
-
-  ADD_COMMAND( is_identity );
-  ADD_COMMAND( qec );
-  ADD_COMMAND( rec );
-  ADD_COMMAND( revsim );
-  ADD_COMMAND( simulate );
-
-  cli.set_category( "Generator" );
-
-  ADD_COMMAND( gen_reciprocal );
-  ADD_COMMAND( revgen );
-  ADD_COMMAND( stg_as );
-
-  cli.set_category( "Various" );
-
-  ADD_COMMAND( abc );
-  ADD_COMMAND( bdd );
-  ADD_COMMAND( circuit_matrix );
-  ADD_COMMAND( circuit_str );
-  ADD_COMMAND( enumerate );
-  ADD_COMMAND( expr );
-  ADD_COMMAND( gates );
-  ADD_COMMAND( perm );
-  ADD_COMMAND( print_io );
-  ADD_COMMAND( random_circuit );
-  ADD_COMMAND( spectral );
-  ADD_COMMAND( tt );
-
-ALICE_END
+ALICE_MAIN(revkit)
 
 // Local Variables:
 // c-basic-offset: 2

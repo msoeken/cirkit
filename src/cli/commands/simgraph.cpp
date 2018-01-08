@@ -64,7 +64,7 @@ simgraph_command::simgraph_command( const environment::ptr& env ) : aig_base_com
   be_verbose();
 }
 
-command::rules_t simgraph_command::validity_rules() const
+command::rules simgraph_command::validity_rules() const
 {
   return { has_store_element<aig_graph>( env ), { [&]() { return !vectors.empty(); }, "no simulation vector specified" } };
 }

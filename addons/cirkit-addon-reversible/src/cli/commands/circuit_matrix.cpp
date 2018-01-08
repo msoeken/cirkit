@@ -39,20 +39,18 @@ namespace cirkit
 circuit_matrix_command::circuit_matrix_command( const environment::ptr& env )
   : cirkit_command( env, "Prints circuit matrix" )
 {
-  opts.add_options()
-    ( "reversible,r", "use reversible simulator" )
-    ( "force,f",      "force printing matrix (for circuits with more than 10 variables)" )
-    ( "round",        "round matrix before printing" )
-    ( "progress,p",   "show progress" )
-    ;
+  add_flag( "--reversible,-r", "use reversible simulator" );
+  add_flag( "--force,-f", "force printing matrix (for circuits with more than 10 variables)" );
+  add_flag( "--round", "round matrix before printing" );
+  add_flag( "--progress,-p", "show progress" );
 }
 
-command::rules_t circuit_matrix_command::validity_rules() const
+command::rules circuit_matrix_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool circuit_matrix_command::execute()
+void circuit_matrix_command::execute()
 {
   const auto& circuits = env->store<circuit>();
   const auto& circ = circuits.current();
@@ -60,7 +58,7 @@ bool circuit_matrix_command::execute()
   if ( circ.lines() > 10u && !is_set( "force" ) )
   {
     std::cout << "[w] circuit has too many variables, use -f to bypass this check" << std::endl;
-    return true;
+    return;
   }
 
   xt::print_options::set_threshold( 10000 );
@@ -81,8 +79,6 @@ bool circuit_matrix_command::execute()
   }
 
   std::cout << matrix << std::endl;
-
-  return true;
 }
 
 }

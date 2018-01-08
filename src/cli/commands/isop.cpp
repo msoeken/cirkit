@@ -46,7 +46,7 @@ isop_command::isop_command( const environment::ptr& env )
   add_flag( "--tt,-t", "computes ISOP from truth table" );
 }
 
-command::rules_t isop_command::validity_rules() const
+command::rules isop_command::validity_rules() const
 {
   return {
     {[this]() { return !is_set( "tt" ) || env->store<tt>().current_index() != -1; }, "no truth table in store" }

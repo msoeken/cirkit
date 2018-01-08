@@ -39,7 +39,7 @@ blif_to_bench_command::blif_to_bench_command( const environment::ptr& env )
   add_option( "bench_name,--bench_name", bench_name, "filename for BENCH file" );
 }
 
-command::rules_t blif_to_bench_command::validity_rules() const
+command::rules blif_to_bench_command::validity_rules() const
 {
   return {
     {[this]() { return is_set( "blif_name" ) && is_set( "bench_name" ); }, "one must specify filenames for BLIF file and BENCH file"}

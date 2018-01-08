@@ -78,7 +78,7 @@ protected:
     return env->has_store<mig_graph>() && is_set( "mig" );
   }
 
-  inline rule_t one_data_structure_selected() const
+  inline rule one_data_structure_selected() const
   {
     const auto assertion = [&]() {
       auto total = 0u;
@@ -92,7 +92,7 @@ protected:
     return {assertion, "exactly one circuit type needs to be selected"};
   }
 
-  inline rule_t maybe_has_aig() const
+  inline rule maybe_has_aig() const
   {
     const auto assertion = [&]() {
       return !( aig_selected() ) || env->store<aig_graph>().current_index() >= 0;
@@ -101,7 +101,7 @@ protected:
     return {assertion, "no current AIG available"};
   }
 
-  inline rule_t maybe_has_mig() const
+  inline rule maybe_has_mig() const
   {
     const auto assertion = [&]() {
       return !( mig_selected() ) || env->store<mig_graph>().current_index() >= 0;
@@ -110,7 +110,7 @@ protected:
     return {assertion, "no current MIG available"};
   }
 
-  virtual rules_t validity_rules() const
+  virtual rules validity_rules() const
   {
     return {one_data_structure_selected(), maybe_has_aig(), maybe_has_mig()};
   }

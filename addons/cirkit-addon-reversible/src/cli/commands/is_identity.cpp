@@ -39,13 +39,13 @@ is_identity_command::is_identity_command( const environment::ptr& env )
 {
 }
 
-command::rules_t is_identity_command::validity_rules() const
+command::rules is_identity_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 
 }
 
-bool is_identity_command::execute()
+void is_identity_command::execute()
 {
   const auto& circuits = env->store<circuit>();
 
@@ -57,8 +57,6 @@ bool is_identity_command::execute()
   {
     std::cout << "[i] circuit does not represent the identity function" << std::endl;
   }
-
-  return true;
 }
 
 }

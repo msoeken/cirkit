@@ -59,7 +59,7 @@ dectest_command::dectest_command( const environment::ptr& env )
   add_option( "--staircase,-s", staircase, "comma-separated list of ids: i,j,k,...\nchecks for decompositions f = g1(xi, g2(xj, g3(xk, others)))" );
 }
 
-command::rules_t dectest_command::validity_rules() const
+command::rules dectest_command::validity_rules() const
 {
   return {has_store_element<tt>( env )};
 }

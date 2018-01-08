@@ -49,7 +49,7 @@ xmgmine_command::xmgmine_command( const environment::ptr& env )
   be_verbose();
 }
 
-command::rules_t xmgmine_command::validity_rules() const
+command::rules xmgmine_command::validity_rules() const
 {
   return {
     {[this]() { return is_set( "verify" ) || is_set( "add" ) || is_set( "lut_file" ); }, "lut_file or verify needs to be set" },

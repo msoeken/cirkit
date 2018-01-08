@@ -47,11 +47,11 @@ public:
   concat_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  rules validity_rules() const;
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   unsigned id1 = 0u;

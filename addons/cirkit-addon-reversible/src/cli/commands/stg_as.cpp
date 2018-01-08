@@ -30,7 +30,6 @@
 #include <cli/stores.hpp>
 #include <cli/reversible_stores.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <classical/functions/spectral_canonization.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/add_stg.hpp>
@@ -44,16 +43,14 @@ namespace cirkit
 stg_as_command::stg_as_command( const environment::ptr& env )
   : cirkit_command( env, "Realize single-target from truth table" )
 {
-  opts.add_options()
-    ( "func,f",    value_with_default( &func ), "id of truth table to realize" )
-    ( "as,a",      value_with_default( &real ), "id of truth table to use in gate" )
-    ( "circuit,c",                              "perform on single-target gates with affine annotations in circuit" )
-    ( "class",                                  "automatically compute affine classes if not annotated (only with option circuit)" )
-    ;
+  add_option( "--func,-f", func, "id of truth table to realize", true );
+  add_option( "--as,-a", real, "id of truth table to use in gate", true );
+  add_flag( "--circuit,-c", "perform on single-target gates with affine annotations in circuit" );
+  add_flag( "--class", "automatically compute affine classes if not annotated (only with option circuit)" );
   add_new_option();
 }
 
-command::rules_t stg_as_command::validity_rules() const
+command::rules stg_as_command::validity_rules() const
 {
   return {
     {[this]() { return is_set( "circuit" ) || func < env->store<tt>().size(); }, "func id is invalid"},
@@ -62,7 +59,7 @@ command::rules_t stg_as_command::validity_rules() const
   };
 }
 
-bool stg_as_command::execute()
+void stg_as_command::execute()
 {
   const auto& tts = env->store<tt>();
   auto& circuits = env->store<circuit>();
@@ -109,15 +106,7 @@ bool stg_as_command::execute()
     add_stg_as_other( circ, tts[func], tts[real] );
     circuits.current() = circ;
   }
-
-  return true;
 }
-
-command::log_opt_t stg_as_command::log() const
-{
-  return boost::none;
-}
-
 
 }
 

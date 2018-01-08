@@ -48,12 +48,12 @@ esopps_command::esopps_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t esopps_command::validity_rules() const
+command::rules esopps_command::validity_rules() const
 {
   return {has_store_element<tt>( env )};
 }
 
-bool esopps_command::execute()
+void esopps_command::execute()
 {
   const auto& tts = env->store<tt>();
 
@@ -104,8 +104,6 @@ bool esopps_command::execute()
   auto& circs = env->store<circuit>();
   extend_if_new( circs );
   circs.current() = circ;
-
-  return true;
 }
 
 }

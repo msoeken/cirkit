@@ -26,54 +26,31 @@
 
 #include "gen_reciprocal.hpp"
 
-#include <boost/program_options.hpp>
-
-#include <core/utils/program_options.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/generators/reciprocal.hpp>
 #include <reversible/verification/validate_reciprocal.hpp>
 
-using boost::program_options::value;
-
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 gen_reciprocal_command::gen_reciprocal_command( const environment::ptr& env )
   : cirkit_command( env, "Generate reciprocal circuit" )
 {
-  opts.add_options()
-    ( "bitwidth,w",   value_with_default( &bitwidth ),     "bitwidth" )
-    ( "algorithm,a",  value_with_default( &algorithm ),    "algorithm\n0: direct\n1: Newton" )
-    ( "method,m",     value_with_default( &method ),       "synthesis method\n0: ESOP based\n1: PLA based" )
-    ( "verilog_name", value_with_default( &verilog_name ), "filename for intermediate Verilog file" )
-    ( "esop_name",    value_with_default( &esop_name ),    "filename for intermediate ESOP file" )
-    ( "pla_name",     value_with_default( &pla_name ),     "filename for intermediate PLA file" )
-    ( "only_write",                                        "only write Verilog file and stop" )
-    ( "validate",                                          "validate resulting circuit" )
-    ;
-  boost::program_options::options_description newton_options( "Newton options" );
-  newton_options.add_options()
-    ( "iterations,i", value( &iterations ),                "number of iterations (for Newton algorithm)\nif not specified, it's automatically determined based on the bitwidth" )
-    ( "blif_name",    value_with_default( &blif_name ),    "filename for intermediate BLIF file" )
-    ;
-  opts.add( newton_options );
-  add_positional_option( "bitwidth" );
+  add_option( "--bitwidth,-w,bitwidth", bitwidth, "bitwidth", true );
+  add_option( "--algorithm,-a", algorithm, "algorithm\n0: direct\n1: Newton", true );
+  add_option( "--method,-m", method, "synthesis method\n0: ESOP based\n1: PLA based", true );
+  add_option( "--verilog_name", verilog_name, "filename for intermediate Verilog file", true );
+  add_option( "--esop_name", esop_name, "filename for intermediate ESOP file", true );
+  add_option( "--pla_name", pla_name, "filename for intermediate PLA file", true );
+  add_flag( "--only_write", "only write Verilog file and stop" );
+  add_flag( "--validate", "validate resulting circuit" );
+  add_option( "--iterations,-i", iterations, "number of iterations (for Newton algorithm)\nif not specified, it's automatically determined based on the bitwidth" );
+  add_option( "--blif_name", blif_name, "filename for intermediate BLIF file", true );
   be_verbose();
   add_new_option();
 }
 
-command::rules_t gen_reciprocal_command::validity_rules() const
+command::rules gen_reciprocal_command::validity_rules() const
 {
   return {
     {[this]() { return algorithm <= 1u; }, "algorithm must be value from 0 to 1"},
@@ -81,7 +58,7 @@ command::rules_t gen_reciprocal_command::validity_rules() const
   };
 }
 
-bool gen_reciprocal_command::execute()
+void gen_reciprocal_command::execute()
 {
   auto settings = make_settings();
 
@@ -123,14 +100,11 @@ bool gen_reciprocal_command::execute()
       validate_reciprocal( circ, bitwidth, settings );
     }
   }
-
-
-  return true;
 }
 
-command::log_opt_t gen_reciprocal_command::log() const
+nlohmann::json gen_reciprocal_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )},
       {"bitwidth", bitwidth},
       {"algorithm", algorithm},

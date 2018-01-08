@@ -54,7 +54,7 @@ tt_command::tt_command( const environment::ptr& env )
   add_option( "--flip,-f", flip, "flips one variable" );
 }
 
-command::rules_t tt_command::validity_rules() const
+command::rules tt_command::validity_rules() const
 {
   return {
     { [this]() { return is_set( "load" ) || is_set( "random" ) || is_set( "hwb" ) || is_set( "maj" ) || is_set( "prime" ) || env->store<tt>().current_index() >= 0; }, "no current truth table available" },

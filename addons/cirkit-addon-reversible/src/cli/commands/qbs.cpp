@@ -26,11 +26,8 @@
 
 #include "qbs.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <classical/optimization/esop_minimization.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
 #include <reversible/circuit.hpp>
@@ -41,34 +38,20 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 qbs_command::qbs_command( const environment::ptr& env )
   : cirkit_command( env, "QMDD based synthesis" )
 {
+  add_option( "--esop_minimizer", esop_minimizer, "ESOP minizer (0: built-in, 1: exorcism); only with symbolic approach", true );
+  add_new_option();
   be_verbose();
-  opts.add_options()
-    ( "esop_minimizer", value_with_default( &esop_minimizer ), "ESOP minizer (0: built-in, 1: exorcism); only with symbolic approach" )
-    ( "new,n",                                                 "Creates new entry in store for circuit" )
-    ;
 }
 
-command::rules_t qbs_command::validity_rules() const
+command::rules qbs_command::validity_rules() const
 {
   return { has_store_element<rcbdd>( env ) };
 }
 
-bool qbs_command::execute()
+void qbs_command::execute()
 {
   const auto& rcbdds = env->store<rcbdd>();
   auto& circuits = env->store<circuit>();
@@ -86,14 +69,12 @@ bool qbs_command::execute()
 
   qmdd_synthesis( circuits.current(), rcbdds.current(), settings, statistics );
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
+  print_runtime();
 }
 
-command::log_opt_t qbs_command::log() const
+nlohmann::json qbs_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )}
     });
 }

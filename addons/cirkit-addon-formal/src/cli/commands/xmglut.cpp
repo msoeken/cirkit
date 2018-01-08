@@ -60,7 +60,7 @@ xmglut_command::xmglut_command( const environment::ptr& env )
   be_verbose();
 }
 
-command::rules_t xmglut_command::validity_rules() const
+command::rules xmglut_command::validity_rules() const
 {
   return {
     {[this]() { return is_set( "blif_name" ) || is_set( "xmg" ) || env->store<aig_graph>().current_index() != -1; }, "no AIG in store" },

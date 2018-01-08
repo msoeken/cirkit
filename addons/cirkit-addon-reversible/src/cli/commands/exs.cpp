@@ -26,11 +26,8 @@
 
 #include "exs.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/truth_table.hpp>
 #include <cli/reversible_stores.hpp>
@@ -41,34 +38,20 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 exs_command::exs_command( const environment::ptr& env )
   : cirkit_command( env, "Exact synthesis" )
 {
-  opts.add_options()
-    ( "mode,m",              value_with_default( &mode ),        "mode (0: BDD, 1: SAT, 2: SAT (Toffoli))" )
-    ( "start_depth,s",       value_with_default( &start_depth ), "initial search depth" )
-    ( "max_depth",           value_with_default( &max_depth ),   "maximum search depth" )
-    ( "negative,n",                                              "allow negative control lines" )
-    ( "multiple,m",                                              "allow multiple target lines (only with SAT)" )
-    ( "all_solutions,a",                                         "extract all solutions (only with BDD)" )
-    ;
+  add_option( "--mode,-m", mode, "mode (0: BDD, 1: SAT, 2: SAT (Toffoli))", true );
+  add_option( "--start_depth,-s", start_depth, "initial search depth", true );
+  add_option( "--max_depth", max_depth, "maximum search depth", true );
+  add_flag( "--negative,-n", "allow negative control lines" );
+  add_flag( "--multiple", "allow multiple target lines (only with SAT)" );
+  add_flag( "--all_solutions,-a", "extract all solutions (only with BDD)" );
   add_new_option( false );
   be_verbose();
 }
 
-command::rules_t exs_command::validity_rules() const
+command::rules exs_command::validity_rules() const
 {
   return {
     { [this]() { return this->mode <= 2u; }, "mode must be either 0 or 1" },
@@ -76,7 +59,7 @@ command::rules_t exs_command::validity_rules() const
   };
 }
 
-bool exs_command::execute()
+void exs_command::execute()
 {
   auto& circuits = env->store<circuit>();
   auto& specs    = env->store<binary_truth_table>();
@@ -113,7 +96,7 @@ bool exs_command::execute()
     //std::cout << "[i] number of solutions: " << statistics->get<unsigned>( "num_circuits" ) << std::endl;
   }
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
 
   if ( mode == 0u && result && is_set( "all_solutions" ) )
   {
@@ -127,13 +110,11 @@ bool exs_command::execute()
 
     circuits.set_current_index( current_index );
   }
-
-  return true;
 }
 
-command::log_opt_t exs_command::log() const
+nlohmann::json exs_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       { "runtime", statistics->get<double>( "runtime" ) }//,
       //{ "num_circuits", static_cast<int>( statistics->get<unsigned>( "num_circuits" ) ) }
     });

@@ -89,7 +89,7 @@ compress_command::compress_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t compress_command::validity_rules() const
+command::rules compress_command::validity_rules() const
 {
   return {
     {[this]() { return base == 2 || base == 10 || base == 16; }, "base must be 2, 10, or 16"},

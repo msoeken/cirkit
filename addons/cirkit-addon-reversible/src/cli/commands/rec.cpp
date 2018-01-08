@@ -28,37 +28,22 @@
 
 #include <iostream>
 
-#include <core/utils/program_options.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/verification/xorsat_equivalence_check.hpp>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 rec_command::rec_command( const environment::ptr& env )
-  : cirkit_command( env, "Equivalence checking for reversible circuits", "[L.G. Amaru, P.-E. Gaillardon, R. Wille, and G. De Micheli, DATE 2016]" )
+  : cirkit_command( env, "Equivalence checking for reversible circuits"/*, "[L.G. Amaru, P.-E. Gaillardon, R. Wille, and G. De Micheli, DATE 2016]"*/ )
 {
-  opts.add_options()
-    ( "id1",            value_with_default( &id1 ), "ID of first circuit" )
-    ( "id2",            value_with_default( &id2 ), "ID of second circuit" )
-    ( "name_mapping,n",                             "map circuits by name instead by index" )
-    ;
+  add_option( "--id1", id1, "ID of first circuit", true );
+  add_option( "--id2", id2, "ID of second circuit", true );
+  add_flag( "--name_mapping,-n", "map circuits by name instead by index" );
   be_verbose();
 }
 
-bool rec_command::execute()
+void rec_command::execute()
 {
   const auto& circuits = env->store<circuit>();
 
@@ -76,13 +61,11 @@ bool rec_command::execute()
   {
     std::cout << "[i] circuits are \033[1;31mnot equivalent\033[0m" << std::endl;
   }
-
-  return true;
 }
 
-command::log_opt_t rec_command::log() const
+nlohmann::json rec_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )},
       {"equivalent", result}
     });

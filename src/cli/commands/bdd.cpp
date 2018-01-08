@@ -48,7 +48,7 @@ bdd_command::bdd_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t bdd_command::validity_rules() const
+command::rules bdd_command::validity_rules() const
 {
   return { has_store_element_if_set<bdd_function_t>( *this, env, "characteristic" ) };
 }

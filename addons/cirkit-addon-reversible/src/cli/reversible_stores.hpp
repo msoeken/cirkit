@@ -25,7 +25,7 @@
  */
 
 /**
- * @file stores.hpp
+ * @file reversible_stores.hpp
  *
  * @brief Meta-data for stores
  *
@@ -36,7 +36,8 @@
 #ifndef REVERSIBLE_STORES_HPP
 #define REVERSIBLE_STORES_HPP
 
-#include <alice/command.hpp>
+#include <alice/api.hpp>
+#include <alice/store_api.hpp>
 
 #include <cli/stores.hpp>
 #include <classical/aig.hpp>
@@ -51,137 +52,45 @@ namespace alice
 
 using namespace cirkit;
 
-struct io_real_tag_t {};
-struct io_spec_tag_t {};
-struct io_quipper_tag_t {};
-struct io_liquid_tag_t {};
-struct io_tikz_tag_t {};
-struct io_numpy_tag_t {};
-struct io_projectq_tag_t {};
-struct io_qpic_tag_t {};
-struct io_qc_tag_t {};
-struct io_qcode_tag_t {};
-struct io_qsharp_tag_t {};
-
 /******************************************************************************
  * circuit                                                                    *
  ******************************************************************************/
 
-template<>
-struct store_info<circuit>
-{
-  static constexpr const char* key         = "circuits";
-  static constexpr const char* option      = "circuit";
-  static constexpr const char* mnemonic    = "c";
-  static constexpr const char* name        = "circuit";
-  static constexpr const char* name_plural = "circuits";
-};
+ALICE_ADD_STORE( circuit, "circuit", "c", "circuit", "circuits" )
 
 template<>
-std::string store_entry_to_string<circuit>( const circuit& circ );
+std::string to_string<circuit>( const circuit& circ );
 
 template<>
-void print_store_entry<circuit>( std::ostream& os, const circuit& circ );
+void print<circuit>( std::ostream& os, const circuit& circ );
 
 template<>
-void print_store_entry_statistics<circuit>( std::ostream& os, const circuit& circ );
+void print_statistics<circuit>( std::ostream& os, const circuit& circ );
 
 template<>
-command::log_opt_t log_store_entry_statistics<circuit>( const circuit& circ );
+nlohmann::json log_statistics<circuit>( const circuit& circ );
+
+// template<>
+// struct show_store_entry<circuit>
+// {
+//   show_store_entry( const command& cmd );
+
+//   bool operator()( circuit& circ, const std::string& dotname, const command& cmd );
+
+//   nlohmann::json log() const;
+// };
 
 template<>
-struct show_store_entry<circuit>
-{
-  show_store_entry( const command& cmd );
-
-  bool operator()( circuit& circ, const std::string& dotname, const command& cmd );
-
-  command::log_opt_t log() const;
-};
+inline bool can_convert<circuit, aig_graph>() { return true; }
 
 template<>
-inline bool store_can_convert<circuit, aig_graph>() { return true; }
+aig_graph convert<circuit, aig_graph>( const circuit& circ );
 
-template<>
-aig_graph store_convert<circuit, aig_graph>( const circuit& circ );
+// template<>
+// inline bool store_has_repr_html<circuit>() { return true; }
 
-template<>
-bool store_can_write_io_type<circuit, io_qpic_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<circuit, io_qpic_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_write_io_type<circuit, io_quipper_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<circuit, io_quipper_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_write_io_type<circuit, io_liquid_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<circuit, io_liquid_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_read_io_type<circuit, io_real_tag_t>( command& cmd );
-
-template<>
-circuit store_read_io_type<circuit, io_real_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_write_io_type<circuit, io_real_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<circuit, io_real_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_write_io_type<circuit, io_tikz_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<circuit, io_tikz_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_read_io_type<circuit, io_qc_tag_t>( command& cmd ) { return true; }
-
-template<>
-circuit store_read_io_type<circuit, io_qc_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_write_io_type<circuit, io_qc_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<circuit, io_qc_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<circuit, io_qcode_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<circuit, io_qcode_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<circuit, io_numpy_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<circuit, io_numpy_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<circuit, io_projectq_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<circuit, io_projectq_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_write_io_type<circuit, io_qsharp_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<circuit, io_qsharp_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_has_repr_html<circuit>() { return true; }
-
-template<>
-std::string store_repr_html<circuit>( const circuit& circ );
+// template<>
+// std::string store_repr_html<circuit>( const circuit& circ );
 
 /******************************************************************************
  * binary_truth_table                                                         *
@@ -198,91 +107,59 @@ struct store_info<binary_truth_table>
 };
 
 template<>
-std::string store_entry_to_string<binary_truth_table>( const binary_truth_table& spec );
+std::string to_string<binary_truth_table>( const binary_truth_table& spec );
 
 template<>
-void print_store_entry<binary_truth_table>( std::ostream& os, const binary_truth_table& spec );
+void print<binary_truth_table>( std::ostream& os, const binary_truth_table& spec );
 
 template<>
-inline bool store_can_convert<circuit, binary_truth_table>() { return true; }
+inline bool can_convert<circuit, binary_truth_table>() { return true; }
 
 template<>
-binary_truth_table store_convert<circuit, binary_truth_table>( const circuit& circ );
+binary_truth_table convert<circuit, binary_truth_table>( const circuit& circ );
 
 template<>
-inline bool store_can_convert<expression_t::ptr, binary_truth_table>() { return true; }
+inline bool can_convert<expression_t::ptr, binary_truth_table>() { return true; }
 
 template<>
-binary_truth_table store_convert<expression_t::ptr, binary_truth_table>( const expression_t::ptr& expr );
+binary_truth_table convert<expression_t::ptr, binary_truth_table>( const expression_t::ptr& expr );
 
 template<>
-inline bool store_can_convert<tt, binary_truth_table>() { return true; }
+inline bool can_convert<tt, binary_truth_table>() { return true; }
 
 template<>
-binary_truth_table store_convert<tt, binary_truth_table>( const tt& func );
-
-template<>
-bool store_can_read_io_type<binary_truth_table, io_spec_tag_t>( command& cmd );
-
-template<>
-binary_truth_table store_read_io_type<binary_truth_table, io_spec_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<binary_truth_table, io_spec_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<binary_truth_table, io_spec_tag_t>( const binary_truth_table& spec, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<binary_truth_table, io_pla_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<binary_truth_table, io_pla_tag_t>( const binary_truth_table& spec, const std::string& filename, const command& cmd );
+binary_truth_table convert<tt, binary_truth_table>( const tt& func );
 
 /******************************************************************************
  * rcbdd                                                                      *
  ******************************************************************************/
 
-template<>
-struct store_info<rcbdd>
-{
-  static constexpr const char* key         = "rcbdds";
-  static constexpr const char* option      = "rcbdd";
-  static constexpr const char* mnemonic    = "r";
-  static constexpr const char* name        = "RCBDD";
-  static constexpr const char* name_plural = "RCBDDs";
-};
+ALICE_ADD_STORE( rcbdd, "rcbdd", "r", "RCBDD", "RCBDDs" )
 
 template<>
-std::string store_entry_to_string<rcbdd>( const rcbdd& bdd );
+std::string to_string<rcbdd>( const rcbdd& bdd );
 
 template<>
-command::log_opt_t log_store_entry_statistics<rcbdd>( const rcbdd& bdd );
+nlohmann::json log_statistics<rcbdd>( const rcbdd& bdd );
+
+// template<>
+// struct show_store_entry<rcbdd>
+// {
+//   show_store_entry( const command& cmd );
+
+//   bool operator()( rcbdd& bdd, const std::string& dotname, const command& cmd );
+
+//   nlohmann::json log() const;
+// };
 
 template<>
-struct show_store_entry<rcbdd>
-{
-  show_store_entry( const command& cmd );
-
-  bool operator()( rcbdd& bdd, const std::string& dotname, const command& cmd );
-
-  command::log_opt_t log() const;
-};
+void print<rcbdd>( std::ostream& os, const rcbdd& bdd );
 
 template<>
-void print_store_entry<rcbdd>( std::ostream& os, const rcbdd& bdd );
+inline bool can_convert<circuit, rcbdd>() { return true; }
 
 template<>
-inline bool store_can_convert<circuit, rcbdd>() { return true; }
-
-template<>
-rcbdd store_convert<circuit, rcbdd>( const circuit& circ );
-
-template<>
-bool store_can_write_io_type<rcbdd, io_pla_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<rcbdd, io_pla_tag_t>( const rcbdd& bdd, const std::string& filename, const command& cmd );
+rcbdd convert<circuit, rcbdd>( const circuit& circ );
 
 }
 

@@ -41,7 +41,7 @@ xmgmerge_command::xmgmerge_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t xmgmerge_command::validity_rules() const
+command::rules xmgmerge_command::validity_rules() const
 {
   return {
     {[this]() { return id1 < env->store<xmg_graph>().size(); }, "id1 points to no valid store entry"},

@@ -28,7 +28,6 @@
 
 #include <alice/rules.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <reversible/circuit.hpp>
 #include <cli/reversible_stores.hpp>
 
@@ -38,21 +37,18 @@ namespace cirkit
 unique_names_command::unique_names_command( const environment::ptr& env )
   : cirkit_command( env, "Ensure unique I/O names" )
 {
-  opts.add_options()
-    ( "input_pattern",    value_with_default( &input_pattern ),    "pattern for input names" )
-    ( "output_pattern",   value_with_default( &output_pattern ),   "pattern for output names" )
-    ( "constant_pattern", value_with_default( &constant_pattern ), "pattern for constant names" )
-    ( "garbage_pattern",  value_with_default( &garbage_pattern ),  "pattern for garbage names" )
-    ;
-
+  add_option( "--input_pattern", input_pattern, "pattern for input names" );
+  add_option( "--output_pattern", output_pattern, "pattern for output names" );
+  add_option( "--constant_pattern", constant_pattern, "pattern for constant names" );
+  add_option( "--garbage_pattern", garbage_pattern, "pattern for garbage names" );
 }
 
-command::rules_t unique_names_command::validity_rules() const
+command::rules unique_names_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool unique_names_command::execute()
+void unique_names_command::execute()
 {
   auto& circ = env->store<circuit>().current();
 
@@ -82,8 +78,6 @@ bool unique_names_command::execute()
 
   circ.set_inputs( inputs );
   circ.set_outputs( outputs );
-
-  return true;
 }
 
 }

@@ -57,7 +57,7 @@ gen_trans_arith_command::gen_trans_arith_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t gen_trans_arith_command::validity_rules() const
+command::rules gen_trans_arith_command::validity_rules() const
 {
   return {
     {[this]() { return mux_prob <= 100u; }, "mux_prob must be between 0 and 100" },

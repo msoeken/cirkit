@@ -29,9 +29,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <boost/program_options.hpp>
-
-#include <core/utils/program_options.hpp>
 #include <core/utils/temporary_filename.hpp>
 #include <classical/abc/gia/gia_utils.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
@@ -42,64 +39,48 @@
 #include <cli/reversible_stores.hpp>
 #include <reversible/synthesis/lhrs/legacy/lhrs.hpp>
 
-using boost::program_options::bool_switch;
-using boost::program_options::value;
-
 namespace cirkit
 {
 
 lhrs_command::lhrs_command( const environment::ptr& env )
   : aig_base_command( env, "LUT-based hierarchical reversible synthesis" )
 {
-  opts.add_options()
-    ( "cut_size,k",         value_with_default( &cut_size ),                  "cut size" )
-    ( "mapping_strategy,m", value_with_default( &params.mapping_strategy ),   "mapping strategy\ndirect (0): direct\nmin_db (1): LUT-based min DB\nbest_fit (2): LUT-based best fit\npick_best (3): LUT-based pick best" )
-    ( "additional_ancilla", value_with_default( &params.additional_ancilla ), "number of additional ancilla to add to circuit" )
-    ( "progress,p",         bool_switch( &params.progress ),                  "show progress" )
-    ( "onlylines",          bool_switch( &params.onlylines ),                 "do not create gates (useful for qubit estimation)" )
-    ( "area_iters_init",    value_with_default( &area_iters_init ),           "number of exact area recovery iterations (in initial mapping)" )
-    ( "flow_iters_init",    value_with_default( &flow_iters_init ),           "number of area flow recovery iterations (in initial mapping)" )
-    ;
+  /* General options */
+  add_option( "--cut_size,-k", cut_size, "cut size", true );
+  add_option( "--mapping_strategy,-m", params.mapping_strategy, "mapping strategy: direct (0): direct; min_db (1): LUT-based min DB; best_fit (2): LUT-based best fit; pick_best (3): LUT-based pick best", true );
+  add_option( "--additional_ancilla", params.additional_ancilla, "number of additional ancilla to add to circuit", true );
+  add_flag( "--progress,-p", params.progress, "show progress" );
+  add_flag( "--onlylines", params.onlylines, "do not create gates (useful for qubit estimation)" );
+  add_option( "--area_iters_init", area_iters_init, "number of exact area recovery iterations (in initial mapping)", true );
+  add_option( "--flow_iters_init", flow_iters_init, "number of area flow recovery iterations (in initial mapping)", true );
 
-  boost::program_options::options_description esopdecomp_options( "ESOP decomposition options" );
-  esopdecomp_options.add_options()
-    ( "esopscript",      value_with_default( &params.map_esop_params.script ),       "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nj2r: just two rounds\nnone: do not optimize ESOP cover" )
-    ( "esopcovermethod", value_with_default( &params.map_esop_params.cover_method ), "ESOP cover method\naig (0): directly from AIG\nbdd (1): using PSDKRO method from BDD\naignew (2): new AIG-based method\nauto (3): tries to estimate the best method for each LUT" )
-    ( "esoppostopt",     bool_switch( &params.map_esop_params.optimize_postesop ),   "post-optimize network derived from ESOP synthesis" )
-    ;
-  opts.add( esopdecomp_options );
+  add_option( "--esopscript", params.map_esop_params.script, "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nj2r: just two rounds\nnone: do not optimize ESOP cover", true )->group( "ESOP decomposition ");
+  add_option( "--esopcovermethod", params.map_esop_params.cover_method, "ESOP cover method\naig (0): directly from AIG\nbdd (1): using PSDKRO method from BDD\naignew (2): new AIG-based method\nauto (3): tries to estimate the best method for each LUT", true )->group( "ESOP decomposition ");
+  add_flag( "--esoppostopt", params.map_esop_params.optimize_postesop, "post-optimize network derived from ESOP synthesis" )->group( "ESOP decomposition ");
 
-  boost::program_options::options_description lutdecomp_options( "LUT decomposition options" );
-  lutdecomp_options.add_options()
-    ( "satlut,s",     bool_switch( &params.map_luts_params.satlut ),                 "optimize mapping with SAT where possible" )
-    ( "area_iters",   value_with_default( &params.map_luts_params.area_iters ),      "number of exact area recovery iterations" )
-    ( "flow_iters",   value_with_default( &params.map_luts_params.flow_iters ),      "number of area flow recovery iterations" )
-    ( "class_method", value_with_default( &params.map_precomp_params.class_method ), "classification method\n0: spectral classification\n1: affine classificiation" )
-    ;
-  opts.add( lutdecomp_options );
+  add_flag( "--satlut,-s", params.map_luts_params.satlut, "optimize mapping with SAT where possible" )->group( "LUT decomposition" );
+  add_option( "--area_iters", params.map_luts_params.area_iters, "number of exact area recovery iterations", true )->group( "LUT decomposition" );
+  add_option( "--flow_iters", params.map_luts_params.flow_iters, "number of area flow recovery iterations", true )->group( "LUT decomposition" );
+  add_option( "--class_method", params.map_precomp_params.class_method, "classification method\n0: spectral classification\n1: affine classificiation", true )->group( "LUT decomposition" );
 
-  boost::program_options::options_description debug_options( "Debug options" );
-  debug_options.add_options()
-    ( "dumpfile",       value( &params.map_esop_params.dumpfile ),         "name of existing directory to dump AIG and ESOP files for exorcism minimization" )
-    ( "nocollapse",     bool_switch( &params.map_esop_params.nocollapse ), "do not collapse LUTs (useful with dumpfile to only write AIGs)" )
-    ( "count_costs",    bool_switch( &params.count_costs ),                "count costs and affected lines per single-target gate" )
-    ( "bounds",                                                            "compute lower and upper bounds for qubits" )
-    ( "dotname_mapped", value( &dotname_mapped ),                          "filename to dump DOT representation of initial mapped network" )
-    ;
-  opts.add( debug_options );
+  add_option( "--dumpfile", params.map_esop_params.dumpfile, "name of existing directory to dump AIG and ESOP files for exorcism minimization" )->group( "Debug" );
+  add_flag( "--nocollapse", params.map_esop_params.nocollapse, "do not collapse LUTs (useful with dumpfile to only write AIGs)" )->group( "Debug" );
+  add_flag( "--count_costs", params.count_costs, "count costs and affected lines per single-target gate" )->group( "Debug" );
+  add_flag( "--bounds", "compute lower and upper bounds for qubits" )->group( "Debug" );
+  add_option( "--dotname_mapped", dotname_mapped, "filename to dump DOT representation of initial mapped network" )->group( "Debug" );
 
-  be_verbose( &params.verbose );
+  be_verbose( params.verbose );
   add_new_option();
 }
 
-command::rules_t lhrs_command::validity_rules() const
+command::rules lhrs_command::validity_rules() const
 {
   return {
     {has_store_element<aig_graph>( env )}
   };
 }
 
-bool lhrs_command::execute()
+void lhrs_command::execute()
 {
   auto& circuits = env->store<circuit>();
   extend_if_new( circuits );
@@ -136,13 +117,11 @@ bool lhrs_command::execute()
   }
 
   print_runtime( stats->runtime );
-
-  return true;
 }
 
-command::log_opt_t lhrs_command::log() const
+nlohmann::json lhrs_command::log() const
 {
-  log_map_t map({
+  nlohmann::json map({
       {"runtime", stats->runtime},
       {"cut_size", cut_size},
       {"lut_count", lut_count},

@@ -39,12 +39,12 @@ reduce_lines_command::reduce_lines_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t reduce_lines_command::validity_rules() const
+command::rules reduce_lines_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool reduce_lines_command::execute()
+void reduce_lines_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -57,13 +57,11 @@ bool reduce_lines_command::execute()
   circuits.current() = circ;
 
   print_runtime();
-
-  return true;
 }
 
-command::log_opt_t reduce_lines_command::log() const
+nlohmann::json reduce_lines_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )}
     });
 }

@@ -39,7 +39,8 @@
 #include <string>
 #include <vector>
 
-#include <alice/alice.hpp>
+#include <alice/api.hpp>
+#include <alice/store_api.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/bdd_utils.hpp>

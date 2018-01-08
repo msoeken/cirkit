@@ -52,13 +52,13 @@ public:
   simulate_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
+  rules validity_rules() const;
   void execute_aig();
   void execute_mig();
 
 private:
-  rule_t one_simulation_method() const;
-  rule_t check_pattern_size() const;
+  rule one_simulation_method() const;
+  rule check_pattern_size() const;
 
   template<typename S>
   void store( const S& element )

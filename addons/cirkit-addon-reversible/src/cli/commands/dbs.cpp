@@ -34,12 +34,10 @@
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/min.hpp>
-#include <boost/format.hpp>
 #include <boost/range/algorithm.hpp>
 
 #include <alice/rules.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/optimization/esop_minimization.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
@@ -50,14 +48,8 @@
 #include <reversible/synthesis/rcbdd_synthesis.hpp>
 #include <reversible/synthesis/young_subgroup_synthesis.hpp>
 
-using namespace boost::program_options;
-
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
 
 /******************************************************************************
  * Private functions                                                          *
@@ -78,32 +70,20 @@ std::tuple<int, int, double> compute_stats( const std::vector<int>& sizes )
  ******************************************************************************/
 
 dbs_command::dbs_command( const environment::ptr& env )
-  : cirkit_command( env, "Decomposition based synthesis", "[A. De Vos, Y. Van Rentergem, Adv. Math. Commun. 2 (2008), 183-200]\n[M. Soeken, L. Tague, G.W. Dueck, R. Drechsler, J. of Symb. Comp. 73 (2016), 1-26]" )
+  : cirkit_command( env, "Decomposition based synthesis"/*, "[A. De Vos, Y. Van Rentergem, Adv. Math. Commun. 2 (2008), 183-200]\n[M. Soeken, L. Tague, G.W. Dueck, R. Drechsler, J. of Symb. Comp. 73 (2016), 1-26]"*/ )
 {
-  opts.add_options()
-    ( "symbolic,s",                                            "use symbolic variant (works on RCBDDs)" )
-    ( "esop_minimizer", value_with_default( &esop_minimizer ), "ESOP minizer (0: built-in, 1: exorcism); only with symbolic approach" )
-    ( "new,n",                                                 "add a new entry to the store; if not set, the current entry is overriden" )
-    ;
-
-  options_description tt_options( "Options for the truth table variant" );
-  tt_options.add_options()
-    ( "ordering",       value( &ordering ),                    "complete variable ordering (space separated, only for truth table variant)" )
-    ;
-
-  options_description symb_options( "Options for the symbolic variant" );
-  symb_options.add_options()
-    ( "mode",           value_with_default( &mode ),           "mode (0: default, 1: swap, 2: hamming)" )
-    ( "progress,p",                                            "show progress" )
-    ;
-
-  opts.add( tt_options );
-  opts.add( symb_options );
-
+  add_option( "--ordering", ordering, "complete variable ordering (space separated, only for truth table variant)" )->group( "Explicit algorithm" );
+  add_flag( "--symbolic,-s", "use symbolic variant (works on RCBDDs)" )->group( "Symbolic algorithm" );
+  add_option( "--esop_minimizer", esop_minimizer, "ESOP minizer (0: built-in, 1: exorcism)", true )->group( "Symbolic algorithm" );
+  add_option( "--mode", mode, "mode (0: default, 1: swap, 2: hamming)" )->group( "Symbolic algorithm" );
+  add_option( "--progress,-p", "show progress" )->group( "Symbolic algorithm" );
+  add_new_option();
   be_verbose();
+
+  opts.set_footer( "References:\n - A. De Vos, Y. Van Rentergem, Adv. Math. Commun. 2 (2008), 183-200\n - M. Soeken, L. Tague, G.W. Dueck, R. Drechsler, J. of Symb. Comp. 73 (2016), 1-26" );
 }
 
-command::rules_t dbs_command::validity_rules() const
+command::rules dbs_command::validity_rules() const
 {
   return {
     { [&]() { return !this->is_set( "symbolic" ) || env->store<rcbdd>().current_index() >= 0; }, "symbolic method require RCBDD in store" },
@@ -111,7 +91,7 @@ command::rules_t dbs_command::validity_rules() const
   };
 }
 
-bool dbs_command::execute()
+void dbs_command::execute()
 {
   auto& circuits = env->store<circuit>();
   auto& rcbdds   = env->store<rcbdd>();
@@ -151,14 +131,12 @@ bool dbs_command::execute()
 
   circuits.current() = circ;
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
+  print_runtime();
 }
 
-command::log_opt_t dbs_command::log() const
+nlohmann::json dbs_command::log() const
 {
-  log_map_t map = {
+  nlohmann::json map = {
     { "runtime", statistics->get<double>( "runtime" ) }
   };
 
@@ -176,7 +154,7 @@ command::log_opt_t dbs_command::log() const
     map["access"] = ss.str();
   }
 
-  return log_opt_t( map );
+  return map;
 }
 
 }

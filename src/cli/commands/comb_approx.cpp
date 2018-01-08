@@ -74,7 +74,7 @@ comb_approx_command::comb_approx_command( const environment::ptr& env )
   be_verbose();
 }
 
-command::rules_t comb_approx_command::validity_rules() const
+command::rules comb_approx_command::validity_rules() const
 {
   return {
     {[this]() { return static_cast<int>( is_set( "bdd" ) ) + static_cast<int>( is_set( "aig" ) ) == 1; }, "either BDD or AIG needs to be chosen" },

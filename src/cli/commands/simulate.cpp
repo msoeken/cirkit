@@ -60,7 +60,7 @@ simulate_command::simulate_command( const environment::ptr& env )
   be_verbose();
 }
 
-command::rule_t simulate_command::one_simulation_method() const
+command::rule simulate_command::one_simulation_method() const
 {
   const auto assertion = [&]() {
     auto total = 0u;
@@ -76,7 +76,7 @@ command::rule_t simulate_command::one_simulation_method() const
   return {assertion, "exactly one simulation method needs to be chose"};
 }
 
-command::rule_t simulate_command::check_pattern_size() const
+command::rule simulate_command::check_pattern_size() const
 {
   const auto assertion = [&]() {
     if ( is_set( "pattern" ) )
@@ -96,7 +96,7 @@ command::rule_t simulate_command::check_pattern_size() const
   return {assertion, "pattern has incorrect size"};
 }
 
-command::rules_t simulate_command::validity_rules() const
+command::rules simulate_command::validity_rules() const
 {
   auto rules = aig_mig_command::validity_rules();
 

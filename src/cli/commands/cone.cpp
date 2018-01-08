@@ -51,7 +51,7 @@ cone_command::cone_command( const environment::ptr& env ) : aig_base_command( en
   be_verbose();
 }
 
-command::rules_t cone_command::validity_rules() const
+command::rules cone_command::validity_rules() const
 {
   return {
     {[&]() { return !outputs.empty() || !output_indexes.empty(); }, "no output name specified" },

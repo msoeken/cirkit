@@ -46,12 +46,12 @@ stg4_command::stg4_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t stg4_command::validity_rules() const
+command::rules stg4_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool stg4_command::execute()
+void stg4_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -100,8 +100,6 @@ bool stg4_command::execute()
 
   extend_if_new( circuits );
   circuits.current() = circ;
-
-  return true;
 }
 
 }

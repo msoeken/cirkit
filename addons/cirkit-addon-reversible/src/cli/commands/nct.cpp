@@ -28,7 +28,6 @@
 
 #include <alice/rules.hpp>
 #include <cli/reversible_stores.hpp>
-#include <core/utils/program_options.hpp>
 #include <reversible/mapping/nct_mapping.hpp>
 
 namespace cirkit
@@ -37,14 +36,12 @@ namespace cirkit
 nct_command::nct_command( const environment::ptr& env )
   : cirkit_command( env, "NCT mapping" )
 {
-  opts.add_options()
-    ( "controls_threshold,t", value_with_default( &controls_threshold ), "do not decompose any gates with less controls" )
-    ;
+  add_option( "--controls_threshold,-t", controls_threshold, "do not decompose any gates with less controls", true );
   add_new_option();
   be_verbose();
 }
 
-command::rules_t nct_command::validity_rules() const
+command::rules nct_command::validity_rules() const
 {
   return {
     has_store_element<circuit>( env ),
@@ -52,7 +49,7 @@ command::rules_t nct_command::validity_rules() const
   };
 }
 
-bool nct_command::execute()
+void nct_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -64,13 +61,11 @@ bool nct_command::execute()
   extend_if_new( circuits );
 
   circuits.current() = mapped;
-
-  return true;
 }
 
-command::log_opt_t nct_command::log() const
+nlohmann::json nct_command::log() const
 {
-  return log_opt_t({{"runtime", statistics->get<double>( "runtime" )}});
+  return nlohmann::json({{"runtime", statistics->get<double>( "runtime" )}});
 }
 
 }

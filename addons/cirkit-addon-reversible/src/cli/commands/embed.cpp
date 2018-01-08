@@ -26,8 +26,6 @@
 
 #include "embed.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
 #include <core/properties.hpp>
@@ -37,33 +35,21 @@
 #include <reversible/synthesis/embed_bdd.hpp>
 #include <reversible/synthesis/embed_truth_table.hpp>
 
+#include <fmt/format.h>
+
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 embed_command::embed_command( const environment::ptr& env )
   : cirkit_command( env, "Embedding" )
 {
-  opts.add_options()
-    ( "bdd,b",      "Embed from BDDs" )
-    ( "only_lines", "Only calculate additional lines" )
-    ;
+  add_option( "--bdd,-b", "embed from BDDs" );
+  add_option( "--only_lines", "only calculate additional lines" );
   add_new_option();
   be_verbose();
 }
 
-command::rules_t embed_command::validity_rules() const
+command::rules embed_command::validity_rules() const
 {
   return {
     has_store_element_if_set<bdd_function_t>( *this, env, "bdd" ),
@@ -72,7 +58,7 @@ command::rules_t embed_command::validity_rules() const
   };
 }
 
-bool embed_command::execute()
+void embed_command::execute()
 {
   const auto& bdds = env->store<bdd_function_t>();
 
@@ -82,7 +68,7 @@ bool embed_command::execute()
   {
     auto lines = calculate_additional_lines( bdds.current(), settings, statistics );
 
-    std::cout << boost::format( "[i] required lines: %d" ) % lines << std::endl;
+    std::cout << fmt::format( "[i] required lines: {}", lines ) << std::endl;
   }
   else if ( is_set( "bdd" ) )
   {
@@ -101,8 +87,6 @@ bool embed_command::execute()
   }
 
   print_runtime();
-
-  return true;
 }
 
 }

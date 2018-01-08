@@ -47,11 +47,8 @@ public:
   stg_as_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
-
-public:
-  log_opt_t log() const;
+  rules validity_rules() const;
+  void execute();
 
 private:
   unsigned func = 0u;

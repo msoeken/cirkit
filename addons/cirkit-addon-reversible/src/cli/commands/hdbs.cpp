@@ -32,7 +32,6 @@
 
 #include <core/utils/bdd_utils.hpp>
 #include <cli/stores.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/timer.hpp>
 #include <reversible/circuit.hpp>
 #include <cli/reversible_stores.hpp>
@@ -41,34 +40,20 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 hdbs_command::hdbs_command( const environment::ptr& env )
   : cirkit_command( env, "Hierarchical DD-based synthesis" )
 {
-  opts.add_options()
-    ( "complemented_edges", value_with_default( &complemented_edges ), "use complemented edges in BDD" )
-    ( "reordering",         value_with_default( &reordering ),         "reordering:\n0: CUDD_REORDER_SAME\n1: CUDD_REORDER_NONE\n2: CUDD_REORDER_RANDOM\n3: CUDD_REORDER_RANDOM_PIVOT\n4: CUDD_REORDER_SIFT\n5: CUDD_REORDER_SIFT_CONVERGE\n6: CUDD_REORDER_SYMM_SIFT\n7: CUDD_REORDER_SYMM_SIFT_CONV\n8: CUDD_REORDER_WINDOW2\n9: CUDD_REORDER_WINDOW3\n10: CUDD_REORDER_WINDOW4\n11: CUDD_REORDER_WINDOW2_CONV\n12: CUDD_REORDER_WINDOW3_CONV\n13: CUDD_REORDER_WINDOW4_CONV\n14: CUDD_REORDER_GROUP_SIFT\n15: CUDD_REORDER_GROUP_SIFT_CONV\n16: CUDD_REORDER_ANNEALING\n17: CUDD_REORDER_GENETIC\n18: CUDD_REORDER_LINEAR\n19: CUDD_REORDER_LINEAR_CONVERGE\n20: CUDD_REORDER_LAZY_SIFT\n21: CUDD_REORDER_EXACT" )
-    ;
+  add_option( "--complemented_edges", complemented_edges, "use complemented edges in BDD", true );
+  add_option( "--reordering", reordering, "reordering:\n0: CUDD_REORDER_SAME\n1: CUDD_REORDER_NONE\n2: CUDD_REORDER_RANDOM\n3: CUDD_REORDER_RANDOM_PIVOT\n4: CUDD_REORDER_SIFT\n5: CUDD_REORDER_SIFT_CONVERGE\n6: CUDD_REORDER_SYMM_SIFT\n7: CUDD_REORDER_SYMM_SIFT_CONV\n8: CUDD_REORDER_WINDOW2\n9: CUDD_REORDER_WINDOW3\n10: CUDD_REORDER_WINDOW4\n11: CUDD_REORDER_WINDOW2_CONV\n12: CUDD_REORDER_WINDOW3_CONV\n13: CUDD_REORDER_WINDOW4_CONV\n14: CUDD_REORDER_GROUP_SIFT\n15: CUDD_REORDER_GROUP_SIFT_CONV\n16: CUDD_REORDER_ANNEALING\n17: CUDD_REORDER_GENETIC\n18: CUDD_REORDER_LINEAR\n19: CUDD_REORDER_LINEAR_CONVERGE\n20: CUDD_REORDER_LAZY_SIFT\n21: CUDD_REORDER_EXACT", true );
   add_new_option();
 }
 
-command::rules_t hdbs_command::valididity_rules() const
+command::rules hdbs_command::valididity_rules() const
 {
   return { has_store_element<bdd_function_t>( env ) };
 }
 
-bool hdbs_command::execute()
+void hdbs_command::execute()
 {
   auto& bdd = env->store<bdd_function_t>().current();
 
@@ -90,13 +75,11 @@ bool hdbs_command::execute()
   auto& circuits = env->store<circuit>();
   extend_if_new( circuits );
   circuits.current() = circ;
-
-  return true;
 }
 
-command::log_opt_t hdbs_command::log() const
+nlohmann::json hdbs_command::log() const
 {
-  return log_opt_t( {{"runtime", statistics->get<double>( "runtime" )}} );
+  return nlohmann::json( {{"runtime", statistics->get<double>( "runtime" )}} );
 }
 
 }

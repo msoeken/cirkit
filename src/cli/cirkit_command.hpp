@@ -55,6 +55,7 @@ public:
 protected:
   /* pre-defined options */
   inline void be_verbose() { add_flag( "--verbose,-v", "be verbose" ); }
+  inline void be_verbose( bool& v ) { add_flag( "--verbose,-v", v, "be verbose" ); }
   inline bool is_verbose() const { return is_set( "verbose" ); }
 
   inline void add_new_option( bool with_short = true )

@@ -56,7 +56,7 @@ public:
   }
 
 protected:
-  virtual rules_t validity_rules() const
+  virtual rules validity_rules() const
   {
     return { has_store_element<aig_graph>( env ) };
   }

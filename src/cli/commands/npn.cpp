@@ -68,7 +68,7 @@ npn_command::npn_command( const environment::ptr& env )
   add_flag( "--store,-n", "copy the result to the store (only for truth tables)" );
 }
 
-command::rules_t npn_command::validity_rules() const
+command::rules npn_command::validity_rules() const
 {
   return {
     {[&]() { return !is_set( "truthtable" ) || !is_set( "enumerate" ); },

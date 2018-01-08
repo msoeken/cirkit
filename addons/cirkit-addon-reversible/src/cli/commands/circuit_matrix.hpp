@@ -45,10 +45,10 @@ class circuit_matrix_command : public cirkit_command
 {
 public:
   circuit_matrix_command( const environment::ptr& env );
-  rules_t validity_rules() const;
+  rules validity_rules() const;
 
 protected:
-  bool execute();
+  void execute();
 };
 
 

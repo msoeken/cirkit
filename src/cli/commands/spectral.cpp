@@ -44,7 +44,7 @@ spectral_command::spectral_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t spectral_command::validity_rules() const
+command::rules spectral_command::validity_rules() const
 {
   return {has_store_element<tt>( env )};
 }

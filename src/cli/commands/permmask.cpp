@@ -41,7 +41,7 @@ permmask_command::permmask_command( const environment::ptr& env )
   add_option( "--permutation,-p,permutation", permutation, "permutation, space separatd (put quotes around it)" );
 }
 
-command::rules_t permmask_command::validity_rules() const
+command::rules permmask_command::validity_rules() const
 {
   return {
     {[this]() { return !permutation.empty(); }, "permutation must not be empty" }

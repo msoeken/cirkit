@@ -27,14 +27,11 @@
 #include "revsim.hpp"
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/program_options.hpp>
 
 #include <alice/rules.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/simulation/partial_simulation.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -42,14 +39,11 @@ namespace cirkit
 revsim_command::revsim_command( const environment::ptr& env )
   : cirkit_command( env, "Reversible circuit simulation" )
 {
-  opts.add_options()
-    ( "partial,r",                    "use partial simulation" )
-    ( "pattern,p", value( &pattern ), "simulation pattern" )
-    ;
-  add_positional_option( "pattern" );
+  add_flag( "--partial,-r", "use partial simulation" );
+  add_option( "--pattern,-p,pattern", pattern, "simulation pattern" );
 }
 
-command::rules_t revsim_command::validity_rules() const
+command::rules revsim_command::validity_rules() const
 {
   return {
     has_store_element<circuit>( env ),
@@ -72,7 +66,7 @@ command::rules_t revsim_command::validity_rules() const
   };
 }
 
-bool revsim_command::execute()
+void revsim_command::execute()
 {
   const auto& circuits = env->store<circuit>();
 
@@ -95,8 +89,6 @@ bool revsim_command::execute()
   }
 
   std::cout << "[i] result: " << output << std::endl;
-
-  return true;
 }
 
 }

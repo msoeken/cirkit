@@ -53,7 +53,7 @@ public:
   npn_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
+  rules validity_rules() const;
   void execute();
 
 public:

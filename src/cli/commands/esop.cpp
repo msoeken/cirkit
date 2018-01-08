@@ -44,7 +44,7 @@ esop_command::esop_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t esop_command::validity_rules() const
+command::rules esop_command::validity_rules() const
 {
   return {
     has_store_element<aig_graph>( env ),

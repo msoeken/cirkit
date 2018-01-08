@@ -27,7 +27,6 @@
 #include "revsimp.hpp"
 
 #include <alice/rules.hpp>
-#include <core/utils/program_options.hpp>
 #include <reversible/circuit.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/optimization/simplify.hpp>
@@ -35,35 +34,21 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 revsimp_command::revsimp_command( const environment::ptr& env )
   : cirkit_command( env, "Reversible circuit simplification" )
 {
-  opts.add_options()
-    ( "methods",   value_with_default( &methods ), "optimization methods:\nm: try to merge gates with same target\nn: cancel NOT gates\na: merge adjacent gates\ne: resynthesize same-target gates with exorcism\np: same target optimization (reduces T-count)\ns: propagate SWAP gates (may change output order)" )
-    ( "noreverse",                                 "do not optimize in reverse direction" )
-    ;
+  add_option( "--methods", methods, "optimization methods:\nm: try to merge gates with same target\nn: cancel NOT gates\na: merge adjacent gates\ne: resynthesize same-target gates with exorcism\np: same target optimization (reduces T-count)\ns: propagate SWAP gates (may change output order)", true );
+  add_flag( "--noreverse", "do not optimize in reverse direction" );
   be_verbose();
   add_new_option();
 }
 
-command::rules_t revsimp_command::validity_rules() const
+command::rules revsimp_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool revsimp_command::execute()
+void revsimp_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -77,13 +62,11 @@ bool revsimp_command::execute()
   circuits.current() = circ;
 
   print_runtime();
-
-  return true;
 }
 
-command::log_opt_t revsimp_command::log() const
+nlohmann::json revsimp_command::log() const
 {
-  return log_opt_t({{"runtime", statistics->get<double>( "runtime" )}});
+  return nlohmann::json({{"runtime", statistics->get<double>( "runtime" )}});
 }
 
 }

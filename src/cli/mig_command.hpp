@@ -45,7 +45,7 @@
 namespace cirkit
 {
 
-inline command::rule_t has_mig( const command* cmd )
+inline command::rule has_mig( const command* cmd )
 {
   return { [&]() { return cmd->env->store<mig_graph>().current_index() >= 0; }, "no current MIG available" };
 }
@@ -60,7 +60,7 @@ public:
   }
 
 protected:
-  virtual rules_t validity_rules() const
+  virtual rules validity_rules() const
   {
     return { has_mig( this ) };
   }

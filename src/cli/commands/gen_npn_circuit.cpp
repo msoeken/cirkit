@@ -40,7 +40,7 @@ gen_npn_circuit_command::gen_npn_circuit_command( const environment::ptr& env )
   add_option( "--num_vars,-n,num_vars", num_vars, "number of variables (from 2 to 6) ", true );
 }
 
-command::rules_t gen_npn_circuit_command::validity_rules() const
+command::rules gen_npn_circuit_command::validity_rules() const
 {
   return {{[this]() { return num_vars >= 2 && num_vars <= 6; }, "number of variables must be between 2 and 6"}};
 }
