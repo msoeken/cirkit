@@ -70,15 +70,11 @@ std::string to_string<bdd_function_t>( const bdd_function_t& bdd );
 template<>
 void print<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd );
 
-// template<>
-// struct show_store_entry<bdd_function_t>
-// {
-//   show_store_entry( command& cmd );
+template<>
+bool can_show<bdd_function_t>( std::string& extension, command& cmd );
 
-//   bool operator()( bdd_function_t& bdd, const std::string& dotname, const command& cmd );
-
-//   command::log_opt_t log() const;
-// };
+template<>
+void show<bdd_function_t>( std::ostream& out, const bdd_function_t& bdd, const command& cmd );
 
 template<>
 void print_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd );
@@ -95,15 +91,11 @@ ALICE_ADD_STORE( aig_graph, "aig", "a", "AIG", "AIGs" )
 template<>
 std::string to_string<aig_graph>( const aig_graph& aig );
 
-// template<>
-// struct show_store_entry<aig_graph>
-// {
-//   show_store_entry( command& cmd );
+template<>
+bool can_show<aig_graph>( std::string& extension, command& cmd );
 
-//   bool operator()( aig_graph& aig, const std::string& dotname, const command& cmd );
-
-//   command::log_opt_t log() const;
-// };
+template<>
+void show<aig_graph>( std::ostream& out, const aig_graph& aig, const command& cmd );
 
 template<>
 void print_statistics<aig_graph>( std::ostream& os, const aig_graph& aig );
@@ -132,18 +124,11 @@ ALICE_ADD_STORE( mig_graph, "mig", "m", "MIG", "MIGs" )
 template<>
 std::string to_string<mig_graph>( const mig_graph& mig );
 
-// template<>
-// struct show_store_entry<mig_graph>
-// {
-//   show_store_entry( command& cmd );
+template<>
+bool can_show<mig_graph>( std::string& extension, command& cmd );
 
-//   bool operator()( mig_graph& mig, const std::string& dotname, const command& cmd );
-
-//   command::log_opt_t log() const;
-
-// private:
-//   std::vector<std::string> expressions;
-// };
+template<>
+void show<mig_graph>( std::ostream& out, const mig_graph& mig, const command& cmd );
 
 template<>
 void print_statistics<mig_graph>( std::ostream& os, const mig_graph& mig );
@@ -262,15 +247,11 @@ void print_statistics<xmg_graph>( std::ostream& os, const xmg_graph& xmg );
 template<>
 nlohmann::json log_statistics<xmg_graph>( const xmg_graph& xmg );
 
-// template<>
-// struct show_store_entry<xmg_graph>
-// {
-//   show_store_entry( command& cmd );
+template<>
+bool can_show<xmg_graph>( std::string& extension, command& cmd );
 
-//   bool operator()( xmg_graph& mig, const std::string& dotname, const command& cmd );
-
-//   command::log_opt_t log() const;
-// };
+template<>
+void show<xmg_graph>( std::ostream& out, const xmg_graph& xmg, const command& cmd );
 
 template<>
 inline bool can_convert<xmg_graph, expression_t::ptr>() { return true; }

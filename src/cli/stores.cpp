@@ -87,45 +87,44 @@ void print<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd )
   }
 }
 
-// show_store_entry<bdd_function_t>::show_store_entry( command& cmd )
-// {
-//   boost::program_options::options_description bdd_options( "BDD options" );
+template<>
+bool can_show<bdd_function_t>( std::string& extension, command& cmd )
+{
+  extension = "dot";
 
-//   bdd_options.add_options()
-//     ( "add", "Convert BDD to ADD to have no complemented edges" )
-//     ;
+  cmd.add_flag( "--add", "convert BDD to ADD to have no compemented edges" );
 
-//   cmd.opts.add( bdd_options );
-// }
+  return true;
+}
 
-// bool show_store_entry<bdd_function_t>::operator()( bdd_function_t& bdd,
-//                                                    const std::string& dotname,
-//                                                    const command& cmd )
-// {
-//   using namespace std::placeholders;
+template<>
+void show<bdd_function_t>( std::ostream& out, const bdd_function_t& bdd, const command& cmd )
+{
+  const std::string tmp = std::tmpnam( nullptr );
+  auto * fd = fopen( tmp.c_str(), "w" );
 
-//   auto * fd = fopen( dotname.c_str(), "w" );
+  if ( cmd.is_set( "add" ) )
+  {
+    std::vector<ADD> adds( bdd.second.size() );
+    std::transform( bdd.second.begin(), bdd.second.end(), adds.begin(), std::bind( &BDD::Add, std::placeholders::_1 ) );
+    bdd.first.DumpDot( adds, 0, 0, fd );
+  }
+  else
+  {
+    bdd.first.DumpDot( bdd.second, 0, 0, fd );
+  }
+  fclose( fd );
 
-//   if ( cmd.is_set( "add" ) )
-//   {
-//     std::vector<ADD> adds( bdd.second.size() );
-//     boost::transform( bdd.second, adds.begin(), std::bind( &BDD::Add, _1 ) );
-//     bdd.first.DumpDot( adds, 0, 0, fd );
-//   }
-//   else
-//   {
-//     bdd.first.DumpDot( bdd.second, 0, 0, fd );
-//   }
+  std::ifstream in( tmp.c_str(), std::ifstream::in );
+  std::string line;
+  while ( std::getline( in, line ) )
+  {
+    out << line;
+  }
+  in.close();
 
-//   fclose( fd );
-
-//   return true;
-// }
-
-// command::log_opt_t show_store_entry<bdd_function_t>::log() const
-// {
-//   return boost::none;
-// }
+  std::remove( tmp.c_str() );
+}
 
 template<>
 void print_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd )
@@ -176,47 +175,42 @@ std::string to_string<aig_graph>( const aig_graph& aig )
   return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
 }
 
-// show_store_entry<aig_graph>::show_store_entry( command& cmd )
-// {
-//   boost::program_options::options_description aig_options( "AIG options" );
+template<>
+bool can_show<aig_graph>( std::string& extension, command& cmd )
+{
+  extension = "dot";
 
-//   aig_options.add_options()
-//     ( "levels", boost::program_options::value<unsigned>()->default_value( 0u ), "Compute and annotate levels for dot\n0: don't compute\n1: push to inputs\n2: push to outputs" )
-//     ;
+  cmd.add_option<unsigned>( "--levels", "compute and annotate levels for dot: 0 don't compute (default), 1: push to inputs, 2: push to outputs" );
 
-//   cmd.opts.add( aig_options );
-// }
+  return true;
+}
 
-// bool show_store_entry<aig_graph>::operator()( aig_graph& aig, const std::string& dotname, const command& cmd )
-// {
-//   auto settings = std::make_shared<properties>();
-//   settings->set( "verbose", cmd.is_set( "verbose" ) );
-//   const auto levels = cmd.vm["levels"].as<unsigned>();
-//   if ( levels > 0u )
-//   {
-//     auto cl_settings = std::make_shared<properties>();
-//     cl_settings->set( "verbose", cmd.is_set( "verbose" ) );
-//     cl_settings->set( "push_to_outputs", levels == 2u );
-//     auto annotation = get( boost::vertex_annotation, aig );
+template<>
+void show<aig_graph>( std::ostream& out, const aig_graph& aig, const command& cmd )
+{
+  aig_graph copy = aig;
 
-//     const auto vertex_levels = compute_levels( aig, cl_settings );
-//     for ( const auto& p : vertex_levels )
-//     {
-//       annotation[p.first]["level"] = std::to_string( p.second );
-//     }
+  auto settings = std::make_shared<properties>();
+  settings->set( "verbose", cmd.is_set( "verbose" ) );
+  const auto levels = cmd.option_value<unsigned>( "--levels", 0u );
+  if ( levels > 0u )
+  {
+    auto cl_settings = std::make_shared<properties>();
+    cl_settings->set( "verbose", cmd.is_set( "verbose" ) );
+    cl_settings->set( "push_to_outputs", levels == 2u );
+    auto annotation = get( boost::vertex_annotation, copy );
 
-//     settings->set( "vertex_levels", boost::optional<std::map<aig_node, unsigned>>( vertex_levels ) );
-//   }
+    const auto vertex_levels = compute_levels( copy, cl_settings );
+    for ( const auto& p : vertex_levels )
+    {
+      annotation[p.first]["level"] = std::to_string( p.second );
+    }
 
-//   write_dot( aig, dotname, settings );
+    settings->set( "vertex_levels", boost::optional<std::map<aig_node, unsigned>>( vertex_levels ) );
+  }
 
-//   return true;
-// }
-
-// command::log_opt_t show_store_entry<aig_graph>::log() const
-// {
-//   return boost::none;
-// }
+  write_dot( copy, out, settings );
+}
 
 template<>
 void print_statistics<aig_graph>( std::ostream& os, const aig_graph& aig )
@@ -292,21 +286,18 @@ std::string to_string<mig_graph>( const mig_graph& mig )
   return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
 }
 
-// show_store_entry<mig_graph>::show_store_entry( command& cmd )
-// {
-// }
+template<>
+bool can_show<mig_graph>( std::string& extension, command& cmd )
+{
+  extension = "dot";
+  return true;
+}
 
-// bool show_store_entry<mig_graph>::operator()( mig_graph& mig, const std::string& dotname, const command& cmd )
-// {
-//   write_dot( mig, dotname );
-
-//   return true;
-// }
-
-// command::log_opt_t show_store_entry<mig_graph>::log() const
-// {
-//   return boost::none;
-// }
+template<>
+void show<mig_graph>( std::ostream& out, const mig_graph& mig, const command& cmd )
+{
+  write_dot( mig, out );
+}
 
 template<>
 void print_statistics<mig_graph>( std::ostream& os, const mig_graph& mig )
@@ -490,62 +481,60 @@ nlohmann::json log_statistics<xmg_graph>( const xmg_graph& xmg )
   return log;
 }
 
-// show_store_entry<xmg_graph>::show_store_entry( command& cmd )
-// {
-//   boost::program_options::options_description xmg_options( "XMG options" );
+template<>
+bool can_show<xmg_graph>( std::string& extension, command& cmd )
+{
+  extension = "dot";
 
-//   xmg_options.add_options()
-//     ( "cover",                                                                          "dump LUT cover of XMG" )
-//     ( "show_all_edges",                                                                 "also show edges of AND and OR gates" )
-//     ( "show_node_ids",                                                                  "show node ids" )
-//     ( "format",         boost::program_options::value<unsigned>()->default_value( 0u ), "output format\n0: dot, 1: cytoscape (JS)\n" )
-//     ;
+  cmd.add_flag( "--cover", "dump LUT cover of XMG" )->group( "XMGs" );
+  cmd.add_flag( "--show_all_edges", "also show edges of AND and OR gates" )->group( "XMGs" );
+  cmd.add_flag( "--show_node_ids", "show node ids" )->group( "XMGs" );
+  cmd.add_option<unsigned>( "--format", "output format: 0: dot (default), 1: cytoscape (JS)" )->group( "XMGs" );
 
-//   cmd.opts.add( xmg_options );
-// }
+  return true;
+}
 
-// bool show_store_entry<xmg_graph>::operator()( xmg_graph& xmg, const std::string& dotname, const command& cmd )
-// {
-//   switch ( cmd.vm["format"].as<unsigned>() )
-//   {
-//   case 0u:
-//     if ( cmd.is_set( "cover" ) )
-//     {
-//       if ( !xmg.has_cover() )
-//       {
-//         std::cout << "[w] XMG has no cover" << std::endl;
-//         return false;
-//       }
+template<>
+void show<xmg_graph>( std::ostream& out, const xmg_graph& xmg, const command& cmd )
+{
+  switch ( cmd.option_value<unsigned>( "--format", 0u ) )
+  {
+  case 0u:
+    if ( cmd.is_set( "cover" ) )
+    {
+      if ( !xmg.has_cover() )
+      {
+        cmd.env->out() << "[w] XMG has no cover" << std::endl;
+        return;
+      }
 
-//       xmg_cover_write_dot( xmg, dotname );
-//     }
-//     else
-//     {
-//       auto settings = std::make_shared<properties>();
-//       settings->set( "show_and_or_edges", cmd.is_set( "show_all_edges" ) );
-//       settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
-//       write_dot( xmg, dotname, settings );
-//     }
-//     return true;
+      xmg_cover_write_dot( xmg, out );
+    }
+    else
+    {
+      auto settings = std::make_shared<properties>();
+      settings->set( "show_and_or_edges", cmd.is_set( "show_all_edges" ) );
+      settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
 
-//   case 1u:
-//     {
-//       auto settings = std::make_shared<properties>();
-//       settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
-//       write_javascript_cytoscape( xmg, dotname, settings );
-//     }
-//     return true;
+      xmg_graph copy = xmg;
+      write_dot( copy, out, settings );
+    }
+    break;
 
-//   default:
-//     std::cout << "[w] unknown format" << std::endl;
-//     return false;
-//   }
-// }
+  case 1u:
+    {
+      auto settings = std::make_shared<properties>();
+      settings->set( "show_node_ids", cmd.is_set( "show_node_ids" ) );
 
-// command::log_opt_t show_store_entry<xmg_graph>::log() const
-// {
-//   return boost::none;
-// }
+      xmg_graph copy = xmg;
+      write_javascript_cytoscape( copy, out, settings );
+    }
+    break;
+
+  default:
+    cmd.env->out() << "[w] unknown format" << std::endl;
+  }
+}
 
 template<>
 expression_t::ptr convert<xmg_graph, expression_t::ptr>( const xmg_graph& xmg )
