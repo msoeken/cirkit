@@ -26,11 +26,10 @@
 
 #include "reversible_stores.hpp"
 
+#include <cstdio>
 #include <cstdlib>
+#include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
 
 #include <core/utils/string_utils.hpp>
 #include <core/utils/system_utils.hpp>
@@ -43,9 +42,13 @@
 #include <reversible/functions/truth_table_from_bitset.hpp>
 #include <reversible/io/print_circuit.hpp>
 #include <reversible/io/print_statistics.hpp>
+#include <reversible/io/write_qpic.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
 #include <reversible/utils/circuit_utils.hpp>
 #include <reversible/utils/costs.hpp>
+
+#include <fmt/format.h>
+#include <json.hpp>
 
 namespace alice
 {
@@ -59,7 +62,7 @@ using namespace cirkit;
 template<>
 std::string to_string<circuit>( const circuit& circ )
 {
-  return ( boost::format( "%d lines, %d gates" ) % circ.lines() % circ.num_gates() ).str();
+  return fmt::format( "{} lines, {} gates", circ.lines(), circ.num_gates() );
 }
 
 template<>
@@ -80,13 +83,13 @@ template<>
 nlohmann::json log_statistics<circuit>( const circuit& circ )
 {
   return nlohmann::json({
-      {"gates", static_cast<int>( circ.num_gates() )},
-      {"lines", static_cast<int>( circ.lines() )},
-      {"tdepth", static_cast<unsigned>( costs( circ, costs_by_gate_func( t_depth_costs() ) ) )},
-      {"tcount", static_cast<unsigned>( costs( circ, costs_by_gate_func( t_costs() ) ) )},
-      {"ncv",    static_cast<unsigned>( costs( circ, costs_by_gate_func( ncv_quantum_costs() ) ) )},
+      {"gates", circ.num_gates()},
+      {"lines", circ.lines()},
+      {"tdepth", costs( circ, costs_by_gate_func( t_depth_costs() ) )},
+      {"tcount", costs( circ, costs_by_gate_func( t_costs() ) )},
+      {"ncv",    costs( circ, costs_by_gate_func( ncv_quantum_costs() ) )},
       {"qubits", number_of_qubits( circ )},
-      {"depth", static_cast<unsigned>( costs( circ, costs_by_circuit_func( depth_costs() ) ) )}
+      {"depth", costs( circ, costs_by_circuit_func( depth_costs() ) )}
     });
 }
 
@@ -121,48 +124,49 @@ binary_truth_table convert<tt, binary_truth_table>( const tt& func )
   return truth_table_from_bitset_bennett( func );
 }
 
-// template<>
-// std::string store_repr_html<circuit>( const circuit& circ )
-// {
-//   temporary_filename filename( "circuit_pic_%d.qpic" );
-//   std::string basename( filename.name().begin(), filename.name().end() - 5 );
+template<>
+std::string html_repr<circuit>( const circuit& circ )
+{
+  temporary_filename filename( "circuit_pic_%d.qpic" );
+  std::string basename( filename.name().begin(), filename.name().end() - 5 );
 
-//   write_qpic( circ, filename.name() );
+  write_qpic( circ, filename.name() );
 
-//   execute_and_omit( boost::str( boost::format( "qpic -f tex %s" ) % filename.name() ) );
+  execute_and_omit( fmt::format( "qpic -f tex {}", filename.name() ) );
 
-//   // modify the TeX code
-//   std::string new_tex_code;
-//   line_parser( basename + ".tex", {
-//       {std::regex( "\\\\documentclass\\{article\\}" ), [&new_tex_code]( const std::smatch& s ) {
-//           new_tex_code += "\\documentclass[dvisvgm]{standalone}\n";
-//         }},
-//       {std::regex( "\\\\usepackage\\[pdftex,active,tightpage\\]\\{preview\\}" ), []( const std::smatch& s ) {}},
-//       {std::regex( "\\\\begin\\{preview\\}" ), []( const std::smatch& s ) {}},
-//       {std::regex( "\\\\end\\{preview\\}" ), []( const std::smatch& s ) {}},
-//       {std::regex( "(.*)" ), [&new_tex_code]( const std::smatch& s ) {
-//           new_tex_code += std::string( s[0u] ) + "\n";
-//         }}} );
+  // modify the TeX code
+  std::string new_tex_code;
+  line_parser( basename + ".tex", {
+      {std::regex( "\\\\documentclass\\{article\\}" ), [&new_tex_code]( const std::smatch& s ) {
+          new_tex_code += "\\documentclass[dvisvgm]{standalone}\n";
+        }},
+      {std::regex( "\\\\usepackage\\[pdftex,active,tightpage\\]\\{preview\\}" ), []( const std::smatch& s ) {}},
+      {std::regex( "\\\\begin\\{preview\\}" ), []( const std::smatch& s ) {}},
+      {std::regex( "\\\\end\\{preview\\}" ), []( const std::smatch& s ) {}},
+      {std::regex( "(.*)" ), [&new_tex_code]( const std::smatch& s ) {
+          new_tex_code += std::string( s[0u] ) + "\n";
+        }}} );
 
-//   std::ofstream os( ( basename + ".tex" ).c_str(), std::ofstream::out );
-//   os << new_tex_code << std::endl;
-//   os.close();
+  std::ofstream os( ( basename + ".tex" ).c_str(), std::ofstream::out );
+  os << new_tex_code << std::endl;
+  os.close();
 
-//   execute_and_omit( boost::str( boost::format( "latex %s.tex" ) % basename ) );
-//   execute_and_omit( boost::str( boost::format( "dvisvgm -b papersize %s.dvi" ) % basename ) );
+  execute_and_omit( fmt::format( "latex {}.tex", basename ) );
+  execute_and_omit( fmt::format( "dvisvgm -b papersize {}.dvi", basename ) );
 
-//   boost::filesystem::remove( basename + ".tex" );
-//   boost::filesystem::remove( basename + ".dvi" );
-//   boost::filesystem::remove( basename + ".out" );
-//   boost::filesystem::remove( basename + ".log" );
+  std::remove( fmt::format( "{}.tex", basename ).c_str() );
+  std::remove( fmt::format( "{}.dvi", basename ).c_str() );
+  std::remove( fmt::format( "{}.out", basename ).c_str() );
+  std::remove( fmt::format( "{}.log", basename ).c_str() );
 
-//   std::ifstream in( ( basename + ".svg" ).c_str(), std::ifstream::in );
-//   std::string svg( (std::istreambuf_iterator<char>( in )), std::istreambuf_iterator<char>() );
-//   in.close();
-//   boost::filesystem::remove( basename + ".svg" );
+  std::ifstream in( ( basename + ".svg" ).c_str(), std::ifstream::in );
+  std::string svg( (std::istreambuf_iterator<char>( in )), std::istreambuf_iterator<char>() );
+  in.close();
 
-//   return svg;
-// }
+  std::remove( fmt::format( "{}.svg", basename ).c_str() );
+
+  return svg;
+}
 
 /******************************************************************************
  * binary_truth_table                                                         *
@@ -171,7 +175,7 @@ binary_truth_table convert<tt, binary_truth_table>( const tt& func )
 template<>
 std::string to_string<binary_truth_table>( const binary_truth_table& spec )
 {
-  return ( boost::format( "%d inputs, %d outputs" ) % spec.num_inputs() % spec.num_outputs() ).str();
+  return fmt::format( "{} inputs, {} outputs", spec.num_inputs(), spec.num_outputs() );
 }
 
 template<>
@@ -195,7 +199,7 @@ binary_truth_table convert<circuit, binary_truth_table>( const circuit& circ )
 template<>
 std::string to_string<rcbdd>( const rcbdd& bdd )
 {
-  return ( boost::format( "%d variables, %d nodes" ) % bdd.num_vars() % bdd.chi().nodeCount() ).str();
+  return fmt::format( "{} variables, {} nodes", bdd.num_vars(), bdd.chi().nodeCount() );
 }
 
 template<>

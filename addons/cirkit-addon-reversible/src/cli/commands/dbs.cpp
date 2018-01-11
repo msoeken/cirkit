@@ -34,7 +34,6 @@
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/min.hpp>
-#include <boost/range/algorithm.hpp>
 
 #include <alice/rules.hpp>
 
@@ -60,7 +59,7 @@ std::tuple<int, int, double> compute_stats( const std::vector<int>& sizes )
   using namespace boost::accumulators;
 
   accumulator_set<double, stats<tag::mean, tag::min, tag::max>> acc;
-  acc = boost::for_each( sizes, acc );
+  acc = std::for_each( sizes.begin(), sizes.end(), acc );
 
   return std::make_tuple( min( acc ), max( acc ), mean( acc ) );
 }

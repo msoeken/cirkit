@@ -29,9 +29,6 @@
 #include <cstdlib>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
-
 #include <core/utils/string_utils.hpp>
 #include <core/utils/system_utils.hpp>
 #include <core/utils/temporary_filename.hpp>

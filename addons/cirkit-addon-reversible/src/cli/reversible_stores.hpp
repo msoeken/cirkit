@@ -82,11 +82,11 @@ inline bool can_convert<circuit, aig_graph>() { return true; }
 template<>
 aig_graph convert<circuit, aig_graph>( const circuit& circ );
 
-// template<>
-// inline bool store_has_repr_html<circuit>() { return true; }
+template<>
+inline bool has_html_repr<circuit>() { return true; }
 
-// template<>
-// std::string store_repr_html<circuit>( const circuit& circ );
+template<>
+std::string html_repr<circuit>( const circuit& circ );
 
 /******************************************************************************
  * binary_truth_table                                                         *
