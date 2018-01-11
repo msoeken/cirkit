@@ -68,12 +68,10 @@ target_include_directories( cirkit PUBLIC ${CMAKE_BINARY_DIR}/programs )
 
 # Python API
 if( cirkit_ENABLE_PYTHON_API )
-  find_package(pybind11 REQUIRED)
-  add_library( cirkit_python MODULE core/cirkit.cpp )
-  target_compile_definitions( cirkit_python PUBLIC ALICE_PYTHON )
-  set_target_properties(cirkit_python PROPERTIES PREFIX ""
-                                                 SUFFIX ""
-                                                 OUTPUT_NAME "cirkit.so")
+  add_alice_python_module( cirkit core/cirkit.cpp )
+  target_link_libraries( cirkit_python PUBLIC cirkit_cli ${cirkit_addon_command_libraries} )
+  set_target_properties( cirkit_python PROPERTIES PREFIX ""
+                                                  SUFFIX ""
+                                                  OUTPUT_NAME "cirkit.so")
   target_include_directories( cirkit_python PUBLIC ${CMAKE_BINARY_DIR}/programs )
-  target_link_libraries( cirkit_python PUBLIC cirkit_cli ${cirkit_addon_command_libraries} PRIVATE pybind11::module )
 endif()

@@ -247,7 +247,7 @@ void write<circuit, io_qsharp_tag_t>( const circuit& circ, const std::string& fi
 template<>
 bool can_read<binary_truth_table, io_spec_tag_t>( command& cmd )
 {
-  cmd.add_option<std::string>( "--permutation,-p", "create spec from permutation (starts with 0, space separated)" );
+  cmd.add_option<std::string>( "--permutation,-p", "create spec from permutation (starts with 0, space separated)" )->group( "Specification" );
   return true;
 }
 
@@ -257,7 +257,7 @@ binary_truth_table read<binary_truth_table, io_spec_tag_t>( const std::string& f
   if ( cmd.is_set( "permutation" ) )
   {
     std::vector<unsigned> perm;
-    parse_string_list( perm, cmd.option_value<std::string>( "permutation" ) );
+    parse_string_list( perm, cmd.option_value<std::string>( "--permutation" ) );
 
     return permutation_to_truth_table( perm );
   }

@@ -90,25 +90,18 @@ nlohmann::json log_statistics<circuit>( const circuit& circ )
     });
 }
 
-// show_store_entry<circuit>::show_store_entry( const command& cmd )
-// {
-// }
+template<>
+bool can_show<circuit>( std::string& extension, command& cmd )
+{
+  extension = "svg";
+  return false; /* for now */
+}
 
-// bool show_store_entry<circuit>::operator()( circuit& circ, const std::string& dotname, const command& cmd )
-// {
-//   temporary_filename qpic_filename( "test-%d.qpic" );
-//   temporary_filename png_filename( "test-%d.png" );
-//   write_qpic( circ, qpic_filename.name() );
-//   system( boost::str( boost::format( "qpic -o %s -f png %s" ) % png_filename.name() % qpic_filename.name() ).c_str() );
-//   system( boost::str( boost::format( "convert %1% -background white -alpha remove -resize x300 %1%" ) % png_filename.name() ).c_str() );
-//   system( boost::str( boost::format( "imgcat %s" ) % png_filename.name() ).c_str() );
-//   return false;
-// }
-
-// command::nlohmann::json show_store_entry<circuit>::log() const
-// {
-//   return boost::none;
-// }
+template<>
+void show<circuit>( std::ostream& out, const circuit& circ, const command& cmd )
+{
+  /* wait for good SVG output engine */
+}
 
 template<>
 aig_graph convert<circuit, aig_graph>( const circuit& circ )
@@ -213,36 +206,40 @@ nlohmann::json log_statistics<rcbdd>( const rcbdd& bdd )
     });
 }
 
-// show_store_entry<rcbdd>::show_store_entry( const command& cmd )
-// {
-// }
+template<>
+bool can_show<rcbdd>( std::string& extension, command& cmd )
+{
+  extension = "dot";
+  return true;
+}
 
-// bool show_store_entry<rcbdd>::operator()( rcbdd& bdd,
-//                                           const std::string& dotname,
-//                                           const command& cmd )
-// {
-//   using namespace std::placeholders;
+template<>
+void show<rcbdd>( std::ostream& out, const rcbdd& bdd, const command& cmd )
+{
+  const std::string tmp = std::tmpnam( nullptr );
+  auto * fd = fopen( tmp.c_str(), "w" );
+  
+  if ( cmd.is_set( "add" ) )
+  {
+    bdd.manager().DumpDot( std::vector<ADD>{bdd.chi().Add()}, 0, 0, fd );
+  }
+  else
+  {
+    bdd.manager().DumpDot( std::vector<BDD>{bdd.chi()}, 0, 0, fd );
+  }
 
-//   auto * fd = fopen( dotname.c_str(), "w" );
+  fclose( fd );
 
-//   if ( cmd.is_set( "add" ) )
-//   {
-//     bdd.manager().DumpDot( std::vector<ADD>{bdd.chi().Add()}, 0, 0, fd );
-//   }
-//   else
-//   {
-//     bdd.manager().DumpDot( std::vector<BDD>{bdd.chi()}, 0, 0, fd );
-//   }
+  std::ifstream in( tmp.c_str(), std::ifstream::in );
+  std::string line;
+  while ( std::getline( in, line ) )
+  {
+    out << line;
+  }
+  in.close();
 
-//   fclose( fd );
-
-//   return true;
-// }
-
-// nlohmann::json show_store_entry<rcbdd>::log() const
-// {
-//   return boost::none;
-// }
+  std::remove( tmp.c_str() );
+}
 
 template<>
 void print<rcbdd>( std::ostream& os, const rcbdd& bdd )

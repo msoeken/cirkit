@@ -38,11 +38,9 @@ target_compile_definitions( revkit PUBLIC USE_LINENOISE )
 
 # Python API
 if( cirkit_ENABLE_PYTHON_API )
-  find_package(pybind11 REQUIRED)
-  add_library( revkit_python MODULE reversible/revkit.cpp )
-  target_compile_definitions( revkit_python PUBLIC ALICE_PYTHON )
-  set_target_properties(revkit_python PROPERTIES PREFIX ""
-                                                 SUFFIX ""
-                                                 OUTPUT_NAME "revkit.so")
-  target_link_libraries( revkit_python PUBLIC cirkit_reversible_cli PRIVATE pybind11::module )
+  add_alice_python_module(revkit reversible/revkit.cpp )
+  target_link_libraries( revkit_python PUBLIC cirkit_reversible_cli )
+  set_target_properties( revkit_python PROPERTIES PREFIX ""
+                                                  SUFFIX ""
+                                                  OUTPUT_NAME "revkit.so")
 endif()

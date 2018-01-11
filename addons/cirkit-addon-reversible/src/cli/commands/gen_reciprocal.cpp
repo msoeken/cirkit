@@ -37,14 +37,14 @@ gen_reciprocal_command::gen_reciprocal_command( const environment::ptr& env )
   : cirkit_command( env, "Generate reciprocal circuit" )
 {
   add_option( "--bitwidth,-w,bitwidth", bitwidth, "bitwidth", true );
-  add_option( "--algorithm,-a", algorithm, "algorithm\n0: direct\n1: Newton", true );
-  add_option( "--method,-m", method, "synthesis method\n0: ESOP based\n1: PLA based", true );
+  add_option( "--algorithm,-a", algorithm, "algorithm: 0: direct, 1: Newton", true );
+  add_option( "--method,-m", method, "synthesis method: 0: ESOP based, 1: PLA based", true );
   add_option( "--verilog_name", verilog_name, "filename for intermediate Verilog file", true );
   add_option( "--esop_name", esop_name, "filename for intermediate ESOP file", true );
   add_option( "--pla_name", pla_name, "filename for intermediate PLA file", true );
   add_flag( "--only_write", "only write Verilog file and stop" );
   add_flag( "--validate", "validate resulting circuit" );
-  add_option( "--iterations,-i", iterations, "number of iterations (for Newton algorithm)\nif not specified, it's automatically determined based on the bitwidth" );
+  add_option( "--iterations,-i", iterations, "number of iterations (for Newton algorithm); if not specified, it's automatically determined based on the bitwidth" );
   add_option( "--blif_name", blif_name, "filename for intermediate BLIF file", true );
   be_verbose();
   add_new_option();

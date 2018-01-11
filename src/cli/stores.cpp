@@ -92,7 +92,7 @@ bool can_show<bdd_function_t>( std::string& extension, command& cmd )
 {
   extension = "dot";
 
-  cmd.add_flag( "--add", "convert BDD to ADD to have no compemented edges" );
+  cmd.add_flag( "--add", "convert BDD to ADD to have no compemented edges" )->group( "BDDs" );
 
   return true;
 }
@@ -180,7 +180,7 @@ bool can_show<aig_graph>( std::string& extension, command& cmd )
 {
   extension = "dot";
 
-  cmd.add_option<unsigned>( "--levels", "compute and annotate levels for dot: 0 don't compute (default), 1: push to inputs, 2: push to outputs" );
+  cmd.add_option<unsigned>( "--levels", "compute and annotate levels for dot: 0 don't compute (default), 1: push to inputs, 2: push to outputs" )->group( "AIGs" );
 
   return true;
 }

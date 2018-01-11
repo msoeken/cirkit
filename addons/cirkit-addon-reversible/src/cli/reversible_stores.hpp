@@ -70,15 +70,11 @@ void print_statistics<circuit>( std::ostream& os, const circuit& circ );
 template<>
 nlohmann::json log_statistics<circuit>( const circuit& circ );
 
-// template<>
-// struct show_store_entry<circuit>
-// {
-//   show_store_entry( const command& cmd );
+template<>
+bool can_show<circuit>( std::string& extension, command& cmd );
 
-//   bool operator()( circuit& circ, const std::string& dotname, const command& cmd );
-
-//   nlohmann::json log() const;
-// };
+template<>
+void show<circuit>( std::ostream& out, const circuit& circ, const command& cmd );
 
 template<>
 inline bool can_convert<circuit, aig_graph>() { return true; }
@@ -96,15 +92,7 @@ aig_graph convert<circuit, aig_graph>( const circuit& circ );
  * binary_truth_table                                                         *
  ******************************************************************************/
 
-template<>
-struct store_info<binary_truth_table>
-{
-  static constexpr const char* key         = "spec";
-  static constexpr const char* option      = "spec";
-  static constexpr const char* mnemonic    = "s";
-  static constexpr const char* name        = "specification";
-  static constexpr const char* name_plural = "specifications";
-};
+ALICE_ADD_STORE( binary_truth_table, "spec", "s", "specification", "specifications" )
 
 template<>
 std::string to_string<binary_truth_table>( const binary_truth_table& spec );
@@ -142,15 +130,11 @@ std::string to_string<rcbdd>( const rcbdd& bdd );
 template<>
 nlohmann::json log_statistics<rcbdd>( const rcbdd& bdd );
 
-// template<>
-// struct show_store_entry<rcbdd>
-// {
-//   show_store_entry( const command& cmd );
+template<>
+bool can_show<rcbdd>( std::string& extension, command& cmd );
 
-//   bool operator()( rcbdd& bdd, const std::string& dotname, const command& cmd );
-
-//   nlohmann::json log() const;
-// };
+template<>
+void show<rcbdd>( std::ostream& out, const rcbdd& bdd, const command& cmd );
 
 template<>
 void print<rcbdd>( std::ostream& os, const rcbdd& bdd );
