@@ -43,8 +43,8 @@ namespace cirkit
 embed_command::embed_command( const environment::ptr& env )
   : cirkit_command( env, "Embedding" )
 {
-  add_option( "--bdd,-b", "embed from BDDs" );
-  add_option( "--only_lines", "only calculate additional lines" );
+  add_flag( "--bdd,-b", "embed from BDDs" );
+  add_flag( "--only_lines", "only calculate additional lines" );
   add_new_option();
   be_verbose();
 }

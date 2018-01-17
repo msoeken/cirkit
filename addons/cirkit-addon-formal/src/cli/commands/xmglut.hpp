@@ -56,7 +56,7 @@ public:
 private:
   unsigned lut_size    = 6u;
   unsigned timeout;
-  std::string map_cmd  = "&if -a -K %d";
+  std::string map_cmd  = "&if -a -K {}";
   std::string blif_name;
   std::string dump_luts;
 };
