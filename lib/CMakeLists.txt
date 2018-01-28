@@ -86,4 +86,3 @@ add_cirkit_library(
     PRIVATE -Wno-sign-compare
 )
 
-add_subdirectory(z3 EXCLUDE_FROM_ALL)

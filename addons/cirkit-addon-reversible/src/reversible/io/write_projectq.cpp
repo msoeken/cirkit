@@ -28,11 +28,14 @@
 
 #include <fstream>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/format.hpp>
 
 #include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/utils/circuit_utils.hpp>
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -47,20 +50,30 @@ namespace cirkit
 
 void write_controlled_gate( std::ostream& os, const std::string& indent, const gate& g, const std::string& gatename)
 {
-  const auto target = g.targets().front();
-
-  std::string neg, beg, mid, end;
-  for ( auto i = 0u; i < g.controls().size(); ++i )
+  std::string neg;
+  std::vector<std::string> qubits;
+  for ( const auto& c : g.controls() )
   {
-    if ( !g.controls()[i].polarity() )
+    if ( !c.polarity() )
     {
-      neg += boost::str( boost::format( "%sX | qubits[%d]\n" ) % indent % g.controls()[i].line() );
+      neg += fmt::format( "{}X | qubits[{}]\n", indent, c.line() );
     }
-    beg += "C(";
-    mid += boost::str( boost::format( "qubits[%d], " ) % g.controls()[i].line() );
-    end += ")";
+    qubits.push_back( fmt::format( "qubits[{}]", c.line() ) );
   }
-  os << boost::format( "%s%s%s%s%s | (%squbits[%d])\n%s" ) % neg % indent % beg % gatename % end % mid % target % neg;
+
+  for ( auto t : g.targets() )
+  {
+    qubits.push_back( fmt::format( "qubits[{}]", t ) );
+  }
+
+  if ( g.controls().empty() )
+  {
+    os << fmt::format( "{}{} | ({})\n", indent, gatename, boost::join( qubits, ", " ) );
+  }
+  else
+  {
+    os << fmt::format( "{}{}C({}, {}) | ({})\n{}", neg, indent, gatename, g.controls().size(), boost::join( qubits, ", " ), neg );
+  }
 }
 
 void write_projectq( const circuit& circ, std::ostream& os, const properties::ptr& settings )
@@ -77,7 +90,7 @@ void write_projectq( const circuit& circ, std::ostream& os, const properties::pt
     os << "#!/usr/bin/env python3" << std::endl << std::endl;
     os << "import projectq" << std::endl;
     os << "from projectq.cengines import MainEngine" << std::endl;
-    os << "from projectq.ops import H, C, CNOT, Toffoli, NOT, X, Measure, T, Tdag" << std::endl << std::endl;
+    os << "from projectq.ops import H, C, CNOT, Swap, Toffoli, NOT, X, Measure, T, Tdag" << std::endl << std::endl;
 
     os << "import numpy as np" << std::endl << std::endl;
 
@@ -100,6 +113,10 @@ void write_projectq( const circuit& circ, std::ostream& os, const properties::pt
     if ( is_toffoli( g ) )
     {
       write_controlled_gate( os, indent, g, "NOT" );
+    }
+    else if ( is_fredkin( g ) )
+    {
+      write_controlled_gate( os, indent, g, "Swap" );
     }
     else if ( is_hadamard( g ) )
     {

@@ -27,16 +27,21 @@
 
 # link_directories(${ext_LIB})
 
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
+find_package(Z3)
+if(NOT Z3_FOUND)
+  message(ERROR "Cannot find Z3.")
+endif()
+
 add_cirkit_library(
   NAME cirkit_formal_z3
   AUTO_DIRS src/formal
   USE
     cirkit_classical
-    #${Z3_LIBRARIES}
-    libz3
+    ${Z3_LIBRARIES}
   INCLUDE
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
-    PUBLIC ${PROJECT_SOURCE_DIR}/lib/z3/src/api
+    PUBLIC ${Z3_INCLUDE_DIRS}
   DEFINE
     PUBLIC ADDON_FORMAL
 )

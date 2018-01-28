@@ -47,15 +47,15 @@ lhrs_command::lhrs_command( const environment::ptr& env )
 {
   /* General options */
   add_option( "--cut_size,-k", cut_size, "cut size", true );
-  add_option( "--mapping_strategy,-m", params.mapping_strategy, "mapping strategy: direct (0): direct; min_db (1): LUT-based min DB; best_fit (2): LUT-based best fit; pick_best (3): LUT-based pick best", true );
+  add_option( "--mapping_strategy,-m", mapping_strategy, "mapping strategy: direct (0): direct; min_db (1): LUT-based min DB; best_fit (2): LUT-based best fit; pick_best (3): LUT-based pick best", true );
   add_option( "--additional_ancilla", params.additional_ancilla, "number of additional ancilla to add to circuit", true );
   add_flag( "--progress,-p", params.progress, "show progress" );
   add_flag( "--onlylines", params.onlylines, "do not create gates (useful for qubit estimation)" );
   add_option( "--area_iters_init", area_iters_init, "number of exact area recovery iterations (in initial mapping)", true );
   add_option( "--flow_iters_init", flow_iters_init, "number of area flow recovery iterations (in initial mapping)", true );
 
-  add_option( "--esopscript", params.map_esop_params.script, "ESOP optimization script\ndef: default exorcism script\ndef_wo4: default without exorlink-4\nj2r: just two rounds\nnone: do not optimize ESOP cover", true )->group( "ESOP decomposition ");
-  add_option( "--esopcovermethod", params.map_esop_params.cover_method, "ESOP cover method\naig (0): directly from AIG\nbdd (1): using PSDKRO method from BDD\naignew (2): new AIG-based method\nauto (3): tries to estimate the best method for each LUT", true )->group( "ESOP decomposition ");
+  add_option( "--esopscript", script, "ESOP optimization script - def (1): default exorcism script, def_wo4 (2): default without exorlink-4, j2r (3): just two rounds, none (0): do not optimize ESOP cover", true )->group( "ESOP decomposition ");
+  add_option( "--esopcovermethod", cover_method, "ESOP cover method - aig (0): directly from AIG, aignew (1): new AIG-based method, auto (2): tries to estimate the best method for each LUT, bdd (3): using PSDKRO method from BDD", true )->group( "ESOP decomposition ");
   add_flag( "--esoppostopt", params.map_esop_params.optimize_postesop, "post-optimize network derived from ESOP synthesis" )->group( "ESOP decomposition ");
 
   add_flag( "--satlut,-s", params.map_luts_params.satlut, "optimize mapping with SAT where possible" )->group( "LUT decomposition" );
@@ -84,6 +84,15 @@ void lhrs_command::execute()
 {
   auto& circuits = env->store<circuit>();
   extend_if_new( circuits );
+
+  std::istringstream ms_str( mapping_strategy );
+  ms_str >> params.mapping_strategy;
+
+  std::istringstream cm_str( cover_method );
+  cm_str >> params.map_esop_params.cover_method;
+
+  std::istringstream s_str( script );
+  s_str >> params.map_esop_params.script;
 
   params.sync();
 

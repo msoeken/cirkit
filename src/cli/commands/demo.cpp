@@ -141,9 +141,6 @@ demo_command::demo_command( const environment::ptr& env )
    *   it has been set using is_set( "long_name" ) . In order to
    *   use value, you add these two lines to the top of the file:
    *
-   *   #include <boost/program_options.hpp>
-   *   using boost::program_options::value;
-   *
    * - Values with default value:
    *
    *   ( "long_name,f", value_with_default( &variable ), "description" )

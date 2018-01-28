@@ -26,24 +26,12 @@
 
 #include "mig_rewrite.hpp"
 
-#include <boost/format.hpp>
-
 #include <classical/mig/mig_rewriting.hpp>
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 mig_rewrite_command::mig_rewrite_command( const environment::ptr& env ) : mig_base_command( env, "MIG rewriting" )
 {
@@ -78,13 +66,13 @@ void mig_rewrite_command::execute()
     break;
   }
 
-  std::cout << boost::format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
 
   if ( is_verbose() )
   {
-    std::cout << boost::format( "[i] distributivity: %d" ) % statistics->get<unsigned>( "distributivity_count" ) << std::endl
-              << boost::format( "[i] associativity: %d" ) % statistics->get<unsigned>( "associativity_count" ) << std::endl
-              << boost::format( "[i] complementary associativity: %d" ) % statistics->get<unsigned>( "compl_associativity_count" ) << std::endl;
+    std::cout << fmt::format( "[i] distributivity: {}", statistics->get<unsigned>( "distributivity_count" ) ) << std::endl
+              << fmt::format( "[i] associativity: {}", statistics->get<unsigned>( "associativity_count" ) ) << std::endl
+              << fmt::format( "[i] complementary associativity: {}", statistics->get<unsigned>( "compl_associativity_count" ) ) << std::endl;
   }
 }
 

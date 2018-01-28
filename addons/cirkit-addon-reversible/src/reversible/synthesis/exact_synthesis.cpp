@@ -47,7 +47,7 @@
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/copy_metadata.hpp>
 
-#include <c++/z3++.h>
+#include <z3++.h>
 
 namespace cirkit
 {

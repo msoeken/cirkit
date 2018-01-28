@@ -26,8 +26,6 @@
 
 #include "comb_approx.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
 #include <cli/stores.hpp>
@@ -44,6 +42,8 @@
 #include <classical/dd/size.hpp>
 #include <classical/dd/visit_solutions.hpp>
 #include <classical/functions/simulate_aig.hpp>
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -87,8 +87,6 @@ command::rules comb_approx_command::validity_rules() const
 
 void comb_approx_command::execute()
 {
-  using boost::format;
-
   auto& aigs = env->store<aig_graph>();
   // auto& bdds = env->store<bdd_function_t>();
 
@@ -204,17 +202,17 @@ void comb_approx_command::execute()
 
   if ( mode < 5u )
   {
-    std::cout << format( "[i] run-time:        %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+    std::cout << fmt::format( "[i] run-time:        {:.2f} secs", statistics->get<double>( "runtime" ) ) << std::endl;
   }
   std::cout << "[i] old size:        " << size << std::endl;
-  std::cout << format( "[i] new size:        %d (%.2f %%)" ) % size_hat % ( ( size - size_hat ) * 100.0 / size ) << std::endl;
-  std::cout << format( "[i] error rate:      %d (%.2f %%)" ) % er % ( (double)er / (1ull << manager->num_vars()) * 100.0 ) << std::endl;
+  std::cout << fmt::format( "[i] new size:        {} ({:.2f} %)", size_hat, ( size - size_hat ) * 100.0 / size ) << std::endl;
+  std::cout << fmt::format( "[i] error rate:      {} ({:.2f} %)", (double)er, (double)er / (1ull << manager->num_vars()) * 100.0 ) << std::endl;
   std::cout << "[i] worst case:      " << worst_case( fs, fshat, metric_settings, wc_statistics ) << std::endl;
-  std::cout << format( "[i] average case:    %.2f" ) % average_case( fs, fshat, metric_settings, ac_statistics ) << std::endl;
+  std::cout << fmt::format( "[i] average case:    {:.2f}", (double)average_case( fs, fshat, metric_settings, ac_statistics ) ) << std::endl;
 
-  std::cout << format( "[i] run-time (er):   %.2f" ) % er_statistics->get<double>( "runtime" ) << std::endl;
-  std::cout << format( "[i] run-time (wc):   %.2f" ) % wc_statistics->get<double>( "runtime" ) << std::endl;
-  std::cout << format( "[i] run-time (ac):   %.2f" ) % ac_statistics->get<double>( "runtime" ) << std::endl;
+  std::cout << fmt::format( "[i] run-time (er):   {:.2f}", er_statistics->get<double>( "runtime" ) ) << std::endl;
+  std::cout << fmt::format( "[i] run-time (wc):   {:.2f}", wc_statistics->get<double>( "runtime" ) ) << std::endl;
+  std::cout << fmt::format( "[i] run-time (ac):   {:.2f}", ac_statistics->get<double>( "runtime" ) ) << std::endl;
 }
 
 }

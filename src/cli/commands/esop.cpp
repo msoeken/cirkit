@@ -26,8 +26,6 @@
 
 #include "esop.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <core/utils/timer.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
 
@@ -79,7 +77,7 @@ void esop_command::execute()
 nlohmann::json esop_command::log() const
 {
   return nlohmann::json({
-      {"collapse", boost::lexical_cast<std::string>( collapse )},
+      {"collapse", static_cast<unsigned>( collapse )},
       {"collapse_runtime", collapse_runtime},
       {"minimize", minimize}
     });

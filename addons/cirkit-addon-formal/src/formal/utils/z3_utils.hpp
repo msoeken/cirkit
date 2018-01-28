@@ -39,7 +39,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include <c++/z3++.h>
+#include <z3++.h>
 
 namespace cirkit
 {
