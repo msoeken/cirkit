@@ -12,6 +12,10 @@ script:
   - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYBIND11_PYTHON_VERSION=2.7 ..
   - make cirkit
 
+addons: 
+  apt: 
+    packages: libboost-all-dev
+
 matrix:
   include:
     - compiler: gcc
