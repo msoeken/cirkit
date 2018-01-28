@@ -11,11 +11,11 @@ addons:
   apt: 
     sources:
       - ubuntu-toolchain-r-test
+      - sourceline: ppa:hvr/z3
     packages:
       - g++-5
       - libboost-all-dev
       - z3
-      - libz3-dev
 
 script:
   - mkdir build
