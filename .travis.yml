@@ -18,5 +18,5 @@ addons:
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=g++-5 -DPYBIND11_PYTHON_VERSION=2.7 ..
-  - make cirkit
+  - cmake -DCMAKE_CXX_COMPILER=g++-5 -DPYBIND11_PYTHON_VERSION=2.7 -Denable_cirkit-addon-formal=ON -Denable_cirkit-addon-reversible=ON ..
+  - make cirkit revkit
