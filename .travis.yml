@@ -6,23 +6,17 @@ sudo: required
 dist: trusty
 
 language: cpp
-script:
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYBIND11_PYTHON_VERSION=2.7 ..
-  - make cirkit
 
 addons: 
   apt: 
-    packages: libboost-all-dev
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
+      - libboost-all-dev
 
-matrix:
-  include:
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env: COMPILER=g++-5
+script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_CXX_COMPILER=g++-5 -DPYBIND11_PYTHON_VERSION=2.7 ..
+  - make cirkit
