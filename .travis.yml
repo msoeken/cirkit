@@ -1,0 +1,13 @@
+branches:
+  only:
+  - develop
+
+sudo: required
+dist: trusty
+
+language: cpp
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make cirkit
