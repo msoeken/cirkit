@@ -9,7 +9,7 @@ language: cpp
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYBIND11_PYTHON_VERSION=2.7 ..
   - make cirkit
 
 matrix:
