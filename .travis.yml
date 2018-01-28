@@ -1,6 +1,6 @@
 branches:
   only:
-  - develop
+    - develop
 
 sudo: required
 dist: trusty
@@ -11,3 +11,4 @@ script:
   - cd build
   - cmake ..
   - make cirkit
+
