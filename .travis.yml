@@ -11,9 +11,11 @@ addons:
   apt: 
     sources:
       - ubuntu-toolchain-r-test
+      - sourceline: 'ppa:kzemek/boost'
     packages:
       - g++-5
-      - libboost-all-dev
+      #- libboost-all-dev
+      - boost1.58
       - ninja-build
 
 script:
