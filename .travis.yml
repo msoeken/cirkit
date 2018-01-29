@@ -11,14 +11,13 @@ addons:
   apt: 
     sources:
       - ubuntu-toolchain-r-test
-      - sourceline: ppa:hvr/z3
     packages:
       - g++-5
       - libboost-all-dev
-      - z3
+      - ninja-build
 
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=g++-5 -DPYBIND11_PYTHON_VERSION=2.7 -Denable_cirkit-addon-reversible=ON ..
-  - make cirkit revkit
+  - cmake -G Ninja -DCMAKE_CXX_COMPILER=g++-5 -DPYBIND11_PYTHON_VERSION=2.7 -Denable_cirkit-addon-reversible=ON ..
+  - ninja revkit
