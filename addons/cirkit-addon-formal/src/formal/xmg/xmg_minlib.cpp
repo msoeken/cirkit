@@ -32,7 +32,6 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/format.hpp>
-#include <boost/pending/integer_log2.hpp>
 
 #include <core/utils/conversion_utils.hpp>
 #include <core/utils/string_utils.hpp>

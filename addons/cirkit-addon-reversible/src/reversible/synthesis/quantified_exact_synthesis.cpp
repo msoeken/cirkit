@@ -31,7 +31,6 @@
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/pending/integer_log2.hpp>
 #include <boost/range/combine.hpp>
 #include <boost/range/numeric.hpp>
 

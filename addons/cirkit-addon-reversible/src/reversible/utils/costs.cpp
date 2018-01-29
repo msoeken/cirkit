@@ -28,7 +28,7 @@
 
 #include <boost/range/algorithm.hpp>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/integer/integer_log2.hpp>
+#include <boost/pending/integer_log2.hpp>
 
 #include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>

@@ -28,7 +28,7 @@
 
 #include <numeric>
 
-#include <boost/random/detail/integer_log2.hpp>
+#include <boost/pending/integer_log2.hpp>
 
 #include <core/utils/range_utils.hpp>
 #include <reversible/functions/add_gates.hpp>
