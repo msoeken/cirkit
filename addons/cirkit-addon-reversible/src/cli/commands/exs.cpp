@@ -24,6 +24,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifdef ADDON_FORMAL
+
 #include "exs.hpp"
 
 #include <alice/rules.hpp>
@@ -121,6 +123,8 @@ nlohmann::json exs_command::log() const
 }
 
 }
+
+#endif
 
 // Local Variables:
 // c-basic-offset: 2

@@ -34,6 +34,8 @@
  * @since  2.3
  */
 
+#ifdef ADDON_FORMAL
+
 #ifndef CLI_EXS_COMMAND_HPP
 #define CLI_EXS_COMMAND_HPP
 
@@ -61,6 +63,8 @@ private:
 };
 
 }
+
+#endif
 
 #endif
 

@@ -88,7 +88,9 @@
 #include <cli/commands/tpar.hpp>
 #include <cli/commands/tt.hpp>
 #include <cli/commands/unique_names.hpp>
+#ifdef ADDON_FORMAL
 #include <cli/commands/xmglut.hpp>
+#endif
 
 #include <core/utils/bdd_utils.hpp>
 #include <classical/aig.hpp>
@@ -112,7 +114,9 @@ ALICE_ADD_COMMAND( dbs, "Synthesis" )
 ALICE_ADD_COMMAND( dxs, "Synthesis" )
 ALICE_ADD_COMMAND( esopbs, "Synthesis" )
 ALICE_ADD_COMMAND( esopps, "Synthesis" )
+#ifdef ADDON_FORMAL
 ALICE_ADD_COMMAND( exs, "Synthesis" )
+#endif
 ALICE_ADD_COMMAND( hdbs, "Synthesis" )
 ALICE_ADD_COMMAND( lhrs, "Synthesis" )
 ALICE_ADD_COMMAND( qbs, "Synthesis" )
@@ -139,7 +143,9 @@ ALICE_ADD_COMMAND( unique_names, "Mapping and rewriting" )
 
 ALICE_ADD_COMMAND( cone, "AIG and XMG synthesis" )
 ALICE_ADD_COMMAND( propagate, "AIG and XMG synthesis" )
+#ifdef ADDON_FORMAL
 ALICE_ADD_COMMAND( xmglut, "AIG and XMG synthesis" )
+#endif
 
 ALICE_ADD_COMMAND( is_identity, "Verification" )
 ALICE_ADD_COMMAND( qec, "Verification" )

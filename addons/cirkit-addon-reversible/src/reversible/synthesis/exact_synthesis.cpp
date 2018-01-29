@@ -24,6 +24,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifdef ADDON_FORMAL
+
 #include "exact_synthesis.hpp"
 
 #include <cmath>
@@ -587,6 +589,8 @@ truth_table_synthesis_func exact_synthesis_func(properties::ptr settings,
 }
 
 }
+
+#endif
 
 // Local Variables:
 // c-basic-offset: 2
