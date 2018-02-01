@@ -47,6 +47,19 @@ namespace cirkit
     copy_metadata( src, dest );
   }
 
+  void copy_circuit( const circuit& src, circuit& dest, int from, int length )
+  {
+    assert( !dest.num_gates() );
+    assert( !dest.lines() );
+
+    unsigned end = length == -1 ? src.num_gates() : std::min<unsigned>( src.num_gates(), from + length );
+
+    for ( auto i = from; i < end; ++i )
+    {
+      dest.append_gate() = src[i];
+    }
+  }
+
   void copy_circuit( const circuit& src, circuit& dest, const std::vector<unsigned>& filter )
   {
     // Some pre-conditions

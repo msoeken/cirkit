@@ -245,7 +245,9 @@ namespace cirkit
     std::vector<unsigned> filter;
     find_non_empty_lines( circ.begin() + start, circ.begin() + end + 1, std::back_inserter( filter ) );
     circuit rcircuit;
-    copy_circuit( subcircuit( circ, start, end + 1 ), rcircuit, filter );
+    circuit s;
+    copy_circuit( circ, s, start, end + 1 - start );
+    copy_circuit( s, rcircuit, filter );
     return std::make_pair( rcircuit, filter );
   }
 
@@ -540,7 +542,9 @@ namespace cirkit
       if ( window.offset() == 0u ) // easy case: window starts on the left side
       {
         circuit zero;
-        copy_circuit( subcircuit( circ, 0u, 0u ), zero, index_map );
+        circuit s;
+        copy_circuit( circ, s, 0, 0 );
+        copy_circuit( s, zero, index_map );
 
         // non constant inputs
         unsigned non_constant_lines = 0u;
@@ -597,7 +601,9 @@ namespace cirkit
 
         /* in this case the window starts in the beginning and we need the constant inputs */
         circuit before_window_sub;
-        copy_circuit( subcircuit( circ, 0u, window.offset() ), before_window_sub, before_filter );
+        circuit s;
+        copy_circuit( circ, s, 0, window.offset() );
+        copy_circuit( s, before_window_sub, before_filter );
         circuit before_window( before_window_sub.lines() );
         append_circuit( before_window, before_window_sub );
         before_window.set_constants( before_window_constants );

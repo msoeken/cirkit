@@ -59,7 +59,9 @@ namespace cirkit
     unsigned length = std::min( window_length, base.num_gates() - pos );
     unsigned to = pos + length;
 
-    subcircuit s( base, pos, to );
+    circuit s;
+    copy_circuit( base, s, pos, length );
+
     pos += offset;
 
     return circuit_filter_pair( s, std::vector<unsigned>() );
@@ -125,7 +127,10 @@ namespace cirkit
             std::vector<unsigned> filter( non_empty_lines.begin(), non_empty_lines.end() );
 
             circuit ret_circuit;
-            copy_circuit( subcircuit( base, start_pos, pos ), ret_circuit, filter );
+            circuit s;
+
+            copy_circuit( base, s, start_pos, pos - start_pos );
+            copy_circuit( s, ret_circuit, filter );
             return circuit_filter_pair( ret_circuit, filter );
           }
           else
@@ -144,7 +149,9 @@ namespace cirkit
       {
         std::vector<unsigned> filter( non_empty_lines.begin(), non_empty_lines.end() );
         circuit ret_circuit;
-        copy_circuit( subcircuit( base, start_pos, base.num_gates() ), ret_circuit, filter );
+        circuit s;
+        copy_circuit( base, s, start_pos, base.num_gates() - start_pos );
+        copy_circuit( s, ret_circuit, filter );
         return circuit_filter_pair( ret_circuit, filter );
       }
       else

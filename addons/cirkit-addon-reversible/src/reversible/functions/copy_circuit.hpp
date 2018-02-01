@@ -57,6 +57,8 @@ namespace cirkit
    */
   void copy_circuit( const circuit& src, circuit& dest );
 
+  void copy_circuit( const circuit& src, circuit& dest, int from, int length = -1 );
+
   /**
    * @brief Copies a circuit based on a line filter
    *
