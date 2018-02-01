@@ -10,15 +10,15 @@ set(reversible_programs
   pidd_debugging
   window_optimization)
 
-foreach(program ${reversible_programs})
-  add_cirkit_program(
-    NAME ${program}
-    SOURCES
-      reversible/${program}.cpp
-    USE
-      cirkit_reversible
-  )
-endforeach()
+#foreach(program ${reversible_programs})
+#  add_cirkit_program(
+#    NAME ${program}
+#    SOURCES
+#      reversible/${program}.cpp
+#    USE
+#      cirkit_reversible
+#  )
+#endforeach()
 
 # RevKit
 
@@ -40,7 +40,5 @@ target_compile_definitions( revkit PUBLIC USE_LINENOISE )
 if( cirkit_ENABLE_PYTHON_API )
   add_alice_python_module(revkit reversible/revkit.cpp )
   target_link_libraries( revkit_python PUBLIC cirkit_reversible_cli )
-  set_target_properties( revkit_python PROPERTIES PREFIX ""
-                                                  SUFFIX ""
-                                                  OUTPUT_NAME "revkit.so")
+  install(TARGETS revkit_python LIBRARY DESTINATION ${CMAKE_PYTHON_SITE_PATH}/)
 endif()
