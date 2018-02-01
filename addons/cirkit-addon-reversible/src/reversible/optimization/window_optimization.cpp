@@ -53,7 +53,7 @@ namespace cirkit
     {
       /* dont forget to reset in case of second call */
       pos = 0u;
-      return circuit_filter_pair( circuit(), std::vector<unsigned>() );
+      return circuit_filter_pair( circuit(), std::vector<unsigned>(), 0 );
     }
 
     unsigned length = std::min( window_length, base.num_gates() - pos );
