@@ -107,17 +107,14 @@ public:
 private:
   inline circuit get_fast_circuit() const
   {
-    standard_circuit c;
-    c.lines = circ.lines();
+    circuit c;
+    c._lines = circ.lines();
     return c;
   }
 
   inline void append_circuit_fast( const circuit& src )
   {
-    auto& dest_s = boost::get<standard_circuit>( static_cast<circuit_variant&>( circ ) );
-    const auto& src_s = boost::get<standard_circuit>( static_cast<const circuit_variant&>( src ) );
-
-    boost::push_back( dest_s.gates, src_s.gates );
+    boost::push_back( circ.gates, src.gates );
   }
 
   unsigned get_dirty_ancilla()

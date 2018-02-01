@@ -62,9 +62,10 @@ namespace cirkit
     circuit s;
     copy_circuit( base, s, pos, length );
 
+    auto old_pos = pos;
     pos += offset;
 
-    return circuit_filter_pair( s, std::vector<unsigned>() );
+    return circuit_filter_pair( s, std::vector<unsigned>(), old_pos );
   }
 
   line_window_selection::line_window_selection()
@@ -96,7 +97,7 @@ namespace cirkit
         else
         {
           line_count = 2u;
-          return circuit_filter_pair( circuit(), std::vector<unsigned>() );
+          return circuit_filter_pair( circuit(), std::vector<unsigned>(), 0 );
         }
       }
 
@@ -131,7 +132,7 @@ namespace cirkit
 
             copy_circuit( base, s, start_pos, pos - start_pos );
             copy_circuit( s, ret_circuit, filter );
-            return circuit_filter_pair( ret_circuit, filter );
+            return circuit_filter_pair( ret_circuit, filter, start_pos );
           }
           else
           {
@@ -152,7 +153,7 @@ namespace cirkit
         circuit s;
         copy_circuit( base, s, start_pos, base.num_gates() - start_pos );
         copy_circuit( s, ret_circuit, filter );
-        return circuit_filter_pair( ret_circuit, filter );
+        return circuit_filter_pair( ret_circuit, filter, start_pos );
       }
       else
       {
@@ -189,7 +190,8 @@ namespace cirkit
       /* select the window */
       circuit s;
       std::vector<unsigned> filter;
-      std::tie( s, filter ) = select_window( circ );
+      unsigned offset;
+      std::tie( s, filter, offset ) = select_window( circ );
 
       /* check if window is still valid */
       if ( s.num_gates() == 0 )
@@ -208,7 +210,7 @@ namespace cirkit
       {
         /* remove old sub-circuit */
         unsigned s_size = s.num_gates(); // save in variable since we are changing its base
-        unsigned s_from = s.offset();
+        unsigned s_from = offset;
         for ( unsigned i = 0u; i < s_size; ++i )
         {
           circ.remove_gate_at( s_from );

@@ -230,7 +230,7 @@ namespace cirkit
     return c.size();
   }
 
-  std::pair<circuit, std::vector<unsigned> > find_window_with_max_lines( const circuit& circ, unsigned end, unsigned max_lines )
+  std::tuple<circuit, std::vector<unsigned>, unsigned> find_window_with_max_lines( const circuit& circ, unsigned end, unsigned max_lines )
   {
     unsigned start = end;
 
@@ -248,7 +248,7 @@ namespace cirkit
     circuit s;
     copy_circuit( circ, s, start, end + 1 - start );
     copy_circuit( s, rcircuit, filter );
-    return std::make_pair( rcircuit, filter );
+    return std::make_tuple( rcircuit, filter, start );
   }
 
   unsigned find_constant_line( const circuit& circ, unsigned window_end )
@@ -287,7 +287,7 @@ namespace cirkit
 
   /* returns a set of the function of the line, which is 0,1 if it is supposed to be the constant line,
      2 if it needs to be used afterwards, or -1 if it is not needed anymore. */
-  void garbage_to_ov( const circuit& circ, const circuit& window, const std::vector<unsigned>& line_mapping,
+  void garbage_to_ov( const circuit& circ, const circuit& window, unsigned offset, const std::vector<unsigned>& line_mapping,
                       unsigned garbage_line, std::vector<short>& ov, bool constant_value )
   {
     for ( unsigned i = 0u; i < window.lines(); ++i )
@@ -304,7 +304,7 @@ namespace cirkit
       }
       else
       {
-        if ( std::find_if( circ.begin() + window.offset() + window.num_gates(), circ.end(), has_control_or_target_at( mapped_line ) ) == circ.end() )
+        if ( std::find_if( circ.begin() + offset + window.num_gates(), circ.end(), has_control_or_target_at( mapped_line ) ) == circ.end() )
         {
           ov += -1;
         }
@@ -519,10 +519,11 @@ namespace cirkit
 
       circuit window;
       std::vector<unsigned> index_map;
-      std::tie( window, index_map ) = find_window_with_max_lines( circ, last_control_position, max_lines );
+      unsigned offset;
+      std::tie( window, index_map, offset ) = find_window_with_max_lines( circ, last_control_position, max_lines );
 
       /* find constant line */
-      unsigned constant_line = find_constant_line( circ, window.offset() + window.num_gates() );
+      unsigned constant_line = find_constant_line( circ, offset + window.num_gates() );
       if ( constant_line == circ.lines() )
       {
         if ( statistics )
@@ -539,7 +540,7 @@ namespace cirkit
       /* index_map */
       std::vector<unsigned long long> assignments;
 
-      if ( window.offset() == 0u ) // easy case: window starts on the left side
+      if ( offset == 0u ) // easy case: window starts on the left side
       {
         circuit zero;
         circuit s;
@@ -575,7 +576,7 @@ namespace cirkit
       else
       {
         std::vector<unsigned> before_filter;
-        find_non_empty_lines( circ.begin(), circ.begin() + window.offset() + window.num_gates(), std::back_inserter( before_filter ) );
+        find_non_empty_lines( circ.begin(), circ.begin() + offset + window.num_gates(), std::back_inserter( before_filter ) );
         std::sort( before_filter.begin(), before_filter.end() );
         before_filter.resize( std::unique( before_filter.begin(), before_filter.end() ) - before_filter.begin() );
 
@@ -602,7 +603,7 @@ namespace cirkit
         /* in this case the window starts in the beginning and we need the constant inputs */
         circuit before_window_sub;
         circuit s;
-        copy_circuit( circ, s, 0, window.offset() );
+        copy_circuit( circ, s, 0, offset );
         copy_circuit( s, before_window_sub, before_filter );
         circuit before_window( before_window_sub.lines() );
         append_circuit( before_window, before_window_sub );
@@ -650,7 +651,7 @@ namespace cirkit
 
       std::vector<short> ov;
       std::vector<unsigned> order;
-      garbage_to_ov( circ, window, index_map, garbage_line, ov, *circ.constants().at( constant_line ) );
+      garbage_to_ov( circ, window, offset, index_map, garbage_line, ov, *circ.constants().at( constant_line ) );
       ov_to_order_vector( ov, order );
 
       /* create specification */
@@ -693,7 +694,7 @@ namespace cirkit
       circuit window_copy( window.lines() );
       append_circuit( window_copy, window );
       unsigned window_length = window.num_gates();
-      unsigned window_offset = window.offset();
+      unsigned window_offset = offset;
 
       for ( unsigned i = 0u; i < window_length; ++i )
       {
