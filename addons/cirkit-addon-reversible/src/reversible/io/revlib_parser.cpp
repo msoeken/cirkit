@@ -432,6 +432,12 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
     {
       // since the inputs can contain spaces in quotes we have to deal with
       // them specifically
+      if ( line == command )
+      {
+        // ignore empty .inputs declaration
+        continue;
+      }
+      
       std::string inputs_str( line.begin() + command.size() + 1u, line.end() );
       boost::algorithm::trim( inputs_str );
       std::vector<std::string> inputs;
@@ -458,6 +464,12 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
     }
     else if ( command == ".outputs" )
     {
+      if ( line == command )
+      {
+        // ignore empty .outputs declaration
+        continue;
+      }
+
       // see .inputs
       std::string outputs_str( line.begin() + command.size() + 1u, line.end() );
       boost::algorithm::trim( outputs_str );
