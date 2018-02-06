@@ -44,6 +44,7 @@
 #include <reversible/io/write_projectq.hpp>
 #include <reversible/io/write_qc.hpp>
 #include <reversible/io/write_qcode.hpp>
+#include <reversible/io/write_qiskit.hpp>
 #include <reversible/io/write_qpic.hpp>
 #include <reversible/io/write_qsharp.hpp>
 #include <reversible/io/write_quipper.hpp>
@@ -206,6 +207,12 @@ template<>
 void write<circuit, io_qcode_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   write_qcode( circ, filename );
+}
+
+template<>
+void write<circuit, io_qiskit_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
+{
+  write_qiskit( circ, filename );
 }
 
 template<>
