@@ -92,7 +92,7 @@ void tt_command::execute()
       }
 
       const auto num_vars = boost::lexical_cast<unsigned>( load.substr( 2u, col - 2u ) );
-      const auto func     = boost::lexical_cast<unsigned>( load.substr( col + 1 ) );
+      const auto func     = boost::lexical_cast<unsigned long>( load.substr( col + 1 ) );
 
       load = to_string( boost::dynamic_bitset<>( 1 << num_vars, func ) );
     }
