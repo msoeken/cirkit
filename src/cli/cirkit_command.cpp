@@ -29,22 +29,10 @@
 #include <iostream>
 #include <memory>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 cirkit_command::cirkit_command( const environment::ptr& env, const std::string& caption )
   : command( env, caption )
@@ -87,12 +75,13 @@ void cirkit_command::print_runtime( double runtime, const std::string& label ) c
 
   if ( label.empty() )
   {
-    std::cout << boost::format( "[i] run-time: %.2f secs" ) % runtime << std::endl;
+    env->out() << fmt::format( "[i] run-time: {:.2f} secs\n", runtime );
   }
   else
   {
-    std::cout << boost::format( "[i] run-time (%s): %.2f secs" ) % label % runtime << std::endl;
+    env->out() << fmt::format( "[i] run-time ({}): {:.2f} secs\n", label, runtime );
   }
+  env->out() << std::flush;
 }
 
 

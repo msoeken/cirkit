@@ -32,13 +32,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/range/algorithm.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <range/v3/algorithm/transform.hpp>
 
 #include <core/graph/depth.hpp>
 #include <core/utils/bitset_utils.hpp>
@@ -61,6 +55,8 @@
 #include <classical/xmg/xmg_string.hpp>
 #include <classical/xmg/xmg_utils.hpp>
 
+#include <fmt/format.h>
+
 namespace alice
 {
 
@@ -73,7 +69,10 @@ using namespace cirkit;
 template<>
 std::string to_string<bdd_function_t>( const bdd_function_t& bdd )
 {
-  return ( boost::format( "%d variables, %d functions, %d nodes" ) % bdd.first.ReadSize() % bdd.second.size() % bdd.first.ReadKeys() ).str();
+  return fmt::format( "{} variables, {} functions, {} nodes",
+                      bdd.first.ReadSize(),
+                      bdd.second.size(),
+                      bdd.first.ReadKeys() );
 }
 
 template<>
@@ -172,7 +171,10 @@ std::string to_string<aig_graph>( const aig_graph& aig )
 {
   const auto& info = aig_info( aig );
   const auto& name = info.model_name;
-  return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
+  return fmt::format( "{} i/o = {}/{}",
+                      name.empty() ? "(unnamed)" : name,
+                      info.inputs.size(),
+                      info.outputs.size() );
 }
 
 template<>
@@ -283,7 +285,10 @@ std::string to_string<mig_graph>( const mig_graph& mig )
 {
   const auto& info = mig_info( mig );
   const auto& name = info.model_name;
-  return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % info.inputs.size() % info.outputs.size() );
+  return fmt::format( "{} i/o = {}/{}",
+                      name.empty() ? "(unnamed)" : name,
+                      info.inputs.size(),
+                      info.outputs.size() );
 }
 
 template<>
@@ -374,13 +379,13 @@ std::string to_string<simple_fanout_graph_t>( const simple_fanout_graph_t& nl )
 template<>
 std::string to_string<std::vector<aig_node>>( const std::vector<aig_node>& g )
 {
-  return ( boost::format( "{ %s }" ) % any_join( g, ", " ) ).str();
+  return fmt::format( "{{ {} }}", any_join( g, ", " ) );
 }
 
 template<>
 void print<std::vector<aig_node>>( std::ostream& os, const std::vector<aig_node>& g )
 {
-  os << boost::format( "{ %s }" ) % any_join( g, ", " ) << std::endl;
+  os << fmt::format( "{{ {} }}", any_join( g, ", " ) );
 }
 
 /******************************************************************************
@@ -456,7 +461,10 @@ template<>
 std::string to_string<xmg_graph>( const xmg_graph& xmg )
 {
   const auto name = xmg.name();
-  return boost::str( boost::format( "%s i/o = %d/%d" ) % ( name.empty() ? "(unnamed)" : name ) % xmg.inputs().size() % xmg.outputs().size() );
+  return fmt::format( "{} i/o = {}/{}",
+                      name.empty() ? "(unnamed)" : name,
+                      xmg.inputs().size(),
+                      xmg.outputs().size() );
 }
 
 template<>

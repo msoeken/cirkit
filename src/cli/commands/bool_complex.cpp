@@ -28,12 +28,10 @@
 
 #include <unordered_set>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <core/utils/range_utils.hpp>
-#include <classical/functions/npn_canonization.hpp>
 
 #include <fmt/format.h>
+#include <kitty/kitty.hpp>
 
 namespace cirkit
 {
@@ -471,11 +469,10 @@ void bool_complex_command::compute_maj( bool length, bool npn )
 
                 if ( npn )
                 {
-                  boost::dynamic_bitset<> phase;
-                  std::vector<unsigned> perm;
-                  auto tt_npn = exact_npn_canonization( tt( 1u << numvars, f ), phase, perm );
-
-                  length_to_npn.back().insert( tt_npn.to_ulong() );
+                  kitty::dynamic_truth_table ft( numvars );
+                  kitty::create_from_words( ft, &f, &f + 1 );
+                  const auto fnpn = std::get<0>( kitty::exact_npn_canonization( ft ) );
+                  length_to_npn.back().insert( fnpn._bits[0] );
                 }
 
                 if ( --count == 0u ) { goto done; }

@@ -29,13 +29,10 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/dynamic_bitset.hpp>
-
-#include <core/cube.hpp>
 #include <core/utils/range_utils.hpp>
 #include <cli/stores.hpp>
-#include <classical/functions/isop.hpp>
-#include <classical/utils/truth_table_utils.hpp>
+
+#include <kitty/kitty.hpp>
 
 namespace cirkit
 {
@@ -59,10 +56,12 @@ void isop_command::execute()
   {
     const auto& tts = env->store<tt>();
 
-    std::vector<int> cover;
-    tt_isop( tts.current(), tts.current(), cover );
-    const auto sop = cover_to_cubes( cover, tt_num_vars( tts.current() ) );
-    common_pla_print( sop );
+    const auto f = to_kitty( tts.current() );
+    const auto cubes = kitty::isop( f );
+    for ( const auto& c : cubes )
+    {
+      c.print( f.num_vars(), env->out() );
+    }
   }
 }
 

@@ -29,7 +29,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/format.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 #include <classical/utils/unateness.hpp>
 #include <classical/verification/unate.hpp>
@@ -144,12 +144,12 @@ void unate_command::execute()
     print_unateness( os, u, info() );
   }
 
-  std::cout << boost::format( "[i] run-time (total): %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl
-            << boost::format( "[i] run-time (wall): %.2f secs" ) % statistics->get<double>( "runtime_wall" ) << std::endl;
+  print_runtime( "runtime", "total" );
+  print_runtime( "runtime_wall", "wall" );
 
   if ( approach == 1u )
   {
-    std::cout << boost::format( "[i] run-time (SAT):   %.2f secs" ) % statistics->get<double>( "sat_runtime" ) << std::endl;
+    print_runtime( "sat_runtime", "SAT" );
   }
 }
 

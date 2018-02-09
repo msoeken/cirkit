@@ -26,9 +26,9 @@
 
 #include "migfh.hpp"
 
-#include <boost/format.hpp>
-
 #include <classical/mig/mig_functional_hashing.hpp>
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -67,12 +67,14 @@ void migfh_command::execute()
   auto hit_rate  = (double)cache_hit / ( cache_hit + cache_miss );
   auto miss_rate = 1.0 - hit_rate;
 
-  std::cout << boost::format( "[i] run-time:        %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl
-            << boost::format( "[i] run-time (cuts): %.2f secs" ) % statistics->get<double>( "runtime_cut" ) << std::endl
-            << boost::format( "[i] run-time (NPN):  %.2f secs" ) % statistics->get<double>( "runtime_npn" ) << std::endl
-            << boost::format( "[i] run-time (ffrs): %.2f secs" ) % statistics->get<double>( "runtime_ffr" ) << std::endl
-            << boost::format( "[i] cache hit:       %u (%.2f %%)" ) % cache_hit % ( hit_rate * 100.0) << std::endl
-            << boost::format( "[i] cache miss:      %u (%.2f %%)" ) % cache_miss % ( miss_rate * 100.0 ) << std::endl;
+  print_runtime();
+  print_runtime( "runtime_cuts", "cuts" );
+  print_runtime( "runtime_npn", "NPN" );
+  print_runtime( "runtime_ffr", "ffrs" );
+
+  env->out() << fmt::format( "[i] cache hit:       %u (%.2f %%)\n", cache_hit, hit_rate * 100.0 )
+             << fmt::format( "[i] cache miss:      %u (%.2f %%)\n", cache_miss, miss_rate * 100.0 );
+  env->out() << std::flush;
 }
 
 nlohmann::json migfh_command::log() const
