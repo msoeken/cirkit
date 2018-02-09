@@ -8,8 +8,6 @@ add_cirkit_library(
     cudd
     obj
     fmt::fmt-header-only
-    ${Boost_PROGRAM_OPTIONS_LIBRARIES}
-    ${Boost_SYSTEM_LIBRARIES}
 )
 
 add_cirkit_library(
@@ -17,6 +15,7 @@ add_cirkit_library(
   AUTO_DIRS classical
   USE
     ${Boost_FILESYSTEM_LIBRARIES}  
+    ${Boost_SYSTEM_LIBRARIES}
     cirkit_core
     libabc-pic
     kitty
