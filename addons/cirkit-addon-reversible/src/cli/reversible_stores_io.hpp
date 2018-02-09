@@ -60,6 +60,7 @@ ALICE_ADD_FILE_TYPE_WRITE_ONLY( projectq, "ProjectQ" )
 ALICE_ADD_FILE_TYPE_WRITE_ONLY( qcode, "QCode" )
 ALICE_ADD_FILE_TYPE_WRITE_ONLY( qiskit, "QISKit" ) 
 ALICE_ADD_FILE_TYPE_WRITE_ONLY( qpic, "qpic" )
+ALICE_ADD_FILE_TYPE_WRITE_ONLY( pyquil, "pyquil" )
 ALICE_ADD_FILE_TYPE_WRITE_ONLY( qsharp, "Q#" )
 ALICE_ADD_FILE_TYPE_WRITE_ONLY( quipper, "Quipper" )
 ALICE_ADD_FILE_TYPE_WRITE_ONLY( tikz, "TikZ" )
@@ -127,6 +128,12 @@ inline bool can_write<circuit, io_qiskit_tag_t>( command& cmd ) { return true; }
 
 template<>
 void write<circuit, io_qiskit_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
+
+template<>
+inline bool can_write<circuit, io_pyquil_tag_t>( command& cmd ) { return true; }
+
+template<>
+void write<circuit, io_pyquil_tag_t>( const circuit& circ, const std::string& filename, const command& cmd );
 
 template<>
 inline bool can_write<circuit, io_numpy_tag_t>( command& cmd ) { return true; }

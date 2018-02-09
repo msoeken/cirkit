@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "write_qiskit.hpp"
+#include "write_pyquil.hpp"
 
 #include <fstream>
 
@@ -41,19 +41,19 @@ namespace cirkit
  * Private functions                                                          *
  ******************************************************************************/
 
-inline void write_x( std::ostream& os, const gate& g )
+inline void pyquil_write_x( std::ostream& os, const gate& g )
 {
   if ( g.controls().empty() )
   {
-    os << fmt::format( "qc.x(qr[{}])\n", g.targets().front() );
+    os << fmt::format( "p.inst(X(qr[{}]))\n", g.targets().front() );
   }
   else if ( g.controls().size() == 1 && g.controls()[0].polarity() )
   {
-    os << fmt::format( "qc.cx(qr[{}], qr[{}])\n", g.controls()[0].line(), g.targets().front() );
+    os << fmt::format( "p.inst(CNOT(qr[{}], qr[{}]))\n", g.controls()[0].line(), g.targets().front() );
   }
   else if ( g.controls().size() == 2 && g.controls()[0].polarity() && g.controls()[1].polarity() )
   {
-    os << fmt::format( "qc.ccx(qr[{}], qr[{}], qr[{}])\n", g.controls()[0].line(), g.controls()[1].line(), g.targets().front() );
+    os << fmt::format( "p.inst(CCNOT(qr[{}], qr[{}], qr[{}]))\n", g.controls()[0].line(), g.controls()[1].line(), g.targets().front() );
   }
   else
   {
@@ -61,15 +61,15 @@ inline void write_x( std::ostream& os, const gate& g )
   }
 }
 
-inline void write_z( std::ostream& os, const gate& g )
+inline void pyquil_write_z( std::ostream& os, const gate& g )
 {
   if ( g.controls().empty() )
   {
-    os << fmt::format( "qc.z(qr[{}])\n", g.targets().front() );
+    os << fmt::format( "p.inst(Z(qr[{}]))\n", g.targets().front() );
   }
   else if ( g.controls().size() == 1 && g.controls()[0].polarity() )
   {
-    os << fmt::format( "qc.cz(qr[{}], qr[{}])\n", g.controls()[0].line(), g.targets().front() );
+    os << fmt::format( "p.inst(CZ(qr[{}], qr[{}]))\n", g.controls()[0].line(), g.targets().front() );
   }
   else
   {
@@ -77,15 +77,15 @@ inline void write_z( std::ostream& os, const gate& g )
   }
 }
 
-inline void write_swap( std::ostream& os, const gate& g )
+inline void pyquil_write_swap( std::ostream& os, const gate& g )
 {
   if ( g.controls().size() == 0)
   {
-    os << fmt::format( "qc.swap(qr[{}], qr[{}])\n", g.targets()[0], g.targets()[1] );
+    os << fmt::format( "p.inst(SWAP(qr[{}], qr[{}]))\n", g.targets()[0], g.targets()[1] );
   }
   else if ( g.controls().size() == 1 && g.controls()[0].polarity() )
   {
-    os << fmt::format( "qc.cswap(qr[{}], qr[{}], qr[{}])\n", g.controls()[0].line(), g.targets()[0], g.targets()[1] );
+    os << fmt::format( "p.inst(CSWAP(qr[{}], qr[{}], qr[{}]))\n", g.controls()[0].line(), g.targets()[0], g.targets()[1] );
   }
   else
   {
@@ -93,7 +93,7 @@ inline void write_swap( std::ostream& os, const gate& g )
   }
 }
 
-void write_qiskit( const circuit& circ, std::ostream& os, const properties::ptr& settings )
+void write_pyquil( const circuit& circ, std::ostream& os, const properties::ptr& settings )
 {
   const auto n = circ.lines();
 
@@ -101,17 +101,17 @@ void write_qiskit( const circuit& circ, std::ostream& os, const properties::ptr&
   {
     if ( is_toffoli( g ) )
     {
-      write_x( os, g );
+      pyquil_write_x( os, g );
     }
     else if ( is_fredkin( g ) )
     {
-      write_swap( os, g );
+      pyquil_write_swap( os, g );
     }
     else if ( is_hadamard( g ) )
     {
       if ( g.controls().size() == 0 )
       {
-        os << fmt::format( "qc.h(qr[{}])\n", g.targets().front() );
+        os << fmt::format( "p.inst(H(qr[{}]))\n", g.targets().front() );
       }
       else
       {
@@ -126,7 +126,7 @@ void write_qiskit( const circuit& circ, std::ostream& os, const properties::ptr&
       case pauli_axis::X:
         if ( pauli.root == 1u )
         {
-          write_x( os, g );
+          pyquil_write_x( os, g );
         }
         else
         {
@@ -134,13 +134,13 @@ void write_qiskit( const circuit& circ, std::ostream& os, const properties::ptr&
         }
         break;
       case pauli_axis::Z:
-        if ( pauli.root == 4u && g.controls().empty() )
+        if ( pauli.root == 4u && g.controls().empty() && !pauli.adjoint )
         {
-          os << fmt::format( "qc.{}(qr[{}])\n", ( pauli.adjoint ? "tdg" : "t" ), g.targets().front() );
+          os << fmt::format( "p.inst(T(qr[{}]))\n", g.targets().front() );
         }
         else if ( pauli.root == 1u )
         {
-          write_z( os, g );
+          pyquil_write_z( os, g );
         }
         else
         {
@@ -165,11 +165,11 @@ void write_qiskit( const circuit& circ, std::ostream& os, const properties::ptr&
  * Public functions                                                           *
  ******************************************************************************/
 
-void write_qiskit( const circuit& circ, const std::string& filename, const properties::ptr& settings )
+void write_pyquil( const circuit& circ, const std::string& filename, const properties::ptr& settings )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
 
-  write_qiskit( circ, os, settings );
+  write_pyquil( circ, os, settings );
 
   os.close();
 }

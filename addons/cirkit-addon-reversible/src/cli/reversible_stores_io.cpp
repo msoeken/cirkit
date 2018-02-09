@@ -42,6 +42,7 @@
 #include <reversible/io/write_numpy.hpp>
 #include <reversible/io/write_pla.hpp>
 #include <reversible/io/write_projectq.hpp>
+#include <reversible/io/write_pyquil.hpp>
 #include <reversible/io/write_qc.hpp>
 #include <reversible/io/write_qcode.hpp>
 #include <reversible/io/write_qiskit.hpp>
@@ -213,6 +214,12 @@ template<>
 void write<circuit, io_qiskit_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
 {
   write_qiskit( circ, filename );
+}
+
+template<>
+void write<circuit, io_pyquil_tag_t>( const circuit& circ, const std::string& filename, const command& cmd )
+{
+  write_pyquil( circ, filename );
 }
 
 template<>
