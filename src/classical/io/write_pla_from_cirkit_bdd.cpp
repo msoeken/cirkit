@@ -26,7 +26,6 @@
 #include "write_pla_from_cirkit_bdd.hpp"
 
 #include <boost/format.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/range/counting_range.hpp>
 #include <boost/timer.hpp>
 

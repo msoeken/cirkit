@@ -33,7 +33,6 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <core/io/pla_parser.hpp>
