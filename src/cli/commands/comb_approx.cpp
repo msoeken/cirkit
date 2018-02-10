@@ -102,7 +102,7 @@ void comb_approx_command::execute()
 
     for ( const auto& m : map )
     {
-      fs += m.second;
+      fs.push_back( m.second );
     }
   }
   else if ( is_set( "bdd" ) )
