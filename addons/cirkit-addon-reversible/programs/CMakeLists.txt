@@ -31,10 +31,7 @@ add_cirkit_program(
     cirkit_reversible_cli
     cirkit_classical
     ${READLINE_LIBRARY}
-    linenoise
 )
-
-target_compile_definitions( revkit PUBLIC USE_LINENOISE )
 
 # Python API
 if( cirkit_ENABLE_PYTHON_API )

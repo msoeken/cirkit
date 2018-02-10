@@ -49,10 +49,8 @@ add_cirkit_program(
   USE
     cirkit_core
     cirkit_classical
-    linenoise
 )
 
-target_compile_definitions( cirkit PUBLIC USE_LINENOISE )
 target_link_libraries( cirkit cirkit_cli ${cirkit_addon_command_libraries} )
 
 file( WRITE ${CMAKE_BINARY_DIR}/programs/addon_commands.hpp "" )
