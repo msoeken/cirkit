@@ -40,7 +40,6 @@
 #include <queue>
 #include <vector>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/bimap.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
@@ -51,8 +50,6 @@
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -94,7 +91,7 @@ ffr_output_queue_t<Graph> make_output_queue( std::vector<vertex_t<Graph>>& outpu
     {
       if ( !indegrees[v] )
       {
-        outputs += v;
+        outputs.push_back( v );
       }
     }
   }
@@ -139,13 +136,13 @@ void compute_ffr_inputs_rec( const vertex_t<Graph>& v,
   {
     if ( boost::find( ffr_inputs, v ) == ffr_inputs.end() )
     {
-      ffr_inputs += v;
+      ffr_inputs.push_back( v );
     }
   }
   /* if ffr output? */
   else if ( v != ffr_output && indegrees.at( v ) > 1u )
   {
-    ffr_inputs += v;
+    ffr_inputs.push_back( v );
     ffr_outputs.push( v );
   }
   else
@@ -188,7 +185,7 @@ std::vector<vertex_t<Graph>> compute_ffr_inputs_bfs( const vertex_t<Graph>& outp
     {
       if ( boost::find( ffr_inputs, top ) == ffr_inputs.end() )
       {
-        ffr_inputs += top;
+        ffr_inputs.push_back( top );
       }
     }
     else
@@ -204,7 +201,7 @@ std::vector<vertex_t<Graph>> compute_ffr_inputs_bfs( const vertex_t<Graph>& outp
   {
     if ( boost::find( ffr_inputs, q.front() ) == ffr_inputs.end() )
     {
-      ffr_inputs += q.front();
+      ffr_inputs.push_back( q.front() );
     }
     q.pop();
   }
@@ -369,7 +366,7 @@ std::vector<vertex_t<Graph>> topological_sort_ffrs( const std::map<vertex_t<Grap
   {
     if ( v != 0u && ffrs.find( v ) != ffrs.end() )
     {
-      ffrs_topsort += v;
+      ffrs_topsort.push_back( v );
     }
   }
 

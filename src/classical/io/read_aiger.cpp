@@ -31,8 +31,6 @@
 #include <core/utils/string_utils.hpp>
 
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/assign/std/vector.hpp>
-#include <boost/assign/std/map.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/counting_range.hpp>
@@ -42,8 +40,6 @@
 
 namespace cirkit
 {
-
-using namespace boost::assign;
 
 unsigned aiger_lit2var( const unsigned lit )
 {
@@ -149,7 +145,7 @@ void read_aiger( aig_graph& aig, std::string& comment, std::istream& in )
       throw "Error: negated inputs are not permitted in definition";
 
     // std::cout << lit << '\n';
-    info.inputs += nodes[aiger_lit2var(lit)];
+    info.inputs.push_back( nodes[aiger_lit2var(lit)] );
   }
 
   /* read latches */
@@ -182,9 +178,9 @@ void read_aiger( aig_graph& aig, std::string& comment, std::istream& in )
 
     aig_function in = { node_in, lit_in % 2u == 1u };
 
-    info.cis += node_out;
+    info.cis.push_back( node_out );
 
-    info.cos += in;
+    info.cos.push_back( in );
 
     info.latch[in] = { node_out, false };
   }
@@ -205,7 +201,7 @@ void read_aiger( aig_graph& aig, std::string& comment, std::istream& in )
     // std::cout << lit << '\n';
 
     const aig_function f = { nodes[aiger_lit2var(lit)], lit%2 == 1 };
-    info.outputs += std::make_pair( f, "" );
+    info.outputs.push_back( std::make_pair( f, "" ) );
 
     if ( f.node == 0u )
     {
@@ -324,7 +320,7 @@ void read_aiger( aig_graph& aig, std::string& comment, std::istream& in )
   {
     if ( info.node_names.find( i.value ) == info.node_names.end() )
     {
-      info.node_names += std::make_pair( i.value, "" );
+      info.node_names.insert( std::make_pair( i.value, "" ) );
     }
   }
 }
@@ -383,7 +379,7 @@ void read_aiger_binary( aig_graph& aig, std::istream& in, bool noopt )
   ntimes( num_outputs, [&]() {
       std::getline( in, line );
       boost::trim( line );
-      oids += boost::lexical_cast<unsigned>( line );
+      oids.push_back( boost::lexical_cast<unsigned>( line ) );
     } );
 
   for ( auto i : boost::counting_range( num_inputs + 1u, num_inputs + num_ands + 1u ) )

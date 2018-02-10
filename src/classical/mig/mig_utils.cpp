@@ -26,7 +26,6 @@
 
 #include "mig_utils.hpp"
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -36,8 +35,6 @@
 #include <core/utils/graph_utils.hpp>
 
 #include <classical/mig/mig_simulate.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -68,7 +65,7 @@ void mig_print_stats( const mig_graph& mig, std::ostream& os )
   std::vector<mig_node> outputs;
   for ( const auto& output : info.outputs )
   {
-    outputs += output.first.node;
+    outputs.push_back( output.first.node );
   }
 
   std::vector<unsigned> depths;
@@ -83,7 +80,7 @@ std::vector<mig_function> get_children( const mig_graph& mig, const mig_node& no
 
   for ( const auto& edge : boost::make_iterator_range( boost::out_edges( node, mig ) ) )
   {
-    children += mig_to_function( mig, edge );
+    children.push_back( mig_to_function( mig, edge ) );
   }
 
   return children;

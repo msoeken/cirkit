@@ -29,8 +29,6 @@
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
 
-using namespace boost::assign;
-
 namespace cirkit
 {
 

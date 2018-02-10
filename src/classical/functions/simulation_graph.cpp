@@ -28,7 +28,6 @@
 
 #include <fstream>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/optional.hpp>
@@ -46,8 +45,6 @@
 #include <classical/functions/simulate_aig.hpp>
 #include <classical/functions/aig_support.hpp>
 #include <classical/utils/aig_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -281,14 +278,14 @@ std::vector<boost::dynamic_bitset<>> create_simulation_vectors( unsigned width, 
                                                }
 
                                                if ( !hot ) { b.flip(); }
-                                               sim_vectors += b;
+                                               sim_vectors.push_back( b );
 
                                                return false;
                                              } );
 
     if ( partition )
     {
-      *partition += boost::unofficial::count_each_combination( k, width - k );
+      partition->push_back( boost::unofficial::count_each_combination( k, width - k ) );
     }
   }
 
@@ -409,7 +406,7 @@ std::vector<simulation_signature_t::value_type> compute_simulation_signatures( c
       }
     }
 
-    vec += signature;
+    vec.push_back( signature );
   }
 
   return vec;

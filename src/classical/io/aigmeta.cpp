@@ -29,7 +29,6 @@
 #include <iostream>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -39,7 +38,6 @@
 namespace cirkit
 {
 
-using namespace boost::assign;
 using boost::property_tree::ptree;
 
 /******************************************************************************
@@ -53,7 +51,7 @@ inline void read_port_def( aigmeta_box& box, const ptree& pt )
   port.id = pt.get<unsigned>( "bundle_id" );
   port.name = pt.get<std::string>( "port_name" );
 
-  box.ports += port;
+  box.ports.push_back( port );
 }
 
 inline void read_box_def( aigmeta& meta, const ptree& pt )
@@ -72,7 +70,7 @@ inline void read_box_def( aigmeta& meta, const ptree& pt )
     }
   }
 
-  meta.boxes += box;
+  meta.boxes.push_back( box );
 }
 
 inline void read_bundle_def( aigmeta& meta, const ptree& pt )
@@ -85,7 +83,7 @@ inline void read_bundle_def( aigmeta& meta, const ptree& pt )
   bundle.name = pt.get<std::string>( "name" );
   boost::push_back( bundle.literals, pt.get_child( "litx" ) | transformed( []( const ptree::value_type& v ) { return boost::lexical_cast<unsigned>( v.second.data() ); } ) );
 
-  meta.bundles += bundle;
+  meta.bundles.push_back( bundle );
 }
 
 /******************************************************************************

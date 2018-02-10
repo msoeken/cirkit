@@ -28,7 +28,6 @@
 
 #include <mutex>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/range/algorithm.hpp>
 
 #include <core/utils/range_utils.hpp>
@@ -54,8 +53,6 @@
 #undef timer
 
 #include <aig/gia/gia.h>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -246,7 +243,7 @@ boost::dynamic_bitset<> unateness_single_output( const aig_graph& aig, unsigned 
     assumptions[i] *= -1;                  /* input i should be different */
 
     /* check for support */
-    assumptions += poids[0u];              /* force XOR gate to be 1 */
+    assumptions.push_back( poids[0u] );              /* force XOR gate to be 1 */
 
     sresult = solve( solver, stats, assumptions );
     //sat_runtime += stats.runtime;
@@ -258,7 +255,8 @@ boost::dynamic_bitset<> unateness_single_output( const aig_graph& aig, unsigned 
 
     /* check for negative unate */
     assumptions.back() = -poids[1u];       /* force OR gate to be 0 */
-    assumptions += piids[i],-piids[n + i]; /* input i should be (1,0) */
+    assumptions.push_back( piids[i] );
+    assumptions.push_back( -piids[n + i] ); /* input i should be (1,0) */
 
     sresult = solve( solver, stats, assumptions );
     //sat_runtime += stats.runtime;
@@ -359,10 +357,11 @@ boost::dynamic_bitset<> unateness_naive( const aig_graph& aig,
       boost::remove_copy( input_xnors, assumptions.begin(), input_xnors[i] );
 
       /* assume different values for x_i */
-      assumptions += piids1[i],-piids2[i];
+      assumptions.push_back( piids1[i] );
+      assumptions.push_back( -piids2[i] );
 
       /* check for support */
-      assumptions += output_xors[j];
+      assumptions.push_back( output_xors[j] );
 
       if ( solve( solver, stats, assumptions ) == boost::none ) /* unsat */
       {
@@ -584,7 +583,7 @@ boost::dynamic_bitset<> unateness( const aig_graph& aig,
       assumptions[i] *= -1;                  /* input i should be different */
 
       /* check for support */
-      assumptions += poids[j << 1u];         /* force XOR gate to be 1 */
+      assumptions.push_back( poids[j << 1u] );         /* force XOR gate to be 1 */
 
       if ( !skiplist || !can_skip[j * n + i] )
       {
@@ -612,7 +611,8 @@ boost::dynamic_bitset<> unateness( const aig_graph& aig,
 
       /* check for negative unate */
       ++assumptions.back() *= -1;            /* force OR gate to be 0 */
-      assumptions += piids[i],-piids[n + i]; /* input i should be (1,0) */
+      assumptions.push_back( piids[i] );
+      assumptions.push_back( -piids[n + i] ); /* input i should be (1,0) */
 
       sresult = solve( solver, stats, assumptions );
       sat_runtime += stats.runtime;

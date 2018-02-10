@@ -29,13 +29,11 @@
 #include <fstream>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/range/algorithm.hpp>
 
 #include <classical/io/io_utils_p.hpp>
 
-using namespace boost::assign;
 using boost::format;
 
 namespace cirkit
@@ -65,7 +63,7 @@ void create_possible_inverter( std::ostream& os, const aig_function& f, std::vec
   if ( f.complemented && boost::find( inverter_created, f.node ) == inverter_created.end() )
   {
     os << format( "not %1%_inv( %1%_inv, %1% );" ) % get_node_name_processed( f.node, aig, &remove_brackets ) << std::endl;
-    inverter_created += f.node;
+    inverter_created.push_back( f.node );
   }
 }
 
@@ -83,13 +81,13 @@ void write_verilog( const aig_graph& aig, std::ostream& os )
   /* Inputs */
   for ( const auto& v : aig_info.inputs )
   {
-    inputs += remove_brackets( aig_info.node_names.find( v )->second );
+    inputs.push_back( remove_brackets( aig_info.node_names.find( v )->second ) );
   }
 
   /* Outputs */
   for ( const auto& v : aig_info.outputs )
   {
-    outputs += remove_brackets( v.second );
+    outputs.push_back( remove_brackets( v.second ) );
   }
 
   os << format( "module top(%s, %s);" ) % boost::join( inputs, ", " ) % boost::join( outputs, ", " ) << std::endl

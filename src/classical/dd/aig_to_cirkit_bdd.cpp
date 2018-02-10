@@ -26,11 +26,7 @@
 
 #include "aig_to_cirkit_bdd.hpp"
 
-#include <boost/assign/std/vector.hpp>
-
 #include <classical/utils/aig_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -87,7 +83,7 @@ std::vector<bdd> aig_to_bdd( const aig_graph& aig, const bdd_manager_ptr& mgr )
 
   for ( const auto& out : info.outputs )
   {
-    fs += map[out.first];
+    fs.push_back( map[out.first] );
   }
 
   return fs;

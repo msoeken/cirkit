@@ -27,15 +27,12 @@
 #include "netlist_graphs.hpp"
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <core/utils/graph_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -87,8 +84,8 @@ void write_simple_fanout_graph( std::ostream& os, const simple_fanout_graph_t& g
 
   for ( const auto& v : boost::make_iterator_range( vertices( g ) ) )
   {
-    if ( gate_type[v] == gate_type_t::pi ) { vinputs += str( format( "input %s" ) % name_or_id( v ) ); }
-    else if ( gate_type[v] == gate_type_t::po ) { voutputs += str( format( "output %s" ) % name_or_id( v ) ); }
+    if ( gate_type[v] == gate_type_t::pi ) { vinputs.push_back( str( format( "input %s" ) % name_or_id( v ) ) ); }
+    else if ( gate_type[v] == gate_type_t::po ) { voutputs.push_back( str( format( "output %s" ) % name_or_id( v ) ) ); }
   }
 
   auto inputs = boost::join( vinputs, ", " );
@@ -123,12 +120,12 @@ void write_simple_fanout_graph( std::ostream& os, const simple_fanout_graph_t& g
       {
         auto s = boost::source( e, g );
         if ( gate_type[s] == gate_type_t::fanout ) { s = boost::source( in_edges[s].front(), g ); }
-        ports += str( format( ".%s( %s )" ) % edge_name[e].second % name_or_id( s ) );
+        ports.push_back( str( format( ".%s( %s )" ) % edge_name[e].second % name_or_id( s ) ) );
       }
 
       if ( boost::out_degree( v, g ) == 1u )
       {
-        ports += str( format( ".%s( %s )" ) % edge_name[*boost::out_edges( v, g ).first].first % name_or_id( v ) );
+        ports.push_back( str( format( ".%s( %s )" ) % edge_name[*boost::out_edges( v, g ).first].first % name_or_id( v ) ) );
       }
       os << format( "VERIFIC_%s g%s(%s);" ) % type_to_name( gate_type[v] ) % name_or_id( v ) % boost::join( ports, ", " ) << std::endl;
     }

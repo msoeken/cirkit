@@ -29,7 +29,6 @@
 #include <fstream>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphviz.hpp>
@@ -41,8 +40,6 @@
 
 namespace cirkit
 {
-
-using namespace boost::assign;
 
 /******************************************************************************
  * Types                                                                      *
@@ -143,7 +140,7 @@ struct aig_dot_writer
 
       for ( const auto& p : *vertex_levels )
       {
-        level_to_nodes[p.second] += p.first;
+        level_to_nodes[p.second].push_back( p.first );
       }
 
       for ( const auto& p : level_to_nodes )
@@ -218,7 +215,7 @@ aig_function aig_create_pi( aig_graph& aig, const std::string& name )
   aig_node node = add_vertex( aig );
   boost::get( boost::vertex_name, aig )[node] = 2u * ( num_vertices( aig ) - 1u );
 
-  boost::get_property( aig, boost::graph_name ).inputs += node;
+  boost::get_property( aig, boost::graph_name ).inputs.push_back( node );
   boost::get_property( aig, boost::graph_name ).node_names[node] = name;
 
   return { node, false };
@@ -227,7 +224,7 @@ aig_function aig_create_pi( aig_graph& aig, const std::string& name )
 void aig_create_po( aig_graph& aig, const aig_function& f, const std::string& name )
 {
   assert( num_vertices( aig ) != 0u && "Uninitialized AIG" );
-  boost::get_property( aig, boost::graph_name ).outputs += std::make_pair( f, name );
+  boost::get_property( aig, boost::graph_name ).outputs.push_back( std::make_pair( f, name ) );
 }
 
 aig_function aig_create_ci( aig_graph& aig, const std::string& name )
@@ -237,7 +234,7 @@ aig_function aig_create_ci( aig_graph& aig, const std::string& name )
   aig_node node = add_vertex( aig );
   boost::get( boost::vertex_name, aig )[node] = 2u * ( num_vertices( aig ) - 1u );
 
-  boost::get_property( aig, boost::graph_name ).cis += node;
+  boost::get_property( aig, boost::graph_name ).cis.push_back( node );
   boost::get_property( aig, boost::graph_name ).node_names[node] = name;
 
   return { node, false };
@@ -253,7 +250,7 @@ void aig_create_co( aig_graph& aig, const aig_function& f )
     info.constant_used = true;
   }
 
-  boost::get_property( aig, boost::graph_name ).cos += f;
+  boost::get_property( aig, boost::graph_name ).cos.push_back( f );
 }
 
 aig_function aig_create_and( aig_graph& aig, const aig_function& left, const aig_function& right )
