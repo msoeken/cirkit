@@ -30,6 +30,7 @@
  * @brief Write circuit to qpic format
  *
  * @author Mathias Soeken
+ * @author Gerhard Dueck
  * @since  2.3
  */
 
