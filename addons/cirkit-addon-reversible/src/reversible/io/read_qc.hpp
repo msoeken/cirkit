@@ -30,6 +30,7 @@
  * @brief Read QC files
  *
  * @author Mathias Soeken
+ * @author Gerhard Dueck
  * @since  2.3
  */
 

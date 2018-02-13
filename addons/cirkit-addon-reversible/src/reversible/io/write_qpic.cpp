@@ -155,6 +155,22 @@ void write_qpic( const circuit& circ, std::ostream& os, const properties::ptr& s
 
         items.push_back( gate );
       }
+      else if ( pauli.axis == pauli_axis::Y )
+      {
+	items.push_back( format_target( g.targets().front(), "" ) );
+
+	std::string gate = "G {$";
+	if ( pauli.root == 1u )
+	{
+	  gate += "Y";
+	}
+	else
+	{
+	  assert( false );
+	}
+	gate += "$}";
+	items.push_back( gate );
+      }
       else
       {
         assert( false );
