@@ -52,6 +52,7 @@
 #include <cli/commands/exorcism.hpp>
 #include <cli/commands/expr.hpp>
 #include <cli/commands/feather.hpp>
+#include <cli/commands/gen_esop.hpp>
 #include <cli/commands/gen_npn_circuit.hpp>
 #include <cli/commands/gen_trans_arith.hpp>
 #include <cli/commands/isop.hpp>
@@ -130,6 +131,7 @@ ALICE_ADD_COMMAND( plim, "RRAM" );
 
 ALICE_ADD_COMMAND( gen_npn_circuit, "Generator" );
 ALICE_ADD_COMMAND( gen_trans_arith, "Generator" );
+ALICE_ADD_COMMAND( gen_esop, "Generator" );
 
 ALICE_ADD_COMMAND( abc, "Various" );
 ALICE_ADD_COMMAND( bdd, "Various" );

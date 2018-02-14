@@ -36,8 +36,8 @@ esop_command::esop_command( const environment::ptr& env )
   : aig_base_command( env, "Generate ESOPs from AIGs" )
 {
   add_option( "--filename,filename", filename, "ESOP filename" );
-  add_option( "--collapse,-c", collapse, "collapsing method:\naig (0): ABC's AIG collapsing\nbdd (1): PSDKRO collapsing\naignew (2): CirKit's AIG collapsing", true );
-  add_option( "--minimize,-m", minimize, "minimization method:\n0: none\n1: exorcism", true );
+  add_option( "--collapse,-c", collapse, "collapsing method:\naig (0): ABC's AIG collapsing\nbdd (3): PSDKRO collapsing\naignew (1): CirKit's AIG collapsing", true );
+  add_option( "--minimize,-m", minimize, "minimization method: 0: none; 1: exorcism", true );
   add_flag( "--progress,-p", "show progress" );
   add_new_option();
 }
@@ -72,6 +72,7 @@ void esop_command::execute()
   }
 
   write_esop( esop, gia.num_inputs(), gia.num_outputs(), filename );
+  num_cubes = abc::Vec_WecSize( esop.get() );
 }
 
 nlohmann::json esop_command::log() const
@@ -79,7 +80,8 @@ nlohmann::json esop_command::log() const
   return nlohmann::json({
       {"collapse", static_cast<unsigned>( collapse )},
       {"collapse_runtime", collapse_runtime},
-      {"minimize", minimize}
+      {"minimize", minimize},
+      {"num_cubes", num_cubes}
     });
 }
 

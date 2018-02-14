@@ -25,16 +25,16 @@
  */
 
 /**
- * @file esop.hpp
+ * @file gen_esop.hpp
  *
- * @brief Generate ESOPs from AIGs
+ * @brief Enumerate ESOPs
  *
  * @author Mathias Soeken
- * @since  2.3
+ * @since  2.4
  */
 
-#ifndef CLI_ESOP_COMMAND_HPP
-#define CLI_ESOP_COMMAND_HPP
+#ifndef CLI_GEN_ESOP_COMMAND_HPP
+#define CLI_GEN_ESOP_COMMAND_HPP
 
 #include <cli/aig_command.hpp>
 #include <classical/abc/gia/gia.hpp>
@@ -42,25 +42,22 @@
 namespace cirkit
 {
 
-class esop_command : public aig_base_command
+class gen_esop_command : public cirkit_command
 {
 public:
-  esop_command( const environment::ptr& env );
+  gen_esop_command( const environment::ptr& env );
 
 protected:
-  rules validity_rules() const;
   void execute();
-
-public:
   nlohmann::json log() const;
 
 private:
-  std::string filename;
-  gia_graph::esop_cover_method collapse = gia_graph::esop_cover_method::bdd;
-  unsigned minimize = 1u;
-  unsigned num_cubes = 0u;
-
-  double collapse_runtime = 0.0;
+  unsigned num_vars = 6u;
+  unsigned max_cubes = 10u;
+  unsigned min_distance = 4u;
+  unsigned max_tries = 1000u;
+  unsigned seed = 0;
+  unsigned num_cubes = 0;
 };
 
 
