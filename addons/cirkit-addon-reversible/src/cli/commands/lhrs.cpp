@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <core/utils/conversion_utils.hpp>
 #include <core/utils/temporary_filename.hpp>
 #include <classical/abc/gia/gia_utils.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
@@ -85,14 +86,9 @@ void lhrs_command::execute()
   auto& circuits = env->store<circuit>();
   extend_if_new( circuits );
 
-  std::istringstream ms_str( mapping_strategy );
-  ms_str >> params.mapping_strategy;
-
-  std::istringstream cm_str( cover_method );
-  cm_str >> params.map_esop_params.cover_method;
-
-  std::istringstream s_str( script );
-  s_str >> params.map_esop_params.script;
+  from_string( params.mapping_strategy, mapping_strategy );
+  from_string( params.map_esop_params.cover_method, cover_method );
+  from_string( params.map_esop_params.script, script );
 
   params.sync();
 
@@ -133,10 +129,14 @@ nlohmann::json lhrs_command::log() const
   nlohmann::json map({
       {"runtime", stats->runtime},
       {"cut_size", cut_size},
+      {"mapping_strategy", to_string( params.mapping_strategy )},
+      {"additional_ancilla", params.additional_ancilla},
       {"lut_count", lut_count},
       {"onlylines", is_set( "onlylines" )},
       {"area_iters_init", area_iters_init},
       {"flow_iters_init", flow_iters_init},
+      {"esopscript", to_string( params.map_esop_params.script )},
+      {"esopcovermethod", to_string( params.map_esop_params.cover_method )},
       {"esoppostopt", is_set( "esoppostopt" )},
       {"satlut", is_set( "satlut" )},
       {"area_iters", params.map_luts_params.area_iters},
