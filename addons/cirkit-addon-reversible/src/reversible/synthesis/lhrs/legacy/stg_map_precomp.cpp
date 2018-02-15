@@ -87,7 +87,7 @@ void stg_map_precomp( circuit& circ, uint64_t function, unsigned num_vars,
   const auto it = stats.class_hash[num_vars - 2u].find( function );
   if ( it == stats.class_hash[num_vars - 2u].end() )
   {
-    if ( params.class_method == 0u ) /* spectral */
+    if ( true /*params.class_method == 0u*/ ) /* spectral */ // FOR affine we fall back here, the max_cut_size will be differen though
     {
       const auto idx = get_spectral_class( tt( 1 << num_vars, function ) );
       cfunc = optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx];
@@ -102,7 +102,11 @@ void stg_map_precomp( circuit& circ, uint64_t function, unsigned num_vars,
   {
     cfunc = it->second;
   }
-  ++stats.class_counter[num_vars - 2u][optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].at( cfunc )];
+
+  if ( params.class_method == 0u )
+  {
+    ++stats.class_counter[num_vars - 2u][optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].at( cfunc )];
+  }
 
   append_stg_from_line_map( circ, function, cfunc, line_map );
 }
