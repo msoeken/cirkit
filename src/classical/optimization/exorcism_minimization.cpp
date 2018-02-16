@@ -32,6 +32,8 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <boost/format.hpp>
 
@@ -47,6 +49,8 @@
 #include <base/exor/exor.h>
 #include <misc/vec/vecInt.h>
 #include <misc/vec/vecWec.h>
+
+#include <fmt/format.h>
 
 namespace abc
 {
@@ -436,7 +440,7 @@ void exorcism_minimization( const cube_vec_t& cubes, const properties::ptr& sett
 {
   const auto verbose      = get( settings, "verbose",      false );
   const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
-  const auto esopname     = get( settings, "esopname",     std::string( "/tmp/test.esop" ) );
+  const auto esopname     = get( settings, "esopname",     fmt::format( "/tmp/exorcism{}.esop", getpid() ) );
   const auto skip_parsing = get( settings, "skip_parsing", false );
 
   properties_timer t( statistics );
