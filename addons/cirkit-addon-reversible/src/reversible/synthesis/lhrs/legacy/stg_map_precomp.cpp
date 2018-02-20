@@ -29,11 +29,12 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include <core/utils/timer.hpp>
-#include <classical/functions/linear_classification.hpp>
 #include <classical/functions/spectral_canonization.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/synthesis/optimal_quantum_circuits.hpp>
+
+#include <kitty/kitty.hpp>
 
 namespace cirkit
 {
@@ -87,14 +88,17 @@ void stg_map_precomp( circuit& circ, uint64_t function, unsigned num_vars,
   const auto it = stats.class_hash[num_vars - 2u].find( function );
   if ( it == stats.class_hash[num_vars - 2u].end() )
   {
-    if ( true /*params.class_method == 0u*/ ) /* spectral */ // FOR affine we fall back here, the max_cut_size will be differen though
+    if ( params.class_method == 0u ) /* spectral */ // FOR affine we fall back here, the max_cut_size will be differen though
     {
       const auto idx = get_spectral_class( tt( 1 << num_vars, function ) );
       cfunc = optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx];
     }
     else                             /* affine */
     {
-      cfunc = exact_affine_classification_output( function, num_vars );
+      kitty::dynamic_truth_table tfunc( num_vars );
+      kitty::create_from_words( tfunc, &function, &function + 1 );
+      auto ccfunc = kitty::exact_affine_output_canonization( tfunc );
+      cfunc = ccfunc._bits[0];
     }
     stats.class_hash[num_vars - 2u].insert( std::make_pair( function, cfunc ) );
   }
@@ -106,6 +110,10 @@ void stg_map_precomp( circuit& circ, uint64_t function, unsigned num_vars,
   if ( params.class_method == 0u )
   {
     ++stats.class_counter[num_vars - 2u][optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].at( cfunc )];
+  }
+  else
+  {
+    ++stats.class_counter[num_vars - 2u][optimal_quantum_circuits::affine_classification_index[num_vars - 2u].at( cfunc )];
   }
 
   append_stg_from_line_map( circ, function, cfunc, line_map );

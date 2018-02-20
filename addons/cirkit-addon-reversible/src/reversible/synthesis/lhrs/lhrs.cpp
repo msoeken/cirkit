@@ -41,7 +41,6 @@
 #include <core/utils/temporary_filename.hpp>
 #include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
-#include <classical/functions/linear_classification.hpp>
 #include <classical/functions/spectral_canonization.hpp>
 #include <classical/io/read_blif.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>

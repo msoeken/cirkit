@@ -338,6 +338,7 @@ kitty::dynamic_truth_table gia_graph::truth_table( int output_index ) const
 
   kitty::dynamic_truth_table func( num_inputs() );
   kitty::create_from_words( func, words, words + num_words );
+  func.mask_bits();
   return func;
 }
 

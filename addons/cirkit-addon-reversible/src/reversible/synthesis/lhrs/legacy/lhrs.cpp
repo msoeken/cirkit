@@ -44,7 +44,6 @@
 #include <classical/abc/gia/gia.hpp>
 #include <classical/abc/gia/gia_utils.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
-#include <classical/functions/linear_classification.hpp>
 #include <classical/functions/spectral_canonization.hpp>
 #include <classical/io/read_blif.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
