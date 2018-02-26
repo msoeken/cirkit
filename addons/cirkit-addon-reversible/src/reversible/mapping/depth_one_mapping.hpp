@@ -36,6 +36,7 @@
 #ifndef DEPTH_ONE_MAPPING_HPP
 #define DEPTH_ONE_MAPPING_HPP
 
+#include <core/properties.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <reversible/circuit.hpp>
 

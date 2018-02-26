@@ -30,6 +30,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/iota.hpp>

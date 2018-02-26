@@ -43,7 +43,6 @@
 
 #include <cudd.h>
 
-#include <core/cube.hpp>
 #include <core/properties.hpp>
 #include <classical/abc/gia/gia.hpp>
 #include <classical/aig.hpp>

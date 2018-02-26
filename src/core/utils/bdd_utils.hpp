@@ -40,8 +40,6 @@
 
 #include <cuddObj.hh>
 
-#include <core/cube.hpp>
-
 #include <kitty/kitty.hpp>
 
 namespace cirkit
