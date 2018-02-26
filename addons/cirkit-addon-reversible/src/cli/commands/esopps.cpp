@@ -58,7 +58,7 @@ void esopps_command::execute()
   const auto& tts = env->store<tt>();
 
   auto tt = to_kitty( tts.current() );
-  auto esop = kitty::esop_from_optimum_pkrm( tt );
+  auto esop = kitty::esop_from_pprm( tt );
 
   circuit circ( tt.num_vars() );
 
