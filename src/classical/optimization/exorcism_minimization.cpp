@@ -50,6 +50,7 @@
 #include <misc/vec/vecInt.h>
 #include <misc/vec/vecWec.h>
 
+#include <cuddObj.hh>
 #include <fmt/format.h>
 
 namespace abc
@@ -433,10 +434,10 @@ void reduce_cover( bool progress, exorcism_script script )
 
 void exorcism_minimization( DdManager * cudd, DdNode * f, const properties::ptr& settings, const properties::ptr& statistics )
 {
-  return exorcism_minimization( bdd_to_cubes( cudd, f ), settings, statistics );
+  return exorcism_minimization( bdd_to_cubes( cudd, f ), Cudd_ReadSize( cudd ), settings, statistics );
 }
 
-void exorcism_minimization( const cube_vec_t& cubes, const properties::ptr& settings, const properties::ptr& statistics )
+void exorcism_minimization( const std::vector<kitty::cube>& cubes, unsigned num_inputs, const properties::ptr& settings, const properties::ptr& statistics )
 {
   const auto verbose      = get( settings, "verbose",      false );
   const auto on_cube      = get( settings, "on_cube",      cube_function_t() );
@@ -456,11 +457,11 @@ void exorcism_minimization( const cube_vec_t& cubes, const properties::ptr& sett
   {
     auto * level = abc::Vec_WecPushLevel( esop );
 
-    for ( auto i = 0u; i < cube.length(); ++i )
+    for ( auto i = 0u; i < num_inputs; ++i )
     {
-      if ( !cube.care()[i] ) { continue; }
+      if ( !cube.get_mask( i ) ) { continue; }
 
-      abc::Vec_IntPush( level, ( i << 1u ) | !cube.bits()[i] );
+      abc::Vec_IntPush( level, ( i << 1u ) | !cube.get_bit( i ) );
     }
     abc::Vec_IntPush( level, -1 );
   }
@@ -471,7 +472,7 @@ void exorcism_minimization( const cube_vec_t& cubes, const properties::ptr& sett
   }
 
   /* redict STDOUT because of one output line in Abc_ExorcismMain */
-  abc::Abc_ExorcismMain( esop, cubes.front().length(), 1, const_cast<char*>( esopname.c_str() ), 2, verbose, 20000, 0 );
+  abc::Abc_ExorcismMain( esop, num_inputs, 1, const_cast<char*>( esopname.c_str() ), 2, verbose, 20000, 0 );
 
   abc::Vec_WecFree( esop );
 

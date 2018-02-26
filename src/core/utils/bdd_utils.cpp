@@ -533,39 +533,41 @@ bdd_function_t compute_characteristic( const bdd_function_t& bdd, bool inputs_fi
   return {mgr, {f}};
 }
 
-cube_vec_t bdd_to_cubes( DdManager* manager, DdNode* f )
+std::vector<kitty::cube> bdd_to_cubes( DdManager* manager, DdNode* f )
 {
   DdGen * gen;
   int * ddcube;
   CUDD_VALUE_TYPE value;
 
-  cube_vec_t cubes;
+  std::vector<kitty::cube> cubes;
 
   Cudd_ForeachCube( manager, f, gen, ddcube, value )
   {
+    kitty::cube cube;
+
     boost::dynamic_bitset<> bits( manager->size ), care( manager->size );
     for ( auto i = 0; i < manager->size; ++i )
     {
       switch ( ddcube[i] )
       {
       case 0:
-        care[i] = true;
+        cube.set_mask( i );
         break;
       case 1:
-        bits[i] = true;
-        care[i] = true;
+        cube.set_bit( i );
+        cube.set_mask( i );
         break;
       default:
         break;
       }
     }
-    cubes.push_back( cube( bits, care ) );
+    cubes.push_back( cube );
   }
 
   return cubes;
 }
 
-cube_vec_t bdd_to_cubes( const Cudd& manager, BDD f )
+std::vector<kitty::cube> bdd_to_cubes( const Cudd& manager, BDD f )
 {
   return bdd_to_cubes( manager.getManager(), f.getNode() );
 }

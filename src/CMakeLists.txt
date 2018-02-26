@@ -7,6 +7,7 @@ add_cirkit_library(
   USE
     cudd
     obj
+    kitty
     fmt::fmt-header-only
 )
 
@@ -18,7 +19,6 @@ add_cirkit_library(
     ${Boost_SYSTEM_LIBRARIES}
     cirkit_core
     libabc-pic
-    kitty
     minisat-lib-static
 )
 

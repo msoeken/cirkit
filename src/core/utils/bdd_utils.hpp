@@ -42,6 +42,8 @@
 
 #include <core/cube.hpp>
 
+#include <kitty/kitty.hpp>
+
 namespace cirkit
 {
 
@@ -81,8 +83,8 @@ std::vector<BDD> bdd_copy( const Cudd& mgr_from, const std::vector<BDD>& from, c
 
 bdd_function_t compute_characteristic( const bdd_function_t& bdd, bool inputs_first );
 
-cube_vec_t bdd_to_cubes( DdManager* manager, DdNode* f );
-cube_vec_t bdd_to_cubes( const Cudd& manager, BDD f );
+std::vector<kitty::cube> bdd_to_cubes( DdManager* manager, DdNode* f );
+std::vector<kitty::cube> bdd_to_cubes( const Cudd& manager, BDD f );
 
 /******************************************************************************
  * new BDD operations                                                         *

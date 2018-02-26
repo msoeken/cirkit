@@ -46,6 +46,8 @@
 #include <reversible/optimization/esop_post_optimization.hpp>
 #include <reversible/utils/permutation.hpp>
 
+#include <kitty/kitty.hpp>
+
 namespace cirkit
 {
 
@@ -393,14 +395,16 @@ circuit simple_merge_heuristic( const circuit& base )
 }
 
 /* moves target-adjacent gates using recomputing control lines with exorcism */
-void exorcism_merge_heuristic_add_cubes( circuit& circ, const cube_vec_t& cubes, int current_target )
+void exorcism_merge_heuristic_add_cubes( circuit& circ, const std::vector<kitty::cube>& cubes, int current_target )
 {
   if ( cubes.empty() ) { return; }
 
   /* just one gate, directly add it */
   if ( cubes.size() == 1u )
   {
-    append_toffoli( circ, make_controls( cubes.front().care(), cubes.front().bits() ), current_target );
+    boost::dynamic_bitset<> _bits( circ.lines(), cubes.front()._bits );
+    boost::dynamic_bitset<> _care( circ.lines(), cubes.front()._mask );
+    append_toffoli( circ, make_controls( _care, _bits ), current_target );
     return;
   }
 
@@ -412,7 +416,7 @@ void exorcism_merge_heuristic_add_cubes( circuit& circ, const cube_vec_t& cubes,
   auto settings = std::make_shared<properties>();
   settings->set( "on_cube", cube_function_t( f ) );
   settings->set( "verbose", false );
-  exorcism_minimization( cubes, settings );
+  exorcism_minimization( cubes, circ.lines(), settings );
 }
 
 circuit exorcism_merge_heuristic( const circuit& base )
@@ -422,7 +426,7 @@ circuit exorcism_merge_heuristic( const circuit& base )
   copy_metadata( base, circ );
 
   auto current_target = -1;
-  cube_vec_t cubes;
+  std::vector<kitty::cube> cubes;
 
   for ( const auto& gate : base )
   {
@@ -448,7 +452,7 @@ circuit exorcism_merge_heuristic( const circuit& base )
 
     /* add new cube */
     const auto mask = control_polarity_mask( gate.controls(), circ.lines() );
-    cubes.push_back( cube( mask.second, mask.first ) );
+    cubes.emplace_back( uint32_t( mask.second.to_ulong() ), uint32_t( mask.first.to_ulong() ) );
   }
 
   /* leftovers? */

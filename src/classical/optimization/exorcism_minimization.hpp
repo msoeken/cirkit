@@ -48,6 +48,8 @@
 #include <classical/abc/gia/gia.hpp>
 #include <classical/aig.hpp>
 
+#include <kitty/kitty.hpp>
+
 namespace cirkit
 {
 
@@ -62,7 +64,8 @@ void exorcism_minimization( DdManager * cudd, DdNode * f,
                             const properties::ptr& settings = properties::ptr(),
                             const properties::ptr& statistics = properties::ptr() );
 
-void exorcism_minimization( const cube_vec_t& cubes,
+void exorcism_minimization( const std::vector<kitty::cube>& cubes,
+                            unsigned num_inputs,
                             const properties::ptr& settings = properties::ptr(),
                             const properties::ptr& statistics = properties::ptr() );
 
