@@ -64,12 +64,44 @@ void stg4_command::execute()
           const auto& stg = boost::any_cast<stg_tag>( g.type() );
           const auto& f = stg.function;
           const auto num_vars = tt_num_vars( f );
+
+          /* try spectral classes first */
           if ( num_vars >= 2u && num_vars <= 5u )
           {
             const auto it = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].find( f.to_ulong() );
             if ( it != optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].end() )
             {
               const auto subcirc = circuit_from_string( optimal_quantum_circuits::spectral_classification[num_vars - 2u][it->second] );
+
+              std::vector<unsigned> line_mapping;
+              for ( const auto& c : g.controls() )
+              {
+                line_mapping.push_back( c.line() );
+              }
+              line_mapping.push_back( g.targets().front() );
+
+              if ( subcirc.lines() > g.size() )
+              {
+                if ( ancilla == -1 )
+                {
+                  ancilla = circ.lines();
+                  add_line_to_circuit( circ, "h", "h" );
+                }
+                line_mapping.push_back( ancilla );
+              }
+
+              append_circuit( circ, subcirc, {}, line_mapping );
+              return true;
+            }
+          }
+
+          /* then affine classes */
+          if ( num_vars >= 2u && num_vars <= 4u )
+          {
+            const auto it = optimal_quantum_circuits::affine_classification_index[num_vars - 2u].find( f.to_ulong() );
+            if ( it != optimal_quantum_circuits::affine_classification_index[num_vars - 2u].end() )
+            {
+              const auto subcirc = circuit_from_string( optimal_quantum_circuits::affine_classification[num_vars - 2u][it->second] );
 
               std::vector<unsigned> line_mapping;
               for ( const auto& c : g.controls() )
