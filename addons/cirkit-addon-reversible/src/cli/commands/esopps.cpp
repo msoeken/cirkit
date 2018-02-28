@@ -64,40 +64,28 @@ void esopps_command::execute()
 
   for ( const auto& cube : esop )
   {
-    std::vector<unsigned> negs;
     std::vector<unsigned> ctrls;
 
-    auto bits = cube._bits;
     auto mask = cube._mask;
+
+    assert( cube._bits == mask );
 
     for ( auto i = 0u; i < tt.num_vars(); ++i )
     {
       if ( mask & 1 )
       {
         ctrls.push_back( i );
-        if ( !( bits & 1 ) )
-        {
-          negs.push_back( i );
-        }
       }
-      bits >>= 1;
       mask >>= 1;
     }
 
-    assert( !ctrls.empty() );
+    /* cannot pick up on global phase */
+    if ( ctrls.empty() ) continue;
 
-    for ( auto n : negs )
-    {
-      append_not( circ, n );
-    }
     auto& g = append_pauli( circ, ctrls.front(), pauli_axis::Z );
     for ( auto i = 1; i < ctrls.size(); ++i )
     {
       g.add_control( make_var( ctrls[i], true ) );
-    }
-    for ( auto n : negs )
-    {
-      append_not( circ, n );
     }
   }
 
