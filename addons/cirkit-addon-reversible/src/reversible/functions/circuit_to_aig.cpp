@@ -112,13 +112,30 @@ aig_graph circuit_to_aig( const circuit& circ )
     else if ( is_stg( g ) )
     {
       const auto& stg = boost::any_cast<stg_tag>( g.type() );
-      std::vector<aig_function> operands;
-      for ( const auto& c : g.controls() )
-      {
-        operands.push_back( make_function( fs[c.line()], false ) );
-      }
       const auto target = g.targets().front();
-      fs[target] = aig_create_xor( aig, fs[target], aig_from_truth_table_naive( aig, stg.function, operands ) );
+
+      /* special cases */
+      if ( stg.function.num_vars() == 0u )
+      {
+        if ( stg.function._bits[0u] == 0 ) /* zero function */
+        {
+          // do nothing
+        }
+        else
+        {
+          // invert target (like NOT gate)
+          fs[target].complemented ^= 1;
+        }
+      }
+      else
+      {
+        std::vector<aig_function> operands;
+        for ( const auto& c : g.controls() )
+        {
+          operands.push_back( make_function( fs[c.line()], false ) );
+        }
+        fs[target] = aig_create_xor( aig, fs[target], aig_from_truth_table_naive( aig, stg.function, operands ) );
+      }
     }
     else
     {
