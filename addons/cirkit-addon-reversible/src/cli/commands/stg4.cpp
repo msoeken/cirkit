@@ -63,12 +63,12 @@ void stg4_command::execute()
         {
           const auto& stg = boost::any_cast<stg_tag>( g.type() );
           const auto& f = stg.function;
-          const auto num_vars = tt_num_vars( f );
+          const auto num_vars = f.num_vars();
 
           /* try spectral classes first */
           if ( num_vars >= 2u && num_vars <= 5u )
           {
-            const auto it = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].find( f.to_ulong() );
+            const auto it = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].find( f._bits[0] );
             if ( it != optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].end() )
             {
               const auto subcirc = circuit_from_string( optimal_quantum_circuits::spectral_classification[num_vars - 2u][it->second] );
@@ -98,7 +98,7 @@ void stg4_command::execute()
           /* then affine classes */
           if ( num_vars >= 2u && num_vars <= 4u )
           {
-            const auto it = optimal_quantum_circuits::affine_classification_index[num_vars - 2u].find( f.to_ulong() );
+            const auto it = optimal_quantum_circuits::affine_classification_index[num_vars - 2u].find( f._bits[0] );
             if ( it != optimal_quantum_circuits::affine_classification_index[num_vars - 2u].end() )
             {
               const auto subcirc = circuit_from_string( optimal_quantum_circuits::affine_classification[num_vars - 2u][it->second] );

@@ -166,7 +166,7 @@ gate& create_module( gate& g, const circuit& circ, const std::string& name, cons
   return g;
 }
 
-gate& create_stg( gate& g, const boost::dynamic_bitset<>& function, const gate::control_container& controls, unsigned target )
+gate& create_stg( gate& g, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target )
 {
   boost::for_each( controls, [&g](variable c) { g.add_control( c ); } );
   g.add_target( target );
@@ -237,7 +237,7 @@ control_line_adder append_fredkin( circuit& circ )
   return append_gate( circ, fredkin_tag() );
 }
 
-gate& append_stg( circuit& circ, const boost::dynamic_bitset<>& function, const gate::control_container& controls, unsigned target )
+gate& append_stg( circuit& circ, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target )
 {
   return create_stg( circ.append_gate(), function, controls, target );
 }
@@ -301,7 +301,7 @@ control_line_adder prepend_fredkin( circuit& circ )
   return prepend_gate( circ, fredkin_tag() );
 }
 
-gate& prepend_stg( circuit& circ, const boost::dynamic_bitset<>& function, const gate::control_container& controls, unsigned target )
+gate& prepend_stg( circuit& circ, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target )
 {
   return create_stg( circ.prepend_gate(), function, controls, target );
 }
@@ -365,7 +365,7 @@ control_line_adder insert_fredkin( circuit& circ, unsigned n )
   return insert_gate( circ, n, fredkin_tag() );
 }
 
-gate& insert_stg( circuit& circ, unsigned n, const boost::dynamic_bitset<>& function, const gate::control_container& controls, unsigned target )
+gate& insert_stg( circuit& circ, unsigned n, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target )
 {
   return create_stg( circ.insert_gate( n ), function, controls, target );
 }

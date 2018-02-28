@@ -118,7 +118,7 @@ aig_graph circuit_to_aig( const circuit& circ )
         operands.push_back( make_function( fs[c.line()], false ) );
       }
       const auto target = g.targets().front();
-      fs[target] = aig_create_xor( aig, fs[target], aig_from_truth_table_naive( aig, to_kitty( stg.function ), operands ) );
+      fs[target] = aig_create_xor( aig, fs[target], aig_from_truth_table_naive( aig, stg.function, operands ) );
     }
     else
     {

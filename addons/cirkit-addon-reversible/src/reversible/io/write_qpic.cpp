@@ -106,7 +106,7 @@ void write_qpic( const circuit& circ, std::ostream& os, const properties::ptr& s
         items.push_back( format_control( c ) );
       }
 
-      items.push_back( boost::str( boost::format( "G:style=rounded_corners=2pt \\rotatebox{90}{\\scriptsize\\texttt{%s}}") % tt_to_hex( stg.function ) ) );
+      items.push_back( boost::str( boost::format( "G:style=rounded_corners=2pt \\rotatebox{90}{\\scriptsize\\texttt{%s}}") % kitty::to_hex( stg.function ) ) );
       for ( const auto& t : g.targets() )
       {
         items.push_back( format_target( t, "+" ) );

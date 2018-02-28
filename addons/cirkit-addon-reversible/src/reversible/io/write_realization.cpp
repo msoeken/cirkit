@@ -101,7 +101,7 @@ namespace cirkit
     else if ( is_stg( g ) )
     {
       const auto stg = boost::any_cast<stg_tag>( g.type() );
-      return boost::str( boost::format( "stg%d[%s]" ) % g.size() % tt_to_hex( stg.function ) );
+      return boost::str( boost::format( "stg%d[%s]" ) % g.size() % kitty::to_hex( stg.function ) );
     }
     else
     {

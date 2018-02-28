@@ -63,10 +63,16 @@ gate& append_stg_from_line_map( circuit& circ, uint64_t func, uint64_t affine_cl
   g.add_target( line_map.back() );
 
   stg_tag stg;
-  stg.function = boost::dynamic_bitset<>( 1 << num_vars, func );
-  stg.affine_class = boost::dynamic_bitset<>( 1 << num_vars, affine_class );
+
+  kitty::dynamic_truth_table kfunc( num_vars );
+  kitty::create_from_words( kfunc, &func, &func + 1 );
+  stg.function = kfunc;
+
+  kitty::dynamic_truth_table kclass( num_vars );
+  kitty::create_from_words( kclass, &affine_class, &affine_class + 1 );
+  stg.affine_class = kclass;
   g.set_type( stg );
-  circ.annotate( g, "affine", tt_to_hex( stg.affine_class ) );
+  circ.annotate( g, "affine", kitty::to_hex( stg.affine_class ) );
 
   return g;
 }

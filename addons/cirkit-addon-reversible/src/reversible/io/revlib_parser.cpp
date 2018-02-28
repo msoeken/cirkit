@@ -707,11 +707,13 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
             auto func = tt_from_expression( parse_expression( expr ) );
             tt_extend( func, params.size() - 1u );
 
-            stg_t.function = func;
+            stg_t.function = to_kitty( func );
           }
           else
           {
-            stg_t.function = boost::dynamic_bitset<>( convert_hex2bin( argument ) );
+            kitty::dynamic_truth_table func( line_indices.size() - 1 );
+            kitty::create_from_hex_string( func, argument );
+            stg_t.function = func;
           }
           gate_type = stg_t;
         }

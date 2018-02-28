@@ -153,7 +153,7 @@ namespace cirkit
           f_pattern.set( i );
         }
       }
-      if ( stg.function.test( f_pattern.to_ulong() ) )
+      if ( kitty::get_bit( stg.function, f_pattern.to_ulong() ) )
       {
         input.flip( g.targets().front() );
       }

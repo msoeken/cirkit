@@ -75,13 +75,16 @@ void stg_as_command::execute()
             const auto& stg = boost::any_cast<stg_tag>( g.type() );
             const auto num_vars = g.controls().size();
 
-            boost::dynamic_bitset<> cls = stg.affine_class;
-            if ( cls.empty() )
+            auto cls = stg.affine_class;
+            if ( cls.num_vars() == 0 )
             {
               if ( is_set( "class" ) && num_vars >= 2u && num_vars <= 5u )
               {
-                const auto idx = get_spectral_class( stg.function );
-                cls = tt( 1 << num_vars, optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx] );
+                const auto idx = get_spectral_class( from_kitty( stg.function ) );
+                kitty::dynamic_truth_table ncls( num_vars );
+                const auto word = optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx];
+                kitty::create_from_words( ncls, &word, &word + 1 );
+                cls = ncls;
               }
               else
               {
@@ -103,7 +106,7 @@ void stg_as_command::execute()
     extend_if_new( circuits );
 
     circuit circ( tt_num_vars( tts[func] ) + 1u );
-    add_stg_as_other( circ, tts[func], tts[real] );
+    add_stg_as_other( circ, to_kitty( tts[func] ), to_kitty( tts[real] ) );
     circuits.current() = circ;
   }
 }

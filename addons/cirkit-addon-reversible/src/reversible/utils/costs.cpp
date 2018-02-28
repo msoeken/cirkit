@@ -175,16 +175,16 @@ cost_t t_costs::operator()( const gate& g, unsigned lines ) const
   else if ( is_stg( g ) )
   {
     const auto& tag = boost::any_cast<stg_tag>( g.type() );
-    const auto spec = tag.affine_class.size() ? tag.affine_class : tag.function;
-    const auto num_vars = boost::integer_log2( spec.size() );
+    const auto spec = tag.affine_class.num_vars() ? tag.affine_class : tag.function;
+    const auto num_vars = spec.num_vars();
     if ( num_vars >= 2 && num_vars <= 5 )
     {
       const auto& idx_map = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u];
-      const auto it = idx_map.find( spec.to_ulong() );
+      const auto it = idx_map.find( spec._bits[0u] );
       if ( it == idx_map.end() )
       {
         const auto& idx_map = optimal_quantum_circuits::affine_classification_index[num_vars - 2u];
-        const auto it = idx_map.find( spec.to_ulong() );
+        const auto it = idx_map.find( spec._bits[0u] );
         if ( it == idx_map.end() )
         {
           return cost_invalid();

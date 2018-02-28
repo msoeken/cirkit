@@ -28,6 +28,7 @@
 
 #include <numeric>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/pending/integer_log2.hpp>
 
 #include <core/utils/range_utils.hpp>
@@ -50,16 +51,16 @@ namespace cirkit
  * Public functions                                                           *
  ******************************************************************************/
 
-void add_stg_as_other( circuit& circ, const tt& func, const tt& func_real, const std::vector<unsigned>& line_map )
+void add_stg_as_other( circuit& circ, const kitty::dynamic_truth_table& func, const kitty::dynamic_truth_table& func_real, const std::vector<unsigned>& line_map )
 {
-  const auto num_vars = tt_num_vars( func );
+  const auto num_vars = func.num_vars();
 
   std::vector<kitty::detail::spectral_operation> trans;
-  const auto func_norm = kitty::exact_spectral_canonization( to_kitty( func ),
+  const auto func_norm = kitty::exact_spectral_canonization( func,
                                                              [&trans]( const std::vector<kitty::detail::spectral_operation>& ops ) {
                                                                std::copy( ops.begin(), ops.end(), std::back_inserter( trans ) );
                                                              } );
-  const auto func_real_norm = kitty::exact_spectral_canonization( to_kitty( func_real ),
+  const auto func_real_norm = kitty::exact_spectral_canonization( func_real,
                                                                   [&trans]( const std::vector<kitty::detail::spectral_operation>& ops ) {
                                                                     std::copy( ops.rbegin(), ops.rend(), std::back_inserter( trans ) );
                                                                   } );
