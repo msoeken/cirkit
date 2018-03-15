@@ -176,7 +176,7 @@ public:
         kitty::create_from_cubes( f, cubes );
         std::vector<uint8_t> support = min_base_inplace( f );
         kitty::dynamic_truth_table tt_f (support.size());
-        kitty::shrink_to(tt_f, f);
+        kitty::shrink_to_inplace(tt_f, f);
 
         gate::control_container controls;
 
@@ -218,7 +218,7 @@ public:
       kitty::create_from_cubes( f, cubes );
       std::vector<uint8_t> support = min_base_inplace( f );
       kitty::dynamic_truth_table tt_f (support.size());
-      kitty::shrink_to(tt_f, f);
+      kitty::shrink_to_inplace(tt_f, f);
 
       gate::control_container controls;
 
