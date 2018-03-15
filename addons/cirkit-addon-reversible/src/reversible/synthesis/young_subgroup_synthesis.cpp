@@ -38,14 +38,16 @@
 
 #include <core/utils/timer.hpp>
 
+#include <classical/utils/truth_table_utils.hpp>
+#include <core/utils/bdd_utils.hpp>
 #include <reversible/circuit.hpp>
-#include <reversible/truth_table.hpp>
 #include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/clear_circuit.hpp>
 #include <reversible/functions/copy_metadata.hpp>
 #include <reversible/functions/fully_specified.hpp>
 #include <reversible/io/write_pla.hpp>
+#include <reversible/truth_table.hpp>
 
 #include <classical/optimization/optimization.hpp>
 
@@ -56,7 +58,7 @@ using namespace boost::assign;
 namespace cirkit
 {
 
-typedef std::vector<std::vector<int> > truth_table_column_t;
+typedef std::vector<std::vector<int>> truth_table_column_t;
 
 class young_subgroup_synthesis_manager
 {
@@ -76,7 +78,8 @@ public:
 
     for ( unsigned i = 0u; i < circ.lines(); ++i )
     {
-      if ( !cube.second[i] ) continue;
+      if ( !cube.second[i] )
+        continue;
       controls += make_var( i, cube.first[i] );
     }
 
@@ -106,15 +109,15 @@ public:
   void basic_first_step()
   {
     unsigned bw = spec.num_inputs();
-    for (binary_truth_table::const_iterator it = spec.begin(); it != spec.end(); ++it)
+    for ( binary_truth_table::const_iterator it = spec.begin(); it != spec.end(); ++it )
     {
       std::vector<int> in_cube, out_cube;
       binary_truth_table::in_const_iterator c = it->first.first;
       binary_truth_table::out_const_iterator ci = it->second.first;
-      for (unsigned i = 0; i < bw; ++i)
+      for ( unsigned i = 0; i < bw; ++i )
       {
-        in_cube.push_back(**(c + i));
-        out_cube.push_back(**(ci + i));
+        in_cube.push_back( **( c + i ) );
+        out_cube.push_back( **( ci + i ) );
       }
       vf_in += in_cube;
       vb_in += out_cube;
@@ -147,7 +150,8 @@ public:
 
         for ( unsigned j = 0; j < circ.lines(); ++j )
         {
-          if ( j == pos ) continue;
+          if ( j == pos )
+            continue;
           cube &= in[i][j] == 1 ? cudd.bddVar( j ) : !cudd.bddVar( j );
         }
 
@@ -160,68 +164,113 @@ public:
 
   void add_gates( unsigned& start )
   {
+    //BDDs containing the two control function corresponding to the adjusted inputs: the one in the front and the one in the back
     BDD bdd_front = get_control_function( vf_in, vf_out );
-    BDD bdd_back  = get_control_function( vb_in, vb_out );
-
-    if ( verbose )
+    BDD bdd_back = get_control_function( vb_in, vb_out ); // I should take these two and build stg from that
+    if ( stg )
     {
-      std::cout << "BDD for front:" << std::endl;
-      bdd_front.PrintMinterm();
-    }
-    synthesis_gate(bdd_front, pos, start);
-    unsigned back = start;
+      for ( const auto& bdd : std::vector<BDD>{bdd_back, bdd_front} )
+      {
+        auto cubes = bdd_to_cubes( cudd, bdd );
+        kitty::dynamic_truth_table f( spec.num_inputs() );
+        kitty::create_from_cubes( f, cubes );
+        std::vector<uint8_t> support = min_base_inplace( f );
+        kitty::dynamic_truth_table tt_f (support.size());
+        kitty::shrink_to(tt_f, f);
 
-    if ( verbose )
-    {
-      std::cout << "BDD for back:" << std::endl;
-      bdd_back.PrintMinterm();
+        gate::control_container controls;
+
+        for ( auto c : support )
+        {
+          controls.push_back( make_var( c ) );
+        }
+
+        insert_stg( circ, start, tt_f, controls, pos );
+      }
+      start++;
     }
-    synthesis_gate(bdd_back, pos, back);
+    else
+    {
+      if ( verbose )
+      {
+        std::cout << "BDD for front:" << std::endl;
+        bdd_front.PrintMinterm();
+      }
+      synthesis_gate( bdd_front, pos, start );
+      unsigned back = start;
+
+      if ( verbose )
+      {
+        std::cout << "BDD for back:" << std::endl;
+        bdd_back.PrintMinterm();
+      }
+      synthesis_gate( bdd_back, pos, back );
+    }
   }
 
   void add_last_gate( unsigned& start )
   {
     BDD bdd = get_control_function( vf_in, vb_in );
-
-    if ( verbose )
+    if ( stg )
     {
-      std::cout << "BDD for middle:" << std::endl;
-      bdd.PrintMinterm();
+      auto cubes = bdd_to_cubes( cudd, bdd );
+      kitty::dynamic_truth_table f( spec.num_inputs() );
+      kitty::create_from_cubes( f, cubes );
+      std::vector<uint8_t> support = min_base_inplace( f );
+      kitty::dynamic_truth_table tt_f (support.size());
+      kitty::shrink_to(tt_f, f);
+
+      gate::control_container controls;
+
+      for ( auto c : support )
+      {
+        controls.push_back( make_var( c ) );
+      }
+
+      insert_stg( circ, start, tt_f, controls, pos );
     }
-    synthesis_gate( bdd, pos, start);
+    else
+    {
+      if ( verbose )
+      {
+        std::cout << "BDD for middle:" << std::endl;
+        bdd.PrintMinterm();
+      }
+      synthesis_gate( bdd, pos, start );
+    }
   }
 
   void next_step()
   {
     vf_in = vf_out;
     vb_in = vb_out;
-    for (unsigned i = 0; i < vf_in.size(); ++i) {
+    for ( unsigned i = 0; i < vf_in.size(); ++i )
+    {
       vf_out[i][pos] = -1;
       vb_out[i][pos] = -1;
-
     }
   }
 
   void build_shape()
   {
     unsigned j = 0u, nb_cubes = 0u;
-    while (j < vf_out.size())
+    while ( j < vf_out.size() )
     {
       unsigned k = j;
-      while (k < vf_out.size() && vf_out[k][pos] != -1)
+      while ( k < vf_out.size() && vf_out[k][pos] != -1 )
       {
         k++;
       }
 
-      if (k < vf_out.size())
+      if ( k < vf_out.size() )
       {
         std::vector<int> v = vf_out[k];
         vf_out[k][pos] = 0;
-        unsigned index = find(vf_out, v);
+        unsigned index = find( vf_out, v );
         vf_out[index][pos] = 1;
         v = vb_out[index];
         vb_out[index][pos] = 1;
-        index = find(vb_out, v);
+        index = find( vb_out, v );
         vb_out[index][pos] = 0;
         j = index;
         nb_cubes++;
@@ -235,6 +284,7 @@ public:
 
   void add_gates_for_line( unsigned line )
   {
+    //assert this line has not been already adjusted
     assert( boost::find( adjusted_lines, line ) == adjusted_lines.end() );
     pos = line;
 
@@ -269,38 +319,42 @@ public:
   unsigned pos, start;
   bool verbose;
   dd_based_esop_optimization_func esopmin;
+  bool stg;
 
   truth_table_column_t vf_in, vf_out, vb_in, vb_out;
 };
 
-
-bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics)
+bool young_subgroup_synthesis( circuit& circ, const binary_truth_table& spec, properties::ptr settings, properties::ptr statistics )
 {
   /* Settings */
-  const auto verbose  = get( settings, "verbose",  false                             );
-        auto ordering = get( settings, "ordering", std::vector<unsigned>()           );
-  const auto esopmin  = get( settings, "esopmin",  dd_based_esop_optimization_func() );
+  const auto verbose = get( settings, "verbose", false );
+  auto ordering = get( settings, "ordering", std::vector<unsigned>() );
+  const auto esopmin = get( settings, "esopmin", dd_based_esop_optimization_func() );
+
+  const auto stg = get( settings, "stg", false );
 
   properties_timer t( statistics );
 
   // circuit has to be empty
-  clear_circuit(circ);
+  clear_circuit( circ );
 
-  // truth table has to be fully specified
-  if (!fully_specified(spec)) {
-    set_error_message(statistics, "truth table `spec` is not fully specified.");
+  // truth table has to be fully specified, is the function to be synthetized
+  if ( !fully_specified( spec ) )
+  {
+    set_error_message( statistics, "truth table `spec` is not fully specified." );
     return false;
   }
 
-  circ.set_lines(spec.num_inputs());
+  circ.set_lines( spec.num_inputs() );
 
   // copy metadata
-  copy_metadata(spec, circ);
+  copy_metadata( spec, circ );
 
   // manager
   young_subgroup_synthesis_manager mgr( circ, spec );
   mgr.verbose = verbose;
   mgr.esopmin = esopmin;
+  mgr.stg = stg;
 
   // variable ordering
   if ( ordering.empty() )
@@ -316,7 +370,7 @@ bool young_subgroup_synthesis(circuit& circ, const binary_truth_table& spec, pro
   return true;
 }
 
-truth_table_synthesis_func young_subgroup_synthesis_func(properties::ptr settings, properties::ptr statistics)
+truth_table_synthesis_func young_subgroup_synthesis_func( properties::ptr settings, properties::ptr statistics )
 {
   truth_table_synthesis_func f = [&settings, &statistics]( circuit& circ, const binary_truth_table& spec ) {
     return young_subgroup_synthesis( circ, spec, settings, statistics );
@@ -324,7 +378,6 @@ truth_table_synthesis_func young_subgroup_synthesis_func(properties::ptr setting
   f.init( settings, statistics );
   return f;
 }
-
 }
 
 // Local Variables:
