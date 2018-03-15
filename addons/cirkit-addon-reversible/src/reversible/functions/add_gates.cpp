@@ -178,6 +178,18 @@ gate& create_stg( gate& g, const kitty::dynamic_truth_table& function, const gat
   return g;
 }
 
+gate& create_stg( gate& g, const kitty::dynamic_truth_table& function, const std::vector<unsigned>& controls, unsigned target )
+{
+  boost::for_each( controls, [&g](auto c) { g.add_control( make_var( c ) ); } );
+  g.add_target( target );
+
+  stg_tag stg;
+  stg.function = function;
+
+  g.set_type( stg );
+  return g;
+}
+
 ////////////////////////////// append_ functions
 
 gate& append_toffoli( circuit& circ, const gate::control_container& controls, unsigned target )
@@ -238,6 +250,11 @@ control_line_adder append_fredkin( circuit& circ )
 }
 
 gate& append_stg( circuit& circ, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target )
+{
+  return create_stg( circ.append_gate(), function, controls, target );
+}
+
+gate& append_stg( circuit& circ, const kitty::dynamic_truth_table& function, const std::vector<unsigned>& controls, unsigned target )
 {
   return create_stg( circ.append_gate(), function, controls, target );
 }
@@ -306,6 +323,11 @@ gate& prepend_stg( circuit& circ, const kitty::dynamic_truth_table& function, co
   return create_stg( circ.prepend_gate(), function, controls, target );
 }
 
+gate& prepend_stg( circuit& circ, const kitty::dynamic_truth_table& function, const std::vector<unsigned>& controls, unsigned target )
+{
+  return create_stg( circ.prepend_gate(), function, controls, target );
+}
+
 ////////////////////////////// insert_ functions
 
 gate& insert_toffoli( circuit& circ, unsigned n, const gate::control_container& controls, unsigned target )
@@ -366,6 +388,11 @@ control_line_adder insert_fredkin( circuit& circ, unsigned n )
 }
 
 gate& insert_stg( circuit& circ, unsigned n, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target )
+{
+  return create_stg( circ.insert_gate( n ), function, controls, target );
+}
+
+gate& insert_stg( circuit& circ, unsigned n, const kitty::dynamic_truth_table& function, const std::vector<unsigned>& controls, unsigned target )
 {
   return create_stg( circ.insert_gate( n ), function, controls, target );
 }

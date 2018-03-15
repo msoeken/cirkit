@@ -309,6 +309,7 @@ control_line_adder append_toffoli( circuit& circ );
 control_line_adder append_fredkin( circuit& circ );
 
 gate& append_stg( circuit& circ, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target );
+gate& append_stg( circuit& circ, const kitty::dynamic_truth_table& function, const std::vector<unsigned>& controls, unsigned target );
 
 
 /**
@@ -435,6 +436,7 @@ control_line_adder prepend_toffoli( circuit& circ );
 control_line_adder prepend_fredkin( circuit& circ );
 
 gate& prepend_stg( circuit& circ, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target );
+gate& prepend_stg( circuit& circ, const kitty::dynamic_truth_table& function, const std::vector<unsigned>& controls, unsigned target );
 
 
 
@@ -571,6 +573,7 @@ control_line_adder insert_toffoli( circuit& circ, unsigned n );
 control_line_adder insert_fredkin( circuit& circ, unsigned n );
 
 gate& insert_stg( circuit& circ, unsigned n, const kitty::dynamic_truth_table& function, const gate::control_container& controls, unsigned target );
+gate& insert_stg( circuit& circ, unsigned n, const kitty::dynamic_truth_table& function, const std::vector<unsigned>& controls, unsigned target );
 
 
 }
