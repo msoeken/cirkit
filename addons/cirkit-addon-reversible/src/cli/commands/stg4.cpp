@@ -32,6 +32,7 @@
 #include <reversible/target_tags.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/functions/add_circuit.hpp>
+#include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/add_line_to_circuit.hpp>
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/rewrite_circuit.hpp>
@@ -65,6 +66,42 @@ void stg4_command::execute()
           const auto& f = stg.function;
           const auto num_vars = f.num_vars();
 
+          std::cout << f._bits[0] << std::endl;
+          /* if there are zero variables in f */
+          if ( num_vars == 0 )
+          {
+            if (f._bits[0] == 0)
+            {
+              std::cout << "add nothing"<< std::endl;
+
+              return true;
+            }
+            else if(f._bits[0] == 1)
+            {
+              std::cout << "add not"<< std::endl;
+
+              append_not(circ, g.targets().front());
+              return true;
+            }
+          }
+          /* if there is one variable*/
+          if( num_vars == 1 )
+          {
+            if( f._bits[0] == 1)
+            {
+              std::cout << "add pos cnot"<< std::endl;
+
+              append_cnot(circ, make_var(g.controls().front().line(), true), g.targets().front());
+              return true;
+            }
+            else if( f._bits[0] == 2)
+            {
+              std::cout << "add neg cnot"<< std::endl;
+
+              append_cnot(circ, make_var(g.controls().front().line(), false), g.targets().front());
+              return true;
+            } 
+          }
           /* try spectral classes first */
           if ( num_vars >= 2u && num_vars <= 5u )
           {
