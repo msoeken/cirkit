@@ -46,7 +46,7 @@ stg_as_command::stg_as_command( const environment::ptr& env )
   add_option( "--func,-f", func, "id of truth table to realize", true );
   add_option( "--as,-a", real, "id of truth table to use in gate", true );
   add_flag( "--circuit,-c", "perform on single-target gates with affine annotations in circuit" );
-  add_flag( "--class", "automatically compute affine classes if not annotated (only with option circuit)" );
+  add_flag( "--classes", "automatically compute affine classes if not annotated (only with option circuit)" );
   add_new_option();
 }
 
@@ -78,7 +78,7 @@ void stg_as_command::execute()
             auto cls = stg.affine_class;
             if ( cls.num_vars() == 0 )
             {
-              if ( is_set( "class" ) && num_vars >= 2u && num_vars <= 5u )
+              if ( is_set( "classes" ) && num_vars >= 2u && num_vars <= 5u )
               {
                 const auto idx = get_spectral_class( from_kitty( stg.function ) );
                 kitty::dynamic_truth_table ncls( num_vars );

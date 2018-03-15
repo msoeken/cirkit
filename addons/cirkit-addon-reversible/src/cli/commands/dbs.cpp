@@ -73,6 +73,7 @@ dbs_command::dbs_command( const environment::ptr& env )
 {
   add_option( "--ordering", ordering, "complete variable ordering (space separated, only for truth table variant)" )->group( "Explicit algorithm" );
   add_flag( "--symbolic,-s", "use symbolic variant (works on RCBDDs)" )->group( "Symbolic algorithm" );
+  add_flag("--stg", "return a stg circuit");
   add_option( "--esop_minimizer", esop_minimizer, "ESOP minizer (0: built-in, 1: exorcism)", true )->group( "Symbolic algorithm" );
   add_option( "--mode", mode, "mode (0: default, 1: swap, 2: hamming)" )->group( "Symbolic algorithm" );
   add_option( "--progress,-p", "show progress" )->group( "Symbolic algorithm" );
@@ -124,7 +125,7 @@ void dbs_command::execute()
       parse_string_list( vuordering, ordering );
       settings->set( "ordering", vuordering );
     }
-
+    settings->set("stg", is_set("stg"));
     young_subgroup_synthesis( circ, specs.current(), settings, statistics );
   }
 
