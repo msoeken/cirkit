@@ -26,7 +26,6 @@
 
 #include "concat.hpp"
 
-#include <core/utils/program_options.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/copy_circuit.hpp>
@@ -37,15 +36,12 @@ namespace cirkit
 concat_command::concat_command( const environment::ptr& env )
   : cirkit_command( env, "Concats two circuits" )
 {
-  opts.add_options()
-    ( "id1", value_with_default( &id1 ), "index of first circuit (determines number of lines)" )
-    ( "id2", value_with_default( &id2 ), "index of second circuit" )
-    ;
-
+  add_option( "--id1", id1, "index of first circuit (determines number of lines)", true );
+  add_option( "--id2", id2, "index of second circuit", true );
   add_new_option();
 }
 
-command::rules_t concat_command::validity_rules() const
+command::rules concat_command::validity_rules() const
 {
   return {
     {[this]() { return id1 < env->store<circuit>().size(); }, "first index is out of range"},
@@ -53,7 +49,7 @@ command::rules_t concat_command::validity_rules() const
   };
 }
 
-bool concat_command::execute()
+void concat_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -64,13 +60,11 @@ bool concat_command::execute()
   extend_if_new( circuits );
 
   circuits.current() = circ;
-
-  return true;
 }
 
-command::log_opt_t concat_command::log() const
+nlohmann::json concat_command::log() const
 {
-  return log_map_t({
+  return nlohmann::json({
       {"id1", id1},
       {"id2", id2}
     });

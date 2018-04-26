@@ -39,8 +39,6 @@
 #include <fstream>
 #include <vector>
 
-#include <boost/range/algorithm.hpp>
-
 #include <core/utils/string_utils.hpp>
 
 namespace cirkit
@@ -67,7 +65,7 @@ void read_graph_file( Graph& g, const std::string& filename, bool verbose = fals
   unsigned n = std::stoul( line );
 
   std::vector<vertex_t> vertices( n );
-  boost::generate( vertices, [&g]() { return boost::add_vertex( g ); } );
+  std::generate( vertices.begin(), vertices.end(), [&g]() { return boost::add_vertex( g ); } );
 
   /* read edges */
   unsigned cur = 0u;

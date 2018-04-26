@@ -34,30 +34,18 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 pos_command::pos_command( const environment::ptr& env )
   : cirkit_command( env, "Replace negative controls with positive ones" )
 {
   add_new_option();
 }
 
-command::rules_t pos_command::validity_rules() const
+command::rules pos_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool pos_command::execute()
+void pos_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -65,8 +53,6 @@ bool pos_command::execute()
 
   extend_if_new( circuits );
   circuits.current() = circ_new;
-
-  return true;
 }
 
 }

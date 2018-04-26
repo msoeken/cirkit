@@ -31,31 +31,17 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 contrinv_command::contrinv_command( const environment::ptr& env )
   : xmg_base_command( env, "Add controlled inverters" )
 {
   add_new_option();
 }
 
-bool contrinv_command::execute()
+void contrinv_command::execute()
 {
   auto xmg_new = xmg_add_controlled_inversions( xmg() );
   extend_if_new( store );
   xmg() = xmg_new;
-
-  return true;
 }
 
 }

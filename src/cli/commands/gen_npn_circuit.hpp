@@ -47,8 +47,8 @@ public:
   gen_npn_circuit_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  rules validity_rules() const;
+  void execute();
 
 private:
   std::string filename = std::string( "/dev/stdout" );

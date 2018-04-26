@@ -28,7 +28,6 @@
 
 #include <alice/rules.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <classical/aig.hpp>
 #include <cli/stores.hpp>
 #include <reversible/circuit.hpp>
@@ -38,57 +37,31 @@
 #include <reversible/synthesis/symbolic_transformation_based_synthesis.hpp>
 #include <reversible/synthesis/transformation_based_synthesis.hpp>
 
+#include <fmt/format.h>
+
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 tbs_command::tbs_command( const environment::ptr& env )
   : cirkit_command( env, "Transformation based synthesis" )
 {
+  add_option( "--bidirectional", bidirectional, "bidirectional synthesis", true );
+  add_flag( "--fredkin,-f", "use Fredkin gates" );
+  add_flag( "--fredkin_lookback", "optimized Fredkin gate insertation (only with `fredkin' enabled)" );
+  add_flag( "--bdd,-b", "use symbolic BDD-based variant (works on RCBDDs)" )->group( "BDD-based symbolic algorithm" );
+  add_flag( "--sat,-s", "use symbolic SAT-based variant (works on RCBDDS (default), circuits (-c), and AIGs (-a))" )->group( "SAT-based symbolic algorithm" );
+  add_flag( "--circuit,-c", "use circuit as input" )->group( "SAT-based symbolic algorithm" );
+  add_flag( "--aig,-a", "use AIG as input" )->group( "SAT-based symbolic algorithm" );
+  add_flag( "--cnf_from_aig", "create initial CNF from AIG instead of BDD (if input is RCBDD)" )->group( "SAT-based symbolic algorithm" );
+  add_flag( "--optimize_aig", "if CNF is from AIG, then optimize AIG before encoding (if input is RCBDD)" )->group( "SAT-based symbolic algorithm" );
+  add_flag( "--sorting_network", "use sorting network instead of cardinality constraints (if input is RCBDD)" )->group( "SAT-based symbolic algorithm" );
+  add_flag( "--inc_optimize", "incrementally optimize after each Hamming weight (if input is RCBDD)" )->group( "SAT-based symbolic algorithm" );
+  add_flag( "--all_assumptions", "use all assumptions for the SAT call" )->group( "SAT-based symbolic algorithm" );
   add_new_option();
   be_verbose();
-
-  boost::program_options::options_description tt_opts( "Explicit truth table based" );
-  tt_opts.add_options()
-    ( "bidirectional",    value_with_default( &bidirectional ), "bidirectional synthesis" )
-    ( "fredkin,f",                                              "use Fredkin gates" )
-    ( "fredkin_lookback",                                       "optimized Fredkin gate insertation (only with `fredkin' enabled)" )
-    ;
-
-  boost::program_options::options_description bdd_opts( "Symbolic BDD based" );
-  bdd_opts.add_options()
-    ( "bdd,b", "use symbolic BDD-based variant (works on RCBDDs)" )
-    ;
-
-  boost::program_options::options_description sat_opts( "Symbolic SAT based" );
-  sat_opts.add_options()
-    ( "sat,s",           "use symbolic SAT-based variant (works on RCBDDS (default), circuits (-c), and AIGs (-a))" )
-    ( "circuit,c",       "use circuit as input" )
-    ( "aig,a",           "use AIG as input" )
-    ( "cnf_from_aig",    "create initial CNF from AIG instead of BDD (if input is RCBDD)" )
-    ( "optimize_aig",    "if CNF is from AIG, then optimize AIG before encoding (if input is RCBDD)" )
-    ( "sorting_network", "use sorting network instead of cardinality constraints (if input is RCBDD)" )
-    ( "inc_optimize",    "incrementally optimize after each Hamming weight (if input is RCBDD)" )
-    ( "all_assumptions", "use all assumptions for the SAT call" )
-    ;
-
-  opts.add( tt_opts );
-  opts.add( bdd_opts );
-  opts.add( sat_opts );
 }
 
-command::rules_t tbs_command::validity_rules() const
+command::rules tbs_command::validity_rules() const
 {
   return {
     { [&]() { return !this->is_set( "bdd" ) || env->store<rcbdd>().current_index() >= 0; }, "symbolid BDD method requires RCBDD in store" },
@@ -98,7 +71,7 @@ command::rules_t tbs_command::validity_rules() const
   };
 }
 
-bool tbs_command::execute()
+void tbs_command::execute()
 {
   auto& circuits = env->store<circuit>();
   auto& rcbdds   = env->store<rcbdd>();
@@ -111,7 +84,7 @@ bool tbs_command::execute()
   if ( is_set( "bdd" ) )
   {
     symbolic_transformation_based_synthesis( circ, rcbdds.current(), settings, statistics );
-    std::cout << boost::format( "[i] adjusted assignments: %d" ) % statistics->get<unsigned>( "assignment_count" ) << std::endl;
+    std::cout << fmt::format( "[i] adjusted assignments: {}", statistics->get<unsigned>( "assignment_count" ) ) << std::endl;
   }
   else if ( is_set( "sat" ) )
   {
@@ -139,7 +112,7 @@ bool tbs_command::execute()
     {
       symbolic_transformation_based_synthesis_sat( circ, rcbdds.current(), settings, statistics );
     }
-    std::cout << boost::format( "[i] adjusted assignments: %d" ) % statistics->get<unsigned>( "assignment_count" ) << std::endl;
+    std::cout << fmt::format( "[i] adjusted assignments: {}", statistics->get<unsigned>( "assignment_count" ) ) << std::endl;
   }
   else
   {
@@ -158,13 +131,11 @@ bool tbs_command::execute()
   {
     print_runtime( "solving_time", "SAT solving" );
   }
-
-  return true;
 }
 
-command::log_opt_t tbs_command::log() const
+nlohmann::json tbs_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )},
       {"bdd", is_set( "bdd" )},
       {"sat", is_set( "sat" )},

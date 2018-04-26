@@ -34,7 +34,7 @@ print_io_command::print_io_command( const environment::ptr& env )
 {
 }
 
-bool print_io_command::execute()
+void print_io_command::execute()
 {
   std::cout << "[i] inputs:";
   for ( const auto& pi : info().inputs )
@@ -49,8 +49,6 @@ bool print_io_command::execute()
     std::cout << " " << po.second;
   }
   std::cout << std::endl;
-
-  return true;
 }
 
 

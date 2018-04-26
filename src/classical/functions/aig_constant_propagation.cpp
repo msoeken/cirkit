@@ -26,13 +26,9 @@
 
 #include "aig_constant_propagation.hpp"
 
-#include <boost/assign/std/vector.hpp>
-
 #include <core/utils/timer.hpp>
 #include <classical/functions/simulate_aig.hpp>
 #include <classical/utils/aig_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {

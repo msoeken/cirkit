@@ -44,7 +44,7 @@
 
 #ifdef ADDON_FORMAL
 #include <formal/utils/z3_utils.hpp>
-#include <c++/z3++.h>
+#include <z3++.h>
 #endif
 
 using namespace boost::assign;

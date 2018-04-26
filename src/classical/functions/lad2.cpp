@@ -35,7 +35,6 @@
 #include <vector>
 #include <stack>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
@@ -55,7 +54,6 @@
 #include <classical/functions/simulation_graph.hpp>
 #include <classical/utils/aig_utils.hpp>
 
-using namespace boost::assign;
 using boost::format;
 using boost::adaptors::transformed;
 
@@ -181,7 +179,7 @@ lad2_domain::lad2_domain( const simulation_graph_wrapper& gp, const simulation_g
       else /* v in D[u] */
       {
         matching.reserve( u, v, gp.degree( u ) );
-        val += v;
+        val.push_back( v );
         nb_val[u]++;
         pos_in_val[u][v] = val_size++;
       }
@@ -429,7 +427,7 @@ bool update_matching( int size_of_u, int size_of_v, const vec_int_t& degree, con
     else
     {
       pos_in_unmatched[u] = unmatched.size();
-      unmatched += u;
+      unmatched.push_back( u );
     }
   }
 
@@ -1257,7 +1255,7 @@ aig_graph shrink_block( const aig_graph& block, const aig_graph& component, cons
     }
     else
     {
-      names += gt.name( v );
+      names.push_back( gt.name( v ) );
     }
   }
 

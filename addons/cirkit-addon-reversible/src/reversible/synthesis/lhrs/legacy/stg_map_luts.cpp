@@ -66,7 +66,7 @@ public:
     /* if very small fall back to precomputed database */
     if ( num_inputs <= params.max_cut_size )
     {
-      auto tt = *function.truth_table( 0 ).begin(); /* function has only a single word, take its value */
+      auto tt = function.truth_table( 0 )._bits[0]; /* function has only a single word, take its value */
       stg_map_precomp( circ, tt, num_inputs, line_map, *params.map_precomp_params, *stats.map_precomp_stats );
       return;
     }

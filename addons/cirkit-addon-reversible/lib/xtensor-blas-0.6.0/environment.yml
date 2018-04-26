@@ -1,0 +1,10 @@
+name: xtensor-blas
+channels:
+  - nodefaults
+  - conda-forge
+  - SylvainCorlay
+dependencies:
+  - cling_ubuntu14
+  - xtensor
+  - flens
+  - xtensor-blas

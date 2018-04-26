@@ -47,7 +47,7 @@ public:
   output_noise_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 private:
   unsigned levels = 2u;

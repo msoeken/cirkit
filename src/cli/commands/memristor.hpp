@@ -47,14 +47,14 @@ public:
   memristor_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 private:
   unsigned memristors;
   unsigned operations;
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 };
 
 }

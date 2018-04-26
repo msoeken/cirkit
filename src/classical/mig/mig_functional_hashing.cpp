@@ -267,7 +267,7 @@ mig_functional_hashing_manager::mig_functional_hashing_manager( const mig_graph&
   mig_node_vec_t outputs;
   for ( const auto& output : info.outputs )
   {
-    outputs += output.first.node;
+    outputs.push_back( output.first.node );
   }
 
   /* compute topological order of vertices */
@@ -671,7 +671,7 @@ void mig_functional_hashing_manager::depth_preserving_functional_hashing( const 
             if ( new_cut.count() >= 5u ) continue;
             //if ( ( new_cut & ~boost::dynamic_bitset<>( n, 0u ) ).count() > 5u ) continue;
             if ( ffr == boost::none && !is_fanout_free_cut( node, new_cut ) ) continue;
-            cuts += new_cut;
+            cuts.push_back( new_cut );
           }
         }
       }

@@ -28,15 +28,12 @@
 
 #include <vector>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/range/algorithm.hpp>
 
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/dd/zdd_to_sets.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {

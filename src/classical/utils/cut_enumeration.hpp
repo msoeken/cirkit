@@ -40,15 +40,12 @@
 #include <stack>
 #include <vector>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <core/properties.hpp>
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/utils/cut_enumeration_traits.hpp>
 #include <classical/utils/truth_table_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -239,12 +236,12 @@ public:
         {
           auto new_cut = cut_union( c1, c2 );
           if ( cut_size( new_cut ) > k ) continue;
-          cuts += new_cut;
+          cuts.push_back( new_cut );
         }
       }
     }
 
-    cuts += cut_from_index<cut_t>( node, n );
+    cuts.push_back( cut_from_index<cut_t>( node, n ) );
 
     return cuts;
   }
@@ -263,13 +260,13 @@ public:
           {
             auto new_cut = cut_union( c1, cut_union( c2, c3 ) );
             if ( cut_size( new_cut ) > k ) continue;
-            cuts += new_cut;
+            cuts.push_back( new_cut );
           }
         }
       }
     }
 
-    cuts += cut_from_index<cut_t>( node, n );
+    cuts.push_back( cut_from_index<cut_t>( node, n ) );
 
     return cuts;
   }
@@ -360,7 +357,7 @@ inline void copy_outputs_from_info( const T& circ, std::vector<typename circuit_
 {
   for ( const auto& o : boost::get_property( circ, boost::graph_name ).outputs )
   {
-    nodes += o.first.node;
+    nodes.push_back( o.first.node );
   }
 }
 

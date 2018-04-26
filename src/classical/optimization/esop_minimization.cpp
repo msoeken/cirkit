@@ -30,8 +30,6 @@
 #include <list>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/list.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -45,8 +43,6 @@
 #include <core/utils/range_utils.hpp>
 #include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -176,11 +172,11 @@ public:
     {
       if ( distances[i] <= 4 )
       {
-        distance_lists[distances[i] - 2u] += std::make_pair( i, _cubes.size() );
+        distance_lists[distances[i] - 2u].push_back( std::make_pair( i, _cubes.size() ) );
       }
     }
 
-    _cubes += cube;
+    _cubes.push_back( cube );
   }
 
   void remove_from_distance_list( cube_pair_list_t& l, unsigned cubeid, bool remove_first = true, bool remove_second = true )
@@ -214,7 +210,7 @@ public:
 
     for ( unsigned i = 0u; i < distance; ++i )
     {
-      positions += ( pos = diff.find_first() );
+      positions.push_back( pos = diff.find_first() );
       diff.flip( pos );
     }
   }

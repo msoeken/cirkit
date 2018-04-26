@@ -40,7 +40,6 @@
 
 #include <numeric>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/range.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm_ext/iota.hpp>
@@ -49,8 +48,6 @@
 #include <core/utils/range_utils.hpp>
 #include <classical/sat/sat_solver.hpp>
 #include <classical/sat/operations/logic.hpp>
-
-using namespace boost::assign;
 
 /**
  * Carsten Sinz's CNF encoding of Boolean cardinality constraints [1].
@@ -112,11 +109,11 @@ int less_or_equal_sinz( S& solver, const clause_t& x, unsigned r, int sid, int s
     {
       // std::cerr << "(" << j << "," << k << ")" << '\n';
       clause_t clause;
-      clause += -x[ j + k ];
-      //if ( k > 0u ) clause += spol * -(sid + j * ( n - r ) + k - 1u );
-      //if ( k < r ) clause += spol * (sid + j * ( n - r ) + k );
-      if ( k > 0u ) clause += spol * -(sid + j * r + k - 1u );
-      if ( k < r ) clause += spol * (sid + j * r + k );
+      clause.push_back( -x[ j + k ] );
+      //if ( k > 0u ) clause.push_back( spol * -(sid + j * ( n - r ) + k - 1u ) );
+      //if ( k < r ) clause.push_back( spol * (sid + j * ( n - r ) + k ) );
+      if ( k > 0u ) clause.push_back( spol * -(sid + j * r + k - 1u ) );
+      if ( k < r ) clause.push_back( spol * (sid + j * r + k ) );
       add_clause( solver )( clause );
     }
   }

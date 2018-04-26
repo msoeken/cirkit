@@ -26,11 +26,7 @@
 
 #include "characteristic.hpp"
 
-#include <boost/assign/std/vector.hpp>
-
 #include <classical/dd/copy.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -53,7 +49,7 @@ bdd characteristic_function( const std::vector<bdd>& fs, bdd_manager& to )
 
   for ( const auto& f : fs )
   {
-    shifted_fs += bdd_copy( f, to );
+    shifted_fs.push_back( bdd_copy( f, to ) );
   }
 
   bdd f = to.bdd_top();

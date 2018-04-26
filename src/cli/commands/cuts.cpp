@@ -28,11 +28,9 @@
 
 #include <iostream>
 
-#include <boost/format.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <core/utils/bitset_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/functions/cuts/paged.hpp>
 #include <classical/mig/mig_cuts_paged.hpp>
@@ -40,53 +38,38 @@
 #include <classical/utils/cut_enumeration.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 
-using namespace boost::program_options;
-using boost::format;
+#include <fmt/format.h>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 cuts_command::cuts_command( const environment::ptr& env ) : aig_mig_command( env, "Computes cuts of an AIG", "Enumerate cuts for %s" )
 {
-  opts.add_options()
-    ( "node_count,k", value_with_default( &node_count ), "Number of nodes in a cut" )
-    ( "truthtable,t",                                    "Prints truth tables when verbose" )
-    ( "cone_count,c",                                    "Prints nodes in cut cone when verbose" )
-    ( "depth,d",                                         "Prints depth of cut when verbose " )
-    ( "parallel",                                        "Parallel cut enumeration for AIGs" )
-    ;
+  add_option( "--node_count,-k", node_count, "number of nodes in a cut", true );
+  add_flag( "--truthtable,-t", "prints truth tables when verbose" );
+  add_flag( "--cone_count,-c", "prints nodes in cut cone when verbose" );
+  add_flag( "--depth,-d", "prints depth of cut when verbose " );
+  add_flag( "--parallel", "parallel cut enumeration for AIGs" );
   be_verbose();
 }
 
-bool cuts_command::execute_aig()
+void cuts_command::execute_aig()
 {
   paged_aig_cuts cuts( aig(), node_count, is_set( "parallel" ) );
-  std::cout << boost::format( "[i] found %d cuts in %.2f secs (%d KB)" ) % cuts.total_cut_count() % cuts.enumeration_time() % ( cuts.memory() >> 10u ) << std::endl;
+  std::cout << fmt::format( "[i] found {} cuts in {:.2f} secs ({} KB)", cuts.total_cut_count(), cuts.enumeration_time(), cuts.memory() >> 10u ) << std::endl;
 
   if ( is_verbose() )
   {
     for ( const auto& p : boost::make_iterator_range( vertices( aig() ) ) )
     {
-      std::cout << boost::format( "[i] node %d has %d cuts" ) % p % cuts.count( p ) << std::endl;
+      std::cout << fmt::format( "[i] node {} has {} cuts", p, cuts.count( p ) ) << std::endl;
       for ( const auto& cut : cuts.cuts( p ) )
       {
         std::cout << "[i] - {" << any_join( cut.range(), ", " ) << "}";
 
         if ( is_set( "cone_count" ) )
         {
-          std::cout << format( " (size: %d)" ) % cut.size();
+          std::cout << fmt::format( " (size: {})", cut.size() );
         }
 
         if ( is_set( "truthtable" ) )
@@ -98,32 +81,30 @@ bool cuts_command::execute_aig()
       }
     }
   }
-
-  return true;
 }
 
-bool cuts_command::execute_mig()
+void cuts_command::execute_mig()
 {
   mig_cuts_paged cuts( mig(), node_count );
-  std::cout << boost::format( "[i] found %d cuts in %.2f secs (%d KB)" ) % cuts.total_cut_count() % cuts.enumeration_time() % ( cuts.memory() >> 10u ) << std::endl;
+  std::cout << fmt::format( "[i] found {} cuts in {:.2f} secs ({} KB)", cuts.total_cut_count(), cuts.enumeration_time(), cuts.memory() >> 10u ) << std::endl;
 
   if ( is_verbose() )
   {
     for ( const auto& p : boost::make_iterator_range( vertices( mig() ) ) )
     {
-      std::cout << boost::format( "[i] node %d has %d cuts" ) % p % cuts.count( p ) << std::endl;
+      std::cout << fmt::format( "[i] node {} has {} cuts", p, cuts.count( p ) ) << std::endl;
       for ( const auto& cut : cuts.cuts( p ) )
       {
         std::cout << "[i] - {" << any_join( cut.range(), ", " ) << "}";
 
         if ( is_set( "cone_count" ) )
         {
-          std::cout << format( " (size: %d)" ) % cuts.size( p, cut );
+          std::cout << fmt::format( " (size: {})", cuts.size( p, cut ) );
         }
 
         if ( is_set( "depth" ) )
         {
-          std::cout << format( " (depth: %d)" ) % cuts.depth( p, cut );
+          std::cout << fmt::format( " (depth: {})", cuts.depth( p, cut ) );
         }
 
         if ( is_set( "truthtable" ) )
@@ -135,8 +116,6 @@ bool cuts_command::execute_mig()
       }
     }
   }
-
-  return true;
 }
 
 }

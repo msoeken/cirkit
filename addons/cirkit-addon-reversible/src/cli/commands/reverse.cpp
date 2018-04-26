@@ -39,12 +39,12 @@ reverse_command::reverse_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t reverse_command::validity_rules() const
+command::rules reverse_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool reverse_command::execute()
+void reverse_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -53,8 +53,6 @@ bool reverse_command::execute()
 
   extend_if_new( circuits );
   circuits.current() = dest;
-
-  return true;
 }
 
 }

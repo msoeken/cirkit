@@ -47,16 +47,16 @@ public:
   xmglut_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  rules validity_rules() const;
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   unsigned lut_size    = 6u;
   unsigned timeout;
-  std::string map_cmd  = "&if -a -K %d";
+  std::string map_cmd  = "&if -a -K {}";
   std::string blif_name;
   std::string dump_luts;
 };

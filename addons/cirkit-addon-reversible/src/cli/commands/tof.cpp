@@ -34,30 +34,18 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 tof_command::tof_command( const environment::ptr& env )
   : cirkit_command( env, "Rewrite Fredkin gates to Toffoli gates" )
 {
   add_new_option();
 }
 
-command::rules_t tof_command::validity_rules() const
+command::rules tof_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool tof_command::execute()
+void tof_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -66,8 +54,6 @@ bool tof_command::execute()
 
   extend_if_new( circuits );
   circuits.current() = circ_new;
-
-  return true;
 }
 
 }

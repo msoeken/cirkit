@@ -26,7 +26,6 @@
 
 #include "aig_cone.hpp"
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/copy.hpp>
@@ -40,8 +39,6 @@
 #include <classical/functions/strash.hpp>
 #include <classical/utils/aig_dfs.hpp>
 #include <classical/utils/aig_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -155,7 +152,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<unsigned>& indexes,
     if ( get( dfs.color(), in.value ) != color_t::white() )
     {
       mapped_inputs.set( in.index );
-      new_info.inputs += copy_map[in.value];
+      new_info.inputs.push_back( copy_map[in.value] );
       new_info.node_names[copy_map[in.value]] = info.node_names.at( in.value );
     }
   }
@@ -166,7 +163,7 @@ aig_graph aig_cone( const aig_graph& aig, const std::vector<unsigned>& indexes,
   {
     const auto& output = info.outputs[index];
     const aig_function f = { copy_map[output.first.node], output.first.complemented };
-    new_info.outputs += std::make_pair( f, output.second );
+    new_info.outputs.push_back( std::make_pair( f, output.second ) );
   }
 
   /* restore internal IDs */

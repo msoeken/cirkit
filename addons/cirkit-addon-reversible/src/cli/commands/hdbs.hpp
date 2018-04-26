@@ -47,11 +47,11 @@ public:
   hdbs_command( const environment::ptr& env );
 
 protected:
-  rules_t valididity_rules() const;
-  bool execute();
+  rules valididity_rules() const;
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   bool     complemented_edges = true;

@@ -49,8 +49,8 @@ public:
   cuts_command( const environment::ptr& env );
 
 protected:
-  bool execute_aig();
-  bool execute_mig();
+  void execute_aig();
+  void execute_mig();
 
 private:
   unsigned node_count = 6u;

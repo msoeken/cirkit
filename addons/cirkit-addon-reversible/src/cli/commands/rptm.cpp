@@ -34,24 +34,22 @@ namespace cirkit
 {
 
 rptm_command::rptm_command( const environment::ptr& env )
-  : cirkit_command( env, "Maslov reversible phase gate mapping up to 4 controls", "D. Maslov: Advantages of using relative-phase Toffoli gates with an application to multiple control Toffoli optimization, PRA 93, 022311, 2016" )
+  : cirkit_command( env, "Maslov reversible phase gate mapping up to 4 controls"/*, "D. Maslov: Advantages of using relative-phase Toffoli gates with an application to multiple control Toffoli optimization, PRA 93, 022311, 2016"*/ )
 {
   add_new_option();
 }
 
-command::rules_t rptm_command::validity_rules() const
+command::rules rptm_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool rptm_command::execute()
+void rptm_command::execute()
 {
   auto& circuits = env->store<circuit>();
   const auto circ = maslov_mapping( circuits.current() );
   extend_if_new( circuits );
   circuits.current() = circ;
-
-  return true;
 }
 
 }

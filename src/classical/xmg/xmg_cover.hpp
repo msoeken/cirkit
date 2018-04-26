@@ -36,6 +36,7 @@
 #ifndef XMG_COVER_HPP
 #define XMG_COVER_HPP
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -80,6 +81,7 @@ private:
   mutable std::vector<unsigned> ref_count;
 };
 
+void xmg_cover_write_dot( const xmg_graph& xmg, std::ostream& os );
 void xmg_cover_write_dot( const xmg_graph& xmg, const std::string& filename );
 
 }

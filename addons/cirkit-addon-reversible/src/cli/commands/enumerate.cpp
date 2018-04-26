@@ -27,7 +27,6 @@
 #include "enumerate.hpp"
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/format.hpp>
 
 #include <core/utils/bitset_utils.hpp>
 #include <reversible/circuit.hpp>
@@ -39,28 +38,14 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 enumerate_command::enumerate_command( const environment::ptr& env )
   : cirkit_command( env, "Different enumeration routines" )
 {
-  opts.add_options()
-    ( "four_stg_pqcs", "Enumerate all four variable single-target gates for pQCS" )
-    ( "from_store_pqcs", "Creates circuits for pQCS for all truth tables in the store" )
-    ;
+  add_flag( "--four_stg_pqcs", "enumerate all four variable single-target gates for pQCS" );
+  add_flag( "--from_store_pqcs", "creates circuits for pQCS for all truth tables in the store" );
 }
 
-bool enumerate_command::execute()
+void enumerate_command::execute()
 {
   if ( is_set( "four_stg_pqcs" ) )
   {
@@ -126,8 +111,6 @@ bool enumerate_command::execute()
                 << format_iqc( circ ) << std::endl;
     }
   }
-
-  return true;
 }
 
 }

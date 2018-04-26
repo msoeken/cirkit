@@ -44,9 +44,6 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/noncopyable.hpp>
-#include <boost/filesystem/path.hpp>
-
 namespace cirkit
 {
 void write_pla_from_cirkit_bdd (const std::vector<bdd> &fvec,

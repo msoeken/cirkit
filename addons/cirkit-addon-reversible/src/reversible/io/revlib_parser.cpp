@@ -432,6 +432,12 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
     {
       // since the inputs can contain spaces in quotes we have to deal with
       // them specifically
+      if ( line == command )
+      {
+        // ignore empty .inputs declaration
+        continue;
+      }
+      
       std::string inputs_str( line.begin() + command.size() + 1u, line.end() );
       boost::algorithm::trim( inputs_str );
       std::vector<std::string> inputs;
@@ -458,6 +464,12 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
     }
     else if ( command == ".outputs" )
     {
+      if ( line == command )
+      {
+        // ignore empty .outputs declaration
+        continue;
+      }
+
       // see .inputs
       std::string outputs_str( line.begin() + command.size() + 1u, line.end() );
       boost::algorithm::trim( outputs_str );
@@ -695,11 +707,13 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
             auto func = tt_from_expression( parse_expression( expr ) );
             tt_extend( func, params.size() - 1u );
 
-            stg_t.function = func;
+            stg_t.function = to_kitty( func );
           }
           else
           {
-            stg_t.function = boost::dynamic_bitset<>( convert_hex2bin( argument ) );
+            kitty::dynamic_truth_table func( line_indices.size() - 1 );
+            kitty::create_from_hex_string( func, argument );
+            stg_t.function = func;
           }
           gate_type = stg_t;
         }

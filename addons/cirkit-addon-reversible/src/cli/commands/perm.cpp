@@ -41,17 +41,15 @@ namespace cirkit
 perm_command::perm_command( const environment::ptr& env )
   : cirkit_command( env, "Prints permuation of a reversible truth table" )
 {
-  opts.add_options()
-    ( "one,o", "start counting from 1" )
-    ;
+  add_flag( "--one,-o", "start counting from 1" );
 }
 
-command::rules_t perm_command::validity_rules() const
+command::rules perm_command::validity_rules() const
 {
   return {has_store_element<binary_truth_table>( env )};
 }
 
-bool perm_command::execute()
+void perm_command::execute()
 {
   const auto& specs = env->store<binary_truth_table>();
 
@@ -67,13 +65,11 @@ bool perm_command::execute()
   }
 
   std::cout << "[i] permutation: " << any_join( perm, " " ) << std::endl;
-
-  return true;
 }
 
-command::log_opt_t perm_command::log() const
+nlohmann::json perm_command::log() const
 {
-  return log_map_t({
+  return nlohmann::json({
       {"permutation", perm}
     });
 }

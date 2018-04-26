@@ -34,6 +34,8 @@
  * @since  2.3
  */
 
+#ifdef ADDON_FORMAL
+
 #ifndef CLI_EXS_COMMAND_HPP
 #define CLI_EXS_COMMAND_HPP
 
@@ -48,11 +50,11 @@ public:
   exs_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  rules validity_rules() const;
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   unsigned mode = 1u;
@@ -61,6 +63,8 @@ private:
 };
 
 }
+
+#endif
 
 #endif
 

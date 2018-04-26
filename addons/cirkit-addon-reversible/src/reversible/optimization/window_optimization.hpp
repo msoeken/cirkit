@@ -36,6 +36,7 @@
 #ifndef WINDOW_OPTIMIZATION_HPP
 #define WINDOW_OPTIMIZATION_HPP
 
+#include <functional>
 #include <vector>
 
 #include <core/properties.hpp>
@@ -49,59 +50,9 @@
 namespace cirkit
 {
 
-  typedef std::tuple<circuit, std::vector<unsigned> > circuit_filter_pair;
+  typedef std::tuple<circuit, std::vector<unsigned>, unsigned> circuit_filter_pair;
 
-  /**
-   * @brief Functor for selecting the windows
-   *
-   * The selection of the windows can be defined by functors.
-   * Two are already implemented, namely the \ref revkit::line_window_selection "Line Window Selection"
-   * and the \ref revkit::shift_window_selection "Shift Window Selection".
-   *
-   * @section sec_example_window_optimization_settings1 Example: How to assign a window selection method
-   *
-   * @code
-   * revkit::shift_window_selection sws;
-   * sws.window_length = 5;
-   * sws.offset = 4;
-   *
-   * revkit::properties::ptr settings( new revkit::properties() );
-   * settings->set( "select_window", sws );
-   *
-   * // or for line window selection without specifying a parameter
-   *
-   * settings->set( "select_window", revkit::line_window_selection() );
-   * @endcode
-   *
-   * @section sec_example_window_optimization_settings2 Example: How to create a new window selection functor
-   *
-   * New window selection functors can be easily defined by creating a struct with the \b operator() method
-   * having the signature as follows in this example. In this example the first half of the circuit is chosen as a window.
-   * In the implementation of window_optimization, this functor is called iteratively until an empty circuit is
-   * returned. Thus, the \p done flag is set to \b true after the first call and the functor returns the empty
-   * circuit in the second call.
-   *
-   * @code
-   * struct whole_circuit_selection
-   * {
-   *   whole_circuit_selection() : done( false ) {}
-   *
-   *   revkit::circuit operator()( const revkit::circuit& base )
-   *   {
-   *     if ( done ) return revkit::circuit();
-   *
-   *     done = true;
-   *     return revkit::subcircuit( base, 0u, base.num_gates() / 2 );
-   *   }
-   *
-   * private:
-   *   bool done;
-   * };
-   * @endcode
-   *
-   * @since  1.0
-   */
-  typedef boost::function<circuit_filter_pair(const circuit&)> select_window_func;
+  typedef std::function<circuit_filter_pair(const circuit&)> select_window_func;
 
   /**
    * @brief Window Selection functor based on Shift Window Selection

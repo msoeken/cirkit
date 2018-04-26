@@ -41,7 +41,6 @@
 #include <core/utils/temporary_filename.hpp>
 #include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
-#include <classical/functions/linear_classification.hpp>
 #include <classical/functions/spectral_canonization.hpp>
 #include <classical/io/read_blif.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
@@ -590,16 +589,13 @@ private:
 
   inline void append_circuit_fast( const circuit& src )
   {
-    auto& dest_s = boost::get<standard_circuit>( static_cast<circuit_variant&>( circ ) );
-    const auto& src_s = boost::get<standard_circuit>( static_cast<const circuit_variant&>( src ) );
-
-    boost::push_back( dest_s.gates, src_s.gates );
+    boost::push_back( circ.gates, src.gates );
   }
 
   inline circuit get_fast_circuit() const
   {
-    standard_circuit c;
-    c.lines = circ.lines();
+    circuit c;
+    c._lines = circ.lines();
     return c;
   }
 

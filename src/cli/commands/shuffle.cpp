@@ -26,16 +26,12 @@
 
 #include "shuffle.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <random>
 
-#include <boost/range/algorithm/random_shuffle.hpp>
-
-#include <core/utils/program_options.hpp>
 #include <classical/utils/aig_utils.hpp>
 #include <classical/mig/mig_utils.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
@@ -67,9 +63,8 @@ private:
 template<class C>
 void shuffle( C& container, unsigned seed )
 {
-
   rng r( seed );
-  boost::random_shuffle( container, r );
+  std::random_shuffle( std::begin( container ), std::end( container ), r );
 }
 
 /******************************************************************************
@@ -79,35 +74,27 @@ void shuffle( C& container, unsigned seed )
 shuffle_command::shuffle_command( const environment::ptr& env )
     : aig_mig_command( env, "Shuffles PIs and POs of AIGs and MIGs", "Shuffle current %s" )
 {
-  opts.add_options()
-    ( "seed,s", value( &seed ), "" )
-    ;
+  add_option( "--seed,-s", seed, "random seed (default is current time)" );
 }
 
-bool shuffle_command::before()
+void shuffle_command::before()
 {
   if ( !is_set( "seed" ) )
   {
     seed = (unsigned)std::chrono::system_clock::now().time_since_epoch().count();
   }
-
-  return true;
 }
 
-bool shuffle_command::execute_aig()
+void shuffle_command::execute_aig()
 {
   shuffle( aig_info().inputs, seed );
   shuffle( aig_info().outputs, seed );
-
-  return true;
 }
 
-bool shuffle_command::execute_mig()
+void shuffle_command::execute_mig()
 {
   shuffle( cirkit::mig_info( mig() ).inputs, seed );
   shuffle( cirkit::mig_info( mig() ).outputs, seed );
-
-  return true;
 }
 
 }

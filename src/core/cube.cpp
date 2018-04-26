@@ -29,10 +29,10 @@
 #include <cstdlib>
 #include <fstream>
 
-#include <boost/format.hpp>
-
 #include <core/io/pla_parser.hpp>
 #include <core/utils/range_utils.hpp>
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -236,7 +236,7 @@ void common_pla_write_single( const cube_vec_t& cubes, const std::string& filena
 
   std::ofstream os( filename.c_str(), std::ofstream::out );
 
-  os << boost::format( ".i %d" ) % cubes.front().length() << std::endl
+  os << fmt::format( ".i {}", cubes.front().length() ) << std::endl
      << ".o 1" << std::endl;
 
   for ( const auto& c : cubes )
@@ -268,8 +268,8 @@ void common_pla_write( const cube_vec_vec_t& cubes, const std::string& filename,
 
   if ( num_inputs == 0u ) return;
 
-  os << boost::format( ".i %d" ) % num_inputs << std::endl
-     << boost::format( ".o %d" ) % cubes.size() << std::endl;
+  os << fmt::format( ".i {}", num_inputs ) << std::endl
+     << fmt::format( ".o {}", cubes.size() ) << std::endl;
 
   /* share cubes */
   std::map<cube, boost::dynamic_bitset<>> cube_map;

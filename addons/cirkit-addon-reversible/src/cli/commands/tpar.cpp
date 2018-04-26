@@ -33,21 +33,23 @@
 #include <reversible/io/read_qc.hpp>
 #include <reversible/io/write_qc.hpp>
 
+#include <fmt/format.h>
+
 namespace cirkit
 {
 
 tpar_command::tpar_command( const environment::ptr& env )
-  : cirkit_command( env, "Runs Matthew Amy's T-par algorithm", "Polynomial-time T-depth Optimization of Clifford+T circuits via Matroid Partitioning (arXiv:1303.2042)\ninstall with ./utils/tools.py install tpar" )
+  : cirkit_command( env, "Runs Matthew Amy's T-par algorithm"/*, "Polynomial-time T-depth Optimization of Clifford+T circuits via Matroid Partitioning (arXiv:1303.2042)\ninstall with ./utils/tools.py install tpar"*/ )
 {
   add_new_option();
 }
 
-command::rules_t tpar_command::validity_rules() const
+command::rules tpar_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool tpar_command::execute()
+void tpar_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -55,13 +57,11 @@ bool tpar_command::execute()
   temporary_filename filename_out( "/tmp/tpar-%d-out.qc" );
 
   write_qc( circuits.current(), filename_in.name(), true );
-  execute_and_omit( boost::str( boost::format( "t-par < %s > %s" ) % filename_in.name() % filename_out.name() ) );
+  execute_and_omit( fmt::format( "t-par < {} > {}", filename_in.name(), filename_out.name() ) );
   const auto circ = read_qc( filename_out.name() );
 
   extend_if_new( circuits );
   circuits.current() = circ;
-
-  return true;
 }
 
 }

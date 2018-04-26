@@ -26,57 +26,39 @@
 
 #include "exact_xmg.hpp"
 
-#include <boost/format.hpp>
 #include <boost/optional.hpp>
 
 #include <cli/stores.hpp>
-#include <core/utils/program_options.hpp>
 #include <classical/mig/mig.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <classical/xmg/xmg.hpp>
 #include <classical/xmg/xmg_expr.hpp>
 #include <formal/synthesis/exact_mig.hpp>
 
-using namespace boost::program_options;
+#include <fmt/format.h>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 exact_xmg_command::exact_xmg_command( const environment::ptr& env )
   : cirkit_command( env, "Exact XMG synthesis" )
 {
-  opts.add_options()
-    ( "objective,o",       value_with_default( &objective ), "optimization objective:\n0: size-optimum\n1: size/depth-optimum\n2: depth/size-optimum" )
-    ( "start,s",           value_with_default( &start ),     "start value for gate enumeration" )
-    ( "mig,m",                                               "load spec from MIG instead of truth table" )
-    ( "incremental,i",                                       "incremental SAT solving" )
-    ( "all_solutions,a",                                     "enumerate all solutions (only with non incremental)" )
-    ( "breaking",          value_with_default( &breaking ),  "symmetry breaking\ns: structural hashing\na: associativity\nl: co-lexicographic ordering\nt: support" )
-    ( "print_solutions",                                     "print solutions" )
-    ( "enc_int",                                             "encode numbers as integers (not bit-vectors)" )
-    ( "timeout",           value( &timeout ),                "timeout (in seconds)" )
-    ( "timeout_heuristic",                                   "continue with next level on timeout" )
-    ( "very_verbose",                                        "be very verbose" )
-    ;
+  add_option( "--objective,-o", objective, "optimization objective:\n0: size-optimum\n1: size/depth-optimum\n2: depth/size-optimum", true );
+  add_option( "--start,-s", start, "start value for gate enumeration", true );
+  add_flag( "--mig,-m", "load spec from MIG instead of truth table" );
+  add_flag( "--incremental,-i", "incremental SAT solving" );
+  add_flag( "--all_solutions,-a", "enumerate all solutions (only with non incremental)" );
+  add_option( "--breaking", breaking,  "symmetry breaking\ns: structural hashing\na: associativity\nl: co-lexicographic ordering\nt: support", true );
+  add_flag( "--print_solutions", "print solutions" );
+  add_flag( "--enc_int", "encode numbers as integers (not bit-vectors)" );
+  add_option( "--timeout", timeout, "timeout (in seconds)" );
+  add_flag( "--timeout_heuristic", "continue with next level on timeout" );
+  add_flag( "--very_verbose", "be very verbose" );
   be_verbose();
 }
 
-bool exact_xmg_command::execute()
+void exact_xmg_command::execute()
 {
-  using boost::format;
-
   auto settings = make_settings();
   settings->set( "objective",           objective );
   settings->set( "start",               start );
@@ -125,7 +107,7 @@ bool exact_xmg_command::execute()
   if ( is_set( "all_solutions" ) )
   {
     const auto& solutions = statistics->get<std::vector<xmg_graph>>( "all_solutions" );
-    std::cout << format( "[i] found %d solutions" ) % solutions.size() << std::endl;
+    std::cout << fmt::format( "[i] found {} solutions", solutions.size() ) << std::endl;
     if ( is_set( "print_solutions" ) )
     {
       for ( const auto& sxmg : solutions )
@@ -136,14 +118,12 @@ bool exact_xmg_command::execute()
     }
   }
 
-  std::cout << format( "[i] run-time: %.2f seconds" ) % statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
+  print_runtime();
 }
 
-command::log_opt_t exact_xmg_command::log() const
+nlohmann::json exact_xmg_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime",       statistics->get<double>( "runtime" )},
       {"last_size",     statistics->get<unsigned>( "last_size" )},
       {"start",         start},

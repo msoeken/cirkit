@@ -36,7 +36,6 @@
 #define QBF_SOLVER_HPP
 
 #include <classical/sat/sat_solver.hpp>
-#include <boost/assign/std/vector.hpp>
 
 namespace cirkit
 {

@@ -4,7 +4,6 @@ add_cirkit_library(
   USE
     cirkit_core
     cirkit_classical
-    cirkit_formal_z3
     puma
     ${CUDD_LIBRARIES}
     ${GMPXX_LIBRARIES}
@@ -19,6 +18,10 @@ add_cirkit_library(
   USE
     cirkit_reversible
     cirkit_cli
-    cirkit_formal_z3_cli
 )
+
+if(enable_cirkit-addon-formal)
+target_link_libraries(cirkit_reversible PUBLIC cirkit_formal_z3)
+target_link_libraries(cirkit_reversible_cli PUBLIC cirkit_formal_z3_cli)
+endif()
 

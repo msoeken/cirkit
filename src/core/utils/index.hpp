@@ -43,7 +43,6 @@
 #include <vector>
 #include <stack>
 
-#include <boost/range/algorithm.hpp>
 #include <boost/dynamic_bitset.hpp>
 
 namespace cirkit

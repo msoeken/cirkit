@@ -30,7 +30,6 @@
 #include <cli/stores.hpp>
 #include <cli/reversible_stores.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <classical/functions/spectral_canonization.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/functions/add_stg.hpp>
@@ -44,16 +43,14 @@ namespace cirkit
 stg_as_command::stg_as_command( const environment::ptr& env )
   : cirkit_command( env, "Realize single-target from truth table" )
 {
-  opts.add_options()
-    ( "func,f",    value_with_default( &func ), "id of truth table to realize" )
-    ( "as,a",      value_with_default( &real ), "id of truth table to use in gate" )
-    ( "circuit,c",                              "perform on single-target gates with affine annotations in circuit" )
-    ( "class",                                  "automatically compute affine classes if not annotated (only with option circuit)" )
-    ;
+  add_option( "--func,-f", func, "id of truth table to realize", true );
+  add_option( "--as,-a", real, "id of truth table to use in gate", true );
+  add_flag( "--circuit,-c", "perform on single-target gates with affine annotations in circuit" );
+  add_flag( "--classes", "automatically compute affine classes if not annotated (only with option circuit)" );
   add_new_option();
 }
 
-command::rules_t stg_as_command::validity_rules() const
+command::rules stg_as_command::validity_rules() const
 {
   return {
     {[this]() { return is_set( "circuit" ) || func < env->store<tt>().size(); }, "func id is invalid"},
@@ -62,7 +59,7 @@ command::rules_t stg_as_command::validity_rules() const
   };
 }
 
-bool stg_as_command::execute()
+void stg_as_command::execute()
 {
   const auto& tts = env->store<tt>();
   auto& circuits = env->store<circuit>();
@@ -78,13 +75,16 @@ bool stg_as_command::execute()
             const auto& stg = boost::any_cast<stg_tag>( g.type() );
             const auto num_vars = g.controls().size();
 
-            boost::dynamic_bitset<> cls = stg.affine_class;
-            if ( cls.empty() )
+            auto cls = stg.affine_class;
+            if ( cls.num_vars() == 0 )
             {
-              if ( is_set( "class" ) && num_vars >= 2u && num_vars <= 5u )
+              if ( is_set( "classes" ) && num_vars >= 2u && num_vars <= 5u )
               {
-                const auto idx = get_spectral_class( stg.function );
-                cls = tt( 1 << num_vars, optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx] );
+                const auto idx = get_spectral_class( from_kitty( stg.function ) );
+                kitty::dynamic_truth_table ncls( num_vars );
+                const auto word = optimal_quantum_circuits::spectral_classification_representative[num_vars - 2u][idx];
+                kitty::create_from_words( ncls, &word, &word + 1 );
+                cls = ncls;
               }
               else
               {
@@ -106,18 +106,10 @@ bool stg_as_command::execute()
     extend_if_new( circuits );
 
     circuit circ( tt_num_vars( tts[func] ) + 1u );
-    add_stg_as_other( circ, tts[func], tts[real] );
+    add_stg_as_other( circ, to_kitty( tts[func] ), to_kitty( tts[real] ) );
     circuits.current() = circ;
   }
-
-  return true;
 }
-
-command::log_opt_t stg_as_command::log() const
-{
-  return boost::none;
-}
-
 
 }
 

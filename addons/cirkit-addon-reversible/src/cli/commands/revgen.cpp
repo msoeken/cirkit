@@ -29,7 +29,6 @@
 #include <iostream>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/program_options.hpp>
 
 #include <cli/reversible_stores.hpp>
 #include <core/utils/bitset_utils.hpp>
@@ -39,18 +38,14 @@
 namespace cirkit
 {
 
-using boost::program_options::value;
-
 revgen_command::revgen_command( const environment::ptr& env )
   : cirkit_command( env, "Generate reversible structures" )
 {
-  opts.add_options()
-    ( "hwb",   value( &hwb ),   "generate reversible HWB function" )
-    ( "prime", value( &prime ), "generate reversible nth-prime function" )
-    ;
+  add_option( "--hwb", hwb, "generate reversible HWB function" );
+  add_option( "--prime", prime, "generate reversible nth-prime function" );
 }
 
-bool revgen_command::execute()
+void revgen_command::execute()
 {
   if ( is_set( "hwb" ) )
   {
@@ -121,8 +116,6 @@ bool revgen_command::execute()
     }
     specs.current() = spec;
   }
-
-  return true;
 }
 
 }

@@ -28,41 +28,24 @@
 
 #include <iostream>
 
-#include <core/utils/program_options.hpp>
 #include <classical/abc/abc_api.hpp>
 #include <classical/abc/functions/cirkit_to_gia.hpp>
 #include <classical/abc/functions/gia_to_cirkit.hpp>
 #include <cli/stores.hpp>
 
-using namespace boost::program_options;
-
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 abc_command::abc_command( const environment::ptr& env )
   : cirkit_command( env, "Runs abc shell with the current aig" )
 {
-  opts.add_options()
-    ( "command,c", value_with_default( &commands ), "Process semicolon-separated list of commands" )
-    ( "empty,e",                                    "Don't load current AIG into abc" )
-    ( "nowarning",                                  "Don't warn about experimental status" )
-    ;
+  add_option( "--command,-c", commands, "process semicolon-separated list of commands", true );
+  add_flag( "--empty,-e", "don't load current AIG into abc" );
+  add_flag( "--nowarning", "don't warn about experimental status" );
   add_new_option();
 }
 
-bool abc_command::execute()
+void abc_command::execute()
 {
   auto& aigs = env->store<aig_graph>();
 
@@ -80,7 +63,6 @@ bool abc_command::execute()
   {
     abc::Abc_Stop();
     std::cout << "[e] could not setup up ABC" << std::endl;
-    return false;
   }
 
   if ( !aigs.empty() && !is_set( "empty" ) )
@@ -142,7 +124,6 @@ bool abc_command::execute()
   }
 
   abc::Abc_Stop();
-  return true;
 }
 
 }

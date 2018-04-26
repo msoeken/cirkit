@@ -26,37 +26,22 @@
 
 #include "dxs.hpp"
 
-#include <core/utils/program_options.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/synthesis/direct_xmg_synthesis.hpp>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 dxs_command::dxs_command( const environment::ptr& env )
   : xmg_base_command( env, "Direct XMG synthesis" )
 {
-  opts.add_options()
-    ( "bennett,b",                                     "use Bennett trick and inplace synthesis" )
-    ( "threshold,t", value_with_default( &threshold ), "synthesize MFFCs with this number of PIs using TBS" )
-    ;
+  add_flag( "--bennett,-b", "use Bennett trick and inplace synthesis" );
+  add_option( "--threshold,-t", threshold, "synthesize MFFCs with this number of PIs using TBS", true );
   add_new_option();
   be_verbose();
 }
 
-bool dxs_command::execute()
+void dxs_command::execute()
 {
   auto& circuits = env->store<circuit>();
   extend_if_new( circuits );
@@ -67,13 +52,11 @@ bool dxs_command::execute()
   direct_xmg_synthesis( circuits.current(), xmg(), settings, statistics );
 
   print_runtime();
-
-  return true;
 }
 
-command::log_opt_t dxs_command::log() const
+nlohmann::json dxs_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )}
     } );
 }

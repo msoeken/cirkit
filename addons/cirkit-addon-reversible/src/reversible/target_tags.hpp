@@ -42,7 +42,8 @@
 #include <reversible/gate.hpp>
 
 #include <boost/any.hpp>
-#include <boost/dynamic_bitset.hpp>
+
+#include <kitty/kitty.hpp>
 
 namespace cirkit
 {
@@ -54,7 +55,9 @@ namespace cirkit
  *
  * @since  1.0
  */
-struct toffoli_tag {};
+struct toffoli_tag
+{
+};
 
 /**
  * @brief Target Tag for Fredkin gates.
@@ -63,7 +66,9 @@ struct toffoli_tag {};
  *
  * @since  1.0
  */
-struct fredkin_tag {};
+struct fredkin_tag
+{
+};
 
 /**
  * @brief Target Tag for Peres gates.
@@ -72,7 +77,9 @@ struct fredkin_tag {};
  *
  * @since  1.0
  */
-struct peres_tag {};
+struct peres_tag
+{
+};
 
 /**
  * @brief Target Tag for Modules
@@ -110,11 +117,15 @@ struct module_tag
  */
 struct stg_tag
 {
-  stg_tag() {}
-  stg_tag( const boost::dynamic_bitset<>& function ) : function( function ) {}
+  stg_tag()
+      : function( 0u ),
+        affine_class( 0u ) {}
+  stg_tag( const kitty::dynamic_truth_table& function )
+      : function( function ),
+        affine_class( 0u ) {}
 
-  boost::dynamic_bitset<> function;
-  boost::dynamic_bitset<> affine_class;
+  kitty::dynamic_truth_table function;
+  kitty::dynamic_truth_table affine_class;
 };
 
 /**
@@ -201,7 +212,6 @@ bool is_module( const gate& g );
  * @since  2.3
  */
 bool is_stg( const gate& g );
-
 }
 
 #endif /* TARGET_TAGS_HPP */

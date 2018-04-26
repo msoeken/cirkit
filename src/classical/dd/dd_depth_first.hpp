@@ -39,10 +39,7 @@
 #include <functional>
 #include <vector>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/range/algorithm.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -60,7 +57,7 @@ void dd_depth_first_rec( const node& n, std::vector<unsigned>& visited, const no
     return;
   }
   if ( boost::find( visited, n.index ) != visited.end() ) { return; }
-  visited += n.index;
+  visited.push_back( n.index );
 
   auto l = n.low(); auto h = n.high();
   if ( l.index > 1 && boost::find( visited, l.index ) == visited.end() ) { dd_depth_first_rec( l, visited, f ); }

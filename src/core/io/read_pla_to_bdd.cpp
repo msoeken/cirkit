@@ -28,13 +28,14 @@
 
 #include <fstream>
 
-#include <boost/format.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/counting_range.hpp>
 
 #include <core/utils/timer.hpp>
+
+#include <fmt/format.h>
 
 #include "pla_parser.hpp"
 
@@ -102,7 +103,7 @@ namespace cirkit
     {
       for ( unsigned i : boost::counting_range( 0u, *p.num_inputs ) )
       {
-        p.input_labels.push_back( boost::str( boost::format( "i%d" ) % i ) );
+        p.input_labels.push_back( fmt::format( "i{}", i ) );
       }
     }
 
@@ -110,7 +111,7 @@ namespace cirkit
     {
       for ( unsigned i : boost::counting_range( 0u, *p.num_outputs ) )
       {
-        p.output_labels.push_back( boost::str( boost::format( "o%d" ) % i ) );
+        p.output_labels.push_back( fmt::format(" o{}", i ) );
       }
     }
 

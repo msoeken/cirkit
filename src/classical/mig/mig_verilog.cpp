@@ -33,7 +33,6 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
@@ -43,8 +42,6 @@
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 #include <classical/mig/mig_utils.hpp>
-
-using namespace boost::assign;
 
 using boost::format;
 
@@ -148,13 +145,14 @@ mig_graph read_mighty_verilog( const std::string& filename,
                        auto sm1 = std::string( match[2] );
 
                        f.operation = mighty_operation_t::opcode::_and;
-                       f.operands += get_operand( sm0 ),get_operand( sm1 );
+                       f.operands.push_back( get_operand( sm0 ) );
+                       f.operands.push_back( get_operand( sm1 ) );
 
                        if ( sm0[0] == '~' ) { sm0 = sm0.substr( 1u ); }
                        if ( sm1[0] == '~' ) { sm1 = sm1.substr( 1u ); }
 
-                       if ( sm0[0] == 'w' ) { wire_operands += sm0; }
-                       if ( sm1[0] == 'w' ) { wire_operands += sm1; }
+                       if ( sm0[0] == 'w' ) { wire_operands.push_back( sm0 ); }
+                       if ( sm1[0] == 'w' ) { wire_operands.push_back( sm1 ); }
                      }
                      else if ( std::regex_search( expr, match, std::regex( "^([^ ]+) \\| ([^ ]+)$" ) ) )
                      {
@@ -162,13 +160,14 @@ mig_graph read_mighty_verilog( const std::string& filename,
                        auto sm1 = std::string( match[2] );
 
                        f.operation = mighty_operation_t::opcode::_or;
-                       f.operands += get_operand( sm0 ),get_operand( sm1 );
+                       f.operands.push_back( get_operand( sm0 ) );
+                       f.operands.push_back( get_operand( sm1 ) );
 
                        if ( sm0[0] == '~' ) { sm0 = sm0.substr( 1u ); }
                        if ( sm1[0] == '~' ) { sm1 = sm1.substr( 1u ); }
 
-                       if ( sm0[0] == 'w' ) { wire_operands += sm0; }
-                       if ( sm1[0] == 'w' ) { wire_operands += sm1; }
+                       if ( sm0[0] == 'w' ) { wire_operands.push_back( sm0 ); }
+                       if ( sm1[0] == 'w' ) { wire_operands.push_back( sm1 ); }
                      }
                      else if ( std::regex_search( expr, match, std::regex( "^\\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\) \\| \\(([^ ]+) & ([^ ]+)\\)$" ) ) )
                      {
@@ -177,15 +176,17 @@ mig_graph read_mighty_verilog( const std::string& filename,
                        std::string sm2 = ( match[3] == sm0 || match[3] == sm1 ) ? match[4] : match[3];
 
                        f.operation = mighty_operation_t::opcode::_maj;
-                       f.operands += get_operand( sm0 ),get_operand( sm1 ),get_operand( sm2 );
+                       f.operands.push_back( get_operand( sm0 ) );
+                       f.operands.push_back( get_operand( sm1 ) );
+                       f.operands.push_back( get_operand( sm2 ) );
 
                        if ( sm0[0] == '~' ) { sm0 = sm0.substr( 1u ); }
                        if ( sm1[0] == '~' ) { sm1 = sm1.substr( 1u ); }
                        if ( sm2[0] == '~' ) { sm2 = sm2.substr( 1u ); }
 
-                       if ( sm0[0] == 'w' ) { wire_operands += sm0; }
-                       if ( sm1[0] == 'w' ) { wire_operands += sm1; }
-                       if ( sm2[0] == 'w' ) { wire_operands += sm2; }
+                       if ( sm0[0] == 'w' ) { wire_operands.push_back( sm0 ); }
+                       if ( sm1[0] == 'w' ) { wire_operands.push_back( sm1 ); }
+                       if ( sm2[0] == 'w' ) { wire_operands.push_back( sm2 ); }
                      }
                      else
                      {
@@ -205,7 +206,7 @@ mig_graph read_mighty_verilog( const std::string& filename,
                  { std::regex( "^assign (.*) = (.*);" ), [&]( const std::smatch& m ) {
                      if ( boost::find( output_names, m[1] ) != output_names.end() )
                      {
-                       outputs += std::make_pair( m[1], m[2] );
+                       outputs.push_back( std::make_pair( m[1], m[2] ) );
                      }
                    } }
                } );
@@ -282,13 +283,13 @@ void write_verilog( const mig_graph& mig, std::ostream& os,
   /* input names */
   for ( const auto& input : info.inputs )
   {
-    inames += info.node_names.at( input );
+    inames.push_back( info.node_names.at( input ) );
   }
 
   /* output names */
   for ( const auto& output : info.outputs )
   {
-    onames += output.second;
+    onames.push_back( output.second );
   }
 
   /* wires */
@@ -299,7 +300,7 @@ void write_verilog( const mig_graph& mig, std::ostream& os,
     if ( !boost::out_degree( node, mig ) ) { continue; }
 
     node_to_wire[node] = count;
-    wnames += boost::str( format( "w%d" ) % count++ );
+    wnames.push_back( boost::str( format( "w%d" ) % count++ ) );
   }
 
   if ( write_header )

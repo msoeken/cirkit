@@ -34,30 +34,18 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 required_lines_command::required_lines_command( const environment::ptr& env )
-  : cirkit_command( env, "Calculates number of required lines" )
+  : cirkit_command( env, "calculates number of required lines" )
 {
   be_verbose();
 }
 
-command::rules_t required_lines_command::validity_rules() const
+command::rules required_lines_command::validity_rules() const
 {
   return {has_store_element<bdd_function_t>( env )};
 }
 
-bool required_lines_command::execute()
+void required_lines_command::execute()
 {
   const auto& bdds = env->store<bdd_function_t>();
 
@@ -67,15 +55,13 @@ bool required_lines_command::execute()
 
   std::cout << "[i] inputs:     " << statistics->get<unsigned>( "num_inputs" ) << std::endl
             << "[i] outputs:    " << statistics->get<unsigned>( "num_outputs" ) << std::endl
-            << "[i] additional: " << additional << std::endl
-            << boost::format( "[i] run-time:   %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
+            << "[i] additional: " << additional << std::endl;
+  print_runtime();
 }
 
-command::log_opt_t required_lines_command::log() const
+nlohmann::json required_lines_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"additional", additional},
       {"num_inputs", statistics->get<unsigned>( "num_inputs" )},
       {"num_outputs", statistics->get<unsigned>( "num_outputs" )},

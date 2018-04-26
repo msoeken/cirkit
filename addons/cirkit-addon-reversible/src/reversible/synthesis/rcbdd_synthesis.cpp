@@ -33,6 +33,7 @@
 #include <boost/range/algorithm_ext/push_back.hpp>
 
 #include <core/utils/terminal.hpp>
+#include <core/utils/temporary_filename.hpp>
 #include <core/utils/timer.hpp>
 #include <reversible/functions/add_circuit.hpp>
 #include <reversible/functions/add_gates.hpp>
@@ -45,6 +46,7 @@
 #undef timer
 
 #include <cuddInt.h>
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -419,7 +421,7 @@ struct rcbdd_synthesis_manager
   {
     if ( false /*verbose*/ )
     {
-      std::cout << boost::format( "[i] resolve cycles for var %d" ) % _var << std::endl;
+      std::cout << fmt::format( "[i] resolve cycles for var {}", _var ) << std::endl;
     }
 
     while ( cf.cofactor( f, _var, true, false ) != cf.manager().bddZero() ||
@@ -496,7 +498,11 @@ struct rcbdd_synthesis_manager
     if ( genesop )
     {
       std::ofstream esopout;
-      esopout.open( boost::str( boost::format( "/tmp/%s_%d_%d.pla" ) % name % var % offset ) );
+
+      auto esop_name_format = fmt::format( "/tmp/{}_{}_{}_%s.pla", name, var, offset );
+      temporary_filename esop_name( esop_name_format );
+
+      esopout.open( esop_name.name() );
       esopout << ".i " << cf.num_vars() << std::endl;
       esopout << ".o " << 1 << std::endl;
 
@@ -539,6 +545,9 @@ struct rcbdd_synthesis_manager
         esopmin.settings()->set( "on_cube", cube_function_t( [this, &offset]( const cube_t& c ) {} ) );
       }
       esopmin.settings()->set( "verify", false );
+      auto esop_name_format = fmt::format( "/tmp/{}_{}_{}_%s.esop", name, var, offset );
+      temporary_filename esop_name( esop_name_format );
+      esopmin.settings()->set( "esopname", esop_name );
       esopmin( gate.manager(), gate.getNode() );
 
       if ( add_gates_to_circuit && offset == 1u )

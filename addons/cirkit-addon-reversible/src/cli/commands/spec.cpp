@@ -39,34 +39,18 @@
 #include <reversible/functions/permutation_to_truth_table.hpp>
 #include <reversible/simulation/simple_simulation.hpp>
 
-using namespace boost::program_options;
-
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 spec_command::spec_command( const environment::ptr& env )
   : cirkit_command( env, "Specification functions" )
 {
-  opts.add_options()
-    ( "circuit,c",                            "Read from current circuit" )
-    ( "permutation,p", value( &permutation ), "Create spec from permutation (starts with 0, space separated)" )
-    ( "new,n",                                "Add a new entry to the store; if not set, the current entry is overriden" )
-    ;
+  add_flag( "--circuit,-c", "read from current circuit" );
+  add_option( "--permutation,-p", permutation, "create spec from permutation (starts with 0, space separated)" );
+  add_new_option();
 }
 
-command::rules_t spec_command::validity_rules() const
+command::rules spec_command::validity_rules() const
 {
   return {
     { [this]() { return is_set( "circuit" ) != is_set( "permutation" ); }, "either circuit or permutation must be set" },
@@ -74,7 +58,7 @@ command::rules_t spec_command::validity_rules() const
   };
 }
 
-bool spec_command::execute()
+void spec_command::execute()
 {
   auto& specs = env->store<binary_truth_table>();
 
@@ -101,8 +85,6 @@ bool spec_command::execute()
 
     specs.current() =  permutation_to_truth_table( perm );
   }
-
-  return true;
 }
 
 }

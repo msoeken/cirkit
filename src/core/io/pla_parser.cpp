@@ -35,7 +35,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/range/algorithm.hpp>
 
 namespace cirkit
 {
@@ -53,7 +52,7 @@ bool pla_parser( std::istream& in, pla_processor& reader, bool skip_after_first_
 
     if ( boost::starts_with( line, "#" ) )
     {
-      std::string comment( boost::find_if( line, []( char c ) { return c != '#'; } ), line.end() );
+      std::string comment( std::find_if( line.begin(), line.end(), []( char c ) { return c != '#'; } ), line.end() );
       reader.on_comment( comment );
     }
     else if ( boost::starts_with( line, ".i " ) )

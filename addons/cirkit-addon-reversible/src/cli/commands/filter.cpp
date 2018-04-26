@@ -63,20 +63,18 @@ gate_pred_t make_not_filter( gate_pred_t f1 )
 filter_command::filter_command( const environment::ptr& env )
   : cirkit_command( env, "Filters a reversible circuit" )
 {
-  opts.add_options()
-    ( "tof,t", "keep Toffoli gates" )
-    ( "stg,s", "keep single-target gates" )
-    ( "inv,i", "invert filter" )
-    ;
+  add_flag( "--tof,-t", "keep Toffoli gates" );
+  add_flag( "--stg,-s", "keep single-target gates" );
+  add_flag( "--inv,-i", "invert filter" );
   add_new_option();
 }
 
-command::rules_t filter_command::rules() const
+command::rules filter_command::rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool filter_command::execute()
+void filter_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -102,15 +100,7 @@ bool filter_command::execute()
 
   extend_if_new( circuits );
   circuits.current() = circ;
-
-  return true;
 }
-
-command::log_opt_t filter_command::log() const
-{
-  return boost::none;
-}
-
 
 }
 

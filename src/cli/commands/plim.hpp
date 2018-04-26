@@ -48,10 +48,10 @@ public:
   plim_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   unsigned generator_strategy = 0u;

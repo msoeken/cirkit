@@ -43,8 +43,6 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/optional.hpp>
-//#include <boost/signals2.hpp>
-#include <boost/variant.hpp>
 
 #include <reversible/gate.hpp>
 #include <reversible/meta/bus_collection.hpp>
@@ -107,44 +105,13 @@ namespace cirkit
   using constant = boost::optional<bool>;
 
   /**
-   * @brief Represents a circuit
+   * @brief Main circuit class
    *
-   * A circuit is represented by a list of gates (type gate::vector)
-   * and meta information like name, inputs, outputs, constants,
-   * and garbage.
-   *
-   * Via STL like iterators the gates can be accessed and also used
-   * in STL and STL like algorithms based on the iterator concept.
-   *
-   * @section example_circuit_class_1 Example: Creating a circuit with 5 lines
-   * @code
-   * #include <reversible/circuit.hpp>
-   *
-   * ...
-   *
-   * circuit circ( 5 );
-   * @endcode
-   *
-   * @section example_circuit_class_2 Example: Iterate through all gates in a circuit \p circ with iterators
-   * @code
-   * for ( circuit::const_iterator itGate = circ.begin(); itGate != circ.end(); ++itGate )
-   * {
-   *   gate& g = *itGate;
-   * }
-   * @endcode
-   *
-   * @section example_circuit_class_3 Example: Iterator through all gates in a circuit
-   * @code
-   * for ( const auto& g : circ )
-   * {
-   *   // g can be modified
-   * }
-   * @endcode
+   * This class represents a circuit and can be used generically for standard circuits and sub circuits.
    *
    * @since  1.0
    */
-  class standard_circuit
-  {
+  class circuit {
   public:
     /**
      * @brief Default Constructor
@@ -153,7 +120,7 @@ namespace cirkit
      *
      * @since  1.0
      */
-    standard_circuit() : lines( 0 ) {}
+    circuit() : _lines( 0 ) {}
 
     /**
      * @brief Default Constructor
@@ -164,215 +131,10 @@ namespace cirkit
      *
      * @since  1.0
      */
-    standard_circuit( unsigned lines ) : lines( lines )
+    circuit( unsigned lines )
     {
-      inputs.resize( lines );
-      outputs.resize( lines );
-      for ( unsigned i = 0; i < lines; ++i )
-      {
-          inputs[i] = boost::str( boost::format( "i%d" ) % i );
-          outputs[i] = boost::str( boost::format( "o%d" ) % i );
-      }
-      constants.resize( lines, constant() );
-      garbage.resize( lines, false );
+      set_lines( lines );
     }
-
-    /** @cond */
-    std::vector<std::shared_ptr<gate> > gates;
-    unsigned lines;
-
-    std::vector<std::string> inputs;
-    std::vector<std::string> outputs;
-    std::vector<constant> constants;
-    std::vector<bool> garbage;
-    std::string name;
-    bus_collection inputbuses;
-    bus_collection outputbuses;
-    bus_collection statesignals;
-    std::map<const gate*, std::map<std::string, std::string> > annotations;
-    /** @endcond */
-  };
-
-  class subcircuit;
-
-  /**
-   * @brief Generic circuit
-   *
-   * This circuit can be both standard_circuit or a subcircuit.
-   * In the default case it is considered as standard_circuit with
-   * no lines.
-   *
-   * In the following examples are given how to construct different
-   * types of circuits.
-   *
-   * <b>Empty circuit with no lines</b>
-   * @code circuit circ; @endcode
-   *
-   * <b>Empty circuit with 3 lines</b>
-   * @code circuit circ( 3 ); @endcode
-   *
-   * <b>Sub-circuit from \p circ including gates [2,4)</b>
-   * @code subcircuit subcirc( circ, 2, 4 ); @endcode
-   *
-   * @since  1.0
-   */
-  using circuit_variant = boost::variant<standard_circuit, subcircuit>;
-
-  /**
-   * @brief Represents a sub-circuit
-   *
-   * A sub-circuit is a <i>window</i> which can be set
-   * on top of a standard_circuit. All methods are
-   * specialized for the sub-circuit. But the gates are
-   * references to the underlying circuit.
-   */
-  class subcircuit
-  {
-  public:
-    /**
-     * @brief Default constructor
-     *
-     * This constructor creates a sub-circuit from a
-     * base which is a standard_circuit and a range of gates
-     * [\p from, \p to). Thus, the gate with index \p to is
-     * not included.
-     *
-     * @param base Underlying circuit
-     * @param from First gate to be included (starting from 0)
-     * @param to First gate to be not included anymore
-     *
-     * @since  1.0
-     */
-    subcircuit( standard_circuit& base, unsigned from, unsigned to ) : base( &base ), from( from ), to( to ) {}
-
-    /**
-     * @brief Default constructor
-     *
-     * Same as other constructor but takes a generic circuit,
-     * which will get casted to a standard_circuit.
-     *
-     * @param base Underlying circuit (has to be standard_circuit in the variant)
-     * @param from First gate to be included (starting from 0)
-     * @param to First gate to be not included anymore
-     *
-     * @since  1.0
-     */
-    subcircuit( circuit_variant& base, unsigned from, unsigned to ) : base( &boost::get<standard_circuit>( base ) ), from( from ), to( to ) {}
-
-    /**
-     * @brief Default constructor
-     *
-     * Same as other constructor but takes a generic circuit,
-     * which will get casted to a standard_circuit.
-     *
-     * @param base Underlying circuit (has to be standard_circuit in the variant)
-     * @param from First gate to be included (starting from 0)
-     * @param to First gate to be not included anymore
-     *
-     * @since  1.0
-     */
-    subcircuit( const circuit_variant& base, unsigned from, unsigned to ) : base( &boost::get<standard_circuit>( const_cast<circuit_variant&>( base ) ) ), from( from ), to( to ) {}
-
-    /** @cond */
-    standard_circuit* base;
-    unsigned from;
-    unsigned to;
-  };
-
-  /**
-   * @brief Main circuit class
-   *
-   * This class represents a circuit and can be used generically for standard circuits and sub circuits.
-   *
-   * @since  1.0
-   */
-  class circuit {
-  public:
-    /**
-     * @brief Default constructor
-     *
-     * This constructor initializes a standard_circuit with 0 lines, also called an empty circuit.
-     * Empty circuits are usually used as parameters for parsing functions, optimization algorithms, etc.
-     *
-     * @since  1.0
-     */
-    circuit() {}
-
-    /**
-     * @brief Cast Constructor for a standard_circuit
-     *
-     * With this constructor the standard_circuit constructor is automatically converted to
-     * a circuit, e.g. by calling
-     *
-     * @code
-     * circuit circ( 3 );
-     * @endcode
-     *
-     * a circuit with 3 lines is created.
-     *
-     * @param std_circ standard_circuit implementation
-     *
-     * @since  1.0
-     */
-    circuit( const standard_circuit& std_circ ) : circ( std_circ ) {}
-
-/**
-     * @brief Cast Constructor for a standard_circuit
-     *
-     * With this constructor the standard_circuit constructor is automatically converted to
-     * a circuit, e.g. by calling
-     *
-     * @code
-     * circuit circ( 3 );
-     * @endcode
-     *
-     * a circuit with 3 lines is created.
-     *
-     * @param std_circ standard_circuit implementation
-     *
-     * @since  1.0
-     */
-    circuit( standard_circuit& std_circ ) : circ( std_circ ) {}
-
-    /**
-     * @brief Cast Constructor for a subcircuit
-     *
-     * This constructor is used, so that subcircuits are detected as circuits in
-     * algorithms and can passed as circuit parameter to other functions and
-     * algorithms.
-     *
-     * @param sub_circ subcircuit implementation
-     *
-     * @since  1.0
-     */
-    circuit( const subcircuit& sub_circ ) : circ( sub_circ ) {}
-
-    /**
-     * @brief Cast Constructor for a subcircuit
-     *
-     * This constructor is used, so that subcircuits are detected as circuits in
-     * algorithms and can passed as circuit parameter to other functions and
-     * algorithms.
-     *
-     * @param sub_circ subcircuit implementation
-     *
-     * @since  1.0
-     */
-    circuit( subcircuit& sub_circ ) : circ( sub_circ ) {}
-
-    /**
-     * @brief Copy Constructor
-     *
-     * This constructor is used by some algorithms, but should not be used directly.
-     *
-     * It copies the underlying circuit, but it does not
-     * copy the signals, so that this information gets lost.
-     *
-     * @param other Circuit to be copied
-     *
-     * @since  1.0
-     */
-    circuit( const circuit& other ) : circ( other.circ ) {}
 
     /**
      * @brief Mutable iterator for accessing the gates in a circuit
@@ -776,32 +538,6 @@ namespace cirkit
     bus_collection& statesignals();
 
     /**
-     * @brief Returns whether the circuit is a sub-circuit or not
-     *
-     * Both standard_circuit and subcircuit are used in the context as a circuit
-     * in other algorithms. To determine what kind of circuit it is, this method
-     * returns \p true if the circuit is a sub-circuit, \p false otherwise.
-     *
-     * @return true, if circuit is a sub-circuit, \p false otherwise
-     *
-     * @since  1.0
-     */
-    bool is_subcircuit() const;
-
-    /**
-     * @brief Returns the offset of the circuit (sub-circuit)
-     *
-     * For a standard_circuit, the offset is always 0, but for a
-     * sub-circuit, the offset is the index of the starting gate
-     * in respect to its base circuit.
-     *
-     * @return Offset of the circuit
-     *
-     * @since  1.0
-     */
-    unsigned offset() const;
-
-    /**
      * @brief Adds a module to the circuit
      *
      * This function adds a module to the circuit. It does
@@ -910,31 +646,22 @@ namespace cirkit
      * @since  1.1
      */
     void annotate( const gate& g, const std::string& key, const std::string& value );
-
-    // SIGNALS
-    /**
-     * @brief Signal which is emitted after adding a gate
-     *
-     * The gate is always empty, since when adding a gate to the
-     * circuit an empty gate is returned as reference and then
-     * further processed by functions such as append_toffoli.
-     */
-    //boost::signals2::signal<void(gate&)> gate_added;
-
+  
+  public:
     /** @cond */
-    operator circuit_variant&()
-    {
-      return circ;
-    }
+    std::vector<std::shared_ptr<gate> > gates;
+    unsigned _lines;
 
-    operator const circuit_variant&() const
-    {
-      return circ;
-    }
-    /** @endcond */
-  private:
-    /** @cond */
-    circuit_variant circ;
+    std::vector<std::string> _inputs;
+    std::vector<std::string> _outputs;
+    std::vector<constant> _constants;
+    std::vector<bool> _garbage;
+    std::string _name;
+    bus_collection _inputbuses;
+    bus_collection _outputbuses;
+    bus_collection _statesignals;
+    std::map<const gate*, std::map<std::string, std::string> > _annotations;
+  
     std::map<std::string, std::shared_ptr<circuit> > _modules;
     /** @endcond */
   };
