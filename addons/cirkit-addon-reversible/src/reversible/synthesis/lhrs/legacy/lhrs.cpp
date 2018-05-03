@@ -108,6 +108,7 @@ public:
     unsigned              target;        /* the target line for the result */
     step_type             type;          /* which step to perform */
     std::vector<unsigned> clean_ancilla; /* number of clean ancillae */
+    std::vector<unsigned> line_map;      /* the mapping of lines to qubits */
   };
 
   using step_vec = std::vector<step>;
@@ -183,7 +184,14 @@ protected:
   {
     if ( !_dry_run )
     {
-      _steps.push_back( {index, target, type, _constants} );
+      if(type == step_type::compute || type == step_type :: uncompute)
+      {
+        _steps.push_back( {index, target, type, _constants, compute_line_map(index)} );
+      }
+      else
+      {
+        _steps.push_back( {index, target, type, _constants, std::vector<unsigned>()} );
+      }
     }
   }
 
@@ -517,14 +525,14 @@ public:
       case lut_order_heuristic::compute:
         if ( !params.onlylines )
         {
-          synthesize_node( step.node, false, step.clean_ancilla );
+          synthesize_node( step.node, false, step.clean_ancilla, step.line_map );
         }
         break;
 
       case lut_order_heuristic::uncompute:
         if ( !params.onlylines )
         {
-          synthesize_node( step.node, true, step.clean_ancilla );
+          synthesize_node( step.node, true, step.clean_ancilla , step.line_map );
         }
         break;
       }
@@ -551,11 +559,11 @@ private:
     return mask;
   }
 
-  inline void synthesize_node( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
+  inline void synthesize_node( int index, bool lookup, const std::vector<unsigned>& clean_ancilla, const std::vector<unsigned>& line_map)
   {
     /* track costs */
     const auto begin = circ.num_gates();
-    const auto line_map = order_heuristic->compute_line_map( index );
+   // const auto line_map = order_heuristic->compute_line_map( index );
 
     switch ( params.mapping_strategy )
     {
