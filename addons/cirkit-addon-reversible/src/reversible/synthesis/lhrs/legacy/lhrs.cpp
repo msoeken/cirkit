@@ -184,9 +184,9 @@ protected:
   {
     if ( !_dry_run )
     {
-      if(type == step_type::compute || type == step_type :: uncompute)
+      if ( type == step_type::compute || type == step_type::uncompute )
       {
-        _steps.push_back( {index, target, type, _constants, compute_line_map(index)} );
+        _steps.push_back( {index, target, type, _constants, compute_line_map( index )} );
       }
       else
       {
@@ -563,7 +563,6 @@ private:
   {
     /* track costs */
     const auto begin = circ.num_gates();
-   // const auto line_map = order_heuristic->compute_line_map( index );
 
     switch ( params.mapping_strategy )
     {
