@@ -108,7 +108,7 @@ public:
     unsigned              target;        /* the target line for the result */
     step_type             type;          /* which step to perform */
     std::vector<unsigned> clean_ancilla; /* number of clean ancillae */
-    std::vector<unsigned> line_map;
+    std::vector<unsigned> line_map;      /* the mapping of lines to qubits */
   };
 
   using step_vec = std::vector<step>;
@@ -185,9 +185,13 @@ protected:
     if ( !_dry_run )
     {
       if(type == step_type::compute || type == step_type :: uncompute)
-      _steps.push_back( {index, target, type, _constants, compute_line_map(index)} );
+      {
+        _steps.push_back( {index, target, type, _constants, compute_line_map(index)} );
+      }
       else
-      _steps.push_back( {index, target, type, _constants, std::vector<unsigned>()} );
+      {
+        _steps.push_back( {index, target, type, _constants, std::vector<unsigned>()} );
+      }
     }
   }
 
@@ -528,7 +532,7 @@ public:
       case lut_order_heuristic::uncompute:
         if ( !params.onlylines )
         {
-          synthesize_node( step.node, true, step.clean_ancilla , step.line_map);
+          synthesize_node( step.node, true, step.clean_ancilla , step.line_map );
         }
         break;
       }
