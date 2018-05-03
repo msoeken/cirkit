@@ -26,40 +26,23 @@
 
 #include "plim.hpp"
 
-#include <boost/format.hpp>
-
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/plim/plim_compiler.hpp>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 plim_command::plim_command( const environment::ptr& env )
   : mig_base_command( env, "PLiM compiler" )
 {
-  opts.add_options()
-    ( "print,p",                                                         "print the program" )
-    ( "generator_strategy,s", value_with_default( &generator_strategy ), "memristor generator request strategy:\n0: LIFO\n1: FIFO" )
-    ( "naive",                                                           "turn off all optimization" )
-    ( "progress",                                                        "show progress" )
-    ;
+  add_flag( "--print,-p", "print the program" );
+  add_option( "--generator_strategy,-s", generator_strategy, "memristor generator request strategy:\n0: LIFO\n1: FIFO", true );
+  add_flag( "--naive", "turn off all optimization" );
+  add_flag( "--progress", "show progress" );
   be_verbose();
 }
 
-bool plim_command::execute()
+void plim_command::execute()
 {
   const auto settings = make_settings();
   settings->set( "enable_cost_function", !is_set( "naive" ) );
@@ -77,17 +60,15 @@ bool plim_command::execute()
     std::cout << program << std::endl;
   }
 
-  std::cout << boost::format( "[i] run-time:     %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+  print_runtime();
   std::cout << "[i] step count:   " << program.step_count() << std::endl
             << "[i] RRAM count:   " << program.rram_count() << std::endl
             << "[i] write counts: " << any_join( program.write_counts(), " " ) << std::endl;
-
-  return true;
 }
 
-command::log_opt_t plim_command::log() const
+nlohmann::json plim_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )},
       {"step_count", statistics->get<int>( "step_count" )},
       {"rram_count", statistics->get<int>( "rram_count" )},

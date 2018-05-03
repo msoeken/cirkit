@@ -28,12 +28,12 @@
 
 #include <vector>
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/pauli_tags.hpp>
 #include <reversible/target_tags.hpp>
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -43,12 +43,12 @@ gates_command::gates_command( const environment::ptr& env )
 {
 }
 
-command::rules_t gates_command::validity_rules() const
+command::rules gates_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool gates_command::execute()
+void gates_command::execute()
 {
   const auto& circuits = env->store<circuit>();
   const auto& circ = circuits.current();
@@ -100,7 +100,7 @@ bool gates_command::execute()
   std::cout << "     controls";
   for ( auto i = 0u; i <= max_controls; ++i )
   {
-    std::cout << boost::format( " | %4d" ) % i;
+    std::cout << fmt::format( " | {:>4}", i );
   }
   std::cout << " | total" << std::endl;
 
@@ -112,20 +112,12 @@ bool gates_command::execute()
 
     for ( auto c : gate_controls[i] )
     {
-      std::cout << boost::format( " | %4d" ) % c;
+      std::cout << fmt::format( " | {:>4}", c );
       total += c;
     }
-    std::cout << boost::format( " | %5d" ) % total << std::endl;
+    std::cout << fmt::format( " | {:>5}", total ) << std::endl;
   }
-
-  return true;
 }
-
-command::log_opt_t gates_command::log() const
-{
-  return boost::none;
-}
-
 
 }
 

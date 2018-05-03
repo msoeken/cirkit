@@ -202,7 +202,9 @@ namespace cirkit
         if ( is_type<stg_tag>( target_type ) && it->first == "affine" )
         {
           auto stg = boost::any_cast<stg_tag>( added_gate->type() );
-          stg.affine_class = tt_from_hex( boost::any_cast<std::string>( it->second ) );
+          kitty::dynamic_truth_table ac( line_indices.size() - 1 );
+          kitty::create_from_hex_string( ac, boost::any_cast<std::string>( it->second ) );
+          stg.affine_class = ac;
           added_gate->set_type( stg );
         }
       }

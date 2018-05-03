@@ -26,62 +26,35 @@
 
 #include "dsop.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
 #include <core/properties.hpp>
-#include <core/utils/program_options.hpp>
 #include <classical/optimization/compact_dsop.hpp>
 
-using namespace boost::program_options;
-using boost::format;
+#include <fmt/format.h>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 dsop_command::dsop_command( const environment::ptr& env ) : cirkit_command( env, "Computes disjoint SOP" )
 {
-  add_positional_option( "filename" );
-  opts.add_options()
-    ( "filename,i", value( &filename ),              "PLA filename for SOP (input)" )
-    ( "outname,o",  value( &outname ),               "PLA filename for DSOP (output)" )
-    ( "optfunc",    value_with_default( &optfunc ),  "Optimization function: 1-5" )
-    ( "sortfunc",   value_with_default( &sortfunc ), "Sort function:\n0: dimension first\n1: weight first" )
-    ;
+  add_option( "--filename,-i,filename", filename, "PLA filename for SOP (input)" )->check( CLI::ExistingFile );
+  add_option( "--outname,-o", outname, "PLA filename for DSOP (output)" );
+  add_option( "--optfunc", optfunc, "optimization function: 1-5", true );
+  add_option( "--sortfunc", sortfunc, "sort function:\n0: dimension first\n1: weight first", true );
   be_verbose();
 }
 
-command::rules_t dsop_command::validity_rules() const
-{
-  return { file_exists( filename, "filename" ) };
-}
-
-bool dsop_command::execute()
+void dsop_command::execute()
 {
   auto settings = make_settings();
-  auto statistics = std::make_shared<properties>();
 
   settings->set( "sortfunc", std::vector<sort_cube_meta_func_t>( {sort_by_dimension_first, sort_by_weight_first} )[sortfunc] );
   settings->set( "optfunc", std::vector<opt_cube_func_t>( {opt_dsop_1,opt_dsop_2,opt_dsop_3,opt_dsop_4,opt_dsop_5} )[optfunc - 1u] );
   compact_dsop( outname, filename, settings, statistics );
 
-  std::cout << format( "[i] cubes:    %d       " ) % statistics->get<unsigned>( "cube_count" ) << std::endl;
-  std::cout << format( "[i] run-time: %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
+  std::cout << fmt::format( "[i] cubes:    {}", statistics->get<unsigned>( "cube_count" ) ) << std::endl;
+  print_runtime();
 }
 
 }

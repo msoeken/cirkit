@@ -29,8 +29,6 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
-
 #include <cuddObj.hh>
 
 #include <alice/rules.hpp>
@@ -39,27 +37,23 @@
 #include <core/utils/range_utils.hpp>
 #include <core/utils/string_utils.hpp>
 
-using namespace boost::program_options;
-
 namespace cirkit
 {
 
 bdd_command::bdd_command( const environment::ptr& env )
   : cirkit_command( env, "BDD manipulation" )
 {
-  opts.add_options()
-    ( "characteristic,c", value( &characteristic ), "Compute characteristic function (x: inputs first, y: outputs first)" )
-    ( "clique",           value( &clique ),         "Computes clique(n,k) function, give n,k as string" )
-    ( "new,n",                                      "Add a new entry to the store; if not set, the current entry is overriden" )
-    ;
+  add_option( "--characteristic,-c", characteristic, "compute characteristic function (x: inputs first, y: outputs first)" );
+  add_option( "--clique", clique, "computes clique(n,k) function, give n,k as string" );
+  add_new_option();
 }
 
-command::rules_t bdd_command::validity_rules() const
+command::rules bdd_command::validity_rules() const
 {
   return { has_store_element_if_set<bdd_function_t>( *this, env, "characteristic" ) };
 }
 
-bool bdd_command::execute()
+void bdd_command::execute()
 {
   auto& bdds = env->store<bdd_function_t>();
 
@@ -75,8 +69,8 @@ bool bdd_command::execute()
   else if ( is_set( "clique" ) )
   {
     const auto nk = split_string_pair( clique, "," );
-    const auto n = boost::lexical_cast<unsigned>( nk.first );
-    const auto k = boost::lexical_cast<unsigned>( nk.second );
+    const auto n = std::stoul( nk.first );
+    const auto k = std::stoul( nk.second );
 
     Cudd mgr;
     auto func = mgr.bddZero();
@@ -101,8 +95,6 @@ bool bdd_command::execute()
     extend_if_new( bdds );
     bdds.current() = {mgr, {func}};
   }
-
-  return true;
 }
 
 }

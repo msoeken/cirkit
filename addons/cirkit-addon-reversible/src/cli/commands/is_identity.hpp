@@ -47,8 +47,8 @@ public:
   is_identity_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  rules validity_rules() const;
+  void execute();
 };
 
 }

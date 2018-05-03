@@ -26,13 +26,10 @@
 
 #include "aig_word.hpp"
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 
 namespace cirkit
 {
-
-using namespace boost::assign;
 
 aig_word to_aig_word( const aig_function& f )
 {
@@ -52,7 +49,7 @@ aig_word aig_create_wi( aig_graph& aig, const unsigned width, const std::string&
   for ( unsigned u = 0u; u < width; ++u )
   {
     const std::string n = (boost::format("%s[%d]") % name % u).str();
-    w += ( aig_create_pi( aig, n ) );
+    w.push_back( aig_create_pi( aig, n ) );
   }
   return w;
 }

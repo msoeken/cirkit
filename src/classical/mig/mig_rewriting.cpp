@@ -28,7 +28,6 @@
 
 #include <functional>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -36,8 +35,6 @@
 #include <core/graph/depth.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/mig/mig_utils.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -274,7 +271,7 @@ void mig_rewriting_manager::swap_current( const std::string& method )
   std::vector<mig_node> outputs;
   for ( const auto& output : info_old.outputs )
   {
-    outputs += output.first.node;
+    outputs.push_back( output.first.node );
   }
 
   max_depth = compute_depth( mig_old, outputs, depths );

@@ -1,0 +1,9 @@
+name: xtensor
+channels:
+  - nodefaults
+  - QuantStack
+dependencies:
+  - xtensor
+  - xtensor-blas
+  - xeus-cling
+  - notebook

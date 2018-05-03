@@ -129,7 +129,7 @@ void foreach_line_in_file_escape( const std::string& filename, const std::functi
     {
       line.pop_back();
       boost::trim( line );
-      assert( getline( in, line2 ) );
+      getline( in, line2 );
       line += line2;
     }
 

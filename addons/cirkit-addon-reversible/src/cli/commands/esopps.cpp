@@ -48,64 +48,50 @@ esopps_command::esopps_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t esopps_command::validity_rules() const
+command::rules esopps_command::validity_rules() const
 {
   return {has_store_element<tt>( env )};
 }
 
-bool esopps_command::execute()
+void esopps_command::execute()
 {
   const auto& tts = env->store<tt>();
 
   auto tt = to_kitty( tts.current() );
-  auto esop = kitty::esop_from_optimum_pkrm( tt );
+  auto esop = kitty::esop_from_pprm( tt );
 
   circuit circ( tt.num_vars() );
 
   for ( const auto& cube : esop )
   {
-    std::vector<unsigned> negs;
     std::vector<unsigned> ctrls;
 
-    auto bits = cube._bits;
     auto mask = cube._mask;
+
+    assert( cube._bits == mask );
 
     for ( auto i = 0u; i < tt.num_vars(); ++i )
     {
       if ( mask & 1 )
       {
         ctrls.push_back( i );
-        if ( !( bits & 1 ) )
-        {
-          negs.push_back( i );
-        }
       }
-      bits >>= 1;
       mask >>= 1;
     }
 
-    assert( !ctrls.empty() );
+    /* cannot pick up on global phase */
+    if ( ctrls.empty() ) continue;
 
-    for ( auto n : negs )
-    {
-      append_not( circ, n );
-    }
     auto& g = append_pauli( circ, ctrls.front(), pauli_axis::Z );
     for ( auto i = 1; i < ctrls.size(); ++i )
     {
       g.add_control( make_var( ctrls[i], true ) );
-    }
-    for ( auto n : negs )
-    {
-      append_not( circ, n );
     }
   }
 
   auto& circs = env->store<circuit>();
   extend_if_new( circs );
   circs.current() = circ;
-
-  return true;
 }
 
 }

@@ -29,11 +29,12 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include <core/utils/timer.hpp>
-#include <classical/functions/linear_classification.hpp>
 #include <classical/functions/spectral_canonization.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <reversible/target_tags.hpp>
 #include <reversible/synthesis/optimal_quantum_circuits.hpp>
+
+#include <kitty/kitty.hpp>
 
 namespace cirkit
 {
@@ -59,10 +60,16 @@ gate& append_stg_from_line_map( circuit& circ, uint64_t func, uint64_t affine_cl
   g.add_target( line_map.back() );
 
   stg_tag stg;
-  stg.function = boost::dynamic_bitset<>( 1 << num_vars, func );
-  stg.affine_class = boost::dynamic_bitset<>( 1 << num_vars, affine_class );
+
+  kitty::dynamic_truth_table kfunc( num_vars );
+  kitty::create_from_words( kfunc, &func, &func + 1 );
+  stg.function = kfunc;
+
+  kitty::dynamic_truth_table kclass( num_vars );
+  kitty::create_from_words( kclass, &affine_class, &affine_class + 1 );
+  stg.affine_class = kclass;
   g.set_type( stg );
-  circ.annotate( g, "affine", tt_to_hex( stg.affine_class ) );
+  circ.annotate( g, "affine", kitty::to_hex( stg.affine_class ) );
 
   return g;
 }
@@ -91,7 +98,9 @@ void stg_map_precomp( circuit& circ, uint64_t function, unsigned num_vars,
     }
     else                             /* affine */
     {
-      cfunc = exact_affine_classification_output( function, num_vars );
+      kitty::dynamic_truth_table tfunc( num_vars );
+      kitty::create_from_words( tfunc, &function, &function + 1 );
+      cfunc = kitty::exact_affine_output_canonization( tfunc )._bits[0];
     }
     stats.class_hash[num_vars - 2u].insert( std::make_pair( function, cfunc ) );
   }

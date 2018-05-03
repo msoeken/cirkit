@@ -26,9 +26,10 @@
 
 #include "paged_memory.hpp"
 
-#include <boost/range/algorithm.hpp>
+#include <algorithm>
+#include <numeric>
+
 #include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/numeric.hpp>
 
 namespace cirkit
 {
@@ -162,12 +163,12 @@ boost::iterator_range<paged_memory::iterator> paged_memory::sets( unsigned index
 
 unsigned paged_memory::sets_count() const
 {
-  return boost::accumulate( _count, 0u );
+  return std::accumulate( _count.begin(), _count.end(), 0u );
 }
 
 unsigned paged_memory::index( const set& s ) const
 {
-  return std::distance( _offset.begin(), boost::lower_bound( _offset, s._address ) );
+  return std::distance( _offset.begin(), std::lower_bound( _offset.begin(), _offset.end(), s._address ) );
 }
 
 paged_memory::set paged_memory::from_address( unsigned address )

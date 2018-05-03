@@ -47,11 +47,8 @@ public:
   filter_command( const environment::ptr& env );
 
 protected:
-  rules_t rules() const;
-  bool execute();
-
-public:
-  log_opt_t log() const;
+  rules rules() const;
+  void execute();
 };
 
 }

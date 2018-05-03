@@ -29,25 +29,13 @@
 #include <iostream>
 #include <memory>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
-cirkit_command::cirkit_command( const environment::ptr& env, const std::string& caption, const std::string& publications )
-  : command( env, caption, publications )
+cirkit_command::cirkit_command( const environment::ptr& env, const std::string& caption )
+  : command( env, caption )
 {
 }
 
@@ -57,25 +45,19 @@ bool cirkit_command::run( const std::vector<std::string>& args )
   return command::run( args );
 }
 
-command::log_opt_t cirkit_command::log() const
-{
-  log_map_t map;
-
-  for ( const auto& p : *statistics )
-  {
-    add_to_log_from_any<int, unsigned>( map, p.first, p.second );
-  }
-
-  return map;
-}
-
 properties::ptr cirkit_command::make_settings() const
 {
   auto settings = std::make_shared<properties>();
-  if ( opts.find_nothrow( "verbose", false ) )
+
+  try
   {
+    opts.count( "-v" );
     settings->set( "verbose", is_verbose() );
   }
+  catch (...)
+  {
+  }
+
   return settings;
 }
 
@@ -86,19 +68,20 @@ void cirkit_command::print_runtime( const std::string& key, const std::string& l
 
 void cirkit_command::print_runtime( double runtime, const std::string& label ) const
 {
-  if ( env->variable_value("omit_runtime", "0") != "0" )
+  if ( env->variable( "omit_runtime", "0" ) != "0" )
   {
     return;
   }
 
   if ( label.empty() )
   {
-    std::cout << boost::format( "[i] run-time: %.2f secs" ) % runtime << std::endl;
+    env->out() << fmt::format( "[i] run-time: {:.2f} secs\n", runtime );
   }
   else
   {
-    std::cout << boost::format( "[i] run-time (%s): %.2f secs" ) % label % runtime << std::endl;
+    env->out() << fmt::format( "[i] run-time ({}): {:.2f} secs\n", label, runtime );
   }
+  env->out() << std::flush;
 }
 
 

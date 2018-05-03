@@ -47,13 +47,13 @@ public:
   qbs_command( const environment::ptr& env );
 
 public:
-  rules_t validity_rules() const;
+  rules validity_rules() const;
 
 protected:
-  bool execute();
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   unsigned esop_minimizer = 1u;

@@ -26,11 +26,8 @@
 
 #include "cbs.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <cli/stores.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/synthesis/cut_based_synthesis.hpp>
@@ -38,39 +35,25 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 cbs_command::cbs_command( const environment::ptr& env )
-  : cirkit_command( env, "Circuit based synthesis", "[M. Soeken, A. Chattopadhyay: Unlocking Efficiency and Scalability of Reversible Logic Synthesis using Conventional Logic Synthesis, in: DAC 53 (2016)]" )
+  : cirkit_command( env, "Circuit based synthesis"/*, "[M. Soeken, A. Chattopadhyay: Unlocking Efficiency and Scalability of Reversible Logic Synthesis using Conventional Logic Synthesis, in: DAC 53 (2016)]"*/ )
 {
-  opts.add_options()
-    ( "threshold,t",        value_with_default( &threshold ), "threshold for size of FFRs" )
-    ( "embedding",          value_with_default( &embedding ), "0u: BDD-based, 1u: PLA-based" )
-    ( "synthesis",          value_with_default( &synthesis ), "0u: TBS (BDD), 1u: TBS (SAT), 2u: DBS" )
-    ( "store_intermediate",                                   "stores all intermediate results (BDDs, RCBDDs, and circuits) in store\n"
-                                                              "should only be used for debugging purposes on small functions" )
-    ( "progress,p",                                           "show progress" )
-    ;
+  add_option( "--threshold,-t", threshold, "threshold for size of FFRs", true );
+  add_option( "--embedding", embedding, "0u: BDD-based, 1u: PLA-based", true );
+  add_option( "--synthesis", synthesis, "0u: TBS (BDD), 1u: TBS (SAT), 2u: DBS", true );
+  add_flag( "--store_intermediate", "stores all intermediate results (BDDs, RCBDDs, and circuits) in store\n"
+                                    "should only be used for debugging purposes on small functions" );
+  add_flag( "--progress,-p", "show progress" );
   add_new_option();
   be_verbose();
 }
 
-command::rules_t cbs_command::validity_rules() const
+command::rules cbs_command::validity_rules() const
 {
   return { has_store_element<aig_graph>( env ) };
 }
 
-bool cbs_command::execute()
+void cbs_command::execute()
 {
   const auto& aigs = env->store<aig_graph>();
   auto& circuits = env->store<circuit>();
@@ -114,17 +97,15 @@ bool cbs_command::execute()
       circuits.current() = circ;
     }
   }
-
-  return true;
 }
 
-command::log_opt_t cbs_command::log() const
+nlohmann::json cbs_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime",   statistics->get<double>( "runtime" )},
-      {"threshold", static_cast<int>(threshold)},
-      {"embedding", static_cast<int>(embedding)},
-      {"synthesis", static_cast<int>(synthesis)}
+      {"threshold", threshold},
+      {"embedding", embedding},
+      {"synthesis", synthesis}
     });
 }
 

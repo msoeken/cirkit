@@ -27,7 +27,6 @@
 #include "rms.hpp"
 
 #include <alice/rules.hpp>
-#include <core/utils/program_options.hpp>
 
 #include <cli/reversible_stores.hpp>
 #include <reversible/synthesis/reed_muller_synthesis.hpp>
@@ -35,34 +34,20 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 rms_command::rms_command( const environment::ptr& env )
   : cirkit_command( env, "Reed-Muller based synthesis" )
 {
-  opts.add_options()
-    ( "bidirectional,b", value_with_default( &bidirectional ), "bidirectional synthesis" )
-    ;
+  add_option( "--bidirectional,-b", bidirectional, "bidirectional synthesis", true );
   add_new_option();
   be_verbose();
 }
 
-command::rules_t rms_command::validity_rules() const
+command::rules rms_command::validity_rules() const
 {
   return {has_store_element<binary_truth_table>( env )};
 }
 
-bool rms_command::execute()
+void rms_command::execute()
 {
   const auto& specs = env->store<binary_truth_table>();
   auto& circuits = env->store<circuit>();
@@ -74,13 +59,11 @@ bool rms_command::execute()
   reed_muller_synthesis( circuits.current(), specs.current(), settings, statistics );
 
   print_runtime();
-
-  return true;
 }
 
-command::log_opt_t rms_command::log() const
+nlohmann::json rms_command::log() const
 {
-  return log_opt_t({{"runtime", statistics->get<double>( "runtime" )}});
+  return nlohmann::json({{"runtime", statistics->get<double>( "runtime" )}});
 }
 
 }

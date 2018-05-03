@@ -33,30 +33,18 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 mitm_command::mitm_command( const environment::ptr& env )
   : cirkit_command( env, "Simple meet-in-the-middle mapping" )
 {
   add_new_option();
 }
 
-command::rules_t mitm_command::validity_rules() const
+command::rules mitm_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool mitm_command::execute()
+void mitm_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -67,13 +55,11 @@ bool mitm_command::execute()
   extend_if_new( circuits );
 
   circuits.current() = mapped;
-
-  return true;
 }
 
-command::log_opt_t mitm_command::log() const
+nlohmann::json mitm_command::log() const
 {
-  return log_opt_t({{"runtime", statistics->get<double>( "runtime" )}});
+  return nlohmann::json({{"runtime", statistics->get<double>( "runtime" )}});
 }
 
 }

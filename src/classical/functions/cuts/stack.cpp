@@ -91,12 +91,12 @@ std::map<mig_node, structural_cut> stack_based_structural_cut_enumeration( const
           {
             cut |= v3;
             if ( cut.count() > k ) { continue; }
-            cuts += cut;
+            cuts.push_back( cut );
           }
         }
       }
 
-      cuts += onehot_bitset( n, node );
+      cuts.push_back( onehot_bitset( n, node ) );
       cut_map.insert( {node, cuts} );
     }
   }

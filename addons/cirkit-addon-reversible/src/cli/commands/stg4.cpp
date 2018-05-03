@@ -32,6 +32,7 @@
 #include <reversible/target_tags.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/functions/add_circuit.hpp>
+#include <reversible/functions/add_gates.hpp>
 #include <reversible/functions/add_line_to_circuit.hpp>
 #include <reversible/functions/circuit_from_string.hpp>
 #include <reversible/functions/rewrite_circuit.hpp>
@@ -46,12 +47,12 @@ stg4_command::stg4_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t stg4_command::validity_rules() const
+command::rules stg4_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool stg4_command::execute()
+void stg4_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -63,13 +64,81 @@ bool stg4_command::execute()
         {
           const auto& stg = boost::any_cast<stg_tag>( g.type() );
           const auto& f = stg.function;
-          const auto num_vars = tt_num_vars( f );
+          const auto num_vars = f.num_vars();
+
+          std::cout << f._bits[0] << std::endl;
+          /* if there are zero variables in f */
+          if ( num_vars == 0 )
+          {
+            if (f._bits[0] == 0)
+            {
+              std::cout << "add nothing"<< std::endl;
+
+              return true;
+            }
+            else if(f._bits[0] == 1)
+            {
+              std::cout << "add not"<< std::endl;
+
+              append_not(circ, g.targets().front());
+              return true;
+            }
+          }
+          /* if there is one variable*/
+          if( num_vars == 1 )
+          {
+            if( f._bits[0] == 1)
+            {
+              std::cout << "add pos cnot"<< std::endl;
+
+              append_cnot(circ, make_var(g.controls().front().line(), true), g.targets().front());
+              return true;
+            }
+            else if( f._bits[0] == 2)
+            {
+              std::cout << "add neg cnot"<< std::endl;
+
+              append_cnot(circ, make_var(g.controls().front().line(), false), g.targets().front());
+              return true;
+            } 
+          }
+          /* try spectral classes first */
           if ( num_vars >= 2u && num_vars <= 5u )
           {
-            const auto it = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].find( f.to_ulong() );
+            const auto it = optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].find( f._bits[0] );
             if ( it != optimal_quantum_circuits::spectral_classification_index[num_vars - 2u].end() )
             {
               const auto subcirc = circuit_from_string( optimal_quantum_circuits::spectral_classification[num_vars - 2u][it->second] );
+
+              std::vector<unsigned> line_mapping;
+              for ( const auto& c : g.controls() )
+              {
+                line_mapping.push_back( c.line() );
+              }
+              line_mapping.push_back( g.targets().front() );
+
+              if ( subcirc.lines() > g.size() )
+              {
+                if ( ancilla == -1 )
+                {
+                  ancilla = circ.lines();
+                  add_line_to_circuit( circ, "h", "h" );
+                }
+                line_mapping.push_back( ancilla );
+              }
+
+              append_circuit( circ, subcirc, {}, line_mapping );
+              return true;
+            }
+          }
+
+          /* then affine classes */
+          if ( num_vars >= 2u && num_vars <= 4u )
+          {
+            const auto it = optimal_quantum_circuits::affine_classification_index[num_vars - 2u].find( f._bits[0] );
+            if ( it != optimal_quantum_circuits::affine_classification_index[num_vars - 2u].end() )
+            {
+              const auto subcirc = circuit_from_string( optimal_quantum_circuits::affine_classification[num_vars - 2u][it->second] );
 
               std::vector<unsigned> line_mapping;
               for ( const auto& c : g.controls() )
@@ -100,8 +169,6 @@ bool stg4_command::execute()
 
   extend_if_new( circuits );
   circuits.current() = circ;
-
-  return true;
 }
 
 }

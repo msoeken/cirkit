@@ -27,19 +27,16 @@
 
 #include "aigmeta_coverage.hpp"
 
-#include <boost/assign/std/list.hpp>
 #include <boost/format.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/numeric.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
 
 void aigmeta_coverage::cover( const aigmeta_bundle& bundle, unsigned literal )
 {
-  covered_bundles[&bundle] += literal;
+  covered_bundles[&bundle].push_back( literal );
 }
 
 double aigmeta_coverage::coverage() const

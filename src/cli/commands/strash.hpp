@@ -47,7 +47,7 @@ public:
   strash_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 };
 
 }

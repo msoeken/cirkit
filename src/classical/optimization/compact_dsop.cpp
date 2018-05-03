@@ -26,7 +26,6 @@
 
 #include "compact_dsop.hpp"
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/algorithm.hpp>
@@ -35,8 +34,6 @@
 
 #include <core/utils/range_utils.hpp>
 #include <core/utils/timer.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -73,15 +70,15 @@ void connected_cube_list::add( const cube& c )
     int m = other.match_intersect( c );
     if ( m != -1 )
     {
-      commons += std::make_pair( other, (unsigned)m );
+      commons.push_back( std::make_pair( other, (unsigned)m ) );
       weight += c.dimension() - m - 1;
-      _connected_cubes[other] += std::make_pair( c, (unsigned)m );
+      _connected_cubes[other].push_back( std::make_pair( c, (unsigned)m ) );
       cube_weights[other] += other.dimension() - m - 1;
     }
   }
 
   /* add cube */
-  _cubes += c;
+  _cubes.push_back( c );
   _connected_cubes[c] = commons;
   cube_weights[c] = weight;
 }
@@ -118,7 +115,7 @@ cube_vec_t connected_cube_list::remove_disjoint_cubes()
   {
     if ( _connected_cubes[c].empty() )
     {
-      dis += c;
+      dis.push_back( c );
       _connected_cubes.erase( c );
       cube_weights.erase( c );
     }
@@ -139,7 +136,7 @@ cube_vec_t connected_cube_list::connected_cubes( const cube& c ) const
 
   for ( const auto& p : _connected_cubes.find( c )->second )
   {
-    connected += p.first;
+    connected.push_back( p.first );
   }
 
   return connected;
@@ -196,7 +193,7 @@ cube_vec_t compute_dsop( cube_vec_t& c, const sort_cube_meta_func_t& sortfunc, c
       /* P = P \ {p} */
       p -= cube;
       /* D = D \cup {p} */
-      d += cube;
+      d.push_back( cube );
 
       if ( verbose )
       {
@@ -243,7 +240,7 @@ cube_vec_t compute_dsop( cube_vec_t& c, const sort_cube_meta_func_t& sortfunc, c
       {
         if ( cuber.match_intersect( cube ) == -1 )
         {
-          b2 += cuber;
+          b2.push_back( cuber );
           continue;
         }
         auto q = cuber.disjoint_sharp( cube );
@@ -313,8 +310,8 @@ void opt_dsop_3( const cube& cubeq, const cube_vec_t& q, connected_cube_list& p,
   {
     if ( cube.match_intersect( cubeq ) != -1 )
     {
-      b += cube;
-      remove += cube;
+      b.push_back( cube );
+      remove.push_back( cube );
     }
   }
 
@@ -346,7 +343,7 @@ void opt_dsop_5( const cube& cubeq, const cube_vec_t& q, connected_cube_list& p,
   {
     if ( c != biggest )
     {
-      b += c;
+      b.push_back( c );
     }
   }
   p.sort( sortfunc );
@@ -369,7 +366,7 @@ void compact_dsop( const std::string& destination, const std::string& filename,
 
   for ( auto& c : cs )
   {
-    ds += compute_dsop( c, sortfunc, optfunc, verbose );
+    ds.push_back( compute_dsop( c, sortfunc, optfunc, verbose ) );
   }
 
   auto cpw_settings   = std::make_shared<properties>();

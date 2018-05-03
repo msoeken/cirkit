@@ -59,15 +59,11 @@ public:
   {
     if ( env->has_store<aig_graph>() )
     {
-      opts.add_options()
-        ( "aig,a", boost::str( boost::format( opts_desc ) % "AIG" ).c_str() )
-        ;
+      add_flag( "--aig,-a", boost::str( boost::format( opts_desc ) % "AIG" ).c_str() );
     }
     if ( env->has_store<mig_graph>() )
     {
-      opts.add_options()
-        ( "mig,m", boost::str( boost::format( opts_desc ) % "MIG" ).c_str() )
-        ;
+      add_flag( "--mig,-m", boost::str( boost::format( opts_desc ) % "MIG" ).c_str() );
     }
   }
 
@@ -82,7 +78,7 @@ protected:
     return env->has_store<mig_graph>() && is_set( "mig" );
   }
 
-  inline rule_t one_data_structure_selected() const
+  inline rule one_data_structure_selected() const
   {
     const auto assertion = [&]() {
       auto total = 0u;
@@ -96,7 +92,7 @@ protected:
     return {assertion, "exactly one circuit type needs to be selected"};
   }
 
-  inline rule_t maybe_has_aig() const
+  inline rule maybe_has_aig() const
   {
     const auto assertion = [&]() {
       return !( aig_selected() ) || env->store<aig_graph>().current_index() >= 0;
@@ -105,7 +101,7 @@ protected:
     return {assertion, "no current AIG available"};
   }
 
-  inline rule_t maybe_has_mig() const
+  inline rule maybe_has_mig() const
   {
     const auto assertion = [&]() {
       return !( mig_selected() ) || env->store<mig_graph>().current_index() >= 0;
@@ -114,7 +110,7 @@ protected:
     return {assertion, "no current MIG available"};
   }
 
-  virtual rules_t validity_rules() const
+  virtual rules validity_rules() const
   {
     return {one_data_structure_selected(), maybe_has_aig(), maybe_has_mig()};
   }
@@ -159,35 +155,26 @@ protected:
     return cirkit::mig_info( mig() );
   }
 
-  virtual bool execute()
+  virtual void execute()
   {
-    if ( !before() )
-    {
-      return false;
-    }
+    before();
 
     if ( aig_selected() )
     {
-      if ( !execute_aig() )
-      {
-        return false;
-      }
+      execute_aig();
     }
     else if ( mig_selected() )
     {
-      if ( !execute_mig() )
-      {
-        return false;
-      }
+      execute_mig();
     }
 
-    return after();
+    after();
   }
 
-  virtual bool before()      { return true; };
-  virtual bool execute_aig() { return true; };
-  virtual bool execute_mig() { return true; };
-  virtual bool after()       { return true; };
+  virtual void before()      {}
+  virtual void execute_aig() {}
+  virtual void execute_mig() {}
+  virtual void after()       {}
 };
 
 }

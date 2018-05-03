@@ -44,7 +44,6 @@
 #include <classical/abc/gia/gia.hpp>
 #include <classical/abc/gia/gia_utils.hpp>
 #include <classical/abc/utils/abc_run_command.hpp>
-#include <classical/functions/linear_classification.hpp>
 #include <classical/functions/spectral_canonization.hpp>
 #include <classical/io/read_blif.hpp>
 #include <classical/optimization/exorcism_minimization.hpp>
@@ -109,6 +108,7 @@ public:
     unsigned              target;        /* the target line for the result */
     step_type             type;          /* which step to perform */
     std::vector<unsigned> clean_ancilla; /* number of clean ancillae */
+    std::vector<unsigned> line_map;      /* the mapping of lines to qubits */
   };
 
   using step_vec = std::vector<step>;
@@ -184,7 +184,14 @@ protected:
   {
     if ( !_dry_run )
     {
-      _steps.push_back( {index, target, type, _constants} );
+      if(type == step_type::compute || type == step_type :: uncompute)
+      {
+        _steps.push_back( {index, target, type, _constants, compute_line_map(index)} );
+      }
+      else
+      {
+        _steps.push_back( {index, target, type, _constants, std::vector<unsigned>()} );
+      }
     }
   }
 
@@ -518,14 +525,14 @@ public:
       case lut_order_heuristic::compute:
         if ( !params.onlylines )
         {
-          synthesize_node( step.node, false, step.clean_ancilla );
+          synthesize_node( step.node, false, step.clean_ancilla, step.line_map );
         }
         break;
 
       case lut_order_heuristic::uncompute:
         if ( !params.onlylines )
         {
-          synthesize_node( step.node, true, step.clean_ancilla );
+          synthesize_node( step.node, true, step.clean_ancilla , step.line_map );
         }
         break;
       }
@@ -552,11 +559,11 @@ private:
     return mask;
   }
 
-  inline void synthesize_node( int index, bool lookup, const std::vector<unsigned>& clean_ancilla )
+  inline void synthesize_node( int index, bool lookup, const std::vector<unsigned>& clean_ancilla, const std::vector<unsigned>& line_map)
   {
     /* track costs */
     const auto begin = circ.num_gates();
-    const auto line_map = order_heuristic->compute_line_map( index );
+   // const auto line_map = order_heuristic->compute_line_map( index );
 
     switch ( params.mapping_strategy )
     {
@@ -613,16 +620,13 @@ private:
 
   inline void append_circuit_fast( const circuit& src )
   {
-    auto& dest_s = boost::get<standard_circuit>( static_cast<circuit_variant&>( circ ) );
-    const auto& src_s = boost::get<standard_circuit>( static_cast<const circuit_variant&>( src ) );
-
-    boost::push_back( dest_s.gates, src_s.gates );
+    boost::push_back( circ.gates, src.gates );
   }
 
   inline circuit get_fast_circuit() const
   {
-    standard_circuit c;
-    c.lines = circ.lines();
+    circuit c;
+    c._lines = circ.lines();
     return c;
   }
 

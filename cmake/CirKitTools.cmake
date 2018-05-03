@@ -84,6 +84,8 @@ function( add_cirkit_library )
     endif()
   endif( )
 
+  install(TARGETS ${arg_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+
 endfunction( )
 
 
@@ -125,6 +127,8 @@ function( add_cirkit_program )
   if( DEFINED arg_INCLUDE )
     target_include_directories( ${arg_NAME} ${arg_INCLUDE} )
   endif( )
+
+  install(TARGETS ${arg_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 endfunction( )
 

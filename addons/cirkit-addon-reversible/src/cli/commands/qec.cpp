@@ -29,8 +29,6 @@
 #include <cmath>
 #include <iostream>
 
-#include <boost/program_options.hpp>
-
 #include <xtensor/xio.hpp>
 #include <xtensor/xmath.hpp>
 #include <xtensor-blas/xlinalg.hpp>
@@ -41,21 +39,17 @@
 namespace cirkit
 {
 
-using boost::program_options::value;
-
 qec_command::qec_command( const environment::ptr& env )
   : cirkit_command( env, "Quantum equivalence checking" )
 {
-  opts.add_options()
-    ( "qid,q",     value( &qids )->composing(), "value of a quantum circuit" )
-    ( "rid,r",     value( &rids )->composing(), "value of a reversible circuit" )
-    ( "ancilla,a",                              "add ancilla (to the end) if necessary" )
-    ( "progress,p",                             "show progress" )
-    ( "quiet",                                  "do not print result" )
-    ;
+  add_option( "--qid,-q", qids, "value of a quantum circuit" );
+  add_option( "--rid,-r", rids, "value of a reversible circuit" );
+  add_flag( "--ancilla,-a", "add ancilla (to the end) if necessary" );
+  add_flag( "--progress,-p", "show progress" );
+  add_flag( "--quiet", "do not print result" );
 }
 
-command::rules_t qec_command::validity_rules() const
+command::rules qec_command::validity_rules() const
 {
   return {
     {[this]() { return qids.size() + rids.size() == 2u; }, "two circuits must be selected"},
@@ -78,7 +72,7 @@ command::rules_t qec_command::validity_rules() const
   };
 }
 
-bool qec_command::execute()
+void qec_command::execute()
 {
   const auto& circuits = env->store<circuit>();
 
@@ -117,12 +111,12 @@ bool qec_command::execute()
     else
     {
       std::cout << "[e] matrices have different dimensions, use ancilla option to adjust." << std::endl;
-      return true;
+      return;
     }
   }
 
   result = complex_allclose( matrices[0u].first, matrices[1u].first );
-  if ( is_set( "quiet" ) ) return true;
+  if ( is_set( "quiet" ) ) return;
 
   if ( result )
   {
@@ -135,13 +129,11 @@ bool qec_command::execute()
 
   qids.clear();
   rids.clear();
-
-  return true;
 }
 
-command::log_opt_t qec_command::log() const
+nlohmann::json qec_command::log() const
 {
-  return log_map_t( {
+  return nlohmann::json( {
       {"result", result}
     } );
 }

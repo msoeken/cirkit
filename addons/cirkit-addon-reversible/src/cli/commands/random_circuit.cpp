@@ -29,25 +29,16 @@
 #include <chrono>
 #include <random>
 
-#include <boost/program_options.hpp>
-
 #include <alice/rules.hpp>
 
 #include <core/utils/bitset_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <reversible/circuit.hpp>
 #include <reversible/gate.hpp>
 #include <reversible/target_tags.hpp>
 #include <cli/reversible_stores.hpp>
 
-using boost::program_options::value;
-
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
 
 /******************************************************************************
  * Private functions                                                          *
@@ -81,24 +72,22 @@ void create_random_gate( gate& g, unsigned lines, bool negative, std::default_ra
 random_circuit_command::random_circuit_command( const environment::ptr& env )
   : cirkit_command( env, "Creates a random reversible circuit" )
 {
-  opts.add_options()
-    ( "lines",         value_with_default( &lines ), "Number of lines" )
-    ( "gates",         value_with_default( &gates ), "Number of gates" )
-    ( "negative,n",                                  "Allow negative control lines" )
-    ( "insert_gate,g",                               "Doesn't create a circuit, but inserts random gate into current circuit" )
-    ( "seed",          value( &seed ),               "Random seed (if not given, current time is used)" )
-    ( "new",                                         "Create a new store element" )
-    ;
+  add_option( "--lines", lines, "number of lines", true );
+  add_option( "--gates", gates, "number of gates", true );
+  add_flag( "--negative,-n", "allow negative control lines" );
+  add_flag( "--insert_gate,-g", "doesn't create a circuit, but inserts random gate into current circuit" );
+  add_option( "--seed", seed, "random seed (if not given, current time is used)" );
+  add_new_option( false );
 }
 
-command::rules_t random_circuit_command::validity_rules() const
+command::rules random_circuit_command::validity_rules() const
 {
   return {
     {[this]() { return !is_set( "insert_gate" ) || env->store<circuit>().current_index() >= 0; }, "no circuit available"}
   };
 }
 
-bool random_circuit_command::execute()
+void random_circuit_command::execute()
 {
   if ( !is_set( "seed" ) )
   {
@@ -129,13 +118,11 @@ bool random_circuit_command::execute()
     }
     circuits.current() = circ;
   }
-
-  return true;
 }
 
-command::log_opt_t random_circuit_command::log() const
+nlohmann::json random_circuit_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"lines", lines},
       {"gates", gates},
       {"negative", is_set( "negative" )},

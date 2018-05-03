@@ -7,9 +7,8 @@ add_cirkit_library(
   USE
     cudd
     obj
+    kitty
     fmt::fmt-header-only
-    ${Boost_PROGRAM_OPTIONS_LIBRARIES}
-    ${Boost_SYSTEM_LIBRARIES}
 )
 
 add_cirkit_library(
@@ -17,9 +16,9 @@ add_cirkit_library(
   AUTO_DIRS classical
   USE
     ${Boost_FILESYSTEM_LIBRARIES}  
+    ${Boost_SYSTEM_LIBRARIES}
     cirkit_core
     libabc-pic
-    kitty
     minisat-lib-static
 )
 
@@ -27,8 +26,11 @@ add_cirkit_library(
   NAME cirkit_cli
   AUTO_DIRS cli
   USE
+    alice
     cirkit_core
     cirkit_classical
     ${READLINE_LIBRARY}
+  DEFINE
+    PUBLIC ALICE_ENV_HOME=CIRKIT_HOME
 )
 

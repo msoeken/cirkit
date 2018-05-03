@@ -27,8 +27,6 @@
 #include "bdd.hpp"
 
 #include <vector>
-
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/counting_range.hpp>
@@ -36,8 +34,6 @@
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/dd/count_solutions.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {

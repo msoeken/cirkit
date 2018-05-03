@@ -29,13 +29,10 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/dynamic_bitset.hpp>
-
-#include <core/cube.hpp>
 #include <core/utils/range_utils.hpp>
 #include <cli/stores.hpp>
-#include <classical/functions/isop.hpp>
-#include <classical/utils/truth_table_utils.hpp>
+
+#include <kitty/kitty.hpp>
 
 namespace cirkit
 {
@@ -43,31 +40,29 @@ namespace cirkit
 isop_command::isop_command( const environment::ptr& env )
   : cirkit_command( env, "Compute ISOP" )
 {
-  opts.add_options()
-    ( "tt,t", "computes ISOP from truth table" )
-    ;
+  add_flag( "--tt,-t", "computes ISOP from truth table" );
 }
 
-command::rules_t isop_command::validity_rules() const
+command::rules isop_command::validity_rules() const
 {
   return {
     {[this]() { return !is_set( "tt" ) || env->store<tt>().current_index() != -1; }, "no truth table in store" }
   };
 }
 
-bool isop_command::execute()
+void isop_command::execute()
 {
   if ( is_set( "tt" ) )
   {
     const auto& tts = env->store<tt>();
 
-    std::vector<int> cover;
-    tt_isop( tts.current(), tts.current(), cover );
-    const auto sop = cover_to_cubes( cover, tt_num_vars( tts.current() ) );
-    common_pla_print( sop );
+    const auto f = to_kitty( tts.current() );
+    const auto cubes = kitty::isop( f );
+    for ( const auto& c : cubes )
+    {
+      c.print( f.num_vars(), env->out() );
+    }
   }
-
-  return true;
 }
 
 }

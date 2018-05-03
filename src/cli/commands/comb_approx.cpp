@@ -26,13 +26,10 @@
 
 #include "comb_approx.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
 #include <cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
 #include <classical/aig.hpp>
 #include <classical/approximate/bdd_level_approximation.hpp>
@@ -45,6 +42,8 @@
 #include <classical/dd/size.hpp>
 #include <classical/dd/visit_solutions.hpp>
 #include <classical/functions/simulate_aig.hpp>
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -64,20 +63,18 @@ namespace cirkit
 comb_approx_command::comb_approx_command( const environment::ptr& env )
   : cirkit_command( env, "Approximate combinational circuits" )
 {
-  opts.add_options()
-    ( "bdd,b",          "Read and write from BDD" )
-    ( "aig,a",          "Read and write from AIG" )
-    ( "mode,m",         value_with_default( &mode ),           "Approximation mode:\n0: round-down\n1: round-up\n2: round-closest\n3: co-factor 0\n4: co-factor 1\n5: copy" )
-    ( "level,l",        value_with_default( &level ),          "Round or co-factor at level (round is inclusive)" )
-    ( "maximum_method", value_with_default( &maximum_method ), "Maximum method:\n0: shift\n1: chi" )
-    ( "print,p",                                               "Print implicants of both functions" )
-    ( "truthtable,t",                                          "Print truth table of both functions" )
-    ( "new,n",                                                 "Create new store element for result" )
-    ;
+  add_flag( "--bdd,-b", "read and write from BDD" );
+  add_flag( "--aig,-a", "read and write from AIG" );
+  add_option( "--mode,-m", mode, "approximation mode:\n0: round-down\n1: round-up\n2: round-closest\n3: co-factor 0\n4: co-factor 1\n5: copy", true );
+  add_option( "--level,-l", level, "round or co-factor at level (round is inclusive)", true );
+  add_option( "--maximum_method", maximum_method, "maximum method:\n0: shift\n1: chi", true );
+  add_flag( "--print,-p", "print implicants of both functions" );
+  add_flag( "--truthtable,-t", "print truth table of both functions" );
+  add_new_option();
   be_verbose();
 }
 
-command::rules_t comb_approx_command::validity_rules() const
+command::rules comb_approx_command::validity_rules() const
 {
   return {
     {[this]() { return static_cast<int>( is_set( "bdd" ) ) + static_cast<int>( is_set( "aig" ) ) == 1; }, "either BDD or AIG needs to be chosen" },
@@ -88,10 +85,8 @@ command::rules_t comb_approx_command::validity_rules() const
   };
 }
 
-bool comb_approx_command::execute()
+void comb_approx_command::execute()
 {
-  using boost::format;
-
   auto& aigs = env->store<aig_graph>();
   // auto& bdds = env->store<bdd_function_t>();
 
@@ -107,13 +102,12 @@ bool comb_approx_command::execute()
 
     for ( const auto& m : map )
     {
-      fs += m.second;
+      fs.push_back( m.second );
     }
   }
   else if ( is_set( "bdd" ) )
   {
     std::cerr << "[e] not implemented yet, use approximate_bdd program" << std::endl;
-    return true;
   }
   else
   {
@@ -129,7 +123,6 @@ bool comb_approx_command::execute()
   if ( level > manager->num_vars() )
   {
     std::cerr << "[e] invalid level (must be less or equal to " << manager->num_vars() << ")" << std::endl;
-    return true;
   }
 
   auto settings = std::make_shared<properties>();
@@ -209,19 +202,17 @@ bool comb_approx_command::execute()
 
   if ( mode < 5u )
   {
-    std::cout << format( "[i] run-time:        %.2f secs" ) % statistics->get<double>( "runtime" ) << std::endl;
+    std::cout << fmt::format( "[i] run-time:        {:.2f} secs", statistics->get<double>( "runtime" ) ) << std::endl;
   }
   std::cout << "[i] old size:        " << size << std::endl;
-  std::cout << format( "[i] new size:        %d (%.2f %%)" ) % size_hat % ( ( size - size_hat ) * 100.0 / size ) << std::endl;
-  std::cout << format( "[i] error rate:      %d (%.2f %%)" ) % er % ( (double)er / (1ull << manager->num_vars()) * 100.0 ) << std::endl;
+  std::cout << fmt::format( "[i] new size:        {} ({:.2f} %)", size_hat, ( size - size_hat ) * 100.0 / size ) << std::endl;
+  std::cout << fmt::format( "[i] error rate:      {} ({:.2f} %)", (double)er, (double)er / (1ull << manager->num_vars()) * 100.0 ) << std::endl;
   std::cout << "[i] worst case:      " << worst_case( fs, fshat, metric_settings, wc_statistics ) << std::endl;
-  std::cout << format( "[i] average case:    %.2f" ) % average_case( fs, fshat, metric_settings, ac_statistics ) << std::endl;
+  std::cout << fmt::format( "[i] average case:    {:.2f}", (double)average_case( fs, fshat, metric_settings, ac_statistics ) ) << std::endl;
 
-  std::cout << format( "[i] run-time (er):   %.2f" ) % er_statistics->get<double>( "runtime" ) << std::endl;
-  std::cout << format( "[i] run-time (wc):   %.2f" ) % wc_statistics->get<double>( "runtime" ) << std::endl;
-  std::cout << format( "[i] run-time (ac):   %.2f" ) % ac_statistics->get<double>( "runtime" ) << std::endl;
-
-  return true;
+  std::cout << fmt::format( "[i] run-time (er):   {:.2f}", er_statistics->get<double>( "runtime" ) ) << std::endl;
+  std::cout << fmt::format( "[i] run-time (wc):   {:.2f}", wc_statistics->get<double>( "runtime" ) ) << std::endl;
+  std::cout << fmt::format( "[i] run-time (ac):   {:.2f}", ac_statistics->get<double>( "runtime" ) ) << std::endl;
 }
 
 }

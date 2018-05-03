@@ -48,16 +48,17 @@ public:
   esop_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  rules validity_rules() const;
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   std::string filename;
-  gia_graph::esop_cover_method collapse = gia_graph::esop_cover_method::aig_new;
+  gia_graph::esop_cover_method collapse = gia_graph::esop_cover_method::bdd;
   unsigned minimize = 1u;
+  unsigned num_cubes = 0u;
 
   double collapse_runtime = 0.0;
 };

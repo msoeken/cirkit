@@ -50,11 +50,11 @@ public:
   lhrs_command( const environment::ptr& env );
 
 protected:
-  rules_t validity_rules() const;
-  bool execute();
+  rules validity_rules() const;
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   legacy::lhrs_params params;
@@ -66,6 +66,11 @@ private:
   unsigned flow_iters_init = 1u;
 
   std::string dotname_mapped;
+
+  /* to be merged */
+  std::string mapping_strategy;
+  std::string cover_method;
+  std::string script;
 
 private:
   unsigned debug_lb = 0;

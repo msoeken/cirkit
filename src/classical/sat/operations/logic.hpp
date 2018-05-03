@@ -36,13 +36,10 @@
 #ifndef LOGIC_HPP
 #define LOGIC_HPP
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
 #include <classical/sat/sat_solver.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -66,7 +63,7 @@ void blocking_and( S& solver, int sel, const clause_t& x, int c )
   }
   clause_t clause = { -sel };
   boost::push_back( clause, x | transformed( []( int l ) { return -l; } ) );
-  clause += c;
+  clause.push_back( c );
   add_clause( solver )( clause );
 }
 
@@ -86,8 +83,8 @@ void blocking_or( S& solver, int sel, const clause_t& x, int c )
     add_clause( solver )( {-sel, -l, c} );
   }
   clause_t clause( x.begin(), x.end() );
-  clause += -sel;
-  clause += -c;
+  clause.push_back( -sel );
+  clause.push_back( -c );
   add_clause( solver )( clause );
 }
 
@@ -128,7 +125,7 @@ void logic_and( S& solver, const clause_t& x, int c )
   }
   clause_t clause;
   boost::push_back( clause, x | transformed( []( int l ) { return -l; } ) );
-  clause += c;
+  clause.push_back( c );
   add_clause( solver )( clause );
 }
 
@@ -148,7 +145,7 @@ void logic_or( S& solver, const clause_t& x, int c )
     add_clause( solver )( {-l, c} );
   }
   clause_t clause( x.begin(), x.end() );
-  clause += -c;
+  clause.push_back( -c );
   add_clause( solver )( clause );
 }
 

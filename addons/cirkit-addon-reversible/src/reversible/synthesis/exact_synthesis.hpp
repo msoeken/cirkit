@@ -38,6 +38,8 @@
 #ifndef EXACT_SYNTHESIS_HPP
 #define EXACT_SYNTHESIS_HPP
 
+#ifdef ADDON_FORMAL
+
 #include <core/properties.hpp>
 
 #include <reversible/circuit.hpp>
@@ -104,6 +106,8 @@ namespace cirkit
                                                    properties::ptr statistics = std::make_shared<properties>() );
 
 }
+
+#endif
 
 #endif
 

@@ -37,6 +37,7 @@
 #ifndef CONVERSION_UTILS_HPP
 #define CONVERSION_UTILS_HPP
 
+#include <sstream>
 #include <string>
 
 namespace cirkit
@@ -46,6 +47,31 @@ char convert_bin2hex( const std::string& bits );
 std::string convert_hex2bin( const char& hex );
 std::string convert_hex2bin( const std::string& hex );
 std::string invert_hex( const std::string& hex );
+
+template<typename T>
+std::string to_string( const T& element )
+{
+  std::ostringstream str;
+  str << element;
+  return str.str();
+}
+
+template<typename T>
+T from_string( const std::string& str )
+{
+  T element;
+  std::istringstream in( str );
+  in >> element;
+  return element;
+}
+
+template<typename T>
+void from_string( T& element, const std::string& str )
+{
+  std::istringstream in( str );
+  in >> element;
+}
+
 }
 
 #endif

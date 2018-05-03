@@ -29,17 +29,12 @@
 #include <cmath>
 #include <iostream>
 
-#include <boost/program_options.hpp>
-
 #include <cli/stores.hpp>
 #include <core/utils/bdd_utils.hpp>
 #include <core/utils/conversion_utils.hpp>
-#include <core/utils/program_options.hpp>
 #include <core/utils/string_utils.hpp>
 
 #include <cuddObj.hh>
-
-using boost::program_options::value;
 
 namespace cirkit
 {
@@ -88,16 +83,13 @@ private:
 compress_command::compress_command( const environment::ptr& env )
   : cirkit_command( env, "Compress files with DDs" )
 {
-  opts.add_options()
-    ( "filename",   value( &filename ),          "file with one number per line" )
-    ( "base,b",     value_with_default( &base ), "number base (2, 10, or 16)" )
-    ( "numvars,n",  value( &numvars ),           "number of variables (can be implied for base 2 and 16)" )
-    ;
-  add_positional_option( "filename" );
+  add_option( "--filename,filename", filename, "file with one number per line" );
+  add_option( "--base,-b", base, "number base (2, 10, or 16)", true );
+  add_option( "--numvars", numvars, "number of variables (can be implied for base 2 and 16)" );
   add_new_option();
 }
 
-command::rules_t compress_command::validity_rules() const
+command::rules compress_command::validity_rules() const
 {
   return {
     {[this]() { return base == 2 || base == 10 || base == 16; }, "base must be 2, 10, or 16"},
@@ -105,7 +97,7 @@ command::rules_t compress_command::validity_rules() const
   };
 }
 
-bool compress_command::execute()
+void compress_command::execute()
 {
   bdd_compressor cmp;
 
@@ -131,8 +123,6 @@ bool compress_command::execute()
   auto& bdds = env->store<bdd_function_t>();
   extend_if_new( bdds );
   bdds.current() = cmp.get();
-
-  return true;
 }
 
 }

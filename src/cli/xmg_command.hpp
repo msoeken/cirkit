@@ -45,7 +45,7 @@
 namespace cirkit
 {
 
-inline command::rule_t has_xmg( const environment::ptr& env )
+inline command::rule has_xmg( const environment::ptr& env )
 {
   return has_store_element<xmg_graph>( env );
 }
@@ -60,7 +60,7 @@ public:
   }
 
 protected:
-  virtual rules_t validity_rules() const
+  virtual rules validity_rules() const
   {
     return { has_xmg( env ) };
   }
@@ -76,7 +76,7 @@ protected:
   }
 
 protected:
-  cli_store<xmg_graph>& store;
+  alice::store_container<xmg_graph>& store;
 };
 
 }

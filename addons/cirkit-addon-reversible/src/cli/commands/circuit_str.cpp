@@ -39,24 +39,22 @@ circuit_str_command::circuit_str_command( const environment::ptr& env )
 {
 }
 
-command::rules_t circuit_str_command::validity_rules() const
+command::rules circuit_str_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool circuit_str_command::execute()
+void circuit_str_command::execute()
 {
   const auto& circuits = env->store<circuit>();
   circuit_str = circuit_to_string( circuits.current() );
 
   std::cout << circuit_str << std::endl;
-
-  return true;
 }
 
-command::log_opt_t circuit_str_command::log() const
+nlohmann::json circuit_str_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"string", circuit_str}
     });
 }

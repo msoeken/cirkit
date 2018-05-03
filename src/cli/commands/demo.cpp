@@ -28,9 +28,9 @@
 
 #include <iostream>
 
-#include <boost/format.hpp>
-
 #include <classical/xmg/xmg.hpp>    /* XMG data structure */
+
+#include <fmt/format.h>
 
 namespace cirkit
 {
@@ -105,7 +105,7 @@ void xmg_demo( bool verbose )
   {
     for ( auto node : xmg.nodes() )
     {
-      std::cout << boost::format( "[i] node %d is at level %d" ) % node % xmg.level( node ) << std::endl;
+      std::cout << fmt::format( "[i] node {} is at level {}", node, xmg.level( node ) ) << std::endl;
     }
   }
 }
@@ -141,9 +141,6 @@ demo_command::demo_command( const environment::ptr& env )
    *   it has been set using is_set( "long_name" ) . In order to
    *   use value, you add these two lines to the top of the file:
    *
-   *   #include <boost/program_options.hpp>
-   *   using boost::program_options::value;
-   *
    * - Values with default value:
    *
    *   ( "long_name,f", value_with_default( &variable ), "description" )
@@ -157,23 +154,18 @@ demo_command::demo_command( const environment::ptr& env )
    *   And you don't need to check whether the variable is set before
    *   using it.
    */
-  opts.add_options()
-    ( "xmg,x", "demonstration of XMG features" )
-    ;
+  add_flag( "--xmg,-x", "demonstration of XMG features" );
 
   /* this adds a verbose option to the command */
   be_verbose();
 }
 
-bool demo_command::execute()
+void demo_command::execute()
 {
   if ( is_set( "xmg" ) )
   {
     xmg_demo( is_verbose() );
   }
-
-  /* command should always return true, false leads to program termination */
-  return true;
 }
 
 

@@ -26,11 +26,8 @@
 
 #include "adding_lines.hpp"
 
-#include <boost/format.hpp>
-
 #include <alice/rules.hpp>
 
-#include <core/utils/program_options.hpp>
 #include <cli/reversible_stores.hpp>
 #include <reversible/optimization/adding_lines.hpp>
 #include <reversible/utils/costs.hpp>
@@ -38,34 +35,20 @@
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 adding_lines_command::adding_lines_command( const environment::ptr& env )
   : cirkit_command( env, "Adding lines optimization" )
 {
-  opts.add_options()
-    ( "additional_lines,a", value_with_default( &additional_lines ), "number of additional lines" )
-    ( "cost_function,c",    value_with_default( &costs ),            "cost function:\n0: Clifford+T costs\n1: T-depth\n2: T-count\n3: H-count\n4: Transistor costs\n5: NCV costs" )
-    ;
+  add_option( "--additional_lines,-a", additional_lines, "number of additional lines", true );
+  add_option( "--cost_function,-c", costs, "cost function:\n0: Clifford+T costs\n1: T-depth\n2: T-count\n3: H-count\n4: Transistor costs\n5: NCV costs", true );
   add_new_option();
 }
 
-command::rules_t adding_lines_command::validity_rules() const
+command::rules adding_lines_command::validity_rules() const
 {
   return {has_store_element<circuit>( env )};
 }
 
-bool adding_lines_command::execute()
+void adding_lines_command::execute()
 {
   auto& circuits = env->store<circuit>();
 
@@ -87,13 +70,11 @@ bool adding_lines_command::execute()
   circuits.current() = opt;
 
   print_runtime();
-
-  return true;
 }
 
-command::log_opt_t adding_lines_command::log() const
+nlohmann::json adding_lines_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime", statistics->get<double>( "runtime" )},
       {"additional_lines", additional_lines}
     });

@@ -47,9 +47,9 @@ public:
   shuffle_command( const environment::ptr& env );
 
 protected:
-  bool before();
-  bool execute_aig();
-  bool execute_mig();
+  void before();
+  void execute_aig();
+  void execute_mig();
 
 private:
   unsigned seed;

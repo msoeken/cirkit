@@ -35,51 +35,32 @@
 #include <boost/format.hpp>
 
 #include <cli/stores.hpp>
-#include <core/utils/program_options.hpp>
 #include <cli/stores.hpp>
 #include <classical/functions/simulate_aig.hpp>
 #include <classical/mig/mig_simulate.hpp>
 
-using namespace boost::program_options;
-
 namespace cirkit
 {
-
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
 
 simulate_command::simulate_command( const environment::ptr& env )
   : aig_mig_command( env, "Simulates an AIG", "Simulate current %s" )
 {
-  opts.add_options()
-    ( "pattern,p",       value( &pattern ),    "Simulates an input pattern" )
-    ( "assignment,s",    value( &assignment ), "Simulates an input assignment, e.g. \"x1=0 x2=1 x3=1 y=1010 z=01\"" )
-    ( "tt,t",                                  "Simulates a truth table" )
-    ( "bdd,b",                                 "Simulates a BDD" )
-    ( "little_endian,l",                       "Change bit endianness to little-endian in assignment method (default: big-endian)" )
-    ( "quiet,q",                               "Don't print simulation results" )
-    ;
-
+  add_option( "--pattern,-p", pattern, "simulates an input pattern" );
+  add_option( "--assignment,-s", assignment, "simulates an input assignment, e.g. \"x1=0 x2=1 x3=1 y=1010 z=01\"" );
+  add_flag( "--tt,-t", "simulates a truth table" );
+  add_flag( "--bdd,-b", "simulates a BDD" );
+  add_flag( "--little_endian,-l", "change bit endianness to little-endian in assignment method (default: big-endian)" );
+  add_flag( "--quiet,-q", "don't print simulation results" );
+  
   if ( env->has_store<tt>() || env->has_store<bdd_function_t>() )
   {
-    opts.add_options()
-      ( "store,n", "Copy the result to the store (only for truth table and BDD simulation)" )
-      ;
+    add_flag( "--store,-n", "copy the result to the store (only for truth table and BDD simulation)" );
   }
 
   be_verbose();
 }
 
-command::rule_t simulate_command::one_simulation_method() const
+command::rule simulate_command::one_simulation_method() const
 {
   const auto assertion = [&]() {
     auto total = 0u;
@@ -95,7 +76,7 @@ command::rule_t simulate_command::one_simulation_method() const
   return {assertion, "exactly one simulation method needs to be chose"};
 }
 
-command::rule_t simulate_command::check_pattern_size() const
+command::rule simulate_command::check_pattern_size() const
 {
   const auto assertion = [&]() {
     if ( is_set( "pattern" ) )
@@ -115,7 +96,7 @@ command::rule_t simulate_command::check_pattern_size() const
   return {assertion, "pattern has incorrect size"};
 }
 
-command::rules_t simulate_command::validity_rules() const
+command::rules simulate_command::validity_rules() const
 {
   auto rules = aig_mig_command::validity_rules();
 
@@ -125,7 +106,7 @@ command::rules_t simulate_command::validity_rules() const
   return rules;
 }
 
-bool simulate_command::execute_aig()
+void simulate_command::execute_aig()
 {
   tts.clear();
 
@@ -241,11 +222,9 @@ bool simulate_command::execute_aig()
   {
     print_runtime( statistics->get<double>( "runtime" ) );
   }
-
-  return true;
 }
 
-bool simulate_command::execute_mig()
+void simulate_command::execute_mig()
 {
   tts.clear();
 
@@ -285,13 +264,11 @@ bool simulate_command::execute_mig()
       tts.push_back( to_string( tt ) );
     }
   }
-
-  return true;
 }
 
-command::log_opt_t simulate_command::log() const
+nlohmann::json simulate_command::log() const
 {
-  log_map_t m;
+  nlohmann::json m;
 
   if ( is_set( "tt" ) )
   {
@@ -309,7 +286,7 @@ command::log_opt_t simulate_command::log() const
   }
   else
   {
-    return boost::none;
+    return nullptr;
   }
 }
 

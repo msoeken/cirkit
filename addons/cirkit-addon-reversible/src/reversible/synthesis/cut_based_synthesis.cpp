@@ -42,6 +42,7 @@
 #include <core/utils/bitset_utils.hpp>
 #include <core/utils/graph_utils.hpp>
 #include <core/utils/range_utils.hpp>
+#include <core/utils/temporary_filename.hpp>
 #include <core/utils/terminal.hpp>
 #include <core/utils/timer.hpp>
 #include <classical/functions/fanout_free_regions.hpp>
@@ -314,6 +315,8 @@ binary_truth_table pla_from_bdd( const Cudd& mgr, const std::vector<BDD>& output
 
 rcbdd embed_with_pla( const bdd_function_t& bdd, bool verbose )
 {
+  temporary_filename extended_name( "/tmp/extend%d.pla" );
+
   if ( verbose )
   {
     std::cout << "[i] create PLA from BDDs" << std::endl;
@@ -327,14 +330,14 @@ rcbdd embed_with_pla( const bdd_function_t& bdd, bool verbose )
   }
   extend_pla( pla, extended );
 
-  write_pla( extended, "/tmp/extended.pla" );
+  write_pla( extended, extended_name.name() );
 
   if ( verbose )
   {
     std::cout << "[i] embedding DSOP" << std::endl;
   }
   rcbdd cf;
-  embed_pla( cf, "/tmp/extended.pla" );
+  embed_pla( cf, extended_name.name() );
 
   return cf;
 }

@@ -39,7 +39,8 @@
 #include <string>
 #include <vector>
 
-#include <alice/command.hpp>
+#include <alice/api.hpp>
+#include <alice/store_api.hpp>
 
 #include <core/properties.hpp>
 #include <core/utils/bdd_utils.hpp>
@@ -57,431 +58,236 @@ namespace alice
 
 using namespace cirkit;
 
-struct io_aiger_tag_t {};
-struct io_bench_tag_t {};
-struct io_edgelist_tag_t {};
-struct io_pla_tag_t {};
-struct io_smt_tag_t {};
-struct io_verilog_tag_t {};
-struct io_yig_tag_t {};
-
 /******************************************************************************
  * bdd_function_t                                                             *
  ******************************************************************************/
 
-template<>
-struct store_info<bdd_function_t>
-{
-  static constexpr const char* key         = "bdds";
-  static constexpr const char* option      = "bdd";
-  static constexpr const char* mnemonic    = "b";
-  static constexpr const char* name        = "BDD";
-  static constexpr const char* name_plural = "BDDs";
-};
+ALICE_ADD_STORE( bdd_function_t, "bdd", "b", "BDD", "BDDs" )
 
 template<>
-std::string store_entry_to_string<bdd_function_t>( const bdd_function_t& bdd );
+std::string to_string<bdd_function_t>( const bdd_function_t& bdd );
 
 template<>
-void print_store_entry<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd );
+void print<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd );
 
 template<>
-struct show_store_entry<bdd_function_t>
-{
-  show_store_entry( command& cmd );
-
-  bool operator()( bdd_function_t& bdd, const std::string& dotname, const command& cmd );
-
-  command::log_opt_t log() const;
-};
+bool can_show<bdd_function_t>( std::string& extension, command& cmd );
 
 template<>
-void print_store_entry_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd );
+void show<bdd_function_t>( std::ostream& out, const bdd_function_t& bdd, const command& cmd );
 
 template<>
-command::log_opt_t log_store_entry_statistics<bdd_function_t>( const bdd_function_t& bdd );
+void print_statistics<bdd_function_t>( std::ostream& os, const bdd_function_t& bdd );
 
 template<>
-inline bool store_can_read_io_type<bdd_function_t, io_pla_tag_t>( command& cmd ) { return true; }
-
-template<>
-bdd_function_t store_read_io_type<bdd_function_t, io_pla_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<bdd_function_t, io_pla_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<bdd_function_t, io_pla_tag_t>( const bdd_function_t& bdd, const std::string& filename, const command& cmd );
+nlohmann::json log_statistics<bdd_function_t>( const bdd_function_t& bdd );
 
 /******************************************************************************
  * aig_graph                                                                  *
  ******************************************************************************/
 
-template<>
-struct store_info<aig_graph>
-{
-  static constexpr const char* key         = "aigs";
-  static constexpr const char* option      = "aig";
-  static constexpr const char* mnemonic    = "a";
-  static constexpr const char* name        = "AIG";
-  static constexpr const char* name_plural = "AIGs";
-};
+ALICE_ADD_STORE( aig_graph, "aig", "a", "AIG", "AIGs" )
 
 template<>
-std::string store_entry_to_string<aig_graph>( const aig_graph& aig );
+std::string to_string<aig_graph>( const aig_graph& aig );
 
 template<>
-struct show_store_entry<aig_graph>
-{
-  show_store_entry( command& cmd );
-
-  bool operator()( aig_graph& aig, const std::string& dotname, const command& cmd );
-
-  command::log_opt_t log() const;
-};
+bool can_show<aig_graph>( std::string& extension, command& cmd );
 
 template<>
-void print_store_entry_statistics<aig_graph>( std::ostream& os, const aig_graph& aig );
+void show<aig_graph>( std::ostream& out, const aig_graph& aig, const command& cmd );
 
 template<>
-command::log_opt_t log_store_entry_statistics<aig_graph>( const aig_graph& aig );
+void print_statistics<aig_graph>( std::ostream& os, const aig_graph& aig );
 
 template<>
-inline bool store_can_convert<tt, aig_graph>() { return true; }
+nlohmann::json log_statistics<aig_graph>( const aig_graph& aig );
 
 template<>
-aig_graph store_convert<tt, aig_graph>( const tt& t );
+inline bool can_convert<tt, aig_graph>() { return true; }
 
 template<>
-inline bool store_can_convert<aig_graph, bdd_function_t>() { return true; }
+aig_graph convert<tt, aig_graph>( const tt& t );
 
 template<>
-bdd_function_t store_convert<aig_graph, bdd_function_t>( const aig_graph& aig );
+inline bool can_convert<aig_graph, bdd_function_t>() { return true; }
 
 template<>
-bool store_can_read_io_type<aig_graph, io_aiger_tag_t>( command& cmd );
-
-template<>
-aig_graph store_read_io_type<aig_graph, io_aiger_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_read_io_type<aig_graph, io_bench_tag_t>( command& cmd ) { return true; }
-
-template<>
-aig_graph store_read_io_type<aig_graph, io_bench_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<aig_graph, io_aiger_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<aig_graph, io_aiger_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_read_io_type<aig_graph, io_verilog_tag_t>( command& cmd ) { return true; }
-
-template<>
-aig_graph store_read_io_type<aig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<aig_graph, io_verilog_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<aig_graph, io_verilog_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_write_io_type<aig_graph, io_edgelist_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<aig_graph, io_edgelist_tag_t>( const aig_graph& aig, const std::string& filename, const command& cmd );
+bdd_function_t convert<aig_graph, bdd_function_t>( const aig_graph& aig );
 
 /******************************************************************************
  * mig_graph                                                                  *
  ******************************************************************************/
 
-template<>
-struct store_info<mig_graph>
-{
-  static constexpr const char* key         = "migs";
-  static constexpr const char* option      = "mig";
-  static constexpr const char* mnemonic    = "m";
-  static constexpr const char* name        = "MIG";
-  static constexpr const char* name_plural = "MIGs";
-};
+ALICE_ADD_STORE( mig_graph, "mig", "m", "MIG", "MIGs" )
 
 template<>
-std::string store_entry_to_string<mig_graph>( const mig_graph& mig );
+std::string to_string<mig_graph>( const mig_graph& mig );
 
 template<>
-struct show_store_entry<mig_graph>
-{
-  show_store_entry( command& cmd );
-
-  bool operator()( mig_graph& mig, const std::string& dotname, const command& cmd );
-
-  command::log_opt_t log() const;
-
-private:
-  std::vector<std::string> expressions;
-};
+bool can_show<mig_graph>( std::string& extension, command& cmd );
 
 template<>
-void print_store_entry_statistics<mig_graph>( std::ostream& os, const mig_graph& mig );
+void show<mig_graph>( std::ostream& out, const mig_graph& mig, const command& cmd );
 
 template<>
-command::log_opt_t log_store_entry_statistics<mig_graph>( const mig_graph& mig );
+void print_statistics<mig_graph>( std::ostream& os, const mig_graph& mig );
 
 template<>
-inline bool store_can_convert<mig_graph, aig_graph>() { return true; }
+nlohmann::json log_statistics<mig_graph>( const mig_graph& mig );
 
 template<>
-aig_graph store_convert<mig_graph, aig_graph>( const mig_graph& mig );
+inline bool can_convert<mig_graph, aig_graph>() { return true; }
 
 template<>
-inline bool store_can_convert<aig_graph, mig_graph>() { return true; }
+aig_graph convert<mig_graph, aig_graph>( const mig_graph& mig );
 
 template<>
-mig_graph store_convert<aig_graph, mig_graph>( const aig_graph& mig );
+inline bool can_convert<aig_graph, mig_graph>() { return true; }
 
 template<>
-inline bool store_can_convert<mig_graph, expression_t::ptr>() { return true; }
+mig_graph convert<aig_graph, mig_graph>( const aig_graph& mig );
 
 template<>
-expression_t::ptr store_convert<mig_graph, expression_t::ptr>( const mig_graph& mig );
+inline bool can_convert<mig_graph, expression_t::ptr>() { return true; }
 
 template<>
-inline bool store_can_convert<expression_t::ptr, mig_graph>() { return true; }
+expression_t::ptr convert<mig_graph, expression_t::ptr>( const mig_graph& mig );
 
 template<>
-mig_graph store_convert<expression_t::ptr, mig_graph>( const expression_t::ptr& expr );
+inline bool can_convert<expression_t::ptr, mig_graph>() { return true; }
 
 template<>
-inline bool store_can_write_io_type<mig_graph, io_verilog_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<mig_graph, io_verilog_tag_t>( const mig_graph& mig, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_read_io_type<mig_graph, io_verilog_tag_t>( command& cmd ) { return true; }
-
-template<>
-mig_graph store_read_io_type<mig_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd );
+mig_graph convert<expression_t::ptr, mig_graph>( const expression_t::ptr& expr );
 
 /******************************************************************************
  * counterexample_t                                                           *
  ******************************************************************************/
 
-template<>
-struct store_info<counterexample_t>
-{
-  static constexpr const char* key         = "cex";
-  static constexpr const char* option      = "counterexample";
-  static constexpr const char* mnemonic    = "";
-  static constexpr const char* name        = "counterexample";
-  static constexpr const char* name_plural = "counterexamples";
-};
+ALICE_ADD_STORE( counterexample_t, "counterexample", "", "counterexample", "counterexamples" )
 
 template<>
-std::string store_entry_to_string<counterexample_t>( const counterexample_t& cex );
+std::string to_string<counterexample_t>( const counterexample_t& cex );
 
 /******************************************************************************
  * simple_fanout_graph_t                                                      *
  ******************************************************************************/
 
-template<>
-struct store_info<simple_fanout_graph_t>
-{
-  static constexpr const char* key         = "nls";
-  static constexpr const char* option      = "netlist";
-  static constexpr const char* mnemonic    = "n";
-  static constexpr const char* name        = "netlist";
-  static constexpr const char* name_plural = "netlists";
-};
+ALICE_ADD_STORE( simple_fanout_graph_t, "netlist", "", "netlist", "netlists" )
 
 template<>
-std::string store_entry_to_string<simple_fanout_graph_t>( const simple_fanout_graph_t& nl );
+std::string to_string<simple_fanout_graph_t>( const simple_fanout_graph_t& nl );
 
 /******************************************************************************
  * std::vector<aig_node>                                                      *
  ******************************************************************************/
 
-template<>
-struct store_info<std::vector<aig_node>>
-{
-  static constexpr const char* key         = "gates";
-  static constexpr const char* option      = "gate";
-  static constexpr const char* mnemonic    = "";
-  static constexpr const char* name        = "gate";
-  static constexpr const char* name_plural = "gates";
-};
+ALICE_ADD_STORE( std::vector<aig_node>, "gate", "", "gate", "gates" )
 
 template<>
-std::string store_entry_to_string<std::vector<aig_node>>( const std::vector<aig_node>& g );
+std::string to_string<std::vector<aig_node>>( const std::vector<aig_node>& g );
 
 template<>
-void print_store_entry<std::vector<aig_node>>( std::ostream& os, const std::vector<aig_node>& g );
+void print<std::vector<aig_node>>( std::ostream& os, const std::vector<aig_node>& g );
 
 /******************************************************************************
  * tt                                                                         *
  ******************************************************************************/
 
-template<>
-struct store_info<tt>
-{
-  static constexpr const char* key         = "tts";
-  static constexpr const char* option      = "tt";
-  static constexpr const char* mnemonic    = "t";
-  static constexpr const char* name        = "truth table";
-  static constexpr const char* name_plural = "truth tables";
-};
+ALICE_ADD_STORE( tt, "tt", "t", "truth table", "truth tables" )
 
 template<>
-std::string store_entry_to_string<tt>( const tt& t );
+std::string to_string<tt>( const tt& t );
 
 template<>
-void print_store_entry<tt>( std::ostream& os, const tt& t );
-
-template<>
-inline bool store_can_write_io_type<tt, io_pla_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<tt, io_pla_tag_t>( const tt& t, const std::string& filename, const command& cmd );
+void print<tt>( std::ostream& os, const tt& t );
 
 /******************************************************************************
  * expression_t::ptr                                                          *
  ******************************************************************************/
 
-template<>
-struct store_info<expression_t::ptr>
-{
-  static constexpr const char* key         = "exprs";
-  static constexpr const char* option      = "expr";
-  static constexpr const char* mnemonic    = "e";
-  static constexpr const char* name        = "expression";
-  static constexpr const char* name_plural = "expressions";
-};
+ALICE_ADD_STORE( expression_t::ptr, "expr", "e", "expression", "expressions" )
 
 template<>
-std::string store_entry_to_string<expression_t::ptr>( const expression_t::ptr& expr );
+std::string to_string<expression_t::ptr>( const expression_t::ptr& expr );
 
 template<>
-void print_store_entry_statistics<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );
+void print_statistics<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );
 
 template<>
-command::log_opt_t log_store_entry_statistics<expression_t::ptr>( const expression_t::ptr& expr );
+nlohmann::json log_statistics<expression_t::ptr>( const expression_t::ptr& expr );
 
 template<>
-void print_store_entry<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );
+void print<expression_t::ptr>( std::ostream& os, const expression_t::ptr& expr );
 
 template<>
-inline bool store_can_convert<expression_t::ptr, tt>() { return true; }
+inline bool can_convert<expression_t::ptr, tt>() { return true; }
 
 template<>
-tt store_convert<expression_t::ptr, tt>( const expression_t::ptr& expr );
+tt convert<expression_t::ptr, tt>( const expression_t::ptr& expr );
 
 template<>
-inline bool store_can_convert<expression_t::ptr, bdd_function_t>() { return true; }
+inline bool can_convert<expression_t::ptr, bdd_function_t>() { return true; }
 
 template<>
-bdd_function_t store_convert<expression_t::ptr, bdd_function_t>( const expression_t::ptr& expr );
+bdd_function_t convert<expression_t::ptr, bdd_function_t>( const expression_t::ptr& expr );
 
 /******************************************************************************
  * xmg_graph                                                                  *
  ******************************************************************************/
 
-template<>
-struct store_info<xmg_graph>
-{
-  static constexpr const char* key         = "xmgs";
-  static constexpr const char* option      = "xmg";
-  static constexpr const char* mnemonic    = "x";
-  static constexpr const char* name        = "XMG";
-  static constexpr const char* name_plural = "XMGs";
-};
+ALICE_ADD_STORE( xmg_graph, "xmg", "x", "XMG", "XMGs" )
 
 template<>
-std::string store_entry_to_string<xmg_graph>( const xmg_graph& xmg );
+std::string to_string<xmg_graph>( const xmg_graph& xmg );
 
 template<>
-void print_store_entry_statistics<xmg_graph>( std::ostream& os, const xmg_graph& xmg );
+void print_statistics<xmg_graph>( std::ostream& os, const xmg_graph& xmg );
 
 template<>
-command::log_opt_t log_store_entry_statistics<xmg_graph>( const xmg_graph& xmg );
+nlohmann::json log_statistics<xmg_graph>( const xmg_graph& xmg );
 
 template<>
-struct show_store_entry<xmg_graph>
-{
-  show_store_entry( command& cmd );
-
-  bool operator()( xmg_graph& mig, const std::string& dotname, const command& cmd );
-
-  command::log_opt_t log() const;
-};
+bool can_show<xmg_graph>( std::string& extension, command& cmd );
 
 template<>
-inline bool store_can_convert<xmg_graph, expression_t::ptr>() { return true; }
+void show<xmg_graph>( std::ostream& out, const xmg_graph& xmg, const command& cmd );
 
 template<>
-expression_t::ptr store_convert<xmg_graph, expression_t::ptr>( const xmg_graph& xmg );
+inline bool can_convert<xmg_graph, expression_t::ptr>() { return true; }
 
 template<>
-inline bool store_can_convert<expression_t::ptr, xmg_graph>() { return true; }
+expression_t::ptr convert<xmg_graph, expression_t::ptr>( const xmg_graph& xmg );
 
 template<>
-xmg_graph store_convert<expression_t::ptr, xmg_graph>( const expression_t::ptr& expr );
+inline bool can_convert<expression_t::ptr, xmg_graph>() { return true; }
 
 template<>
-inline bool store_can_convert<aig_graph, xmg_graph>() { return true; }
+xmg_graph convert<expression_t::ptr, xmg_graph>( const expression_t::ptr& expr );
 
 template<>
-xmg_graph store_convert<aig_graph, xmg_graph>( const aig_graph& aig );
+inline bool can_convert<aig_graph, xmg_graph>() { return true; }
 
 template<>
-inline bool store_can_convert<xmg_graph, aig_graph>() { return true; }
+xmg_graph convert<aig_graph, xmg_graph>( const aig_graph& aig );
 
 template<>
-aig_graph store_convert<xmg_graph, aig_graph>( const xmg_graph& aig );
+inline bool can_convert<xmg_graph, aig_graph>() { return true; }
 
 template<>
-inline bool store_can_convert<mig_graph, xmg_graph>() { return true; }
+aig_graph convert<xmg_graph, aig_graph>( const xmg_graph& aig );
 
 template<>
-xmg_graph store_convert<mig_graph, xmg_graph>( const mig_graph& mig );
+inline bool can_convert<mig_graph, xmg_graph>() { return true; }
 
 template<>
-inline bool store_can_convert<xmg_graph, mig_graph>() { return true; }
+xmg_graph convert<mig_graph, xmg_graph>( const mig_graph& mig );
 
 template<>
-mig_graph store_convert<xmg_graph, mig_graph>( const xmg_graph& mig );
+inline bool can_convert<xmg_graph, mig_graph>() { return true; }
 
 template<>
-inline bool store_can_write_io_type<xmg_graph, io_bench_tag_t>( command& cmd ) { return true; }
-
-template<>
-void store_write_io_type<xmg_graph, io_bench_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_read_io_type<xmg_graph, io_verilog_tag_t>( command& cmd );
-
-template<>
-xmg_graph store_read_io_type<xmg_graph, io_verilog_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_write_io_type<xmg_graph, io_verilog_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<xmg_graph, io_verilog_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd );
-
-template<>
-inline bool store_can_read_io_type<xmg_graph, io_yig_tag_t>( command& cmd ) { return true; }
-
-template<>
-xmg_graph store_read_io_type<xmg_graph, io_yig_tag_t>( const std::string& filename, const command& cmd );
-
-template<>
-bool store_can_write_io_type<xmg_graph, io_smt_tag_t>( command& cmd );
-
-template<>
-void store_write_io_type<xmg_graph, io_smt_tag_t>( const xmg_graph& xmg, const std::string& filename, const command& cmd );
+mig_graph convert<xmg_graph, mig_graph>( const xmg_graph& mig );
 
 }
 

@@ -38,7 +38,6 @@
 #include <classical/dd/dd_manager.hpp>
 #include <classical/dd/bdd_fwd.hpp>
 
-#include <boost/call_traits.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include <cassert>
@@ -53,7 +52,7 @@ class bdd_manager;
 
 struct bdd
 {
-  using const_param_ref = boost::call_traits < bdd >::const_reference;
+  using const_param_ref = const bdd&;
 
   bdd() : manager( nullptr ), index( 0u ) {}
   bdd( bdd_manager* manager, unsigned index )

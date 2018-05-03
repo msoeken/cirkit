@@ -28,46 +28,27 @@
 
 #include <unordered_set>
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/format.hpp>
-
-#include <core/utils/program_options.hpp>
 #include <core/utils/range_utils.hpp>
-#include <classical/functions/npn_canonization.hpp>
 
-using namespace boost::program_options;
+#include <fmt/format.h>
+#include <kitty/kitty.hpp>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 bool_complex_command::bool_complex_command( const environment::ptr& env )
   : cirkit_command( env, "Computes complexities of Boolean functions" )
 {
-  opts.add_options()
-    ( "numvars,n", value_with_default( &numvars ), "number of variables (n <= 4)" )
-    ( "count,c",                                   "compute upper bound on size" )
-    ( "lengths,l",                                 "compute normal lengths" )
-    ( "depths,d",                                  "compute depths" )
-    ( "lengths_maj",                               "compute normal lengths (MAJ)" )
-    ( "depths_maj",                                "compute depths (MAJ)" )
-    ( "npn",                                       "compute number of NPN classes" )
-    ;
-  add_positional_option( "numvars" );
+  add_option( "--numvars,-n,numvars", numvars, "number of variables (n <= 4)", true );
+  add_flag( "--count,-c", "compute upper bound on size" );
+  add_flag( "--lengths,-l", "compute normal lengths" );
+  add_flag( "--depths,-d", "compute depths" );
+  add_flag( "--lengths_maj", "compute normal lengths (MAJ)" );
+  add_flag( "--depths_maj", "compute depths (MAJ)" );
+  add_flag( "--npn", "compute number of NPN classes" );
 }
 
-bool bool_complex_command::execute()
+void bool_complex_command::execute()
 {
   if ( is_set( "count" ) )
   {
@@ -89,8 +70,6 @@ bool bool_complex_command::execute()
   {
     compute_maj( false, is_set( "npn" ) );
   }
-
-  return true;
 }
 
 void bool_complex_command::compute( bool length )
@@ -157,7 +136,7 @@ void bool_complex_command::compute( bool length )
 done:
   for ( const auto& entry : index( length_to_func ) )
   {
-    std::cout << boost::format( "[i] %s %3d: %12d" ) % ( length ? "length" : "depth" ) % entry.index % ( entry.value.size() << 1u ) << std::endl;
+    std::cout << fmt::format( "[i] {} {:>3}: {:>12}", length ? "length" : "depth", entry.index, entry.value.size() << 1u ) << std::endl;
   }
 }
 
@@ -285,7 +264,7 @@ void bool_complex_command::compute_ub()
 
   for ( const auto& entry : index( count_to_func ) )
   {
-    std::cout << boost::format( "[i] count %3d: %12d" ) % entry.index % ( entry.value.size() << 1u ) << std::endl;
+    std::cout << fmt::format( "[i] count {:>3} {:>12}", entry.index, entry.value.size() << 1 ) << std::endl;
   }
 }
 
@@ -411,7 +390,7 @@ void bool_complex_command::compute_ub_aig()
 
   for ( const auto& entry : index( count_to_func ) )
   {
-    std::cout << boost::format( "[i] count %3d: %12d" ) % entry.index % ( entry.value.size() << 1u ) << std::endl;
+    std::cout << fmt::format( "[i] count {:>3}: {:>12}", entry.index, entry.value.size() << 1u ) << std::endl;
   }
 }
 
@@ -490,11 +469,10 @@ void bool_complex_command::compute_maj( bool length, bool npn )
 
                 if ( npn )
                 {
-                  boost::dynamic_bitset<> phase;
-                  std::vector<unsigned> perm;
-                  auto tt_npn = exact_npn_canonization( tt( 1u << numvars, f ), phase, perm );
-
-                  length_to_npn.back().insert( tt_npn.to_ulong() );
+                  kitty::dynamic_truth_table ft( numvars );
+                  kitty::create_from_words( ft, &f, &f + 1 );
+                  const auto fnpn = std::get<0>( kitty::exact_npn_canonization( ft ) );
+                  length_to_npn.back().insert( fnpn._bits[0] );
                 }
 
                 if ( --count == 0u ) { goto done; }
@@ -539,11 +517,11 @@ void bool_complex_command::compute_maj( bool length, bool npn )
 done:
   for ( const auto& entry : index( length_to_func ) )
   {
-    std::cout << boost::format( "[i] %s %3d: %12d" ) % ( length ? "length" : "depth" ) % entry.index % ( entry.value.size() << 1u );
+    std::cout << fmt::format( "[i] {} {:>3}: {:>12}", length ? "length" : "depth", entry.index, entry.value.size() << 1u );
 
     if ( npn )
     {
-      std::cout << boost::format( ", npn classes: %5d" ) % length_to_npn[entry.index].size();
+      std::cout << fmt::format( ", npn classes: {:>5}", length_to_npn[entry.index].size() );
     }
 
     std::cout << std::endl;

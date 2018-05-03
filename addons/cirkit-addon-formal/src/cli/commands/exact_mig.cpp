@@ -26,59 +26,41 @@
 
 #include "exact_mig.hpp"
 
-#include <boost/format.hpp>
 #include <boost/optional.hpp>
 
 #include <cli/stores.hpp>
-#include <core/utils/program_options.hpp>
 #include <classical/mig/mig.hpp>
 #include <classical/mig/mig_from_string.hpp>
 #include <classical/mig/mig_utils.hpp>
 #include <classical/utils/truth_table_utils.hpp>
 #include <formal/synthesis/exact_mig.hpp>
 
-using namespace boost::program_options;
+#include <fmt/format.h>
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 exact_mig_command::exact_mig_command( const environment::ptr& env )
   : cirkit_command( env, "Exact MIG synthesis" )
 {
-  opts.add_options()
-    ( "objective,o",       value_with_default( &objective ),     "optimization objective:\n0: size-optimum\n1: size/depth-optimum\n2: depth/size-optimum" )
-    ( "start,s",           value_with_default( &start ),         "start value for gate enumeration" )
-    ( "stop",              value( &stop ),                       "stop value for gate enumeration (ignored for depth/size-optimum)" )
-    ( "start_depth",       value_with_default( &start_depth ),   "start value for depth enumeration" )
-    ( "mig,m",                                                   "load spec from MIG instead of truth table" )
-    ( "incremental,i",                                           "incremental SAT solving" )
-    ( "max_solutions,m",   value_with_default( &max_solutions ), "enumerate as many solutions (only with non incremental)" )
-    ( "breaking",          value_with_default( &breaking ),      "symmetry breaking\ns: structural hashing\na: associativity\nl: co-lexicographic ordering\nt: support\ny: symmetric variables" )
-    ( "print_solutions",                                         "print solutions" )
-    ( "enc_int",                                                 "encode numbers as integers (not bit-vectors)" )
-    ( "timeout",           value( &timeout ),                    "timeout (in seconds)" )
-    ( "timeout_heuristic",                                       "continue with next level on timeout" )
-    ( "very_verbose",                                            "be very verbose" )
-    ;
+  add_option( "--objective,-o", objective, "optimization objective:\n0: size-optimum\n1: size/depth-optimum\n2: depth/size-optimum", true );
+  add_option( "--start,-s", start, "start value for gate enumeration", true );
+  add_option( "--stop", stop, "stop value for gate enumeration (ignored for depth/size-optimum)" );
+  add_option( "--start_depth", start_depth, "start value for depth enumeration", true );
+  add_flag( "--mig,-m", "load spec from MIG instead of truth table" );
+  add_flag( "--incremental,-i", "incremental SAT solving" );
+  add_option( "--max_solutions", max_solutions, "enumerate as many solutions (only with non incremental)", true );
+  add_option( "--breaking", breaking, "symmetry breaking\ns: structural hashing\na: associativity\nl: co-lexicographic ordering\nt: support\ny: symmetric variables", true );
+  add_flag( "--print_solutions", "print solutions" );
+  add_flag( "--enc_int", "encode numbers as integers (not bit-vectors)" );
+  add_option( "--timeout", timeout, "timeout (in seconds)" );
+  add_flag( "--timeout_heuristic", "continue with next level on timeout" );
+  add_flag( "--very_verbose", "be very verbose" );
   be_verbose();
 }
 
-bool exact_mig_command::execute()
+void exact_mig_command::execute()
 {
-  using boost::format;
-
   auto settings = make_settings();
   settings->set( "objective",           objective );
   settings->set( "start",               start );
@@ -132,7 +114,7 @@ bool exact_mig_command::execute()
   {
     const auto& solutions = statistics->get<std::vector<mig_graph>>( "all_solutions" );
 
-    std::cout << format( "[i] found %d solutions" ) % solutions.size() << std::endl;
+    std::cout << fmt::format( "[i] found {} solutions", solutions.size() ) << std::endl;
 
     for ( const auto& smig : solutions )
     {
@@ -142,14 +124,12 @@ bool exact_mig_command::execute()
   }
 
   print_runtime();
-  std::cout << format( "[i] memory: %.2f MB" ) % statistics->get<double>( "memory" ) << std::endl;
-
-  return true;
+  std::cout << fmt::format( "[i] memory: {:.2f} MB", statistics->get<double>( "memory" ) ) << std::endl;
 }
 
-command::log_opt_t exact_mig_command::log() const
+nlohmann::json exact_mig_command::log() const
 {
-  return log_opt_t({
+  return nlohmann::json({
       {"runtime",       statistics->get<double>( "runtime" )},
       {"start",         start},
       {"all_solutions", is_set( "all_solutions" )},

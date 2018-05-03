@@ -47,7 +47,7 @@ public:
   revgen_command( const environment::ptr& env );
 
 protected:
-  bool execute();
+  void execute();
 
 private:
   unsigned hwb;

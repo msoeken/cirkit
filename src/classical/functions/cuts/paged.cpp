@@ -36,13 +36,10 @@
 #include <classical/functions/parallel_compute.hpp>
 #include <classical/functions/simulate_aig.hpp>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/numeric.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -262,7 +259,7 @@ std::vector<std::pair<boost::dynamic_bitset<>, unsigned>> paged_aig_cuts::enumer
 
         if ( add )
         {
-          local_cuts += std::make_pair( new_cut, min_level );
+          local_cuts.push_back( std::make_pair( new_cut, min_level ) );
         }
       }
     }

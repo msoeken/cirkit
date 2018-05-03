@@ -36,6 +36,7 @@
 #ifndef XMG_SHOW_HPP
 #define XMG_SHOW_HPP
 
+#include <iostream>
 #include <string>
 
 #include <core/properties.hpp>
@@ -44,9 +45,17 @@
 namespace cirkit
 {
 
+void write_dot( xmg_graph& xmg, std::ostream& os,
+                const properties::ptr& settings = properties::ptr(),
+                const properties::ptr& statistics = properties::ptr() );
+
 void write_dot( xmg_graph& xmg, const std::string& filename,
                 const properties::ptr& settings = properties::ptr(),
                 const properties::ptr& statistics = properties::ptr() );
+
+void write_javascript_cytoscape( xmg_graph& xmg, std::ostream& os,
+                                 const properties::ptr& settings = properties::ptr(),
+                                 const properties::ptr& statistics = properties::ptr() );
 
 void write_javascript_cytoscape( xmg_graph& xmg, const std::string& filename,
                                  const properties::ptr& settings = properties::ptr(),

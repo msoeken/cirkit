@@ -46,13 +46,13 @@ class rms_command : public cirkit_command
 public:
   rms_command( const environment::ptr& env );
 
-  rules_t validity_rules() const;
+  rules validity_rules() const;
 
 protected:
-  bool execute();
+  void execute();
 
 public:
-  log_opt_t log() const;
+  nlohmann::json log() const;
 
 private:
   bool bidirectional = true;

@@ -78,12 +78,14 @@ circuit circuit_from_string( const std::string& description, const std::string& 
     assert( tc == 't' || tc == 'f' || tc == 's' || tc == 'X' || tc == 'Y' || tc == 'Z' || tc == 'H' );
 
     /* single target gate comes with function */
-    boost::dynamic_bitset<> func;
+    std::shared_ptr<kitty::dynamic_truth_table> func;
     if ( tc == 's' )
     {
       assert( lines[0].size() > 3u );
       const auto fstr = lines[0].substr( 2u, lines[0].size() - 3u );
-      func = boost::dynamic_bitset<>( convert_hex2bin( fstr ) );
+
+      func = std::make_shared<kitty::dynamic_truth_table>( lines.size() - 2 );
+      kitty::create_from_hex_string( *func, fstr );
     }
 
     /* check if there is a root */
@@ -114,7 +116,7 @@ circuit circuit_from_string( const std::string& description, const std::string& 
       _gate.set_type( fredkin_tag() );
       break;
     case 's':
-      _gate.set_type( stg_tag( func ) );
+      _gate.set_type( stg_tag( *func ) );
       break;
     case 'X':
       num_targets = 1u;

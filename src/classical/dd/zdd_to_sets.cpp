@@ -28,12 +28,9 @@
 
 #include <map>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
-
-using namespace boost::assign;
 
 namespace cirkit
 {
@@ -82,7 +79,7 @@ set_set_t zdd_to_sets( const zdd& z )
   visited_t visited;
   set_set_t s0;
   visited.insert( {0u, s0 } );
-  set_set_t s1; set_t e( z.manager->num_vars() ); s1 += e;
+  set_set_t s1; set_t e( z.manager->num_vars() ); s1.push_back( e );
   visited.insert( {1u, s1} );
 
   return zdd_to_sets_rec( z, visited );

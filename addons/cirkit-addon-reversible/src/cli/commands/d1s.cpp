@@ -40,12 +40,12 @@ d1s_command::d1s_command( const environment::ptr& env )
   add_new_option();
 }
 
-command::rules_t d1s_command::validity_rules() const
+command::rules d1s_command::validity_rules() const
 {
   return {has_store_element<tt>( env )};
 }
 
-bool d1s_command::execute()
+void d1s_command::execute()
 {
   const auto& tts = env->store<tt>();
   auto& circuits = env->store<circuit>();
@@ -54,8 +54,6 @@ bool d1s_command::execute()
   circuits.current() = depth_one_synthesis( tts.current(), make_settings(), statistics );
 
   print_runtime();
-
-  return true;
 }
 
 }

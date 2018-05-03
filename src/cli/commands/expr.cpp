@@ -26,39 +26,20 @@
 
 #include "expr.hpp"
 
-#include <boost/program_options.hpp>
-
 #include <cli/stores.hpp>
 #include <classical/utils/expression_parser.hpp>
-
-using namespace boost::program_options;
 
 namespace cirkit
 {
 
-/******************************************************************************
- * Types                                                                      *
- ******************************************************************************/
-
-/******************************************************************************
- * Private functions                                                          *
- ******************************************************************************/
-
-/******************************************************************************
- * Public functions                                                           *
- ******************************************************************************/
-
 expr_command::expr_command( const environment::ptr& env )
   : cirkit_command( env, "Load expressions" )
 {
-  add_positional_option( "load" );
-  opts.add_options()
-    ( "load,l", value( &load ), "expression to load" )
-    ( "new,n",                  "create new store entry" )
-    ;
+  add_option( "--load,-l,load", load, "expression to load" );
+  add_new_option();
 }
 
-bool expr_command::execute()
+void expr_command::execute()
 {
   auto& exprs = env->store<expression_t::ptr>();
 
@@ -68,13 +49,11 @@ bool expr_command::execute()
   }
 
   exprs.current() = parse_expression( load );
-
-  return true;
 }
 
-command::log_opt_t expr_command::log() const
+nlohmann::json expr_command::log() const
 {
-  return log_opt_t({{"load", load}});
+  return nlohmann::json({{"load", load}});
 }
 
 }
