@@ -26,8 +26,6 @@
 
 #include "xmgmine.hpp"
 
-#include <boost/filesystem.hpp>
-
 #include <alice/rules.hpp>
 #include <cli/stores.hpp>
 #include <formal/xmg/xmg_mine.hpp>
@@ -53,7 +51,7 @@ command::rules xmgmine_command::validity_rules() const
 {
   return {
     {[this]() { return is_set( "verify" ) || is_set( "add" ) || is_set( "lut_file" ); }, "lut_file or verify needs to be set" },
-    {[this]() { return is_set( "verify" ) || is_set( "add" ) || boost::filesystem::exists( lut_file ); }, "lut_file does not exist" },
+    {[this]() { return is_set( "verify" ) || is_set( "add" ) || std::ifstream( lut_file.c_str() ).good(); }, "lut_file does not exist" },
     {[this]() { return !is_set( "add" ) || env->store<xmg_graph>().current_index() != -1; }, "no XMG in store" },
     {[this]() { return !is_set( "add" ) || env->store<xmg_graph>().current().outputs().size() == 1u; }, "XMG can only have one output" }
   };
@@ -68,7 +66,7 @@ void xmgmine_command::execute()
     if ( const auto* path = std::getenv( "CIRKIT_HOME" ) )
     {
       const auto filename = fmt::format( "{}/xmgmin.txt", path );
-      if ( boost::filesystem::exists( filename ) )
+      if ( std::ifstream( filename.c_str() ).good() )
       {
         opt_file = filename;
       }

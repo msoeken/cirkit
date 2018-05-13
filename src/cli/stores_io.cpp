@@ -27,7 +27,6 @@
 #include "stores_io.hpp"
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <core/io/read_pla.hpp>
@@ -103,7 +102,7 @@ aig_graph read<aig_graph, io_aiger_tag_t>( const std::string& filename, const co
 
   /* auto-find symmetry file */
   const auto symname = filename.substr( 0, filename.size() - 3 ) + "sym";
-  if ( !cmd.is_set( "nosym" ) && boost::filesystem::exists( symname ) )
+  if ( !cmd.is_set( "nosym" ) && std::ifstream( symname.c_str() ).good() )
   {
     /* read symmetries */
     std::cout << "[i] found and read symmetries file" << std::endl;
@@ -112,7 +111,7 @@ aig_graph read<aig_graph, io_aiger_tag_t>( const std::string& filename, const co
 
   /* auto-find unateness file */
   const auto depname = filename.substr( 0, filename.size() - 3 ) + "dep";
-  if ( !cmd.is_set( "nounate" ) && boost::filesystem::exists( depname ) )
+  if ( !cmd.is_set( "nounate" ) && std::ifstream( depname.c_str() ).good() )
   {
     /* read unateness */
     std::cout << "[i] found and read unateness dependency file" << std::endl;

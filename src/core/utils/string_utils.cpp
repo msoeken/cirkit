@@ -168,6 +168,10 @@ std::vector<std::string> split_with_quotes( const std::string& s )
   return result;
 }
 
+std::string basename( const std::string& pathname )
+{
+  return std::string( std::find( pathname.rbegin(), pathname.rend(), '/' ).base(), pathname.end() );
+}
 
 }
 

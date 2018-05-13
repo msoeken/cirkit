@@ -209,7 +209,7 @@ private:
     if ( const auto* path = std::getenv( "CIRKIT_HOME" ) )
     {
       const auto filename = boost::str( boost::format( "%s/dxsmin.txt" ) % path );
-      if ( boost::filesystem::exists( filename ) )
+      if ( std::ifstream( filename.c_str() ).good() )
       {
         foreach_line_in_file( filename, [this]( const std::string& line ) {
             const auto split = line.find( ' ' );

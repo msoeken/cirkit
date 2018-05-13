@@ -26,6 +26,7 @@
 
 #include "revlib_parser.hpp"
 
+#include <fstream>
 #include <iostream>
 #include <locale>
 #include <map>
@@ -604,7 +605,7 @@ bool revlib_parser( std::istream& in, revlib_processor& reader, const revlib_par
         filename = settings.base_directory + "/" + params.back();
       }
 
-      if ( filename && !boost::filesystem::exists( *filename ) )
+      if ( filename && !std::ifstream( filename->c_str() ).good() )
       {
         if ( error )
         {

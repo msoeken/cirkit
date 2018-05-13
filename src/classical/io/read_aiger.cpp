@@ -31,7 +31,6 @@
 #include <core/utils/string_utils.hpp>
 
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/counting_range.hpp>
 
@@ -63,7 +62,7 @@ void read_aiger( aig_graph& aig, std::string& comment, const std::string &filena
   std::ifstream is( filename.c_str() );
   read_aiger( aig, comment, is );
   auto& info = aig_info( aig );
-  info.model_name = boost::filesystem::path( filename ).stem().string();
+  info.model_name = basename( filename );
   is.close();
 }
 
@@ -427,7 +426,7 @@ void read_aiger_binary( aig_graph& aig, const std::string& filename, bool noopt 
   std::ifstream in( filename.c_str(), std::ifstream::in );
   read_aiger_binary( aig, in, noopt );
 
-  aig_info( aig ).model_name = boost::filesystem::path( filename ).stem().string();
+  aig_info( aig ).model_name = basename( filename );
   in.close();
 }
 

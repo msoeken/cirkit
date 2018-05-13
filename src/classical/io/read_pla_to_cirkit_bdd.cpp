@@ -31,8 +31,9 @@
 #include <classical/dd/bdd.hpp>
 
 #include <boost/format.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/timer.hpp>
+
+#include <fstream>
 
 namespace cirkit
 {
@@ -292,7 +293,7 @@ void bdd_function::setOutputName(unsigned index, const std::string &name)
   m_outputNames.emplace ( index, name );
 }
 
-bdd_function_cptr read_pla_into_cirkit_bdd_job( boost::filesystem::ifstream& stream, unsigned log_max_objs, bool verbose )
+bdd_function_cptr read_pla_into_cirkit_bdd_job( std::ifstream& stream, unsigned log_max_objs, bool verbose )
 {
   assert ( stream );
 
@@ -307,7 +308,7 @@ bdd_function_cptr read_pla_into_cirkit_bdd_job( boost::filesystem::ifstream& str
   return processor.function();
 }
 
-bdd_function_cptr read_pla_into_cirkit_bdd( const boost::filesystem::path &filename,
+bdd_function_cptr read_pla_into_cirkit_bdd( const std::string &filename,
                                             const properties::ptr& settings )
 {
   assert ( !filename.empty() );
@@ -315,7 +316,7 @@ bdd_function_cptr read_pla_into_cirkit_bdd( const boost::filesystem::path &filen
   auto log_max_objs = get( settings, "log_max_objs", 24u );
   auto verbose      = get( settings, "verbose",      false );
 
-  boost::filesystem::ifstream stream( filename );
+  std::ifstream stream( filename.c_str(), std::ifstream::in );
   if ( !stream ) {
     std::cerr << "[e] unable to open file " << filename << std::endl;
     return bdd_function_ptr();

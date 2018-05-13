@@ -271,7 +271,7 @@ private:
     if ( const auto* path = std::getenv( "CIRKIT_HOME" ) )
     {
       const auto filename = boost::str( boost::format( "%s/xmgmin.txt" ) % path );
-      if ( boost::filesystem::exists( filename ) )
+      if ( std::ifstream( filename.c_str() ).good() )
       {
         minlib.load_library_file( filename );
       }

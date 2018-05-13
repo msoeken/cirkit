@@ -44,7 +44,6 @@
 #include <vector>
 
 #include <boost/noncopyable.hpp>
-#include <boost/filesystem/path.hpp>
 
 namespace cirkit
 {
@@ -99,7 +98,7 @@ class bdd_function : public boost::noncopyable
 using bdd_function_ptr  = std::shared_ptr<bdd_function>;
 using bdd_function_cptr = std::shared_ptr<const bdd_function>;
 
-bdd_function_cptr read_pla_into_cirkit_bdd( const boost::filesystem::path &filename,
+bdd_function_cptr read_pla_into_cirkit_bdd( const std::string &filename,
                                             const properties::ptr& settings = properties::ptr() );
 
 } // namespace cirkit

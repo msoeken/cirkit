@@ -90,6 +90,8 @@ inline const std::string& empty_default( const std::string& s, const std::string
   return s.empty() ? d : s;
 }
 
+std::string basename( const std::string& filename );
+
 }
 
 #endif

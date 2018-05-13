@@ -35,7 +35,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/range/algorithm.hpp>
 
 #include <range/v3/algorithm/find.hpp>
@@ -45,6 +44,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iterator>
+#include <stack>
 
 namespace cirkit
 {
@@ -192,7 +192,7 @@ void read_bench( aig_graph& aig, const std::string& filename )
   std::ifstream is( filename.c_str() );
   read_bench( aig, is );
   auto& info = aig_info( aig );
-  info.model_name = boost::filesystem::path( filename ).stem().string();
+  info.model_name = basename( filename );
   is.close();
 }
 
