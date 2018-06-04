@@ -27,6 +27,9 @@
 #include "esopbs.hpp"
 
 #include <alice/rules.hpp>
+#include <kitty/cube.hpp>
+#include <kitty/esop.hpp>
+
 #include <classical/abc/gia/gia.hpp>
 #include <classical/abc/gia/gia_esop.hpp>
 #include <cli/stores.hpp>
@@ -37,8 +40,47 @@
 #include <cli/reversible_stores.hpp>
 #include <reversible/synthesis/esop_synthesis.hpp>
 
+#include <reversible/functions/rewrite_circuit.hpp>
+#include <reversible/target_tags.hpp>
+#include <classical/functions/aig_from_truth_table.hpp>
+#include <reversible/utils/circuit_utils.hpp>
+
 namespace cirkit
 {
+
+gia_graph::esop_ptr cubes_to_esop_ptr( const std::vector<kitty::cube>& cubes )
+{
+  abc::Vec_Wec_t *esop = abc::Vec_WecAlloc( 0u );
+
+  for ( auto cube : cubes )
+  {
+    auto * level = abc::Vec_WecPushLevel( esop );
+
+    auto bits = cube._bits;
+    auto mask = cube._mask;
+
+    for ( auto i = 0; i < tt.num_vars(); ++i )
+    {
+      if ( mask & 1 )
+      {
+        auto var = tt.construct();
+        create_nth_var( var, i, !( bits & 1 ) );
+        product &= var;
+      }
+      bits >>= 1;
+      mask >>= 1;
+    }
+
+    if ( esop )
+    {
+      tt ^= product;
+    }
+    else
+    {
+      tt |= product;
+    }
+  }
+}
 
 esopbs_command::esopbs_command( const environment::ptr& env )
   : cirkit_command( env, "ESOP based synthesis" )
@@ -51,6 +93,7 @@ esopbs_command::esopbs_command( const environment::ptr& env )
   add_flag( "--exorcism,-e", "use exorcism to optimize ESOP cover (only for --aig)" );
   add_flag( "--progress,-p", "show progress" );
   add_flag( "--experimental", "experimental method for single-output AIGs" );
+  add_flag( "--stg,-c", "esop all the stg in a circuit" );
   add_new_option();
   be_verbose();
 }
@@ -58,7 +101,8 @@ esopbs_command::esopbs_command( const environment::ptr& env )
 command::rules esopbs_command::validity_rules() const
 {
   return {
-    has_store_element_if_set<aig_graph>( *this, env, "aig" )
+    has_store_element_if_set<aig_graph>( *this, env, "aig" ),
+    has_store_element_if_set<circuit>( *this, env, "stg" )
   };
 }
 
@@ -108,6 +152,49 @@ void esopbs_command::execute()
     esop_synthesis( circuits.current(), cubes_opt, gia.num_inputs(), settings, statistics );
 
     print_runtime();
+  }
+  else if ( is_set("stg"))
+  {
+ 
+    const auto circ = rewrite_circuit( circuits.current(), {
+      [this, settings]( const gate& g, circuit& circ ) {
+
+      const auto map = get_line_map(g);
+      settings->set( "line_map", map );
+      
+
+      if ( is_stg( g ) )
+      {
+        const auto& stg = boost::any_cast<stg_tag>( g.type() );
+        const auto num_vars = g.controls().size();
+        const auto f = stg.function; //kitty dynamic tt
+
+
+
+        aig_graph stg_aig = aig_from_truth_table(f);
+        gia_graph gia( stg_aig );
+        auto esop = gia.compute_esop_cover( gia_graph::esop_cover_method::aig_new, settings );
+        if ( is_set( "exorcism" ) )
+        {
+          esop = exorcism_minimization( esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
+          print_runtime( "runtime", "exorcism" );
+        }
+        
+        esop_synthesis( circ, esop, gia.num_inputs(), gia.num_outputs(), settings, statistics );
+
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+         
+      }
+      
+    } );
+    extend_if_new( circuits );
+    circuits.current() = circ; 
+
   }
 }
 

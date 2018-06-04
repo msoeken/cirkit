@@ -66,7 +66,6 @@ void stg4_command::execute()
           const auto& f = stg.function;
           const auto num_vars = f.num_vars();
 
-          std::cout << f._bits[0] << std::endl;
           /* if there are zero variables in f */
           if ( num_vars == 0 )
           {
