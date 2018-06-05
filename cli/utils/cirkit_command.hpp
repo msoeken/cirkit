@@ -27,7 +27,10 @@ public:
 
   void execute() override
   {
-    ( execute_helper<Stores>() || ... );
+    if ( !( execute_helper<Stores>() || ... ) )
+    {
+      env->out() << "[w] no store specified\n";
+    }
   }
 
 protected:
