@@ -9,6 +9,7 @@
 
 #include "algorithms/clpmap.hpp"
 #include "algorithms/lutmap.hpp"
+#include "algorithms/mighty.hpp"
 #include "algorithms/miglut.hpp"
 
 ALICE_MAIN( cirkit )
