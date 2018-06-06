@@ -24,61 +24,28 @@
  */
 
 /*
-  \file current.hpp
-  \brief Switches current data structure
+  \file settings.hpp
+  \brief Global static settings for alice
 
   \author Mathias Soeken
 */
 
 #pragma once
 
-#include "../command.hpp"
+#ifndef ALICE_SETTINGS_WITH_DEFAULT_OPTION
+/*! \brief Controls whether default store options are supported
 
-namespace alice
-{
+  Default store options are useful, when a shell interface contains several
+  stores.  If one command uses a store, e.g., to read a file, it can remember
+  the last store, such that a following command does not necessarily need to be
+  provided with a flag to select the store again.  For example, if one has a
+  store for strings (accessed via option ``--str``) and one for numbers (access
+  via option ``--int``), then a call to ``read_text --str file`` would set the
+  default option to ``--str``, such that a immediate call to ``print`` would
+  not need the ``--str`` option to print the string.  The default store option
+  is displayed in the prompt.
 
-template<class... S>
-class current_command : public command
-{
-public:
-  explicit current_command( const environment::ptr& env )
-      : command( env, "Switches current data structure" )
-  {
-    add_option( "index,--index", index, "new index" );
-
-    []( ... ) {}( add_option_helper<S>( opts )... );
-  }
-
-protected:
-  rules validity_rules() const
-  {
-    rules rules;
-
-    rules.push_back( {[this]() { (void)this; return env->has_default_option() || exactly_one_true_helper<bool>( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"} );
-
-    return rules;
-  }
-
-  void execute()
-  {
-    []( ... ) {}( set_current_index<S>()... );
-  }
-
-private:
-  template<typename Store>
-  int set_current_index()
-  {
-    constexpr auto option = store_info<Store>::option;
-
-    if ( ( is_set( option ) || env->is_default_option( option ) ) && index < store<Store>().size() )
-    {
-      store<Store>().set_current_index( index );
-      env->set_default_option( option );
-    }
-    return 0;
-  }
-
-private:
-  unsigned index;
-};
-}
+  The default value for this setting is ``false``.
+*/
+#define ALICE_SETTINGS_WITH_DEFAULT_OPTION false
+#endif

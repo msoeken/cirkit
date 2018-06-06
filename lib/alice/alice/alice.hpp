@@ -39,6 +39,7 @@
 #include "command.hpp"
 #include "readline.hpp"
 #include "rules.hpp"
+#include "settings.hpp"
 #include "store.hpp"
 #include "store_api.hpp"
 #include "validators.hpp"

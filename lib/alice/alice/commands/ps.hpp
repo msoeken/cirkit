@@ -57,12 +57,15 @@ protected:
   rules validity_rules() const
   {
     return {
-      {[this]() { (void)this; return any_true_helper<bool>( { is_set( store_info<S>::option )... } ); }, "no store has been specified" }
+      {[this]() { (void)this; return env->has_default_option() || any_true_helper<bool>( { is_set( store_info<S>::option )... } ); }, "no store has been specified" }
     };
   }
 
   void execute()
   {
+    has_option = false;
+    [](...){}( check_option<S>()... );
+
     if ( !is_set( "silent" ) )
     {
       [](...){}( ps_store<S>()... );
@@ -78,12 +81,23 @@ protected:
 
 private:
   template<typename Store>
+  int check_option()
+  {
+    constexpr auto option = store_info<Store>::option;
+    if ( is_set( option ) )
+    {
+      has_option = true;
+    }
+    return true;
+  }
+
+  template<typename Store>
   int ps_store() const
   {
     constexpr auto option = store_info<Store>::option;
     constexpr auto name   = store_info<Store>::name;
 
-    if ( is_set( option ) )
+    if ( is_set( option ) || ( !has_option && env->is_default_option( option ) ) )
     {
       if ( is_set( "all" ) )
       {
@@ -93,16 +107,19 @@ private:
           env->out() << "[i] \033[1;34m" << name << "\033[0m \033[1;33m" << ctr++ << "\033[0m\n";
           print_statistics<Store>( env->out(), elem );
         }
+        env->set_default_option( option );
       }
       else
       {
         if ( store<Store>().current_index() == -1 )
         {
           env->out() << "[w] no " << name << " in store" << std::endl;
+          env->set_default_option( "" );
         }
         else
         {
           print_statistics<Store>( env->out(), store<Store>().current() );
+          env->set_default_option( option );
         }
       }
     }
@@ -120,7 +137,7 @@ private:
 
     constexpr auto option = store_info<Store>::option;
 
-    if ( is_set( option ) )
+    if ( is_set( option ) || env->is_default_option( option ) )
     {
       if ( is_set( "all" ) )
       {
@@ -142,6 +159,9 @@ private:
 
     return 0;
   }
+
+private:
+  bool has_option{false};
 };
 
 }

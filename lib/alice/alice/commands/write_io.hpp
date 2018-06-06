@@ -62,11 +62,12 @@ int write_io_helper( const command& cmd, const std::string& default_option, cons
   constexpr auto option = store_info<S>::option;
   constexpr auto name = store_info<S>::name;
 
-  if ( cmd.is_set( option ) || option == default_option )
+  if ( cmd.is_set( option ) || option == default_option || env->is_default_option( option ) )
   {
     if ( env->store<S>().current_index() == -1 )
     {
       env->out() << "[w] no " << name << " selected in store" << std::endl;
+      env->set_default_option( "" );
     }
     else if ( cmd.is_set( "--log" ) )
     {
@@ -80,10 +81,12 @@ int write_io_helper( const command& cmd, const std::string& default_option, cons
       {
         env->out() << "[w] writing to log is not supported for this command" << std::endl;
       }
+      env->set_default_option( option );
     }
     else
     {
       write<S, Tag>( env->store<S>().current(), filename, cmd );
+      env->set_default_option( option );
     }
   }
   return 0;
@@ -111,7 +114,7 @@ protected:
   {
     rules rules;
 
-    rules.push_back( {[this]() { return option_count == 1 || exactly_one_true_helper( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"} );
+    rules.push_back( {[this]() { return option_count == 1 || env->has_default_option() || exactly_one_true_helper( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"} );
 
     return rules;
   }

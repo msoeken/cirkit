@@ -64,7 +64,7 @@ int read_io_helper( const command& cmd, const std::string& default_option, bool 
 {
   constexpr auto option = store_info<S>::option;
 
-  if ( cmd.is_set( option ) || option == default_option )
+  if ( cmd.is_set( option ) || option == default_option || env->is_default_option( option ) )
   {
     const auto names = detail::split( filename, " " );
 
@@ -90,6 +90,8 @@ int read_io_helper( const command& cmd, const std::string& default_option, bool 
         /* do nothing, user should display error or warning in `read` function */
       }
     }
+
+    env->set_default_option( option );
   }
   return 0;
 }
@@ -116,7 +118,7 @@ protected:
   {
     rules rules;
 
-    rules.push_back( {[this]() { return option_count == 1 || exactly_one_true_helper( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"} );
+    rules.push_back( {[this]() { return option_count == 1 || env->has_default_option() || exactly_one_true_helper( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"} );
 
     return rules;
   }

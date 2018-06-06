@@ -394,14 +394,17 @@ private:
 
   std::string get_prefix()
   {
+    std::string r = prefix;
+
+    if ( env->has_default_option() )
+    {
+      r += fmt::format( " [{}]", env->default_option() );
+    }
     if ( opts.count( "-n" ) )
     {
-      return prefix + fmt::format( " {}> ", counter++ );
+      r += fmt::format( " {}", counter++ );
     }
-    else
-    {
-      return prefix + "> ";
-    }
+    return r + "> ";
   }
 
   void read_aliases()

@@ -52,7 +52,7 @@ protected:
   rules validity_rules() const
   {
     return {
-        {[this]() { (void)this; return exactly_one_true_helper<bool>( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"}};
+        {[this]() { (void)this; return env->has_default_option() || exactly_one_true_helper<bool>( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"}};
   }
 
   void execute()
@@ -78,15 +78,17 @@ private:
     constexpr auto option = store_info<Store>::option;
     constexpr auto name = store_info<Store>::name;
 
-    if ( is_set( option ) )
+    if ( is_set( option ) || env->is_default_option( option ) )
     {
       if ( store<Store>().current_index() == -1 )
       {
         env->out() << "[w] no " << name << " in store" << std::endl;
+        env->set_default_option( "" );
       }
       else
       {
         print<Store>( env->out(), store<Store>().current() );
+        env->set_default_option( option );
       }
     }
     return 0;
@@ -98,7 +100,7 @@ private:
     constexpr auto option = store_info<Store>::option;
     constexpr auto name = store_info<Store>::name;
 
-    if ( is_set( option ) )
+    if ( is_set( option ) || env->is_default_option( option ) )
     {
       if ( store<Store>().current_index() == -1 )
       {

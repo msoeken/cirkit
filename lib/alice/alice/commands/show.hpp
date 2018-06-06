@@ -68,7 +68,7 @@ protected:
   {
     rules rules;
 
-    rules.push_back( {[this]() { return option_count == 1 || exactly_one_true_helper<bool>( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"} );
+    rules.push_back( {[this]() { return option_count == 1 || env->has_default_option() || exactly_one_true_helper<bool>( {is_set( store_info<S>::option )...} ); }, "exactly one store needs to be specified"} );
 
     return rules;
   }
@@ -102,11 +102,12 @@ private:
     constexpr auto option = store_info<Store>::option;
     constexpr auto name = store_info<Store>::name;
 
-    if ( is_set( option ) )
+    if ( is_set( option ) || default_option == option || env->is_default_option( option ) )
     {
       if ( store<Store>().current_index() == -1 )
       {
         env->out() << "[w] no " << name << " in store" << std::endl;
+        env->set_default_option( "" );
       }
       else
       {
@@ -128,6 +129,8 @@ private:
         {
           std::remove( filename.c_str() );
         }
+
+        env->set_default_option( option );
       }
     }
 

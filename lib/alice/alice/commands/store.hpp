@@ -59,7 +59,7 @@ protected:
   {
     return {
         {[this]() { return static_cast<unsigned>( is_set( "show" ) ) + static_cast<unsigned>( is_set( "clear" ) ) <= 1u; }, "only one operation can be specified"},
-        {[this]() { (void)this; return any_true_helper<bool>( {is_set( store_info<S>::option )...} ); }, "no store has been specified"}};
+        {[this]() { (void)this; return env->has_default_option() || any_true_helper<bool>( {is_set( store_info<S>::option )...} ); }, "no store has been specified"}};
   }
 
   void execute()
@@ -90,7 +90,7 @@ private:
 
     const auto& _store = store<Store>();
 
-    if ( is_set( option ) )
+    if ( is_set( option ) || env->is_default_option( option ) )
     {
       if ( _store.empty() )
       {
@@ -107,6 +107,8 @@ private:
           ++index;
         }
       }
+
+      env->set_default_option( option );
     }
 
     return 0;
@@ -117,9 +119,10 @@ private:
   {
     constexpr auto option = store_info<Store>::option;
 
-    if ( is_set( option ) )
+    if ( is_set( option ) || env->is_default_option( option ) )
     {
       store<Store>().clear();
+      env->set_default_option( option );
     }
     return 0;
   }
@@ -129,7 +132,7 @@ private:
   {
     constexpr auto option = store_info<Store>::option;
 
-    if ( is_set( option ) )
+    if ( is_set( option ) || env->is_default_option( option ) )
     {
       map[option] = store<Store>().current_index();
     }

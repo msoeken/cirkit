@@ -46,6 +46,7 @@
 
 #include "detail/logging.hpp"
 #include "detail/utils.hpp"
+#include "settings.hpp"
 #include "store.hpp"
 #include "store_api.hpp"
 
@@ -163,6 +164,51 @@ public:
     return it != _variables.end() ? it->second : default_value;
   }
 
+  /*! \brief Sets default store option
+
+    The environment can keep track of a default store option that can be
+    changed after every command.  For example, if one has a store for strings
+    (accessed via option ``--str``) and one for numbers (access via option
+    ``--int``), then a call to ``read_text --str file`` would set the default
+    option to ``--str``, such that a immediate call to ``print`` would not need
+    the ``--str`` option to print the string.  The default store option is
+    displayed in the prompt.
+
+    This behavior needs to be enabled by defining the macro
+    ``ALICE_SETTINGS_WITH_DEFAULT_OPTION`` to ``true``, before the
+    ``alice.hpp`` is included.
+
+    \param default_option Updates default store option for next commands
+  */
+  void set_default_option( const std::string& default_option )
+  {
+    _default_option = default_option;
+  }
+
+  /*! \brief Returns the current default store option */
+  const std::string& default_option() const
+  {
+    return _default_option;
+  }
+
+  /*! \brief Checks whether a default store option is enabled and set */
+  bool has_default_option() const
+  {
+    return ALICE_SETTINGS_WITH_DEFAULT_OPTION && !_default_option.empty();
+  }
+
+  /*! \brief Checks whether option is default store option
+    
+    This method also checks whether default store options are enabled.  If not,
+    this method always returns ``false``.
+
+    \param option Option argument to check (fill name without dashes)
+  */
+  bool is_default_option( const std::string& option ) const
+  {
+    return ALICE_SETTINGS_WITH_DEFAULT_OPTION && _default_option == option;
+  }
+
 private:
   /*! \brief Adds store to environment */
   template<typename T>
@@ -197,6 +243,7 @@ private:
   std::unordered_map<std::string, std::vector<std::string>> _categories;
   std::unordered_map<std::string, std::string> _aliases;
   std::unordered_map<std::string, std::string> _variables;
+  std::string _default_option;
 
   bool log{false};
   alice::detail::logger logger;
