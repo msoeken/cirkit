@@ -8,10 +8,10 @@
 namespace alice
 {
 
-class miglut_command : public cirkit::cirkit_command<miglut_command, aig_t, mig_t, klut_t>
+class miglut_command : public cirkit::cirkit_command<miglut_command, klut_t>
 {
 public:
-  miglut_command( environment::ptr& env ) : cirkit::cirkit_command<miglut_command, aig_t, mig_t, klut_t>( env, "Performs LUT resynthesis", "apply LUT resynthesis to {0}" )
+  miglut_command( environment::ptr& env ) : cirkit::cirkit_command<miglut_command, klut_t>( env, "Performs LUT resynthesis", "apply LUT resynthesis to {0}" )
   {
     add_new_option();
   }
