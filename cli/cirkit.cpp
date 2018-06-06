@@ -1,3 +1,5 @@
+#define ALICE_SETTINGS_WITH_DEFAULT_OPTION true
+
 #include <alice/alice.hpp>
 
 #include "filetypes.hpp"
