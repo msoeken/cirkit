@@ -28,7 +28,7 @@ ALICE_DESCRIBE_STORE( klut_t, klut )
 ALICE_PRINT_STORE_STATISTICS( klut_t, os, klut )
 {
   mockturtle::depth_view depth_klut{*klut};
-  os << fmt::format( "i/o = {}/{}   gates = {}   level = {}", klut->num_pis(), klut->num_pos(), klut->num_gates(), depth_klut.depth() );
+  os << fmt::format( "LUT network   i/o = {}/{}   gates = {}   level = {}", klut->num_pis(), klut->num_pos(), klut->num_gates(), depth_klut.depth() );
   if ( klut->has_mapping() )
   {
     os << fmt::format( "   luts = {}", klut->num_luts() );

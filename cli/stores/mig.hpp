@@ -26,7 +26,7 @@ ALICE_DESCRIBE_STORE( mig_t, mig )
 ALICE_PRINT_STORE_STATISTICS( mig_t, os, mig )
 {
   mockturtle::depth_view depth_mig{*mig};
-  os << fmt::format( "i/o = {}/{}   gates = {}   level = {}", mig->num_pis(), mig->num_pos(), mig->num_gates(), depth_mig.depth() );
+  os << fmt::format( "MIG   i/o = {}/{}   gates = {}   level = {}", mig->num_pis(), mig->num_pos(), mig->num_gates(), depth_mig.depth() );
   if ( mig->has_mapping() )
   {
     os << fmt::format( "   luts = {}", mig->num_luts() );
