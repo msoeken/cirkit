@@ -1,7 +1,7 @@
 #include <alice/alice.hpp>
 
-#include <mockturtle/algorithms/lut_resynthesis.hpp>
-#include <mockturtle/algorithms/lut_resynthesis/mig_npn.hpp>
+#include <mockturtle/algorithms/node_resynthesis.hpp>
+#include <mockturtle/algorithms/node_resynthesis/mig_npn.hpp>
 
 #include "../utils/cirkit_command.hpp"
 
@@ -22,7 +22,7 @@ public:
     const auto& ntk = *( store<Store>().current() );
     mockturtle::mig_npn_resynthesis resyn;
     extend_if_new<mig_t>();
-    const auto mig = mockturtle::lut_resynthesis<mockturtle::mig_network>( ntk, resyn );
+    const auto mig = mockturtle::node_resynthesis<mockturtle::mig_network>( ntk, resyn );
     store<mig_t>().current() = std::make_shared<mig_nt>( mig );
   }
 };

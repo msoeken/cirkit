@@ -29,7 +29,7 @@ ALICE_PRINT_STORE_STATISTICS( mig_t, os, mig )
   os << fmt::format( "MIG   i/o = {}/{}   gates = {}   level = {}", mig->num_pis(), mig->num_pos(), mig->num_gates(), depth_mig.depth() );
   if ( mig->has_mapping() )
   {
-    os << fmt::format( "   luts = {}", mig->num_luts() );
+    os << fmt::format( "   luts = {}", mig->num_cells() );
   }
   os << "\n";
 }

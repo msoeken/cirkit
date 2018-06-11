@@ -29,7 +29,7 @@ ALICE_PRINT_STORE_STATISTICS( aig_t, os, aig )
   os << fmt::format( "AIG   i/o = {}/{}   gates = {}   level = {}", aig->num_pis(), aig->num_pos(), aig->num_gates(), depth_aig.depth() );
   if ( aig->has_mapping() )
   {
-    os << fmt::format( "   luts = {}", aig->num_luts() );
+    os << fmt::format( "   luts = {}", aig->num_cells() );
   }
   os << "\n";
 }

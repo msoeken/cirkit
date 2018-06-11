@@ -31,7 +31,7 @@ ALICE_PRINT_STORE_STATISTICS( klut_t, os, klut )
   os << fmt::format( "LUT network   i/o = {}/{}   gates = {}   level = {}", klut->num_pis(), klut->num_pos(), klut->num_gates(), depth_klut.depth() );
   if ( klut->has_mapping() )
   {
-    os << fmt::format( "   luts = {}", klut->num_luts() );
+    os << fmt::format( "   luts = {}", klut->num_cells() );
   }
   os << "\n";
 }
