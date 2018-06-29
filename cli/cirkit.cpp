@@ -8,6 +8,7 @@
 #include "stores/mig.hpp"
 
 #include "algorithms/clpmap.hpp"
+#include "algorithms/cut_rewrite.hpp"
 #include "algorithms/lutmap.hpp"
 #include "algorithms/mighty.hpp"
 #include "algorithms/miglut.hpp"
