@@ -12,5 +12,6 @@
 #include "algorithms/lutmap.hpp"
 #include "algorithms/mighty.hpp"
 #include "algorithms/miglut.hpp"
+#include "algorithms/refactor.hpp"
 
 ALICE_MAIN( cirkit )
