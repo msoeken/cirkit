@@ -7,10 +7,10 @@
 namespace alice
 {
 
-class lutmap_command : public cirkit::cirkit_command<lutmap_command, aig_t, mig_t, klut_t>
+class lut_mapping_command : public cirkit::cirkit_command<lut_mapping_command, aig_t, mig_t, klut_t>
 {
 public:
-  lutmap_command( environment::ptr& env ) : cirkit::cirkit_command<lutmap_command, aig_t, mig_t, klut_t>( env, "Performs k-LUT mapping", "apply LUT-mapping to {0}" )
+  lut_mapping_command( environment::ptr& env ) : cirkit::cirkit_command<lut_mapping_command, aig_t, mig_t, klut_t>( env, "Performs k-LUT mapping", "apply LUT-mapping to {0}" )
   {
     add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
     add_option( "--lutcount", ps.cut_enumeration_ps.cut_limit, "number of cuts per node", true );
@@ -34,6 +34,6 @@ private:
   mockturtle::lut_mapping_params ps;
 };
 
-ALICE_ADD_COMMAND( lutmap, "Mapping" )
+ALICE_ADD_COMMAND( lut_mapping, "Mapping" )
 
 }

@@ -9,10 +9,10 @@
 namespace alice
 {
 
-class miglut_command : public cirkit::cirkit_command<miglut_command, klut_t>
+class lut_resynthesis_command : public cirkit::cirkit_command<lut_resynthesis_command, klut_t>
 {
 public:
-  miglut_command( environment::ptr& env ) : cirkit::cirkit_command<miglut_command, klut_t>( env, "Performs LUT resynthesis", "apply LUT resynthesis to {0}" )
+  lut_resynthesis_command( environment::ptr& env ) : cirkit::cirkit_command<lut_resynthesis_command, klut_t>( env, "Performs LUT resynthesis", "apply LUT resynthesis to {0}" )
   {
     add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1}" );
     add_new_option();
@@ -50,6 +50,6 @@ private:
   unsigned strategy{0u};
 };
 
-ALICE_ADD_COMMAND( miglut, "Synthesis" )
+ALICE_ADD_COMMAND( lut_resynthesis, "Synthesis" )
 
 } // namespace alice
