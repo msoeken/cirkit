@@ -19,6 +19,7 @@ public:
 
     add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
     add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1}" );
+    add_flag( "-p,--progress", ps.progress, "show progress" );
   }
 
   template<class Store>
