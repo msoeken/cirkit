@@ -48,6 +48,7 @@ class BuildExt(build_ext):
     if ct == 'unix':
       opts.append('-std=c++17')
       opts.append('-Wno-register')
+      opts.append('-Wno-unknown-pragmas')
     for ext in self.extensions:
       ext.extra_compile_args = opts
     build_ext.build_extensions(self)

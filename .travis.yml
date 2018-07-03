@@ -15,7 +15,7 @@ addons:
     - g++-7
   artifacts:
     paths:
-    - ./dist/*.whl
+    - $(ls ./dist/*.whl)
 
 env:
 - CC=g++-7
