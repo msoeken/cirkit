@@ -18,8 +18,7 @@ addons:
     - ./dist/*.whl
 
 env:
-- CC=g++7
-- CXX=g++7
+- CC=g++-7
 
 matrix:
   include:
