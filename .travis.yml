@@ -17,7 +17,9 @@ addons:
     paths:
     - ./dist/*.whl
 
-env: CXX=g++7
+env:
+- CC=g++7
+- CXX=g++7
 
 matrix:
   include:
