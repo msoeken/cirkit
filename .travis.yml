@@ -2,6 +2,8 @@ language: cpp
 dist: trusty
 
 install:
+- python -m pip install --upgrade pip setuptools wheel
+- python -m pip install pybind11
 - python setup.py sdist bdist_wheel
 
 addons:
