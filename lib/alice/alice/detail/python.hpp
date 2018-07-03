@@ -61,7 +61,19 @@ py::object json_to_python( const nlohmann::json& json )
   }
   else if ( json.is_number() )
   {
-    return py::float_( json.get<double>() );
+    using nlohmann::detail::value_t;
+    if ( static_cast<value_t>( json ) == value_t::number_unsigned )
+    {
+      return py::int_( json.get<unsigned long>() );
+    }
+    else if ( static_cast<value_t>( json ) == value_t::number_integer )
+    {
+      return py::int_( json.get<long>() );
+    }
+    else
+    {
+      return py::float_( json.get<double>() );
+    }
   }
   else if ( json.is_object() )
   {
