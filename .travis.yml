@@ -1,0 +1,24 @@
+language: cpp
+dist: trusty
+
+install:
+- python setup.py sdist bdist_wheel
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-7
+  artifacts:
+    paths:
+    - ./dist/*.whl
+
+env: CXX=g++7
+
+matrix:
+  include:
+  - os: linux
+    python: "2.7"
+  - os: linux
+    python: "3.6"
