@@ -36,6 +36,17 @@ ALICE_PRINT_STORE_STATISTICS( klut_t, os, klut )
   os << "\n";
 }
 
+ALICE_LOG_STORE_STATISTICS( klut_t, klut )
+{
+  mockturtle::depth_view depth_klut{*klut};
+  return {
+    {"pis", klut->num_pis()},
+    {"pos", klut->num_pos()},
+    {"gates", klut->num_gates()},
+    {"depth", depth_klut.depth()}
+  };
+}
+
 ALICE_READ_FILE( klut_t, aiger, filename, cmd )
 {
   mockturtle::klut_network klut;

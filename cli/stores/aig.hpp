@@ -34,6 +34,17 @@ ALICE_PRINT_STORE_STATISTICS( aig_t, os, aig )
   os << "\n";
 }
 
+ALICE_LOG_STORE_STATISTICS( aig_t, aig )
+{
+  mockturtle::depth_view depth_aig{*aig};
+  return {
+    {"pis", aig->num_pis()},
+    {"pos", aig->num_pos()},
+    {"gates", aig->num_gates()},
+    {"depth", depth_aig.depth()}
+  };
+}
+
 ALICE_READ_FILE( aig_t, aiger, filename, cmd )
 {
   mockturtle::aig_network aig;
