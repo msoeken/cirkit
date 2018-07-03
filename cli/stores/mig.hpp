@@ -34,6 +34,17 @@ ALICE_PRINT_STORE_STATISTICS( mig_t, os, mig )
   os << "\n";
 }
 
+ALICE_LOG_STORE_STATISTICS( mig_t, mig )
+{
+  mockturtle::depth_view depth_mig{*mig};
+  return {
+    {"pis", mig->num_pis()},
+    {"pos", mig->num_pos()},
+    {"gates", mig->num_gates()},
+    {"depth", depth_mig.depth()}
+  };
+}
+
 ALICE_READ_FILE( mig_t, aiger, filename, cmd )
 {
   mockturtle::mig_network mig;
