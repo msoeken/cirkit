@@ -11,8 +11,5 @@ if (HAS_FCOLOR_DIAGNOSTICS)
   add_compile_options(-fcolor-diagnostics)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/tools")
-include(AliceTools)
-
 add_subdirectory(lib)
 add_subdirectory(cli)

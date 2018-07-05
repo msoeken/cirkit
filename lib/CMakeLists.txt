@@ -23,5 +23,3 @@ add_library(json INTERFACE) # v3.0.0
 target_include_directories(json INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/json)
 
 add_subdirectory(mockturtle)
-
-add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
