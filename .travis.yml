@@ -5,7 +5,10 @@ sudo: false
 script:
 - python -m pip install --upgrade pip setuptools wheel
 - python -m pip install pybind11
-- python setup.py sdist bdist_wheel
+- cd dist/cirkit
+- python setup.py bdist_wheel
+- cd ../revkit
+- python setup.py bdist_wheel
 
 addons:
   apt:
@@ -16,7 +19,7 @@ addons:
   artifacts:
     s3_region: us-west-2
     paths:
-    - $(ls ./dist/*.whl)
+    - $(ls ./dist/*/dist/*.whl)
 
 env:
 - CC=g++-7

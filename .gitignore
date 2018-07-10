@@ -1,5 +1,10 @@
 build
-dist
+dist/cirkit/build
+dist/cirkit/cirkit.egg-info
+dist/cirkit/dist
+dist/revkit/build
+dist/revkit/revkit.egg-info
+dist/revkit/dist
 
 # projects
 .vscode
