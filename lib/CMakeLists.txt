@@ -24,6 +24,6 @@ target_include_directories(json INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/json)
 
 add_library(td INTERFACE)
 target_include_directories(td INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/td)
-target_link_libraries(td INTERFACE fmt)
+target_link_libraries(td INTERFACE fmt kitty)
 
 add_subdirectory(mockturtle)

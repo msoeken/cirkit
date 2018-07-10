@@ -31,6 +31,7 @@ revkit_modules = [
       "../../lib/fmt",
       "../../lib/json",
       "../../lib/td",
+      "../../lib/mockturtle/lib/kitty"
     ],
     define_macros=[('ALICE_PYTHON', '1'), ('FMT_HEADER_ONLY', '1')],
     language='c++'
