@@ -19,6 +19,8 @@ install:
   - git submodule update --init --recursive
   - "%PYTHON%\\python.exe -m pip install pybind11"
   - "%PYTHON%\\python.exe -m pip install wheel"
+  - echo "Installed SDKs:"
+  - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
 
 build: off
 
