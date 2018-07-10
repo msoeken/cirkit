@@ -9,6 +9,7 @@ script:
 - python setup.py bdist_wheel
 - cd ../revkit
 - python setup.py bdist_wheel
+- cd ../../
 
 addons:
   apt:
