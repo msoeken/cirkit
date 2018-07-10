@@ -45,11 +45,20 @@ namespace alice
   Before checking whether the file exists, tilde characters for home directories
   and environment variables are expanded (using `wordexp`).
 
+  In Windows this method is just forwarding to `CLI::EistingFile` and does not
+  perform any substitution.
+
   Camel case convention for this function is intentional to match the convention
   of CLI11, since this function is used when declaring CLI options.
 
   \param filename Filename
 */
+#ifdef _WIN32
+inline std::string ExistingFileWordExp( const std::string& filename )
+{
+  return CLI::ExistingFile( filename );
+}
+#else
 inline std::string ExistingFileWordExp( const std::string& filename )
 {
   std::string ret;
@@ -59,4 +68,5 @@ inline std::string ExistingFileWordExp( const std::string& filename )
   }
   return ret;
 }
+#endif
 }

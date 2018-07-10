@@ -29,7 +29,9 @@
 
 #include <cstdio>
 #include <cstdlib>
+#ifndef _WIN32
 #include <wordexp.h>
+#endif
 
 #include <algorithm>
 #include <cctype>
@@ -196,6 +198,12 @@ inline std::vector<std::string> split( const std::string& str, const std::string
   return result;
 }
 
+#ifdef _WIN32
+inline std::pair<int, std::string> execute_program( const std::string& cmd )
+{
+  return {-1, "[w] program execution not yet supported in Windows\n"};
+}
+#else
 // from http://stackoverflow.com/questions/478898/how-to-execute-a-command-and-get-output-of-command-within-c-using-posix
 inline std::pair<int, std::string> execute_program( const std::string& cmd )
 {
@@ -217,6 +225,7 @@ inline std::pair<int, std::string> execute_program( const std::string& cmd )
   }
   return {exit_status, result};
 }
+#endif
 
 // based on https://stackoverflow.com/questions/5612182/convert-string-with-explicit-escape-sequence-into-relative-character
 inline std::string unescape_quotes( const std::string& s )
@@ -238,6 +247,12 @@ inline std::string unescape_quotes( const std::string& s )
   return res;
 }
 
+#ifdef _WIN32
+inline const std::string& word_exp_filename( const std::string& filename )
+{
+  return filename;
+}
+#else
 inline std::string word_exp_filename( const std::string& filename )
 {
   std::string result;
@@ -258,6 +273,7 @@ inline std::string word_exp_filename( const std::string& filename )
 
   return result;
 }
+#endif
 } /* namespace detail */
 } /* namespace alice */
 

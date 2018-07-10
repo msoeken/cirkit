@@ -32,7 +32,12 @@
 
 #pragma once
 
+#ifdef _WIN32
+#include <stdio.h>
+#include <windows.h>
+#else
 #include <sys/utsname.h>
+#endif
 
 #include <thread>
 
@@ -57,7 +62,16 @@ protected:
 
   nlohmann::json log() const
   {
+#ifdef _WIN32
+    OSVERSIONINFO osvi;
+    ZeroMemory( &osvi, sizeof( OSVERSIONINFO ) );
+    osvi.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
 
+    return nlohmann::json( {{"sysname", "Windows"},
+                            {"majorversion", osvi.dwMajorVersion},
+                            {"minorversion", osvi.dwMinorVersion},
+                            {"supported_threads", static_cast<int>( std::thread::hardware_concurrency() )}} );
+#else
     utsname u;
     uname( &u );
     return nlohmann::json( {{"sysname", std::string( u.sysname )},
@@ -66,6 +80,7 @@ protected:
                             {"version", std::string( u.version )},
                             {"machine", std::string( u.machine )},
                             {"supported_threads", static_cast<int>( std::thread::hardware_concurrency() )}} );
+#endif
   }
 };
-}
+} // namespace alice
