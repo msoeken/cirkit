@@ -5,6 +5,7 @@
 #include <string>
 
 #include <fmt/format.h>
+#include <kitty/detail/mscfix.hpp>
 
 #include "../networks/small_mct_circuit.hpp"
 
