@@ -20,7 +20,7 @@ install:
   - "%PYTHON%\\python.exe -m pip install pybind11"
   - "%PYTHON%\\python.exe -m pip install wheel"
   - echo "Installed SDKs:"
-  - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
+  - ps: "ls \"C:/Program Files (x86)/Microsoft SDKs/Windows\""
 
 build: off
 
