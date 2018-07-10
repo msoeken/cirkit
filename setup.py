@@ -16,7 +16,7 @@ class get_pybind_include(object):
     import pybind11
     return pybind11.get_include(self.user)
 
-ext_modules = [
+cirkit_modules = [
   Extension(
     'cirkit',
     ['cli/cirkit.cpp'],
@@ -34,6 +34,25 @@ ext_modules = [
       "lib/mockturtle/lib/rang",
       "lib/mockturtle/lib/sparsepp",
       "lib/mockturtle/include"
+    ],
+    define_macros=[('ALICE_PYTHON', '1'), ('FMT_HEADER_ONLY', '1')],
+    language='c++'
+  )
+]
+
+revkit_modules = [
+  Extension(
+    'revkit',
+    ['cli/revkit.cpp'],
+    include_dirs=[
+      get_pybind_include(),
+      get_pybind_include(user=True),
+      "lib/alice/",
+      "lib/any",
+      "lib/cli11",
+      "lib/fmt",
+      "lib/json",
+      "lib/td",
     ],
     define_macros=[('ALICE_PYTHON', '1'), ('FMT_HEADER_ONLY', '1')],
     language='c++'
@@ -64,7 +83,25 @@ setup(
   url='https://msoeken.github.io/cirkit.html',
   description='A C++ logic synthesis framework',
   long_description=long_description,
-  ext_modules=ext_modules,
+  ext_modules=cirkit_modules,
+  install_requires=['pybind11>=2.2'],
+  cmdclass={'build_ext': BuildExt},
+  zip_safe=False,
+  classifiers=(
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+  )
+)
+
+setup(
+  name='revkit',
+  version=__version__,
+  author='Mathias Soeken',
+  author_email='mathias.soeken@epfl.ch',
+  url='https://msoeken.github.io/revkit.html',
+  description='A C++ quantum compilation framework',
+  long_description=long_description,
+  ext_modules=revkit_modules,
   install_requires=['pybind11>=2.2'],
   cmdclass={'build_ext': BuildExt},
   zip_safe=False,
