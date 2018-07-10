@@ -19,7 +19,9 @@ install:
   - git submodule update --init --recursive
   - "%PYTHON%\\python.exe -m pip install wheel"
 
-build:
+build: off
+
+after_test:
   - "cd dist\\cirkit"
   - "%PYTHON%\\python.exe setup.py bdist_wheel"
   - "cd ..\\.."
