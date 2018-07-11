@@ -79,7 +79,7 @@ matrix:
       - brew update
       - brew cask uninstall oclint
       - brew install gcc@7
-      - brew install python
+      - brew upgrade python
     env:
       - PYTHON=python3
       - CC=/usr/local/Cellar/gcc@7/7.3.0/bin/g++-7
@@ -90,7 +90,6 @@ matrix:
       - brew update
       - brew cask uninstall oclint
       - brew install gcc@7
-      - brew install python@2
     env:
-      - PYTHON=python2
+      - PYTHON=python
       - CC=/usr/local/Cellar/gcc@7/7.3.0/bin/g++-7
