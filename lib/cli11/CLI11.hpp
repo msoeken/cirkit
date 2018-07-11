@@ -1623,6 +1623,8 @@ class App {
         set_help_flag("-h,--help", "Print this help message and exit");
     }
 
+    virtual ~App() = default;
+
     /// Set a callback for the end of parsing.
     ///
     /// Due to a bug in c++11,

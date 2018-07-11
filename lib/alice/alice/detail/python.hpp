@@ -38,6 +38,7 @@
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "../command.hpp"
 
@@ -172,7 +173,7 @@ private:
 };
 
 template<typename CLI>
-void create_python_module( const CLI& cli, py::module& m )
+void create_python_module( CLI& cli, py::module& m )
 {
   m.doc() = "Python bindings";
 

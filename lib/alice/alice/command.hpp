@@ -286,6 +286,8 @@ public:
   {
   }
 
+  virtual ~command() = default;
+
 protected:
   /*! \brief Returns rules to check validity of command line arguments  
 
