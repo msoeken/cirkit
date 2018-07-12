@@ -90,7 +90,7 @@ matrix:
       - brew update
       - brew cask uninstall oclint
       - brew install gcc@7
-      - sudo easy_install pip
+      - curl https://bootstrap.pypa.io/get-pip.py | python
     env:
       - PYTHON=python
       - CC=/usr/local/Cellar/gcc@7/7.3.0/bin/g++-7
