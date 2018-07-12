@@ -28,7 +28,7 @@ small_mct_circuit esop_based_synthesis( kitty::dynamic_truth_table const& tt )
       assert( cube.get_bit( i ) );
       controls.emplace_back( i );
     }
-    circ.insert_toffoli_before( circ.end(), controls, targets );
+    circ.add_toffoli( controls, targets );
   }
 
   return circ;

@@ -56,10 +56,6 @@ public:
     _free_qubits.push( q );
   }
 
-  // TODO remove once there is a dependency graph
-  inline node begin() const { return _nodes.begin(); }
-  inline node end() const { return _nodes.end(); }
-
   template<typename Fn>
   void foreach_node( Fn&& fn ) const
   {
@@ -100,13 +96,21 @@ public:
     }
   }
 
-  node insert_toffoli_before( node pos, std::vector<qubit> const& controls, std::vector<qubit> const& targets )
+  node add_toffoli( uint32_t controls, uint32_t targets )
+  {
+    const auto n = _nodes.insert( _nodes.end(), _gates.size() );
+    _gates.emplace_back( gate_mask_t{controls, targets} );
+
+    return n;
+  }
+
+  node add_toffoli( std::vector<qubit> const& controls, std::vector<qubit> const& targets )
   {
     gate_mask_t mask;
     std::for_each( controls.begin(), controls.end(), [&]( auto q ) { mask.controls |= 1 << q; } );
     std::for_each( targets.begin(), targets.end(), [&]( auto q ) { mask.targets |= 1 << q; } );
 
-    const auto n = _nodes.insert( pos, _gates.size() );
+    const auto n = _nodes.insert( _nodes.end(), _gates.size() );
     _gates.emplace_back( mask );
 
     return n;

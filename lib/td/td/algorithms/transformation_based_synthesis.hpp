@@ -11,7 +11,7 @@
 #include "../networks/small_mct_circuit.hpp"
 
 // TODO move to library
-void update_permutation( small_mct_circuit& circ, small_mct_circuit::node pos, std::vector<uint16_t>& perm, uint16_t controls, uint16_t targets )
+void update_permutation( small_mct_circuit& circ, std::vector<uint16_t>& perm, uint16_t controls, uint16_t targets )
 {
   std::for_each( perm.begin(), perm.end(), [&]( auto& z ) {
     if ( ( z & controls ) == controls )
@@ -19,24 +19,9 @@ void update_permutation( small_mct_circuit& circ, small_mct_circuit::node pos, s
       z ^= targets;
     }
   } );
-
-  std::vector<small_mct_circuit::qubit> vcontrols, vtargets;
-  for ( auto i = 0u; i < circ.num_qubits(); ++i )
-  {
-    if ( ( controls >> i ) & 1 )
-    {
-      vcontrols.push_back( i  );
-    }
-    if ( ( targets >> i ) & 1 )
-    {
-      vtargets.push_back( i );
-    }
-  }
-
-  circ.insert_toffoli_before( pos, vcontrols, vtargets );
 }
 
-void update_permutation_inv( small_mct_circuit& circ, small_mct_circuit::node pos, std::vector<uint16_t>& perm, uint16_t controls, uint16_t targets )
+void update_permutation_inv( small_mct_circuit& circ, std::vector<uint16_t>& perm, uint16_t controls, uint16_t targets )
 {
   for ( auto i = 0u; i < perm.size(); ++i )
   {
@@ -46,21 +31,6 @@ void update_permutation_inv( small_mct_circuit& circ, small_mct_circuit::node po
       std::swap( perm[i], perm[partner] );
     }
   }
-
-  std::vector<small_mct_circuit::qubit> vcontrols, vtargets;
-  for ( auto i = 0u; i < circ.num_qubits(); ++i )
-  {
-    if ( ( controls >> i ) & 1 )
-    {
-      vcontrols.push_back( i  );
-    }
-    if ( ( targets >> i ) & 1 )
-    {
-      vtargets.push_back( i );
-    }
-  }
-
-  circ.insert_toffoli_before( pos, vcontrols, vtargets );
 }
 
 small_mct_circuit transformation_based_synthesis( std::vector<uint16_t>& perm )
@@ -72,6 +42,7 @@ small_mct_circuit transformation_based_synthesis( std::vector<uint16_t>& perm )
     circ.allocate_qubit();
   }
 
+  std::vector<std::pair<uint16_t, uint16_t>> gates;
   uint32_t x{0u}; /* we need 32-bit if num_vars == 16 */
   while ( x < perm.size() )
   {
@@ -86,16 +57,24 @@ small_mct_circuit transformation_based_synthesis( std::vector<uint16_t>& perm )
     /* move 0s to 1s */
     if ( const uint16_t t01 = x & ~y )
     {
-      update_permutation( circ, circ.begin(), perm, y, t01 );
+      update_permutation( circ, perm, y, t01 );
+      gates.emplace_back( y, t01 );
     }
 
     /* move 1s to 0s */
     if ( const uint16_t t10 = ~x & y )
     {
-      update_permutation( circ, circ.begin(), perm, x, t10 );
+      update_permutation( circ, perm, x, t10 );
+      gates.emplace_back( y, t10 );
     }
 
     ++x;
+  }
+
+  std::reverse( gates.begin(), gates.end() );
+  for ( const auto [c, t] : gates )
+  {
+    circ.add_toffoli( c, t );
   }
 
   return circ;
@@ -110,7 +89,8 @@ small_mct_circuit transformation_based_synthesis_bidirectional( std::vector<uint
     circ.allocate_qubit();
   }
 
-  auto pos = circ.begin();
+  std::list<std::pair<uint16_t, uint16_t>> gates;
+  auto pos = gates.begin();
   uint32_t x{0u}; /* we need 32-bit if num_vars == 16 */
   while ( x < perm.size() )
   {
@@ -129,13 +109,15 @@ small_mct_circuit transformation_based_synthesis_bidirectional( std::vector<uint
       /* move 0s to 1s */
       if ( const uint16_t t01 = x & ~y )
       {
-        update_permutation( circ, pos, perm, y, t01 );
+        update_permutation( circ, perm, y, t01 );
+        gates.emplace( pos, y, t01 );
       }
 
       /* move 1s to 0s */
       if ( const uint16_t t10 = ~x & y )
       {
-        update_permutation( circ, pos, perm, x, t10 );
+        update_permutation( circ, perm, x, t10 );
+        gates.emplace( pos, x, t10 );
       }
     }
     else
@@ -143,17 +125,24 @@ small_mct_circuit transformation_based_synthesis_bidirectional( std::vector<uint
       /* move 0s to 1s */
       if ( const uint16_t t01 = ~xs & x )
       {
-        update_permutation_inv( circ, pos++, perm, xs, t01 );
+        update_permutation_inv( circ, perm, xs, t01 );
+        gates.emplace( pos++, xs, t01 );
       }
       
       /* move 1s to 0s */
       if ( const uint16_t t10 = xs & ~x)
       {
-        update_permutation_inv( circ, pos++, perm, x, t10 );
+        update_permutation_inv( circ, perm, x, t10 );
+        gates.emplace( pos++, x, t10 );
       }
     }
 
     ++x;
+  }
+
+  for ( const auto [c, t] : gates )
+  {
+    circ.add_toffoli( c, t );
   }
 
   return circ;
