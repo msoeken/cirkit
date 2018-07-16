@@ -31,7 +31,16 @@ void write_projectq( small_mct_circuit const& circ, std::ostream& out )
     circ.foreach_control( g, make_qubit_list( controls ) );
     circ.foreach_target( g, make_qubit_list( targets ) );
 
-    out << fmt::format( "C(All(X), {}) | ([{}], [{}])\n", circ.num_controls( g ), controls, targets );
+    char u;
+    switch ( circ.gate_type( g ) )
+    {
+      default: assert( false ); break;
+      case gate_type_t::mct: u = 'X'; break;
+      case gate_type_t::mcy: u = 'Y'; break;
+      case gate_type_t::mcz: u = 'Z'; break;
+    }
+
+    out << fmt::format( "C(All({}), {}) | ([{}], [{}])\n", u, circ.num_controls( g ), controls, targets );
   });
 }
 

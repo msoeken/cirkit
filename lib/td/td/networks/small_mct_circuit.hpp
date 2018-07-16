@@ -7,6 +7,11 @@
 #include <stack>
 #include <vector>
 
+enum class gate_type_t
+{
+  mct, mcy, mcz
+};
+
 // TODO move to library
 class small_mct_circuit
 {
@@ -15,7 +20,10 @@ public:
   using gate = uint32_t;
   using node = std::list<gate>::const_iterator;
 
-  explicit small_mct_circuit( uint32_t capacity = 32u )
+  enum class axis_t { X, Y, Z };
+
+  explicit small_mct_circuit( uint32_t capacity = 32u, axis_t axis = axis_t::X )
+    : _axis( axis )
   {
     assert( capacity <= 32u );
 
@@ -116,6 +124,16 @@ public:
     return n;
   }
 
+  gate_type_t gate_type( gate const& g ) const
+  {
+    switch ( _axis )
+    {
+      case axis_t::X: return gate_type_t::mct; break;
+      case axis_t::Y: return gate_type_t::mcy; break;
+      case axis_t::Z: return gate_type_t::mcz; break;
+    }
+  }
+
 private:
   struct gate_mask_t
   {
@@ -123,6 +141,7 @@ private:
     uint32_t targets{};
   };
 
+  axis_t _axis;
   uint32_t _current_qubits{0};
   uint32_t _num_qubits{0};
   std::stack<uint32_t> _free_qubits;
