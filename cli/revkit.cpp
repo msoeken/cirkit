@@ -5,6 +5,7 @@
 #include "stores/perm.hpp"
 #include "stores/tt.hpp"
 #include "algorithms/esopbs.hpp"
+#include "algorithms/esopps.hpp"
 #include "algorithms/perm.hpp"
 #include "algorithms/tbs.hpp"
 #include "algorithms/tt.hpp"

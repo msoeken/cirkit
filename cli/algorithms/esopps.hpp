@@ -7,7 +7,7 @@
 namespace alice
 {
 
-class esopbs_command : public alice::command
+class esopps_command : public alice::command
 {
 public:
   esopps_command( const environment::ptr& env ) : command( env, "ESOP phase synthesis" )
