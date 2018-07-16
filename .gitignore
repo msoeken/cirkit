@@ -5,6 +5,7 @@ dist/cirkit/dist
 dist/revkit/build
 dist/revkit/revkit.egg-info
 dist/revkit/dist
+dist/wheels
 
 # projects
 .vscode

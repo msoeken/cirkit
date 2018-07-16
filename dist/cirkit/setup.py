@@ -1,8 +1,7 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-import os
 
-__version__ = '3.0b1'
+__version__ = '3.0a1.dev1'
 
 class get_pybind_include(object):
   """Helper class to determine the pybind11 include path
@@ -20,22 +19,22 @@ class get_pybind_include(object):
 cirkit_modules = [
   Extension(
     'cirkit',
-    [os.path.abspath('../../cli/cirkit.cpp')],
+    ['cli/cirkit.cpp'],
     include_dirs=[
       get_pybind_include(),
       get_pybind_include(user=True),
-      "../../cli",
-      "../../lib/alice/",
-      "../../lib/any",
-      "../../lib/cli11",
-      "../../lib/fmt",
-      "../../lib/json",
-      "../../lib/mockturtle/lib/ez",
-      "../../lib/mockturtle/lib/lorina",
-      "../../lib/mockturtle/lib/kitty",
-      "../../lib/mockturtle/lib/rang",
-      "../../lib/mockturtle/lib/sparsepp",
-      "../../lib/mockturtle/include"
+      "cli",
+      "lib/alice/",
+      "lib/any",
+      "lib/cli11",
+      "lib/fmt",
+      "lib/json",
+      "lib/mockturtle/lib/ez",
+      "lib/mockturtle/lib/lorina",
+      "lib/mockturtle/lib/kitty",
+      "lib/mockturtle/lib/rang",
+      "lib/mockturtle/lib/sparsepp",
+      "lib/mockturtle/include"
     ],
     define_macros=[('ALICE_PYTHON', '1'), ('FMT_HEADER_ONLY', '1')],
     language='c++'
@@ -57,7 +56,7 @@ class BuildExt(build_ext):
       ext.extra_compile_args = opts
     build_ext.build_extensions(self)
 
-with open("../../README.md", "r") as fh:
+with open("README.md", "r") as fh:
   long_description = fh.read()
 
 setup(
