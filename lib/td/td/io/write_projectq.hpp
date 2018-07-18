@@ -16,7 +16,7 @@ auto make_qubit_list( std::string& s )
       {
         s += ", ";
       }
-      s += fmt::format( "qr[{}]", c );
+      s += fmt::format( "qs[{}]", c );
   };
 }
 
