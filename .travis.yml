@@ -1,5 +1,8 @@
+language: cpp
+
 script:
 - mkdir build
+- cd build
 - cmake -DCMAKE_CXX_COMPILER=$CC ..
 - make cirkit revkit
 
@@ -7,6 +10,7 @@ matrix:
   include:
   - os: linux
     dist: trusty
+    sudo: required
     addons:
       apt:
         sources:
