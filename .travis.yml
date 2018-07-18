@@ -1,26 +1,12 @@
 script:
-- $PYTHON -m pip install --upgrade pip setuptools wheel
-- $PYTHON -m pip install pybind11
-- cd dist/cirkit
-- $PYTHON setup.py bdist_wheel
-- cd ../revkit
-- $PYTHON setup.py bdist_wheel
-- cd ../../
-
-addons:
-  artifacts:
-    s3_region: us-west-2
-    paths:
-    - $(ls ./dist/cirkit/dist/*.whl)
-    - $(ls ./dist/revkit/dist/*.whl)
+- mkdir build
+- cmake -DCMAKE_CXX_COMPILER=$CC ..
+- make cirkit revkit
 
 matrix:
   include:
   - os: linux
-    language: python
     dist: trusty
-    sudo: false
-    python: "2.7"
     addons:
       apt:
         sources:
@@ -29,49 +15,6 @@ matrix:
         - g++-7
     env:
     - CC=g++-7
-    - PYTHON=python
-  - os: linux
-    language: python
-    dist: trusty
-    sudo: false
-    python: "3.4"
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-7
-    env:
-    - CC=g++-7
-    - PYTHON=python
-  - os: linux
-    language: python
-    dist: trusty
-    sudo: false
-    python: "3.5"
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-7
-    env:
-    - CC=g++-7
-    - PYTHON=python
-  - os: linux
-    language: python
-    dist: trusty
-    sudo: false
-    python: "3.6"
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-7
-    env:
-    - CC=g++-7
-    - PYTHON=python
   - os: osx
     osx_image: xcode8.3
     compiler: gcc
@@ -79,18 +22,5 @@ matrix:
       - brew update
       - brew cask uninstall oclint
       - brew install gcc@7
-      - brew upgrade python
     env:
-      - PYTHON=python3
-      - CC=/usr/local/Cellar/gcc@7/7.3.0/bin/g++-7
-  - os: osx
-    osx_image: xcode8.3
-    compiler: gcc
-    before_install:
-      - brew update
-      - brew cask uninstall oclint
-      - brew install gcc@7
-      - curl https://bootstrap.pypa.io/get-pip.py | sudo python
-    env:
-      - PYTHON=python
       - CC=/usr/local/Cellar/gcc@7/7.3.0/bin/g++-7

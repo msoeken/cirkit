@@ -1,4 +1,4 @@
-version: '3.1b.{build}'
+version: '3.1pre.{build}'
 
 image: Visual Studio 2017
 
@@ -8,30 +8,11 @@ platform:
 configuration:
   - Release
 
-environment:
-  matrix:
-    #- PYTHON: "C:\\Python27-x64"
-    #- PYTHON: "C:\\Python34-x64"
-    #- PYTHON: "C:\\Python35-x64"
-    - PYTHON: "C:\\Python36-x64"
-
 install:
   - git submodule update --init --recursive
-  - "%PYTHON%\\python.exe -m pip install pybind11"
-  - "%PYTHON%\\python.exe -m pip install wheel"
-  - echo "Installed SDKs:"
-  - ps: "ls \"C:/Program Files (x86)/Microsoft SDKs/Windows\""
 
-build: off
+before_build:
+  - cmake -G "Visual Studio 15 2017 Win64" .
 
-after_test:
-  - "cd dist\\cirkit"
-  - "%PYTHON%\\python.exe setup.py bdist_wheel"
-  - "cd ..\\.."
-  - "cd dist\\revkit"
-  - "%PYTHON%\\python.exe setup.py bdist_wheel"
-  - "cd ..\\.."
-
-artifacts:
-  - path: dist\cirkit\dist\*
-  - path: dist\revkit\dist\*
+build:
+  project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
