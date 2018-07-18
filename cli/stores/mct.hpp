@@ -15,6 +15,14 @@ ALICE_DESCRIBE_STORE( small_mct_circuit, circ )
   return fmt::format( "{} qubits, {} gates", circ.num_qubits(), circ.num_gates() );
 }
 
+ALICE_LOG_STORE_STATISTICS( small_mct_circuit, circ )
+{
+  return {
+    {"qubits", circ.num_qubits()},
+    {"gates", circ.num_gates()}
+  };
+}
+
 ALICE_WRITE_FILE(small_mct_circuit, projectq, circ, filename, cmd)
 {
   write_projectq( circ, filename );
