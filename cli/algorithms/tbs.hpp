@@ -12,6 +12,7 @@ class tbs_command : public alice::command
 public:
   tbs_command( const environment::ptr& env ) : command( env, "Transformation-based synthesis" )
   {
+    add_option( "--strategy", strategy, "algorithm strategy", true )->set_type_name( "strategy in {multidir=0, bidir=1, unidir=2}" );
     add_flag( "-n,--new", "adds new store entry" );
   }
 
@@ -30,8 +31,23 @@ public:
     }
 
     auto f = perms.current(); // will be modified by tbs
-    circs.current() = transformation_based_synthesis_bidirectional( f );
+
+    switch ( strategy )
+    {
+      case 0u:
+        circs.current() = transformation_based_synthesis_multidirectional( f );
+        break;
+      case 1u:
+        circs.current() = transformation_based_synthesis_bidirectional( f );
+        break;
+      case 2u:
+        circs.current() = transformation_based_synthesis( f );
+        break;
+    }
   }
+
+private:
+  unsigned strategy{0u};
 };
 
 ALICE_ADD_COMMAND( tbs, "Synthesis" );
