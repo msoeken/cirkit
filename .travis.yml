@@ -3,7 +3,7 @@ language: cpp
 script:
 - mkdir build
 - cd build
-- cmake -DCMAKE_CXX_COMPILER=$CC ..
+- cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
 - make cirkit revkit
 
 matrix:
@@ -11,14 +11,14 @@ matrix:
   - os: linux
     dist: trusty
     sudo: required
+    compiler: gcc
     addons:
       apt:
         sources:
         - ubuntu-toolchain-r-test
         packages:
         - g++-7
-    env:
-    - CC=g++-7
+    env: COMPILER=g++-7
   - os: osx
     osx_image: xcode8.3
     compiler: gcc
@@ -26,5 +26,4 @@ matrix:
       - brew update
       - brew cask uninstall oclint
       - brew install gcc@7
-    env:
-      - CC=/usr/local/Cellar/gcc@7/7.3.0/bin/g++-7
+    env: COMPILER=/usr/local/Cellar/gcc@7/7.3.0/bin/g++-7
