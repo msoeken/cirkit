@@ -15,20 +15,10 @@ small_mct_circuit esop_based_synthesis( kitty::dynamic_truth_table const& tt )
     circ.allocate_qubit();
   }
 
-  std::vector<small_mct_circuit::qubit> targets;
-  targets.emplace_back( tt.num_vars() );
-
+  uint32_t target = 1 << tt.num_vars();
   for ( const auto& cube : esop_from_pprm( tt ) )
   {
-    std::vector<small_mct_circuit::qubit> controls;
-    for ( auto i = 0; i < tt.num_vars(); ++i )
-    {
-      if ( !cube.get_mask( i ) ) continue;
-
-      assert( cube.get_bit( i ) );
-      controls.emplace_back( i );
-    }
-    circ.add_toffoli( controls, targets );
+    circ.add_toffoli( cube._bits, target );
   }
 
   return circ;
