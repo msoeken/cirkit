@@ -4,6 +4,7 @@
 #include "stores/mct.hpp"
 #include "stores/perm.hpp"
 #include "stores/tt.hpp"
+#include "algorithms/dbs.hpp"
 #include "algorithms/esopbs.hpp"
 #include "algorithms/esopps.hpp"
 #include "algorithms/perm.hpp"
