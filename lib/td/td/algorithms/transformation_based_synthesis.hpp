@@ -110,14 +110,14 @@ small_mct_circuit transformation_based_synthesis_bidirectional( std::vector<uint
       if ( const uint16_t t01 = x & ~y )
       {
         update_permutation( circ, perm, y, t01 );
-        gates.emplace( pos, y, t01 );
+        pos = gates.emplace( pos, y, t01 );
       }
 
       /* move 1s to 0s */
       if ( const uint16_t t10 = ~x & y )
       {
         update_permutation( circ, perm, x, t10 );
-        gates.emplace( pos, x, t10 );
+        pos = gates.emplace( pos, x, t10 );
       }
     }
     else
@@ -126,14 +126,16 @@ small_mct_circuit transformation_based_synthesis_bidirectional( std::vector<uint
       if ( const uint16_t t01 = ~xs & x )
       {
         update_permutation_inv( circ, perm, xs, t01 );
-        gates.emplace( pos++, xs, t01 );
+        pos = gates.emplace( pos, xs, t01 );
+        pos++;
       }
       
       /* move 1s to 0s */
       if ( const uint16_t t10 = xs & ~x)
       {
         update_permutation_inv( circ, perm, x, t10 );
-        gates.emplace( pos++, x, t10 );
+        pos = gates.emplace( pos, x, t10 );
+        pos++;
       }
     }
 
@@ -188,14 +190,16 @@ small_mct_circuit transformation_based_synthesis_multidirectional( std::vector<u
     if ( const uint16_t t01 = ~z & x )
     {
       update_permutation_inv( circ, perm, z, t01 );
-      gates.emplace( pos++, z, t01 );
+      pos = gates.emplace( pos, z, t01 );
+      pos++;
     }
       
     /* move 1s to 0s */
     if ( const uint16_t t10 = z & ~x)
     {
       update_permutation_inv( circ, perm, x, t10 );
-      gates.emplace( pos++, x, t10 );
+      pos = gates.emplace( pos, x, t10 );
+      pos++;
     }
 
     /* map y |-> x */
@@ -203,14 +207,14 @@ small_mct_circuit transformation_based_synthesis_multidirectional( std::vector<u
     if ( const uint16_t t01 = x & ~y )
     {
       update_permutation( circ, perm, y, t01 );
-      gates.emplace( pos, y, t01 );
+      pos = gates.emplace( pos, y, t01 );
     }
 
       /* move 1s to 0s */
     if ( const uint16_t t10 = ~x & y )
     {
       update_permutation( circ, perm, x, t10 );
-      gates.emplace( pos, x, t10 );
+      pos = gates.emplace( pos, x, t10 );
     }
 
     ++x;
