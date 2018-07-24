@@ -27,3 +27,4 @@ target_include_directories(td INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/td)
 target_link_libraries(td INTERFACE fmt kitty)
 
 add_subdirectory(mockturtle)
+add_subdirectory(tweedledum)
