@@ -2,10 +2,11 @@
 
 #include <iostream>
 
-#include <td/algorithms/decomposition_based_synthesis.hpp>
+#include <tweedledum/algorithms/synthesis/decomposition_based.hpp>
 
 namespace alice
 {
+  using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
 
 class dbs_command : public alice::command
 {
@@ -23,7 +24,7 @@ public:
   void execute() override
   {
     auto const& perms = store<perm_t>();
-    auto& circs = store<small_mct_circuit>();
+    auto& circs = store<small_mct_circuit_t>();
     if ( circs.empty() || is_set( "new" ) )
     {
       circs.extend();
@@ -31,7 +32,7 @@ public:
 
     auto f = perms.current(); // will be modified by tbs
 
-    circs.current() = decomposition_based_synthesis( f );
+    tweedledum::decomposition_based_synthesis( circs.current(), f );
   }
 };
 

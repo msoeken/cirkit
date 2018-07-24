@@ -2,10 +2,11 @@
 
 #include <iostream>
 
-#include <td/algorithms/esop_based_synthesis.hpp>
+#include <tweedledum/algorithms/synthesis/esop_based.hpp>
 
 namespace alice
 {
+  using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
 
 class esopbs_command : public alice::command
 {
@@ -23,13 +24,13 @@ public:
   void execute() override
   {
     auto const& tts = store<kitty::dynamic_truth_table>();
-    auto& circs = store<small_mct_circuit>();
+    auto& circs = store<small_mct_circuit_t>();
     if ( circs.empty() || is_set( "new" ) )
     {
       circs.extend();
     }
 
-    circs.current() = esop_based_synthesis( tts.current() );
+    tweedledum::esop_based_synthesis( circs.current(), tts.current() );
   }
 };
 

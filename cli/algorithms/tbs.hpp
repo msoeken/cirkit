@@ -2,10 +2,11 @@
 
 #include <iostream>
 
-#include <td/algorithms/transformation_based_synthesis.hpp>
+#include <tweedledum/algorithms/synthesis/transformation_based.hpp>
 
 namespace alice
 {
+  using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
 
 class tbs_command : public alice::command
 {
@@ -24,7 +25,7 @@ public:
   void execute() override
   {
     auto const& perms = store<perm_t>();
-    auto& circs = store<small_mct_circuit>();
+    auto& circs = store<small_mct_circuit_t>();
     if ( circs.empty() || is_set( "new" ) )
     {
       circs.extend();
@@ -35,13 +36,13 @@ public:
     switch ( strategy )
     {
       case 0u:
-        circs.current() = transformation_based_synthesis_multidirectional( f );
+        tweedledum::transformation_based_synthesis_multidirectional( circs.current(), f );
         break;
       case 1u:
-        circs.current() = transformation_based_synthesis_bidirectional( f );
+        tweedledum::transformation_based_synthesis_bidirectional( circs.current(), f );
         break;
       case 2u:
-        circs.current() = transformation_based_synthesis( f );
+        tweedledum::transformation_based_synthesis( circs.current(), f );
         break;
     }
   }
