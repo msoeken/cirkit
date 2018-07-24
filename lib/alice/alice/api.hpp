@@ -164,6 +164,37 @@ struct insert_write_commands<CLI, Tuple, 0>
   }
 };
 
+#if defined ALICE_PYTHON
+template<typename CLI, typename Tuple, std::size_t Index>
+struct make_special_write_commands
+{
+  make_special_write_commands( CLI& cli, py::module& m )
+  {
+    make_special_write_commands<CLI, Tuple, Index - 1> irc( cli, m );
+
+    using tag_type = std::tuple_element_t<Index - 1, Tuple>;
+    //cli.template insert_write_command<tag_type>( fmt::format( "write_{}", alice_globals::get().write_tags[Index - 1] ), alice_globals::get().write_names[Index - 1] );
+    
+    auto const& tag = alice_globals::get().write_tags[Index - 1];
+    const auto name = fmt::format( "write_{}", tag );
+    auto const& cmd = cli.env->commands().at( name );
+    m.def( fmt::format( "to_{}", tag ).c_str(), [cmd, name]( py::kwargs kwargs ) -> py::str {
+      auto pargs = detail::make_args( name, kwargs );
+      pargs.push_back( "--log" );
+      cmd->run( pargs );
+      const auto log = cmd->log();
+      return py::str( log["contents"].template get<std::string>() );
+    } );
+  }
+};
+
+template<typename CLI, typename Tuple>
+struct make_special_write_commands<CLI, Tuple, 0>
+{
+  make_special_write_commands( CLI& cli, py::module& m ) {}
+};
+#endif
+
 /*! \brief Returns a one-line string to show when printing store contents
 
   This macro is used to return a string that is shown in the output of
@@ -501,6 +532,7 @@ PYBIND11_MODULE(prefix, m) \
 { \
   _ALICE_MAIN_BODY(prefix) \
   alice::detail::create_python_module( cli, m ); \
+  make_special_write_commands<cli_t, alice_write_tags, std::tuple_size<alice_write_tags>::value> swc( cli, m ); \
 }
 #elif defined ALICE_CINTERFACE
 #define ALICE_MAIN(prefix) \

@@ -50,6 +50,7 @@ public:
   {
     add_flag( "--show", "show contents" );
     add_flag( "--clear", "clear contents" );
+    add_flag( "--pop", "pop current element" );
 
     []( ... ) {}( add_option_helper<S>( opts )... );
   }
@@ -64,13 +65,17 @@ protected:
 
   void execute()
   {
-    if ( is_set( "show" ) || !is_set( "clear" ) )
+    if ( is_set( "show" ) || ( !is_set( "clear" ) && !( is_set( "pop" ) ) ) )
     {
       []( ... ) {}( show_store<S>()... );
     }
     else if ( is_set( "clear" ) )
     {
       []( ... ) {}( clear_store<S>()... );
+    }
+    else if ( is_set( "pop" ) )
+    {
+      []( ... ) {}( pop_store<S>()... );
     }
   }
 
@@ -122,6 +127,19 @@ private:
     if ( is_set( option ) || env->is_default_option( option ) )
     {
       store<Store>().clear();
+      env->set_default_option( option );
+    }
+    return 0;
+  }
+
+  template<typename Store>
+  int pop_store()
+  {
+    constexpr auto option = store_info<Store>::option;
+
+    if ( is_set( option ) || env->is_default_option( option ) )
+    {
+      store<Store>().pop_current();
       env->set_default_option( option );
     }
     return 0;
