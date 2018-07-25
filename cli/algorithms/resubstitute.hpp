@@ -16,6 +16,7 @@ public:
     add_option( "--max_pis", ps.max_pis, "maximum number of PIs in reconvergence-driven window", true );
     add_option( "--max_nnodes", ps.max_nodes, "maximum number of nodes in reconvergence-driven window", true );
     add_flag( "-p,--progress", ps.progress, "show progress" );
+    add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
 
   template<class Store>
