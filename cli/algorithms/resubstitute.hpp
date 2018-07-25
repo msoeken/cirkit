@@ -13,7 +13,8 @@ class resub_command : public cirkit::cirkit_command<resub_command, mig_t>
 public:
   resub_command( environment::ptr& env ) : cirkit::cirkit_command<resub_command, mig_t>( env, "Performs resubstitution", "apply resubstitution to {0}" )
   {
-    add_option( "--max_pis", ps.max_pis, "maximum number of PIs in MFFC", true );
+    add_option( "--max_pis", ps.max_pis, "maximum number of PIs in reconvergence-driven window", true );
+    add_option( "--max_nnodes", ps.max_nodes, "maximum number of nodes in reconvergence-driven window", true );
     add_flag( "-p,--progress", ps.progress, "show progress" );
   }
 
