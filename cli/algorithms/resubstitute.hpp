@@ -14,7 +14,8 @@ public:
   resub_command( environment::ptr& env ) : cirkit::cirkit_command<resub_command, mig_t>( env, "Performs resubstitution", "apply resubstitution to {0}" )
   {
     add_option( "--max_pis", ps.max_pis, "maximum number of PIs in reconvergence-driven window", true );
-    add_option( "--max_nnodes", ps.max_nodes, "maximum number of nodes in reconvergence-driven window", true );
+    add_option( "--max_nodes", ps.max_nodes, "maximum number of nodes in reconvergence-driven window", true );
+    add_option( "--depth", ps.max_inserts, "maximum number of nodes inserted by resubstitution", true );
     add_flag( "-p,--progress", ps.progress, "show progress" );
     add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
