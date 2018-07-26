@@ -50,7 +50,12 @@ ALICE_LOG_STORE_STATISTICS( mig_t, mig )
 ALICE_READ_FILE( mig_t, aiger, filename, cmd )
 {
   mockturtle::mig_network mig;
-  lorina::read_aiger( filename, mockturtle::aiger_reader( mig ) );
+
+  lorina::diagnostic_engine diag;
+  if ( lorina::read_aiger( filename, mockturtle::aiger_reader( mig ), &diag ) != lorina::return_code::success )
+  {
+    std::cout << "[w] parse error\n";
+  }
   return std::make_shared<mig_nt>( mig );
 }
 
@@ -62,7 +67,9 @@ ALICE_WRITE_FILE( mig_t, bench, mig, filename, cmd )
 ALICE_READ_FILE( mig_t, verilog, filename, cmd )
 {
   mockturtle::mig_network mig;
-  if ( lorina::read_verilog( filename, mockturtle::verilog_reader( mig ) ) != lorina::return_code::success )
+
+  lorina::diagnostic_engine diag;
+  if ( lorina::read_verilog( filename, mockturtle::verilog_reader( mig ), &diag ) != lorina::return_code::success )
   {
     std::cout << "[w] parse error\n";
   }
