@@ -19,6 +19,7 @@ public:
                    mockturtle::mig_algebraic_depth_rewriting_params::aggressive,
                    mockturtle::mig_algebraic_depth_rewriting_params::selective},
                   "optimization strategy", true )->set_type_name( "enum/strategy in {dfs=0, aggressive=1, selective=2}" );
+    opts.add_flag( "--area_aware", "do not increase area" );
   }
 
   template<class Store>
@@ -26,6 +27,7 @@ public:
   {
     auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
     mockturtle::depth_view depth_mig{*mig_p};
+    ps.allow_area_increase = !is_set( "area_aware" );
     mockturtle::mig_algebraic_depth_rewriting( depth_mig, ps );
     *mig_p = mockturtle::cleanup_dangling( *mig_p );
   }

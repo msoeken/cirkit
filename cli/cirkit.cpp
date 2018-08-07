@@ -13,5 +13,6 @@
 #include "algorithms/mighty.hpp"
 #include "algorithms/lut_resynthesis.hpp"
 #include "algorithms/refactor.hpp"
+#include "algorithms/resubstitute.hpp"
 
 ALICE_MAIN( cirkit )

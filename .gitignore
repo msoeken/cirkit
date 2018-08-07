@@ -9,3 +9,7 @@ dist/wheels
 
 # projects
 .vscode
+
+# tmp files
+**/*~
+**/.DS_Store

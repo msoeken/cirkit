@@ -19,7 +19,10 @@ public:
 
     add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
     add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1}" );
+    add_flag( "-z", ps.allow_zero_gain, "enable zero-gain rewriting" );
+    add_flag( "--multiple", "try multiple candidates if possible" );
     add_flag( "-p,--progress", ps.progress, "show progress" );
+    add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
 
   template<class Store>
@@ -32,7 +35,7 @@ public:
     default:
     case 0:
     {
-      mockturtle::mig_npn_resynthesis resyn;
+      mockturtle::mig_npn_resynthesis resyn( is_set( "multiple" ) );
       mockturtle::cut_rewriting( *mig_p, resyn, ps );
     }
     break;

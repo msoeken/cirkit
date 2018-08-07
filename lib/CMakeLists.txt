@@ -1,7 +1,10 @@
 add_library(alice INTERFACE) # v0.2+
 target_include_directories(alice INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/alice)
+if(UNIX)
 target_compile_definitions(alice INTERFACE "-DREADLINE_USE_READLINE=1")
-target_link_libraries(alice INTERFACE any cli11 fmt json readline)
+target_link_libraries(alice INTERFACE readline)
+endif()
+target_link_libraries(alice INTERFACE any cli11 fmt json)
 
 # library for Python bindings
 add_library(alice_python INTERFACE)
