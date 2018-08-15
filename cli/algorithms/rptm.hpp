@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include <tweedledum/algorithms/mapping/relative_phase.hpp>
-#include <tweedledum/io/write_quil.hpp>
 #include <tweedledum/networks/dag_path.hpp>
 #include <tweedledum/networks/gates/qc_gate.hpp>
 

@@ -3,7 +3,7 @@
 #include <fmt/format.h>
 
 #include <tweedledum/io/write_projectq.hpp>
-#include <tweedledum/io/write_quil.hpp>
+#include <tweedledum/io/quil.hpp>
 #include <tweedledum/networks/gates/mct_gate.hpp>
 #include <tweedledum/networks/netlist.hpp>
 
@@ -31,21 +31,10 @@ ALICE_WRITE_FILE(small_mct_circuit_t, projectq, circ, filename, cmd)
   write_projectq( circ, filename );
 }
 
-ALICE_WRITE_FILE(small_mct_circuit_t, quil, circ, filename, cmd)
-{
-  write_quil( circ, filename );
-}
-
 template<>
 inline void write<small_mct_circuit_t, io_projectq_tag_t>( small_mct_circuit_t const& circ, std::ostream& os, const command& )
 {
   write_projectq( circ, os );
-}
-
-template<>
-inline void write<small_mct_circuit_t, io_quil_tag_t>( small_mct_circuit_t const& circ, std::ostream& os, const command& )
-{
-  write_quil( circ, os );
 }
 
 }

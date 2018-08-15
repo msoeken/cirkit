@@ -8,6 +8,7 @@
 #include "algorithms/dbs.hpp"
 #include "algorithms/esopbs.hpp"
 #include "algorithms/esopps.hpp"
+#include "algorithms/nct.hpp"
 #include "algorithms/perm.hpp"
 #include "algorithms/rptm.hpp"
 #include "algorithms/tbs.hpp"

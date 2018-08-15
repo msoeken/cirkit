@@ -3,7 +3,7 @@
 #include <fmt/format.h>
 
 #include <tweedledum/io/write_projectq.hpp>
-#include <tweedledum/io/write_quil.hpp>
+#include <tweedledum/io/quil.hpp>
 #include <tweedledum/networks/gates/qc_gate.hpp>
 #include <tweedledum/networks/dag_path.hpp>
 
