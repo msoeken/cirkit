@@ -30,7 +30,9 @@ revkit_modules = [
       "lib/fmt",
       "lib/json",
       "lib/tweedledum/include",
-      "lib/mockturtle/lib/kitty"
+      "lib/tweedledum/libs/tweedledee/",
+      "lib/mockturtle/lib/kitty",
+      "lib/mockturtle/lib/rang"
     ],
     define_macros=[('ALICE_PYTHON', '1'), ('FMT_HEADER_ONLY', '1')],
     language='c++'
