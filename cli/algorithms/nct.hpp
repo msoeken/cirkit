@@ -7,7 +7,6 @@
 namespace alice
 {
 using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
-using qc_circuit_t = tweedledum::dag_path<tweedledum::qc_gate>;
 
 class nct_command : public alice::command
 {
@@ -24,18 +23,16 @@ public:
 
   void execute() override
   {
-    auto const& circs = store<small_mct_circuit_t>();
-    auto& qcircs = store<qc_circuit_t>();
-    if ( qcircs.empty() || is_set( "new" ) )
+    auto& circs = store<small_mct_circuit_t>();
+
+    small_mct_circuit_t circ;
+    tweedledum::nct_mapping( circ, circs.current() );
+    if ( is_set( "new" ) )
     {
-      qcircs.extend();
+      circs.extend();
     }
-
-    tweedledum::nct_mapping( qcircs.current(), circs.current() );
+    circs.current() = circ;
   }
-
-private:
-  uint32_t strategy{0u};
 };
 
 ALICE_ADD_COMMAND( nct, "Mapping" );
