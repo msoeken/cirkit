@@ -2,8 +2,9 @@
 
 #include <fmt/format.h>
 
-#include <tweedledum/io/write_projectq.hpp>
 #include <tweedledum/io/quil.hpp>
+#include <tweedledum/io/write_projectq.hpp>
+#include <tweedledum/io/write_qasm.hpp>
 #include <tweedledum/networks/gates/mct_gate.hpp>
 #include <tweedledum/networks/netlist.hpp>
 
@@ -46,6 +47,17 @@ template<>
 inline void write<small_mct_circuit_t, io_quil_tag_t>( small_mct_circuit_t const& circ, std::ostream& os, const command& )
 {
   write_quil( circ, os );
+}
+
+ALICE_WRITE_FILE(small_mct_circuit_t, qasm, circ, filename, cmd)
+{
+  write_qasm( circ, filename );
+}
+
+template<>
+inline void write<small_mct_circuit_t, io_qasm_tag_t>( small_mct_circuit_t const& circ, std::ostream& os, const command& )
+{
+  write_qasm( circ, os );
 }
 
 }
