@@ -37,4 +37,15 @@ inline void write<small_mct_circuit_t, io_projectq_tag_t>( small_mct_circuit_t c
   write_projectq( circ, os );
 }
 
+ALICE_WRITE_FILE(small_mct_circuit_t, quil, circ, filename, cmd)
+{
+  write_quil( circ, filename );
+}
+
+template<>
+inline void write<small_mct_circuit_t, io_quil_tag_t>( small_mct_circuit_t const& circ, std::ostream& os, const command& )
+{
+  write_quil( circ, os );
+}
+
 }
