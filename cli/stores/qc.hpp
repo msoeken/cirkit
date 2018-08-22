@@ -38,6 +38,13 @@ inline void write<qc_circuit_t, io_projectq_tag_t>( qc_circuit_t const& circ, st
   write_projectq( circ, os );
 }
 
+ALICE_READ_FILE(qc_circuit_t, quil, filename, cmd)
+{
+  qc_circuit_t circ;
+  read_quil_file( circ, filename );
+  return circ;
+}
+
 ALICE_WRITE_FILE(qc_circuit_t, quil, circ, filename, cmd)
 {
   write_quil( circ, filename );
