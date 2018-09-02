@@ -2,6 +2,8 @@
 
 #include <fmt/format.h>
 
+#include <tweedledee/dotqc/dotqc.hpp>
+#include <tweedledum/io/dotqc.hpp>
 #include <tweedledum/io/quil.hpp>
 #include <tweedledum/io/write_projectq.hpp>
 #include <tweedledum/io/write_qasm.hpp>
@@ -65,6 +67,16 @@ template<>
 inline void write<qc_circuit_t, io_qasm_tag_t>( qc_circuit_t const& circ, std::ostream& os, const command& )
 {
   write_qasm( circ, os );
+}
+
+ALICE_READ_FILE(qc_circuit_t, dotqc, filename, cmd)
+{
+  qc_circuit_t circ;
+
+  tweedledum::dotqc_reader reader(circ);
+  tweedledee::dotqc_read( filename, reader, tweedledum::identify_gate_kind() );
+
+  return circ;
 }
 
 }
