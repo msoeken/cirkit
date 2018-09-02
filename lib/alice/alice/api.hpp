@@ -172,9 +172,6 @@ struct make_special_write_commands
   {
     make_special_write_commands<CLI, Tuple, Index - 1> irc( cli, m );
 
-    using tag_type = std::tuple_element_t<Index - 1, Tuple>;
-    //cli.template insert_write_command<tag_type>( fmt::format( "write_{}", alice_globals::get().write_tags[Index - 1] ), alice_globals::get().write_names[Index - 1] );
-    
     auto const& tag = alice_globals::get().write_tags[Index - 1];
     const auto name = fmt::format( "write_{}", tag );
     auto const& cmd = cli.env->commands().at( name );

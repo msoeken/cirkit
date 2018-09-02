@@ -173,7 +173,7 @@ public:
     if ( _data.empty() || _current == -1 ) return;
 
     _data.erase( _data.begin() + _current );
-    if ( _current == _data.size() )
+    if ( _current == static_cast<int>( _data.size() ) )
     {
       --_current;
     }
