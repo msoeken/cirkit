@@ -48,6 +48,7 @@ class BuildExt(build_ext):
       opts.append('-std=c++17')
       opts.append('-Wno-register')
       opts.append('-Wno-unknown-pragmas')
+      opts.append('-Wno-deprecated-declarations')
     else:
       opts.append('/std:c++17')
     for ext in self.extensions:
