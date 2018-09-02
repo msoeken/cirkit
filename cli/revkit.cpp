@@ -11,6 +11,7 @@
 #include "algorithms/nct.hpp"
 #include "algorithms/perm.hpp"
 #include "algorithms/rptm.hpp"
+#include "algorithms/stg.hpp"
 #include "algorithms/tbs.hpp"
 #include "algorithms/tt.hpp"
 
