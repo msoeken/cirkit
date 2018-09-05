@@ -3,6 +3,7 @@
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>
 #include <mockturtle/algorithms/node_resynthesis/akers.hpp>
+#include <mockturtle/algorithms/node_resynthesis/exact.hpp>
 #include <mockturtle/algorithms/node_resynthesis/mig_npn.hpp>
 
 #include "../utils/cirkit_command.hpp"
@@ -10,17 +11,20 @@
 namespace alice
 {
 
-class cut_rewrite_command : public cirkit::cirkit_command<cut_rewrite_command, mig_t>
+class cut_rewrite_command : public cirkit::cirkit_command<cut_rewrite_command, mig_t, klut_t>
 {
 public:
-  cut_rewrite_command( environment::ptr& env ) : cirkit::cirkit_command<cut_rewrite_command, mig_t>( env, "Performs cut rewriting", "apply cut rewriting to {0}" )
+  cut_rewrite_command( environment::ptr& env ) : cirkit::cirkit_command<cut_rewrite_command, mig_t, klut_t>( env, "Performs cut rewriting", "apply cut rewriting to {0}" )
   {
     ps.cut_enumeration_ps.cut_size = 4;
 
     add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
-    add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1}" );
+    add_option( "--lutcount", ps.cut_enumeration_ps.cut_limit, "cut limit", true );
+    add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1, exact=2}" );
     add_flag( "-z", ps.allow_zero_gain, "enable zero-gain rewriting" );
     add_flag( "--multiple", "try multiple candidates if possible" );
+    add_flag( "--clear_cache", "clear network cache" );
+    add_option( "--exact_lutsize", exact_lutsize, "LUT size for exact resynthesis", true );
     add_flag( "-p,--progress", ps.progress, "show progress" );
     add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
@@ -28,30 +32,62 @@ public:
   template<class Store>
   inline void execute_store()
   {
-    auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
-
     switch ( strategy )
     {
     default:
     case 0:
     {
-      mockturtle::mig_npn_resynthesis resyn( is_set( "multiple" ) );
-      mockturtle::cut_rewriting( *mig_p, resyn, ps );
+      if constexpr ( std::is_same_v<Store, mig_t> )
+      {
+        auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
+        mockturtle::mig_npn_resynthesis resyn( is_set( "multiple" ) );
+        mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
+        *mig_p = cleanup_dangling( *mig_p );
+      }
     }
     break;
     case 1:
     {
-      mockturtle::akers_resynthesis resyn;
-      mockturtle::cut_rewriting( *mig_p, resyn, ps );
+      if constexpr ( std::is_same_v<Store, mig_t> )
+      {
+        auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
+        mockturtle::akers_resynthesis resyn;
+        mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
+        *mig_p = cleanup_dangling( *mig_p );
+      }
     }
+    break;
+    case 2:
+    {
+      if constexpr ( std::is_same_v<Store, klut_t> )
+      {
+        auto* klut_p = static_cast<mockturtle::klut_network*>( store<Store>().current().get() );
+        if ( is_set( "clear_cache" ) )
+        {
+          exact_cache = std::make_shared<mockturtle::exact_resynthesis::cache_map_t>();
+        }
+        mockturtle::exact_resynthesis resyn( exact_lutsize, exact_cache );
+        mockturtle::cut_rewriting( *klut_p, resyn, ps, &st );
+        *klut_p = cleanup_dangling( *klut_p );
+      }
     }
+    break;
+    }
+  }
 
-    *mig_p = cleanup_dangling( *mig_p );
+  nlohmann::json log() const override
+  {
+    return {
+      {"time_total", mockturtle::to_seconds( st.time_total )}
+    };
   }
 
 private:
   mockturtle::cut_rewriting_params ps;
+  mockturtle::cut_rewriting_stats st;
+  mockturtle::exact_resynthesis::cache_t exact_cache{std::make_shared<mockturtle::exact_resynthesis::cache_map_t>()}; 
   unsigned strategy{0u};
+  unsigned exact_lutsize{3u};
 };
 
 ALICE_ADD_COMMAND( cut_rewrite, "Synthesis" )
