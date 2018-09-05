@@ -19,7 +19,9 @@ class get_pybind_include(object):
 cirkit_modules = [
   Extension(
     'cirkit',
-    ['cli/cirkit.cpp'],
+    ['cli/cirkit.cpp',
+     'lib/mockturtle/lib/abcsat/satSolver.cpp',
+     'lib/mockturtle/lib/abcsat/satStore.cpp'],
     include_dirs=[
       get_pybind_include(),
       get_pybind_include(user=True),
@@ -29,14 +31,23 @@ cirkit_modules = [
       "lib/cli11",
       "lib/fmt",
       "lib/json",
+      "lib/mockturtle/lib/abcsat",
       "lib/mockturtle/lib/ez",
       "lib/mockturtle/lib/lorina",
       "lib/mockturtle/lib/kitty",
+      "lib/mockturtle/lib/percy",
       "lib/mockturtle/lib/rang",
       "lib/mockturtle/lib/sparsepp",
       "lib/mockturtle/include"
     ],
-    define_macros=[('ALICE_PYTHON', '1'), ('FMT_HEADER_ONLY', '1')],
+    define_macros=[
+      ('ALICE_PYTHON', '1'),
+      ('FMT_HEADER_ONLY', '1'),
+      ('DISABLE_NAUTY', '1'),
+      ('LIN64', '1'),
+      ('ABC_NAMESPACE', 'pabc'),
+      ('ABC_NO_USE_READLINE', '1')
+    ],
     language='c++'
   )
 ]
@@ -47,6 +58,8 @@ class BuildExt(build_ext):
     ct = self.compiler.compiler_type
     opts = []
     if ct == 'unix':
+      opts.append('-O2')
+      opts.append('-DNDEBUG')
       opts.append('-std=c++17')
       opts.append('-Wno-register')
       opts.append('-Wno-unknown-pragmas')
