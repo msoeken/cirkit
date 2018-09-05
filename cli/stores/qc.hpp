@@ -7,6 +7,7 @@
 #include <tweedledum/io/quil.hpp>
 #include <tweedledum/io/write_projectq.hpp>
 #include <tweedledum/io/write_qasm.hpp>
+#include <tweedledum/io/write_quirk.hpp>
 #include <tweedledum/networks/gates/qc_gate.hpp>
 #include <tweedledum/networks/dag_path.hpp>
 
@@ -77,6 +78,17 @@ ALICE_READ_FILE(qc_circuit_t, dotqc, filename, cmd)
   tweedledee::dotqc_read( filename, reader, tweedledum::identify_gate_kind() );
 
   return circ;
+}
+
+ALICE_WRITE_FILE(qc_circuit_t, quirk, circ, filename, cmd)
+{
+  write_quirk_encoded_json( circ, filename );
+}
+
+template<>
+inline void write<qc_circuit_t, io_quirk_tag_t>( qc_circuit_t const& circ, std::ostream& os, const command& )
+{
+  write_quirk_encoded_json( circ, os );
 }
 
 }
