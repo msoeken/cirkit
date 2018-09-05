@@ -6,6 +6,7 @@
 #include "stores/aig.hpp"
 #include "stores/klut.hpp"
 #include "stores/mig.hpp"
+#include "stores/tt.hpp"
 
 #include "algorithms/collapse_mapping.hpp"
 #include "algorithms/cut_rewrite.hpp"
@@ -14,5 +15,6 @@
 #include "algorithms/lut_resynthesis.hpp"
 #include "algorithms/refactor.hpp"
 #include "algorithms/resubstitute.hpp"
+#include "algorithms/tt.hpp"
 
 ALICE_MAIN( cirkit )
