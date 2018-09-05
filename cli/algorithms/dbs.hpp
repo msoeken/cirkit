@@ -15,7 +15,7 @@ class dbs_command : public alice::command
 public:
   dbs_command( const environment::ptr& env ) : command( env, "Decomposition-based synthesis" )
   {
-    add_option( "--stg", strategy, "synthesis strategy", true )->set_type_name( "strategy in {pprm=0, spectrum=1, pkrm=2, db=3}" );
+    add_option( "--stg", strategy, "synthesis strategy", true )->set_type_name( "strategy in {pprm=0, spectrum=1, pkrm=2}" );
     add_flag( "-n,--new", "adds new store entry" );
     add_flag( "-v,--verbose", "be verbose" );
   }
@@ -63,7 +63,7 @@ public:
       circs.current() = small_mct_circuit_t();
       tweedledum::decomposition_based_synthesis( circs.current(), f, tweedledum::stg_from_pkrm(), ps );
     }
-    else if (strategy == 3u)
+    /*else if (strategy == 3u)
     {
       auto& circs = store<qc_circuit_t>();
       if ( circs.empty() || is_set( "new" ) )
@@ -72,7 +72,7 @@ public:
       }
       circs.current() = qc_circuit_t();
       tweedledum::decomposition_based_synthesis( circs.current(), f, tweedledum::stg_from_db(), ps );
-    }
+    }*/
   }
 
 private:

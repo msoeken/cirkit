@@ -66,7 +66,7 @@ public:
     }
     else if ( strategy == 3u )
     {
-      tweedledum::stg_from_db()( get_circuit<qc_circuit_t>( f.num_vars() ), f, qubit_map );
+      //tweedledum::stg_from_db()( get_circuit<qc_circuit_t>( f.num_vars() ), f, qubit_map );
     }
   }
 
