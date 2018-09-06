@@ -6,6 +6,7 @@
 #include <mockturtle/io/aiger_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
+#include <mockturtle/io/write_verilog.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
@@ -74,6 +75,11 @@ ALICE_READ_FILE( mig_t, verilog, filename, cmd )
     std::cout << "[w] parse error\n";
   }
   return std::make_shared<mig_nt>( mig );
+}
+
+ALICE_WRITE_FILE( mig_t, verilog, mig, filename, cmd )
+{
+  mockturtle::write_verilog( *mig, filename );
 }
 
 } // namespace alice
