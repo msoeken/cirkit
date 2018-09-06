@@ -4,6 +4,7 @@
 #include <lorina/aiger.hpp>
 #include <mockturtle/io/aiger_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
+#include <mockturtle/io/write_verilog.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
@@ -55,6 +56,11 @@ ALICE_READ_FILE( aig_t, aiger, filename, cmd )
 ALICE_WRITE_FILE( aig_t, bench, aig, filename, cmd )
 {
   mockturtle::write_bench( *aig, filename );
+}
+
+ALICE_WRITE_FILE( aig_t, verilog, aig, filename, cmd )
+{
+  mockturtle::write_verilog( *aig, filename );
 }
 
 } // namespace alice
