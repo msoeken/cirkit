@@ -19,7 +19,7 @@ namespace alice
 using xmg_nt = mockturtle::mapping_view<mockturtle::xmg_network, true>;
 using xmg_t = std::shared_ptr<xmg_nt>;
 
-ALICE_ADD_STORE( xmg_t, "xmg", "m", "xmg", "xmgs" );
+ALICE_ADD_STORE( xmg_t, "xmg", "x", "xmg", "xmgs" );
 
 ALICE_DESCRIBE_STORE( xmg_t, xmg )
 {
