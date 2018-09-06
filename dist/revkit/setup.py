@@ -31,8 +31,14 @@ revkit_modules = [
       "lib/json",
       "lib/tweedledum/include",
       "lib/tweedledum/libs/tweedledee/",
+      "lib/mockturtle/lib/abcsat",
+      "lib/mockturtle/lib/ez",
+      "lib/mockturtle/lib/lorina",
       "lib/mockturtle/lib/kitty",
-      "lib/mockturtle/lib/rang"
+      "lib/mockturtle/lib/percy",
+      "lib/mockturtle/lib/rang",
+      "lib/mockturtle/lib/sparsepp",
+      "lib/mockturtle/include"
     ],
     define_macros=[('ALICE_PYTHON', '1'), ('FMT_HEADER_ONLY', '1')],
     language='c++'
@@ -70,8 +76,8 @@ setup(
   install_requires=['pybind11>=2.2'],
   cmdclass={'build_ext': BuildExt},
   zip_safe=False,
-  classifiers=(
+  classifiers=[
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
-  )
+  ]
 )
