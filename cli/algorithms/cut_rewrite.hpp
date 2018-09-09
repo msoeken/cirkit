@@ -25,6 +25,7 @@ public:
     add_flag( "--multiple", "try multiple candidates if possible" );
     add_flag( "--clear_cache", "clear network cache" );
     add_option( "--exact_lutsize", exact_lutsize, "LUT size for exact resynthesis", true );
+    add_option( "--conflict_limit", conflict_limit, "conflict limit for exact resynthesis", true );
     add_flag( "-p,--progress", ps.progress, "show progress" );
     add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
@@ -66,7 +67,10 @@ public:
         {
           exact_cache = std::make_shared<mockturtle::exact_resynthesis::cache_map_t>();
         }
-        mockturtle::exact_resynthesis resyn( exact_lutsize, exact_cache );
+        mockturtle::exact_resynthesis_params esps;
+        esps.cache = exact_cache;
+        esps.conflict_limit = conflict_limit;
+        mockturtle::exact_resynthesis resyn( exact_lutsize, esps );
         mockturtle::cut_rewriting( *klut_p, resyn, ps, &st );
         *klut_p = cleanup_dangling( *klut_p );
       }
@@ -88,6 +92,7 @@ private:
   mockturtle::exact_resynthesis::cache_t exact_cache{std::make_shared<mockturtle::exact_resynthesis::cache_map_t>()}; 
   unsigned strategy{0u};
   unsigned exact_lutsize{3u};
+  int conflict_limit{0};
 };
 
 ALICE_ADD_COMMAND( cut_rewrite, "Synthesis" )
