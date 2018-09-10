@@ -7,8 +7,8 @@
 
 namespace alice
 {
-  using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
-  using qc_circuit_t = tweedledum::dag_path<tweedledum::qc_gate>;
+using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
+using qc_circuit_t = tweedledum::dag_path<tweedledum::qc_gate>;
 
 class dbs_command : public alice::command
 {
@@ -16,6 +16,9 @@ public:
   dbs_command( const environment::ptr& env ) : command( env, "Decomposition-based synthesis" )
   {
     add_option( "--stg", strategy, "synthesis strategy", true )->set_type_name( "strategy in {pprm=0, spectrum=1, pkrm=2}" );
+    add_flag( "--allow_rewiring", "allow rewiring inside single-target gates" );
+    add_option( "--lin_comb_synth_behavior", lin_comb_synth_behavior, "how to use LinCombSynth in spectrum strategy", true )->set_type_name( "behavior in {always=0, never=1, complete_sepctra=2}" );
+    add_option( "--lin_comb_synth_strategy", lin_comb_synth_strategy, "strategy for LinCombSynth in spectrum strategy", true )->set_type_name( "behavior in {gray=0, binary=1}" );
     add_flag( "-n,--new", "adds new store entry" );
     add_flag( "-v,--verbose", "be verbose" );
   }
@@ -33,7 +36,7 @@ public:
     tweedledum::decomposition_based_synthesis_params ps;
     ps.verbose = is_set( "verbose" );
 
-    if (strategy == 0u)
+    if ( strategy == 0u )
     {
       auto& circs = store<small_mct_circuit_t>();
       if ( circs.empty() || is_set( "new" ) )
@@ -43,7 +46,7 @@ public:
       circs.current() = small_mct_circuit_t();
       tweedledum::decomposition_based_synthesis( circs.current(), f, tweedledum::stg_from_pprm(), ps );
     }
-    else if (strategy == 1u)
+    else if ( strategy == 1u )
     {
       auto& circs = store<qc_circuit_t>();
       if ( circs.empty() || is_set( "new" ) )
@@ -51,9 +54,13 @@ public:
         circs.extend();
       }
       circs.current() = qc_circuit_t();
-      tweedledum::decomposition_based_synthesis( circs.current(), f, tweedledum::stg_from_spectrum(), ps );
+      tweedledum::stg_from_spectrum_params stgps;
+      stgps.lin_comb_synth_behavior = static_cast<tweedledum::stg_from_spectrum_params::lin_comb_synth_behavior_t>( lin_comb_synth_behavior );
+      stgps.lin_comb_synth_strategy = static_cast<tweedledum::stg_from_spectrum_params::lin_comb_synth_strategy_t>( lin_comb_synth_strategy );
+      stgps.gray_synth_ps.allow_rewiring = is_set( "allow_rewiring" );
+      tweedledum::decomposition_based_synthesis( circs.current(), f, tweedledum::stg_from_spectrum( stgps ), ps );
     }
-    else if (strategy == 2u)
+    else if ( strategy == 2u )
     {
       auto& circs = store<small_mct_circuit_t>();
       if ( circs.empty() || is_set( "new" ) )
@@ -77,6 +84,8 @@ public:
 
 private:
   uint32_t strategy{0u};
+  uint32_t lin_comb_synth_behavior{2u};
+  uint32_t lin_comb_synth_strategy{0u};
 };
 
 ALICE_ADD_COMMAND( dbs, "Synthesis" );
