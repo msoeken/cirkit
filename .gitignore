@@ -11,5 +11,6 @@ dist/wheels
 .vscode
 
 # tmp files
+tmp/
 **/*~
 **/.DS_Store
