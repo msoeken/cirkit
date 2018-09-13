@@ -23,6 +23,7 @@ public:
     add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1, exact=2}" );
     add_flag( "-z", ps.allow_zero_gain, "enable zero-gain rewriting" );
     add_flag( "--multiple", "try multiple candidates if possible" );
+    add_flag( "--dont_cares", "use don't cares if possible" );
     add_flag( "--clear_cache", "clear network cache" );
     add_option( "--exact_lutsize", exact_lutsize, "LUT size for exact resynthesis", true );
     add_option( "--conflict_limit", conflict_limit, "conflict limit for exact resynthesis", true );
@@ -33,6 +34,7 @@ public:
   template<class Store>
   inline void execute_store()
   {
+    ps.use_dont_cares = is_set( "use_dont_cares" );
     switch ( strategy )
     {
     default:
