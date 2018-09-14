@@ -5,12 +5,12 @@
 #include <tweedledum/io/quil.hpp>
 #include <tweedledum/io/write_projectq.hpp>
 #include <tweedledum/io/write_qasm.hpp>
-#include <tweedledum/networks/gates/mct_gate.hpp>
+#include <tweedledum/networks/gates/pmct_gate.hpp>
 #include <tweedledum/networks/netlist.hpp>
 
 namespace alice
 {
-  using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
+  using small_mct_circuit_t = tweedledum::netlist<tweedledum::pmct_gate>;
 
 ALICE_ADD_STORE( small_mct_circuit_t, "mct", "c", "MCT circuit", "MCT circuits" );
 

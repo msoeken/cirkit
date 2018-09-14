@@ -7,8 +7,6 @@
 
 namespace alice
 {
-using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
-using qc_circuit_t = tweedledum::dag_path<tweedledum::qc_gate>;
 
 class dbs_command : public alice::command
 {

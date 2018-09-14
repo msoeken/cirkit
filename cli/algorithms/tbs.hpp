@@ -6,7 +6,6 @@
 
 namespace alice
 {
-  using small_mct_circuit_t = tweedledum::netlist<tweedledum::mct_gate>;
 
 class tbs_command : public alice::command
 {
