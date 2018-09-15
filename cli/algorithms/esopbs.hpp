@@ -29,6 +29,7 @@ public:
       circs.extend();
     }
 
+    circs.current() = small_mct_circuit_t();
     tweedledum::esop_based_synthesis( circs.current(), tts.current() );
   }
 };

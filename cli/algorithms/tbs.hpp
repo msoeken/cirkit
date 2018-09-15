@@ -32,6 +32,7 @@ public:
 
     auto f = perms.current(); // will be modified by tbs
 
+    circs.current() = small_mct_circuit_t();
     switch ( strategy )
     {
       case 0u:
