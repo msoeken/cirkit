@@ -34,7 +34,7 @@ public:
   template<class Store>
   inline void execute_store()
   {
-    ps.use_dont_cares = is_set( "use_dont_cares" );
+    ps.use_dont_cares = is_set( "dont_cares" );
     switch ( strategy )
     {
     default:
