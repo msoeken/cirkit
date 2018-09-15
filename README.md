@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/msoeken/cirkit.svg?branch=cirkit3)](https://travis-ci.org/msoeken/cirkit)
+[![Build status](https://ci.appveyor.com/api/projects/status/201o4wdh0gmb56et?svg=true)](https://ci.appveyor.com/project/msoeken/cirkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # CirKit and RevKit (version 3)
 
 CirKit and RevKit are synthesis and optimization frameworks for classical and
