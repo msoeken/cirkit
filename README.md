@@ -47,6 +47,11 @@ CXX=/path/to/c++-compiler make cirkit
 CC=/path/to/c++-compiler python3 setup.py install
 ```
 
+## CirKit and RevKit 2.0
+
+The 2.0 versions of CirKit and RevKit can be found
+in the [develop](https://github.com/msoeken/cirkit/tree/develop/) branch.
+
 
 ## EPFL logic sythesis libraries
 
