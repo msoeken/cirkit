@@ -8,6 +8,21 @@ CirKit and RevKit are synthesis and optimization frameworks for classical and
 quantum logic synthesis, respectively.  They are implemented based on various
 [EPFL logic sythesis libraries](https://github.com/lsils/lstools-showcase).
 
+## Clone
+
+CirKit and RevKit depend on submodules, so make sure to clone recursively:
+
+```bash
+git clone --recursive https://github.com/msoeken/cirkit.git
+```
+
+If you update the repository, then also update the submodules:
+
+```bash
+git pull origin cirkit3
+git submodule update --recursive
+```
+
 ## Installation (shell interface)
 
 ```bash
