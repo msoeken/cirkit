@@ -5,6 +5,7 @@
 #include <tweedledee/dotqc/dotqc.hpp>
 #include <tweedledum/io/dotqc.hpp>
 #include <tweedledum/io/quil.hpp>
+#include <tweedledum/io/write_cirq.hpp>
 #include <tweedledum/io/write_projectq.hpp>
 #include <tweedledum/io/write_qasm.hpp>
 #include <tweedledum/io/write_quirk.hpp>
@@ -28,6 +29,17 @@ ALICE_LOG_STORE_STATISTICS( qc_circuit_t, circ )
     {"qubits", circ.num_qubits()},
     {"gates", circ.num_gates()}
   };
+}
+
+ALICE_WRITE_FILE(qc_circuit_t, cirq, circ, filename, cmd)
+{
+  write_cirq( circ, filename );
+}
+
+template<>
+inline void write<qc_circuit_t, io_cirq_tag_t>( qc_circuit_t const& circ, std::ostream& os, const command& )
+{
+  write_cirq( circ, os );
 }
 
 ALICE_WRITE_FILE(qc_circuit_t, projectq, circ, filename, cmd)
