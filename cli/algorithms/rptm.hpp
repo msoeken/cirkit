@@ -32,6 +32,7 @@ public:
       qcs.extend();
     }
     
+    qcs.current() = qc_circuit_t();
     tweedledum::relative_phase_mapping( qcs.current(), circs.current() );
   }
 };
