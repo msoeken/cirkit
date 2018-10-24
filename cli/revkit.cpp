@@ -4,6 +4,7 @@
 #include "stores/mct.hpp"
 #include "stores/perm.hpp"
 #include "stores/qc.hpp"
+#include "stores/klut.hpp"
 #include "stores/mig.hpp"
 #include "stores/tt.hpp"
 #include "stores/xmg.hpp"

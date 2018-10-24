@@ -20,6 +20,11 @@ ALICE_DESCRIBE_STORE( small_mct_circuit_t, circ )
   return fmt::format( "{} qubits, {} gates", circ.num_qubits(), circ.num_gates() );
 }
 
+ALICE_PRINT_STORE_STATISTICS( small_mct_circuit_t, os, circ )
+{
+  os << fmt::format( "MCT circuit   gates = {}   qubits = {}\n", circ.num_gates(), circ.num_qubits() );
+}
+
 ALICE_LOG_STORE_STATISTICS( small_mct_circuit_t, circ )
 {
   return {

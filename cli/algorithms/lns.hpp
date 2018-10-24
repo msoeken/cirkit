@@ -7,10 +7,10 @@
 namespace alice
 {
 
-class lns_command : public cirkit::cirkit_command<lns_command, mig_t, xmg_t>
+class lns_command : public cirkit::cirkit_command<lns_command, mig_t, xmg_t, klut_t>
 {
 public:
-  lns_command( environment::ptr& env ) : cirkit::cirkit_command<lns_command, mig_t, xmg_t>( env, "Logic network based hierarchical synthesis", "hierarchical synthesis from {0}" )
+  lns_command( environment::ptr& env ) : cirkit::cirkit_command<lns_command, mig_t, xmg_t, klut_t>( env, "Logic network based hierarchical synthesis", "hierarchical synthesis from {0}" )
   {
     add_flag( "-v,--verbose", "be verbose" );
   }
@@ -19,12 +19,12 @@ public:
   inline void execute_store()
   {
     ps.verbose = is_set( "verbose" );
-    auto& circs = store<qc_circuit_t>();
+    auto& circs = store<small_mct_circuit_t>();
     if ( circs.empty() || is_set( "new" ) )
     {
       circs.extend();
     }
-    circs.current() = qc_circuit_t();
+    circs.current() = small_mct_circuit_t();
     logic_network_synthesis( circs.current(), *( store<Store>().current() ), ps );
   }
 
