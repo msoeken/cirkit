@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include <tweedledum/algorithms/synthesis/esop_based.hpp>
+#include <tweedledum/algorithms/synthesis/control_function.hpp>
 
 namespace alice
 {
@@ -29,8 +29,7 @@ public:
       circs.extend();
     }
 
-    circs.current() = small_mct_circuit_t();
-    tweedledum::esop_based_synthesis( circs.current(), tts.current() );
+    circs.current() = tweedledum::control_function_synthesis<small_mct_circuit_t>( tts.current() );
   }
 };
 

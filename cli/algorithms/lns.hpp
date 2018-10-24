@@ -7,8 +7,6 @@
 namespace alice
 {
 
-using qc_circuit_t = tweedledum::dag_path<tweedledum::qc_gate>;
-
 class lns_command : public cirkit::cirkit_command<lns_command, mig_t, xmg_t>
 {
 public:

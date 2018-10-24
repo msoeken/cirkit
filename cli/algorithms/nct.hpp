@@ -25,8 +25,7 @@ public:
   {
     auto& circs = store<small_mct_circuit_t>();
 
-    small_mct_circuit_t circ;
-    tweedledum::nct_mapping( circ, circs.current(), ps );
+    auto circ = tweedledum::nct_mapping<small_mct_circuit_t>( circs.current(), ps );
     if ( is_set( "new" ) )
     {
       circs.extend();

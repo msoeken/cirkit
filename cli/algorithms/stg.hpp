@@ -36,7 +36,7 @@ private:
     circs.current() = Network();
     for ( auto i = 0u; i <= num_vars; ++i )
     {
-      circs.current().allocate_qubit();
+      circs.current().add_qubit();
     }
     return circs.current();
   }
@@ -47,7 +47,7 @@ public:
     auto const& tts = store<kitty::dynamic_truth_table>();
     auto const& f = tts.current();
 
-    std::vector<uint8_t> qubit_map( f.num_vars() + 1u );
+    std::vector<uint32_t> qubit_map( f.num_vars() + 1u );
     std::iota( qubit_map.begin(), qubit_map.end(), 0u );
 
     if ( strategy == 0u )

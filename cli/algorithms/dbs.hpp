@@ -41,8 +41,7 @@ public:
       {
         circs.extend();
       }
-      circs.current() = small_mct_circuit_t();
-      tweedledum::decomposition_based_synthesis( circs.current(), f, tweedledum::stg_from_pprm(), ps );
+      circs.current() = tweedledum::decomposition_based_synthesis<small_mct_circuit_t>( f, tweedledum::stg_from_pprm(), ps );
     }
     else if ( strategy == 1u )
     {
@@ -51,12 +50,11 @@ public:
       {
         circs.extend();
       }
-      circs.current() = qc_circuit_t();
       tweedledum::stg_from_spectrum_params stgps;
       stgps.lin_comb_synth_behavior = static_cast<tweedledum::stg_from_spectrum_params::lin_comb_synth_behavior_t>( lin_comb_synth_behavior );
       stgps.lin_comb_synth_strategy = static_cast<tweedledum::stg_from_spectrum_params::lin_comb_synth_strategy_t>( lin_comb_synth_strategy );
       stgps.gray_synth_ps.allow_rewiring = is_set( "allow_rewiring" );
-      tweedledum::decomposition_based_synthesis( circs.current(), f, tweedledum::stg_from_spectrum( stgps ), ps );
+      circs.current() = tweedledum::decomposition_based_synthesis<qc_circuit_t>( f, tweedledum::stg_from_spectrum( stgps ), ps );
     }
     else if ( strategy == 2u )
     {
@@ -65,8 +63,7 @@ public:
       {
         circs.extend();
       }
-      circs.current() = small_mct_circuit_t();
-      tweedledum::decomposition_based_synthesis( circs.current(), f, tweedledum::stg_from_pkrm(), ps );
+      circs.current() = tweedledum::decomposition_based_synthesis<small_mct_circuit_t>( f, tweedledum::stg_from_pkrm(), ps );
     }
     /*else if (strategy == 3u)
     {

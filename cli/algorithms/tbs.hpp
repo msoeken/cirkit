@@ -32,17 +32,16 @@ public:
 
     auto f = perms.current(); // will be modified by tbs
 
-    circs.current() = small_mct_circuit_t();
     switch ( strategy )
     {
       case 0u:
-        tweedledum::transformation_based_synthesis_multidirectional( circs.current(), f );
+        circs.current() = tweedledum::transformation_based_synthesis_multidirectional<small_mct_circuit_t>( f );
         break;
       case 1u:
-        tweedledum::transformation_based_synthesis_bidirectional( circs.current(), f );
+        circs.current() = tweedledum::transformation_based_synthesis_bidirectional<small_mct_circuit_t>( f );
         break;
       case 2u:
-        tweedledum::transformation_based_synthesis( circs.current(), f );
+        circs.current() = tweedledum::transformation_based_synthesis<small_mct_circuit_t>( f );
         break;
     }
   }

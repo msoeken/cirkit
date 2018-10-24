@@ -3,8 +3,6 @@
 #include <iostream>
 
 #include <tweedledum/algorithms/mapping/relative_phase.hpp>
-#include <tweedledum/networks/dag_path.hpp>
-#include <tweedledum/networks/gates/qc_gate.hpp>
 
 namespace alice
 {
@@ -32,8 +30,7 @@ public:
       qcs.extend();
     }
     
-    qcs.current() = qc_circuit_t();
-    tweedledum::relative_phase_mapping( qcs.current(), circs.current() );
+    qcs.current() = tweedledum::relative_phase_mapping<qc_circuit_t>( circs.current() );
   }
 };
 
