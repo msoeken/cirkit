@@ -16,6 +16,7 @@
 #include "algorithms/rptm.hpp"
 #include "algorithms/stg.hpp"
 #include "algorithms/tbs.hpp"
+#include "algorithms/tofsim.hpp"
 #include "algorithms/tt.hpp"
 
 ALICE_MAIN( revkit )
