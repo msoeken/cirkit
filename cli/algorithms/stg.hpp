@@ -52,19 +52,19 @@ public:
 
     if ( strategy == 0u )
     {
-      tweedledum::stg_from_pprm()( get_circuit<small_mct_circuit_t>( f.num_vars() ), f, qubit_map );
+      tweedledum::stg_from_pprm()( get_circuit<qcircuit_t>( f.num_vars() ), f, qubit_map );
     }
     else if ( strategy == 1u )
     {
-      tweedledum::stg_from_spectrum()( get_circuit<qc_circuit_t>( f.num_vars() ), f, qubit_map );
+      tweedledum::stg_from_spectrum()( get_circuit<qcircuit_t>( f.num_vars() ), f, qubit_map );
     }
     else if ( strategy == 2u )
     {
-      tweedledum::stg_from_pkrm()( get_circuit<small_mct_circuit_t>( f.num_vars() ), f, qubit_map );
+      tweedledum::stg_from_pkrm()( get_circuit<qcircuit_t>( f.num_vars() ), f, qubit_map );
     }
     else if ( strategy == 3u )
     {
-      //tweedledum::stg_from_db()( get_circuit<qc_circuit_t>( f.num_vars() ), f, qubit_map );
+      //tweedledum::stg_from_db()( get_circuit<qcircuit_t>( f.num_vars() ), f, qubit_map );
     }
   }
 

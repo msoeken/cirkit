@@ -18,14 +18,14 @@ public:
 
   rules validity_rules() const override
   {
-    return {has_store_element<small_mct_circuit_t>( env )};
+    return {has_store_element<qcircuit_t>( env )};
   }
 
   void execute() override
   {
-    auto& circs = store<small_mct_circuit_t>();
+    auto& circs = store<qcircuit_t>();
 
-    auto circ = tweedledum::nct_mapping<small_mct_circuit_t>( circs.current(), ps );
+    auto circ = tweedledum::nct_mapping<qcircuit_t>( circs.current(), ps );
     if ( is_set( "new" ) )
     {
       circs.extend();

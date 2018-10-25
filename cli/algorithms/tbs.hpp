@@ -24,7 +24,7 @@ public:
   void execute() override
   {
     auto const& perms = store<perm_t>();
-    auto& circs = store<small_mct_circuit_t>();
+    auto& circs = store<qcircuit_t>();
     if ( circs.empty() || is_set( "new" ) )
     {
       circs.extend();
@@ -35,13 +35,13 @@ public:
     switch ( strategy )
     {
       case 0u:
-        circs.current() = tweedledum::transformation_based_synthesis_multidirectional<small_mct_circuit_t>( f );
+        circs.current() = tweedledum::transformation_based_synthesis_multidirectional<qcircuit_t>( f );
         break;
       case 1u:
-        circs.current() = tweedledum::transformation_based_synthesis_bidirectional<small_mct_circuit_t>( f );
+        circs.current() = tweedledum::transformation_based_synthesis_bidirectional<qcircuit_t>( f );
         break;
       case 2u:
-        circs.current() = tweedledum::transformation_based_synthesis<small_mct_circuit_t>( f );
+        circs.current() = tweedledum::transformation_based_synthesis<qcircuit_t>( f );
         break;
     }
   }

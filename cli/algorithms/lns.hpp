@@ -19,12 +19,12 @@ public:
   inline void execute_store()
   {
     ps.verbose = is_set( "verbose" );
-    auto& circs = store<small_mct_circuit_t>();
+    auto& circs = store<qcircuit_t>();
     if ( circs.empty() || is_set( "new" ) )
     {
       circs.extend();
     }
-    circs.current() = small_mct_circuit_t();
+    circs.current() = qcircuit_t();
     logic_network_synthesis( circs.current(), *( store<Store>().current() ), ps );
   }
 

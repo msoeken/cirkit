@@ -21,14 +21,14 @@ public:
   rules validity_rules() const override
   {
     return {
-        has_store_element<small_mct_circuit_t>( env ),
+        has_store_element<qcircuit_t>( env ),
         {[&]() { return std::count_if( pattern.begin(), pattern.end(), []( auto c ) { return c != '0' && c != '1'; } ) == 0; }, "input pattern must consists of only 0 and 1"},
-        {[&]() { return pattern.size() == store<small_mct_circuit_t>().current().num_qubits(); }, "input pattern size must match number of qubits"}};
+        {[&]() { return pattern.size() == store<qcircuit_t>().current().num_qubits(); }, "input pattern size must match number of qubits"}};
   }
 
   void execute() override
   {
-    const auto& circs = store<small_mct_circuit_t>();
+    const auto& circs = store<qcircuit_t>();
     const auto result = tweedledum::simulate_pattern_classical( circs.current(), pattern_from_string() );
     pattern_to_string( result );
     if (!is_set("quiet")) {
@@ -45,7 +45,7 @@ private:
   uint64_t pattern_from_string() const
   {
     uint64_t ipattern{0};
-    const auto n = store<small_mct_circuit_t>().current().num_qubits();
+    const auto n = store<qcircuit_t>().current().num_qubits();
     for ( auto i = 0; i < n; ++i )
     {
       if ( pattern[i] == '1' )
@@ -58,7 +58,7 @@ private:
 
   void pattern_to_string( uint64_t opattern )
   {
-    const auto n = store<small_mct_circuit_t>().current().num_qubits();
+    const auto n = store<qcircuit_t>().current().num_qubits();
     pattern_result = std::string( n, '0' );
     for ( auto i = 0; i < n; ++i )
     {

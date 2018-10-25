@@ -23,13 +23,13 @@ public:
   void execute() override
   {
     auto const& tts = store<kitty::dynamic_truth_table>();
-    auto& circs = store<small_mct_circuit_t>();
+    auto& circs = store<qcircuit_t>();
     if ( circs.empty() || is_set( "new" ) )
     {
       circs.extend();
     }
 
-    circs.current() = tweedledum::control_function_synthesis<small_mct_circuit_t>( tts.current() );
+    circs.current() = tweedledum::control_function_synthesis<qcircuit_t>( tts.current() );
   }
 };
 

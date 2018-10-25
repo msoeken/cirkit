@@ -17,20 +17,20 @@ public:
 
   rules validity_rules() const override
   {
-    return {has_store_element<small_mct_circuit_t>( env )};
+    return {has_store_element<qcircuit_t>( env )};
   }
 
   void execute() override
   {
-    auto const& circs = store<small_mct_circuit_t>();
-    auto& qcs = store<qc_circuit_t>();
+    auto& circs = store<qcircuit_t>();
     
-    if ( qcs.empty() || is_set( "new" ) )
+    auto circ = tweedledum::relative_phase_mapping<qcircuit_t>( circs.current() );
+    if ( circs.empty() || is_set( "new" ) )
     {
-      qcs.extend();
+      circs.extend();
     }
     
-    qcs.current() = tweedledum::relative_phase_mapping<qc_circuit_t>( circs.current() );
+    circs.current() = circ;
   }
 };
 
