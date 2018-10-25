@@ -7,11 +7,12 @@
 namespace alice
 {
 
-class lns_command : public cirkit::cirkit_command<lns_command, mig_t, xmg_t, klut_t>
+class lns_command : public cirkit::cirkit_command<lns_command, aig_t, mig_t, xmg_t, klut_t>
 {
 public:
-  lns_command( environment::ptr& env ) : cirkit::cirkit_command<lns_command, mig_t, xmg_t, klut_t>( env, "Logic network based hierarchical synthesis", "hierarchical synthesis from {0}" )
+  lns_command( environment::ptr& env ) : cirkit::cirkit_command<lns_command, aig_t, mig_t, xmg_t, klut_t>( env, "Logic network based hierarchical synthesis", "hierarchical synthesis from {0}" )
   {
+    add_flag( "--outofplace", "use always out-of-place mapping" );
     add_flag( "-v,--verbose", "be verbose" );
   }
 
@@ -25,7 +26,16 @@ public:
       circs.extend();
     }
     circs.current() = qcircuit_t();
-    logic_network_synthesis( circs.current(), *( store<Store>().current() ), ps );
+
+    using LogicNetwork = typename Store::element_type;
+    if ( is_set( "outofplace" ) )
+    {
+      tweedledum::logic_network_synthesis<qcircuit_t, LogicNetwork, typename tweedledum::bennett_mapping_strategy<LogicNetwork>>( circs.current(), *( store<Store>().current() ), ps );
+    }
+    else
+    {
+      tweedledum::logic_network_synthesis<qcircuit_t, LogicNetwork, typename tweedledum::bennett_inplace_mapping_strategy<LogicNetwork>>( circs.current(), *( store<Store>().current() ), ps );
+    }
   }
 
 private:
