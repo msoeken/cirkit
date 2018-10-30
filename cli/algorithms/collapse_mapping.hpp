@@ -7,10 +7,10 @@
 namespace alice
 {
 
-class collapse_mapping_command : public cirkit::cirkit_command<collapse_mapping_command, aig_t, mig_t, xmg_t, klut_t>
+class collapse_mapping_command : public cirkit::cirkit_command<collapse_mapping_command, aig_t, mig_t, xag_t, xmg_t, klut_t>
 {
 public:
-  collapse_mapping_command( environment::ptr& env ) : cirkit::cirkit_command<collapse_mapping_command, aig_t, mig_t, xmg_t, klut_t>( env, "Collapses mapped network", "collapse mapped {}" )
+  collapse_mapping_command( environment::ptr& env ) : cirkit::cirkit_command<collapse_mapping_command, aig_t, mig_t, xag_t, xmg_t, klut_t>( env, "Collapses mapped network", "collapse mapped {}" )
   {
     add_new_option();
   }

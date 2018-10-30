@@ -7,10 +7,10 @@
 namespace alice
 {
 
-class lns_command : public cirkit::cirkit_command<lns_command, aig_t, mig_t, xmg_t, klut_t>
+class lns_command : public cirkit::cirkit_command<lns_command, aig_t, mig_t, xag_t, xmg_t, klut_t>
 {
 public:
-  lns_command( environment::ptr& env ) : cirkit::cirkit_command<lns_command, aig_t, mig_t, xmg_t, klut_t>( env, "Logic network based hierarchical synthesis", "hierarchical synthesis from {0}" )
+  lns_command( environment::ptr& env ) : cirkit::cirkit_command<lns_command, aig_t, mig_t, xag_t, xmg_t, klut_t>( env, "Logic network based hierarchical synthesis", "hierarchical synthesis from {0}" )
   {
     add_flag( "--outofplace", "use always out-of-place mapping" );
     add_flag( "-v,--verbose", "be verbose" );
