@@ -7,6 +7,7 @@
 #include "stores/klut.hpp"
 #include "stores/mig.hpp"
 #include "stores/tt.hpp"
+#include "stores/xag.hpp"
 #include "stores/xmg.hpp"
 
 #include "algorithms/collapse_mapping.hpp"
