@@ -18,6 +18,7 @@
 #include "algorithms/refactor.hpp"
 #include "algorithms/resubstitute.hpp"
 #include "algorithms/simulate.hpp"
+#include "algorithms/spectral.hpp"
 #include "algorithms/tt.hpp"
 
 ALICE_MAIN( cirkit )
