@@ -1,6 +1,6 @@
 #include <alice/alice.hpp>
 
-#include <mockturtle/algorithms/lut_mapping.hpp>
+#include <mockturtle/traits.hpp>
 
 #include "../utils/cirkit_command.hpp"
 
@@ -17,7 +17,7 @@ public:
   template<class Store>
   inline void execute_store()
   {
-    unsigned num_and{0u}, num_or{0u}, num_xor{0u}, num_maj{0u}, num_ite{0u}, num_unknown{0u};
+    num_and = num_or = num_xor = num_maj = num_ite = num_unknown = 0u;
 
     using Ntk = typename Store::element_type;
     const auto& ntk = *store<Store>().current();
@@ -82,8 +82,20 @@ public:
                                num_and, num_or, num_xor, num_maj, num_ite, num_unknown );
   }
 
+  nlohmann::json log() const override
+  {
+    return {
+      {"and", num_and},
+      {"or", num_or},
+      {"xor", num_xor},
+      {"maj", num_maj},
+      {"ite", num_ite},
+      {"unknown", num_unknown}
+    };
+  }
+
 private:
-  mockturtle::lut_mapping_params ps;
+  unsigned num_and{0u}, num_or{0u}, num_xor{0u}, num_maj{0u}, num_ite{0u}, num_unknown{0u};
 };
 
 ALICE_ADD_COMMAND( print_gates, "I/O" )
