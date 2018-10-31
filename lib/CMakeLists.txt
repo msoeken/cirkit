@@ -27,3 +27,7 @@ target_include_directories(json INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/json)
 
 add_subdirectory(mockturtle)
 add_subdirectory(tweedledum)
+
+add_library(caterpillar INTERFACE)
+target_include_directories(caterpillar INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/caterpillar)
+target_link_libraries(caterpillar INTERFACE mockturtle tweedledum)

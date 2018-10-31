@@ -1,6 +1,6 @@
 #include <alice/alice.hpp>
 
-#include <tweedledum/algorithms/synthesis/logic_network_synthesis.hpp>
+#include <caterpillar/lhrs.hpp>
 
 #include "../utils/cirkit_command.hpp"
 
