@@ -1,7 +1,7 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
-__version__ = '3.0a2.dev1'
+__version__ = '3.0a2.dev3'
 
 class get_pybind_include(object):
   """Helper class to determine the pybind11 include path
@@ -63,6 +63,10 @@ class BuildExt(build_ext):
       opts.append('-std=c++17')
       opts.append('-Wno-register')
       opts.append('-Wno-unknown-pragmas')
+      opts.append('-Wno-unused-variable')
+      opts.append('-Wno-deprecated-declarations')
+      opts.append('-Wno-format')
+      opts.append('-Wno-switch')
     else:
       opts.append('/std:c++17')
     for ext in self.extensions:
