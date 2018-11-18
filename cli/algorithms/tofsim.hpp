@@ -36,7 +36,7 @@ public:
     }
   }
 
-  nlohmann::json log() const
+  nlohmann::json log() const override
   {
     return {{"result", pattern_result}};
   }
