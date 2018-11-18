@@ -56,13 +56,16 @@ python3 setup.py install
 ## With custom compiler
 
 CirKit and RevKit are implemented using C++-17 features and therefore a recent
-compiler is required (e.g., GCC ≥ 7.3.0 and Clang ≥ 6.0.0).  If your recent
-compiler is not on the `PATH` prefix the `make` and `python3` commands as
-follows:
+compiler is required (e.g., GCC ≥ 7.3.0 and Clang ≥ 7.0.0).  If your recent
+compiler is not on the `PATH` prefix, extend the `cmake` command as follows:
 
 ```bash
-CXX=/path/to/c++-compiler make cirkit
+cmake -DCMAKE_CXX_COMPILER=/path/to/c++-compiler ..
+```
 
+and prefix the `python3` command as follows:
+
+```bash
 CC=/path/to/c++-compiler python3 setup.py install
 ```
 
