@@ -4,16 +4,17 @@
 #include <mockturtle/algorithms/refactoring.hpp>
 #include <mockturtle/algorithms/node_resynthesis/akers.hpp>
 #include <mockturtle/algorithms/node_resynthesis/mig_npn.hpp>
+#include <mockturtle/algorithms/node_resynthesis/xmg_npn.hpp>
 
 #include "../utils/cirkit_command.hpp"
 
 namespace alice
 {
 
-class refactor_command : public cirkit::cirkit_command<refactor_command, mig_t>
+class refactor_command : public cirkit::cirkit_command<refactor_command, mig_t, xmg_t>
 {
 public:
-  refactor_command( environment::ptr& env ) : cirkit::cirkit_command<refactor_command, mig_t>( env, "Performs cut rewriting", "apply cut rewriting to {0}" )
+  refactor_command( environment::ptr& env ) : cirkit::cirkit_command<refactor_command, mig_t, xmg_t>( env, "Performs cut rewriting", "apply cut rewriting to {0}" )
   {
     add_option( "--max_pis", ps.max_pis, "maximum number of PIs in MFFC", true );
     add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1}" );
@@ -25,25 +26,47 @@ public:
   template<class Store>
   inline void execute_store()
   {
-    auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
-
     switch ( strategy )
     {
     default:
     case 0:
     {
-      mockturtle::mig_npn_resynthesis resyn;
-      mockturtle::refactoring( *mig_p, resyn, ps );
+      if constexpr ( std::is_same_v<Store, mig_t> )
+      {
+        auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
+        mockturtle::mig_npn_resynthesis resyn;
+        mockturtle::refactoring( *mig_p, resyn, ps );
+        *mig_p = cleanup_dangling( *mig_p );
+      }
+      else if constexpr ( std::is_same_v<Store, xmg_t> )
+      {
+        auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
+        mockturtle::xmg_npn_resynthesis resyn;
+        mockturtle::refactoring( *xmg_p, resyn, ps );
+        *xmg_p = cleanup_dangling( *xmg_p );
+      }
     }
     break;
     case 1:
     {
-      mockturtle::akers_resynthesis resyn;
-      mockturtle::refactoring( *mig_p, resyn, ps );
+      if constexpr ( std::is_same_v<Store, mig_t> )
+      {
+        auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
+        mockturtle::akers_resynthesis<mockturtle::mig_network> resyn;
+        mockturtle::refactoring( *mig_p, resyn, ps );
+        *mig_p = cleanup_dangling( *mig_p );
+      }
+      else if constexpr ( std::is_same_v<Store, xmg_t> )
+      {
+        auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
+        mockturtle::akers_resynthesis<mockturtle::xmg_network> resyn;
+        mockturtle::refactoring( *xmg_p, resyn, ps );
+        *xmg_p = cleanup_dangling( *xmg_p );
+      }
     }
     }
 
-    *mig_p = cleanup_dangling( *mig_p );
+    
   }
 
 private:

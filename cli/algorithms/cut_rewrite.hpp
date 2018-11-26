@@ -58,7 +58,7 @@ public:
       if constexpr ( std::is_same_v<Store, mig_t> )
       {
         auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
-        mockturtle::akers_resynthesis resyn;
+        mockturtle::akers_resynthesis<mockturtle::mig_network> resyn;
         mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
         *mig_p = cleanup_dangling( *mig_p );
       }
