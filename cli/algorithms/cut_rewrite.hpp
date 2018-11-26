@@ -2,7 +2,10 @@
 
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>
+#include <mockturtle/algorithms/gates_to_nodes.hpp>
+#include <mockturtle/algorithms/node_resynthesis.hpp>
 #include <mockturtle/algorithms/node_resynthesis/akers.hpp>
+#include <mockturtle/algorithms/node_resynthesis/direct.hpp>
 #include <mockturtle/algorithms/node_resynthesis/exact.hpp>
 #include <mockturtle/algorithms/node_resynthesis/mig_npn.hpp>
 #include <mockturtle/algorithms/node_resynthesis/xmg_npn.hpp>
@@ -12,16 +15,16 @@
 namespace alice
 {
 
-class cut_rewrite_command : public cirkit::cirkit_command<cut_rewrite_command, aig_t, mig_t, xmg_t, klut_t>
+class cut_rewrite_command : public cirkit::cirkit_command<cut_rewrite_command, aig_t, mig_t, xmg_t, xag_t, klut_t>
 {
 public:
-  cut_rewrite_command( environment::ptr& env ) : cirkit::cirkit_command<cut_rewrite_command, aig_t, mig_t, xmg_t, klut_t>( env, "Performs cut rewriting", "apply cut rewriting to {0}" )
+  cut_rewrite_command( environment::ptr& env ) : cirkit::cirkit_command<cut_rewrite_command, aig_t, mig_t, xmg_t, xag_t, klut_t>( env, "Performs cut rewriting", "apply cut rewriting to {0}" )
   {
     ps.cut_enumeration_ps.cut_size = 4;
 
     add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
     add_option( "--lutcount", ps.cut_enumeration_ps.cut_limit, "cut limit", true );
-    add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1, exact=2, exact_aig=3, xmgnpn=4}" );
+    add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1, exact=2, exact_aig=3, xmgnpn=4, exact_xag=5}" );
     add_flag( "-z,--zero_gain", ps.allow_zero_gain, "enable zero-gain rewriting" );
     add_flag( "--multiple", "try multiple candidates if possible" );
     add_flag( "--dont_cares", "use don't cares if possible" );
@@ -108,6 +111,28 @@ public:
       }
     }
     break;
+    case 5:
+    {
+      if constexpr ( std::is_same_v<Store, xag_t> )
+      {
+        auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
+        auto klut = mockturtle::gates_to_nodes<mockturtle::klut_network>( *xag_p );
+        if ( is_set( "clear_cache" ) )
+        {
+          exact_xag_cache = std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>();
+        }
+        mockturtle::exact_resynthesis_params esps;
+        esps.cache = exact_xag_cache;
+        esps.conflict_limit = conflict_limit;
+        mockturtle::exact_resynthesis resyn( 2u, esps );
+        mockturtle::cut_rewriting( klut, resyn, ps, &st );
+        klut = cleanup_dangling( klut );
+
+        mockturtle::direct_resynthesis<mockturtle::xag_network> dresyn;
+        *xag_p = mockturtle::node_resynthesis<mockturtle::xag_network>( klut, dresyn );
+      }
+    }
+    break;
     }
   }
 
@@ -123,6 +148,7 @@ private:
   mockturtle::cut_rewriting_stats st;
   mockturtle::exact_resynthesis_params::cache_t exact_cache{std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>()}; 
   mockturtle::exact_resynthesis_params::cache_t exact_aig_cache{std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>()}; 
+  mockturtle::exact_resynthesis_params::cache_t exact_xag_cache{std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>()}; 
   unsigned strategy{0u};
   unsigned exact_lutsize{3u};
   int conflict_limit{0};

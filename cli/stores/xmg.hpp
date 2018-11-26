@@ -19,7 +19,7 @@ namespace alice
 using xmg_nt = mockturtle::mapping_view<mockturtle::xmg_network, true>;
 using xmg_t = std::shared_ptr<xmg_nt>;
 
-ALICE_ADD_STORE( xmg_t, "xmg", "x", "xmg", "xmgs" );
+ALICE_ADD_STORE( xmg_t, "xmg", "x", "XMG", "XMGs" );
 
 ALICE_DESCRIBE_STORE( xmg_t, xmg )
 {
@@ -29,7 +29,7 @@ ALICE_DESCRIBE_STORE( xmg_t, xmg )
 ALICE_PRINT_STORE_STATISTICS( xmg_t, os, xmg )
 {
   mockturtle::depth_view depth_xmg{*xmg};
-  os << fmt::format( "xmg   i/o = {}/{}   gates = {}   level = {}", xmg->num_pis(), xmg->num_pos(), xmg->num_gates(), depth_xmg.depth() );
+  os << fmt::format( "XMG   i/o = {}/{}   gates = {}   level = {}", xmg->num_pis(), xmg->num_pos(), xmg->num_gates(), depth_xmg.depth() );
   if ( xmg->has_mapping() )
   {
     os << fmt::format( "   luts = {}", xmg->num_cells() );
