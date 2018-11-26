@@ -101,7 +101,7 @@ public:
     {
       if constexpr ( std::is_same_v<Store, xmg_nt> )
       {
-        auto* xmg_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
+        auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
         mockturtle::xmg_npn_resynthesis resyn;
         mockturtle::cut_rewriting( *xmg_p, resyn, ps, &st );
         *xmg_p = cleanup_dangling( *xmg_p );
