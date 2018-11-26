@@ -46,6 +46,13 @@ ALICE_LOG_STORE_STATISTICS( xag_t, xag )
   };
 }
 
+ALICE_READ_FILE( xag_t, aiger, filename, cmd )
+{
+  mockturtle::xag_network xag;
+  lorina::read_aiger( filename, mockturtle::aiger_reader( xag ) );
+  return std::make_shared<xag_nt>( xag );
+}
+
 ALICE_WRITE_FILE( xag_t, bench, xag, filename, cmd )
 {
   mockturtle::write_bench( *xag, filename );
