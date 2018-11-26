@@ -18,7 +18,7 @@ public:
     add_option( "--max_compare", ps.max_compare, "maximum number of nodes compared per candidate node", true );
     add_option( "--depth", ps.max_inserts, "maximum number of nodes inserted by resubstitution", true );
     add_flag( "-w,--window", ps.extend, "extend reconvergence-driven cut to window" );
-    add_flag( "-z", ps.zero_gain, "enable zero-gain resubstitution" );
+    add_flag( "-z,--zero-gain", ps.zero_gain, "enable zero-gain resubstitution" );
     add_flag( "-p,--progress", ps.progress, "show progress" );
     add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
