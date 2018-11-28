@@ -37,7 +37,7 @@ public:
       break;
       case 1:
       {
-        mockturtle::akers_resynthesis resyn;
+        mockturtle::akers_resynthesis<mockturtle::mig_network> resyn;
         return mockturtle::node_resynthesis<mockturtle::mig_network>( ntk, resyn );
       }
       }
