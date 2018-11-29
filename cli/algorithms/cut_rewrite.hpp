@@ -27,6 +27,7 @@ public:
     add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1, exact=2, exact_aig=3, xmgnpn=4, exact_xag=5}" );
     add_flag( "-z", ps.allow_zero_gain, "enable zero-gain rewriting" );
     add_flag( "--multiple", "try multiple candidates if possible" );
+    add_flag( "--greedy", "use Greedy candidate selection" );
     add_flag( "--dont_cares", "use don't cares if possible" );
     add_flag( "--clear_cache", "clear network cache" );
     add_option( "--exact_lutsize", exact_lutsize, "LUT size for exact resynthesis", true );
@@ -38,6 +39,7 @@ public:
   template<class Store>
   inline void execute_store()
   {
+    ps.candidate_selection_strategy = is_set( "greedy" ) ? mockturtle::cut_rewriting_params::greedy : mockturtle::cut_rewriting_params::minimize_weight;
     ps.use_dont_cares = is_set( "dont_cares" );
     switch ( strategy )
     {
