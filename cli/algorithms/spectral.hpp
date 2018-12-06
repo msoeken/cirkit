@@ -42,6 +42,8 @@ public:
         {
           switch ( trans._kind )
           {
+          default:
+            break;
           case kitty::detail::spectral_operation::kind::permutation:
             env->out() << fmt::format( "[i] swap {} and {}\n", (char)( 'a' + (int)std::log2( trans._var1 ) ), (char)( 'a' + (int)std::log2( trans._var2 ) ) );
             break;
