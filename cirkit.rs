@@ -1,8 +1,8 @@
 # commands
 alias "rfz(.*)" "refactor --strategy=1 -p -z{}"
 alias "rf(.*)" "refactor --strategy=1 -p{}"
-alias "rwz(.*)" "cut_rewrite --strategy=0 -k 4 -p --multiple -z{}"
-alias "rw(.*)" "cut_rewrite --strategy=0 -k 4 --multiple -p{}"
+alias "rwz(.*)" "cut_rewrite --strategy=0 -k 4 --lutcount 25 -p --multiple -z{}"
+alias "rw(.*)" "cut_rewrite --strategy=0 -k 4 --lutcount 25 --multiple -p{}"
 alias "rsz(.*)" "resub -p -z{}"
 alias "rs(.*)" "resub -p{}"
 alias "bz(.*)" "mighty --area_aware{}"

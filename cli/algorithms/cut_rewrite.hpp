@@ -8,6 +8,7 @@
 #include <mockturtle/algorithms/node_resynthesis/direct.hpp>
 #include <mockturtle/algorithms/node_resynthesis/exact.hpp>
 #include <mockturtle/algorithms/node_resynthesis/mig_npn.hpp>
+#include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>
 #include <mockturtle/algorithms/node_resynthesis/xmg_npn.hpp>
 
 #include "../utils/cirkit_command.hpp"
@@ -24,7 +25,7 @@ public:
 
     add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
     add_option( "--lutcount", ps.cut_enumeration_ps.cut_limit, "cut limit", true );
-    add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1, exact=2, exact_aig=3, xmgnpn=4, exact_xag=5}" );
+    add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {db=0, exact=1, akers=2}" );
     add_flag( "-z", ps.allow_zero_gain, "enable zero-gain rewriting" );
     add_flag( "--multiple", "try multiple candidates if possible" );
     add_flag( "--greedy", "use Greedy candidate selection" );
@@ -46,27 +47,41 @@ public:
     default:
     case 0:
     {
-      if constexpr ( std::is_same_v<Store, mig_t> )
+      if constexpr ( std::is_same_v<Store, aig_t> )
+      {
+        auto* aig_p = static_cast<mockturtle::aig_network*>( store<Store>().current().get() );
+        mockturtle::xag_npn_resynthesis<mockturtle::aig_network> resyn;
+        mockturtle::cut_rewriting( *aig_p, resyn, ps, &st );
+        *aig_p = cleanup_dangling( *aig_p );
+      }
+      else if constexpr (std::is_same_v<Store, xag_t> )
+      {
+        auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
+        mockturtle::xag_npn_resynthesis<mockturtle::xag_network> resyn;
+        mockturtle::cut_rewriting( *xag_p, resyn, ps, &st );
+        *xag_p = cleanup_dangling( *xag_p );
+      }
+      else if constexpr ( std::is_same_v<Store, mig_t> )
       {
         auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
         mockturtle::mig_npn_resynthesis resyn( is_set( "multiple" ) );
         mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
         *mig_p = cleanup_dangling( *mig_p );
       }
-    }
-    break;
-    case 1:
-    {
-      if constexpr ( std::is_same_v<Store, mig_t> )
+      else if constexpr ( std::is_same_v<Store, xmg_nt> )
       {
-        auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
-        mockturtle::akers_resynthesis<mockturtle::mig_network> resyn;
-        mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
-        *mig_p = cleanup_dangling( *mig_p );
+        auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
+        mockturtle::xmg_npn_resynthesis resyn;
+        mockturtle::cut_rewriting( *xmg_p, resyn, ps, &st );
+        *xmg_p = cleanup_dangling( *xmg_p );
+      }
+      else
+      {
+        env->err() << "[w] this strategy works only for AIGs, XAGs, MIGs, and XMGs\n";
       }
     }
     break;
-    case 2:
+    case 1:
     {
       if constexpr ( std::is_same_v<Store, klut_t> )
       {
@@ -82,11 +97,7 @@ public:
         mockturtle::cut_rewriting( *klut_p, resyn, ps, &st );
         *klut_p = cleanup_dangling( *klut_p );
       }
-    }
-    break;
-    case 3:
-    {
-      if constexpr ( std::is_same_v<Store, aig_t> )
+      else if constexpr ( std::is_same_v<Store, aig_t> )
       {
         auto* aig_p = static_cast<mockturtle::aig_network*>( store<Store>().current().get() );
         if ( is_set( "clear_cache" ) )
@@ -100,22 +111,7 @@ public:
         mockturtle::cut_rewriting( *aig_p, resyn, ps, &st );
         *aig_p = cleanup_dangling( *aig_p );
       }
-    }
-    break;
-    case 4:
-    {
-      if constexpr ( std::is_same_v<Store, xmg_nt> )
-      {
-        auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
-        mockturtle::xmg_npn_resynthesis resyn;
-        mockturtle::cut_rewriting( *xmg_p, resyn, ps, &st );
-        *xmg_p = cleanup_dangling( *xmg_p );
-      }
-    }
-    break;
-    case 5:
-    {
-      if constexpr ( std::is_same_v<Store, xag_t> )
+      else if constexpr ( std::is_same_v<Store, xag_t> )
       {
         auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
         auto klut = mockturtle::gates_to_nodes<mockturtle::klut_network>( *xag_p );
@@ -132,6 +128,25 @@ public:
 
         mockturtle::direct_resynthesis<mockturtle::xag_network> dresyn;
         *xag_p = mockturtle::node_resynthesis<mockturtle::xag_network>( klut, dresyn );
+      }
+      else
+      {
+        env->err() << "[w] this strategy works only for LUT networks, AIGs, and XAGs\n";
+      }
+    }
+    break;
+    case 2:
+    {
+      if constexpr ( std::is_same_v<Store, mig_t> )
+      {
+        auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
+        mockturtle::akers_resynthesis<mockturtle::mig_network> resyn;
+        mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
+        *mig_p = cleanup_dangling( *mig_p );
+      }
+      else
+      {
+        env->err() << "[w] this strategy works only for MIGs\n";
       }
     }
     break;
