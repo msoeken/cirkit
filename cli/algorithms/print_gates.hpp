@@ -10,7 +10,7 @@ namespace alice
 class print_gates_command : public cirkit::cirkit_command<print_gates_command, aig_t, mig_t, xag_t, xmg_t, klut_t>
 {
 public:
-  print_gates_command( environment::ptr& env ) : cirkit::cirkit_command<print_gates_command, aig_t, mig_t, xag_t, xmg_t, klut_t>( env, "Performs k-LUT mapping", "apply LUT-mapping to {0}" )
+  print_gates_command( environment::ptr& env ) : cirkit::cirkit_command<print_gates_command, aig_t, mig_t, xag_t, xmg_t, klut_t>( env, "Print gate summary", "gate summary for {0}" )
   {
   }
 
