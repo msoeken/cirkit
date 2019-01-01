@@ -13,6 +13,7 @@
 #include "algorithms/collapse_mapping.hpp"
 #include "algorithms/cut_rewrite.hpp"
 #include "algorithms/lut_mapping.hpp"
+#include "algorithms/migcost.hpp"
 #include "algorithms/mighty.hpp"
 #include "algorithms/lut_resynthesis.hpp"
 #include "algorithms/print_gates.hpp"
