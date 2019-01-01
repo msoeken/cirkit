@@ -26,7 +26,7 @@ public:
     add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
     add_option( "--lutcount", ps.cut_enumeration_ps.cut_limit, "cut limit", true );
     add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {db=0, exact=1, akers=2}" );
-    add_flag( "-z", ps.allow_zero_gain, "enable zero-gain rewriting" );
+    add_flag( "-z,--zero_gain", ps.allow_zero_gain, "enable zero-gain rewriting" );
     add_flag( "--multiple", "try multiple candidates if possible" );
     add_flag( "--greedy", "use Greedy candidate selection" );
     add_flag( "--dont_cares", "use don't cares if possible" );
