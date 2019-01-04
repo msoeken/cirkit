@@ -14,6 +14,7 @@ class migcost_command : public cirkit::cirkit_command<migcost_command, aig_t, mi
 public:
   migcost_command( environment::ptr& env ) : cirkit::cirkit_command<migcost_command, aig_t, mig_t>( env, "Performs k-LUT mapping", "apply LUT-mapping to {0}" )
   {
+    add_flag( "--silent", silent, "produce no output" );
   }
 
   template<class Store>
@@ -40,24 +41,27 @@ public:
     stmg_delay = depth_maj * 1.5 + depth_inv * 0.0262701;
     stmg_energy = 700 * num_dangling + 3.98495 * num_inv;
 
-    env->out() << fmt::format( "[i] Gates             = {}\n"
-                               "[i] Inverters         = {}\n"
-                               "[i] Depth (def.)      = {}\n"
-                               "[i] Depth mixed       = {}\n"
-                               "[i] Depth mixed (MAJ) = {}\n"
-                               "[i] Depth mixed (INV) = {}\n"
-                               "[i] Dangling inputs   = {}\n",
-                               num_gates, num_inv, depth, depth_mixed, depth_maj, depth_inv, num_dangling );
+    if ( !silent )
+    {
+      env->out() << fmt::format( "[i] Gates             = {}\n"
+                                 "[i] Inverters         = {}\n"
+                                 "[i] Depth (def.)      = {}\n"
+                                 "[i] Depth mixed       = {}\n"
+                                 "[i] Depth mixed (MAJ) = {}\n"
+                                 "[i] Depth mixed (INV) = {}\n"
+                                 "[i] Dangling inputs   = {}\n",
+                                 num_gates, num_inv, depth, depth_mixed, depth_maj, depth_inv, num_dangling );
 
-    env->out() << fmt::format( "[i] QCA (area)        = {:.2f} um^2\n"
-                               "[i] QCA (delay)       = {:.2f} ns\n"
-                               "[i] QCA (energy)      = {:.2f} E-21 J\n",
-                               qca_area, qca_delay, qca_energy );
+      env->out() << fmt::format( "[i] QCA (area)        = {:.2f} um^2\n"
+                                 "[i] QCA (delay)       = {:.2f} ns\n"
+                                 "[i] QCA (energy)      = {:.2f} E-21 J\n",
+                                 qca_area, qca_delay, qca_energy );
 
-    env->out() << fmt::format( "[i] STMG (area)       = {:.2f} um^2\n"
-                               "[i] STMG (delay)      = {:.2f} ns\n"
-                               "[i] STMG (energy)     = {:.2f} E-21 J\n",
-                               stmg_area, stmg_delay, stmg_energy );
+      env->out() << fmt::format( "[i] STMG (area)       = {:.2f} um^2\n"
+                                 "[i] STMG (delay)      = {:.2f} ns\n"
+                                 "[i] STMG (energy)     = {:.2f} E-21 J\n",
+                                 stmg_area, stmg_delay, stmg_energy );
+    }
   }
 
   nlohmann::json log() const override
@@ -138,6 +142,7 @@ private:
   unsigned num_gates{0u}, num_inv{0u}, depth{0u}, depth_mixed{0u}, depth_maj{0u}, depth_inv{0u}, num_dangling{0u};
   double qca_area, qca_delay, qca_energy;
   double stmg_area, stmg_delay, stmg_energy;
+  bool silent{false};
 };
 
 ALICE_ADD_COMMAND( migcost, "Various" )
