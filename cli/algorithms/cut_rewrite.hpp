@@ -68,7 +68,7 @@ public:
         mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
         *mig_p = cleanup_dangling( *mig_p );
       }
-      else if constexpr ( std::is_same_v<Store, xmg_nt> )
+      else if constexpr ( std::is_same_v<Store, xmg_t> )
       {
         auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
         mockturtle::xmg_npn_resynthesis resyn;
