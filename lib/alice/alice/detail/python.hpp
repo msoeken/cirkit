@@ -85,7 +85,7 @@ py::object json_to_python( const nlohmann::json& json )
       _dict[py::str( it.key() )] = json_to_python( it.value() );
     }
 
-    return _dict;
+    return std::move( _dict );
   }
   else if ( json.is_array() )
   {
@@ -96,7 +96,7 @@ py::object json_to_python( const nlohmann::json& json )
       _list.append( json_to_python( element ) );
     }
 
-    return _list;
+    return std::move( _list );
   }
   else if ( json.is_string() )
   {
