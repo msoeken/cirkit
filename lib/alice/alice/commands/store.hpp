@@ -91,6 +91,7 @@ private:
   int show_store()
   {
     constexpr auto option = store_info<Store>::option;
+    constexpr auto name = store_info<Store>::name;
     constexpr auto name_plural = store_info<Store>::name_plural;
 
     const auto& _store = store<Store>();
@@ -99,7 +100,7 @@ private:
     {
       if ( _store.empty() )
       {
-        env->out() << fmt::format( "[i] no {} in store", name_plural ) << std::endl;
+        env->out() << fmt::format( "[w] no {} in store", name ) << std::endl;
       }
       else
       {

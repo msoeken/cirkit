@@ -197,6 +197,12 @@ public:
     return ALICE_SETTINGS_WITH_DEFAULT_OPTION && !_default_option.empty();
   }
 
+  /*! \brief Checks whether a default store option is enabled and set from a set of options */
+  bool has_default_option( std::vector<std::string> const& list ) const
+  {
+    return ALICE_SETTINGS_WITH_DEFAULT_OPTION && std::find( list.begin(), list.end(), _default_option ) != list.end();
+  }
+
   /*! \brief Checks whether option is default store option
     
     This method also checks whether default store options are enabled.  If not,
