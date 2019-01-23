@@ -58,6 +58,12 @@ ALICE_WRITE_FILE( xag_t, bench, xag, filename, cmd )
   mockturtle::write_bench( *xag, filename );
 }
 
+template<>
+inline void write<xag_t, io_bench_tag_t>( xag_t const& xag, std::ostream& os, const command& )
+{
+  mockturtle::write_bench( *xag, os );
+}
+
 ALICE_READ_FILE( xag_t, verilog, filename, cmd )
 {
   mockturtle::xag_network xag;

@@ -65,6 +65,12 @@ ALICE_WRITE_FILE( mig_t, bench, mig, filename, cmd )
   mockturtle::write_bench( *mig, filename );
 }
 
+template<>
+inline void write<mig_t, io_bench_tag_t>( mig_t const& mig, std::ostream& os, const command& )
+{
+  mockturtle::write_bench( *mig, os );
+}
+
 ALICE_READ_FILE( mig_t, verilog, filename, cmd )
 {
   mockturtle::mig_network mig;

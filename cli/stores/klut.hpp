@@ -66,4 +66,10 @@ ALICE_WRITE_FILE( klut_t, bench, klut, filename, cmd )
   mockturtle::write_bench( *klut, filename );
 }
 
+template<>
+inline void write<klut_t, io_bench_tag_t>( klut_t const& klut, std::ostream& os, const command& )
+{
+  mockturtle::write_bench( *klut, os );
+}
+
 } // namespace alice

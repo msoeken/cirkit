@@ -65,6 +65,12 @@ ALICE_WRITE_FILE( xmg_t, bench, xmg, filename, cmd )
   mockturtle::write_bench( *xmg, filename );
 }
 
+template<>
+inline void write<xmg_t, io_bench_tag_t>( xmg_t const& xmg, std::ostream& os, const command& )
+{
+  mockturtle::write_bench( *xmg, os );
+}
+
 ALICE_READ_FILE( xmg_t, verilog, filename, cmd )
 {
   mockturtle::xmg_network xmg;
