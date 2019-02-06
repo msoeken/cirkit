@@ -18,6 +18,7 @@
 #include "algorithms/lut_mapping.hpp"
 #include "algorithms/migcost.hpp"
 #include "algorithms/mighty.hpp"
+#include "algorithms/minmc.hpp"
 #include "algorithms/lut_resynthesis.hpp"
 #include "algorithms/print_gates.hpp"
 #include "algorithms/refactor.hpp"
