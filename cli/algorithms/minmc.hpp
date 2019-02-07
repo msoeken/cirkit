@@ -18,9 +18,12 @@ class minmc_command : public cirkit::cirkit_command<minmc_command, xag_t>
 public:
   minmc_command( environment::ptr& env ) : cirkit::cirkit_command<minmc_command, xag_t>( env, "Optimizes for multiplicative complexity", "applies optimization to {0}" )
   {
-    opts.add_flag( "--progress,-p", ps.progress, "show progress" );
-    opts.add_option( "--load", db, "load database" );
-    opts.add_flag( "--verbose,-v", ps.verbose, "be verbose" );
+    add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
+    add_option( "--lutcount", ps.cut_enumeration_ps.cut_limit, "cut limit", true );
+    add_flag( "--progress,-p", ps.progress, "show progress" );
+    add_option( "--load", db, "load database" );
+    add_flag( "--verify" , "verify database when loading" );
+    add_flag( "--verbose,-v", ps.verbose, "be verbose" );
   }
 
   rules validity_rules() const override
@@ -36,7 +39,12 @@ public:
   {
     if ( is_set( "load" ) )
     {
-      resyn.reset( new mockturtle::xag_minmc_resynthesis( db ) );
+      mockturtle::xag_minmc_resynthesis_params params;
+      if ( is_set( "verify" ) )
+      {
+        params.verify_database = true;
+      }
+      resyn.reset( new mockturtle::xag_minmc_resynthesis( db, params ) );
     }
 
     if ( store<xag_t>().current_index() >= 0 )
