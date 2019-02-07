@@ -65,7 +65,6 @@ class BuildExt(build_ext):
       opts.append('-Wno-unknown-pragmas')
       opts.append('-Wno-unused-variable')
       opts.append('-Wno-deprecated-declarations')
-      opts.append('-Wno-format')
       opts.append('-Wno-switch')
     else:
       opts.append('/std:c++17')
