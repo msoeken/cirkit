@@ -13,6 +13,18 @@
 namespace alice
 {
 
+namespace detail
+{
+template<class Ntk>
+struct mc_cost
+{
+  uint32_t operator()( Ntk const& ntk, mockturtle::node<Ntk> const& n ) const
+  {
+    return ntk.is_and( n ) ? 1 : 0;
+  }
+};
+} // namespace detail
+
 class minmc_command : public cirkit::cirkit_command<minmc_command, xag_t>
 {
 public:
@@ -52,7 +64,7 @@ public:
       resyn->ps.print_stats = ps.verbose;
 
       auto* xag_p = static_cast<mockturtle::xag_network*>( store<xag_t>().current().get() );
-      mockturtle::cut_rewriting( *xag_p, *resyn, ps, &st );
+      mockturtle::cut_rewriting( *xag_p, *resyn, ps, &st, detail::mc_cost<mockturtle::xag_network>() );
       *xag_p = mockturtle::cleanup_dangling( *xag_p );
     }
   }
