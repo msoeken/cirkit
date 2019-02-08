@@ -532,6 +532,11 @@ PYBIND11_MODULE(prefix, m) \
   make_special_write_commands<cli_t, alice_write_tags, std::tuple_size<alice_write_tags>::value> swc( cli, m ); \
 }
 #elif defined ALICE_CINTERFACE
+#ifdef _MSC_VER
+#define DLLEXPORT __declspec(dllexport)
+#else
+#define DLLEXPORT
+#endif
 #define ALICE_MAIN(prefix) \
 using namespace alice; \
 _ALICE_END_LIST( alice_stores ) \
@@ -542,7 +547,7 @@ _ALICE_END_LIST( alice_write_tags ) \
 using cli_t = tuple_to_cli<alice_stores>::type; \
 \
 extern "C" { \
-  void* prefix##_create() { \
+  DLLEXPORT void* prefix##_create() { \
     auto cli = new cli_t( #prefix ); \
     insert_read_commands<cli_t, alice_read_tags, std::tuple_size<alice_read_tags>::value> irc( *cli ); \
     insert_write_commands<cli_t, alice_write_tags, std::tuple_size<alice_write_tags>::value> iwc( *cli ); \
@@ -550,12 +555,12 @@ extern "C" { \
     return reinterpret_cast<void*>( cli ); \
   } \
   \
-  void prefix##_delete( void* p ) { \
+  DLLEXPORT void prefix##_delete( void* p ) { \
     auto cli = reinterpret_cast<cli_t*>( p ); \
     delete cli; \
   } \
   \
-  int prefix##_command( void* p, const char *cmd, char* log, size_t size ) { \
+  DLLEXPORT int prefix##_command( void* p, const char *cmd, char* log, size_t size ) { \
     auto cli = reinterpret_cast<cli_t*>( p ); \
     auto vline = detail::split_with_quotes<' '>( cmd ); \
     const auto it = cli->env->commands().find( vline.front() ); \
