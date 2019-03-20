@@ -10,10 +10,10 @@
 namespace alice
 {
 
-class simulate_command : public cirkit::cirkit_command<simulate_command, aig_t, mig_t, klut_t, xmg_t>
+class simulate_command : public cirkit::cirkit_command<simulate_command, aig_t, xag_t, mig_t, klut_t, xmg_t>
 {
 public:
-  simulate_command( environment::ptr& env ) : cirkit::cirkit_command<simulate_command, aig_t, mig_t, klut_t, xmg_t>( env, "Simulates network into truth tables", "simulate {0}" )
+  simulate_command( environment::ptr& env ) : cirkit::cirkit_command<simulate_command, aig_t, xag_t, mig_t, klut_t, xmg_t>( env, "Simulates network into truth tables", "simulate {0}" )
   {
     add_flag( "--store", "store simulation results in truth table store" );
     add_flag( "--binary", "print truth tables as binary strings" );
