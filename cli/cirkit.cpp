@@ -20,6 +20,7 @@
 #include "algorithms/mighty.hpp"
 #include "algorithms/minmc.hpp"
 #include "algorithms/lut_resynthesis.hpp"
+#include "algorithms/npn.hpp"
 #include "algorithms/print_gates.hpp"
 #include "algorithms/refactor.hpp"
 #include "algorithms/resubstitute.hpp"
