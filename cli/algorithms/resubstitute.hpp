@@ -28,7 +28,6 @@ public:
   template<class Store>
   inline void execute_store()
   {
-    /* *** aig *** */
     if constexpr ( std::is_same_v<Store, aig_t> )
     {
       using view_t = mockturtle::depth_view<mockturtle::fanout_view<mockturtle::aig_network>>;
