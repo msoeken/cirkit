@@ -65,12 +65,18 @@ public:
       }
     }
     }
+  }
 
-    
+  nlohmann::json log() const override
+  {
+   return {
+      {"time_total", mockturtle::to_seconds( st.time_total )}
+    };
   }
 
 private:
   mockturtle::refactoring_params ps;
+  mockturtle::refactoring_stats st;
   unsigned strategy{0u};
 };
 

@@ -32,8 +32,16 @@ public:
     *mig_p = mockturtle::cleanup_dangling( *mig_p );
   }
 
+  nlohmann::json log() const override
+  {
+   return {
+      {"time_total", mockturtle::to_seconds( st.time_total )}
+    };
+  }
+
 private:
   mockturtle::mig_algebraic_depth_rewriting_params ps;
+  mockturtle::mig_algebraic_depth_rewriting_stats st;
 };
 
 ALICE_ADD_COMMAND( mighty, "Synthesis" )
