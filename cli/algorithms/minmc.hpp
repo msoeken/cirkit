@@ -36,6 +36,8 @@ public:
     add_option( "--load", db, "load database" );
     add_flag( "--verify" , "verify database when loading" );
     add_flag( "--verbose,-v", ps.verbose, "be verbose" );
+
+    ps.min_cand_cut_size = 2u;
   }
 
   rules validity_rules() const override
