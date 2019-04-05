@@ -18,7 +18,7 @@ public:
   {
     add_option( "--max_pis", ps.max_pis, "maximum number of PIs in MFFC", true );
     add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {mignpn=0, akers=1}" );
-    add_flag( "-z", ps.allow_zero_gain, "enable zero-gain refactoring" );
+    add_flag( "-z,--zero_gain", ps.allow_zero_gain, "enable zero-gain refactoring" );
     add_flag( "-p,--progress", ps.progress, "show progress" );
     add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
