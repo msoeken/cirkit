@@ -1,7 +1,7 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
-__version__ = '3.0a2.dev4'
+__version__ = '3.0a2.dev5'
 
 class get_pybind_include(object):
   """Helper class to determine the pybind11 include path
