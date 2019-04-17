@@ -30,38 +30,26 @@ public:
   {
     if constexpr ( std::is_same_v<Store, aig_t> )
     {
-      using view_t = mockturtle::depth_view<mockturtle::fanout_view<mockturtle::aig_network>>;
       auto* aig_p = static_cast<mockturtle::aig_network*>( store<Store>().current().get() );
-      mockturtle::fanout_view<mockturtle::aig_network> fanout_view{*aig_p};
-      view_t resub_view{fanout_view};
-      mockturtle::aig_resubstitution( resub_view, ps, &st );
+      mockturtle::aig_resubstitution( *aig_p, ps, &st );
       *aig_p = cleanup_dangling( *aig_p );
     }
     else if constexpr ( std::is_same_v<Store, mig_t> )
     {
-      using view_t = mockturtle::depth_view<mockturtle::fanout_view<mockturtle::mig_network>>;
       auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
-      mockturtle::fanout_view<mockturtle::mig_network> fanout_view{*mig_p};
-      view_t resub_view{fanout_view};
-      mockturtle::mig_resubstitution( resub_view, ps, &st );
+      mockturtle::mig_resubstitution( *mig_p, ps, &st );
       *mig_p = cleanup_dangling( *mig_p );
     }
     else if constexpr ( std::is_same_v<Store, xag_t> )
     {
-      using view_t = mockturtle::depth_view<mockturtle::fanout_view<mockturtle::xag_network>>;
       auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
-      mockturtle::fanout_view<mockturtle::xag_network> fanout_view{*xag_p};
-      view_t resub_view{fanout_view};
-      mockturtle::resubstitution( resub_view, ps, &st );
+      mockturtle::resubstitution( *xag_p, ps, &st );
       *xag_p = cleanup_dangling( *xag_p );
     }
     else if constexpr ( std::is_same_v<Store, xmg_t> )
     {
-      using view_t = mockturtle::depth_view<mockturtle::fanout_view<mockturtle::xmg_network>>;
       auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
-      mockturtle::fanout_view<mockturtle::xmg_network> fanout_view{*xmg_p};
-      view_t resub_view{fanout_view};
-      mockturtle::resubstitution( resub_view, ps, &st );
+      mockturtle::resubstitution( *xmg_p, ps, &st );
       *xmg_p = cleanup_dangling( *xmg_p );
     }
   }
