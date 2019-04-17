@@ -24,6 +24,7 @@
 #include "algorithms/print_gates.hpp"
 #include "algorithms/refactor.hpp"
 #include "algorithms/resubstitute.hpp"
+#include "algorithms/satlut.hpp"
 #include "algorithms/simulate.hpp"
 #include "algorithms/spectral.hpp"
 #include "algorithms/tt.hpp"
