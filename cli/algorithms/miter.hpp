@@ -156,6 +156,9 @@ private:
       store<Store2>().extend();
       typename Store2::element_type view{*miter_ntk};
       store<Store2>().current() = std::make_shared<typename Store2::element_type>( view );
+
+      constexpr auto option = store_info<Store2>::option;
+      env->set_default_option( option );
     }
   }
 
