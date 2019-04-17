@@ -10,7 +10,7 @@ namespace alice
 class satlut_mapping_command : public cirkit::cirkit_command<satlut_mapping_command, aig_t, mig_t, xag_t, xmg_t, klut_t>
 {
 public:
-  satlut_mapping_command( environment::ptr& env ) : cirkit::cirkit_command<satlut_mapping_command, aig_t, mig_t, xag_t, xmg_t, klut_t>( env, "Performs k-LUT mapping", "apply LUT-mapping to {0}" )
+  satlut_mapping_command( environment::ptr& env ) : cirkit::cirkit_command<satlut_mapping_command, aig_t, mig_t, xag_t, xmg_t, klut_t>( env, "Performs k-LUT mapping using SAT", "apply LUT-mapping to {0}" )
   {
     add_option( "-k,--lutsize", ps.cut_enumeration_ps.cut_size, "cut size", true );
     add_option( "--lutcount", ps.cut_enumeration_ps.cut_limit, "number of cuts per node", true );
@@ -51,7 +51,7 @@ public:
     }
   }
 
-  nlohmann::json log() const
+  nlohmann::json log() const override
   {
     return {
       {"time_total", mockturtle::to_seconds( st.time_total )}
