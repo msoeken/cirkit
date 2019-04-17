@@ -2,7 +2,9 @@
 
 #include <alice/alice.hpp>
 #include <lorina/aiger.hpp>
+#include <lorina/verilog.hpp>
 #include <mockturtle/io/aiger_reader.hpp>
+#include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
 #include <mockturtle/io/write_verilog.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -56,6 +58,18 @@ ALICE_READ_FILE( aig_t, aiger, filename, cmd )
 ALICE_WRITE_FILE( aig_t, bench, aig, filename, cmd )
 {
   mockturtle::write_bench( *aig, filename );
+}
+
+ALICE_READ_FILE( aig_t, verilog, filename, cmd )
+{
+  mockturtle::aig_network aig;
+
+  lorina::diagnostic_engine diag;
+  if ( lorina::read_verilog( filename, mockturtle::verilog_reader( aig ), &diag ) != lorina::return_code::success )
+  {
+    std::cout << "[w] parse error\n";
+  }
+  return std::make_shared<aig_nt>( aig );
 }
 
 ALICE_WRITE_FILE( aig_t, verilog, aig, filename, cmd )
