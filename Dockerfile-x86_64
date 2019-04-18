@@ -43,7 +43,7 @@ RUN git clone --recursive https://github.com/msoeken/cirkit
 
 # Change to RevKit python bindings directory
 ENV CC clang++
-WORKDIR /root/cirkit/dist/revkit
+WORKDIR /root/cirkit/dist/cirkit
 
 # Compile RevKit python bindings
 RUN /opt/python/cp27-cp27m/bin/python setup.py bdist_wheel
