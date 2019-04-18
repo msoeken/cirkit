@@ -62,6 +62,14 @@ protected:
     }
   }
 
+  template<class S>
+  void set_default_option()
+  {
+    constexpr auto option = store_info<S>::option;
+    env->set_default_option( option );
+    option_set = true;
+  }
+
 private:
   template<class S>
   void add_flag_helper( const std::string& option_text )
@@ -88,8 +96,12 @@ private:
 
     if ( is_set( option ) || default_option == option || env->default_option() == option )
     {
+      option_set = false;
       static_cast<Command*>( this )->template execute_store<S>();
-      env->set_default_option( option );
+      if ( !option_set )
+      {
+        env->set_default_option( option );
+      }
       return true;
     }
 
@@ -98,6 +110,7 @@ private:
 
 private:
   std::string default_option;
+  bool option_set{false};
 };
 
 } // namespace cirkit

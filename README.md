@@ -66,7 +66,7 @@ ps
 cut_rewrite
 lut_mapping
 collapse_mapping
-ps --lut
+ps
 write_bench file.bench
 ```
 
