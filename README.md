@@ -2,15 +2,14 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/201o4wdh0gmb56et?svg=true)](https://ci.appveyor.com/project/msoeken/cirkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# CirKit and RevKit (version 3)
+# CirKit (version 3)
 
-CirKit and RevKit are synthesis and optimization frameworks for classical and
-quantum logic synthesis, respectively.  They are implemented based on various
-[EPFL logic sythesis libraries](https://github.com/lsils/lstools-showcase).
+CirKit is a logic synthesis and optimization framework.  It is
+implemented based on various [EPFL logic sythesis libraries](https://github.com/lsils/lstools-showcase).
 
 ## Clone
 
-CirKit and RevKit depend on submodules, so make sure to clone recursively:
+CirKit depends on submodules, so make sure to clone recursively:
 
 ```bash
 git clone --recursive https://github.com/msoeken/cirkit.git
@@ -32,13 +31,6 @@ cd build
 cmake ..
 make cirkit
 cli/cirkit
-
-# RevKit
-mkdir build
-cd build
-cmake ..
-make revkit
-cli/revkit
 ```
 
 ## Installation (Python library)
@@ -47,17 +39,13 @@ cli/revkit
 # CirKit
 cd dist/cirkit
 python3 setup.py install
-
-# RevKit
-cd dist/revkit
-python3 setup.py install
 ```
 
 ## With custom compiler
 
-CirKit and RevKit are implemented using C++-17 features and therefore a recent
-compiler is required (e.g., GCC ≥ 7.3.0 and Clang ≥ 7.0.0).  If your recent
-compiler is not on the `PATH` prefix, extend the `cmake` command as follows:
+CirKit is implemented using C++-17 features and therefore a recent compiler is
+required (e.g., GCC ≥ 7.3.0 and Clang ≥ 7.0.0).  If your recent compiler is not
+on the `PATH` prefix, extend the `cmake` command as follows:
 
 ```bash
 cmake -DCMAKE_CXX_COMPILER=/path/to/c++-compiler ..
