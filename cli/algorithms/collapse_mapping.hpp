@@ -23,6 +23,9 @@ public:
     {
       extend_if_new<klut_t>();
       store<klut_t>().current() = std::make_shared<klut_nt>( *ntk );
+
+      constexpr auto option = store_info<klut_t>::option;
+      env->set_default_option( option );
     }
     else
     {
