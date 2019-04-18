@@ -65,8 +65,8 @@ read_aiger --aig file.aig
 ps
 cut_rewrite
 lut_mapping
-collapse_mapped
-ps
+collapse_mapping
+ps --lut
 write_bench file.bench
 ```
 
@@ -78,7 +78,7 @@ cirkit.read_aiger(aig=True, filename="file.aig")
 cirkit.ps(aig=True)
 cirkit.cut_rewrite(aig=True)
 cirkit.lut_mapping(aig=True)
-cirkit.collapse_mapped(aig=True)
+cirkit.collapse_mapping(aig=True)
 cirkit.ps(lut=True)
 cirkit.write_bench(lut=True, filename="file.bench")
 ```
