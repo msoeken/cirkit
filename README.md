@@ -87,6 +87,11 @@ cirkit.ps(lut=True)
 cirkit.write_bench(lut=True, filename="file.bench")
 ```
 
+## RevKit 3.1
+
+RevKit 3.1 is a Python library without a stand-alone interface as in CirKit.
+It can be found at [the RevKit repository](https://github.com/msoeken/revkit).
+
 ## CirKit and RevKit 2.0
 
 The 2.0 versions of CirKit and RevKit can be found
