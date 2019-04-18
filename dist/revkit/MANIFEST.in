@@ -1,2 +1,0 @@
-recursive-include cli *.cpp *.hpp
-recursive-include lib *.hpp *.h *.cc *.def
