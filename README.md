@@ -57,6 +57,32 @@ and prefix the `python3` command as follows:
 CC=/path/to/c++-compiler python3 setup.py install
 ```
 
+## Example (stand-alone application)
+
+```bash
+$ cirkit
+read_aiger --aig file.aig
+ps
+cut_rewrite
+lut_mapping
+collapse_mapped
+ps
+write_bench file.bench
+```
+
+## Example (Python interface)
+
+```python
+import cirkit
+cirkit.read_aiger(aig=True, filename="file.aig")
+cirkit.ps(aig=True)
+cirkit.cut_rewrite(aig=True)
+cirkit.lut_mapping(aig=True)
+cirkit.collapse_mapped(aig=True)
+cirkit.ps(lut=True)
+cirkit.write_bench(lut=True, filename="file.bench")
+```
+
 ## CirKit and RevKit 2.0
 
 The 2.0 versions of CirKit and RevKit can be found
