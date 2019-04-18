@@ -25,7 +25,6 @@ git submodule update --recursive
 ## Installation (shell interface)
 
 ```bash
-# CirKit
 mkdir build
 cd build
 cmake ..
@@ -36,9 +35,14 @@ cli/cirkit
 ## Installation (Python library)
 
 ```bash
-# CirKit
-cd dist/cirkit
 python3 setup.py install
+```
+
+But you can also use the `Makefile` to build the Python library in a virtual
+environment:
+
+```bash
+make devbuild
 ```
 
 ## With custom compiler

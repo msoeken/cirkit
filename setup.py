@@ -1,5 +1,6 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
+from halo import Halo
 
 __version__ = '3.0a2.dev5'
 
@@ -54,6 +55,8 @@ cirkit_modules = [
 
 class BuildExt(build_ext):
   """A custom build extension for adding compiler-specific options."""
+
+  @Halo(text='Compiling C++ sources... (be patient, this may take a few minutes)', spinner='dots')
   def build_extensions(self):
     ct = self.compiler.compiler_type
     opts = []
