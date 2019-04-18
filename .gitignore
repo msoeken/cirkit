@@ -14,3 +14,6 @@ dist/wheels
 tmp/
 **/*~
 **/.DS_Store
+
+# docs
+docs/_build
