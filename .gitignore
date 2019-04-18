@@ -1,11 +1,4 @@
 build
-dist/cirkit/build
-dist/cirkit/cirkit.egg-info
-dist/cirkit/dist
-dist/revkit/build
-dist/revkit/revkit.egg-info
-dist/revkit/dist
-dist/wheels
 
 # projects
 .vscode
@@ -14,6 +7,12 @@ dist/wheels
 tmp/
 **/*~
 **/.DS_Store
+
+# Python build files
+cirkit.egg-info
+dist
+pybuild
+venv
 
 # docs
 docs/_build
