@@ -30,12 +30,12 @@ cirkit_modules = [
       "lib/alice/",
       "lib/any",
       "lib/cli11",
-      "lib/fmt",
-      "lib/json",
       "lib/mockturtle/lib/abcsat",
       "lib/mockturtle/lib/ez",
-      "lib/mockturtle/lib/lorina",
+      "lib/mockturtle/lib/fmt",
+      "lib/mockturtle/lib/json",
       "lib/mockturtle/lib/kitty",
+      "lib/mockturtle/lib/lorina",
       "lib/mockturtle/lib/percy",
       "lib/mockturtle/lib/rang",
       "lib/mockturtle/lib/sparsepp",
@@ -66,6 +66,7 @@ class BuildExt(build_ext):
       opts.append('-std=c++17')
       opts.append('-Wno-register')
       opts.append('-Wno-unknown-pragmas')
+      opts.append('-Wno-unused-function')
       opts.append('-Wno-unused-variable')
       opts.append('-Wno-deprecated-declarations')
       opts.append('-Wno-switch')
