@@ -1,3 +1,5 @@
+add_subdirectory(mockturtle)
+
 add_library(alice INTERFACE) # v0.2+
 target_include_directories(alice INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/alice)
 if(UNIX)
@@ -17,12 +19,3 @@ target_include_directories(any INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/any)
 
 add_library(cli11 INTERFACE) # v1.3
 target_include_directories(cli11 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/cli11)
-
-add_library(fmt INTERFACE) # v4.1.0
-target_include_directories(fmt INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/fmt)
-target_compile_definitions(fmt INTERFACE FMT_HEADER_ONLY)
-
-add_library(json INTERFACE) # v3.0.0
-target_include_directories(json INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/json)
-
-add_subdirectory(mockturtle)
