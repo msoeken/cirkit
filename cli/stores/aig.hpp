@@ -2,8 +2,10 @@
 
 #include <alice/alice.hpp>
 #include <lorina/aiger.hpp>
+#include <lorina/blif.hpp>
 #include <lorina/verilog.hpp>
 #include <mockturtle/io/aiger_reader.hpp>
+#include <mockturtle/io/blif_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
 #include <mockturtle/io/write_verilog.hpp>

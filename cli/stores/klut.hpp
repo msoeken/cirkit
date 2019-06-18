@@ -72,4 +72,16 @@ inline void write<klut_t, io_bench_tag_t>( klut_t const& klut, std::ostream& os,
   mockturtle::write_bench( *klut, os );
 }
 
+ALICE_READ_FILE( klut_t, blif, filename, cmd )
+{
+  mockturtle::klut_network klut;
+
+  lorina::diagnostic_engine diag;
+  if ( lorina::read_blif( filename, mockturtle::blif_reader( klut ), &diag ) != lorina::return_code::success )
+  {
+    std::cout << "[w] parse error\n";
+  }
+  return std::make_shared<klut_nt>( klut );
+}
+
 } // namespace alice
