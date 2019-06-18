@@ -50,14 +50,24 @@ ALICE_LOG_STORE_STATISTICS( klut_t, klut )
 ALICE_READ_FILE( klut_t, aiger, filename, cmd )
 {
   mockturtle::klut_network klut;
-  lorina::read_aiger( filename, mockturtle::aiger_reader( klut ) );
+
+  lorina::diagnostic_engine diag;
+  if ( lorina::read_aiger( filename, mockturtle::aiger_reader( klut ), &diag ) != lorina::return_code::success )
+  {
+    std::cout << "[w] parse error\n";
+  }
   return std::make_shared<klut_nt>( klut );
 }
 
 ALICE_READ_FILE( klut_t, bench, filename, cmd )
 {
   mockturtle::klut_network klut;
-  lorina::read_bench( filename, mockturtle::bench_reader( klut ) );
+
+  lorina::diagnostic_engine diag;
+  if ( lorina::read_bench( filename, mockturtle::bench_reader( klut ), &diag ) != lorina::return_code::success )
+  {
+    std::cout << "[w] parse error\n";
+  }
   return std::make_shared<klut_nt>( klut );
 }
 

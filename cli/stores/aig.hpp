@@ -53,7 +53,12 @@ ALICE_LOG_STORE_STATISTICS( aig_t, aig )
 ALICE_READ_FILE( aig_t, aiger, filename, cmd )
 {
   mockturtle::aig_network aig;
-  lorina::read_aiger( filename, mockturtle::aiger_reader( aig ) );
+
+  lorina::diagnostic_engine diag;
+  if ( lorina::read_aiger( filename, mockturtle::aiger_reader( aig ), &diag ) != lorina::return_code::success )
+  {
+    std::cout << "[w] parse error\n";
+  }
   return std::make_shared<aig_nt>( aig );
 }
 
