@@ -6,6 +6,8 @@
 #include <mockturtle/io/aiger_reader.hpp>
 #include <mockturtle/io/bench_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
+#include <mockturtle/io/blif_reader.hpp>
+#include <mockturtle/io/write_blif.hpp>
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
@@ -92,6 +94,11 @@ ALICE_READ_FILE( klut_t, blif, filename, cmd )
     std::cout << "[w] parse error\n";
   }
   return std::make_shared<klut_nt>( klut );
+}
+
+ALICE_WRITE_FILE( klut_t, blif, klut, filename, cmd )
+{
+  mockturtle::write_blif( *klut, filename );
 }
 
 } // namespace alice
