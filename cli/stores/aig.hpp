@@ -2,8 +2,10 @@
 
 #include <alice/alice.hpp>
 #include <lorina/aiger.hpp>
+#include <lorina/blif.hpp>
 #include <lorina/verilog.hpp>
 #include <mockturtle/io/aiger_reader.hpp>
+#include <mockturtle/io/blif_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
 #include <mockturtle/io/write_verilog.hpp>
@@ -51,7 +53,12 @@ ALICE_LOG_STORE_STATISTICS( aig_t, aig )
 ALICE_READ_FILE( aig_t, aiger, filename, cmd )
 {
   mockturtle::aig_network aig;
-  lorina::read_aiger( filename, mockturtle::aiger_reader( aig ) );
+
+  lorina::diagnostic_engine diag;
+  if ( lorina::read_aiger( filename, mockturtle::aiger_reader( aig ), &diag ) != lorina::return_code::success )
+  {
+    std::cout << "[w] parse error\n";
+  }
   return std::make_shared<aig_nt>( aig );
 }
 
