@@ -15,7 +15,20 @@ public:
   {
     add_option( "table,--table", table, "truth table (prefix with 0x to read as hexadecimal)" );
     add_option( "--expression", expression, "creates truth table from expression" );
+    add_option( "--maj", maj, "creates truth table n-input majority function" );
+    add_option( "--sym", sym, "creates truth table for symmetric function (e.g., tt --sym 001 for 2-input AND; tt --sym 101 for 2-input XNOR; tt --sym 000111 for 5-input MAJ" );
     add_flag( "-n,--new", "adds new store entry" );
+  }
+
+  rules validity_rules() const override
+  {
+    return {
+        {[this]() { return !is_set( "maj" ) || ( maj > 2 && maj % 2 == 1 ); }, "majority size must be odd positive number greater than 2"},
+        {[this]() {
+           return !is_set( "sym" ) ||
+                  std::all_of( sym.begin(), sym.end(), []( auto c ) { return c == '0' || c == '1'; } );
+         },
+         "symmetric pattern must contain only of 0s and 1s"}};
   }
 
   void execute() override
@@ -67,11 +80,44 @@ public:
         tts.current() = tt;
       }
     }
+    else if ( is_set( "maj" ) )
+    {
+      if ( tts.empty() || is_set( "new" ) )
+      {
+        tts.extend();
+      }
+
+      kitty::dynamic_truth_table tt( maj );
+      kitty::create_majority( tt );
+      tts.current() = tt;
+    }
+    else if ( is_set( "sym" ) )
+    {
+      if ( tts.empty() || is_set( "new" ) )
+      {
+        tts.extend();
+      }
+
+      kitty::dynamic_truth_table tt( sym.size() - 1u );
+      uint64_t counts{0u}, mask{1u};
+      for ( auto c : sym )
+      {
+        if ( c == '1' )
+        {
+          counts |= mask;
+        }
+        mask <<= 1u;
+      }
+      kitty::create_symmetric( tt, counts );
+      tts.current() = tt;
+    }
   }
 
 private:
   std::string table;
   std::string expression;
+  uint32_t maj;
+  std::string sym;
 };
 
 ALICE_ADD_COMMAND( tt, "Loading" );
