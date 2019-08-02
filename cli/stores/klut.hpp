@@ -11,13 +11,14 @@
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <fmt/format.h>
 
 namespace alice
 {
 
-using klut_nt = mockturtle::mapping_view<mockturtle::klut_network, true>;
+using klut_nt = mockturtle::mapping_view<mockturtle::names_view<mockturtle::klut_network>, true>;
 using klut_t = std::shared_ptr<klut_nt>;
 
 ALICE_ADD_STORE( klut_t, "lut", "l", "LUT network", "LUT networks" );
@@ -52,25 +53,27 @@ ALICE_LOG_STORE_STATISTICS( klut_t, klut )
 ALICE_READ_FILE( klut_t, aiger, filename, cmd )
 {
   mockturtle::klut_network klut;
+  mockturtle::names_view<mockturtle::klut_network> named_klut( klut );
 
   lorina::diagnostic_engine diag;
-  if ( lorina::read_aiger( filename, mockturtle::aiger_reader( klut ), &diag ) != lorina::return_code::success )
+  if ( lorina::read_aiger( filename, mockturtle::aiger_reader( named_klut ), &diag ) != lorina::return_code::success )
   {
     std::cout << "[w] parse error\n";
   }
-  return std::make_shared<klut_nt>( klut );
+  return std::make_shared<klut_nt>( named_klut );
 }
 
 ALICE_READ_FILE( klut_t, bench, filename, cmd )
 {
   mockturtle::klut_network klut;
+  mockturtle::names_view<mockturtle::klut_network> named_klut( klut );
 
   lorina::diagnostic_engine diag;
-  if ( lorina::read_bench( filename, mockturtle::bench_reader( klut ), &diag ) != lorina::return_code::success )
+  if ( lorina::read_bench( filename, mockturtle::bench_reader( named_klut ), &diag ) != lorina::return_code::success )
   {
     std::cout << "[w] parse error\n";
   }
-  return std::make_shared<klut_nt>( klut );
+  return std::make_shared<klut_nt>( named_klut );
 }
 
 ALICE_WRITE_FILE( klut_t, bench, klut, filename, cmd )
@@ -87,13 +90,14 @@ inline void write<klut_t, io_bench_tag_t>( klut_t const& klut, std::ostream& os,
 ALICE_READ_FILE( klut_t, blif, filename, cmd )
 {
   mockturtle::klut_network klut;
+  mockturtle::names_view<mockturtle::klut_network> named_klut( klut );
 
   lorina::diagnostic_engine diag;
-  if ( lorina::read_blif( filename, mockturtle::blif_reader( klut ), &diag ) != lorina::return_code::success )
+  if ( lorina::read_blif( filename, mockturtle::blif_reader( named_klut ), &diag ) != lorina::return_code::success )
   {
     std::cout << "[w] parse error\n";
   }
-  return std::make_shared<klut_nt>( klut );
+  return std::make_shared<klut_nt>( named_klut );
 }
 
 ALICE_WRITE_FILE( klut_t, blif, klut, filename, cmd )
