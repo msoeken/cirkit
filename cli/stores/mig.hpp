@@ -16,7 +16,7 @@
 namespace alice
 {
 
-using mig_nt = mockturtle::mapping_view<mockturtle::mig_network, true>;
+using mig_nt = mockturtle::mapping_view<mockturtle::names_view<mockturtle::mig_network>, true>;
 using mig_t = std::shared_ptr<mig_nt>;
 
 ALICE_ADD_STORE( mig_t, "mig", "m", "MIG", "MIGs" );
@@ -86,6 +86,11 @@ ALICE_READ_FILE( mig_t, verilog, filename, cmd )
 ALICE_WRITE_FILE( mig_t, verilog, mig, filename, cmd )
 {
   mockturtle::write_verilog( *mig, filename );
+}
+
+ALICE_WRITE_FILE( mig_t, blif, mig, filename, cmd )
+{
+  mockturtle::write_blif( *mig, filename );
 }
 
 } // namespace alice
