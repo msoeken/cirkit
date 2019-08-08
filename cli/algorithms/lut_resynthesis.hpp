@@ -32,13 +32,19 @@ public:
       case 0:
       {
         mockturtle::mig_npn_resynthesis resyn;
-        return mockturtle::node_resynthesis<mockturtle::mig_network>( ntk, resyn );
+        mockturtle::mig_network mig;
+        mockturtle::names_view<mockturtle::mig_network> named_mig( mig );
+        mockturtle::node_resynthesis( named_mig, ntk, resyn );
+        return named_mig;
       }
       break;
       case 1:
       {
         mockturtle::akers_resynthesis<mockturtle::mig_network> resyn;
-        return mockturtle::node_resynthesis<mockturtle::mig_network>( ntk, resyn );
+        mockturtle::mig_network mig;
+        mockturtle::names_view<mockturtle::mig_network> named_mig( mig );
+        mockturtle::node_resynthesis( named_mig, ntk, resyn );
+        return named_mig;
       }
       }
     }();
