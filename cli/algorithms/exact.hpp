@@ -41,7 +41,7 @@ public:
       mockturtle::exact_resynthesis_params esps;
       esps.cache = exact_aig_cache;
       esps.conflict_limit = conflict_limit;
-      mockturtle::exact_aig_resynthesis resyn( esps );
+      mockturtle::exact_aig_resynthesis resyn( false, esps );
 
       mockturtle::aig_network ntk;
       std::vector<mockturtle::aig_network::signal> pis( tt.num_vars() );
