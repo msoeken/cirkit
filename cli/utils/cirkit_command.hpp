@@ -70,7 +70,7 @@ protected:
     option_set = true;
   }
 
-private:
+protected:
   template<class S>
   void add_flag_helper( const std::string& option_text )
   {
@@ -89,6 +89,7 @@ private:
     }
   }
 
+private:
   template<class S>
   bool execute_helper()
   {
