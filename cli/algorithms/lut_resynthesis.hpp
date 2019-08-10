@@ -150,22 +150,20 @@ private:
     using network_type = typename Dest::element_type;
     using base_type = typename network_type::base_type;
 
-    constexpr bool with_xor = std::is_same_v<Dest, xag_t> || std::is_same_v<Dest, xmg_t>;
-
     if ( is_store_set<Dest>() )
     {
       const auto dest = [&]() -> base_type {
-        if constexpr ( std::is_same_v<Store, xag_t> || std::is_same_v<Store, aig_t> )
+        if constexpr ( std::is_same_v<Dest, xag_t> || std::is_same_v<Dest, aig_t> )
         {
           mockturtle::xag_npn_resynthesis<base_type> resyn;
           return mockturtle::node_resynthesis<base_type>( ntk, resyn );
         }
-        else if constexpr ( std::is_same_v<Store, mig_t> )
+        else if constexpr ( std::is_same_v<Dest, mig_t> )
         {
           mockturtle::mig_npn_resynthesis resyn;
           return mockturtle::node_resynthesis<base_type>( ntk, resyn );
         }
-        else if constexpr ( std::is_same_v<Store, xmg_t> )
+        else if constexpr ( std::is_same_v<Dest, xmg_t> )
         {
           mockturtle::xmg_npn_resynthesis resyn;
           return mockturtle::node_resynthesis<base_type>( ntk, resyn );
