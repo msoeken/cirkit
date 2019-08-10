@@ -3,7 +3,10 @@
 #include <mockturtle/algorithms/node_resynthesis.hpp>
 #include <mockturtle/algorithms/node_resynthesis/dsd.hpp>
 #include <mockturtle/algorithms/node_resynthesis/exact.hpp>
+#include <mockturtle/algorithms/node_resynthesis/mig_npn.hpp>
 #include <mockturtle/algorithms/node_resynthesis/shannon.hpp>
+#include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>
+#include <mockturtle/algorithms/node_resynthesis/xmg_npn.hpp>
 
 #include "../utils/cirkit_command.hpp"
 
@@ -15,7 +18,7 @@ class lut_resynthesis_command : public cirkit::cirkit_command<lut_resynthesis_co
 public:
   lut_resynthesis_command( environment::ptr& env ) : cirkit::cirkit_command<lut_resynthesis_command, klut_t>( env, "Performs LUT resynthesis", "apply LUT resynthesis to {0}" )
   {
-    add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {dsd=0, shannon=1, dsd+exact=2}" );
+    add_option( "--strategy", strategy, "resynthesis strategy", true )->set_type_name( "strategy in {dsd=0, shannon=1, dsd+exact=2, npn=3 (LUT size must be <= 4)}" );
     add_flag_helper<aig_t>( "store result in {0}" );
     add_flag_helper<xag_t>( "store result in {0}" );
     add_flag_helper<mig_t>( "store result in {0}" );
@@ -42,10 +45,16 @@ public:
       if ( execute_shannon<Store, xmg_t>() ) return;
       break;
     case 2:
-      if ( execute_dsdexact<Store, xag_t>() ) return;
       if ( execute_dsdexact<Store, aig_t>() ) return;
+      if ( execute_dsdexact<Store, xag_t>() ) return;
       if ( execute_dsdexact<Store, mig_t>() ) return;
       if ( execute_dsdexact<Store, xmg_t>() ) return;
+      break;
+    case 3:
+      if ( execute_npn<Store, aig_t>() ) return;
+      if ( execute_npn<Store, xag_t>() ) return;
+      if ( execute_npn<Store, mig_t>() ) return;
+      if ( execute_npn<Store, xmg_t>() ) return;
       break;
     }
   }
@@ -124,6 +133,49 @@ private:
       mockturtle::exact_aig_resynthesis<base_type> eresyn( with_xor, esps );
       mockturtle::dsd_resynthesis<base_type, decltype( eresyn )> resyn( eresyn );
       const auto dest = mockturtle::node_resynthesis<base_type>( ntk, resyn );
+      network_type wrapped( dest );
+      extend_if_new<Dest>();
+      store<Dest>().current() = std::make_shared<network_type>( wrapped );
+
+      return true;
+    }
+
+    return false;
+  }
+
+  template<class Store, class Dest>
+  bool execute_npn()
+  {
+    const auto& ntk = *( store<Store>().current() );
+    using network_type = typename Dest::element_type;
+    using base_type = typename network_type::base_type;
+
+    constexpr bool with_xor = std::is_same_v<Dest, xag_t> || std::is_same_v<Dest, xmg_t>;
+
+    if ( is_store_set<Dest>() )
+    {
+      const auto dest = [&]() -> base_type {
+        if constexpr ( std::is_same_v<Store, xag_t> || std::is_same_v<Store, aig_t> )
+        {
+          mockturtle::xag_npn_resynthesis<base_type> resyn;
+          return mockturtle::node_resynthesis<base_type>( ntk, resyn );
+        }
+        else if constexpr ( std::is_same_v<Store, mig_t> )
+        {
+          mockturtle::mig_npn_resynthesis resyn;
+          return mockturtle::node_resynthesis<base_type>( ntk, resyn );
+        }
+        else if constexpr ( std::is_same_v<Store, xmg_t> )
+        {
+          mockturtle::xmg_npn_resynthesis resyn;
+          return mockturtle::node_resynthesis<base_type>( ntk, resyn );
+        }
+        else
+        {
+          assert( false );
+        }
+        return base_type();
+      }();
       network_type wrapped( dest );
       extend_if_new<Dest>();
       store<Dest>().current() = std::make_shared<network_type>( wrapped );
