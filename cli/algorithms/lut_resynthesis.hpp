@@ -52,11 +52,17 @@ public:
 
 private:
   template<class Store>
-  bool is_store_set() const
+  bool is_store_set()
   {
     constexpr auto option = store_info<Store>::option;
 
-    return is_set( option );
+    if ( is_set( option ) )
+    {
+      set_default_option<Store>();
+      return true;
+    }
+
+    return false;
   }
 
   template<class Store, class Dest>
