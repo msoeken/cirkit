@@ -107,14 +107,13 @@ public:
         mockturtle::exact_resynthesis_params esps;
         esps.cache = exact_aig_cache;
         esps.conflict_limit = conflict_limit;
-        mockturtle::exact_aig_resynthesis resyn( false, esps );
+        mockturtle::exact_aig_resynthesis<mockturtle::aig_network> resyn( false, esps );
         mockturtle::cut_rewriting( *aig_p, resyn, ps, &st );
         *aig_p = cleanup_dangling( *aig_p );
       }
       else if constexpr ( std::is_same_v<Store, xag_t> )
       {
         auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
-        auto klut = mockturtle::gates_to_nodes<mockturtle::klut_network>( *xag_p );
         if ( is_set( "clear_cache" ) )
         {
           exact_xag_cache = std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>();
@@ -122,12 +121,9 @@ public:
         mockturtle::exact_resynthesis_params esps;
         esps.cache = exact_xag_cache;
         esps.conflict_limit = conflict_limit;
-        mockturtle::exact_resynthesis resyn( 2u, esps );
-        mockturtle::cut_rewriting( klut, resyn, ps, &st );
-        klut = cleanup_dangling( klut );
-
-        mockturtle::direct_resynthesis<mockturtle::xag_network> dresyn;
-        *xag_p = mockturtle::node_resynthesis<mockturtle::xag_network>( klut, dresyn );
+        mockturtle::exact_aig_resynthesis<mockturtle::xag_network> resyn( true, esps );
+        mockturtle::cut_rewriting( *xag_p, resyn, ps, &st );
+        *xag_p = cleanup_dangling( *xag_p );
       }
       else
       {
