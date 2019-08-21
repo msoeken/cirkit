@@ -8,17 +8,19 @@
 #include <mockturtle/io/blif_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
+#include <mockturtle/io/write_blif.hpp>
 #include <mockturtle/io/write_verilog.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <fmt/format.h>
 
 namespace alice
 {
 
-using aig_nt = mockturtle::mapping_view<mockturtle::aig_network, true>;
+using aig_nt = mockturtle::mapping_view<mockturtle::names_view<mockturtle::aig_network>, true>;
 using aig_t = std::shared_ptr<aig_nt>;
 
 ALICE_ADD_STORE( aig_t, "aig", "a", "AIG", "AIGs" );
@@ -82,6 +84,11 @@ ALICE_READ_FILE( aig_t, verilog, filename, cmd )
 ALICE_WRITE_FILE( aig_t, verilog, aig, filename, cmd )
 {
   mockturtle::write_verilog( *aig, filename );
+}
+
+ALICE_WRITE_FILE( aig_t, blif, aig, filename, cmd )
+{
+  mockturtle::write_blif( *aig, filename );
 }
 
 } // namespace alice

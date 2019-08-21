@@ -4,17 +4,19 @@
 #include <lorina/verilog.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
+#include <mockturtle/io/write_blif.hpp>
 #include <mockturtle/io/write_verilog.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <fmt/format.h>
 
 namespace alice
 {
 
-using xag_nt = mockturtle::mapping_view<mockturtle::xag_network, true>;
+using xag_nt = mockturtle::mapping_view<mockturtle::names_view<mockturtle::xag_network>, true>;
 using xag_t = std::shared_ptr<xag_nt>;
 
 ALICE_ADD_STORE( xag_t, "xag", "", "XAG", "XAGs" );
@@ -79,6 +81,11 @@ ALICE_READ_FILE( xag_t, verilog, filename, cmd )
 ALICE_WRITE_FILE( xag_t, verilog, xag, filename, cmd )
 {
   mockturtle::write_verilog( *xag, filename );
+}
+
+ALICE_WRITE_FILE( xag_t, blif, xag, filename, cmd )
+{
+  mockturtle::write_blif( *xag, filename );
 }
 
 } // namespace alice

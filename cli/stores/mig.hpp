@@ -10,6 +10,7 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <fmt/format.h>
 

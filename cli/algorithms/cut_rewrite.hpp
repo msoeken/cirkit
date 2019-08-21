@@ -33,6 +33,7 @@ public:
     add_flag( "--clear_cache", "clear network cache" );
     add_option( "--exact_lutsize", exact_lutsize, "LUT size for exact resynthesis", true );
     add_option( "--conflict_limit", conflict_limit, "conflict limit for exact resynthesis", true );
+    add_flag( "-r,--repeat", "repeat until convergence" );
     add_flag( "-p,--progress", ps.progress, "show progress" );
     add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
@@ -40,119 +41,142 @@ public:
   template<class Store>
   inline void execute_store()
   {
+    bool done = true;
     ps.candidate_selection_strategy = is_set( "greedy" ) ? mockturtle::cut_rewriting_params::greedy : mockturtle::cut_rewriting_params::minimize_weight;
     ps.use_dont_cares = is_set( "dont_cares" );
-    switch ( strategy )
+
+    /* cost function */
+    auto const cost_fn = []( const auto& ntk ){
+      return ntk->num_gates();
+    };
+
+    /* cost comparison function: repeated until evaluates to true  */
+    auto const compare_fn = []( const auto& new_cost, const auto& old_cost ){
+      return new_cost < old_cost;
+    };
+
+    auto curr_cost = cost_fn( store<Store>().current().get() );
+    do
     {
-    default:
-    case 0:
-    {
-      if constexpr ( std::is_same_v<Store, aig_t> )
+      ++num_iterations;
+
+      switch ( strategy )
       {
-        auto* aig_p = static_cast<mockturtle::aig_network*>( store<Store>().current().get() );
-        mockturtle::xag_npn_resynthesis<mockturtle::aig_network> resyn;
-        mockturtle::cut_rewriting( *aig_p, resyn, ps, &st );
-        *aig_p = cleanup_dangling( *aig_p );
-      }
-      else if constexpr (std::is_same_v<Store, xag_t> )
+      default:
+      case 0:
       {
-        auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
-        mockturtle::xag_npn_resynthesis<mockturtle::xag_network> resyn;
-        mockturtle::cut_rewriting( *xag_p, resyn, ps, &st );
-        *xag_p = cleanup_dangling( *xag_p );
-      }
-      else if constexpr ( std::is_same_v<Store, mig_t> )
-      {
-        auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
-        mockturtle::mig_npn_resynthesis resyn( is_set( "multiple" ) );
-        mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
-        *mig_p = cleanup_dangling( *mig_p );
-      }
-      else if constexpr ( std::is_same_v<Store, xmg_t> )
-      {
-        auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
-        mockturtle::xmg_npn_resynthesis resyn;
-        mockturtle::cut_rewriting( *xmg_p, resyn, ps, &st );
-        *xmg_p = cleanup_dangling( *xmg_p );
-      }
-      else
-      {
-        env->err() << "[w] this strategy works only for AIGs, XAGs, MIGs, and XMGs\n";
-      }
-    }
-    break;
-    case 1:
-    {
-      if constexpr ( std::is_same_v<Store, klut_t> )
-      {
-        auto* klut_p = static_cast<mockturtle::klut_network*>( store<Store>().current().get() );
-        if ( is_set( "clear_cache" ) )
+        if constexpr ( std::is_same_v<Store, aig_t> )
         {
-          exact_cache = std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>();
+          auto* aig_p = static_cast<mockturtle::aig_network*>( store<Store>().current().get() );
+          mockturtle::xag_npn_resynthesis<mockturtle::aig_network> resyn;
+          mockturtle::cut_rewriting( *aig_p, resyn, ps, &st );
+          *aig_p = cleanup_dangling( *aig_p );
         }
-        mockturtle::exact_resynthesis_params esps;
-        esps.cache = exact_cache;
-        esps.conflict_limit = conflict_limit;
-        mockturtle::exact_resynthesis resyn( exact_lutsize, esps );
-        mockturtle::cut_rewriting( *klut_p, resyn, ps, &st );
-        *klut_p = cleanup_dangling( *klut_p );
-      }
-      else if constexpr ( std::is_same_v<Store, aig_t> )
-      {
-        auto* aig_p = static_cast<mockturtle::aig_network*>( store<Store>().current().get() );
-        if ( is_set( "clear_cache" ) )
+        else if constexpr (std::is_same_v<Store, xag_t> )
         {
-          exact_aig_cache = std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>();
+          auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
+          mockturtle::xag_npn_resynthesis<mockturtle::xag_network> resyn;
+          mockturtle::cut_rewriting( *xag_p, resyn, ps, &st );
+          *xag_p = cleanup_dangling( *xag_p );
         }
-        mockturtle::exact_resynthesis_params esps;
-        esps.cache = exact_aig_cache;
-        esps.conflict_limit = conflict_limit;
-        mockturtle::exact_aig_resynthesis<mockturtle::aig_network> resyn( false, esps );
-        mockturtle::cut_rewriting( *aig_p, resyn, ps, &st );
-        *aig_p = cleanup_dangling( *aig_p );
-      }
-      else if constexpr ( std::is_same_v<Store, xag_t> )
-      {
-        auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
-        if ( is_set( "clear_cache" ) )
+        else if constexpr ( std::is_same_v<Store, mig_t> )
         {
-          exact_xag_cache = std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>();
+          auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
+          mockturtle::mig_npn_resynthesis resyn( is_set( "multiple" ) );
+          mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
+          *mig_p = cleanup_dangling( *mig_p );
         }
-        mockturtle::exact_resynthesis_params esps;
-        esps.cache = exact_xag_cache;
-        esps.conflict_limit = conflict_limit;
-        mockturtle::exact_aig_resynthesis<mockturtle::xag_network> resyn( true, esps );
-        mockturtle::cut_rewriting( *xag_p, resyn, ps, &st );
-        *xag_p = cleanup_dangling( *xag_p );
+        else if constexpr ( std::is_same_v<Store, xmg_t> )
+        {
+          auto* xmg_p = static_cast<mockturtle::xmg_network*>( store<Store>().current().get() );
+          mockturtle::xmg_npn_resynthesis resyn;
+          mockturtle::cut_rewriting( *xmg_p, resyn, ps, &st );
+          *xmg_p = cleanup_dangling( *xmg_p );
+        }
+        else
+        {
+          env->err() << "[w] this strategy works only for AIGs, XAGs, MIGs, and XMGs\n";
+        }
       }
-      else
+      break;
+      case 1:
       {
-        env->err() << "[w] this strategy works only for LUT networks, AIGs, and XAGs\n";
+        if constexpr ( std::is_same_v<Store, klut_t> )
+        {
+          auto* klut_p = static_cast<mockturtle::klut_network*>( store<Store>().current().get() );
+          if ( is_set( "clear_cache" ) )
+          {
+            exact_cache = std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>();
+          }
+          mockturtle::exact_resynthesis_params esps;
+          esps.cache = exact_cache;
+          esps.conflict_limit = conflict_limit;
+          mockturtle::exact_resynthesis resyn( exact_lutsize, esps );
+          mockturtle::cut_rewriting( *klut_p, resyn, ps, &st );
+          *klut_p = cleanup_dangling( *klut_p );
+        }
+        else if constexpr ( std::is_same_v<Store, aig_t> )
+        {
+          auto* aig_p = static_cast<mockturtle::aig_network*>( store<Store>().current().get() );
+          if ( is_set( "clear_cache" ) )
+          {
+            exact_aig_cache = std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>();
+          }
+          mockturtle::exact_resynthesis_params esps;
+          esps.cache = exact_aig_cache;
+          esps.conflict_limit = conflict_limit;
+          mockturtle::exact_aig_resynthesis<mockturtle::aig_network> resyn( false, esps );
+          mockturtle::cut_rewriting( *aig_p, resyn, ps, &st );
+          *aig_p = cleanup_dangling( *aig_p );
+        }
+        else if constexpr ( std::is_same_v<Store, xag_t> )
+        {
+          auto* xag_p = static_cast<mockturtle::xag_network*>( store<Store>().current().get() );
+          if ( is_set( "clear_cache" ) )
+          {
+            exact_xag_cache = std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>();
+          }
+          mockturtle::exact_resynthesis_params esps;
+          esps.cache = exact_xag_cache;
+          esps.conflict_limit = conflict_limit;
+          mockturtle::exact_aig_resynthesis<mockturtle::xag_network> resyn( true, esps );
+          mockturtle::cut_rewriting( *xag_p, resyn, ps, &st );
+          *xag_p = cleanup_dangling( *xag_p );
+        }
+        else
+        {
+          env->err() << "[w] this strategy works only for LUT networks, AIGs, and XAGs\n";
+        }
       }
-    }
-    break;
-    case 2:
-    {
-      if constexpr ( std::is_same_v<Store, mig_t> )
+      break;
+      case 2:
       {
-        auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
-        mockturtle::akers_resynthesis<mockturtle::mig_network> resyn;
-        mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
-        *mig_p = cleanup_dangling( *mig_p );
+        if constexpr ( std::is_same_v<Store, mig_t> )
+        {
+          auto* mig_p = static_cast<mockturtle::mig_network*>( store<Store>().current().get() );
+          mockturtle::akers_resynthesis<mockturtle::mig_network> resyn;
+          mockturtle::cut_rewriting( *mig_p, resyn, ps, &st );
+          *mig_p = cleanup_dangling( *mig_p );
+        }
+        else
+        {
+          env->err() << "[w] this strategy works only for MIGs\n";
+        }
       }
-      else
-      {
-        env->err() << "[w] this strategy works only for MIGs\n";
+      break;
       }
-    }
-    break;
-    }
+
+      auto const new_cost = cost_fn( store<Store>().current().get() );
+      done = !is_set( "repeat" ) || !compare_fn( new_cost, curr_cost );
+      curr_cost = new_cost;
+    } while ( !done );
   }
 
   nlohmann::json log() const override
   {
     return {
-      {"time_total", mockturtle::to_seconds( st.time_total )}
+      {"time_total", mockturtle::to_seconds( st.time_total )},
+      {"num_iterations", num_iterations}
     };
   }
 
@@ -162,9 +186,10 @@ private:
   mockturtle::exact_resynthesis_params::cache_t exact_cache{std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>()}; 
   mockturtle::exact_resynthesis_params::cache_t exact_aig_cache{std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>()}; 
   mockturtle::exact_resynthesis_params::cache_t exact_xag_cache{std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>()}; 
-  unsigned strategy{0u};
-  unsigned exact_lutsize{3u};
-  int conflict_limit{0};
+  uint32_t strategy{0u};
+  uint32_t exact_lutsize{3u};
+  uint32_t num_iterations{0u};
+  int32_t conflict_limit{0};
 };
 
 ALICE_ADD_COMMAND( cut_rewrite, "Synthesis" )
