@@ -80,13 +80,16 @@ private:
     const auto& ntk = *( store<Store>().current() );
     using network_type = typename Dest::element_type;
     using base_type = typename network_type::base_type;
+    using named_base_type = typename mockturtle::names_view<base_type>;
 
     if ( is_store_set<Dest>() )
     {
-      mockturtle::shannon_resynthesis<base_type> sresyn;
-      mockturtle::dsd_resynthesis<base_type, decltype( sresyn )> resyn( sresyn );
-      const auto dest = mockturtle::node_resynthesis<base_type>( ntk, resyn );
-      network_type wrapped( dest );
+      mockturtle::shannon_resynthesis<named_base_type> sresyn;
+      mockturtle::dsd_resynthesis<named_base_type, decltype( sresyn )> resyn( sresyn );
+      base_type dest;
+      named_base_type named_dest( dest );
+      mockturtle::node_resynthesis( named_dest, ntk, resyn );
+      mockturtle::names_view<network_type> wrapped( named_dest );
       extend_if_new<Dest>();
       store<Dest>().current() = std::make_shared<network_type>( wrapped );
 
@@ -102,12 +105,15 @@ private:
     const auto& ntk = *( store<Store>().current() );
     using network_type = typename Dest::element_type;
     using base_type = typename network_type::base_type;
+    using named_base_type = typename mockturtle::names_view<base_type>;
 
     if ( is_store_set<Dest>() )
     {
-      mockturtle::shannon_resynthesis<base_type> resyn;
-      const auto dest = mockturtle::node_resynthesis<base_type>( ntk, resyn );
-      network_type wrapped( dest );
+      mockturtle::shannon_resynthesis<named_base_type> resyn;
+      base_type dest;
+      named_base_type named_dest( dest );
+      mockturtle::node_resynthesis( named_dest, ntk, resyn );
+      mockturtle::names_view<network_type> wrapped( named_dest );
       extend_if_new<Dest>();
       store<Dest>().current() = std::make_shared<network_type>( wrapped );
 
@@ -123,6 +129,7 @@ private:
     const auto& ntk = *( store<Store>().current() );
     using network_type = typename Dest::element_type;
     using base_type = typename network_type::base_type;
+    using named_base_type = typename mockturtle::names_view<base_type>;
 
     constexpr bool with_xor = std::is_same_v<Dest, xag_t> || std::is_same_v<Dest, xmg_t>;
 
@@ -130,10 +137,12 @@ private:
     {
       mockturtle::exact_resynthesis_params esps;
       esps.cache = exact_aig_cache;
-      mockturtle::exact_aig_resynthesis<base_type> eresyn( with_xor, esps );
-      mockturtle::dsd_resynthesis<base_type, decltype( eresyn )> resyn( eresyn );
-      const auto dest = mockturtle::node_resynthesis<base_type>( ntk, resyn );
-      network_type wrapped( dest );
+      mockturtle::exact_aig_resynthesis<named_base_type> eresyn( with_xor, esps );
+      mockturtle::dsd_resynthesis<named_base_type, decltype( eresyn )> resyn( eresyn );
+      base_type dest;
+      named_base_type named_dest( dest );
+      mockturtle::node_resynthesis( named_dest, ntk, resyn );
+      mockturtle::names_view<network_type> wrapped( named_dest );
       extend_if_new<Dest>();
       store<Dest>().current() = std::make_shared<network_type>( wrapped );
 
@@ -149,24 +158,34 @@ private:
     const auto& ntk = *( store<Store>().current() );
     using network_type = typename Dest::element_type;
     using base_type = typename network_type::base_type;
+    using named_base_type = typename mockturtle::names_view<base_type>;
 
     if ( is_store_set<Dest>() )
     {
-      const auto dest = [&]() -> base_type {
+      const auto named_dest = [&]() -> named_base_type {
         if constexpr ( std::is_same_v<Dest, xag_t> || std::is_same_v<Dest, aig_t> )
         {
-          mockturtle::xag_npn_resynthesis<base_type> resyn;
-          return mockturtle::node_resynthesis<base_type>( ntk, resyn );
+          mockturtle::xag_npn_resynthesis<named_base_type> resyn;
+          base_type dest;
+          named_base_type named_dest( dest );
+          mockturtle::node_resynthesis( named_dest, ntk, resyn );
+          return named_dest;
         }
         else if constexpr ( std::is_same_v<Dest, mig_t> )
         {
           mockturtle::mig_npn_resynthesis resyn;
-          return mockturtle::node_resynthesis<base_type>( ntk, resyn );
+          base_type dest;
+          named_base_type named_dest( dest );
+          mockturtle::node_resynthesis( named_dest, ntk, resyn );
+          return named_dest;
         }
         else if constexpr ( std::is_same_v<Dest, xmg_t> )
         {
           mockturtle::xmg_npn_resynthesis resyn;
-          return mockturtle::node_resynthesis<base_type>( ntk, resyn );
+          base_type dest;
+          named_base_type named_dest( dest );
+          mockturtle::node_resynthesis( named_dest, ntk, resyn );
+          return named_dest;
         }
         else
         {
@@ -174,7 +193,7 @@ private:
         }
         return base_type();
       }();
-      network_type wrapped( dest );
+      mockturtle::names_view<network_type> wrapped( named_dest );
       extend_if_new<Dest>();
       store<Dest>().current() = std::make_shared<network_type>( wrapped );
 
