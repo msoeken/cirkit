@@ -8,6 +8,7 @@
 #include <mockturtle/io/blif_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/io/write_bench.hpp>
+#include <mockturtle/io/write_blif.hpp>
 #include <mockturtle/io/write_verilog.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/depth_view.hpp>
@@ -83,6 +84,11 @@ ALICE_READ_FILE( aig_t, verilog, filename, cmd )
 ALICE_WRITE_FILE( aig_t, verilog, aig, filename, cmd )
 {
   mockturtle::write_verilog( *aig, filename );
+}
+
+ALICE_WRITE_FILE( aig_t, blif, aig, filename, cmd )
+{
+  mockturtle::write_blif( *aig, filename );
 }
 
 } // namespace alice
