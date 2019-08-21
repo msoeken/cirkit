@@ -8,13 +8,14 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <fmt/format.h>
 
 namespace alice
 {
 
-using xag_nt = mockturtle::mapping_view<mockturtle::xag_network, true>;
+using xag_nt = mockturtle::mapping_view<mockturtle::names_view<mockturtle::xag_network>, true>;
 using xag_t = std::shared_ptr<xag_nt>;
 
 ALICE_ADD_STORE( xag_t, "xag", "", "XAG", "XAGs" );

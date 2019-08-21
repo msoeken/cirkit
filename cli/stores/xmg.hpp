@@ -10,13 +10,14 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <fmt/format.h>
 
 namespace alice
 {
 
-using xmg_nt = mockturtle::mapping_view<mockturtle::xmg_network, true>;
+using xmg_nt = mockturtle::mapping_view<mockturtle::names_view<mockturtle::xmg_network>, true>;
 using xmg_t = std::shared_ptr<xmg_nt>;
 
 ALICE_ADD_STORE( xmg_t, "xmg", "x", "XMG", "XMGs" );

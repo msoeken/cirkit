@@ -12,13 +12,14 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/mapping_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <fmt/format.h>
 
 namespace alice
 {
 
-using aig_nt = mockturtle::mapping_view<mockturtle::aig_network, true>;
+using aig_nt = mockturtle::mapping_view<mockturtle::names_view<mockturtle::aig_network>, true>;
 using aig_t = std::shared_ptr<aig_nt>;
 
 ALICE_ADD_STORE( aig_t, "aig", "a", "AIG", "AIGs" );
