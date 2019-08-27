@@ -1,6 +1,7 @@
 #include <alice/alice.hpp>
 
 #include <mockturtle/algorithms/collapse_mapped.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include "../utils/cirkit_command.hpp"
 
@@ -18,11 +19,13 @@ public:
   template<class Store>
   void execute_store()
   {
-    const auto ntk = mockturtle::collapse_mapped_network<mockturtle::klut_network>( *( env->store<Store>().current() ) );
-    if ( ntk )
+    mockturtle::klut_network ntk;
+    mockturtle::names_view<mockturtle::klut_network> named_ntk( ntk );
+    bool success = mockturtle::collapse_mapped_network<mockturtle::names_view<mockturtle::klut_network>>( named_ntk, *( env->store<Store>().current() ) );
+    if ( success )
     {
       extend_if_new<klut_t>();
-      store<klut_t>().current() = std::make_shared<klut_nt>( *ntk );
+      store<klut_t>().current() = std::make_shared<klut_nt>( named_ntk );
 
       set_default_option<klut_t>();
     }
