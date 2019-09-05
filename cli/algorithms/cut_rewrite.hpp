@@ -33,7 +33,7 @@ public:
     add_flag( "--clear_cache", "clear network cache" );
     add_option( "--exact_lutsize", exact_lutsize, "LUT size for exact resynthesis", true );
     add_option( "--conflict_limit", conflict_limit, "conflict limit for exact resynthesis", true );
-    add_option( "-i,--iterations", num_iterations, "number of iterations to repeat {0=infty}" );
+    add_option( "-i,--iterations", num_iterations, "number of iterations to repeat {0=infty}", true );
     add_flag( "-p,--progress", ps.progress, "show progress" );
     add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
@@ -192,7 +192,7 @@ private:
   uint32_t strategy{0u};
   uint32_t exact_lutsize{3u};
   uint32_t iterations_counter{0u};
-  uint32_t num_iterations{0u};
+  uint32_t num_iterations{1u};
   int32_t conflict_limit{0};
 };
 
