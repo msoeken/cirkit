@@ -33,7 +33,7 @@ public:
     add_flag( "--clear_cache", "clear network cache" );
     add_option( "--exact_lutsize", exact_lutsize, "LUT size for exact resynthesis", true );
     add_option( "--conflict_limit", conflict_limit, "conflict limit for exact resynthesis", true );
-    add_flag( "-r,--repeat", "repeat until convergence" );
+    add_option( "-i,--iterations", num_iterations, "number of iterations to repeat {0=infty}" );
     add_flag( "-p,--progress", ps.progress, "show progress" );
     add_flag( "-v,--verbose", ps.verbose, "show statistics" );
   }
@@ -56,9 +56,10 @@ public:
     };
 
     auto curr_cost = cost_fn( store<Store>().current().get() );
+    iterations_counter = 0u;
     do
     {
-      ++num_iterations;
+      ++iterations_counter;
 
       switch ( strategy )
       {
@@ -167,7 +168,9 @@ public:
       }
 
       auto const new_cost = cost_fn( store<Store>().current().get() );
-      done = !is_set( "repeat" ) || !compare_fn( new_cost, curr_cost );
+      done = ( num_iterations == 0 && !compare_fn( new_cost, curr_cost ) ) ||
+             ( num_iterations > 0 && iterations_counter >= num_iterations );
+
       curr_cost = new_cost;
     } while ( !done );
   }
@@ -188,6 +191,7 @@ private:
   mockturtle::exact_resynthesis_params::cache_t exact_xag_cache{std::make_shared<mockturtle::exact_resynthesis_params::cache_map_t>()}; 
   uint32_t strategy{0u};
   uint32_t exact_lutsize{3u};
+  uint32_t iterations_counter{0u};
   uint32_t num_iterations{0u};
   int32_t conflict_limit{0};
 };
