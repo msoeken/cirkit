@@ -52,6 +52,7 @@
 #include "algorithms/npn.hpp"
 #include "algorithms/print_gates.hpp"
 #include "algorithms/refactor.hpp"
+#include "algorithms/refactormc.hpp"
 #include "algorithms/resubstitute.hpp"
 #include "algorithms/satlut_mapping.hpp"
 #include "algorithms/simulate.hpp"
