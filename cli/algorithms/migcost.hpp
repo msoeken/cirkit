@@ -49,10 +49,13 @@ public:
     num_gates = ntk.num_gates();
     num_inv = mockturtle::num_inverters( ntk );
 
-    mockturtle::depth_view depth_ntk{ntk};
+    mockturtle::depth_view_params ps;
+    ps.count_complements = false;
+    mockturtle::depth_view depth_ntk{ntk, ps};
     depth = depth_ntk.depth();
 
-    mockturtle::depth_view depth_ntk2{ntk, true};
+    ps.count_complements = true;
+    mockturtle::depth_view depth_ntk2{ntk, ps};
     depth_mixed = depth_ntk2.depth();
     std::tie( depth_maj, depth_inv ) = split_critical_path( depth_ntk2 );
 
