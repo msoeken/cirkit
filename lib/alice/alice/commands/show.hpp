@@ -153,6 +153,8 @@ private:
   std::string filename;
 #ifdef __APPLE__
   std::string program = "open {}";
+#elif _WIN32
+  std::string program = "start {}";
 #else
   std::string program = "xdg-open {}";
 #endif
