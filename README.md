@@ -27,7 +27,7 @@ CirKit can be executed with
 
 Use git to build RevKit with the following steps
 
-    git clone --recursive https://github.com/msoeken/cirkit.git
+    git clone -b master --recursive https://github.com/msoeken/cirkit.git
     mkdir build
     cd build
     cmake -Denable_cirkit-addon-reversible=ON -Denable_cirkit-addon-formal=ON ..
